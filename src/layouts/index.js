@@ -3,23 +3,23 @@ import PropTypes from "prop-types";
 import Link from "gatsby-link";
 import Helmet from "react-helmet";
 import Header from "../components/Header";
-import jQuery from "jquery";
-import scrollX from "../js/jquery.scrollex.min";
-import scrollY from "../js/jquery.scrolly.min";
-import mainjs from "../js/main";
-import skel from "../js/skel.min";
-import utiljs from "../js/util";
+// import jQuery from "jquery";
+// import scrollX from "../js/jquery.scrollex.min";
+// import scrollY from "../js/jquery.scrolly.min";
+// import mainjs from "../js/main";
+// import skel from "../js/skel.min";
+// import utiljs from "../js/util";
 import "./index.css";
 
 // const TemplateWrapper = ({ children }) => (
 class TemplateWrapper extends React.Component {
-  componentDiDMount() {
-    mainjs(jQuery);
-    scrollX(jQuery);
-    scrollY(jQuery);
-    skell(jQuery);
-    utiljs(jQuery);
-  }
+  // componentDiDMount() {
+  //   mainjs(jQuery);
+  //   scrollX(jQuery);
+  //   scrollY(jQuery);
+  //   skell(jQuery);
+  //   utiljs(jQuery);
+  // }
   render() {
     const { children } = this.props;
     return (
