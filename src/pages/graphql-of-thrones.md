@@ -1,21 +1,29 @@
 ---
-title: "GraphQL of Thrones"
+title: GraphQL of Thrones
 date: "2017-10-18"
-indexscreenshot: "/images/graphql1.png"
-landingscreenshot: "/images/graphql1.png"
+indexscreenshot: /images/graphql.jpg-large
+landingscreenshot: /images/graphqlofthrones.gif
 link: "https://graphql-of-thrones.herokuapp.com"
 github: "https://github.com/sw-yx/FSA-GraphQL-of-Thrones"
-blurb: "Learn GraphQL by roleplaying Game of Thrones characters. 🎲"
-blurb2: "two sentence blurb"
-stack: abc def lkj
+blurb: "What if Game of Thrones characters used GraphQL? 🎲"
+blurb2: "Inspired by Flexbox Froggy and CSS Grid Garden, this is a game to progressively learn the basic API of GraphQL without getting lost in all the tooling. Alternate between LEARN and PLAY modes reimagining how Game of Thrones characters could solve their problems with GraphQL."
+stack: apollo graphql react redux swyx styled-components css-animation
 ---
 
-GRAPHQL is awesome
+GraphQL is seemingly taking over the world and I decided to learn by teaching.
 
-Pandas are really sweet.
+The problem with the GraphQL tutorials out there is that things generally go from "hey watch this video to see why GraphQL is theoretically awesome" to "here is 5 pages of code you need to copy and paste to get the client and server up and running trust me don't worry about it. Oh also be aware of the differences between the 3-4 different server implementations and between Relay and Apollo".
 
-Here's a video of a panda eating sweets.
+The user hasn't had a chance to be sold yet! Let's take it easy.
 
-Even though large tracts of Europe and many old and famous States have fallen or may fall into the grip of the Gestapo and all the odious apparatus of Nazi rule, we shall not flag or fail. We shall go on to the end. We shall fight in France, we shall fight on the seas and oceans, we shall fight with growing confidence and growing strength in the air, we shall defend our island, whatever the cost may be. We shall fight on the beaches, we shall fight on the landing grounds, we shall fight in the fields and in the streets, we shall fight in the hills; we shall never surrender, and if, which I do not for a moment believe, this island or a large part of it were subjugated and starving, then our Empire beyond the seas, armed and guarded by the British Fleet, would carry on the struggle, until, in God's good time, the New World, with all its power and might, steps forth to the rescue and the liberation of the old.
+To achieve this:
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/4n0xNbfJLR8" frameborder="0" allowfullscreen></iframe>
+- I created the entire course platform (state managed and persisted clientside with redux) from scratch, cloning css from [Codecademy](http://codecademy.com/learn/learn-html) using [styled components](https://www.styled-components.com/docs/basics).
+- [Forked Facebook's `graphiql` implementation](https://www.npmjs.com/package/swyx-graphiql) and put it up on the frontend (not advised!) to put my own tweaks on it
+- Created 15 levels of content (all in simple markdown thanks to [react-markings](http://thejameskyle.com/react-markings.html)) to teach the user GraphQL's basic API in an entertaining way
+- implemented [CSS animation buttons](https://codepen.io/aundrekerr/pen/GtLul/) after taking feedback from user testing
+- Backend provided by my own experimental thin framework <https://www.npmjs.com/package/swyx>
+
+This was done in 1 week as a Fullstack capstone project guided by Gabriel.
+
+It is already paying dividends days later as I can use GraphQL in GatsbyJS without much afterthought.

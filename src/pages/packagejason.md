@@ -2,16 +2,24 @@
 title: Package Jason
 date: "2017-07-13"
 indexscreenshot: "/images/packagejason1.png"
-landingscreenshot: "/images/packagejason1.png"
+landingscreenshot: "https://raw.githubusercontent.com/sw-yx/packageJason/master/public/fulldemo1.gif"
 link: "https://packagejason.herokuapp.com/"
 github: "https://github.com/sw-yx/packageJason"
 blurb: "Rank NodeJS boilerplates by cognitive load 📦"
-blurb2: "two sentence blurb"
-stack: abc def lkj
+blurb2: "Boilerplates serve as the catch-all alternative to opinionated ecosystems like NextJS and CRA, but they can be hard to track and evaluate. PackageJason literally analyzes package.json and other metadata to help rank and filter boilerplates by cognitive load and desired stack."
+stack: meteor bootstrap
 ---
 
-Package jason
+This was something I deeply desired when doing FreeCodeCamp and encountering the bewildering array of setups. In particular, these were the pain points that mattered to me as a newbie:
 
-Even though large tracts of Europe and many old and famous States have fallen or may fall into the grip of the Gestapo and all the odious apparatus of Nazi rule, we shall not flag or fail. We shall go on to the end. We shall fight in France, we shall fight on the seas and oceans, we shall fight with growing confidence and growing strength in the air, we shall defend our island, whatever the cost may be. We shall fight on the beaches, we shall fight on the landing grounds, we shall fight in the fields and in the streets, we shall fight in the hills; we shall never surrender, and if, which I do not for a moment believe, this island or a large part of it were subjugated and starving, then our Empire beyond the seas, armed and guarded by the British Fleet, would carry on the struggle, until, in God's good time, the New World, with all its power and might, steps forth to the rescue and the liberation of the old.
+- I wanted webpack configurations figured out for me - just didnt understand any of it
+- I wanted some sort of design system already in place, dropping in bootstrap on top of react was beyond my ability back then
+- I wanted authentication ([Meteor accounts](https://guide.meteor.com/accounts.html) DX is second to none)
+- I wanted to be able to search by stack (right tool, right job) - other attempts exist but didnt have versioning
+- I wanted a "cost function" to reduce bias toward all singing, all dancing boilerplates that were so wildly complicated I would never be able to understand them
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/4SZl1r2O_bY" frameborder="0" allowfullscreen></iframe>
+So over the course of a couple weeks of free time I made this and gave it a name and a [charming backstory](https://github.com/sw-yx/packageJason/blob/master/README.md) (who doesn't want PackageJason to get the girl?)
+
+Ironically looking back at it three months later, I no longer have much need for it because I have gained all the knowledge I need to create my own and the cognitive load is much lower.
+
+I had a strong reliance on Meteor (and Ryan Glover's fantastic [Clever Beagle Pup project](https://cleverbeagle.com/pup/v1/introduction)) as a beginner but with the comfort level I have now I do question what remaining use I have left for Meteor in terms of speed to MVP.

@@ -5,6 +5,27 @@ import Footer from "../components/Footer";
 export default ({ data }) => {
   const post = data.markdownRemark;
   console.log("post.frontmatter", post.frontmatter);
+  const stack = post.frontmatter.stack.split(" ");
+  const CheckOut = (
+    <ul className="actions icons">
+      <li>
+        {post.frontmatter.link && (
+          <a href={post.frontmatter.link} target="_blank" className="button">
+            Check it out
+          </a>
+        )}
+      </li>
+      <li>
+        {post.frontmatter.github && (
+          <a href={post.frontmatter.github} target="_blank">
+            <div href="#" className="icon alt fa-github">
+              <span className="label">GitHub</span>
+            </div>
+          </a>
+        )}
+      </li>
+    </ul>
+  );
   return (
     <div id="wrapper">
       <Header />
@@ -17,8 +38,19 @@ export default ({ data }) => {
             <h1>{post.frontmatter.title}</h1>
           </header>
           <div className="content">
-            <p>{post.frontmatter.blurb}</p>
+            <p>
+              {post.frontmatter.blurb} | <i>{post.frontmatter.date}</i>
+            </p>
           </div>
+          {stack && (
+            <ul className="actions">
+              {stack.map(stackitem => (
+                <li key={stackitem}>
+                  <span className="button">{stackitem}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </section>
       <div id="main">
@@ -26,7 +58,7 @@ export default ({ data }) => {
           <section>
             <a href="generic.html" className="image">
               <img
-                src={post.frontmatter.indexscreenshot}
+                src={post.frontmatter.landingscreenshot}
                 alt=""
                 data-position="center center"
               />
@@ -34,28 +66,10 @@ export default ({ data }) => {
             <div className="content">
               <div className="inner">
                 <header className="major">
-                  <h3>Description</h3>
+                  <h3>What is {post.frontmatter.title}?</h3>
                 </header>
-                <p>
-                  Even though large tracts of Europe and many old and famous
-                  States have fallen or may fall into the grip of the Gestapo
-                  and all the odious apparatus of Nazi rule, we shall not flag
-                  or fail. We shall go on to the end. We shall fight in France,
-                  we shall fight on the seas and oceans, we shall fight with
-                  growing confidence and growing strength in the air, we shall
-                  defend our island, whatever the cost may be.{" "}
-                </p>
-                <ul className="actions">
-                  <li>
-                    <a
-                      href={post.frontmatter.link}
-                      target="_blank"
-                      className="button"
-                    >
-                      Check it out
-                    </a>
-                  </li>
-                </ul>
+                <p>{post.frontmatter.blurb2}</p>
+                {CheckOut}
               </div>
             </div>
           </section>
@@ -63,9 +77,10 @@ export default ({ data }) => {
         <section id="one">
           <div className="inner">
             <header className="major">
-              <h2>Description</h2>
+              <h2>Discussion</h2>
             </header>
             <div dangerouslySetInnerHTML={{ __html: post.html }} />
+            {CheckOut}
           </div>
         </section>
       </div>
@@ -81,6 +96,7 @@ export const query = graphql`
       html
       frontmatter {
         title
+        date(formatString: "MMMM, YYYY")
         blurb
         blurb2
         stack
