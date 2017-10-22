@@ -25,10 +25,13 @@ class TemplateWrapper extends React.Component {
     return (
       <div>
         <Helmet
-          title="Gatsby Default Starter"
+          title="@swyx || personal site"
           meta={[
-            { name: "description", content: "Sample" },
-            { name: "keywords", content: "sample, something" }
+            {
+              name: "description",
+              content: "this is the personal portfolio site for @swyx"
+            },
+            { name: "keywords", content: "personal site, portfolio, swyx" }
           ]}
         >
           <meta

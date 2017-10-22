@@ -5,7 +5,7 @@ indexscreenshot: /images/tripplanner.png
 landingscreenshot: https://j.gifs.com/KZO828.gif
 link: "https://swyx-tripplanner.herokuapp.com"
 github: "https://github.com/sw-yx/FSA-React-Trip-Planner"
-blurb: "A student led workshop on how to port a vanilla JS project to React 👩‍🏫✈️"
+blurb: "Learn to port vanilla JS+HTML+CSS to React+Webpack 👩‍🏫✈️"
 blurb2: "Many people simply get by not knowing how to really configure Webpack or set up React from scratch. This project provides a self contained exercise that teaches both Webpack and React, and solutions are included. Includes two-part video recording of live coding! 📹"
 stack: react webpack mapbox
 ---

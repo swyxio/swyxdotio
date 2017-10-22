@@ -2,6 +2,8 @@ import React from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
+const noPointer = { cursor: "default" };
+
 export default ({ data }) => {
   const post = data.markdownRemark;
   console.log("post.frontmatter", post.frontmatter);
@@ -46,7 +48,9 @@ export default ({ data }) => {
             <ul className="actions">
               {stack.map(stackitem => (
                 <li key={stackitem}>
-                  <span className="button">{stackitem}</span>
+                  <span className="button" style={noPointer}>
+                    {stackitem}
+                  </span>
                 </li>
               ))}
             </ul>

@@ -5,7 +5,7 @@ indexscreenshot: /images/crossbones1.png
 landingscreenshot: https://github.com/sw-yx/crossbones/raw/master/bones.gif
 link: "https://github.com/sw-yx/crossbones"
 github: "https://github.com/sw-yx/crossbones"
-blurb: "The Simple, Functional, Designed RN Boilerplate ☠️📱"
+blurb: "The Simple, Functional, Designed React Native Boilerplate ☠️📱"
 blurb2: "There is a gap between basic (CRNA and react-native init) and full-featured (Ignite-infinite red) React Native setups out there. CrossBones borrows the sensible philosophy of Fullstack's Bones and implements it in React Native."
 stack: react-native react-native-elements react-navigation redux-thunk redux-persist
 ---
