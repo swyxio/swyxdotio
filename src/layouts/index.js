@@ -3,27 +3,18 @@ import PropTypes from "prop-types";
 import Link from "gatsby-link";
 import Helmet from "react-helmet";
 import Header from "../components/Header";
-// import jQuery from "jquery";
-// import scrollX from "../js/jquery.scrollex.min";
-// import scrollY from "../js/jquery.scrolly.min";
-// import mainjs from "../js/main";
-// import skel from "../js/skel.min";
-// import utiljs from "../js/util";
 import "./index.css";
 
 // const TemplateWrapper = ({ children }) => (
 class TemplateWrapper extends React.Component {
-  // componentDiDMount() {
-  //   mainjs(jQuery);
-  //   scrollX(jQuery);
-  //   scrollY(jQuery);
-  //   skell(jQuery);
-  //   utiljs(jQuery);
-  // }
+  state = { menu: false };
+  handleMenuClick() {
+    this.setState({ menu: !this.state.menu });
+  }
   render() {
     const { children } = this.props;
     return (
-      <div>
+      <div className={this.state.menu && "is-menu-visible"}>
         <Helmet
           title="@swyx || personal site"
           meta={[
@@ -40,7 +31,7 @@ class TemplateWrapper extends React.Component {
           />
           <link rel="stylesheet" href="/assets/css/main.css" />
         </Helmet>
-        <Header />
+        <Header handleMenuClick={this.handleMenuClick.bind(this)} />
         <div
           style={{
             // margin: "0 auto",
@@ -58,34 +49,6 @@ class TemplateWrapper extends React.Component {
         <script src="assets/js/skel.min.js" />
         <script src="assets/js/util.js" />
         <script src="assets/js/main.js" />
-        <nav id="menu">
-          <ul className="links">
-            <li>
-              <a href="index.html">Hose</a>
-            </li>
-            <li>
-              <a href="landing.html">Landing</a>
-            </li>
-            <li>
-              <a href="generic.html">Generic</a>
-            </li>
-            <li>
-              <a href="elements.html">Elements</a>
-            </li>
-          </ul>
-          <ul className="actions vertical">
-            <li>
-              <a href="#" className="button special fit">
-                Get Started
-              </a>
-            </li>
-            <li>
-              <a href="#" className="button fit">
-                Log In
-              </a>
-            </li>
-          </ul>
-        </nav>
       </div>
     );
   }
@@ -96,3 +59,17 @@ TemplateWrapper.propTypes = {
 };
 
 export default TemplateWrapper;
+
+// import jQuery from "jquery";
+// import scrollX from "../js/jquery.scrollex.min";
+// import scrollY from "../js/jquery.scrolly.min";
+// import mainjs from "../js/main";
+// import skel from "../js/skel.min";
+// import utiljs from "../js/util";
+// componentDiDMount() {
+//   mainjs(jQuery);
+//   scrollX(jQuery);
+//   scrollY(jQuery);
+//   skell(jQuery);
+//   utiljs(jQuery);
+// }

@@ -1,12 +1,12 @@
 import React from "react";
-import Header from "../components/Header";
+// import Header from "../components/Header";
 import Footer from "../components/Footer";
 
 const noPointer = { cursor: "default" };
 
 export default ({ data }) => {
   const post = data.markdownRemark;
-  console.log("post.frontmatter", post.frontmatter);
+  // console.log("post.frontmatter", post.frontmatter);
   const stack = post.frontmatter.stack.split(" ");
   const CheckOut = (
     <ul className="actions icons">
@@ -30,7 +30,6 @@ export default ({ data }) => {
   );
   return (
     <div id="wrapper">
-      <Header />
       <section id="banner" className="style2">
         <div className="inner">
           <span className="image">
@@ -60,13 +59,13 @@ export default ({ data }) => {
       <div id="main">
         <section id="two" className="spotlights">
           <section>
-            <a href="generic.html" className="image">
+            <div className="image">
               <img
                 src={post.frontmatter.landingscreenshot}
                 alt=""
                 data-position="center center"
               />
-            </a>
+            </div>
             <div className="content">
               <div className="inner">
                 <header className="major">

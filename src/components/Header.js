@@ -1,45 +1,35 @@
 import React from "react";
 import Link from "gatsby-link";
+import MyModal from "./Modal";
 
-// const Header = () => (
-//   <div
-//     style={{
-//       background: "rebeccapurple",
-//       marginBottom: "1.45rem"
-//     }}
-//   >
-//     <div
-//       style={{
-//         margin: "0 auto",
-//         maxWidth: 960,
-//         padding: "1.45rem 1.0875rem"
-//       }}
-//     >
-//       <h1 style={{ margin: 0 }}>
-//         <Link
-//           to="/"
-//           style={{
-//             color: "white",
-//             textDecoration: "none"
-//           }}
-//         >
-//           Gatsby
-//         </Link>
-//       </h1>
-//     </div>
-//   </div>
-// );
-const Header = () => (
-  <header id="header" className="alt">
-    <Link to="/" className="logo">
-      <span>
-        shawn <strong>swyx</strong> wang
-      </span>
-    </Link>
-    <nav>
-      <a href="#menu">Menu</a>
-    </nav>
-  </header>
-);
+class Header extends React.Component {
+  state = { isOpen: false };
+  handleMenuClick = e => {
+    // e.preventDefault();
+    this.setState({ isOpen: true });
+  };
+  handleCloseModal = () => this.setState({ isOpen: false });
+  render() {
+    // const { handleMenuClick } = this.props;
+    return (
+      <header id="header" className="alt">
+        <Link to="/" className="logo">
+          <span>
+            shawn <strong>swyx</strong> wang
+          </span>
+        </Link>
+        <nav>
+          <a href="#menu" onClick={this.handleMenuClick}>
+            Menu
+          </a>
+        </nav>
+        <MyModal
+          isOpen={this.state.isOpen}
+          handleCloseModal={this.handleCloseModal}
+        />
+      </header>
+    );
+  }
+}
 
 export default Header;

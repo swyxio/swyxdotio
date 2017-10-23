@@ -3962,14 +3962,14 @@
 		background: rgba(42, 47, 74, 0.975);
 	}
 
-	div.is-menu-visible #wrapper {
+	body.is-menu-visible #wrapper {
 		-moz-filter: blur(0.5em);
 		-webkit-filter: blur(0.5em);
 		-ms-filter: blur(0.5em);
 		filter: blur(0.5em);
 	}
 
-	div.is-menu-visible #menu {
+	body.is-menu-visible #menu {
 		-moz-pointer-events: auto;
 		-webkit-pointer-events: auto;
 		-ms-pointer-events: auto;
@@ -3978,7 +3978,7 @@
 		visibility: visible;
 	}
 
-		div.is-menu-visible #menu .inner {
+		body.is-menu-visible #menu .inner {
 			-moz-transform: none;
 			-webkit-transform: none;
 			-ms-transform: none;

@@ -1,13 +1,12 @@
 import React from "react";
 import Link from "gatsby-link";
-import Header from "../components/Header";
+// import Header from "../components/Header";
 import Footer from "../components/Footer";
 
 export default ({ data }) => {
+  // <Header />
   return (
     <div id="wrapper">
-      <Header />
-
       <section id="banner" className="major">
         <div className="inner">
           <header className="major">
@@ -30,30 +29,26 @@ export default ({ data }) => {
       </section>
       <div id="main">
         <section id="one" className="tiles">
-          {data.allMarkdownRemark.edges.map(
-            ({ node }) =>
-              console.log("node.frontmatter", node.frontmatter) || (
-                <article
-                  style={{
-                    backgroundImage: `url('${node.frontmatter
-                      .indexscreenshot}')`
-                  }}
-                  key={node.fields.slug}
-                >
-                  <span className="image">
-                    <img src={node.frontmatter.indexscreenshot} alt="" />
-                  </span>
-                  <header className="major">
-                    <h3>
-                      <Link to={node.fields.slug} className="link">
-                        {node.frontmatter.title}
-                      </Link>
-                    </h3>
-                    <p>{node.frontmatter.blurb}</p>
-                  </header>
-                </article>
-              )
-          )}
+          {data.allMarkdownRemark.edges.map(({ node }) => (
+            <article
+              style={{
+                backgroundImage: `url('${node.frontmatter.indexscreenshot}')`
+              }}
+              key={node.fields.slug}
+            >
+              <span className="image">
+                <img src={node.frontmatter.indexscreenshot} alt="" />
+              </span>
+              <header className="major">
+                <h3>
+                  <Link to={node.fields.slug} className="link">
+                    {node.frontmatter.title}
+                  </Link>
+                </h3>
+                <p>{node.frontmatter.blurb}</p>
+              </header>
+            </article>
+          ))}
         </section>
 
         <section id="two">

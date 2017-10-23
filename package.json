@@ -9,7 +9,7 @@
     "gatsby-plugin-react-helmet": "^1.0.5",
     "gatsby-source-filesystem": "^1.5.5",
     "gatsby-transformer-remark": "^1.7.17",
-    "jquery": "^3.2.1"
+    "react-modal": "^3.0.4"
   },
   "keywords": [
     "gatsby"
