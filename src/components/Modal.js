@@ -26,6 +26,7 @@ class Modal extends React.Component {
         shouldCloseOnOverlayClick={true}
         role="dialog"
         // parentSelector={() => document.getElementById("___gatsby")}
+        parentSelector={() => document.body}
       >
         <nav id="menu">
           <ul className="actions vertical">

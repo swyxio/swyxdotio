@@ -6,6 +6,7 @@ class Header extends React.Component {
   state = { isOpen: false };
   handleMenuClick = e => {
     // e.preventDefault();
+    console.log("******** hello", this.state);
     this.setState({ isOpen: true });
   };
   handleCloseModal = () => this.setState({ isOpen: false });
