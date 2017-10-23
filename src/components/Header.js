@@ -5,8 +5,6 @@ import MyModal from "./Modal";
 class Header extends React.Component {
   state = { isOpen: false };
   handleMenuClick = e => {
-    // e.preventDefault();
-    console.log("******** hello", this.state);
     this.setState({ isOpen: true });
   };
   handleCloseModal = () => this.setState({ isOpen: false });
@@ -20,9 +18,8 @@ class Header extends React.Component {
           </span>
         </Link>
         <nav>
-          <a href="#menu" onClick={this.handleMenuClick}>
-            Menu
-          </a>
+          {/*<a href="#menu" onClick={this.handleMenuClick}>*/}
+          <a onClick={this.handleMenuClick}>Menu</a>
         </nav>
         <MyModal
           isOpen={this.state.isOpen}

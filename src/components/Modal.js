@@ -13,7 +13,7 @@ class Modal extends React.Component {
         isOpen={this.state.isOpen}
         // onAfterOpen={handleAfterOpenFunc}
         // onRequestClose={handleRequestCloseFunc}
-        // onRequestClose={this.props.handleCloseModal} // https://github.com/reactjs/react-modal/issues/462
+        onRequestClose={this.props.handleCloseModal} // https://github.com/reactjs/react-modal/issues/462
         closeTimeoutMS={0}
         style={{ overlay: {}, content: { background: "rgba(0,0,0,0.1)" } }}
         contentLabel="Example Modal"
