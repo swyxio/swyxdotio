@@ -1,6 +1,7 @@
 import React from "react";
 // import Header from "../components/Header";
 import Footer from "../components/Footer";
+import Link from "gatsby-link";
 
 const noPointer = { cursor: "default" };
 
@@ -84,6 +85,10 @@ export default ({ data }) => {
             </header>
             <div dangerouslySetInnerHTML={{ __html: post.html }} />
             {CheckOut}
+            <hr />
+            <Link to="/" className="button">
+              Back to Home 🏠
+            </Link>
           </div>
         </section>
       </div>
