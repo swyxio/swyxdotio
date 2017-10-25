@@ -30,6 +30,7 @@ class TemplateWrapper extends React.Component {
             content="width=device-width, initial-scale=1, user-scalable=no"
           />
           <link rel="stylesheet" href="/assets/css/main.css" />
+          <script src="assets/js/drift.js" />
         </Helmet>
         <Header handleMenuClick={this.handleMenuClick.bind(this)} />
         <div>{children()}</div>
