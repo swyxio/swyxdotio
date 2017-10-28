@@ -34,15 +34,14 @@ class TemplateWrapper extends React.Component {
         </Helmet>
         <Header handleMenuClick={this.handleMenuClick.bind(this)} />
         <div>{children()}</div>
-        <script defer src="assets/js/drift.js" />
-        <script defer src="assets/js/jquery.min.js" />
-        <script defer src="assets/js/jquery.scrolly.min.js" />
-        <script defer src="assets/js/jquery.scrollex.min.js" />
-        <script defer src="assets/js/skel.min.js" />
-        <script defer src="assets/js/util.js" />
-        <script defer src="assets/js/main.js" />
       </div>
     );
+        // <script defer src="assets/js/jquery.min.js" />
+        // <script defer src="assets/js/jquery.scrolly.min.js" />
+        // <script defer src="assets/js/jquery.scrollex.min.js" />
+        // <script defer src="assets/js/skel.min.js" />
+        // <script defer src="assets/js/util.js" />
+        // <script defer src="assets/js/main.js" />
   }
 }
 
