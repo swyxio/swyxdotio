@@ -1,7 +1,7 @@
 ---
 title: React Trip Planner
 date: "2017-08-20"
-indexscreenshot: /images/tripplanner.png
+indexscreenshot: /images/tripplanner.svg
 landingscreenshot: https://j.gifs.com/KZO828.gif
 link: "https://swyx-tripplanner.herokuapp.com"
 github: "https://github.com/sw-yx/FSA-React-Trip-Planner"
