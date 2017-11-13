@@ -33,9 +33,6 @@ export default ({ data }) => {
     <div id="wrapper">
       <section id="banner" className="style2">
         <div className="inner">
-          <span className="image">
-            <img src="/images/pic07.jpg" alt="" />
-          </span>
           <header className="major">
             <h1>{post.frontmatter.title}</h1>
           </header>

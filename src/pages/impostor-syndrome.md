@@ -2,7 +2,7 @@
 title: Impostor Syndrome
 date: "2017-10-20"
 indexscreenshot: /images/impostorsyndrome.svg
-landingscreenshot: /images/impostorsyndrome-square.svg
+landingscreenshot: /images/impostorsyndrome-square.png
 link: "https://www.impostor-syndrome.org/"
 blurb: "(Ongoing) An audio documentary about 8 bootcamp students 👢🏕️"
 blurb2: "A podcast with a series of interviews that is superficially about life during and after a coding bootcamp. But perhaps what it is really about is people changing careers and assuming new identities and the wonderful vulnerability that accompanies growth."
