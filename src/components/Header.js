@@ -17,14 +17,23 @@ class Header extends React.Component {
             shawn <strong>swyx</strong> wang
           </span>
         </Link>
+        <Link to="/projects" className="logo">
+          <span>Projects</span>
+        </Link>
+        <Link to="/principles" className="logo">
+          <span>Principles</span>
+        </Link>
+        <Link to="/writing" className="logo">
+          <span>Writing</span>
+        </Link>
+        <Link to="/resources" className="logo">
+          <span>Resources</span>
+        </Link>
         <nav>
           {/*<a href="#menu" onClick={this.handleMenuClick}>*/}
           <a onClick={this.handleMenuClick}>Menu</a>
         </nav>
-        <MyModal
-          isOpen={this.state.isOpen}
-          handleCloseModal={this.handleCloseModal}
-        />
+        <MyModal isOpen={this.state.isOpen} handleCloseModal={this.handleCloseModal} />
       </header>
     );
   }

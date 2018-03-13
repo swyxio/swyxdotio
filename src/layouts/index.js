@@ -25,23 +25,19 @@ class TemplateWrapper extends React.Component {
             { name: "keywords", content: "personal site, portfolio, swyx" }
           ]}
         >
-          <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1, user-scalable=no"
-          />
+          <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
           <link rel="stylesheet" href="/assets/css/main.css" />
-          
         </Helmet>
         <Header handleMenuClick={this.handleMenuClick.bind(this)} />
         <div>{children()}</div>
       </div>
     );
-        // <script defer src="assets/js/jquery.min.js" />
-        // <script defer src="assets/js/jquery.scrolly.min.js" />
-        // <script defer src="assets/js/jquery.scrollex.min.js" />
-        // <script defer src="assets/js/skel.min.js" />
-        // <script defer src="assets/js/util.js" />
-        // <script defer src="assets/js/main.js" />
+    // <script defer src="assets/js/jquery.min.js" />
+    // <script defer src="assets/js/jquery.scrolly.min.js" />
+    // <script defer src="assets/js/jquery.scrollex.min.js" />
+    // <script defer src="assets/js/skel.min.js" />
+    // <script defer src="assets/js/util.js" />
+    // <script defer src="assets/js/main.js" />
   }
 }
 

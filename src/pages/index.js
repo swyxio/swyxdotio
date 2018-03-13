@@ -3,12 +3,20 @@ import Link from "gatsby-link";
 // import Header from "../components/Header";
 import Footer from "../components/Footer";
 
+const profileStyle = {
+  borderRadius: "10px",
+  height: "150px",
+  width: "150px",
+  display: "inline-block"
+};
+
 export default ({ data }) => {
   // <Header />
   return (
     <div id="wrapper">
       <section id="banner" className="major">
         <div className="inner">
+          <img src={"/images/swyx_ski.jpg"} style={profileStyle} alt="" />
           <header className="major">
             <h1>swyx || home</h1>
           </header>
