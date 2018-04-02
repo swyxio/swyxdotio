@@ -7,6 +7,15 @@ import './index.css'
 
 const TemplateWrapper = ({ children }) => (
   <div>
+    <link href="https://unpkg.com/normalize.css@^7.0.0" rel="stylesheet" />
+    <link
+      href="https://unpkg.com/@blueprintjs/core@^2.0.0/lib/css/blueprint.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://unpkg.com/@blueprintjs/icons@^2.0.0/lib/css/blueprint-icons.css"
+      rel="stylesheet"
+    />
     <Helmet
       title="Gatsby Default Starter"
       meta={[
