@@ -6,7 +6,7 @@ const Markdown = require('react-markdown')
 import { Callout } from '@blueprintjs/core'
 const IndexPage = () => (
   <div>
-    <div>
+    <div style={{ marginTop: 20 }}>
       <img
         src="https://user-images.githubusercontent.com/35976578/39973926-0f34b514-56f3-11e8-9c4e-59547fedb719.jpg"
         height={100}
