@@ -11,13 +11,14 @@
     "react": "^16.3.0",
     "react-dom": "^16.3.0",
     "react-helmet": "^5.2.0",
-    "react-transition-group": "^2.3.0"
+    "react-markdown": "^3.3.2",
+    "react-transition-group": "^2.3.0",
+    "swyx-a": "^1.0.0"
   },
-  "keywords": [
-    "gatsby"
-  ],
+  "keywords": ["gatsby"],
   "license": "MIT",
   "scripts": {
+    "start": "npm run develop",
     "build": "gatsby build",
     "develop": "gatsby develop",
     "format": "prettier --write 'src/**/*.js'",

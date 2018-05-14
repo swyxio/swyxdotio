@@ -17,10 +17,10 @@ const TemplateWrapper = ({ children }) => (
       rel="stylesheet"
     />
     <Helmet
-      title="Gatsby Default Starter"
+      title="swyx.io home"
       meta={[
-        { name: 'description', content: 'Sample' },
-        { name: 'keywords', content: 'sample, something' },
+        { name: 'description', content: 'home page for shawn swyx wang' },
+        { name: 'keywords', content: 'swyx, shawn swyx wang' },
       ]}
     />
     <Header />
