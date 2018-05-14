@@ -45,11 +45,11 @@ const Header = () => (
     <NavbarGroup align={Alignment.RIGHT}>
       <NavbarHeading>shawn swyx wang</NavbarHeading>
       <NavbarDivider />
-      <Link to="/">
+      <Link to="/" activeClassName="active">
         <Button className={Classes.MINIMAL} icon="home" text="Home" />
       </Link>
-      <Link to="/page-2">
-        <Button className={Classes.MINIMAL} icon="document" text="Files" />
+      <Link to="/projects" activeClassName="active">
+        <Button className={Classes.MINIMAL} icon="document" text="Projects" />
       </Link>
     </NavbarGroup>
   </Navbar>
