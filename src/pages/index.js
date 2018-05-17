@@ -45,6 +45,7 @@ const IndexPage = () => (
 
   * [Founder Checklists](https://founders.swyx.io/) - Short lists for hard problems by founders who've been there, done that.
   * [Impostor Syndrome](https://spectrum.chat/impostor-syndrome) - a [podcast](https://www.impostor-syndrome.org/) and [online community](https://spectrum.chat/impostor-syndrome) for people joining the tech industry via bootcamps.
+  * [React Rally](http://www.reactrally.com/speakers) - Preparing for a public talk at the biggest stage of my life.
   * (pending) [Egghead.io](https://egghead.io/) instructor - short technical courses!
 
 
