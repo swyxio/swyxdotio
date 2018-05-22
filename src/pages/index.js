@@ -47,6 +47,7 @@ const IndexPage = () => (
   * [Impostor Syndrome](https://spectrum.chat/impostor-syndrome) - a [podcast](https://www.impostor-syndrome.org/) and [online community](https://spectrum.chat/impostor-syndrome) for people joining the tech industry via bootcamps.
   * [React Rally](http://www.reactrally.com/speakers) - Preparing for a public talk at the biggest stage of my life.
   * (pending) [Egghead.io](https://egghead.io/) instructor - short technical courses!
+  * (pending) Georgia Tech OMSCS - Course 1-10
 
 
   ### ❤️ Open Source
@@ -63,6 +64,8 @@ const IndexPage = () => (
   * [Fullstack Academy: Heaps](https://slides.com/swyx/heaps#/) - a guide to the data structure and where they are used
   * [ReactNYC: Contributing to React](https://www.youtube.com/watch?v=GWCcZ6fnpn4) - my first technical talk, added by Dan Abramov to [React's official docs](https://reactjs.org/docs/how-to-contribute.html) [[slides](https://github.com/sw-yx/react-contributing)]
   * [ReactNYC: Never Bundle React Again](https://www.youtube.com/watch?v=rPuwZJEA-9U) - a lightning talk rehash of [this React Rally talk](https://www.youtube.com/watch?v=2rhkgB8Cohc) [[slides](https://slides.com/swyx/never-bundle-react-again#/)] - I'm not super proud of it but 🤷🏼‍♂️
+  * [ReactNYC: React Suspense](https://slides.com/swyx/react-suspense) - a compendium of everything discussed about the React Suspense API
+  * [ReactNYC: Creating Create React App](https://www.beautiful.ai/deck/-LD4eaMxlqSlCy6biPmZ/Creating-Create-React-App) - diving into the history of CRA, how CRA works, and my experience making [create-react-app-parcel](https://github.com/sw-yx/create-react-app-parcel)
 
   `}
     />
