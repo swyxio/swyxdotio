@@ -3,9 +3,9 @@ import Link from 'gatsby-link'
 
 const SecondPage = () => (
   <div>
-    <h1>Hi from the second page</h1>
-    <p>Welcome to page 2</p>
-    <Link to="/">Go back to the homepage</Link>
+    <h1>Projects</h1>
+    <p>For now, you can find my awesomesauce at Github:</p>
+    <Link to="https://github.com/sw-yx">https://github.com/sw-yx</Link>
   </div>
 )
 
