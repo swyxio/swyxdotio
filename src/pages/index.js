@@ -7,6 +7,17 @@ import { Callout } from '@blueprintjs/core'
 const IndexPage = () => (
   <div>
     <div style={{ marginTop: 20 }}>
+    <Callout style={{ marginBottom: 20, textAlign: 'center' }}>
+      <h3>Hello React Rally!</h3>
+      <p>
+      If you're looking for my talk slides they are <Link to="/ReactRally">here</Link>.
+    
+      You can also find me on <A href="https://twitter.com/swyx">@swyx</A> on Twitter!
+      </p>
+      
+    </Callout>
+    </div>
+    <div style={{ marginTop: 20 }}>
       <img
         src="https://user-images.githubusercontent.com/35976578/39973926-0f34b514-56f3-11e8-9c4e-59547fedb719.jpg"
         height={100}
@@ -66,6 +77,7 @@ const IndexPage = () => (
   * [ReactNYC: Never Bundle React Again](https://www.youtube.com/watch?v=rPuwZJEA-9U) - a lightning talk rehash of [this React Rally talk](https://www.youtube.com/watch?v=2rhkgB8Cohc) [[slides](https://slides.com/swyx/never-bundle-react-again#/)] - I'm not super proud of it but 🤷🏼‍♂️
   * [ReactNYC: React Suspense](https://slides.com/swyx/react-suspense) - a compendium of everything discussed about the React Suspense API
   * [ReactNYC: Creating Create React App](https://www.beautiful.ai/deck/-LD4eaMxlqSlCy6biPmZ/Creating-Create-React-App) - diving into the history of CRA, how CRA works, and my experience making [create-react-app-parcel](https://github.com/sw-yx/create-react-app-parcel)
+  * [React Rally: Why React is -NOT- Reactive](https://slides.com/swyx/why-react-is-not-reactive)
 
   `}
     />

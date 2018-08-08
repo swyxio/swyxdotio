@@ -23,7 +23,7 @@ function ReactRally() {
              reactive-react
            </A>
     </p>
-    <p style={{paddingLeft: 100}}>
+    <p>
     Feedback: <button 
       style={{
         backgroundColor: 'lightblue',
