@@ -19,10 +19,14 @@ function ReactRally() {
   <h5>a talk given at ReactNYC/React Rally</h5>
     <p>
     diving into React's push-pull data flow and the importance of the scheduler: 
-           <A href="https://github.com/sw-yx/reactive-react">
+    </p>
+    <ul>
+      <li>
+           Github: <A href="https://github.com/sw-yx/reactive-react">
              reactive-react
            </A>
-    </p>
+           </li>
+    </ul>
     <p>
     Feedback: <button 
       style={{
