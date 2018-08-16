@@ -12,6 +12,12 @@ const Talks = () => (
     }}
   >
   <div>
+    <h1>Current Talk: Why React is -NOT- Reactive</h1>
+    <h5>a talk given at ReactNYC and React Rally</h5>
+    <p>Please see the dedicated <Link to="/reactrally">React Rally</Link> page</p>
+  </div>
+  <hr />
+  <div>
     <h1>Contributing to React</h1>
     <h5>a talk given at ReactNYC</h5>
     <p>Details coming</p>
@@ -33,11 +39,6 @@ const Talks = () => (
       <li><A href="https://github.com/sw-yx/create-react-app-parcel">Related Github</A></li>
     </ul>
     <p>We all use create-react-app but how much do we know about how it works internally? In this talk we discuss how I recently dived into the source code for create-react-app to make a fun clone! It looks intimidating but is really not, once you get a hang of how lerna monorepos work and try making one of your own. Watch this and then go make your own create-awesome-app!</p>
-  </div>
-  <div>
-    <h1>Why React is -NOT- Reactive</h1>
-    <h5>a talk given at ReactNYC and React Rally</h5>
-    <p>Details coming</p>
   </div>
   <div>
     <h1>Babel ❤️ GraphQL</h1>

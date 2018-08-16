@@ -49,7 +49,7 @@ const Header = () => (
         <Button className={Classes.MINIMAL} icon="home" text="Home" />
       </Link>
       <Link to="/talks" activeClassName="active">
-        <Button className={Classes.MINIMAL} icon="document" text="Talks" />
+        <Button className={Classes.MINIMAL} icon="chat" text="Talks" />
       </Link>
     </NavbarGroup>
   </Navbar>

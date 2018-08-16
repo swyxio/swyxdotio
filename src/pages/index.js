@@ -37,9 +37,9 @@ const IndexPage = () => (
       source={`
 
   * 🗺️ I'm from Singapore 🇸🇬 and live in NYC 🍎🗽.
-  * 👨🏼‍🎓 Proud [Wharton](https://www.wharton.upenn.edu/), [Huntsman](http://huntsman.upenn.edu/) and [UChicago](http://finmath.uchicago.edu/) alum, current [GATech OMSCS](https://www.omscs.gatech.edu/) student.
+  * 👨🏼‍🎓 Proud [Fullstack] [Wharton/Huntsman](http://huntsman.upenn.edu/) and [UChicago](http://finmath.uchicago.edu/) alum, current [GATech OMSCS](https://www.omscs.gatech.edu/) student.
   * 💰 I used to trade stocks, currency and derivatives at some of the largest [banks](https://www.sc.com/) and [hedge funds](https://www.bamfunds.com/) in the world (with [Haskell](https://www.haskell.org/) and [Python](https://www.python.org/)).
-  * ⚛️ Now I maintain the [Typescript](https://www.typescriptlang.org/)/[React](https://reactjs.org/) [design system](https://designsystemsrepo.netlify.com/) at [Two Sigma](https://www.twosigma.com/)'s insurance startup.
+  * ⚛️ Most recently I worked on the [Typescript](https://www.typescriptlang.org/)/[React](https://reactjs.org/) [design system](https://designsystemsrepo.netlify.com/) at [Two Sigma](https://www.twosigma.com/)'s insurance startup.
   * 🎤 I also did a fair amount of Singing/Acapella back in the day. Now I listen to a ton of [podcasts](https://github.com/sw-yx/awesome-dev-podcasts) (and [make one](https://www.impostor-syndrome.org/)!)
   * 💁🏼‍♂️ [Talk to me](mailto:momoney@swyx.io) about fintech/frontend consulting engagements!
   `}
@@ -54,8 +54,6 @@ const IndexPage = () => (
       source={`
   ### 📚 Current Projects
 
-  * [Founder Checklists](https://founders.swyx.io/) - Short lists for hard problems by founders who've been there, done that.
-  * [Impostor Syndrome](https://spectrum.chat/impostor-syndrome) - a [podcast](https://www.impostor-syndrome.org/) and [online community](https://spectrum.chat/impostor-syndrome) for people joining the tech industry via bootcamps.
   * [React Rally](http://www.reactrally.com/speakers) - Preparing for a public talk at the biggest stage of my life.
   * (pending) [Egghead.io](https://egghead.io/) instructor - short technical courses!
   * (pending) Georgia Tech OMSCS - Course 1-10
@@ -69,6 +67,8 @@ const IndexPage = () => (
 
 
   ### 🗣️ Talks
+
+  See the new dedicated [Talks page](/talks)!
 
   * [Fullstack Academy: React Trip Planner](https://github.com/sw-yx/FSA-React-Trip-Planner) - a guided workshop on converting a vanilla JS app into React for the first time.
   * [Fullstack Academy: Crossbones](https://www.fullstackacademy.com/hackathon-presentations/crossbones-fullstacks-react-native-boilerplate) - a React Native boilerplate [[source](https://github.com/sw-yx/crossbones)]
