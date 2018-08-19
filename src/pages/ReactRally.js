@@ -22,10 +22,23 @@ function ReactRally() {
     </p>
     <ul>
       <li>
-           Github: <A href="https://github.com/sw-yx/reactive-react">
-             reactive-react
-           </A>
-           </li>
+        Youtube: 
+        <A href="https://www.youtube.com/watch?v=SaO-7Lk5hZ8">
+          React Rally 2018
+        </A>
+      </li>
+      <li>
+        Github: 
+        <A href="https://github.com/sw-yx/reactive-react">
+          reactive-react
+        </A>
+      </li>
+      <li>
+        Slides: 
+        <A href="https://slides.com/swyx/why-react-is-not-reactive#/">
+          Why React is *not* Reactive
+        </A>
+      </li>
     </ul>
     <p>
     Feedback: <button 
@@ -40,7 +53,7 @@ function ReactRally() {
         </marquee>
     </button>
     </p> 
-    <iframe src="//slides.com/swyx/why-react-is-not-reactive/embed" width="576" height="420" scrolling="no" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/SaO-7Lk5hZ8" frameborder="0" allow="autoplay; encrypted-media" webkitallowfullscreen mozallowfullscreen  allowfullscreen></iframe>
   </div>
 )
 }
