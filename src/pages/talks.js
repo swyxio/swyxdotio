@@ -83,6 +83,7 @@ Even if you don't work with React, you're likely to have come across a React dev
       <h5>Reacting Ahead of Time</h5>
       <p>
       What's faster than O(1)? Step changes in performance and scalability come from paradigm changes rather than incremental optimizations. The inexorable march forward in "table stakes" product requirements  has forced developers to explore ways to push computation from client to server, from runtime to buildtime, from fat SPAs to code-split frameworks. Cutting edge UX is exploring how to prefetch and cache resources intelligently, trading off memory usage for compute time. Lastly, DX has also been pushed forward with fascinating ideas from hot reloading to GraphQL. Where is all this taking us?
+      </p>
     </div>
   </div>
   </div>
