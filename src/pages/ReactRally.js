@@ -20,6 +20,20 @@ function ReactRally() {
     <p>
     diving into React's push-pull data flow and the importance of the scheduler: 
     </p>
+    <p>
+    Feedback: <button 
+      style={{
+        backgroundColor: 'lightblue',
+        borderRadius: 10,
+        padding: 20
+      }}
+      onClick={() => window.open("https://shawnwang3.typeform.com/to/cC7sYD")}
+      ><marquee>
+        <h3>⚛️ GIVE FEEDBACK! ⚛️</h3>
+        </marquee>
+    </button>
+    </p> 
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/SaO-7Lk5hZ8" frameborder="0" allow="autoplay; encrypted-media" webkitallowfullscreen mozallowfullscreen  allowfullscreen></iframe>
     <ul>
       <li>
         Youtube: 
@@ -43,6 +57,18 @@ function ReactRally() {
         <A href="https://www.reddit.com/r/reactjs/comments/98lbpi/why_react_is_not_reactive_react_rally_2018/">
         Reddit
         </A>
+        <ul>
+          <li>"Hey! Just wanted to say as a dev who's aspiring to continuously improve that your talk was amazing."</li>
+          <li>"enjoyed your talk! I've been really reading into message queue usage in microservices and so its nice to see it explained in front-end context on while that model makes sense. thanks!"</li>
+          <li>"Loved your talk Shawn." - /u/stolinski 😍</li>
+        </ul>
+      </li>
+      <li>
+        Private
+        <ul>
+          <li>i thought it was awesome! thanks for representing!</li>
+          <li>hey! awesome talk and nice to see a fellow FSA repping!</li>
+        </ul>
       </li>
       <li>
         Twitter shoutouts!
@@ -89,22 +115,7 @@ function ReactRally() {
           </li>
         </ul>
       </li>
-      
     </ul>
-    <p>
-    Feedback: <button 
-      style={{
-        backgroundColor: 'lightblue',
-        borderRadius: 10,
-        padding: 20
-      }}
-      onClick={() => window.open("https://shawnwang3.typeform.com/to/cC7sYD")}
-      ><marquee>
-        <h3>⚛️ GIVE FEEDBACK! ⚛️</h3>
-        </marquee>
-    </button>
-    </p> 
-    <iframe width="560" height="315" src="https://www.youtube.com/embed/SaO-7Lk5hZ8" frameborder="0" allow="autoplay; encrypted-media" webkitallowfullscreen mozallowfullscreen  allowfullscreen></iframe>
   </div>
 )
 }
