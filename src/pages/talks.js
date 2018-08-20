@@ -20,7 +20,9 @@ const Talks = () => (
   <div>
     <h1>Contributing to React</h1>
     <h5>a talk given at ReactNYC</h5>
-    <p>Details coming</p>
+    <ul>
+      <li><A href="https://www.youtube.com/watch?v=GWCcZ6fnpn4">Recording (?? 2018)</A></li>
+    </ul>
   </div>
   <div>
     <h1>React Suspense</h1>
@@ -52,8 +54,13 @@ const Talks = () => (
   </div>
   <hr />
   <div>
+    <h5>Reusable bio</h5>
+    <p>swyx is an Infinite Builder working on Developer Experience at Netlify. In his free time he helps run the Beginner Q&A and Job Postings at /r/reactjs.</p>
+  </div>
+  <hr />
+  <div>
     <p>
-    <i>pending talk proposals</i>
+    <i>pending talks</i>
     </p>
     <div>
       <h5>I can Babel Macros (and So Can You!)</h5>
@@ -71,6 +78,11 @@ const Talks = () => (
       <h5>React Suspense For The Rest of Us</h5>
       <p>
 Even if you don't work with React, you're likely to have come across a React dev super excited about the new Suspense feature in React. What is it? Why are people so hyped? Should I care? This talk is an introduction for anyone who feels out of the loop - walking through the history of the idea and the general UI problems it solves (even for React Native!). We will approach this in a framework-agnostic way, so that you can see if the Suspense design pattern might make sense in your next project!</p>
+    </div>
+    <div>
+      <h5>Reacting Ahead of Time</h5>
+      <p>
+      What's faster than O(1)? Step changes in performance and scalability come from paradigm changes rather than incremental optimizations. The inexorable march forward in "table stakes" product requirements  has forced developers to explore ways to push computation from client to server, from runtime to buildtime, from fat SPAs to code-split frameworks. Cutting edge UX is exploring how to prefetch and cache resources intelligently, trading off memory usage for compute time. Lastly, DX has also been pushed forward with fascinating ideas from hot reloading to GraphQL. Where is all this taking us?
     </div>
   </div>
   </div>

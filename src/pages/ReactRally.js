@@ -39,6 +39,57 @@ function ReactRally() {
           Why React is *not* Reactive
         </A>
       </li>
+      <li>
+        <A href="https://www.reddit.com/r/reactjs/comments/98lbpi/why_react_is_not_reactive_react_rally_2018/">
+        Reddit
+        </A>
+      </li>
+      <li>
+        Twitter shoutouts!
+        <ul>
+          <li>
+            <A href="https://twitter.com/JemYoung/status/1030896519115751424">
+            Jem Young
+            </A>
+          </li>
+          <li>
+            <A href="https://twitter.com/kyleshevlin/status/1030134445838233600">
+            Kyle Shevlin
+            </A>
+          </li>
+          <li>
+            <A href="https://twitter.com/amberleyjohanna/status/1030135278663426048">
+            Amberley Johanna
+            </A>
+          </li>
+          <li>
+            <A href="https://twitter.com/mweststrate/status/1030140251640135680">
+            Michel Weststrate
+            </A>
+          </li>
+          <li>
+            <A href="https://twitter.com/kentcdodds/status/1030132879827685376">
+            Kent C. Dodds
+            </A>
+          </li>
+          <li>
+            <A href="https://twitter.com/MatthewGerstman/status/1030132442768658432">
+            Matthew Gerstman
+            </A>
+          </li>
+          <li>
+            <A href="https://twitter.com/aweary/status/1030138785302896640">
+            Brandon Dail
+            </A>
+          </li>
+          <li>
+            <A href="https://twitter.com/kurtiskemple/status/1030133624807378944">
+            Kurt Kemple
+            </A>
+          </li>
+        </ul>
+      </li>
+      
     </ul>
     <p>
     Feedback: <button 
