@@ -6,7 +6,7 @@ const Markdown = require('react-markdown')
 import { Callout } from '@blueprintjs/core'
 const IndexPage = () => (
   <div>
-    <div style={{ marginTop: 20 }}>
+    {/* <div style={{ marginTop: 20 }}>
       <Callout style={{ marginBottom: 20, textAlign: 'center' }}>
         <h3>Hello React Rally!</h3>
         <p>
@@ -15,7 +15,7 @@ const IndexPage = () => (
           <A href="https://twitter.com/swyx">@swyx</A> on Twitter!
         </p>
       </Callout>
-    </div>
+    </div> */}
     <div style={{ marginTop: 20 }}>
       <img
         src="https://user-images.githubusercontent.com/35976578/39973926-0f34b514-56f3-11e8-9c4e-59547fedb719.jpg"
@@ -35,7 +35,7 @@ const IndexPage = () => (
       escapeHtml={false}
       source={`
 
-  * 🗺️ I'm from Singapore 🇸🇬 and live in NYC 🍎🗽.
+  * 🗺️ I'm from Singapore 🇸🇬 and live in NYC 🗽.
   * 👨🏼‍🎓 Proud [Fullstack](https://twitter.com/fullstack), [Wharton/Huntsman](http://huntsman.upenn.edu/) and [UChicago](http://finmath.uchicago.edu/) alum, current [GATech OMSCS](https://www.omscs.gatech.edu/) student.
   * 💰 I used to trade stocks, currency and derivatives at some of the largest [banks](https://www.sc.com/) and [hedge funds](https://www.bamfunds.com/) in the world (with [Haskell](https://www.haskell.org/) and [Python](https://www.python.org/)).
   * ⚛️ Most recently I worked on the [Typescript](https://www.typescriptlang.org/)/[React](https://reactjs.org/) [design system](https://designsystemsrepo.netlify.com/) at [Two Sigma](https://www.twosigma.com/)'s insurance startup.
@@ -75,7 +75,7 @@ const IndexPage = () => (
   * [ReactNYC: Never Bundle React Again](https://www.youtube.com/watch?v=rPuwZJEA-9U) - a lightning talk rehash of [this React Rally talk](https://www.youtube.com/watch?v=2rhkgB8Cohc) [[slides](https://slides.com/swyx/never-bundle-react-again#/)] - I'm not super proud of it but 🤷🏼‍♂️
   * [ReactNYC: React Suspense](https://slides.com/swyx/react-suspense) - a compendium of everything discussed about the React Suspense API
   * [ReactNYC: Creating Create React App](https://www.beautiful.ai/deck/-LD4eaMxlqSlCy6biPmZ/Creating-Create-React-App) - diving into the history of CRA, how CRA works, and my experience making [create-react-app-parcel](https://github.com/sw-yx/create-react-app-parcel)
-  * [React Rally: Why React is -NOT- Reactive](https://slides.com/swyx/why-react-is-not-reactive)
+  * [React Rally: Why React is -NOT- Reactive](https://slides.com/swyx/why-react-is-not-reactive) - a talk about why we have scheduling in React
 
   `}
     />
