@@ -7,15 +7,14 @@ import { Callout } from '@blueprintjs/core'
 const IndexPage = () => (
   <div>
     <div style={{ marginTop: 20 }}>
-    <Callout style={{ marginBottom: 20, textAlign: 'center' }}>
-      <h3>Hello React Rally!</h3>
-      <p>
-      If you're looking for my talk slides they are <Link to="/ReactRally">here</Link>.
-    
-      You can also find me on <A href="https://twitter.com/swyx">@swyx</A> on Twitter!
-      </p>
-      
-    </Callout>
+      <Callout style={{ marginBottom: 20, textAlign: 'center' }}>
+        <h3>Hello React Rally!</h3>
+        <p>
+          If you're looking for my talk slides they are{' '}
+          <Link to="/ReactRally">here</Link>. You can also find me on{' '}
+          <A href="https://twitter.com/swyx">@swyx</A> on Twitter!
+        </p>
+      </Callout>
     </div>
     <div style={{ marginTop: 20 }}>
       <img
@@ -37,10 +36,10 @@ const IndexPage = () => (
       source={`
 
   * 🗺️ I'm from Singapore 🇸🇬 and live in NYC 🍎🗽.
-  * 👨🏼‍🎓 Proud [Fullstack] [Wharton/Huntsman](http://huntsman.upenn.edu/) and [UChicago](http://finmath.uchicago.edu/) alum, current [GATech OMSCS](https://www.omscs.gatech.edu/) student.
+  * 👨🏼‍🎓 Proud [Fullstack](https://twitter.com/fullstack), [Wharton/Huntsman](http://huntsman.upenn.edu/) and [UChicago](http://finmath.uchicago.edu/) alum, current [GATech OMSCS](https://www.omscs.gatech.edu/) student.
   * 💰 I used to trade stocks, currency and derivatives at some of the largest [banks](https://www.sc.com/) and [hedge funds](https://www.bamfunds.com/) in the world (with [Haskell](https://www.haskell.org/) and [Python](https://www.python.org/)).
   * ⚛️ Most recently I worked on the [Typescript](https://www.typescriptlang.org/)/[React](https://reactjs.org/) [design system](https://designsystemsrepo.netlify.com/) at [Two Sigma](https://www.twosigma.com/)'s insurance startup.
-  * 🎤 I also did a fair amount of Singing/Acapella back in the day. Now I listen to a ton of [podcasts](https://github.com/sw-yx/awesome-dev-podcasts) (and [make one](https://www.impostor-syndrome.org/)!)
+  * 🎤 I also did a fair amount of Singing/Acapella back in the day. Now I listen to a ton of [podcasts](https://github.com/sw-yx/awesome-dev-podcasts)!
   * 💁🏼‍♂️ [Talk to me](mailto:momoney@swyx.io) about fintech/frontend consulting engagements!
   `}
     />
@@ -54,21 +53,20 @@ const IndexPage = () => (
       source={`
   ### 📚 Current Projects
 
-  * [React Rally](http://www.reactrally.com/speakers) - Preparing for a public talk at the biggest stage of my life.
-  * (pending) [Egghead.io](https://egghead.io/) instructor - short technical courses!
-  * (pending) Georgia Tech OMSCS - Course 1-10
-
+  * [Egghead.io](https://egghead.io/) instructor - short technical courses!
+  * Georgia Tech OMSCS - Computer Networks
+  * Georgia Tech OMSCS - Human Computer Interfaces
 
   ### ❤️ Open Source
 
   * [Storybook Typescript Docs](https://storybook.js.org/configurations/typescript-config/) - I wrote the whole thing, and also added some more longform stuff on [dev.to](https://dev.to/swyx/quick-guide-to-setup-your-react--typescript-storybook-design-system-1c51)
   * [create-react-app-parcel](https://github.com/sw-yx/create-react-app-parcel) - CLI for creating react apps with parceljs because why not!
   * [async-render-toolbox](https://github.com/sw-yx/async-render-toolbox) - Chrome/Firefox extension for adding the React Time Slicing Lag Radar
-
+  * [babel-blade](https://babel-blade.netlify.com) - Babel plugin to solve the double declaration problem in clientside GraphQL.
 
   ### 🗣️ Talks
 
-  See the new dedicated [Talks page](/talks)!
+  NEW: See the new dedicated [Talks page](/talks)!
 
   * [Fullstack Academy: React Trip Planner](https://github.com/sw-yx/FSA-React-Trip-Planner) - a guided workshop on converting a vanilla JS app into React for the first time.
   * [Fullstack Academy: Crossbones](https://www.fullstackacademy.com/hackathon-presentations/crossbones-fullstacks-react-native-boilerplate) - a React Native boilerplate [[source](https://github.com/sw-yx/crossbones)]
