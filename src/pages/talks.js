@@ -85,6 +85,12 @@ Even if you don't work with React, you're likely to have come across a React dev
       What's faster than O(1)? Step changes in performance and scalability come from paradigm changes rather than incremental optimizations. The inexorable march forward in "table stakes" product requirements  has forced developers to explore ways to push computation from client to server, from runtime to buildtime, from fat SPAs to code-split frameworks. Cutting edge UX is exploring how to prefetch and cache resources intelligently, trading off memory usage for compute time. Lastly, DX has also been pushed forward with fascinating ideas from hot reloading to GraphQL. Where is all this taking us?
       </p>
     </div>
+    <div>
+      <h5>React Suspense Workers</h5>
+      <p>
+      React Suspense doesn't work without a caching layer, so every Suspense library has built one - except in service workers! In this talk we go through what React Suspense is, then explore a prototype of how "Suspense Workers" could be useful in future Concurrent React apps.
+      </p>
+    </div>
   </div>
   </div>
 )
