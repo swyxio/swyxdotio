@@ -19,7 +19,6 @@ function ReactBoston() {
       <h5>a talk given at React Boston</h5>
       <p>solving the Double Declaration problem in clientside GraphQL</p>
       <p>
-        Feedback:{' '}
         <button
           style={{
             backgroundColor: 'lightblue',
