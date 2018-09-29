@@ -48,7 +48,7 @@ const Talks = () => (
     <ul>
       <li>Coming to React Boston Sept 2018</li>
       <li><A href="https://youtu.be/7OHXz7vXC0g">Recording (Aug 2018)</A></li>
-      <li><A href="https://github.com/sw-yx/create-react-app-parcel">Related Github</A></li>
+      <li><A href="https://babel-blade.netlify.com/">babel-blade Docs</A></li>
     </ul>
     <p>Babel plugins can help solve DX and UX tradeoffs by metaprogramming to write code the way that is best for you while delivering code that is best for the user. Case in point: JSX - but why stop there? In this talk we explore how babel-blade solves the double declaration problem in all React GraphQL client libraries, and how to get started writing your first babel plugin!</p>
   </div>
