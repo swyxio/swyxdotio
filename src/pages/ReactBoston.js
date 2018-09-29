@@ -27,7 +27,7 @@ function ReactBoston() {
             padding: 20,
           }}
           onClick={() =>
-            window.open('https://shawnwang3.typeform.com/to/cC7sYD')
+            window.open('https://shawnwang3.typeform.com/to/OYtqZ7')
           }
         >
           <marquee>
