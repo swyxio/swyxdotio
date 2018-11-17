@@ -113,6 +113,26 @@ const Talks = () => (
         <i>pending talks</i>
       </p>
       <div>
+        <h5>Static Site Generators: Performance by Default</h5>
+        <p>
+          There is a sea change afoot in the worlds of frontend frameworks and
+          static site generators: the two have gotten married! React has Gatsby
+          and React-Static, Vue has VuePress, even Svelte has Sapper. What’s
+          going on? In this talk we explore how the performance bar has been
+          raised for making fast, full-featured sites on the JAMStack, and how
+          new tools are meeting that bar!
+        </p>
+        <p style={{ display: 'none' }}>
+          I do a lot of work with the JAMstack as a DX advocate with Netlify - a
+          lot of folks still underestimate how much Static Site Generator
+          frameworks build in performance best practices by default (Lighthouse
+          100 out of the box anyone?), and overestimate how limiting the
+          constraint of Static Site Generation is for actually building non
+          trivial web apps. I'd love the opportunity to talk about it to the
+          PerfMatters community!
+        </p>
+      </div>
+      <div>
         <h5>I can Babel Macros (and So Can You!)</h5>
         <p>
           Babel macros are a new way to solve DX and UX tradeoffs by
@@ -200,6 +220,17 @@ const Talks = () => (
           library has built one - except in service workers! In this talk we go
           through what React Suspense is, then explore a prototype of how
           "Suspense Workers" could be useful in future Concurrent React apps.
+        </p>
+      </div>
+      <div>
+        <h5>Immutability is Changing: From Immutable.js to Immer</h5>
+        <p>
+          The need for immutability in JavaScript isn’t obvious, but
+          Immutable.js swept the Javascript world in 2015 when it enforced a
+          stricter, more functional approach to code without any need for deep
+          comparisons. Then Immer was introduced in 2018, and took the
+          Javascript world by storm. What's different? What's better? And what
+          do ES6 Proxies have to do with it?
         </p>
       </div>
       <div>
