@@ -1,0 +1,5 @@
+- name: swyx
+  bio: |
+    swyx is an Infinite Builder working on Developer Experience at Netlify. In his free time he helps people Learn in Public at Egghead.io and /r/reactjs.
+  avatar: ./swyx.jpg
+  featured: true

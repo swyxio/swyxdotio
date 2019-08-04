@@ -1,0 +1,25 @@
+{
+  "name": "swyxdotio",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "sw-yx <swyx@dontemail.me>",
+  "license": "MIT",
+  "dependencies": {
+    "@narative/gatsby-theme-novela": "^0.0.3",
+    "gatsby": "^2.13.50",
+    "gatsby-plugin-manifest": "^2.2.4",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6"
+  },
+  "scripts": {
+    "start": "gatsby develop",
+    "build": "gatsby build",
+    "eject": "gatsby-theme eject",
+    "postinstall": "patch-package"
+  },
+  "devDependencies": {
+    "gatsby-theme": "^0.0.6",
+    "patch-package": "^6.1.2",
+    "postinstall-postinstall": "^2.0.0"
+  }
+}
