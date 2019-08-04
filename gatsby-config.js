@@ -15,7 +15,7 @@ module.exports = {
       },
       {
         name: `github`,
-        url: `https://github.com/sw-yx`,
+        url: `https://github.com/sw-yx/swyxdotio`,
       },
     ],
   },
