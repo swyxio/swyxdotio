@@ -3,6 +3,7 @@ title: Cool Facts about Cuttlefish
 slug: cuttlefish
 category: Rants
 date: 2019-01-15
+author: swyx
 ---
 
 ![https://sw-yx.tinytake.com/media/93bf88?filename=1547580830746_15-01-2019-11-33-49.png&sub_type=thumbnail_preview&type=attachment&width=698&height=241&&salt=MzIzMTM5MV85NjgyODI0](https://sw-yx.tinytake.com/media/93bf88?filename=1547580830746_15-01-2019-11-33-49.png&sub_type=thumbnail_preview&type=attachment&width=698&height=241&&salt=MzIzMTM5MV85NjgyODI0)

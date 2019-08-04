@@ -3,6 +3,7 @@ title: Learn In Public
 slug: learn-in-public
 category: Advice
 date: 2018-06-19
+author: swyx
 ---
 
 If there's a golden rule, it's this one, so I put it first. All the other rules are more or less elaborations of this rule #1.
@@ -39,8 +40,7 @@ _originally drafted [in a gist](https://gist.github.com/sw-yx/9720bd4a30606ca3ff
 
 **Related links**
 
-- Talks:
-  - https://www.swyx.io/talks/learn-in-public
+- Talk version of this essay: https://www.swyx.io/talks/learn-in-public
 - Patio11: [Do not end the week with nothing](https://training.kalzumeus.com/newsletters/archive/do-not-end-the-week-with-nothing)
 - Chris Coyier: [Showing up and Persistence](https://chriscoyier.net/2013/10/18/mediocre-ideas-showing-up-and-persistence/) and [Working in Public](https://chriscoyier.net/2012/09/23/working-in-public/)
 - Cory House: [Becoming an Outlier](https://vimeo.com/97415346) and [The Art of Learning](https://www.bitnative.com/2013/12/14/programming-your-brain-the-art-of-learning-in-three-steps/)

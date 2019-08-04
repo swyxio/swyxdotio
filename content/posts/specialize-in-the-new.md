@@ -3,6 +3,7 @@ title: Specialize In The New
 slug: specialize-in-the-new
 category: Advice
 date: 2018-06-22
+author: swyx
 ---
 
 You already know the value of a niche - you go up in market value the more specialized you are in anything. So what do you specialize in?

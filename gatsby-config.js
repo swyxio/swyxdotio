@@ -1,33 +1,21 @@
 module.exports = {
   siteMetadata: {
-    title: `Novela by Narative`,
-    name: `Narative`,
-    siteUrl: `https://novela.narative.co`,
-    description: `This is my description that will be used in the meta tags and important for search results`,
+    title: `swyx dot io`,
+    name: `swyx`,
+    siteUrl: `https://swyx.io`,
+    description: `Personal site for shawn swyx wang`,
     hero: {
-      heading: `Welcome to Novela, the simplest way to start publishing with Gatsby.`,
+      heading: `swyx's writing`,
       maxWidth: 652,
     },
     social: [
       {
         name: `twitter`,
-        url: `https://twitter.com/narative`,
+        url: `https://twitter.com/swyx`,
       },
       {
         name: `github`,
-        url: `https://github.com/narative`,
-      },
-      {
-        name: `instagram`,
-        url: `https://instagram.com/narative.co`,
-      },
-      {
-        name: `linkedin`,
-        url: `https://www.linkedin.com/company/narative/`,
-      },
-      {
-        name: `dribbble`,
-        url: `https://dribbble.com/narativestudio`,
+        url: `https://github.com/sw-yx`,
       },
     ],
   },
@@ -37,14 +25,14 @@ module.exports = {
       options: {
         contentPosts: 'content/posts',
         contentAuthors: 'content/authors',
-        basePath: '/',
+        basePath: '/writing',
       },
     },
     {
       resolve: `gatsby-plugin-manifest`,
       options: {
-        name: `Novela by Narative`,
-        short_name: `Novela`,
+        name: `swyx dot io`,
+        short_name: `swyx`,
         start_url: `/`,
         background_color: `#fff`,
         theme_color: `#fff`,

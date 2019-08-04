@@ -3,6 +3,7 @@ title: Post Graduation Mindmap
 slug: post-graduation
 category: Advice
 date: 2019-02-21
+author: swyx
 ---
 
 What are all the things you can do to improve as a developer after graduating from college or bootcamp?

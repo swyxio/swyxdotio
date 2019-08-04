@@ -4,6 +4,7 @@ slug: how-to-name-things
 category: Tech
 begun: 2019-05-09
 date: 2019-05-16
+author: swyx
 ---
 
 > There are 2 hard problems in computer science: cache invalidation, naming things, and off-by-1 errors. - [Leon Bambrick](https://twitter.com/secretgeek/status/7269997868?lang=en)

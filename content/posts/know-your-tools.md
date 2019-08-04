@@ -3,6 +3,7 @@ title: Know Your Tools
 slug: know-your-tools
 category: Advice
 date: 2018-06-20
+author: swyx
 ---
 
 You missed a lot in your bootcamp. I'm not talking about compiler theory from computer science courses. I don't mean algos. I mean a lot of basic knowledge of your tools is lacking. "A poor craftsperson blames his tools", they say. But you. You're no "craftsperson", you're still a novice. You don't even know your own tools that well. You haven't built that much with them, and you still freak out when things go wrong. It's not your fault, but it's in your power to fix your gaps. The bootcamp gave you a head start, now you have to go the distance.

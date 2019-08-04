@@ -3,6 +3,7 @@ title: Learning Gears
 slug: learning-gears
 category: Advice
 date: 2019-04-19
+author: swyx
 ---
 
 The most common question I get when people hear about [#LearnInPublic](https://twitter.com/hashtag/LearnInPublic?src=hash) is how to start.
