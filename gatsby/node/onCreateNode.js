@@ -11,8 +11,6 @@ module.exports = ({ node, actions, getNode, createNodeId }) => {
   const { createNode, createParentChildLink } = actions;
 
   // Make sure it's an MDX node
-  console.log({internal: node.internal})
-  
   if (node.internal.type !== `Mdx`) {
     return;
   }
@@ -37,7 +35,7 @@ module.exports = ({ node, actions, getNode, createNodeId }) => {
     });
 
     const fieldData = {
-      slug: node.frontmatter.slug || slugify(node.frontmatter.title),
+      slug: slugify(node.frontmatter.slug) || slugify(node.frontmatter.title),
       author: node.frontmatter.author,
       title: node.frontmatter.title,
       date: node.frontmatter.date,
