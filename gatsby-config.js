@@ -21,19 +21,18 @@ module.exports = {
   },
   plugins: [
     {
-      resolve: '@narative/gatsby-theme-novela',
+      resolve: "gatsby-source-filesystem",
       options: {
-        contentPosts: 'content/posts',
-        contentAuthors: 'content/authors',
-        basePath: '/writing',
+        path: 'content/collections/drafts',
+        name: "draftPosts",
       },
     },
     {
       resolve: '@narative/gatsby-theme-novela',
       options: {
-        contentPosts: 'content/collections/drafts/posts',
+        contentPosts: 'content/posts',
         contentAuthors: 'content/authors',
-        basePath: '/writing/draft',
+        basePath: '/writing',
       },
     },
     {
