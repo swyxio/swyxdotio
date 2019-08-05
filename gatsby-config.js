@@ -29,6 +29,14 @@ module.exports = {
       },
     },
     {
+      resolve: '@narative/gatsby-theme-novela',
+      options: {
+        contentPosts: 'content/collections/drafts/posts',
+        contentAuthors: 'content/authors',
+        basePath: '/writing/draft',
+      },
+    },
+    {
       resolve: `gatsby-plugin-manifest`,
       options: {
         name: `swyx dot io`,

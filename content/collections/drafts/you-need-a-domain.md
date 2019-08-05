@@ -3,6 +3,8 @@ title: You Need a Domain
 slug: you-need-a-domain
 category: Advice
 begun: 2018-12-15
+date: 2018-12-15
+author: swyx
 ---
 
 for a long time i resisted buying and investing in my own domain name.

@@ -3,6 +3,8 @@ title: Ensembles vs Committees
 slug: ensembles-vs-committees
 category: General
 begun: 2018-11-24
+date: 2018-11-24
+author: swyx
 ---
 
 Some groups wear down each other's rough edges; other groups form a gestalt combination of strengths.

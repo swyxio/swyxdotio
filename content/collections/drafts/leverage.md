@@ -3,6 +3,8 @@ title: On Leverage
 slug: on-leverage
 category: Philosophy
 begun: 2018-12-15
+date: 2018-12-15
+author: swyx
 ---
 
 - borrowing

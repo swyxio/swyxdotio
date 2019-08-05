@@ -3,6 +3,8 @@ title: Better Questions
 slug: better-questions
 category: Philosophy
 begun: 2018-12-15
+date: 2018-12-15
+author: swyx
 ---
 
 - seek better questions instead of seeking better answers

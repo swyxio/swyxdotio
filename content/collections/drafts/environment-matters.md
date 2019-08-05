@@ -3,6 +3,8 @@ title: Environment Matters
 slug: environment-matters
 category: Philosophy
 begun: 2019-01-22
+date: 2019-01-22
+author: swyx
 ---
 
 we are illogical creatures first and it is a conscious effort to stay logical

@@ -3,6 +3,8 @@ title: Media Impact
 slug: media-impact
 category: Philosophy
 begun: 2018-12-15
+date: 2018-12-15
+author: swyx
 ---
 
 Media changes how we think https://vimeo.com/34017777

@@ -3,6 +3,8 @@ title: Speaking Advice
 slug: speaking-advice
 category: Speaking
 begun: 2018-12-15
+date: 2018-12-15
+author: swyx
 ---
 
 ## Rules

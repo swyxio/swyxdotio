@@ -3,6 +3,8 @@ title: You Should Speak
 slug: you-should-speak
 category: Advice
 begun: 2018-12-15
+date: 2018-12-15
+author: swyx
 ---
 
 https://blog.kentcdodds.com/why-and-how-i-started-public-speaking-d5ae78303707

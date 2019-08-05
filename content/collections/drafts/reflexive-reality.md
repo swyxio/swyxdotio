@@ -3,6 +3,8 @@ title: Reflexive Reality
 slug: reflexive-reality
 category: Philosophy
 begun: 2018-12-15
+date: 2018-12-15
+author: swyx
 ---
 
 Disparate threads of a common idea abound:

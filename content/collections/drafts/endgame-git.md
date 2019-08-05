@@ -6,6 +6,7 @@ tags: git
 category: Rants
 date: 2019-01-15
 slug: endgame-git
+author: swyx
 ---
 
 > ⚠️ Warning: It goes without saying that this entire article is full of spoilers for Avengers: Endgame!

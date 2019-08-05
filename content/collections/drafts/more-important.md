@@ -3,6 +3,8 @@ title: More Important Than
 slug: more-important
 category: Philosophy
 begun: 2019-01-25
+date: 2019-01-25
+author: swyx
 ---
 
 - intelligence and competence are necessary but insufficient for success

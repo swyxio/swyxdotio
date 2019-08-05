@@ -3,6 +3,8 @@ title: Categorical Imperatives
 slug: categorical imperatives
 category: Philosophy
 begun: 2018-12-15
+date: 2018-12-15
+author: swyx
 ---
 
 as opposed to the Kantian idea https://en.wikipedia.org/wiki/Categorical_imperative

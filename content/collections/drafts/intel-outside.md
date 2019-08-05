@@ -3,6 +3,8 @@ title: Intel Outside
 slug: intel-outside
 category: Tech
 begun: 2019-05-04
+date: 2019-05-04
+author: swyx
 ---
 
 my recent https://www.graphql-asia.org talk ([tweet](https://mobile.twitter.com/swyx/status/1118540249305681922)) partially centered on the thesis that "intel inside" is bad. A lot of vendors want to expand your capability to do work inside their tool, and there are often decent efficiency and security reasons to do so, but this increases lockin. Increasing lockin is fine, but often the embedded logic is so restrictive as to be very convoluted, and increases learning curve.

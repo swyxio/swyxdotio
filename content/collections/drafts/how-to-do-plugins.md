@@ -3,6 +3,8 @@ title: How To Do Plugins
 slug: how-to-do-plugins
 category: Tech
 begun: 2018-12-03
+date: 2018-12-03
+author: swyx
 ---
 
 - plugins are important for growing an ecosystem

@@ -3,6 +3,8 @@ title: What Humans Can Learn From Machine Learning
 slug: humans-learning-from-machine-learning
 category: Philosophy
 begun: 2019-01-21
+date: 2019-01-21
+author: swyx
 ---
 
 Human Learning differs from Machine Learning in important ways.

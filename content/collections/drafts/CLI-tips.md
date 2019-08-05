@@ -3,6 +3,8 @@ title: CLI Tips
 slug: cli-tips
 category: coding
 begun: 2019-04-04
+date: 2019-04-04
+author: swyx
 ---
 
 https://github.com/sindresorhus/ora

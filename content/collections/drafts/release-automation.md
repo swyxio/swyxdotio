@@ -3,6 +3,8 @@ title: Best Practices in JavaScript Release Automation
 slug: release-automation
 category: Notes
 begun: 2019-04-20
+date: 2019-04-20
+author: swyx
 ---
 
 There is a step change in industry-standard knowledge when going from individual contributor to maintainer, whether working on open source projects or closed source company infrastructure. It is easy enough to fork, write code, and add PR, and it is intentionally easy to get started manually publishing releases. (This also helps keep the core infrastructure as tooling agnostic as possible, which increases its longevity.) However, a low barrier to entry and small set of enforced/required standards also makes it hard to keep up a high quality project.

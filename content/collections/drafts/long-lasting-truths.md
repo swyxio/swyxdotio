@@ -3,6 +3,8 @@ title: Long Lasting Truths
 slug: long-lasting-truths
 category: Principles
 begun: 2019-01-25
+date: 2019-01-25
+author: swyx
 ---
 
 - compounding is incredibly important (cf sam altman's post)

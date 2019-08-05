@@ -3,6 +3,7 @@ title: Betwixt Reason and Result
 slug: betwixt-reason-and-result
 category: Advice
 date: 2019-06-29
+author: swyx
 ---
 
 I'm writing to you from a cheap hostel in downtown Toronto ([Hostelling International](https://reservations.hostellingtoronto.com/iqreservations/asp/IQHome.asp), highly recommend for solo travel, I have stayed in SF, LA, NY, PHL, TO, NZ and more I probably forget) where a cute anecdote just happened that illustrates an important principle.
