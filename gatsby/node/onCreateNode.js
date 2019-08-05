@@ -37,7 +37,7 @@ module.exports = ({ node, actions, getNode, createNodeId }) => {
     });
 
     const fieldData = {
-      slug: slugify(node.frontmatter.title),
+      slug: node.frontmatter.slug || slugify(node.frontmatter.title),
       author: node.frontmatter.author,
       title: node.frontmatter.title,
       date: node.frontmatter.date,
