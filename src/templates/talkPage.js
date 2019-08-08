@@ -45,7 +45,7 @@ function Article({ pageContext, location }) {
 
   const { talk, next } = pageContext
   const author = { potato: 'potato' }
-  console.log({ talk, next })
+  // console.log({ talk, next })
 
   useEffect(() => {
     const calculateBodySize = throttle(() => {

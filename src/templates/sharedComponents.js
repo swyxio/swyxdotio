@@ -45,6 +45,31 @@ export const GridItem = ({ talk, narrow }) => {
   )
 }
 
+const Image = styled.div`
+  position: relative;
+  height: 280px;
+  box-shadow: 0 30px 60px -10px rgba(0, 0, 0, ${(p) => (p.narrow ? 0.22 : 0.3)}),
+    0 18px 36px -18px rgba(0, 0, 0, ${(p) => (p.narrow ? 0.25 : 0.33)});
+  margin-bottom: 30px;
+  transition: transform 0.3s var(--ease-out-quad), box-shadow 0.3s var(--ease-out-quad);
+
+  & > div {
+    height: 100%;
+  }
+
+  ${mediaqueries.tablet`
+    height: 200px;
+    margin-bottom: 35px;
+  `}
+
+  ${mediaqueries.phablet`
+    overflow: hidden;
+    margin-bottom: 0;
+    box-shadow: none;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
+  `}
+`
 const ArticleLink = styled(Link)`
   position: relative;
   display: block;
@@ -110,32 +135,6 @@ const Item = styled.div`
   `}
 `
 
-const Image = styled.div`
-  position: relative;
-  height: 280px;
-  box-shadow: 0 30px 60px -10px rgba(0, 0, 0, ${(p) => (p.narrow ? 0.22 : 0.3)}),
-    0 18px 36px -18px rgba(0, 0, 0, ${(p) => (p.narrow ? 0.25 : 0.33)});
-  margin-bottom: 30px;
-  transition: transform 0.3s var(--ease-out-quad), box-shadow 0.3s var(--ease-out-quad);
-
-  & > div {
-    height: 100%;
-  }
-
-  ${mediaqueries.tablet`
-    height: 200px;
-    margin-bottom: 35px;
-  `}
-
-  ${mediaqueries.phablet`
-    overflow: hidden;
-    margin-bottom: 0;
-    box-shadow: none;
-    border-top-right-radius: 5px;
-    border-top-left-radius: 5px;
-  `}
-`
-
 export const MetaData = styled.div`
   font-weight: 600;
   font-size: 16px;
@@ -145,6 +144,20 @@ export const MetaData = styled.div`
   ${mediaqueries.phablet`
     max-width: 100%;
     padding:  0 20px 30px;
+  `}
+`
+
+const limitToTwoLines = css`
+  text-overflow: ellipsis;
+  overflow-wrap: normal;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  display: -webkit-box;
+  white-space: normal;
+  overflow: hidden;
+
+  ${mediaqueries.phablet`
+    -webkit-line-clamp: 3;
   `}
 `
 
@@ -187,20 +200,6 @@ export const Excerpt = styled.div`
     max-width: 100%;
     padding:  0 20px;
     margin-bottom: 20px;
-    -webkit-line-clamp: 3;
-  `}
-`
-
-const limitToTwoLines = css`
-  text-overflow: ellipsis;
-  overflow-wrap: normal;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  display: -webkit-box;
-  white-space: normal;
-  overflow: hidden;
-
-  ${mediaqueries.phablet`
     -webkit-line-clamp: 3;
   `}
 `
