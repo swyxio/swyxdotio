@@ -21,10 +21,24 @@ module.exports = {
   },
   plugins: [
     {
-      resolve: "gatsby-source-filesystem",
+      resolve: 'gatsby-source-filesystem',
+      options: {
+        path: 'content/collections/talks2019',
+        name: 'talks2019',
+      },
+    },
+    {
+      resolve: 'gatsby-source-filesystem',
+      options: {
+        path: 'content/collections/talks2018',
+        name: 'talks2018',
+      },
+    },
+    {
+      resolve: 'gatsby-source-filesystem',
       options: {
         path: 'content/collections/drafts',
-        name: "draftPosts",
+        name: 'draftPosts',
       },
     },
     {

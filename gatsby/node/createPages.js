@@ -1,20 +1,19 @@
-"use strict";
-require("dotenv").config();
+'use strict'
+require('dotenv').config()
 
-const log = (msg, section) =>
-  console.log(`\n\x1b[36m${msg} \x1b[4m${section}\x1b[0m\x1b[0m\n`);
+const log = (msg, section) => console.log(`\n\x1b[36m${msg} \x1b[4m${section}\x1b[0m\x1b[0m\n`)
 
-const path = require("path");
-const createPaginatedPages = require("gatsby-paginate");
+const path = require('path')
+const createPaginatedPages = require('gatsby-paginate')
 
-const templatesDir = path.resolve('node_modules', "@narative/gatsby-theme-novela/src/templates");
+const templatesDir = path.resolve('node_modules', '@narative/gatsby-theme-novela/src/templates')
 const templates = {
-  articles: path.resolve(templatesDir, "articles.template.tsx"),
-  article: path.resolve(templatesDir, "article.template.tsx"),
-};
+  articles: path.resolve(templatesDir, 'articles.template.tsx'),
+  article: path.resolve(templatesDir, 'article.template.tsx'),
+}
 
 // How many posts per page? This is hardcoded for now.
-const pageLength = 6;
+const pageLength = 6
 
 // https://github.com/gatsbyjs/gatsby/blob/master/packages/gatsby-transformer-sharp/src/fragments.js
 const GatsbyImageSharpFluid_withWebp = `
@@ -25,7 +24,7 @@ const GatsbyImageSharpFluid_withWebp = `
   srcWebp
   srcSetWebp
   sizes
-`;
+`
 
 const articlesQuery = `{
   articles: allDraft(
@@ -85,32 +84,32 @@ const articlesQuery = `{
     }
   }
 }
-`;
+`
 
-const basePath = "/writing/draft";
+const basePath = '/writing/draft'
 module.exports = async ({ actions: { createPage }, graphql }) => {
-
+  await require('./createTalkPages')({ actions: { createPage }, graphql })
   function buildPaginatedPath(index, basePath) {
-    if (basePath === "/") {
-      return index > 1 ? `${basePath}page/${index}` : basePath;
+    if (basePath === '/') {
+      return index > 1 ? `${basePath}page/${index}` : basePath
     }
-    return index > 1 ? `${basePath}/page/${index}` : basePath;
+    return index > 1 ? `${basePath}/page/${index}` : basePath
   }
 
-  log("Querying", "drafts");
-  const result = await graphql(articlesQuery);
-  const articles = result.data.articles.edges;
-  const authors = result.data.authors.edges;
+  log('Querying', 'drafts')
+  const result = await graphql(articlesQuery)
+  const articles = result.data.articles.edges
+  const authors = result.data.authors.edges
 
   if (articles.length === 0) {
-    throw new Error("You must have at least one article");
+    throw new Error('You must have at least one article')
   }
 
   if (authors.length === 0) {
-    throw new Error("You must have at least one author");
+    throw new Error('You must have at least one author')
   }
 
-  log("Creating", "drafts page");
+  log('Creating', 'drafts page')
   createPaginatedPages({
     edges: articles,
     pathPrefix: basePath,
@@ -123,37 +122,34 @@ module.exports = async ({ actions: { createPage }, graphql }) => {
       skip: pageLength,
       limit: pageLength,
     },
-  });
+  })
 
-  log("Creating", "draft posts");
+  log('Creating', 'draft posts')
   articles.forEach(({ node }, index) => {
-    const article = node;
+    const article = node
 
     // Match the Author to the one specified in the article
-    let author;
+    let author
 
     try {
-      author = authors.find(
-        ({ node: author }) => author.name === article.author,
-      ).node;
+      author = authors.find(({ node: author }) => author.name === article.author).node
     } catch (error) {
       throw new Error(`
           We could not find the Author for "${article.title}".
           Double check the author field is specified in your post and the name
           matches a specified author.
-        `);
+        `)
     }
 
-    let next = articles.slice(index + 1, index + 3);
+    let next = articles.slice(index + 1, index + 3)
 
     // If it's the last item in the list, there will be no articles. So grab the first 2
-    if (next.length === 0) next = articles.slice(0, 2);
+    if (next.length === 0) next = articles.slice(0, 2)
 
     // If there's 1 item in the list, grab the first article
-    if (next.length === 1 && articles.length !== 2)
-      next = [...next, articles[0]];
+    if (next.length === 1 && articles.length !== 2) next = [...next, articles[0]]
 
-    if (articles.length === 1) next = [];
+    if (articles.length === 1) next = []
 
     createPage({
       path: article.slug,
@@ -167,6 +163,6 @@ module.exports = async ({ actions: { createPage }, graphql }) => {
         title: article.title,
         next,
       },
-    });
-  });
-};
+    })
+  })
+}
