@@ -1,6 +1,6 @@
 import React from 'react'
 import Layout from '@narative/gatsby-theme-novela/src/components/Layout'
-import Section from '@narative/gatsby-theme-novela/src/components/Section'
+// import Section from '@narative/gatsby-theme-novela/src/components/Section'
 import SEO from '@narative/gatsby-theme-novela/src/components/SEO'
 import Heading from '@narative/gatsby-theme-novela/src/components/Heading'
 import Media from '@narative/gatsby-theme-novela/src/components/Media/Media.Img'
@@ -75,12 +75,12 @@ export default function Home(props) {
             <BioAvatarInner>
               <Media src={author.avatar.image.fluid} />
             </BioAvatarInner>
-            <Heading.h1>shawn swyx wang</Heading.h1>
+            <Heading.h1>swyx</Heading.h1>
 
             <ul>
               <li
                 style={{
-                  display: 'inline-block',
+                  display: 'block',
                   margin: 3,
                   zoom: 1,
                 }}
@@ -92,6 +92,7 @@ export default function Home(props) {
                   display: 'inline-block',
                   margin: 3,
                   zoom: 1,
+                  fontWeight: 'bold',
                 }}
               >
                 <Link to="/writing">Writing</Link>
@@ -101,6 +102,7 @@ export default function Home(props) {
                   display: 'inline-block',
                   margin: 3,
                   zoom: 1,
+                  fontWeight: 'bold',
                 }}
               >
                 <Link to="/talks">Talks</Link>
@@ -192,7 +194,33 @@ const SubheadingContainer = styled.div`
     margin-bottom: 60px;
   `}; */
 
-  ${mediaqueries.phablet`
+  /* ${mediaqueries.phablet`
     display: none;
+  `}; */
+`
+
+const Section = styled.section`
+  width: 90%;
+  max-width: 1220px;
+  margin: 0 auto;
+  /* padding: 0 0rem; */
+
+  ${mediaqueries.desktop`
+    max-width: 850px;
   `};
 `
+
+// ${p =>
+//   p.narrow
+//     ? mediaqueries.tablet`
+//         padding: 0 2rem;
+//         max-width: 527px;
+//       `
+//     : mediaqueries.tablet`
+//         padding: 0 4rem;
+//         max-width: 567px;
+//       `}
+
+// ${mediaqueries.phablet`
+//   max-width: 100%;
+// `};
