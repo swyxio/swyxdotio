@@ -60,7 +60,11 @@ I'm not a fan of process that doesn't add value, but I'm equally not a fan of no
 
 I _could_ have volunteered to change my job to formally actually maintain Netlify Dev. That wasn't ever explicitly on the table, but it also wasn't off the table. I made a conscious nondecision not to do that, but I weighed it for a long time. I like my DX role too much, and I didn't know if I wanted a career being primarily a CLI dev. I may yet live to regret this nondecision. [Raees](https://raeesbhatti.com/) has that job now and is far more qualified than I.
 
-Overall I loved it though, and although I don't relish being viewed as a "spiky" person, its clear that I did fine under those circumstances and there wasn't anyone else doing what I did. 🤷🏼‍♂️ There are also other similar opportunities to be had in the DX space as I see it right now, with at least 2 nonpublic projects ongoing I am excited about contributing to. So there's that.
+Overall I loved it though, and although I don't relish being viewed as a "spiky" person, its clear that I did fine under those circumstances and there wasn't anyone else doing what I did. 🤷🏼‍♂️ I learned a _toooon_ about making CLI's and in my usual style [I started writing a cheatsheet for that stuff](https://github.com/sw-yx/cli-cheatsheet/tree-save/master/README.md).
+
+I also started writing about [Templating](https://gist.github.com/sw-yx/6f97b9d7f3efbfad4c8e5b8a14b5bd27) and [CLI state](https://gist.github.com/sw-yx/3af1e264b8460af8897768045b2c229f) which turned into [a fun conference talk](https://www.youtube.com/watch?v=1_w1YWCHXFg).
+
+There are also other similar opportunities to be had in the DX space as I see it right now, with at least 2 nonpublic projects ongoing I am excited about contributing to. So there's that.
 
 Our subsequent [Netlify Analytics](https://www.netlify.com/products/analytics/) launch was quite a different story. Being primarily a backend thing, with the only frontend part tightly integrated with the App UI, I had 0 part to play in it. It had design and docs input from the get go, has no learning curve apart from the "click here and pay us money" button, and launched to smaller fanfare, but, because we charge for it, it makes money and is doing well (surprise! i dont think i can say how well its doing tho :)).
 

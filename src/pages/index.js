@@ -54,15 +54,16 @@ export const query = graphql`
   }
 `
 export default function Home(props) {
-  // const [colorMode] = useColorMode()
+  const [colorMode] = useColorMode()
   const author = props.data.author.edges[0].node
   const pageData = props.data.pageData.edges.map(({ node }) => node)
   // const Currentprojects = pageData.find((v) => v.childMdx.body === 'currentprojects')
   // const Intro =
   // const OpenSource = pageData.find((v) => v.childMdx.body === 'opensource')
+  console.log({ colorMode })
   return (
     // <Layout>
-    <div style={{ backgroundColor: 'papayawhip' }}>
+    <div style={{ backgroundColor: colorMode === 'dark' ? '#116' : 'papayawhip' }}>
       <SEO pathname={'/'} />
       <Section relative id="MainPage">
         {/* <HeadingContainer style={{ maxWidth: `${hero.maxWidth}px` }}> */}
@@ -77,7 +78,7 @@ export default function Home(props) {
             </BioAvatarInner>
             <Heading.h1>swyx</Heading.h1>
 
-            <ul>
+            <ul style={{ color: colorMode !== 'dark' ? '#116' : 'papayawhip' }}>
               <li
                 style={{
                   display: 'block',
@@ -165,7 +166,8 @@ const BioText = styled.p`
   max-width: 430px;
   font-size: 14px;
   line-height: 1.45;
-  color: ${(p) => p.theme.colors.grey};
+  /* color: ${(p) => p.theme.colors.grey}; */
+  color: black;
 `
 
 const HeadingContainer = styled.div`
