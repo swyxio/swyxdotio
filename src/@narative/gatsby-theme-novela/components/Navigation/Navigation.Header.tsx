@@ -40,8 +40,8 @@ function NavigationHeader() {
           <Hidden>Navigate back to the homepage</Hidden>
         </LogoLink>
         <div style={{ width: '100%', marginLeft: 10 }}>
-          <RouteLink to="/writing">Writing</RouteLink>
-          <RouteLink to="/talks">Talks</RouteLink>
+          <RouteLink style={{color: fill}} to="/writing">Writing</RouteLink>
+          <RouteLink style={{color: fill}}  to="/talks">Talks</RouteLink>
         </div>
         <NavControls>
           <SharePageButton />

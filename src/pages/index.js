@@ -63,7 +63,7 @@ export default function Home(props) {
   console.log({ colorMode })
   return (
     // <Layout>
-    <div style={{ backgroundColor: colorMode === 'dark' ? '#116' : 'papayawhip' }}>
+    <div style={{ backgroundColor: colorMode === 'dark' ? '#113' : 'papayawhip' }}>
       <SEO pathname={'/'} />
       <Section relative id="MainPage">
         {/* <HeadingContainer style={{ maxWidth: `${hero.maxWidth}px` }}> */}
@@ -96,7 +96,9 @@ export default function Home(props) {
                   fontWeight: 'bold',
                 }}
               >
-                <Link to="/writing">Writing</Link>
+                <Link style={{ color: colorMode !== 'dark' ? '#116' : 'papayawhip' }} to="/writing">
+                  Writing
+                </Link>
               </li>
               <li
                 style={{
@@ -106,7 +108,9 @@ export default function Home(props) {
                   fontWeight: 'bold',
                 }}
               >
-                <Link to="/talks">Talks</Link>
+                <Link style={{ color: colorMode !== 'dark' ? '#116' : 'papayawhip' }} to="/talks">
+                  Talks
+                </Link>
               </li>
             </ul>
             {/* </BioAvatar> */}
