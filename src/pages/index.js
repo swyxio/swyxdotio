@@ -4,13 +4,29 @@ import Section from '@narative/gatsby-theme-novela/src/components/Section'
 import SEO from '@narative/gatsby-theme-novela/src/components/SEO'
 import Heading from '@narative/gatsby-theme-novela/src/components/Heading'
 import Media from '@narative/gatsby-theme-novela/src/components/Media/Media.Img'
+import { RichText } from '@narative/gatsby-theme-novela/src/components/Media'
+import { MDXRenderer } from 'gatsby-plugin-mdx'
+import { useColorMode } from 'theme-ui'
 
+import './index.css'
 import mediaqueries from '@narative/gatsby-theme-novela/src/styles/media'
 import styled from '@emotion/styled'
-import { graphql } from 'gatsby'
+import { graphql, Link } from 'gatsby'
 
 export const query = graphql`
   query {
+    pageData: allFile(filter: { sourceInstanceName: { eq: "homePage" } }) {
+      edges {
+        node {
+          id
+          childMdx {
+            body
+          }
+          absolutePath
+          name
+        }
+      }
+    }
     author: allAuthorsYaml(filter: { featured: { eq: true } }) {
       edges {
         node {
@@ -38,38 +54,70 @@ export const query = graphql`
   }
 `
 export default function Home(props) {
-  const {
-    data: {
-      site: {
-        siteMetadata: { hero },
-      },
-      author: { edges },
-    },
-  } = props
-  const author = edges[0].node
+  // const [colorMode] = useColorMode()
+  const author = props.data.author.edges[0].node
+  const pageData = props.data.pageData.edges.map(({ node }) => node)
+  // const Currentprojects = pageData.find((v) => v.childMdx.body === 'currentprojects')
+  // const Intro =
+  // const OpenSource = pageData.find((v) => v.childMdx.body === 'opensource')
   return (
-    <Layout>
+    // <Layout>
+    <div style={{ backgroundColor: 'papayawhip' }}>
       <SEO pathname={'/'} />
       <Section relative id="MainPage">
-        <HeadingContainer style={{ maxWidth: `${hero.maxWidth}px` }}>
-          <Heading.h1>Hello there!</Heading.h1>
-          <Heading.h2>This is the homepage of Shawn Wang on the web!</Heading.h2>
-        </HeadingContainer>
+        {/* <HeadingContainer style={{ maxWidth: `${hero.maxWidth}px` }}> */}
+        {/* <HeadingContainer> */}
+        {/* <Heading.h2>This is the homepage of Shawn Wang on the web!</Heading.h2> */}
+        {/* </HeadingContainer> */}
         <SubheadingContainer>
           <BioContainer>
-            <BioAvatar>
-              <BioAvatarInner>
-                <Media src={author.avatar.image.fluid} />
-              </BioAvatarInner>
-            </BioAvatar>
-            <BioText>
+            {/* <BioAvatar> */}
+            <BioAvatarInner>
+              <Media src={author.avatar.image.fluid} />
+            </BioAvatarInner>
+            <Heading.h1>shawn swyx wang</Heading.h1>
+
+            <ul>
+              <li
+                style={{
+                  display: 'inline-block',
+                  margin: 3,
+                  zoom: 1,
+                }}
+              >
+                Navigate to:
+              </li>
+              <li
+                style={{
+                  display: 'inline-block',
+                  margin: 3,
+                  zoom: 1,
+                }}
+              >
+                <Link to="/writing">Writing</Link>
+              </li>
+              <li
+                style={{
+                  display: 'inline-block',
+                  margin: 3,
+                  zoom: 1,
+                }}
+              >
+                <Link to="/talks">Talks</Link>
+              </li>
+            </ul>
+            {/* </BioAvatar> */}
+            {/* <BioText>
               swyx is an Infinite Builder working on Developer Experience at Netlify. In his free time he helps people
               Learn in Public at Egghead.io and /r/reactjs.
-            </BioText>
+            </BioText> */}
           </BioContainer>
         </SubheadingContainer>
+        <RichText content={pageData.find((v) => v.name === 'intro').childMdx.body} />
+        <RichText content={pageData.find((v) => v.name === 'opensource').childMdx.body} />
+        <RichText content={pageData.find((v) => v.name === 'currentprojects').childMdx.body} />
       </Section>
-    </Layout>
+    </div>
   )
 }
 
@@ -80,32 +128,33 @@ const BioContainer = styled.div`
   left: -10px;
 `
 
-const BioAvatar = styled.div`
-  position: relative;
-  height: 40px;
-  width: 40px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.25);
-  margin-right: 16px;
-  margin: 10px 26px 10px 10px;
+// const BioAvatar = styled.div`
+//   position: relative;
+//   height: 40px;
+//   width: 40px;
+//   border-radius: 50%;
+//   background: rgba(0, 0, 0, 1);
+//   margin-right: 16px;
+//   margin: 10px 26px 10px 10px;
 
-  &::after {
-    content: '';
-    position: absolute;
-    left: -5px;
-    top: -5px;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    border: 1px solid rgba(0, 0, 0, 0.25);
-  }
-`
+//   &::after {
+//     content: '';
+//     position: absolute;
+//     left: -5px;
+//     top: -5px;
+//     width: 50px;
+//     height: 50px;
+//     border-radius: 50%;
+//     border: 1px solid rgba(0, 0, 0, 1);
+//   }
+// `
 
 const BioAvatarInner = styled.div`
   height: 40px;
   width: 40px;
+  border: 3px solid black;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 1);
   margin-right: 16px;
   overflow: hidden;
 `
@@ -133,7 +182,7 @@ const SubheadingContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 100px;
+  /* margin-bottom: 100px;
 
   ${mediaqueries.desktop`
     margin-bottom: 80px;
@@ -141,7 +190,7 @@ const SubheadingContainer = styled.div`
 
   ${mediaqueries.tablet`
     margin-bottom: 60px;
-  `};
+  `}; */
 
   ${mediaqueries.phablet`
     display: none;

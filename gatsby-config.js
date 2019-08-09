@@ -42,6 +42,13 @@ module.exports = {
       },
     },
     {
+      resolve: 'gatsby-source-filesystem',
+      options: {
+        path: 'content/home',
+        name: 'homePage',
+      },
+    },
+    {
       resolve: '@narative/gatsby-theme-novela',
       options: {
         contentPosts: 'content/posts',
