@@ -1,5 +1,5 @@
 ---
-title: One Year at Netlify
+title: Netlify Year One
 slug: netlify-year-one
 category: Reflections
 date: 2019-08-09
