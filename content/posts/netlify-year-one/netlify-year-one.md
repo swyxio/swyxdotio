@@ -102,13 +102,13 @@ Then see [Sarah Drasner reaching _inbound_ to work at Netlify](https://sarah.dev
 
 That's The Mo. Netlify has it. I don't know much but I know that much.
 
-The most awkward part about Netlify is the JAMstack terminology. I have a love hate relationship with it, because it isn't self explanatory but does represent a fundamentally simpler infrastructure that we try to advocate for.
+The most awkward part about Netlify is the JAMstack terminology. I have a love hate relationship with it, because it isn't self explanatory but does represent a fundamentally simpler infrastructure that we try to advocate for. It's here to stay because people are adopting it and I'm very fine with that!
 
-It makes for very strange bedfellows:
+It does make for very strange bedfellows:
 
 - On one hand, "lol dont overengineer everything" people like Phil and [Zach Leatherman](https://mobile.twitter.com/zachleat/status/1148924107477663745) and [Sara Soueidan](https://mobile.twitter.com/SaraSoueidan/status/1094214772055334912) love Netlify for its return to simplicity without managing servers. As someone who has wrestled with setting up pm2 on a digital ocean box, I am so glad never to do that undifferentiated heavy lifting again.
 - On the other hand, double digit percents of Netlify sites -are- "overengineered" Gatsby sites, which love Netlify because it helps build their complex setups better than Github Pages can, and has good defaults which passes for good DX when compared to AWS.
-- there's also a third contingent of moderate
+- there's also a third contingent of people who use SSGs like Jekyll and Hugo and are generally kinda bemused at all the drama in JS land
 
 In case it wasn't clear, i'm being ridiculously reductionist in either of the above bullet points and of course there are many other very good reasons and contingents.
 
@@ -153,8 +153,14 @@ I also do some amount of engagement on community.netlify.com, on our github issu
 
 OSS maintenance and community engagement are the kind of thing that are table stakes for developer experience, but it doesn't make it onto OKRs, nor does anyone try to measure ROI out of that stuff. We do it because we feel responsible for the developer experience, with a safety net of support. I don't have any other way to phrase it, nor do I see any other way to manage it, but I do wish that it counted for more so that incentives align well.
 
+## Remote
+
+The company is headquartered in SF, I work remotely out of NYC. We're about 50-50 in remote vs SF, across US and EU timezones. I was also a "slowmad" for about half of the year as I combined travel with conference speaking.
+
+I have more comments on remote work in a separate post, but the main points to hit are that I love working from home (even moved to a new place with a 24hr coworking space downstairs to facilitate my weird hours) and also that [I hate Slack being central to everything](https://mobile.twitter.com/swyx/status/1120050592263692293). But I'll live.
+
 ## Fin
 
-That's all I can think of for now. I budgeted 2 hours for this and am now at hour 3 so I'm gonna wrap this up and hit send super psyched
+That's all I can think of for now. I budgeted 2 hours for this and am now at hour 3 so I'm gonna wrap this up and hit send. super psyched for the `redacted` projects coming down the pike, for my product rotation, for new hires coming in, and to continue learning from Sarah and the rest of my team in this weird new job!
 
 _P.S. This post was inspired by [David Wells](https://davidwells.io/blog/netlify-year-one), a great colleague, mentor and friend. Check out his post for more stuff we've done, some of which I supported. I don't think like him so this format doesn't match, but I wrote it my way._
