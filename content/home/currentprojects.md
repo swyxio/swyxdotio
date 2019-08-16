@@ -32,6 +32,7 @@
 - Aug 21 - JAMstack Philly?
 - Aug 22-23 - React Rally
 - Sept 13 - React NY?
+- Sept 27 - Devmode.fm podcast
 - Oct 4 - [Asbury Agile](http://www.asburyagile.com/) - Unannounced talk + workshop
 - Oct 13-15 - All Things Open
 - Oct 15-16 - SmashingConf NY
@@ -40,3 +41,4 @@
 - Oct 25 - [React Advanced](https://reactadvanced.com)
 - Oct 25 - React Conf?
 - Nov 9 - Oredev
+- Nov 12-15 - poconos techbash

@@ -43,6 +43,6 @@ _originally drafted [in a gist](https://gist.github.com/sw-yx/9720bd4a30606ca3ff
 - Talk version of this essay: https://www.swyx.io/talks/learn-in-public
 - Patio11: [Do not end the week with nothing](https://training.kalzumeus.com/newsletters/archive/do-not-end-the-week-with-nothing)
 - Chris Coyier: [Showing up and Persistence](https://chriscoyier.net/2013/10/18/mediocre-ideas-showing-up-and-persistence/) and [Working in Public](https://chriscoyier.net/2012/09/23/working-in-public/)
-- Cory House: [Becoming an Outlier](https://vimeo.com/97415346) and [The Art of Learning](https://www.bitnative.com/2013/12/14/programming-your-brain-the-art-of-learning-in-three-steps/)
+- Cory House: [Becoming an Outlier](https://vimeo.com/97415346) and [The Art of Learning](https://www.bitnative.com/2013/12/14/programming-your-brain-the-art-of-learning-in-three-steps/) and [Lifestyle Systems](https://www.infoq.com/presentations/lifestyle-software-developer/)
 - Jeff Atwood: [How to stop sucking and be awesome instead](https://blog.codinghorror.com/how-to-stop-sucking-and-be-awesome-instead/)
 - Kent C Dodds: [Intentional Career Building](https://kentcdodds.com/blog/intentional-career-building)
