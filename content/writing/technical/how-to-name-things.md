@@ -86,6 +86,14 @@ As Nick Shrock says: **Delegate to Tooling Whenever Possible**. [His advice on C
 
 Sindre Sorhus has some strong opinions on naming. You may not agree with all of them, but at least they are enforced in code. [Check `eslint-plugin-unicorn`](https://github.com/sindresorhus/eslint-plugin-unicorn#rules).
 
+## Domain Driven Design
+
+(Aug 2019 Update) I was fortunate enough to attend a workshop by [Andrew Cassell on Domain Driven Design](https://www.youtube.com/watch?v=bgJafJI8mp8) ([slides](https://speakerdeck.com/cassell/domain-driven-design-2)) where the concept of "Ubiquitous Language" drives naming and I really like this concept. However some of the application examples I've seen bleed the domain all over the place whereas I really only think it matters most at the public API.
+
+## Collections of Things
+
+(Aug 2019 Update) Don't pluralize lazily, e.g. `blog.js` and `blogs.js`. This is terrible to grep especially with one name being a substring of the other. Prefer to name both items and collections visibly. This is similar to the Hungarian notation idea, but works even if you use a type system.
+
 ## Your Opinion Here!
 
 I [asked for more opinions on Twitter](https://twitter.com/swyx/status/1127648507676983296), and here are some I got:
