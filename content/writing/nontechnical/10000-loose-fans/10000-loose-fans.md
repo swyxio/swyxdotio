@@ -5,7 +5,6 @@ categories: ['Advice']
 date: 2019-08-18
 banner: './swyxtwitteranalytics.png'
 keywords: ['twitter']
-published: false
 ---
 
 I broke past 10,000 Twitter followers on Saturday. Obviously this is a completely arbitrary milestone and pretty minor in the hierarchy of needs. I'm not celebrating.
