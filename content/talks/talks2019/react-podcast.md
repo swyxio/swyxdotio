@@ -2,7 +2,7 @@
 title: Be Wrong with Shawn Swyx Wang
 slug: react-podcast
 topic: React
-venues: React-Podcast
+venues: podcast
 date: 2019-02-20
 url: https://reactpodcast.simplecast.fm/36
 desc: A disussion about strategies for being a lifelong learner in React.

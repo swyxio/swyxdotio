@@ -4,7 +4,8 @@ slug: react-hooks
 topic: React
 venues: JSConf Asia
 date: 2019-06-18
-video: https://youtu.be/9jWwO7McMbU?t=9451
+video: https://www.youtube.com/watch?v=KJP1E-Y-xyo
+livestream: https://youtu.be/9jWwO7McMbU?t=9451
 rehearsal: https://youtu.be/6zDQBnbGQx8
 meetup: https://www.youtube.com/watch?v=il43iId9JQA
 url: https://2019.jsconf.asia/#program
@@ -17,8 +18,11 @@ description: The design of React Hooks requires a good understanding of closures
 
 ## Twitter feedback
 
-- @dalanmiller: [@swyx
-  giving one of the most confident and well executed live coding presentations I've ever seen](https://mobile.twitter.com/dalanmiller/status/1139741383248375810)
+- @dalanmiller: [@swyx giving one of the most confident and well executed live coding presentations I've ever seen](https://mobile.twitter.com/dalanmiller/status/1139741383248375810)
+- @sgrove: [Just watched this _again_, it's such a good talk](https://mobile.twitter.com/sgrove/status/1160694978919534592)
+- @bhekanik: [Awesome talk by @swyx on React Hooks, had to watch it a couple of times to keep up but totally worth it!!](https://mobile.twitter.com/bhekanik/status/1155784178048352256)
+- @rwieruch: [If ever wondered about all the "Rules of Hooks", make sure to watch @swyx talk about implementing Hooks (and #ReactJs) from scratch in 30 minutes.](https://mobile.twitter.com/rwieruch/status/1151520943963070465)
+- @victorvation: [This is the best conference talk I've seen in a long time - interesting subject, starts from fundamentals, great pacing and explanations, lots of code](https://mobile.twitter.com/victorvation/status/1148059967007555584)
 
 ## further references
 
