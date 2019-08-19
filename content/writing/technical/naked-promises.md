@@ -4,6 +4,7 @@ slug: naked-promises
 categories: ['Tech']
 begun: 2019-07-15
 date: 2019-08-14
+canonical: https://www.freecodecamp.org/news/naked-promises-are-not-safe-for-work/
 ---
 
 _Published on [FreeCodeCamp's Developer News](https://www.freecodecamp.org/news/naked-promises-are-not-safe-for-work/)_
