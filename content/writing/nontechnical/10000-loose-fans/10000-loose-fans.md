@@ -1,6 +1,6 @@
 ---
 title: 10,000 Loose Fans
-slug: advice
+slug: 10000-loose-fans
 categories: ['Advice']
 date: 2019-08-18
 banner: './swyxtwitteranalytics.png'
