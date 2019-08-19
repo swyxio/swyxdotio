@@ -6057,10 +6057,10 @@ gatsby-telemetry@^1.1.11:
     stack-utils "1.0.2"
     uuid "3.3.2"
 
-gatsby-theme-dev-blog@^0.0.19:
-  version "0.0.19"
-  resolved "https://registry.yarnpkg.com/gatsby-theme-dev-blog/-/gatsby-theme-dev-blog-0.0.19.tgz#0006bd3be15296eb637b83f4a9cb1d16324db79a"
-  integrity sha512-JS+9SFU7iVpDGUl5KB0EE6sbT8zTixMIaxsybY88A0v3civp7s9wzXoNIuBH/Um9v4GF1bE55iKa4nmeXFe98g==
+gatsby-theme-dev-blog@^0.0.20:
+  version "0.0.20"
+  resolved "https://registry.yarnpkg.com/gatsby-theme-dev-blog/-/gatsby-theme-dev-blog-0.0.20.tgz#212e0ec90ca1fbe30e03c90ff7c96ddf4b1fa62b"
+  integrity sha512-9tDzKSkyAud9WdsgRJazOru4bv3VR3+uEP0Hpt4QmpW6Thhv/ggQ18EYNDLjIBldu73ZX858uDutXe1U0F3qhw==
   dependencies:
     "@callstack/react-theme-provider" "^3.0.3"
     "@emotion/core" "^10.0.14"
@@ -6101,7 +6101,6 @@ gatsby-theme-dev-blog@^0.0.19:
     gatsby-transformer-sharp "^2.2.5"
     lodash "^4.17.15"
     polished "^3.4.1"
-    prism-react-renderer "^0.1.7"
     prism-themes "^1.1.0"
     prismjs "^1.17.1"
     react "^16.8.6"
@@ -10827,7 +10826,7 @@ pretty-error@^2.1.1:
     renderkid "^2.0.1"
     utila "~0.4"
 
-prism-react-renderer@^0.1.0, prism-react-renderer@^0.1.7:
+prism-react-renderer@^0.1.0:
   version "0.1.7"
   resolved "https://registry.yarnpkg.com/prism-react-renderer/-/prism-react-renderer-0.1.7.tgz#dc273d0cb6e4a498ba0775094e9a8b01a3ad2eaa"
   integrity sha512-EhnM0sYfLK103ASK0ViSv0rta//ZGB0dBA9TiFyOvA+zOj5peLmGEG01sLEDwl9sMe+gSqncInafBe1VFTCMvA==
