@@ -49,7 +49,7 @@ This is actually pretty easy! I always go for a [Hostelling International](https
 
 **It's not going to be cheap and living out of a suitcase isn't fun**. My current apartment building, with a gym and living room and bbq pool deck, is $1750 a month. That's $58 a night. If you're not committing to a long term place you are going to be paying **higher** rates for **shorter** terms for **worse** living conditions. In NYC the best value for money is [HI NY](https://hinewyork.org) between \$70-90 a night depending on the night for bunk beds with no safety or privacy. You often can't cook so you'll be eating out more and that costs more of course.
 
-This is self inflicted, as I chose not to go to cheap places for the most part, to do more speaking engagements and meet more people in places we wanted to focus on. There's another version of this that involves swinging through Thailand, Indonesia, or Columbia for free.99 but none of these cheap countries coincide with work related things. I don't regard that kind of travel as appropriate for this job.
+This is self inflicted, as I chose not to go to cheap places for the most part, to do more speaking engagements and meet more people in places we wanted to focus on. There's another version of this that involves swinging through Thailand, Indonesia, or Columbia for next to nothing but none of these cheap countries coincide with work related things. I don't regard that kind of travel as appropriate for this job.
 
 **Find a coworking space.** No, you won't do fine in a coffee shop or using the hostel wifi sitting in your bunk bed.
 
