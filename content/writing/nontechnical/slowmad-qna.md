@@ -35,7 +35,7 @@ Once I had my visa, I mixed [conference travel](https://www.swyx.io/about) with 
 
 - I spent January in SF for some conference and the Netlify All-hands.
 - February was in Hawaii with JSConfHi and working out of a delightful coworking space.
-- March was my only PTO to date for a Socorro dive trip (planned for over a year) with dive buddies and extended stay in Mexico, with stopovers in LA and SF for speaking opportunities.
+- March was my only PTO to date for a Socorro dive trip (planned for over a year) with dive buddies and extended stay in Mexico, with stopovers in LA, SF, and Florida for speaking/work.
 - April and May was my first time back in NYC (having entirely skipped out on cold season), but I knew I would be traveling again (including a brief trip to Bangalore) and didn't want to commit to a place so I found a dirt cheap, really crappy (the floor creaked when I walk around, and the roommate yelled at me if I didn't push my chair back in after a meal) sublet in Journal Square. During these two months I actively scouted and found my heart setting on my current place.
 - June brought me back to Singapore for my big JSConfAsia talk (which Netlify did not support) and associated events, and then to Toronto and finally back to NY/NJ. I had more travel planned, but nothing that intense, so I decided to finally launch the roommate hunt and finally sign my first long term lease for a place since leaving SF 3 years ago.
 
@@ -52,6 +52,8 @@ This is actually pretty easy! I always go for a [Hostelling International](https
 This is self inflicted, as I chose not to go to cheap places for the most part, to do more speaking engagements and meet more people in places we wanted to focus on. There's another version of this that involves swinging through Thailand, Indonesia, or Columbia for free.99 but none of these cheap countries coincide with work related things. I don't regard that kind of travel as appropriate for this job.
 
 **Find a coworking space.** No, you won't do fine in a coffee shop or using the hostel wifi sitting in your bunk bed.
+
+**Leave the microphone at home**. You won't have privacy to record jack shit.
 
 **Make all your meetings.** This isn't something I wish someone had told me, it is just a rule I made for myself and largely stuck to. Remote travel is something you choose to take on on your own time. The company should by and large not care where you are but your end of that bargain is making all the meetings you are supposed to do regardless of timezone or what else you have going on (within reason). This demonstrates you are responsible enough to handle the travel aspect of the job. Nobody asked me to commit to this, but I do think this is important to uphold the implicit contract between you and your company.
 
@@ -73,7 +75,7 @@ We've loosely tried to do "virtual coffee chats" where I suggested adopting [Kno
 
 I guess what is important is we all seem to have a personal preference for the smaller company feel. It's less pay and more ownership. A pretty poor trade if you look at \$ per hour, but higher in terms of self actualization.
 
-**Public**: One last transition I made in this job is the public nature of my job in particular. In my previous job I had to apply for clearance to speak in public, due to financial regulations, despite my content having nothing to do with the company whatsoever. I did my writing and speaking on nights and weekends in my own time. Now I am _encouraged_ to write and speak on company time. I think this builds [portable capital](https://www.swyx.io/talks/learn-in-public) and assign a nontrivial amount of nonmonetary value to this opportunity.
+**Public**: One last transition I made in this job is the public nature of my job in particular. In my previous job I had to apply for clearance to speak in public, due to financial regulations, despite my content having nothing to do with the company whatsoever. I did my writing and speaking on nights and weekends in my own time. Now I am _encouraged_ to write and speak on company time. I think this builds [portable capital](https://www.swyx.io/talks/learn-in-public) and assign a significant amount of nonmonetary value to this opportunity.
 
 ## How do you maintain focus?
 
@@ -85,7 +87,7 @@ Easy. I had no home.
 
 ## I consider community/camaraderie an important aspect of work. Does it get lonely while working remotely? How do you deal with it?
 
-I don't think I do this well. I was a lone ranger for much of my travel. Although I did actively participate in every local meetup at every location, beyond that I rarely came out of my shell. Hostelling International will organize team events and movie nights, I basically only took part in this while in SF because they seemed the most welcoming. This lack of established social group is one reason I keep coming back to NYC.
+I don't think I do this well. I was a lone ranger for much of my travel. Although I did actively participate in every local meetup at every location, beyond that I rarely came out of my shell. [Hosteling International](https://www.hihostels.com/) will organize team events and movie nights, I basically only took part in this while in SF because they seemed the most welcoming. This lack of established social group is one reason I keep coming back to NYC.
 
 ## How far ahead do you plan travel? What do you do to find places? How big is your support network in places you go?
 
@@ -101,7 +103,7 @@ I think Hawaii was my favorite non-home spot (I consider NY and SG home). I foun
 
 Mexico was a lot about partying and getting wasted. I didn't like it very much but it was cheap (\$15/night hostels!) and my friends were there.
 
-I didn't spend long in LA, but I really liked JS.LA. In general I feel like the tech scene is really good in LA. [Ben Horowitz is forever going on about how tech and entertainment have a lot of similarities](https://a16z.com/2018/09/25/michael-ovitz-entertainment-culture-negotiation-talent/), and you can feel it speaking with people there. A good mix of startups, agencies, ecommerce, social media, even Google has a big presence there now.
+I didn't spend long in LA, but I really liked JS.LA. In general I feel like the tech scene is really good in LA. [Ben Horowitz is forever going on about how tech and entertainment have a lot of similarities](https://a16z.com/2018/09/25/michael-ovitz-entertainment-culture-negotiation-talent/), and you can feel it speaking with people there. A good mix of startups, agencies, ecommerce, social media, even Google has a big presence there now. Toronto is a nice runner up in this category.
 
 ---
 
