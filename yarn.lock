@@ -6057,10 +6057,10 @@ gatsby-telemetry@^1.1.11:
     stack-utils "1.0.2"
     uuid "3.3.2"
 
-gatsby-theme-dev-blog@^0.0.21:
-  version "0.0.21"
-  resolved "https://registry.yarnpkg.com/gatsby-theme-dev-blog/-/gatsby-theme-dev-blog-0.0.21.tgz#942c1097e4a8bd45a27970fce45482e5bdc95537"
-  integrity sha512-bFIyxZsfJpuv5tRW7m9ARZko+UefMUWyMOPvDy8kmQW7slrzHYtCgftTUxnYbGdyqYx4d5KyW82ytgXHCeA9iw==
+gatsby-theme-dev-blog@^0.0.22:
+  version "0.0.22"
+  resolved "https://registry.yarnpkg.com/gatsby-theme-dev-blog/-/gatsby-theme-dev-blog-0.0.22.tgz#1b760edcd2947ee396647909201c47a39d0cd7e1"
+  integrity sha512-H1mlm6BQfMRDS2AkUh74K0HbNQs3+zqCfsEU+pG1+inzKtiIvMJvNaBTc7ErGFTOxpKUJm1sooGY6AzZ6k5jzg==
   dependencies:
     "@callstack/react-theme-provider" "^3.0.3"
     "@emotion/core" "^10.0.14"
