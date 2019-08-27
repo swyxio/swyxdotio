@@ -1,3 +1,8 @@
+---
+published: false
+notes_to_self: so as not to have this show up on rss feed
+---
+
 ## ❤️ Open Source
 
 - [netlify-lambda](https://github.com/netlify/netlify-lambda), [create-react-app-lambda](https://github.com/netlify/create-react-app-lambda), [react-netlify-identity](https://github.com/sw-yx/react-netlify-identity) - Maintaining Netlify's serverless utilities and starter kits. I also wrote a little [Chrome plugin](https://github.com/netlify/netlify-browser-extension).

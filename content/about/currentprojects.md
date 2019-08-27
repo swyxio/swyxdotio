@@ -1,3 +1,8 @@
+---
+published: false
+notes_to_self: so as not to have this show up on rss feed
+---
+
 ## 📚 Current Projects
 
 - [Egghead.io](https://egghead.io/) instructor - short technical courses on [⚛️ React and 📜 Typescript](https://egghead.io/courses/design-systems-with-react-and-typescript-in-storybook)!
@@ -16,6 +21,7 @@
 - March 25-27 - [VueConf US](http://vueconf.us/) - Attending
 - March 30-31 - [Reactathon](https://www.reactathon.com/) - Speaking
 - April 9 - JAMStackConf NYC
+- April 12-13 - GraphQL Asia
 - April 16 - JAMStack Boston
 - May 14 - Apollo Day NYC
 - May 31 - [Oclif Conf](https://oclif.io/conf)

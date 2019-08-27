@@ -3,7 +3,7 @@ title: Serverless GraphQL
 slug: serverless-graphql
 topic: GraphQL
 venues: GraphQL Asia
-date: 2019-05-14
+date: 2019-04-12
 url: https://www.graphql-asia.org/
 video: https://www.youtube.com/watch?v=lq_He6Buv14
 desc: A basic talk on how serverless functions work with GraphQL

@@ -1,3 +1,8 @@
+---
+published: false
+notes_to_self: so as not to have this show up on rss feed
+---
+
 _This page is in the process of being redesigned so pardon the shoddy appearance right now._
 
 - 🗺️ I'm from Singapore 🇸🇬 and live in NYC 🗽.
