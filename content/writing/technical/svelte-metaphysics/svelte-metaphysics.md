@@ -33,18 +33,18 @@ I think I noted down all the substantive points in the talk here. A few of us re
 This talk was heavily wrapped up in a delightful package of metaphysical discussion, involving:
 
 - The [Ship of Theseus](https://en.wikipedia.org/wiki/Ship_of_Theseus) - I don't remember what the analogy was here
-- This Heraclitus quote, where I think the message was time matters, UI = f(State) is an illusion
+- This Heraclitus quote, where I think the message was time matters, `UI = f(State)` is an illusion
 
 ![heraclitus](./heraclitus.jpg)
 
-- Plato's cave which I found the most apt, which was the attraction of developers around the idea of components, but looking at React and thinking that this is the ultimate expression of that ideal, when in reality the core idea can be done without looking through the blurry shadows of FP
+- [Plato's Allegory of the Cave](https://en.wikipedia.org/wiki/Allegory_of_the_Cave) which I found the most apt, which was the attraction of developers around the idea of components, but looking at React and thinking that this is the ultimate expression of that ideal, when in reality the core idea can be done without looking through the blurry shadows of FP
 
 ![platocave](./platocave.jpg)
 
-I found this approach extremely fun for a meetup talk, especially as someone familiar with all the allegories, but for someone new to any of these it might be too much cognitive load to juggle both the meta and the message.
+I found this approach extremely fun for a meetup talk, especially as someone familiar with all the allegories, but for someone new to any of these it might be too much cognitive load to juggle both the meta and the message. Eh.
 
-There were also two other stylistic points I loved in the introduction.
+There were also a couple other stylistic notes I loved, specifically in the introduction.
 
-Rich started by recapping his 3 prior talks at [JSConfEU](https://www.youtube.com/watch?v=qqt6YxAZoOc), [YGLF](https://www.youtube.com/watch?v=AdNJ3fydeao), and JSCamp Barcelona (not yet recorded, but meeting Jenn Creighton was the proximate cause of coming to speak at useReactNYC). I dont remember what exactly was said but each talk was neatly wrapped up and contrasted against each other in one sentence each and I thought that this was a very nice shorthand for longtime observers ("Previously on...") as well as homework for newcomers.
+Rich started by recapping his 3 prior talks at [JSConfEU](https://www.youtube.com/watch?v=qqt6YxAZoOc), [YGLF](https://www.youtube.com/watch?v=AdNJ3fydeao), and JSCamp Barcelona (not yet recorded, but meeting Jenn Creighton was the proximate cause of coming to speak at useReactNYC). I dont remember what exactly was said but **each talk was neatly wrapped up and contrasted against each other in one sentence each** and I thought that this was a very nice shorthand for longtime observers ("Previously on...") as well as homework for newcomers.
 
-One of his last contrast points, that "Svelte is objectively better than React" also served as the context setter for this talk, that "Svelte is subjectively better than React". A bit of a troll framing of course, but very effective.
+Finally, one of his last contrast points, that "Svelte is objectively better than React" also served as the context setter for this talk, that "Svelte is subjectively better than React". A bit of a troll framing of course, but very effective in indicating that we're going to talk about the Why, not the What.
