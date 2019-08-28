@@ -10,6 +10,8 @@ canonical: https://scotch.io/@sw-yx/python-the-jamstack
 cover_image: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSVyXO9qi9y9KqWqYLcofhkaCaxQGMcXIkXht9YOGxLXP9jx1-W
 ---
 
+_Published on [Scotch.io](https://scotch.io/@sw-yx/python-the-jamstack)_
+
 Recently I was floored to hear Netlify's name on the excellent [TalkPython](https://talkpython.fm/episodes/show/224/12-lessons-from-100-days-of-web) podcast as a place to host Python web development projects. Let's talk about why I originally thought Python doesn't work on Netlify, and why that is wrong.
 
 **TL;DR**: In this post we cover how to set up any Python Static Site Generator to deploy on Netlify, using the newly launched [Portray](https://timothycrosley.github.io/portray/) documentation generator as an example.
