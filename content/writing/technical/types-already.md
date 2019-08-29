@@ -120,13 +120,13 @@ This usually happens when you have arrays of objects and the objects are differe
 
 ```js
 const animals = [{ name: 'Fido', legs: 4, says: 'woof' }, { name: 'Kermit', legs: 2, marriedTo: 'Piggy' }]
-// falls apart if an animal with both `says` and `marriedTo` exists
+// will have bugs if an animal with both `says` and `marriedTo` exists
 animals.forEach((animal) => {
   if (animal.says) {
-    // must be a dog?
+    // i guess it's a dog?
   }
   if (animal.marriedTo) {
-    // must be a frog?
+    // i guess it's a frog?
   }
 })
 ```
@@ -153,7 +153,7 @@ animals.forEach((animal) => {
     // must be a dog!
   }
   if (animal.type === 'frog') {
-    // must be a frog?
+    // must be a frog!
   }
 })
 ```
@@ -261,7 +261,7 @@ let fruit: string | undefined
 fruit.toLowerCase() // Error: Object is possibly 'undefined'.
 ```
 
-Above the built in nullable checking (which takes care of issues like passing in 3 arguments when a function expects 4), a type system can make the most of your enums (aka union types). I struggled coming up with a good example, so I may replace this one in future, but it at least tells you when you've written code you don't need:
+Over and above the built in nullable checking (which takes care of issues like passing in 3 arguments when a function expects 4), a type system can make the most of your enums (aka union types). I struggled coming up with a good example but here is one:
 
 ```ts
 type Fruit = 'banana' | 'orange' | 'apple'
