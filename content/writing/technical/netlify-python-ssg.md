@@ -115,10 +115,10 @@ We'll also want to get Netlify to install Portray itself via `requirements.txt`:
 portray==1.0.5
 ```
 
-That sets up the environment, but the final step is to configure the build commands. There are a few equivalent ways to do this, so I'll walk through 3 of the most popular. What's common among all of them is you need to know upfront:
+That sets up the environment, but the final step is to configure the build setup (aka tell Netlify the information it needs to do things for you). There are a few equivalent ways to do this, so I'll walk through 3 of the most popular. What's common among all of them is you need to know upfront:
 
-- the build command: `portray as_html` (what command you type into your terminal to do a production build of your site)
-- the deploy directory: `site` (what folder the above build command builds to, so we only deploy this specific folder)
+- the build `command`: `portray as_html` (what command you type into your terminal to do a production build of your site)
+- the `publish` folder: `site` (what folder the above build command builds to, so we only publish this specific folder to our CDN)
 
 ## Option 1: Configuring Build Commands through Netlify Web UI
 

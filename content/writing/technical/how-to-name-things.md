@@ -47,7 +47,7 @@ This was adapted from real code in a popular framework. Here we end up with 3 di
 Not all names are obviously bad, even though they may seem bad to you.
 
 - **Single Letter Names**: You may dislike the TypeScript community using `T`, `U`, or `V` for generic type variables, but that does genuinely reflect the mathematical/set theory framing of the type system, and emphasize the genericness of the type variable. You may dislike using `e` for errors or for events, but if its usage is scoped, the impact really is very small and not worth arguing over. However, non-descriptive abbreviations that show up in errors seen by end users and your library consumers are bad news. Other forms of abbreviations may or may not be worth banning, check [this ESLint rule](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/master/docs/rules/prevent-abbreviations.md) for ideas.
-- **Plurals vs Arrays**: You can have `names` variable be an array of `name`s, or a `nameArray`, which is more verbose and explicit but less aesthetic.
+- **Plurals vs Arrays**: You can have `names` variable be an array of `name`s, or a `nameArray`, which is more verbose and explicit but less aesthetic. [Don't choose lazy pluralization](https://mobile.twitter.com/swyx/status/1159462137745629185) and beware substrings.
 - **[Block, Element, Modifier](http://getbem.com/introduction/)**: BEM was wildly popular for a reason - the global nature of CSS - but scoping methods have evolved a lot since then and BEM is far less necessary than used to be. It is also, to put it mildly, verbose.
 
 ## Probably Good Ideas and their Considerations
@@ -92,7 +92,7 @@ Sindre Sorhus has some strong opinions on naming. You may not agree with all of 
 
 ## Collections of Things
 
-(Aug 2019 Update) Don't pluralize lazily, e.g. `blog.js` and `blogs.js`. This is terrible to grep especially with one name being a substring of the other. Prefer to name both items and collections visibly. This is similar to the Hungarian notation idea, but works even if you use a type system.
+(Aug 2019 Update) Don't pluralize lazily, e.g. `blog.js` and `blogs.js`. This is terrible to grep especially with one name being a substring of the other. Prefer to name both items and collections visibly. This is similar to the Hungarian notation idea, but works even if you use a type system. [Tweet](https://mobile.twitter.com/swyx/status/1159462137745629185)
 
 ## Your Opinion Here!
 
