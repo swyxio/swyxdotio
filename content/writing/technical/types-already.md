@@ -2,7 +2,7 @@
 title: You Already Use Types
 slug: types-already
 categories: ['Tech']
-date: 2019-08-28
+date: 2019-08-29
 ---
 
 This post is for skeptics and newcomers to type systems, and aims to articulate rather than hard sell.
@@ -53,7 +53,7 @@ React introduced the `use` prefix to indicate hooking into the runtime that must
 
 ```js
 function Component() {
-  React.useState(true)
+  const [bool, setBool] = React.useState(true)
   React.useEffect(callback)
   const foo = useCustomHook()
   // ...
@@ -268,29 +268,15 @@ Above the built in nullable checking (which takes care of issues like passing in
 ```ts
 type Fruit = 'banana' | 'orange' | 'apple'
 function makeDessert(fruit: Fruit) {
+  // Error: Not all code paths return a value.
   switch (fruit) {
     case 'banana':
       return 'Banana Shake'
     case 'orange':
       return 'Orange Juice'
-    case 'apple':
-      return 'apple Juice'
   }
-  fruit.toUpperCase() // Property 'toUpperCase' does not exist on type 'never'.
 }
 ```
-
-Or, more likely, forgot to account for remaining cases:
-
-```ts
-type Fruit = 'banana' | 'orange' | 'apple'
-function makeDessert(fruit: Fruit) {
-  if (fruit === 'banana') return 'Banana Shake'
-  fruit // fruit: "orange" | "apple", dont assume it's an orange!
-}
-```
-
-Again; I know these aren't the best examples. I'm working on that.
 
 **Fearless Refactoring**
 
@@ -300,9 +286,15 @@ This is the wrong take.
 
 When we start off exploring a problem, we start off with a vague idea of the solution. As we progress, we learn more about the problem, or priorities change, and unless we've done it a million times we probably picked something wrong along the way, whether it be function API, data structure, or something larger scale. The question is then to either stick with it until it breaks or to refactor the moment you can sense that you're going to outgrow whatever you used to have.
 
-The reason you put off that refactor is that it is costly, not because it isn't beneficial to you.
+**The reason you put off that refactor is that it is costly, not because it isn't beneficial to you.**
 
 Type System tooling helps to dramatically lower the cost of that refactor, so you can experience the benefits earlier. It lowers that cost via faster feedback, exhaustiveness checking, and better error messages.
+
+## Truth in Advertising
+
+There is a cost to learning Type Systems you didn't write. This cost may offset any imagined benefit to automated type checking. This is why I put a great deal of effort into helping to lower that learning curve. However, be aware that it is a new language and will involve unfamiliar concepts, and also that even the tooling is an imperfect work in progress.
+
+But it is good enough for [AirBnb](https://www.reddit.com/r/typescript/comments/aofcik/38_of_bugs_at_airbnb_could_have_been_prevented_by/) and [Google](http://neugierig.org/software/blog/2018/09/typescript-at-google.html) and [Atlassian](https://github.com/atlassian/react-beautiful-dnd/issues/982) and [Lyft](https://eng.lyft.com/typescript-at-lyft-64f0702346ea) and [Priceline](https://medium.com/priceline-labs/trying-out-typescript-part-1-15a5267215b9) and [Slack](https://slack.engineering/typescript-at-slack-a81307fa288d) and it may be for you.
 
 <!--
 
