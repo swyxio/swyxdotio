@@ -162,7 +162,7 @@ This is in fact what happens for Redux (and, interestingly enough, handy for oth
 
 Types even exist in HTML: `<input type="file">` and `<input type="checkbox">` behave so differently! (and I already mentioned Types in CSS with [Block\_\_Element--Modifier](http://getbem.com/naming/))
 
-**Even in HTML, you're already using types.**
+**Even in HTML/CSS, you're already using types.**
 
 ## 1C: Types in APIs
 
@@ -226,7 +226,7 @@ Just like GraphQL vs REST, Standardized types in a language unlock much better t
 
 We might take months and days to learn from **runtime errors**, and these are exposed to users, so they are the worst possible outcome.
 
-We write tests and apply lint rules and other checks to move these errors to **build time errors**, which shortens feedback cycles to minutes and hours. (As aI wrote recently: [Types don't replace Tests!](https://css-tricks.com/types-or-tests-why-not-both/))
+We write tests and apply lint rules and other checks to move these errors to **build time errors**, which shortens feedback cycles to minutes and hours. (As I wrote recently: [Types don't replace Tests!](https://css-tricks.com/types-or-tests-why-not-both/))
 
 Type Systems can shorten this feedback by yet another order of magnitude, to seconds, checking during **write time**. (Linters can also do this. Both are conditional on a supportive IDE like VS Code) As side effect, you get autocomplete for free, because autocomplete and write time validation are two sides of the same coin.
 
@@ -249,7 +249,7 @@ const Foo = {
     return 'data'
   },
 }
-Foo.getdata() // Property 'getdata' does not exist on type '{ getData(): string; }'. Did you mean 'getData'?
+Foo['getdata']() // Property 'getdata' does not exist on type '{ getData(): string; }'. Did you mean 'getData'?
 ```
 
 Why yes, TypeScript, I did.
