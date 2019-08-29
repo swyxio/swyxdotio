@@ -62,11 +62,11 @@ I am personally fond of reminders of nullability:
 
 ```js
 const maybeResult = await fetchAPI()
-if (!maybeResult) {
+if (maybeResult) {
   const result = maybeResult
   // do things with result
 } else {
-  // maybeResult is safe
+  // maybeResult is falsy, dont assume it is there
 }
 ```
 
