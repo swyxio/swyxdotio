@@ -7,13 +7,11 @@ date: 2019-08-29
 
 This post is for skeptics and newcomers to type systems, and aims to articulate rather than hard sell.
 
-First we'll look at the subtle way types make their way into your coding.
+1. First we'll look at the subtle way types make their way into your coding.
+2. Then we'll step back and try to think about what this phenomenon tells us about how we want to code.
+3. Lastly, we'll ask some (leading!) questions that should arise from these insights.
 
-Then we'll step back and try to think about what this phenomenon tells us about how we want to code.
-
-Lastly, we'll ask some (leading!) questions that should arise from these insights.
-
-## Types in Names
+## 1A: Types in Names
 
 Regardless of language, your journey with types starts almost as soon as you learn to code. The basic list data structure invites a corresponding plural:
 
@@ -78,7 +76,7 @@ So what, you ask?
 
 Keep reading, I'm building up to it.
 
-## Types in Data Structures
+## 1B: Types in Data Structures
 
 The problem with encoding types in names is that the language probably doesn't care about your meticulously named variables (indeed, in JavaScript, it probably gets mercilessly minified beyond recognition). It will happily run your code and throw a runtime error if you forget to respect your own nametypehints. What if we made types formally checkable through data structures?
 
@@ -166,7 +164,7 @@ Types even exist in HTML: `<input type="file">` and `<input type="checkbox">` be
 
 **Even in HTML, you're already using types.**
 
-## Types in APIs
+## 1C: Types in APIs
 
 I'm almost done. Even outside your programming language, the interfaces between machines involve types.
 
@@ -176,7 +174,7 @@ GraphQL takes that idea and dials it up to 11: Types are key to queries and muta
 
 I don't know the history of SOAP and XML and gRPC and other machine-machine communication protocols but I'm willing to bet there are strong parallels.
 
-## Stepping Back: What Does This Tell Us?
+## Part 2: What Does This Tell Us?
 
 This was a very long, and yet inexhaustive examination of types permeating everything you do. Now that you've seen these patterns, you can probably think of more examples I'm forgetting right now. But at every turn, it seems the way toward more maintainable code, and better tooling is to add types in some way.
 
@@ -188,11 +186,11 @@ But if it does, and you've been doing this in slipshod fashion, you may be inter
 
 You may be working your way toward a type system, without even knowing it.
 
-## Leading Questions
+## Part 3: Leading Questions
 
 So knowing what we know now about using types in our code without a type system. I'll ask some hard questions.
 
-**What do you currently do to enforce types without a type system?**
+**Question 1: What do you currently do to enforce types without a type system?**
 
 At an individual level, you engage in defensive coding and manual verification. Basically manually eyeballing your own code and reflexively adding checks and guards without knowing if they're really needed (or, worse, NOT doing it and figuring out after seeing run time exceptions).
 
@@ -208,7 +206,7 @@ Therein lies the last option: Do Nothing.
 
 Most people do nothing to enforce their informally designed type systems.
 
-**How much of these types are you writing yourself?**
+**Question 2: How much of these types are you writing yourself?**
 
 It goes without saying that if all your type policies are created by you, then they must be written by you and enforced by you.
 
@@ -218,13 +216,13 @@ Is there a way to share types?
 
 ([yes](https://github.com/DefinitelyTyped/DefinitelyTyped/))
 
-**What if your types were standardized?**
+**Question 3: What if your types were standardized?**
 
 Research has shown that the #1 reason programmers adopt a language is the existing capabilities and functionality available for them to use. I will learn Python to use TensorFlow. I will learn Objective C to create native iOS experiences. Correspondingly, JS has been so successful because it runs everywhere, compounded by the wide availability of free open source software written _by other people_. With some standardized type system, we can [import types just as easily as we import open source software](https://github.com/DefinitelyTyped/DefinitelyTyped/) written by other people.
 
 Just like GraphQL vs REST, Standardized types in a language unlock much better tooling. I will offer 4 examples:
 
-**Faster Feedback**
+**Example 1: Faster Feedback**
 
 We might take months and days to learn from **runtime errors**, and these are exposed to users, so they are the worst possible outcome.
 
@@ -232,7 +230,7 @@ We write tests and apply lint rules and other checks to move these errors to **b
 
 Type Systems can shorten this feedback by yet another order of magnitude, to seconds, checking during **write time**. (Linters can also do this. Both are conditional on a supportive IDE like VS Code) As side effect, you get autocomplete for free, because autocomplete and write time validation are two sides of the same coin.
 
-**Better Error Messages**
+**Example 2: Better Error Messages**
 
 ```js
 const Foo = {
@@ -256,7 +254,7 @@ Foo.getdata() // Property 'getdata' does not exist on type '{ getData(): string;
 
 Why yes, TypeScript, I did.
 
-**Edge Case Exhaustion**
+**Example 3: Edge Case Exhaustion**
 
 ```ts
 let fruit: string | undefined
@@ -278,7 +276,7 @@ function makeDessert(fruit: Fruit) {
 }
 ```
 
-**Fearless Refactoring**
+**Example 4: Fearless Refactoring**
 
 Many people mentioned this and I'll be honest that it took me a long while to come around to this. The thinking is: "so what? I don't refactor that much. so that means TypeScript's benefit is smaller to me than to you because I'm better than you."
 
