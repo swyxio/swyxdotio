@@ -7,7 +7,7 @@ date: 2019-08-29
 
 This post is for skeptics and newcomers to type systems, and aims to articulate rather than hard sell.
 
-1. First we'll look at the subtle way types make their way into your coding.
+1. First we'll look at how static type conventions appear in your dynamically typed coding.
 2. Then we'll step back and try to think about what this phenomenon tells us about how we want to code.
 3. Lastly, we'll ask some (leading!) questions that should arise from these insights.
 
