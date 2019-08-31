@@ -7,10 +7,10 @@
   "dependencies": {
     "gatsby": "^2.13.66",
     "gatsby-plugin-manifest": "^2.2.4",
-    "gatsby-theme-dev-blog": "^0.0.27",
+    "gatsby-theme-dev-blog": "^0.0.28",
+    "postinstall-postinstall": "^2.0.0",
     "react": "^16.8.6",
-    "react-dom": "^16.8.6",
-    "postinstall-postinstall": "^2.0.0"
+    "react-dom": "^16.8.6"
   },
   "scripts": {
     "start": "gatsby develop",
@@ -19,7 +19,7 @@
     "postinstall": "patch-package"
   },
   "devDependencies": {
-    "patch-package": "^6.1.2",
-    "gatsby-theme": "^0.0.6"
+    "gatsby-theme": "^0.0.6",
+    "patch-package": "^6.1.2"
   }
 }
