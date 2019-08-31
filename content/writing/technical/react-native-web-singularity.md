@@ -100,13 +100,17 @@ The RNW DX story itself does have some drawbacks. [Ryan Jerue](https://twitter.c
 
 > In terms of using RNW for a bit over a year, I'd say that there's some good and some bad. The good is that it does deliver on its promise. My focus has been working on a design system that my company can use across our web and native apps. If you like CSS in JS, it's 100% that. Dimensions API covers media queries well too. The bad of RNW is mostly from react native, meaning webapps are going to be stuck at the ceiling of being annoying up upgrade, flexbox everywhere. The support of libraries isn't as great either as often ones with native modules require one to be skilled in JS, Swift/ObjC, and Java. React Native doesn't support SVG out of the box (or really at all) either, which is a bummer.
 
-[Bruno Lemos](https://twitter.com/brunolemos) said:
+Even if it isn't RNW, something else that looks like it might do it. [Christian Hall](https://twitter.com/jchristianhall) said:
+
+> Given the interest in VR and AR, for devs who want to focus on making the best UI possible, regardless of platform, I think the “RNW Singularity” is essential. If the React Team doesn’t come up with some way to express UI universally, someone else will.
+
+[Bruno Lemos](https://twitter.com/brunolemos) agreed:
 
 > We are definitely trending into more cross-platform dev, all big companies are betting on it (facebook, microsoft, google and even apple with project catalina). Dunno if it will be react-native-web or not, but yes I agree with the predictions
 
-[Christian Hall](https://twitter.com/jchristianhall) said:
+There remain key sticking points in a RNW singularity, like opening in a new tab, and routing. As [Josh Parret put it](https://twitter.com/JTParrett/status/1167853538057379840):
 
-> Given the interest in VR and AR, for devs who want to focus on making the best UI possible, regardless of platform, I think the “RNW Singularity” is essential. If the React Team doesn’t come up with some way to express UI universally, someone else will.
+> I feel we are quite far off a RNW singularity, as there’s undeniable cases where a single codebase doesn’t work for both platforms; such as opening a link in a new tab, or changing routes/screens...
 
 ---
 
