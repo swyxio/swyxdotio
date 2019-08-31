@@ -26,9 +26,8 @@ Structure
 - Why you can't avoid Generics
 - Concepts
   - Assignable ([Compatibility](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#subtype-vs-assignment))
-  -
 - Constructor Generics
-  - Promise<>
+  - `Promise<>`
 - Interface Modification Inbuilt Generics
   - Partial
   - Readonly
