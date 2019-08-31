@@ -32,17 +32,20 @@ Also worth noting that there was a (more ambitious!) experiment, [React Native D
 Because there is a lot of ground to cover, I will assume from here on that you have read and watched these basic things above. The main selling points that resonate with me are:
 
 - Code reuse across RN and Web codebases
-- POSSIBLE "A11y by default" (not a given, and if you reject this out of hand please stop reading)
+- [Better A11y APIs](https://github.com/necolas/react-native-web/blob/master/docs/guides/accessibility.md) (not a given, and if you reject this out of hand please stop reading)
 - [Improved styling model](https://github.com/necolas/react-native-web/blob/master/docs/guides/style.md) (subjective!)
-- ["Free" built-in components that RN developers enjoy](https://github.com/necolas/react-native-web#components) including [an Animated Module](https://github.com/necolas/react-native-web#modules)
+- "native-quality interactions, support for multiple input modes (touch, mouse, keyboard)" (untested! I'd love to read more here)
+- ["Free" built-in components and modules that RN developers enjoy](https://github.com/necolas/react-native-web#components) including [an Animated Module](https://github.com/necolas/react-native-web#modules)
+- (not so relevant to me) [i18n is better](https://github.com/necolas/react-native-web/blob/master/docs/guides/internationalization.md)
 
-There is one very big downside, which cannot be ignored: it drops all pretense of using APIs that look like normal webdev. No `<div>`s here. And expect fiddling with alien RN ecosystems like Metro with [fun problems with symlinks](https://github.com/facebook/metro/issues/1).
+There is one very big downside, which cannot be ignored: it drops all pretense of using APIs that look like normal webdev. No `<div>`s here. No [Media Queries](https://github.com/necolas/react-native-web/blob/master/docs/guides/style.md#what-about-media-queries). And expect fiddling with alien RN ecosystems like Metro with [fun problems with symlinks](https://github.com/facebook/metro/issues/1).
 
 Now, I also pay attention to incidental/leading indicators:
 
 - Both the authors of React-Native-Web and React-Native-DOM have been hired into the React org in the past year. [@necolas](https://twitter.com/necolas) is on React Core and [@vincentriemer](https://twitter.com/vincentriemer) seems to be on Web but is obviously extremely close to the RN team.
 - [Rick Hanlon (RN team)'s talk on the Untouchable Web](https://www.youtube.com/watch?v=LhKglxQT4sU) gives a very strong indication of what the RN team wants for mobile web
 - [React Fire](https://github.com/facebook/react/issues/13525) gave way to [React Flare](https://github.com/facebook/react/issues/15257) (also worth reading: [`<FocusScope>` and the unreleased `useEvent` hook](https://github.com/facebook/react/issues/16009)). I expect some form of this to be announced, even released at [React Conf 2019](https://conf.reactjs.org/) alongside Suspense for Data Fetching.
+- [From Nicolas](https://mobile.twitter.com/necolas/status/1136687268377219073): "You can now build Web, Android, and iOS apps from the same React codebase using Expo. Expect a lot more progress towards a web-first, multi-platform React over the next couple of years."
 - Of course, [Twitter's continuing investment](https://twitter.com/paularmstrong/status/1070472670452559872)
 - _what am I missing?_
 
@@ -58,15 +61,17 @@ Now for the really useless part of this blogpost, where I speculate about the po
 
 **Fact**: Mobile is terribly important for web developers. I won't bother substantiating this point.
 
-**Opinion**: I don't think `react-dom` can or should ever be deprecated, because it will forever be important for web developers coming into React from a HTML/CSS background.
+**Opinion**: I don't think `react-dom` can or should ever be deprecated, because it will forever be important for web developers coming into React from a HTML/CSS background. I used to entertain this notion, but I recognize it is unnecessarily aggressive.
 
 **Opinion**: I also don't think code reuse is an inherently worthy goal in and of itself. Plenty of projects are web-only and premature optimization, particularly for projects you will never use, is to be avoided.
 
-**Speculation**: However there is a decent chance that RNW reaches a crossover point, a singularity, where it simply starts to be a better starting point for developing for mobile web than `react-dom` is. As a standalone tool, even with no intention of reusing code for native apps, it could be better than `react-dom`.
+**Speculation**: However there is a decent chance that RNW reaches a crossover point, a singularity, where it simply starts to be a better starting point for developing for mobile web than `react-dom` is. As a standalone tool, **even with no intention of reusing code for native apps**, it could be better than `react-dom`, for reasons I have already stated.
 
 If true, **THIS WOULD BE INCREDIBLY FREAKING IMPORTANT.** Like, drop everything and invest in this now important.
 
 This is why I keep eyeing the RNW project despite never having needed it.
+
+This would be a fun turn of events from people proclaiming the death of RN after [Airbnb sunset RN](https://medium.com/airbnb-engineering/sunsetting-react-native-1868ba28e30a) in 2018. If anything, judging by [Eli White's talk](https://mobile.twitter.com/Eli_White/status/1123490937785782273), the expanded RN team with Lean Core/community focus, and [open sourcing of Hermes](https://www.youtube.com/watch?v=zEjqDWqeDdg), RN has in the public eye suddenly become far more relevant than ever in 2019.
 
 ## Definitely Not Immediate Future
 
@@ -80,7 +85,7 @@ So RN is the near term focus for now. But what if...
 
 ---
 
-PostScript: more resources for my reference
+_PostScript: more resources for my reference_
 
 - [Ben Awad's RNW Series](https://www.reddit.com/r/reactjs/comments/aw65z8/react_native_web_workout_app_tutorial/)
 - [Guide for Creating reusable RN and RNW components](https://medium.com/@yannickdot/write-once-run-anywhere-with-create-react-native-app-and-react-native-web-ad40db63eed0)
