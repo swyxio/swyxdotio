@@ -3,6 +3,7 @@ title: 'The Case for the React Native Web Singularity'
 slug: react-native-web-singularity
 categories: ['Tech', 'React']
 date: 2019-08-30
+banner: './react-native-web-singularity.jpeg'
 ---
 
 Bottom line up front: There is a possible "React Native Web Singularity", when it starts being a better standalone choice for developing for the mobile web than `react-dom`. If this speculation comes true, this would be gamechanging.
@@ -120,3 +121,5 @@ _PostScript: more resources for my reference_
 - [Guide for Creating reusable RN and RNW components](https://medium.com/@yannickdot/write-once-run-anywhere-with-create-react-native-app-and-react-native-web-ad40db63eed0)
 - [Material Bread RN universal components](https://www.reddit.com/r/reactjs/comments/brgtqb/how_to_make_a_react_component_library_for_both/eoge9yo/)
 - [Expo Web tutorial](https://medium.com/@toastui/from-zero-to-publish-expo-web-react-native-for-web-tutorial-e3e020d6d3ff)
+- [Routing: React Router](https://github.com/edupooch/simple-crna-routing)
+- [Routing: React Navigation](https://pickering.org/using-react-native-react-native-web-and-react-navigation-in-a-single-project-cfd4bcca16d0)

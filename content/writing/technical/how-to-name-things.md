@@ -12,6 +12,47 @@ I've vacillated on my opinion on naming things. I think most people start out wi
 
 I've given this essay a slightly clickbaity title. Spoiler: I'm not going to solve the problem of naming things today. All I hope to do is describe some opinions I've formed from my experience in Python and JS, list some considerations, invite you to [share yours](https://twitter.com/swyx), and suggest you have this debate on your team.
 
+## Not Naming Things
+
+[Aug 2019 Edit] One option people sometimes forget they have at their disposal is to just _not_ name things where possible. I have a couple examples for you.
+
+**Example 1: Not giving different names at module and function boundaries**
+
+Mind your "name stack". This is the number of names you have to keep in your head as you read code.
+
+You can name the same thing 8 different ways at boundaries and hate life when you have to refactor or grep your own code:
+
+```js
+// index.js
+const grault = require('./corge')
+const foo = grault('baz')
+
+// corge.js
+export default function doBar(qux) {
+  let quux = parse(qux)
+  return quux
+}
+```
+
+or just 2 ways and hate life less:
+
+```js
+// index.js
+const { getFoo } = require('./getFoo')
+const foo = getFoo('bar')
+
+// getFoo.js
+export function getFoo(bar) {
+  return parse(bar)
+}
+```
+
+**Example 2: Using Tooling to autogenerate names**
+
+Instead of naming a `title` in CSS and then also a `<Title className="title">` in React, opening yourself up to global conflicts and subsequent refactoring, you could choose to use either a CSS Module or CSS in JS approach to scope and manage them together. Credit for this idea comes from [Max Stoiber](https://www.smashingmagazine.com/2016/09/how-to-scale-react-applications/#unique-class-names).
+
+Notable Exception: Kyle Simpson famously does not use `=>` function syntax, preferring explicit `function` declaration, because he wants to avoid anonymous functions in the stack trace. That is his prerogative, but I don't think this is a battle worth fighting.
+
 ## Probably Bad Names
 
 Inherent in having any opinion on naming things is some intuition that some names are worse than others.
