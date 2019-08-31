@@ -41,7 +41,7 @@ export const Hero = () => {
             max-width: ${rhythm(30)};
           `}
         >
-          shawn swyx wang's personal site
+          shawn / @swyx / site
         </h1>
       </Container>
       <div

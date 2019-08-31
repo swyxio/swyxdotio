@@ -25,6 +25,8 @@ If you are out of the loop on even knowing what RNW is, here are some resources 
 
 - [Their README](https://github.com/necolas/react-native-web#react-native-for-web)
 - [@necolas' talk at React Rally 2017](https://www.youtube.com/watch?v=tFFn39lLO-U) and on [the React Podcast](https://changelog.com/reactpodcast/1)
+- [Peggy Rayzis's talk: Write Once, Render Anywhere — ReactNext 2017](https://www.youtube.com/watch?v=HLWM2uhv2wI&feature=youtu.be)
+- [Using React Native For Web in Production at Curai](https://medium.com/curai-tech/using-react-native-for-web-in-production-at-curai-53202945b0b3)
 - _what am I missing?_
 
 Also worth noting that there was a (more ambitious!) experiment, [React Native DOM](https://github.com/vincentriemer/react-native-dom/), that has since gone on [hiatus](https://github.com/vincentriemer/react-native-dom/issues/102). [ReactXP](https://microsoft.github.io/reactxp/) is another notable attempt I know nothing about, backed by MSFT.
@@ -68,13 +70,15 @@ Now for the really useless part of this blogpost, where I speculate about the po
 
 **Opinion**: I don't think `react-dom` can or should ever be deprecated, because it will forever be important for web developers coming into React from a HTML/CSS background. I used to entertain this notion, but I recognize it is unnecessarily aggressive.
 
-**Opinion**: I also don't think code reuse is an inherently worthy goal in and of itself. Plenty of projects are web-only and premature optimization, particularly for projects you will never use, is to be avoided.
+**Opinion**: Code reuse is very project dependent. Plenty of projects are web-only. BUT...
 
-**Speculation**: However there is a decent chance that RNW reaches a crossover point, a singularity, where it simply starts to be a better starting point for developing for mobile web than `react-dom` is. As a standalone tool, **even with no intention of reusing code for native apps**, it could be better than `react-dom`, for reasons I have already stated. At this point, all doubt of premature optimization becomes invalid, and RNW becomes the default for people who are ok not using HTML-like APIs.
+**Speculation**: There is a decent chance that RNW reaches a crossover point, a singularity, where it simply starts to be a better starting point for developing for mobile web than `react-dom` is. As a standalone tool, **even with no intention of reusing code for native apps**, it could be better than `react-dom`, for reasons I have already stated. At this point, all doubt of premature optimization becomes invalid, and RNW becomes the default for people who are ok not using HTML-like APIs.
 
 If true, **THIS WOULD BE INCREDIBLY FREAKING IMPORTANT.** This is why I keep eyeing the RNW project despite never having needed it.
 
 If true, This would be a fun turn of events from people proclaiming the death of RN after [Airbnb sunset RN](https://medium.com/airbnb-engineering/sunsetting-react-native-1868ba28e30a) in 2018. If anything, judging by [Eli White's talk](https://mobile.twitter.com/Eli_White/status/1123490937785782273), the expanded RN team with Lean Core/community focus, and [open sourcing of Hermes](https://www.youtube.com/watch?v=zEjqDWqeDdg), RN has in the public eye become more relevant than ever in 2019.
+
+It also doesn't have to be RN that "wins". If Flutter is a success, [Bruno Lemos](https://twitter.com/brunolemos) also notes that [Flutter for web](https://flutter.dev/web) is in technical preview.
 
 ## Definitely Not Immediate Future
 
@@ -85,6 +89,20 @@ I think all this is years out. I directly pointed this question at Dan a few mon
 > Dan: Not in immediate feature. But finding ways to steer people towards accessible UIs by default is an active exploration with Flare. In shorter term insights will likely feed back into React Native. Maybe someday having a unified opt-in API for folks who prefer it would be nice.
 
 So RN is the near term focus for now. But what if...
+
+## Feedback from early reviewers
+
+I was a bit too web centric in this piece. [Glen Maddern](http://twitter.com/glenmaddern) has ported an RN app to RNW which of course is going to be a great usecase for RNW. He said:
+
+> In general RNW isn't the bottleneck, it's the native bits of RN that cause trouble. So I would speculate that one day maybe Expo becomes better for building for the web than Create React App, that'll be the tipping point. RNW is a small piece of the puzzle but it feels good enough for now.
+
+[Ryan Jerue](https://twitter.com/rjerue) says:
+
+> In terms of using RNW for a bit over a year, I'd say that there's some good and some bad. The good is that it does deliver on its promise. My focus has been working on a design system that my company can use across our web and native apps. If you like CSS in JS, it's 100% that. Dimensions API covers media queries well too. The bad of RNW is mostly from react native, meaning webapps are going to be stuck at the ceiling of being annoying up upgrade, flexbox everywhere. The support of libraries isn't as great either as often ones with native modules require one to be skilled in JS, Swift/ObjC, and Java. React Native doesn't support SVG out of the box (or really at all) either, which is a bummer.
+
+[Bruno Lemos](https://twitter.com/brunolemos) said:
+
+> We are definitely trending into more cross-platform dev, all big companies are betting on it (facebook, microsoft, google and even apple with project catalina). Dunno if it will be react-native-web or not, but yes I agree with the predictions
 
 ---
 

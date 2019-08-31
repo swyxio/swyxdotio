@@ -2,7 +2,7 @@ const pathPrefix = '/' // Prefix for all links. If you deploy your site to examp
 const siteTitle = 'swyx.io' // Navigation and Site Title
 const siteUrl = 'https://www.swyx.io' // Domain of your site. No trailing slash!
 const siteLogo = 'swyx.jpg' // Used for SEO and manifest, path to your image you placed in the 'static' folder
-const siteDescription = 'Personal site for shawn swyx wang'
+const siteDescription = 'shawn / @swyx / site'
 module.exports = {
   siteMetadata: {
     siteUrl: siteUrl + pathPrefix,
