@@ -92,17 +92,21 @@ So RN is the near term focus for now. But what if...
 
 ## Feedback from early reviewers
 
-I was a bit too web centric in this piece. [Glen Maddern](http://twitter.com/glenmaddern) has ported an RN app to RNW which of course is going to be a great usecase for RNW. He said:
+I was a bit too web centric in this piece, and was totally blind to the obvious fact that RNW is a bigger win for RN users than for React-Dom users. [Glen Maddern](http://twitter.com/glenmaddern) has ported an RN app to RNW which of course is going to be a great usecase for RNW. He said:
 
 > In general RNW isn't the bottleneck, it's the native bits of RN that cause trouble. So I would speculate that one day maybe Expo becomes better for building for the web than Create React App, that'll be the tipping point. RNW is a small piece of the puzzle but it feels good enough for now.
 
-[Ryan Jerue](https://twitter.com/rjerue) says:
+The RNW DX story itself does have some drawbacks. [Ryan Jerue](https://twitter.com/rjerue) says:
 
 > In terms of using RNW for a bit over a year, I'd say that there's some good and some bad. The good is that it does deliver on its promise. My focus has been working on a design system that my company can use across our web and native apps. If you like CSS in JS, it's 100% that. Dimensions API covers media queries well too. The bad of RNW is mostly from react native, meaning webapps are going to be stuck at the ceiling of being annoying up upgrade, flexbox everywhere. The support of libraries isn't as great either as often ones with native modules require one to be skilled in JS, Swift/ObjC, and Java. React Native doesn't support SVG out of the box (or really at all) either, which is a bummer.
 
 [Bruno Lemos](https://twitter.com/brunolemos) said:
 
 > We are definitely trending into more cross-platform dev, all big companies are betting on it (facebook, microsoft, google and even apple with project catalina). Dunno if it will be react-native-web or not, but yes I agree with the predictions
+
+[Christian Hall](https://twitter.com/jchristianhall) said:
+
+> Given the interest in VR and AR, for devs who want to focus on making the best UI possible, regardless of platform, I think the “RNW Singularity” is essential. If the React Team doesn’t come up with some way to express UI universally, someone else will.
 
 ---
 
