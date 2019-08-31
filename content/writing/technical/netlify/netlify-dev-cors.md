@@ -1,7 +1,7 @@
 ---
 title: Solve CORS once and for all with Netlify Dev
 slug: netlify-dev-cors
-categories: ['Tech']
+categories: ['Tech', 'Netlify']
 date: 2019-06-28
 canonical: https://alligator.io/nodejs/solve-cors-once-and-for-all-netlify-dev/
 ---

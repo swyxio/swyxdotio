@@ -4,7 +4,7 @@ published: true
 slug: netlify-python-ssg
 description: How to deploy Python projects to Netlify
 tags: python, netlify
-categories: ['Tech']
+categories: ['Tech', 'Netlify', 'Python']
 date: 2019-08-27
 canonical: https://scotch.io/@sw-yx/python-the-jamstack
 cover_image: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSVyXO9qi9y9KqWqYLcofhkaCaxQGMcXIkXht9YOGxLXP9jx1-W

@@ -3,7 +3,11 @@ title: You Already Use Types
 slug: types-already
 categories: ['Tech']
 date: 2019-08-29
+canonical: https://www.freecodecamp.org/news/you-already-use-types/
+decription: Even if you are a skeptic about type systems, you probably already use one in your code. However, because you refuse to use a formal type system, you are missing out on better tooling that takes advantage of the type work you do anyway, and that the open source community can do for you.
 ---
+
+_[Published on Freecodecamp](https://www.freecodecamp.org/news/you-already-use-types/)_
 
 This post is for skeptics and newcomers to type systems, and aims to articulate rather than hard sell.
 
@@ -282,9 +286,13 @@ Many people mentioned this and I'll be honest that it took me a long while to co
 
 This is the wrong take.
 
-When we start off exploring a problem, we start off with a vague idea of the solution. As we progress, we learn more about the problem, or priorities change, and unless we've done it a million times we probably picked something wrong along the way, whether it be function API, data structure, or something larger scale. The question is then to either stick with it until it breaks or to refactor the moment you can sense that you're going to outgrow whatever you used to have.
+When we start off exploring a problem, we start off with a vague idea of the solution. As we progress, we learn more about the problem, or priorities change, and unless we've done it a million times we probably picked something wrong along the way, whether it be function API, data structure, or something larger scale.
 
-**The reason you put off that refactor is that it is costly, not because it isn't beneficial to you.**
+![](http://www.methodsandtools.com/archive/refact8.png)
+
+The question is then to either stick with it until it breaks or to refactor the moment you can sense that you're going to outgrow whatever you used to have. I'll assume you accept that there are often benefits to refactoring. So why do we avoid refactoring?
+
+**The reason you put off that refactor is that it is costly, not because it isn't beneficial to you. Yet putting it off only increases future cost.**
 
 Type System tooling helps to dramatically lower the cost of that refactor, so you can experience the benefits earlier. It lowers that cost via faster feedback, exhaustiveness checking, and better error messages.
 

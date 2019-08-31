@@ -1,7 +1,7 @@
 ---
 title: "JAMstack or 'Pilha de Atolamento'? Let Your User Decide (i18n in Gatsby + Netlify)"
 slug: netlify-redirects-i18n
-categories: ['Tech']
+categories: ['Tech', 'Netlify']
 started: 2019-08-19
 date: 2019-08-21
 canonical: https://scotch.io/@sw-yx/jamstack-or-pilha-de-atolamento-let-your-user-decide-i18n-in-gatsby-netlify

@@ -1,7 +1,7 @@
 ---
 title: 'Netlify Environment Variables: The Cheat Codes of the Internet'
 slug: netlify-env-vars
-categories: ['Tech']
+categories: ['Tech', 'Netlify']
 date: 2019-08-09
 canonical: https://scotch.io/@sw-yx/netlify-environment-variables-the-cheat-codes-of-the-internet
 ---
