@@ -9,7 +9,9 @@
     "gatsby-plugin-manifest": "^2.2.4",
     "gatsby-theme-dev-blog": "^0.0.27",
     "react": "^16.8.6",
-    "react-dom": "^16.8.6"
+    "react-dom": "^16.8.6",
+    "postinstall-postinstall": "^2.0.0",
+    "patch-package": "^6.1.2"
   },
   "scripts": {
     "start": "gatsby develop",
@@ -18,8 +20,6 @@
     "postinstall": "patch-package"
   },
   "devDependencies": {
-    "gatsby-theme": "^0.0.6",
-    "patch-package": "^6.1.2",
-    "postinstall-postinstall": "^2.0.0"
+    "gatsby-theme": "^0.0.6"
   }
 }
