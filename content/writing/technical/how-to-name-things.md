@@ -12,11 +12,11 @@ I've vacillated on my opinion on naming things. I think most people start out wi
 
 I've given this essay a slightly clickbaity title. Spoiler: I'm not going to solve the problem of naming things today. All I hope to do is describe some opinions I've formed from my experience in Python and JS, list some considerations, invite you to [share yours](https://twitter.com/swyx), and suggest you have this debate on your team.
 
-## Not Naming Things
+## Not Naming Things [Aug 2019 Edit]
 
-[Aug 2019 Edit] One option people sometimes forget they have at their disposal is to just _not_ name things where possible. I have a couple examples for you.
+One option people sometimes forget they have at their disposal is to just _not_ name things where possible. I have a couple examples for you.
 
-**Example 1: Not giving different names at module and function boundaries**
+### Example 1: Not giving different names at module and function boundaries
 
 Mind your "name stack". This is the number of names you have to keep in your head as you read code.
 
@@ -47,7 +47,7 @@ export function getFoo(bar) {
 }
 ```
 
-**Example 2: Using Tooling to autogenerate names**
+### Example 2: Using Tooling to autogenerate names
 
 Instead of naming a `title` in CSS and then also a `<Title className="title">` in React, opening yourself up to global conflicts and subsequent refactoring, you could choose to use either a CSS Module or CSS in JS approach to scope and manage them together. Credit for this idea comes from [Max Stoiber](https://www.smashingmagazine.com/2016/09/how-to-scale-react-applications/#unique-class-names).
 
@@ -65,9 +65,9 @@ And yes, I've unironically been in standups where we _bikeshedded on whether som
 
 I'll motivate the discussion with some examples:
 
-- [**Metasyntactic names**](https://en.wikipedia.org/wiki/Metasyntactic_variable), the "lorem ipsum" of code: `foo`, `bar`, `baz`. You're not likely to see these in actual code. But you might.
+- [**Metasyntactic names**](https://en.wikipedia.org/wiki/Metasyntactic_variable), the "lorem ipsum" of code: `foo`, `bar`, `baz`. This isn't always wrong, especially when the name is meant to be a placeholder. You're not likely to see these in actual code. But you might.
 - **Vague names**: `thething`, `that`, `someObject`. Everything's a thing. `that` is no more descriptive than `this`. In JS, everything's an object. So what?
-- **Too short, likely overloaded names**: `id`, `name`, `url`. There's nothing inherently wrong with these, but often you need more than one of these. So you start with one `id` in your code, and then later on have an `product.id`, then a `user.id`, and pretty soon its no longer clear what `id` means. It is then harder and harder to grep and rename names in your code. This is especially important when the language allows shadowing (_ahem JS_). Probably my most controversial, and recent, opinion.
+- **Too short, likely overloaded names**: `id`, `name`, `url`. There's nothing inherently wrong with these, but often you need more than one of these. So you start with one `id` in your code, and then later on have an `product.id`, then a `user.id`, and pretty soon its no longer clear what `id` means. It is then harder and harder to grep and rename names in your code. This is especially important when the language allows shadowing (_ahem JS_). Probably my most controversial, and recent, opinion. Always ask yourself: "What do I do if there is more than one of this name?"
 - **Overly Long names**: >30 characters is pushing it IMO. You can namespace names inside a dict/object. (see below)
 - **Scary Technical names**: `ModifiedApplicativeFunctor`. As much as this makes sense to you, it has to make sense to the next person. Again, if you're on a team that all shares your context, go ahead. But at least pause to consider if they do.
 - **Nonconventional names**: Naming conventions don't exist in a vacuum. If everyone in a community does `import React from 'react'` and you do `import Bunny from 'react'` because you thought it would be a fun idea... it loses its fun quickly. More seriously, you can establish convenient aliases for names and concepts, but be careful that your code becomes an unreadable mess of custom convention.
@@ -81,7 +81,7 @@ It is possible to have too much of a good thing! Even if _all_ names technically
 - A different file imports `styleInjection.js` and calls it `styleInjector` because that's what **it** uses it for.
 - `styleInjection.js` isn't imported anywhere else, it isn't a reusable utility.
 
-This was adapted from real code in a popular framework. Here we end up with 3 different names for the exact same thing. Triple the bikeshedding. As [Joe Fiorini](https://twitter.com/joegrammer2/status/1127744685978652679) puts it, **name files after their default export**. (If it makes sense).
+This was adapted from real code in a popular framework. Here we end up with 3 different names for the exact same thing. Triple the bikeshedding. As [Joe Fiorini](https://twitter.com/joegrammer2/status/1127744685978652679) puts it, **name files after their default export**, or even better, don't have a default export, and still name the file after the "main" export anyway.
 
 ## Controversial Names
 
