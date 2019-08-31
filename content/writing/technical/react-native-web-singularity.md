@@ -5,7 +5,7 @@ categories: ['Tech', 'React']
 date: 2019-08-30
 ---
 
-Bottom line up front: There is a possible "React Native Web Singularity" when it starts being a better standalone choice for developing for the mobile web than `react-dom`. If this speculation comes true, this would be gamechanging.
+Bottom line up front: There is a possible "React Native Web Singularity", when it starts being a better standalone choice for developing for the mobile web than `react-dom`. If this speculation comes true, this would be gamechanging.
 
 ## Context
 
@@ -17,7 +17,7 @@ I just want to discuss why React Native Web is interesting to me and what I see 
 
 I mean it, please stop reading if you are just going to get mad whenever RNW is mentioned.
 
-Wew. ok.
+Wew. Ok.
 
 ## Basic Facts on React Native Web
 
@@ -54,24 +54,27 @@ As well as community proof points:
 - [Max Stoiber's Regrets](https://mxstbr.com/thoughts/tech-choice-regrets-at-spectrum/)
 - [the incredible DevHub app](https://github.com/devhubapp/devhub)
 - Evan Bacon's Expo Web efforts with a [Crossy Road clone](https://github.com/EvanBacon/Expo-Crossy-Road), [Instagram](https://github.com/EvanBacon/Instagram), [Flappy Bird](https://flappybacon.netlify.com/), [Lego](https://ldr.netlify.com/), [Doodle Jump](https://doodlejump.netlify.com/) (Evan is my RNW idol right now... jeez)
+- _what am I missing?_
 
-## My speculations: The React Native Web Singularity
+## My speculation: The React Native Web Singularity
 
 Now for the really useless part of this blogpost, where I speculate about the potential of RNW without even ever having used it. Yeah, I know. Humor me, contradict me, back me up, I'm just thinking aloud and would love your thoughts.
 
-**Fact**: Mobile is terribly important for web developers. I won't bother substantiating this point.
+**Fact**: Mobile is extremely important for web developers. I won't bother substantiating this.
+
+**Fact**: A React-Native-informed approach to Gestures, Focus, and A11y is clearly in the future of React.
+
+**Fact**: It is working for Twitter and [Uber Eats](https://www.youtube.com/watch?v=RV9rxrNIxnY) and others.
 
 **Opinion**: I don't think `react-dom` can or should ever be deprecated, because it will forever be important for web developers coming into React from a HTML/CSS background. I used to entertain this notion, but I recognize it is unnecessarily aggressive.
 
 **Opinion**: I also don't think code reuse is an inherently worthy goal in and of itself. Plenty of projects are web-only and premature optimization, particularly for projects you will never use, is to be avoided.
 
-**Speculation**: However there is a decent chance that RNW reaches a crossover point, a singularity, where it simply starts to be a better starting point for developing for mobile web than `react-dom` is. As a standalone tool, **even with no intention of reusing code for native apps**, it could be better than `react-dom`, for reasons I have already stated.
+**Speculation**: However there is a decent chance that RNW reaches a crossover point, a singularity, where it simply starts to be a better starting point for developing for mobile web than `react-dom` is. As a standalone tool, **even with no intention of reusing code for native apps**, it could be better than `react-dom`, for reasons I have already stated. At this point, all doubt of premature optimization becomes invalid, and RNW becomes the default for people who are ok not using HTML-like APIs.
 
-If true, **THIS WOULD BE INCREDIBLY FREAKING IMPORTANT.** Like, drop everything and invest in this now important.
+If true, **THIS WOULD BE INCREDIBLY FREAKING IMPORTANT.** This is why I keep eyeing the RNW project despite never having needed it.
 
-This is why I keep eyeing the RNW project despite never having needed it.
-
-This would be a fun turn of events from people proclaiming the death of RN after [Airbnb sunset RN](https://medium.com/airbnb-engineering/sunsetting-react-native-1868ba28e30a) in 2018. If anything, judging by [Eli White's talk](https://mobile.twitter.com/Eli_White/status/1123490937785782273), the expanded RN team with Lean Core/community focus, and [open sourcing of Hermes](https://www.youtube.com/watch?v=zEjqDWqeDdg), RN has in the public eye suddenly become far more relevant than ever in 2019.
+If true, This would be a fun turn of events from people proclaiming the death of RN after [Airbnb sunset RN](https://medium.com/airbnb-engineering/sunsetting-react-native-1868ba28e30a) in 2018. If anything, judging by [Eli White's talk](https://mobile.twitter.com/Eli_White/status/1123490937785782273), the expanded RN team with Lean Core/community focus, and [open sourcing of Hermes](https://www.youtube.com/watch?v=zEjqDWqeDdg), RN has in the public eye become more relevant than ever in 2019.
 
 ## Definitely Not Immediate Future
 
