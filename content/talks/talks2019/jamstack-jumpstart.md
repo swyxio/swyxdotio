@@ -5,10 +5,16 @@ topic: JAMstack
 venues: JSConfAsia
 date: 2019-06-15
 video: https://www.youtube.com/watch?v=s-l99ZzR77k
+video2: https://www.youtube.com/watch?v=PoqWF9BKtOE
 url: https://2019.jsconf.asia
 desc: A 3-4hr workshop to introduce JAMstack and get started with Gatsby and Netlify
 description: There is a lot of developer and investment interest in JAMStack technologies, from the serverless movement to new authentication models to continuous atomic deployment to the static site generator renaissance. But with so many new terms and options, it is hard for people to figure out where to start. This workshop will teach developers to set up a simple but state of the art Gatsby and Netlify stack, which lets people create blazing fast sites and apps with React and GraphQL, backed up by a continuous deployment and serverless platform complete with authentication and CMS. It has never been easier to get a great Lighthouse score, or to deploy complex, secure webapps for free.
 ---
+
+I gave another version of this at Middev Con 2019
+
+- https://vimeo.com/showcase/6204270/video/352567930
+- https://www.youtube.com/watch?v=PoqWF9BKtOE
 
 ## final copy
 

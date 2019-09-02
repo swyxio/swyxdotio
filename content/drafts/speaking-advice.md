@@ -165,3 +165,5 @@ fixing speaking voice: https://www.artofmanliness.com/articles/improve-your-spea
 ## more
 
 - https://dev.to/emmawedekind/tips-for-first-time-speakers-3fcb
+- how to start a speech https://www.youtube.com/watch?v=w82a1FT5o88
+- Book: Present! A Techie's Guide to Public Speaking https://www.amazon.com/Present-Techies-Guide-Public-Speaking-ebook/dp/B01BCXHULK
