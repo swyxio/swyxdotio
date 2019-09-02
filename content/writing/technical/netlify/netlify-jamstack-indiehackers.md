@@ -2,8 +2,8 @@
 title: 'JAMstack for Indie Hackers'
 slug: netlify-jamstack-indiehackers
 categories: ['Tech', 'Netlify']
-date: 2019-09-01
-published: false
+date: 2019-09-02
+published: true
 ---
 
 You can make money _with_ the JAMstack or _on_ the JAMstack. I have spent the last year at Netlify, working at the heart of the JAMstack ecosystem, and when [Derrick Reimer](https://derrickreimer.com) reached out to have a chat about [StaticKit](http://statickit.com), I immediately realized that what I've learned could be helpful to a broader Indie Hacker audience. Here's what I know.
@@ -22,7 +22,9 @@ The best person to learn about the JAMstack from is the co-founder of Netlify, [
 
 If you prefer reading to watching talks, you can check out [JAMstack.org](https://jamstack.org/) as well as the recently published [O'Reilly book on JAMstack](https://www.netlify.com/oreilly-jamstack/).
 
-## At Least Your Landing Page Should Be JAMstack
+## Using the JAMstack for your projects
+
+### At Least Your Landing Page Should Be JAMstack
 
 I find there is very little argument for having your marketing site NOT be JAMstack. A Twitter friend of mine recently lauched a side project he'd been laboring over for 9 months on Product Hunt. Unbeknownst to him it got to the top of HN a day later when he wasn't watching. HN brought in tens of thousands of hits and the site went down for hours... and my friend didn't know, because he thought his launch was done. Given a conservative estimate of 10,000 missed visitors and a 1% conversion rate, that is 100 users that were lost because the server went down. Not to forget negative impressions from existing users.
 
@@ -32,14 +34,52 @@ Of course, on managed platforms like Heroku, you can simply set auto restart and
 
 In particular, if your marketing site is JAMstack, launch days are far less stressful because your landing pages aren't vulnerable to being "hugged to death", keeping the top of your funnel open and only assigning compute resources to users that actually sign up. As a result of JAMstackifying, your marketing pages will probably also load faster, which matters for a first impression.
 
-## Continuous Deployment and Git-centric Workflow
+Whether or not the rest of your app is JAMstack is totally up to your tech preferences and product requirements; just remember that statically hosted assets don't mean static content, and the whole idea is you can use as much or as little JS as you like, interacting with a decoupled API, to create the dynamic product experience you envision.
 
-I feel like Continuous Deployment doesn't need to be sold in this day and age, but it isn't the default in some environments and so an Indie Hacker might omit to set it up. I know this because 2 years ago I was personally still SSHing to my Digital Ocean box and manually restarting and redeploying and it was such a waste of time in retrospect. You can use Netlify or GitHub Actions or some other CI/CD system, doesn't matter, the point is to automate as much of the undifferentiated heavy lifting (my favorite term lifted from AWS) as possible so that a) you don't make mistakes or skip important steps and b) you spend as much of your limited time as possible on the stuff that is actually going to set your project apart.
+### Continuous Deployment and Git-centric Workflow
 
-## Platform by Default
+I feel like Continuous Deployment doesn't need to be sold in this day and age, but it isn't the default in some environments and so an Indie Hacker might forget to set it up. I know this because 2 years ago I was personally still SSHing to my Digital Ocean box and manually restarting and redeploying and it was such a waste of time in retrospect. You can use Netlify or GitHub Actions or some other CI/CD system, doesn't matter, the point is to automate as much of the undifferentiated heavy lifting (my favorite term lifted from AWS) as possible so that A) you don't make mistakes or skip important steps, and B) you spend as much of your limited time as possible on the stuff that is actually going to set your project apart.
+
+JAMstack (as a best practice, not as a requirement) takes Continuous Deployment and extends that into the concept of **Git-centric Workflow**. This is an idea that can be expressed a few different ways:
+
+- **Continuous Deployment from Git**: It's hard to imagine where else to deploy from, but having the absolute certainty that if you committed it to Git, and it passes tests/builds properly, it will be deployed, is very nice. The other way around is also perhaps even more valuable to have in your arsenal - if it was deployed, then there is a git hash somewhere for it, one that you can roll back to at any time regardless of what platform you use. Netlify offers this as [Immutable Deploys](https://www.netlify.com/blog/2018/10/05/netlify-and-the-functional-immutable-reactive-deploy/?utm_source=blog&utm_medium=indiehackers&utm_campaign=devex), and so does [Linc](https://linc.sh/) and [Zeit](https://zeit.co/docs/v2/advanced/concepts/immutability). With a some effort, you could also set it up in a custom S3 + Route53 configuration.
+- **Everything Lives in Git**: With a JAMstack project, anyone should be able to do a `git clone`, install any needed dependencies with a standard procedure (like `npm install`), and be ready to run the full project locally. No databases to clone, no complex installs. This reduces contributor friction, and also simplifies staging and testing workflows. Even without contributors, this means that your project is resistant to you losing your machine, because you don't rely on implicit config. Even your [redirects](https://www.netlify.com/docs/redirects/?utm_source=blog&utm_medium=indiehackers&utm_campaign=devex) and [serverless functions](https://www.netlify.com/docs/functions/?utm_source=blog&utm_medium=indiehackers&utm_campaign=devex) live in Git. [NetlifyCMS](https://netlifycms.org) is a free open source project that even lets you manage your content in Git with a nice WYSIWYG UI.
+- **No API other than Git**: Netlify takes this to the extreme, building tons of infrastructure around the Git assumption. [Every PR gets a Preview](https://www.netlify.com/blog/2016/07/20/introducing-deploy-previews-in-netlify/?utm_source=blog&utm_medium=indiehackers&utm_campaign=devex). This means you can Test In Production™ and going live is as simple as merging the PR or un-pinning a deploy, as Netlify's CEO recently did [on stage to launch Netlify Analytics](https://www.netlify.com/blog/2019/07/10/netlify-analytics-accurate-insights-without-performance-impacts/?utm_source=blog&utm_medium=indiehackers&utm_campaign=devex#watch-the-announcement). For persistent branches, you can set up [branch deploys](https://www.netlify.com/docs/continuous-deployment/?utm_source=blog&utm_medium=indiehackers&utm_campaign=devex#branches-deploys) so you aren't just limited to `staging` or `UAT` environments, the number of environments is literally as unlimited as the number of branch names you can think of! (Tip: Use [Netlify DNS to set up branch subdomains](https://www.netlify.com/docs/custom-domains/#branch-subdomains) if you also want this to show on your custom `*.mysweetproject.com` domain). We can even build [A/B Split testing](https://www.netlify.com/docs/split-testing/?utm_source=blog&utm_medium=indiehackers&utm_campaign=devex) with no API to learn other than git branching. You can even do [feature flags with that same feature](https://mobile.twitter.com/philhawksworth/status/969190271480205312) and launch darkly 😉.
+
+### Platform by Default
 
 Additionally, ensuring strict separation between your APIs (which can either be microservices or serverless functions you maintain, or third party APIs others provide) and your markup generation means that you don't need a major refactor if you decide to add a mobile or desktop client. Max Stoiber's writeup on [Tech Choices I Regret at Spectrum](https://mxstbr.com/thoughts/tech-choice-regrets-at-spectrum/) doesn't include JAMstack, but does mention optimize for iteration speed and flexibility, especially where it comes to leaving the door open to native apps.
 
 In particular, especially if you run a strict ["backend for frontend" or API Gateway](https://samnewman.io/patterns/architectural/bff/) layer, you can consider yourself simply the first consumer of a generalizable developer platform you are creating, which makes opening up your ~~app~~ platform to whitelabel or third party developers trivial.
 
 Netlify is already a beneficiary of this: because Netlify runs an [Open API](https://open-api.netlify.com), developers have been able to create custom clients like a [Mac OS Menubar](https://github.com/stefanjudis/netlify-menubar) without even contacting us. This allows your users to help each other and plug perceived product gaps you don't have time to get to.
+
+## Serving JAMstack devs with your projects
+
+With the rise in JAMstack as a category, it's no surprise that there are actual money-making opportunities to be had. To be clear, I don't have an active business in this race, since I work at Netlify, but I do interact with a number of important players in the space and I thought I would share what I know.
+
+One way to tackle this is to lean on Venture Capitalists that have done the work (note, this doesn't mean seeking funding from VC, we are Indie Hackers after all!). For a Netlify/trends perspective, you can see the investment theses from [Kleiner Perkins](https://www.kleinerperkins.com/perspectives/netlify-modernizing-the-web/) and [a16z](https://a16z.com/2017/08/09/netlify/). But for opportunities in the broader landscape, there are [great charts from Redpoint](https://medium.com/memory-leak/the-jamstack-its-pretty-sweet-e0834e4e6bb7) that presents a OSI-like stack of layers:
+
+![https://miro.medium.com/max/2304/1*TdRFV0LAG7TG3US2YJMALA.jpeg](https://miro.medium.com/max/2304/1*TdRFV0LAG7TG3US2YJMALA.jpeg)
+
+CRV has [a different landscape chart](https://medium.com/crv-insights/the-jamstack-startup-landscape-c06cc3cdb917) that also includes testing, community, and a loose split between products and platforms:
+
+![https://miro.medium.com/max/1755/1*R65rmc0x432_s9EmAbGlOA.png](https://miro.medium.com/max/1755/1*R65rmc0x432_s9EmAbGlOA.png)
+
+You may notice a lot of these are frontend-focused tools. JAMstack isn't exclusively for frontend developers, but it does get a lot of its growth from enabling frontend, particularly JavaScript devs, to do a lot more on their oown than they could before. **This sounds perfect for Indie Hackers.** As Chris Coyier [recently noted](https://full-stack.netlify.com), that is a result of the "product stack" moving ever closer to the front of the stack, as the rise of [the API Economy](https://a16z.com/2018/03/13/api-economy-why-what-how/) commoditizes a lot of functionality that developers historically had to build by themselves or relied on their serverside framework to provide.
+
+This landscape shift presents opportunities to serve growing customer segments that are in the right stage of life, and have the right architecture, to try out new tools. Two big categories are CMSes and Third Party APIs:
+
+- **Decoupled Content**: Rule 1 of CMSes is never build your own CMS, but if you do find a customer segment that is underserved, the CMS market is vast, and nice bootstrapped businesses like [Prismic](https://prismic.io) can work. If you consider ecommerce a specialized form of CMS, then there is a very fascinating cadre of ecommerce service providers like [Snipcart](https://snipcart.com/jamstack-ecommerce-podcast) that can serve their market well. Of course, if you hit scale, you can look at [Contentful](https://www.contentful.com/) and [Commerce Layer](https://commercelayer.io/) as corresponding examples who have raised VC.
+- **Third Party APIs**: This category is as vast as the API Economy, so it is very hard to describe. I'll try to name a few categories just to jog your imagination, but by no means is this exhaustive:
+  - A horizontal API requires more configuration to use but is applicable in a broad swathe of use cases because you provide basic building blocks. For example you can provide a database as a service like [FaunaDB](https://fauna.com/) and [mLab](https://mlab.com/), or even one you don't host like [Hasura](https://hasura.io). Job running and scheduling would alos be an interesting one here, were there not [so many free services](https://www.google.com/search?q=free+cron&oq=free+cron&aqs=chrome..69i57j0l4j69i60.1115j0j1&sourceid=chrome&ie=UTF-8) that already do it.
+  - A vertical API focuses on one very specific use case, but just excels at it and can have easier adoption due to ease of onboarding. For example, the [Auth0](https://auth0.com/) addresses the Identity usecase very well, or [Cloudinary](https://cloudinary.com/) for images and video. Form management seems a nice category for Indie Hackers, with entrants like [FormKeep](https://formkeep.com/) and [StaticKit](http://statickit.com), because APIs and business models can differ a lot. Because you are going vertical, it is easier, maybe even imperative, to have a stronger idea of the kind of customer persona you are going to serve. I think Search is a worthwhile category for people to explore, because it is primarily dominated by [Algolia](https://www.algolia.com/), but there are certainly far more usecases and needs for search than Algolia can handle.
+  - API services is an emerging fascinating category. You can rollup a bunch of existing APIs and present them in a unified way with consistent authentication management, like [OneGraph](https://www.onegraph.com/) does. You can provide API monitoring/observability for other APIs like [Thundra](https://www.thundra.io/), or provide a service in between your own open source front and back end layers like [Apollo Engine](https://www.apollographql.com/platform). You can help to deploy serverless functions and API services like [Serverless.com](https://serverless.com/) and [Begin.com](https://begin.com/) do.
+
+Other areas in the landscape are of course available to the enterprising Indie Hacker, but you may need more funding to get going. Backend-as-a-Service companies like [Prisma](https://www.prisma.io/) and [Heroku](https://www.heroku.com/) are fine businesses, but the buildout took funding. [Gatsby](https://www.gatsbyjs.com/) started as an open source side project, but in order to build out their full vision as a framework they had to take funding to hire the people they needed. Storybook [survived near death](https://medium.com/storybookjs/the-storybook-story-dd3c1ab0d2ce) and now is heavily supported by [Chroma](https://blog.hichroma.com/). Open source funding is still not solved, so Indie Hacking is probably best pursued from a product mindset instead.
+
+If you need more inspiration about commercializing developer-focused projects, [Heavybit does a lot of content](https://mobile.twitter.com/heavybit/status/1146441165648093184) with CEOs who have walked down this road, although there is some funding attached if you choose to join them.
+
+## Conclusion
+
+There is a great deal of opportunity in using the JAMstack, and even making money on the JAMstack. I'm happy to chat with and help any Indie Hacker who wants to jump on this category and figure it out with you. At the very least, I'll know who you should talk to if you want to get some ideas. [Get in touch](https://twitter.com/swyx)!
