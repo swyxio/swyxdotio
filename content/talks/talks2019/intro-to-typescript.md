@@ -5,9 +5,15 @@ topic: TypeScript
 venues: Netlify
 date: 2019-09-03
 url: https://mobile.twitter.com/swyx/status/1166487148331184128
+video: https://www.youtube.com/watch?v=YDK8sYCgbDw
 desc: a 1hr netlify workshop introducing people to TS
 description: a 1hr netlify workshop introducing people to TS
 ---
+
+## Twitter Comments
+
+- [From Leslie](https://mobile.twitter.com/lesliecdubs/status/1168968624956198915)
+- [From Me](https://mobile.twitter.com/swyx/status/1166487148331184128)
 
 ## Basic Questions
 
@@ -77,8 +83,11 @@ Increased Benefits
   - Move Compile Time Errors to Write Time Errors with Tooling
   - [Airbnb reports 38% of production bugs preventable with TypeScript](https://www.youtube.com/watch?v=P-J9Eg7hJwE)
     - remember Airbnb has extensive linting and testing already
+  - Choose to have More Errors Nearer to the Origin rather than Fewer Errors but Further Away
 - [Increased Developer Velocity](https://medium.com/hootsuite-engineering/thoughts-on-migrating-to-typescript-5e1a04288202)
   - Hidden cost of defensive programming and local dev manual testing
+- Enforced Documentation
+  - including [inline documentation with TSDoc](https://github.com/microsoft/tsdoc)
 
 Lower Costs
 
@@ -291,6 +300,10 @@ Community Tooling
 
 - https://github.com/typescript-cheatsheets/typescript-utilities-cheatsheet
 - "End to End Types" = codegen from backend API (GraphQL/OpenAPI/Swagger/Thrift) to frontend
+- Design System: Generate prop tables
+  - [Storybook](https://storybook-design-system.netlify.com/?path=/docs/design-system-button--all-buttons)
+  - [Docz](https://www.docz.site/docs/built-ins-components#component-props)
+  - [Styleguidist](http://www.episodeyang.com/react-component-props-table/)
 
 ## Criticisms of TypeScript
 
@@ -364,6 +377,13 @@ In converting the Netlify codebase, I found some other compiler options handy.
 Copy and Paste your JS code to [TypeScript Playground](https://typescriptlang.org/play/), play with the compiler options, see what it finds!
 
 ## Resources
+
+More of My Talks
+
+- [Cultural Learnings of Programming for Make Benefit Glorious Users of TypeScript](https://www.swyx.io/talks/programming-typescript)
+- [A Gentle Introduction to React and TypeScript](https://www.swyx.io/talks/react-typescript)
+
+Other People
 
 - TypeScript for Non-Technical People: https://artsy.github.io/blog/2019/04/05/omakase-typescript/
 - Types for People Who Don't Like Types: https://www.swyx.io/writing/types-already
