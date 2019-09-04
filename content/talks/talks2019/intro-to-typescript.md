@@ -7,7 +7,7 @@ date: 2019-09-03
 url: https://mobile.twitter.com/swyx/status/1166487148331184128
 video: https://www.youtube.com/watch?v=YDK8sYCgbDw
 desc: a 1hr netlify workshop introducing people to TS
-description: a 1hr netlify workshop introducing people to TS
+description: TypeScript is a megatrend in JavaScript, going from 46% of npm survey respondents in 2018 to 62% in 2019. This is an introduction to TypeScript for those familiar with JavaScript with a Q&A at the end. A 1hr internal Netlify lunch & learn.
 ---
 
 ## Twitter Comments
@@ -139,7 +139,7 @@ let user: Person = { firstName: 'Jane', lastName: 'Doe' }
 document.body.innerHTML = greeting(user)
 ```
 
-compiles to perfectly JS to be run:
+compiles to perfectly readable JS to be run:
 
 ```js
 function greeting(person) {
@@ -151,7 +151,7 @@ document.body.innerHTML = greeting(user)
 
 This is why criticism from people who claim you should not adopt TypeScript because ECMAScript may someday have types, mostly fall flat.
 
-In particular, note that Types do not get sent to the browser as they are compiled away.
+In particular, note that Types do not get sent to the browser because they are compiled away.
 
 ### Inferable
 
