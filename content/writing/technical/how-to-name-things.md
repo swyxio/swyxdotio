@@ -141,6 +141,7 @@ I [asked for more opinions on Twitter](https://twitter.com/swyx/status/112764850
 
 - Dan Abramov: [Longer names to discourage use](https://twitter.com/dan_abramov/status/1127664407239114752) - for context, React uses this a lot in [dangerouslySetInnerHTML](https://reactjs.org/docs/dom-elements.html#dangerouslysetinnerhtml) and more subtly in [getDerivedStateFromProps](https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html) and most famously in [DO_NOT_USE_OR YOU_WILL_BE_FIRED](https://news.ycombinator.com/item?id=11447020)
 - Jamie Wong: The [Grep Test](http://jamie-wong.com/2013/07/12/grep-test/)
+- Chris Biscardi's post on [Styles and Naming](https://www.christopherbiscardi.com/post/styles-and-naming/)
 - Ivan Babak: Use [Context-independent names](https://twitter.com/sompylasar/status/1127694272604413952)
 - b_sted: [Don't camelcase filenames](https://twitter.com/b_sted/status/1127650071393136640) for Unix compatibility
 - Danny Eck: [Mark unstable, sync and unsafe code!](https://twitter.com/EckDaniel/status/1127694055054266368)

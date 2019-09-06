@@ -3,8 +3,11 @@ title: "Notes on 'Metaphysics and JavaScript'"
 slug: svelte-metaphysics
 categories: ['Tech']
 banner: ./metaphysics1.jpg
+url: https://docs.google.com/presentation/d/1_aeM_UkwS9qaSzHDz87zC9bmtvbuLbPof7RnN96SJKE/edit?usp=sharing
 date: 2019-08-28
 ---
+
+_[Slides here](https://docs.google.com/presentation/d/1_aeM_UkwS9qaSzHDz87zC9bmtvbuLbPof7RnN96SJKE/edit?usp=sharing)_
 
 Rich Harris gave an excellent unrecorded talk tonight at [useReactNYC](http://usereact.nyc) on [Metaphysics and JavaScript](https://twitter.com/Rich_Harris/status/1166342346323238912). Much of it was above my paygrade, and I don't have access to his slides, but I love every opportunity to dissect Rich Harris insights so I figured I would jot down some notes from (my very holey) memory, in my words.
 
