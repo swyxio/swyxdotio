@@ -388,6 +388,7 @@ Other People
 - TypeScript for Non-Technical People: https://artsy.github.io/blog/2019/04/05/omakase-typescript/
 - Types for People Who Don't Like Types: https://www.swyx.io/writing/types-already
 - Types for People Who Think Tests are Good Enough https://css-tricks.com/types-or-tests-why-not-both/
+- TypeScript for JS devs: https://www.youtube.com/watch?v=veXkJq0Z2Qk
 - TypeScript for React Devs: https://github.com/typescript-cheatsheets/react-typescript-cheatsheet/
 - Anders Hejlsberg reintroducing TypeScript: https://www.youtube.com/watch?v=ET4kT88JRXs (much of this intro cribs directly from there)
 - Simple Courses
