@@ -30,6 +30,7 @@ Goal: what's available.
     - https://templates.netlify.com/
     - more ways (Siri, Wand, Watch, CodeSandbox) https://community.netlify.com/t/common-issue-deploying-a-site-to-netlify-different-approaches/146
 - Functions
+  - add a sample proxy function
   - setting Functions folder in app
   - setting Functions folder in netlify.toml
 - Defaults
@@ -117,14 +118,29 @@ Goal: what's available.
 
 # Part 3: 👩🏼‍💻 Netlify Dev
 
-- netlify-lambda
 - Netlify Dev => **separate video**
+  - netlify dev (netlify.toml)
+    - command
+    - port
+  - netlify dev (detector)
+    - env vars
+    - redirects
+  - netlify dev --live (_beta_)
+  - netlify functions:create
+  - netlify functions:invoke
+- netlify-lambda
+  - netlify-lambda install
+  - netlify-lambda build
 
-- 4: 📈 Netlify Addons
-  - Analytics
-  - Forms => **separate video**
-  - Identity => **separate video**
-  - NetlifyCMS => **separate video**
+# Part 4: 📈 Netlify Addons
+
+- Analytics
+- Forms => **separate video**
+- Identity => **separate video**
+- NetlifyCMS => **separate video**
+
+# Part 5: ❓ Learn More
+
 - Troubleshoot
   - http://community.netlify.com
   - https://www.netlify.com/support/
