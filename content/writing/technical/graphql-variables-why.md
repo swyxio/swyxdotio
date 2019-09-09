@@ -7,7 +7,7 @@ date: 2019-09-09
 intro: Hi! This is swyx, I work on Developer Experience at Netlify and recently wrote an article on the common trends behind [Design Systems, TypeScript, Apollo GraphQL, and React at CSS Tricks.](https://css-tricks.com/star-apps-a-new-generation-of-front-end-tooling-for-development-workflows/)
 ---
 
-_This is a brief commentary for the awesome Ladybug podcast._
+_This is a brief commentary for the awesome [Ladybug podcast](http://ladybug.dev)._
 
 Hi! This is swyx, I work on Developer Experience at Netlify and recently wrote an article on the common trends behind [Design Systems, TypeScript, Apollo GraphQL, and React at CSS Tricks.](https://css-tricks.com/star-apps-a-new-generation-of-front-end-tooling-for-development-workflows/)
 
