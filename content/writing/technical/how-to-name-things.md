@@ -135,6 +135,10 @@ Sindre Sorhus has some strong opinions on naming. You may not agree with all of 
 
 (Aug 2019 Update) Don't pluralize lazily, e.g. `blog.js` and `blogs.js`. This is terrible to grep especially with one name being a substring of the other. Prefer to name both items and collections visibly. This is similar to the Hungarian notation idea, but works even if you use a type system. [Tweet](https://mobile.twitter.com/swyx/status/1159462137745629185)
 
+## When all else fails... who writes the code?
+
+If you're still spending a lot of organizational energy bickering over a name... [remember this story from Bret Taylor about how Google Maps' Satellite Mode was almost named Bird Mode.](https://mobile.twitter.com/btaylor/status/1099370172916195328)
+
 ## Your Opinion Here!
 
 I [asked for more opinions on Twitter](https://twitter.com/swyx/status/1127648507676983296), and here are some I got:
