@@ -73,6 +73,7 @@ function getPosts(contentPath, linkPrefix = '') {
       }
     })
     .filter(Boolean)
+    .filter((x) => (typeof x.published === 'undefined' ? true : x.published))
     .reduce((acc, cur) => (Array.isArray(cur) ? [...acc, ...cur] : [...acc, cur]), [])
     .sort((a, b) => {
       if (!a.metadata) console.log('nometadata', Object.keys(a[0]))

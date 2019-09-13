@@ -1,0 +1,70 @@
+---
+title: "Static Svelte: JavaScript Blogging with 80% less JavaScript"
+subtitle: "Why Svelte is a Perfect Fit For Blogging"
+slug: svelte-blogging-fit
+categories: ['Tech', 'Svelte']
+date: 2019-09-13
+---
+
+This blog now uses [Svelte & Sapper](https://sapper.svelte.dev/) as a static site generator, where it [previously used React & Gatsby](https://5d7699e172ae430007210374--scout-videos-51664.netlify.com/writing/moving-to-novela).
+
+Through the magic of [Netlify's Immutable Deploys](https://www.netlify.com/blog/2018/10/05/netlify-and-the-functional-immutable-reactive-deploy/?utm_source=blog&utm_medium=swyxdotio&utm_campaign=devex), we can directly compare them on representative live URL's for a recent blogpost of mine:
+
+- [With React/Gatsby](https://5d7699e172ae430007210374--scout-videos-51664.netlify.com/writing/netlify-redirects-i18n): **138kb**
+- [With Svelte/Sapper](https://5d7c1b1930bb95017fea05f7--scout-videos-51664.netlify.com/writing/netlify-redirects-i18n/): **28kb**
+
+> ⚠️To be very clear - this post is not even close to being an apples to apples benchmark, and I spend some effort below explaining why it isn't. If you aren't prepared to read this post with a critical mind and understanding that this is a random , please stop here.
+
+## Screenshots
+
+### Gatsby version
+
+![screenshot of Gatsby site with 138kb of JS](./assets/sveltegatsby.png)
+
+### Sapper version
+
+![screenshot of Sapper site with 28kb of JS](./assets/sveltesvelte.png)
+
+## Differences and Similarities
+
+### Similarities
+
+First, the similarities must be noted, for any reasonable discussion to be had. For example, the *reductio ad finem* conclusion of the premise of this post is to use any old static site generator like [Jekyll or Hugo](https://www.staticgen.com/) since it will result in *no* JS payload.
+
+However, both Gatsby and Sapper offer clientside rehydration, which makes the subsequent page navigation very fast. It is also easy to progressively add dynamic features without a major refactor, code in reusable components, and leverage the vast JS ecosystem to add functionality. 
+
+This is by no means a free tradeoff: as [Addy Osmani recently noted](https://addyosmani.com/blog/rehydration/), an "uncanny valley" of rehydration exists, and [Alex Russell consistently warns](https://infrequently.org/2018/09/the-developer-experience-bait-and-switch/) that better developer experience is not without its costs.
+
+I could have made the difference more drastic by omitting [PrismJS](https://prismjs.com/), which adds ~19kb of JS, which is more than half the final JS payload of the Sapper site. However, as a developer you can pry syntax highlighting from my cold dead hands. So it wouldn't be fair to compare a site without syntax highlighting to my old site with one.
+
+Of course, I could have also put in a bit more effort exploring a no-JS solution for syntax highlighting, since I don't intend readers to edit the code in runtime. [Andrew Branch recently twote](https://mobile.twitter.com/atcb/status/1158480783666888704) about how to preprocess ALL your syntax-highlighting using some VSCode API's.
+
+## Differences
+
+There are material differences in implementation that make the two sites not comparable.
+
+Sapper is by far less mature, and not designed to have an upfront content ingestion pipeline with pluggable lifecycles. I spent a significant amount of time coding up the markdown ingestion for my site, which in Gatsby is as trivial as adding a couple of source and transform plugins.
+
+As [Una Kravets as noted](https://mobile.twitter.com/Una/status/687690138550288384), images are a critically important part of web performance. [Gatsby-Image](https://www.gatsbyjs.org/packages/gatsby-image/) not only preprocesses images to resize them down via standard techniques, but also helps you rapidly [load superfast images for a nice progressive upgrade effect]((https://using-gatsby-image.gatsbyjs.org/)). My colleague [Phil Hawksworth recently wrote on CSS Tricks about how to achieve your own lazy loading](https://css-tricks.com/tips-for-rolling-your-own-lazy-loading/) - so you definitely don't need Gatsby for this - but it is nice to have a blessed, maintained, tested, well documented, adaptable approach. This Sapper site does not (yet!) do any of that.
+
+For these reasons, the (default, no throttling) Lighthouse scores tell the corresponding story. These are all going to vary based on the specific implementation details of the site so don't pay this *too* much mind, but not that they're all... *alright*. Definitely not a failing grade:
+
+- [Gatsby version:](https://5d7699e172ae430007210374--scout-videos-51664.netlify.com/writing/netlify-redirects-i18n)
+  - Performance: 100
+  - Accessibility: 96
+  - Best Practices: 93
+  - SEO: 89
+  - PWA: yes
+- Sapper version: 
+  - Performance: 100
+  - Accessibility: 86
+  - Best Practices: 86
+  - SEO: 78
+  - PWA: no (i didn't spend time on a manifest)
+
+
+Finally, the Sapper site does not use CSS-in-JS. This is a very controversial topic with pros and cons so I put it last. In particular, if you have not spent time appreciating [some basic facts of CSS in JS from proponents](https://mxstbr.com/thoughts/css-in-js/), as well as [some nuances in implementation](https://github.com/styled-components/styled-components/issues/2377), then your debate will not be very well informed.
+
+The old site has a [Dark Theme Toggle](https://github.com/sw-yx/gatsby-theme-dev-blog/blob/master/packages/gatsby-theme-dev-blog/src/components/Header/ThemeToggler.js). This Sapper implementation does not.
+
+However, I expect [animations to be a lot easier with Svelte](https://svelte.dev/tutorial/animate) as it is a first class citizen. This frees me up to play a lot more with animations in future.

@@ -38,36 +38,35 @@ exports.getData = async () => {
 //     },
 //   },
 // })
-async function getJdown(_path, getJdownOpts) {
-  let data = await jdown(_path, getJdownOpts.jdownOpts)
-  data = flatten(data, getJdownOpts.prefix && getJdownOpts.prefix + '___ssg___')
-  const index = [] // build up array of objects for the top level list
-  Object.entries(data).forEach(([_, v]) => {
-    index.push({
-      title: v.title,
-      slug: v.slug,
-      date: v.date,
-    })
-  })
-  data = extractSlugObjectFromArray(Object.values(data))
-  return { data, index }
-}
+// async function getJdown(_path, getJdownOpts) {
+//   let data = await jdown(_path, getJdownOpts.jdownOpts)
+//   data = flatten(data, getJdownOpts.prefix && getJdownOpts.prefix + '___ssg___')
+//   const index = [] // build up array of objects for the top level list
+//   Object.entries(data).forEach(([_, v]) => {
+//     index.push({
+//       title: v.title,
+//       slug: v.slug,
+//       date: v.date,
+//     })
+//   })
+//   data = extractSlugObjectFromArray(Object.values(data))
+//   return { data, index }
+// }
+// function flatten(obj, prefix = '') {
+//   let _obj = {}
+//   Object.entries(obj).map(([k, v]) => {
+//     if (typeof v.contents === 'string') {
+//       _obj[prefix + k] = v
+//     } else {
+//       // console.log('flattening', flatten(v))
+//       Object.assign(_obj, flatten(v, `${k}_`))
+//     }
+//   })
+//   return _obj
+// }
 
 function extractSlugObjectFromArray(arr) {
   let obj = {}
   arr.forEach((item) => (obj[item.slug] = item))
   return obj
-}
-
-function flatten(obj, prefix = '') {
-  let _obj = {}
-  Object.entries(obj).map(([k, v]) => {
-    if (typeof v.contents === 'string') {
-      _obj[prefix + k] = v
-    } else {
-      // console.log('flattening', flatten(v))
-      Object.assign(_obj, flatten(v, `${k}_`))
-    }
-  })
-  return _obj
 }
