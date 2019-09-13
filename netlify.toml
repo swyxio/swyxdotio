@@ -1,4 +1,4 @@
 # example netlify.toml
 [build]
   command = "yarn run build"
-  publish = "public"
+  publish = "__sapper__/export"

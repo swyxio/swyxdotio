@@ -1,23 +1,25 @@
 const fs = require('fs')
 const path = require('path')
-
-const jdown = require('jdown')
-const getJdownOpts = (prefix) => ({
-  prefix,
-  jdownOpts: {
-    // so that markdown images show nicely
-    assets: {
-      output: './static/jdown-assets',
-      path: '/jdown-assets',
-    },
-  },
-})
+const { get_posts } = require('./sapper_markdown_code')
 exports.getData = async () => {
-  let writing = await getJdown('content/writing', getJdownOpts('writing'))
-  writing.data.writing_index = writing.index
-  let talks = await getJdown('content/talks', getJdownOpts('talks'))
-  talks.data.talks_index = talks.index
-  return { writing: writing.data, talks: talks.data }
+  let _talks = get_posts('content/talks')
+  const talks = extractSlugObjectFromArray(_talks)
+  const talks_index = _talks.map((v) => ({
+    title: v.metadata.title,
+    slug: v.slug,
+    date: v.metadata.date,
+  }))
+  talks.talks_index = talks_index
+  let _writing = get_posts('content/writing')
+  const writing = extractSlugObjectFromArray(_writing)
+  const writing_index = _writing.map((v) => ({
+    title: v.metadata.title,
+    slug: v.slug,
+    date: v.metadata.date,
+  }))
+
+  writing.writing_index = writing_index
+  return { talks, writing }
 }
 
 /**
@@ -25,6 +27,17 @@ exports.getData = async () => {
  * will be moved to jdown plugin
  *
  */
+// const jdown = require('jdown')
+// const getJdownOpts = (prefix) => ({
+//   prefix,
+//   jdownOpts: {
+//     // so that markdown images show nicely
+//     assets: {
+//       output: './static/jdown-assets',
+//       path: '/jdown-assets',
+//     },
+//   },
+// })
 async function getJdown(_path, getJdownOpts) {
   let data = await jdown(_path, getJdownOpts.jdownOpts)
   data = flatten(data, getJdownOpts.prefix && getJdownOpts.prefix + '___ssg___')

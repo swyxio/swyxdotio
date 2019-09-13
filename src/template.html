@@ -7,8 +7,8 @@
 
     %sapper.base%
 
-    <link rel="stylesheet" href="global.css" />
-    <link rel="manifest" href="manifest.json" />
+    <!-- <link rel="stylesheet" href="global.css" />
+    <link rel="manifest" href="manifest.json" /> -->
     <link rel="icon" type="image/png" href="favicon.png" />
 
     <!-- Sapper generates a <style> tag containing critical CSS
@@ -19,6 +19,7 @@
     <!-- This contains the contents of the <svelte:head> component, if
 	     the current page has one -->
     %sapper.head%
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/themes/prism.css" rel="stylesheet" />
   </head>
   <body>
     <!-- The application will be rendered inside this element,
@@ -29,5 +30,14 @@
 	     and anything else it needs to hydrate the app and
 	     initialise the router -->
     %sapper.scripts%
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/components/prism-core.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/plugins/autoloader/prism-autoloader.min.js"
+      crossorigin="anonymous"
+    ></script>
   </body>
 </html>
