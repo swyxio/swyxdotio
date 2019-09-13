@@ -6,12 +6,13 @@ categories: ['Tech', 'Svelte']
 date: 2019-09-13
 ---
 
-This blog now uses [Svelte & Sapper](https://sapper.svelte.dev/) as a static site generator, where it [previously used React & Gatsby](https://5d7699e172ae430007210374--scout-videos-51664.netlify.com/writing/moving-to-novela).
+This blog now uses [Svelte & Sapper](https://sapper.svelte.dev/) as a static site generator, where it [previously used React & Gatsby](https://5d7699e172ae430007210374--scout-videos-51664.netlify.com/writing/moving-to-novela). This is achieved through [Sapper's `sapper export` feature](https://sapper.svelte.dev/docs#sapper_export).
 
 Through the magic of [Netlify's Immutable Deploys](https://www.netlify.com/blog/2018/10/05/netlify-and-the-functional-immutable-reactive-deploy/?utm_source=blog&utm_medium=swyxdotio&utm_campaign=devex), we can directly compare them on representative live URL's for a recent blogpost of mine:
 
 - [With React/Gatsby](https://5d7699e172ae430007210374--scout-videos-51664.netlify.com/writing/netlify-redirects-i18n): **138kb**
 - [With Svelte/Sapper](https://5d7c1b1930bb95017fea05f7--scout-videos-51664.netlify.com/writing/netlify-redirects-i18n/): **28kb**
+- For the curious, I also recently wrote about using [Next.js as a Static Site Generator](https://scotch.io/@sw-yx/using-nextjs-as-a-static-site-generator-for-netlify) as well, but don't expect much difference.
 
 > ⚠️To be very clear - this post is not even close to being an apples to apples benchmark, and I spend some effort below explaining why it isn't. If you aren't prepared to read this post with a critical mind and understanding that this is a random , please stop here.
 
@@ -49,13 +50,13 @@ As [Una Kravets as noted](https://mobile.twitter.com/Una/status/6876901385502883
 
 For these reasons, the (default, no throttling) Lighthouse scores tell the corresponding story. These are all going to vary based on the specific implementation details of the site so don't pay this *too* much mind, but not that they're all... *alright*. Definitely not a failing grade:
 
-- [Gatsby version:](https://5d7699e172ae430007210374--scout-videos-51664.netlify.com/writing/netlify-redirects-i18n)
+- [Gatsby version](https://5d7699e172ae430007210374--scout-videos-51664.netlify.com/writing/netlify-redirects-i18n):
   - Performance: 100
   - Accessibility: 96
   - Best Practices: 93
   - SEO: 89
   - PWA: yes
-- Sapper version: 
+- [Sapper version](https://5d7c1b1930bb95017fea05f7--scout-videos-51664.netlify.com/writing/netlify-redirects-i18n/): 
   - Performance: 100
   - Accessibility: 86
   - Best Practices: 86
