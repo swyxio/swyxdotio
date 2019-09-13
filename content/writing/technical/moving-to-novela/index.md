@@ -2,7 +2,7 @@
 title: Using Novela by Narative (updated)
 author: swyx
 date: 2019-08-04
-banner: ./gatsby-theme-novela-hero.jpg
+banner: ./assets/gatsby-theme-novela-hero.jpg
 categories: ['Tech']
 slug: moving-to-novela
 excerpt: With the growing community interest in Gatsby, we hope to create more resources that make it easier for anyone to grasp the power of this incredible tool.

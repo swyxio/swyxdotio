@@ -2,7 +2,7 @@
 title: "Notes on 'Metaphysics and JavaScript'"
 slug: svelte-metaphysics
 categories: ['Tech']
-banner: ./metaphysics1.jpg
+banner: ./assets/metaphysics1.jpg
 url: https://docs.google.com/presentation/d/1_aeM_UkwS9qaSzHDz87zC9bmtvbuLbPof7RnN96SJKE/edit?usp=sharing
 date: 2019-08-28
 ---
@@ -38,11 +38,11 @@ This talk was heavily wrapped up in a delightful package of metaphysical discuss
 - The [Ship of Theseus](https://en.wikipedia.org/wiki/Ship_of_Theseus) - I don't remember what the analogy was here
 - This Heraclitus quote, where I think the message was time matters, `UI = f(State)` is an illusion
 
-![heraclitus](./heraclitus.jpg)
+![heraclitus](./assets/heraclitus.jpg)
 
 - [Plato's Allegory of the Cave](https://en.wikipedia.org/wiki/Allegory_of_the_Cave) which I found the most apt, which was the attraction of developers around the idea of components, but looking at React and thinking that this is the ultimate expression of that ideal, when in reality the core idea can be done without looking through the blurry shadows of FP
 
-![platocave](./platocave.jpg)
+![platocave](./assets/platocave.jpg)
 
 I found this approach extremely fun for a meetup talk, especially as someone familiar with all the allegories, but for someone new to any of these it might be too much cognitive load to juggle both the meta and the message. Eh.
 
