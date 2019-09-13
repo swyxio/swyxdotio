@@ -13,14 +13,14 @@ require('prismjs/components/prism-tsx')
 const makeSlug = makeSlugProcessor(SLUG_PRESERVE_UNICODE)
 
 exports.get_posts = getPosts
-function getPosts(contentPath, slugPrefix = '') {
+function getPosts(contentPath, linkPrefix = '') {
   return fs
     .readdirSync(contentPath)
     .map((file) => {
       const fullFilePath = path.join(contentPath, file)
       if (fs.lstatSync(fullFilePath).isDirectory()) {
         // recursive
-        const data = getPosts(fullFilePath, slugPrefix)
+        const data = getPosts(fullFilePath, linkPrefix)
         return data
       }
       if (path.extname(file) !== '.md') return
@@ -57,7 +57,7 @@ function getPosts(contentPath, slugPrefix = '') {
         return `
 					<h${level}>
 						<span id="${fragment}" class="offset-anchor"></span>
-						<a href="blog/${slug}#${fragment}" class="anchor" aria-hidden="true"></a>
+						<a href="/${linkPrefix}/${slug}#${fragment}" class="anchor" aria-hidden="true"></a>
 						${text}
 					</h${level}>`
       }
@@ -65,7 +65,6 @@ function getPosts(contentPath, slugPrefix = '') {
       const temp = content.replace(/^\t+/gm, (match) => match.split('\t').join('  '))
       const html = marked(temp, { renderer })
 
-      // const newSlug = (slugPrefix[slugPrefix.length - 1] !== '_' ? slugPrefix + '_' : slugPrefix) + slug
       const newSlug = slug
       return {
         html,
