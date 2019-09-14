@@ -1,6 +1,6 @@
 ---
-title: "Static Svelte: JavaScript Blogging with 93% less JavaScript"
-subtitle: "Why Svelte is a Perfect Fit For Blogging"
+title: Static Svelte: JavaScript Blogging with 93% less JavaScript
+subtitle: Why Svelte is a Perfect Fit For Blogging
 slug: svelte-blogging-fit
 categories: ['Tech', 'Svelte']
 date: 2019-09-13
@@ -46,7 +46,7 @@ There are material differences in implementation that make the two sites not com
 
 Sapper is by far less mature, and not designed to have an upfront content ingestion pipeline with pluggable lifecycles. I spent a significant amount of time coding up the markdown ingestion for my site, which in Gatsby is as trivial as adding a couple of source and transform plugins.
 
-As [Una Kravets as noted](https://mobile.twitter.com/Una/status/687690138550288384), images are a critically important part of web performance. [Gatsby-Image](https://www.gatsbyjs.org/packages/gatsby-image/) not only preprocesses images to resize them down via standard techniques, but also helps you rapidly [load superfast images for a nice progressive upgrade effect](https://using-gatsby-image.gatsbyjs.org/). My colleague [Phil Hawksworth recently wrote on CSS Tricks about how to achieve your own lazy loading](https://css-tricks.com/tips-for-rolling-your-own-lazy-loading/) - so you definitely don't need Gatsby for this - but it is nice to have a blessed, maintained, tested, well documented, adaptable approach. This Sapper site does not (yet!) do any of that.
+As [Una Kravets as noted](https://mobile.twitter.com/Una/status/687690138550288384), images are a critically important part of web performance. [Gatsby-Image](https://www.gatsbyjs.org/packages/gatsby-image/) not only preprocesses images to resize them down via standard techniques, but also helps you rapidly [load superfast images for a nice progressive upgrade effect](https://using-gatsby-image.gatsbyjs.org/). My colleague [Phil Hawksworth recently wrote on CSS Tricks about how to achieve your own lazy loading](https://css-tricks.com/tips-for-rolling-your-own-lazy-loading/) - so you definitely don't need Gatsby for this - but it is nice to have a blessed, maintained, tested, well documented, adaptable approach. This Sapper site does not (yet!) do any of that. There are open source [Svelte Image](https://svelte-image.matyunya.now.sh/) components I have yet to investigate.
 
 For these reasons, the (default, no throttling) Lighthouse scores tell the corresponding story. These are all going to vary based on the specific implementation details of the site (in particular, how much time/effort I spend on it) so don't pay this *too* much mind, but not that they're all... *alright*. Definitely not a failing grade:
 

@@ -1,5 +1,5 @@
 ---
-title: "Building Authenticated Serverless JAMstack Apps with Gatsby and Netlify"
+title: Building Authenticated Serverless JAMstack Apps with Gatsby and Netlify
 date: 2019-09-11
 slug: netlify-gatsby-jamstack-apps-authenticated-serverless
 categories: ['Tech', 'Netlify', 'Gatsby']

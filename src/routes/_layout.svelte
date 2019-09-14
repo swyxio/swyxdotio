@@ -32,3 +32,5 @@
 <main>
   <slot />
 </main>
+
+<Nav isFooter {segment} />

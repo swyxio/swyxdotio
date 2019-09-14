@@ -18,10 +18,24 @@
   const { page } = stores();
   export let slug = $page.params.slug
   export let post
+  export let description = post.metadata.desc || post.metadata.description 
   export let seoCategory = "swyx Talks"
   export let seoTitle = `${seoCategory} | ${post.metadata.title}`
-  export let seoDescription = post.metadata.desc || post.metadata.description || seoTitle
+  export let seoDescription = description || seoTitle
   export let category = "talks"
+  export let date = post.metadata.dateString || 'no date specified'
+  export let topic = post.metadata.topic ? post.metadata.topic + ' @ ' : ''
+
+  export let videoId  = post.metadata.video || post.metadata.video_url
+  if (videoId) {
+    if (videoId.startsWith('https://www.youtube.com/watch')) {
+      videoId = new URL(videoId).searchParams.get('v')
+    } else if (videoId.startsWith('https://youtu.be/')) {
+      videoId = videoId.slice(17)
+    } else {
+      videoId = null
+    }
+  }
 </script>
 
 <style>
@@ -33,10 +47,10 @@
 		so we have to use the :global(...) modifier to target
 		all elements inside .content
 	*/
-  .content :global(h2) {
+  /* .content :global(h2) {
     font-size: 1.4em;
     font-weight: 500;
-  }
+  } */
 
   .content :global(pre) {
     background-color: #f9f9f9;
@@ -65,14 +79,29 @@
     display: block;
   }
 
-  /* figure */
-  h1 {
+  h1, h2 {
     text-align: center;
     margin: 0 auto;
   }
-  /* img {
-    max-width: 80%;
-  } */
+  .VideoDiv {
+    position: relative;
+    overflow: hidden;
+    padding-top: 56.25%;
+    padding-bottom: -56.25%;
+    margin-bottom: 2rem;
+  }
+  .VideoDiv iframe {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    border: 0px;
+  }
+  #metadataDisplay {
+    color:rgb(254, 254, 218);
+    background-color: rgb(18, 0, 18);
+  }
 </style>
 
 <svelte:head>
@@ -90,10 +119,45 @@
   <meta name="twitter:image" content="https://www.swyx.io/swyx.jpg">
 </svelte:head>
 
-<h1>{post.metadata.title}</h1>
+<h1>{post.metadata.title} </h1>
+<h2><b>{topic}</b>
+{#if post.metadata.venues && post.metadata.url}
+  {post.metadata.venues} <br /> {date} (<a href={post.metadata.url}>External link</a>)
+{:else if post.metadata.venues}
+  {post.metadata.venues} <br /> {date}
+{:else if post.metadata.url}
+  {date} (<a href={post.metadata.url}>External link</a>)
+{/if}
+</h2>
+
+
+
+{#if videoId}
+<div class="VideoDiv">
+  <iframe
+    src={`https://www.youtube.com/embed/${videoId}`}
+    title={seoTitle}
+    name={seoTitle}
+    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+    frameBorder="0"
+    webkitallowfullscreen="true"
+    mozallowfullscreen="true"
+    width="600"
+    height="400"
+    allowFullScreen
+    aria-hidden="true"
+  />
+</div>
+{/if}
+
 
 <div class="content">
+  <p> {description}
+  </p>
   {@html post.html}
+    <pre id="metadataDisplay">
+      {JSON.stringify(post.metadata, null, 2)}
+    </pre>
 </div>
 <!-- 
 <div class="content">

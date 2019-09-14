@@ -1,12 +1,17 @@
 <script>
   export let segment;
+  export let isFooter = false
 </script>
 
 <style>
-  nav {
+  nav.headerNav {
     border-bottom: 1px solid rgba(255, 62, 0, 0.1);
     font-weight: 300;
     padding: 0 1em;
+  }
+  nav.footerNav {
+    border-top: 1px solid rgba(255, 62, 0, 0.1);
+    border-bottom: none;
   }
 
   ul {
@@ -31,7 +36,7 @@
     display: inline-block;
   }
 
-  .selected::after {
+  .headerNav .selected::after {
     position: absolute;
     content: "";
     width: calc(100% - 1em);
@@ -41,6 +46,16 @@
     bottom: -1px;
   }
 
+  .footerNav .selected::before {
+    position: absolute;
+    content: "";
+    width: calc(100% - 1em);
+    height: 2px;
+    background-color: rgb(255, 62, 0);
+    display: block;
+    top: -1px;
+  }
+
   a {
     text-decoration: none;
     padding: 1em 0.5em;
@@ -48,7 +63,7 @@
   }
 </style>
 
-<nav>
+<nav class={isFooter && 'footerNav' || 'headerNav'}>
   <ul>
     <li>
       <a class={segment === undefined ? 'selected' : ''} href=".">home</a>

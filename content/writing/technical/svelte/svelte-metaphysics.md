@@ -1,5 +1,5 @@
 ---
-title: "Notes on 'Metaphysics and JavaScript'"
+title: Notes on 'Metaphysics and JavaScript'
 slug: svelte-metaphysics
 categories: ['Tech']
 banner: ./assets/metaphysics1.jpg
