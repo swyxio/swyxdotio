@@ -32,7 +32,6 @@ Through the magic of [Netlify's Immutable Deploys](https://www.netlify.com/blog/
 
 First, the similarities must be noted, for any reasonable discussion to be had. For example, the *reductio ad finem* conclusion of the premise of this post is to use any old static site generator like [Jekyll or Hugo](https://www.staticgen.com/) since it will result in *no* JS payload.
 
-
 **Costs and Benefits of JS Blogging**
 
 However, both Gatsby and Sapper offer clientside rehydration, which makes the subsequent page navigation very fast. It is also easy to:

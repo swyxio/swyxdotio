@@ -4696,10 +4696,10 @@ squeak@^1.0.0:
     console-stream "^0.1.1"
     lpad-align "^1.0.1"
 
-ssg@^0.0.13:
-  version "0.0.13"
-  resolved "https://registry.yarnpkg.com/ssg/-/ssg-0.0.13.tgz#e17039653e17dba422175a4d55da7c8802d21e03"
-  integrity sha512-UEOri3vfIH8Bcw8PE1VOo3ot2TZoJ+Qlhv6shtHRbwLj4kenxAZsdhniH0DXoz8HjR/lOOMj/Od8sUF4YSAMWw==
+ssg@^0.0.14:
+  version "0.0.14"
+  resolved "https://registry.yarnpkg.com/ssg/-/ssg-0.0.14.tgz#bfcedc77ee9091d33f3cda12743c5b0d8bf7092d"
+  integrity sha512-mF8OZBWyPrFUBTr4x9oEHMqLozZcNh3ty28zEnA0MORfax5b0FcnuNIHg0s4NkKJo86BjbhnzyltfR3W6lXg0g==
   dependencies:
     chalk "^2.4.2"
     chokidar "^3.0.2"

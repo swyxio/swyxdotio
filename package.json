@@ -18,7 +18,7 @@
     "shiki": "^0.1.5",
     "sirv": "^0.4.0",
     "slugify": "^1.3.5",
-    "ssg": "^0.0.13"
+    "ssg": "^0.0.14"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",

@@ -10,6 +10,7 @@ exports.getData = async (category, slug) => {
 }
 
 exports.getInitialData = async () => {
+  console.log('getting intial data')
   let [_talks, _writing] = await Promise.all([
     get_posts('content/talks', 'talks'),
     get_posts('content/writing', 'writing'),
