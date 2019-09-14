@@ -1,5 +1,5 @@
 ---
-title: Static Svelte: JavaScript Blogging with 93% less JavaScript
+title: "Static Svelte: JavaScript Blogging with 93% less JavaScript"
 subtitle: Why Svelte is a Perfect Fit For Blogging
 slug: svelte-blogging-fit
 categories: ['Tech', 'Svelte']

@@ -11,7 +11,7 @@
   }
   nav.footerNav {
     border-top: 1px solid rgba(255, 62, 0, 0.1);
-    border-bottom: none;
+    padding: 0 1em;
   }
 
   ul {
@@ -59,11 +59,6 @@
     display: inline-block;
   }
 
-  .external {
-    background: linear-gradient(to right,#647bd8,#93199f);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
   .headerNav .selected::after {
     position: absolute;
     content: "";

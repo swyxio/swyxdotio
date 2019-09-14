@@ -10,7 +10,9 @@ exports.extract_frontmatter = (markdown) => {
     const metadata = {}
     frontMatter.split('\n').forEach((pair) => {
       const colonIndex = pair.indexOf(':')
-      metadata[pair.slice(0, colonIndex).trim()] = pair.slice(colonIndex + 1).trim()
+      let value = pair.slice(colonIndex + 1).trim()
+      if (value === 'false') value = false // SWYX
+      metadata[pair.slice(0, colonIndex).trim()] = value
     })
 
     return { metadata, content }
