@@ -58,7 +58,7 @@ For these reasons, the (default, no throttling) Lighthouse scores tell the corre
   - PWA: yes
 - [Sapper version](https://5d7c3ee00da452f2caf76ae8--scout-videos-51664.netlify.com/writing/netlify-redirects-i18n/): 
   - Performance: 100
-  - Accessibility: 86
+  - Accessibility: 93
   - Best Practices: 86
   - SEO: 78
   - PWA: no (i didn't spend time on a manifest)

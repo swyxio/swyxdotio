@@ -57,5 +57,5 @@ exports.link_renderer = (href, title, text) => {
     title_attr = ` title="${title}"`
   }
 
-  return `<a href="${href}"${target_attr}${title_attr}>${text}</a>`
+  return `<a href="${href}"${target_attr}${title_attr}  rel="noopener noreferrer">${text}</a>`
 }

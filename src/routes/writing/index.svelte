@@ -44,6 +44,16 @@
 
 <svelte:head>
   <title>swyx | Writing</title>
+  <meta property="og:url" content="https://www.swyx.io/writing/">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="swyx | Writing">
+  <meta property="og:description" content="shawn / @swyx / site">
+  <meta property="og:image" content="https://www.swyx.io/swyx.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:creator" content="https://twitter.com/swyx/">
+  <meta name="twitter:title" content="swyx | Writing">
+  <meta name="twitter:description" content="shawn / @swyx / site">
+  <meta name="twitter:image" content="https://www.swyx.io/swyx.jpg">
 </svelte:head>
 
 <h1>Writing</h1>

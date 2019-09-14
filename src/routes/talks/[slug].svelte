@@ -15,7 +15,9 @@
 
 <script>
   export let post
-  // $: console.log({ post })
+  export let seoCategory = "swyx Talks"
+  export let seoTitle = `${seoCategory} | ${post.metadata.title}`
+  export let category = "talks"
 </script>
 
 <style>
@@ -70,7 +72,17 @@
 </style>
 
 <svelte:head>
-  <title>{post.metadata.title}</title>
+  <title>{seoTitle}</title>
+  <meta property="og:url" content={`https://www.swyx.io/${category}/${params.slug}`}>
+  <meta property="og:type" content="article">
+  <meta property="og:title" content={seoCategory}>
+  <meta property="og:description" content="shawn / @swyx / site">
+  <meta property="og:image" content="https://www.swyx.io/swyx.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:creator" content="https://twitter.com/swyx/">
+  <meta name="twitter:title" content={seoCategory}>
+  <meta name="twitter:description" content="shawn / @swyx / site">
+  <meta name="twitter:image" content="https://www.swyx.io/swyx.jpg">
 </svelte:head>
 
 <h1>{post.metadata.title}</h1>
