@@ -43,7 +43,7 @@
   },
   "scripts": {
     "start": "ssg dev",
-    "build": "ssg export --timeout=9999999",
+    "build": "ssg export --timeout=10000",
     "postinstall": "patch-package"
   }
 }

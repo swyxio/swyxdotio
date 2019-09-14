@@ -1,0 +1,35 @@
+diff --git a/node_modules/sapper/dist/export.js b/node_modules/sapper/dist/export.js
+index bbea70d..8745628 100644
+--- a/node_modules/sapper/dist/export.js
++++ b/node_modules/sapper/dist/export.js
+@@ -1772,7 +1772,7 @@ async function _export({
+ 	const saved = new Set();
+ 	const q = queue(concurrent);
+ 
+-	function save(url, status, type, body) {
++	async function save(url, status, type, body) {
+ 		const { pathname } = resolve(origin, url);
+ 		let file = decodeURIComponent(pathname.slice(1));
+ 
+@@ -1795,9 +1795,10 @@ async function _export({
+ 		});
+ 
+ 		const export_file = path.join(export_dir, file);
+-		if (fs.existsSync(export_file)) return;
++		const fileExists = await require('util').promisify(fs.stat)(export_file).catch(() => null)
++		if (fileExists) return;
+ 		__chunk_5.mkdirp(path.dirname(export_file));
+-		fs.writeFileSync(export_file, body);
++		return require('util').promisify(fs.writeFile)(export_file, body)
+ 	}
+ 
+ 	proc.on('message', message => {
+@@ -1905,7 +1906,7 @@ async function _export({
+ 		await handle(resolve(root.href, 'service-worker-index.html'));
+ 		await q.close();
+ 
+-		proc.kill();
++		proc.kill(); // swyx: must let the data flowoowowowow
+ 	} catch (err) {
+ 		proc.kill();
+ 		throw err;
