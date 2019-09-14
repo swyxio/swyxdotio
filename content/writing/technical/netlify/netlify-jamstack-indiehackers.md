@@ -1,5 +1,5 @@
 ---
-title: 'JAMstack for Indie Hackers'
+title: JAMstack for Indie Hackers
 slug: netlify-jamstack-indiehackers
 categories: ['Tech', 'Netlify']
 date: 2019-09-02

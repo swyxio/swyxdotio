@@ -1,5 +1,5 @@
 ---
-title: 'Using Next.js as a Static Site Generator for Netlify'
+title: Using Next.js as a Static Site Generator for Netlify
 published: true
 slug: netlify-nextjs-ssg
 description: How to deploy a Static Next.js Site to Netlify, and then upgrade it to use Dynamic Route Segments to become a full fledged Static Site Generator!

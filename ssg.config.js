@@ -15,7 +15,7 @@ exports.getInitialData = async () => {
     get_posts('content/writing', 'writing'),
   ])
 
-  _talks = _talks.filter((x) => x.metadata.date < new Date())
+  _talks = _talks.filter((x) => new Date(x.metadata.date) <= new Date())
   const talks = extractSlugObjectFromArray(_talks)
   const talks_index = _talks.map((v) => ({
     title: v.metadata.title,
@@ -24,7 +24,7 @@ exports.getInitialData = async () => {
   }))
   talks.talks_index = talks_index
 
-  _writing = _writing.filter((x) => x.metadata.date < new Date())
+  _writing = _writing.filter((x) => new Date(x.metadata.date) <= new Date())
   const writing = extractSlugObjectFromArray(_writing)
   const writing_index = _writing.map((v) => ({
     title: v.metadata.title,

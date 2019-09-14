@@ -1,5 +1,5 @@
 ---
-title: 'Tests or Types: Why Not Both?'
+title: Tests or Types: Why Not Both?
 slug: tests-or-types
 categories: ['Tech']
 date: 2019-07-10

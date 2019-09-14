@@ -1,5 +1,5 @@
 ---
-title: 'STAR Apps: A New Generation of Front-End Tooling for Development Workflows'
+title: STAR Apps: A New Generation of Front-End Tooling for Development Workflows
 slug: star-apps
 categories: ['Tech']
 date: 2019-01-18

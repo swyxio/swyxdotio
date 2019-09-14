@@ -22,6 +22,7 @@
     line-height: 1.5;
     list-style-type: none;
     display: grid;
+    grid-gap: 3rem 1rem;
     grid-template-columns: 1fr 1fr 1fr;
   }
   @media (max-width: 400px) {
@@ -65,11 +66,11 @@
 <ul>
   {#each posts as post}
   <li>
-    <strong>
+
       <a rel="prefetch" href="/writing/{post.slug}">
         {post.title}
       </a>
-    </strong>
+
     <br />
     - {new Date(post.date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
   </li>

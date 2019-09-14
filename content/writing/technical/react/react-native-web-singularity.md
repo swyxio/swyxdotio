@@ -1,5 +1,5 @@
 ---
-title: 'The Case for the React Native Web Singularity'
+title: The Case for the React Native Web Singularity
 slug: react-native-web-singularity
 categories: ['Tech', 'React']
 date: 2019-08-30

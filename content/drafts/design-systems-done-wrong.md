@@ -1,5 +1,5 @@
 ---
-title: 'Design Systems Done Wrong'
+title: Design Systems Done Wrong
 slug: design-systems-done-wrong
 categories: ['Tech']
 date: 2019-08-25

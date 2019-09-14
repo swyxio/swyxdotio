@@ -1,5 +1,5 @@
 ---
-title: 'Turning the Static Dynamic: Gatsby + Netlify Functions + Netlify Identity'
+title: Turning the Static Dynamic: Gatsby + Netlify Functions + Netlify Identity
 date: 2018-12-26
 slug: gatsby-static-dynamic
 categories: ['Tech', 'Netlify', 'Gatsby']
