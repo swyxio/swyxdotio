@@ -1,8 +1,16 @@
 const fs = require('fs')
 const path = require('path')
 const { get_posts } = require('./sapper_markdown_code')
-exports.getData = async () => {
-  let _talks = get_posts('content/talks', 'talks')
+
+exports.getData = async (category, slug) => {
+  const data = require(path.resolve('.ssg/data.json'))
+  const result = data[category][slug]
+  if (typeof result === 'undefined') throw new Error('no data found for ' + slug)
+  return result
+}
+
+exports.getInitialData = async () => {
+  let _talks = await get_posts('content/talks', 'talks')
   const talks = extractSlugObjectFromArray(_talks)
   const talks_index = _talks.map((v) => ({
     title: v.metadata.title,
@@ -10,7 +18,7 @@ exports.getData = async () => {
     date: v.metadata.date,
   }))
   talks.talks_index = talks_index
-  let _writing = get_posts('content/writing', 'writing')
+  let _writing = await get_posts('content/writing', 'writing')
   const writing = extractSlugObjectFromArray(_writing)
   const writing_index = _writing.map((v) => ({
     title: v.metadata.title,

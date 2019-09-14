@@ -70,3 +70,4 @@ yarn-error.log
 
 .netlify/
 __sapper__
+.ssg

@@ -37,9 +37,9 @@
 		text-align: center;
 		margin: 0 auto;
 	} */
-  img {
+  /* img {
     max-width: 95%;
-  }
+  } */
 </style>
 
 <svelte:head>

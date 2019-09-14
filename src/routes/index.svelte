@@ -1,5 +1,5 @@
 <style>
-  h1 {
+  h1, h2 {
     text-align: center;
     margin: 0 auto;
   }
@@ -33,10 +33,11 @@
 </style>
 
 <svelte:head>
-  <title>Spark Joy</title>
+  <title>swyx's site</title>
 </svelte:head>
 
-<h1>Spark Joy!</h1>
+<h1>swyx's site!</h1>
+<h2>Latest Post: <a href="/writing/svelte-static"><b>Static Svelte: JavaScript Blogging with 80% less JavaScript</b></a></h2>
 <!-- 
 <figure>
   <img alt="Borat" src="great-success.png" />

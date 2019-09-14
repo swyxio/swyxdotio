@@ -73,5 +73,10 @@
           talks
         </a>
       </li>
+      <li>
+          <a href="https://tinyletter.com/swyx">
+            newsletter
+          </a>
+        </li>
   </ul>
 </nav>

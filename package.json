@@ -13,11 +13,11 @@
     "marked": "^0.7.0",
     "mdsvex": "^0.4.0",
     "polka": "next",
-    "prismjs": "^1.17.1",
     "sapper": "^0.27.8",
+    "shiki": "^0.1.5",
     "sirv": "^0.4.0",
     "slugify": "^1.3.5",
-    "ssg": "^0.0.7"
+    "ssg": "^0.0.11"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",

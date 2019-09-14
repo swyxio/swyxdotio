@@ -1,5 +1,5 @@
 ---
-title: "Static Svelte: JavaScript Blogging with 80% less JavaScript"
+title: "Static Svelte: JavaScript Blogging with 93% less JavaScript"
 subtitle: "Why Svelte is a Perfect Fit For Blogging"
 slug: svelte-blogging-fit
 categories: ['Tech', 'Svelte']
@@ -11,10 +11,10 @@ This blog now uses [Svelte & Sapper](https://sapper.svelte.dev/) as a static sit
 Through the magic of [Netlify's Immutable Deploys](https://www.netlify.com/blog/2018/10/05/netlify-and-the-functional-immutable-reactive-deploy/?utm_source=blog&utm_medium=swyxdotio&utm_campaign=devex), we can directly compare them on representative live URL's for a recent blogpost of mine:
 
 - [With React/Gatsby](https://5d7699e172ae430007210374--scout-videos-51664.netlify.com/writing/netlify-redirects-i18n): **138kb**
-- [With Svelte/Sapper](https://5d7c2bf230bb95de0eea060a--scout-videos-51664.netlify.com/writing/netlify-redirects-i18n/): **28kb**
+- [With Svelte/Sapper](https://5d7c3ee00da452f2caf76ae8--scout-videos-51664.netlify.com/writing/netlify-redirects-i18n/): **9kb**
 - For the curious, I also recently wrote about using [Next.js as a Static Site Generator](https://scotch.io/@sw-yx/using-nextjs-as-a-static-site-generator-for-netlify) as well, but don't expect much difference.
 
-> ⚠️To be very clear - this post is not even close to being an apples to apples benchmark, and I spend some effort below explaining why it isn't. If you aren't prepared to read this post with a critical mind and understanding that this is a random , please stop here.
+> ⚠️To be very clear - this post is not even close to being an apples to apples benchmark, and I spend some effort below explaining why it isn't. If you aren't prepared to read this post with a critical mind and understanding that this is a random work in progress report, please stop here.
 
 ## Screenshots
 
@@ -24,7 +24,7 @@ Through the magic of [Netlify's Immutable Deploys](https://www.netlify.com/blog/
 
 ### Sapper version
 
-![screenshot of Sapper site with 28kb of JS](./assets/sveltesvelte.png)
+![screenshot of Sapper site with 9kb of JS](./assets/sveltesvelte.png)
 
 ## Differences and Similarities
 
@@ -36,9 +36,9 @@ However, both Gatsby and Sapper offer clientside rehydration, which makes the su
 
 This is by no means a free tradeoff: as [Addy Osmani recently noted](https://addyosmani.com/blog/rehydration/), an "uncanny valley" of rehydration exists, and [Alex Russell consistently warns](https://infrequently.org/2018/09/the-developer-experience-bait-and-switch/) that better developer experience is not without its costs.
 
-I could have made the difference more drastic by omitting [PrismJS](https://prismjs.com/), which adds ~19kb of JS, which is more than half the final JS payload of the Sapper site. However, as a developer you can pry syntax highlighting from my cold dead hands. So it wouldn't be fair to compare a site without syntax highlighting to my old site with one.
+I originally used [PrismJS](https://prismjs.com/), which adds ~19kb of JS, beacuse as a developer you can pry syntax highlighting from my cold dead hands. So it wouldn't be fair to compare a site without syntax highlighting to my old site with one.
 
-Of course, I could have also put in a bit more effort exploring a no-JS solution for syntax highlighting, since I don't intend readers to edit the code in runtime. [Andrew Branch recently twote](https://mobile.twitter.com/atcb/status/1158480783666888704) about how to preprocess ALL your syntax-highlighting using some VSCode API's.
+However, there are no-JS solutions for syntax highlighting, since I don't intend readers to edit the code in runtime. [Andrew Branch recently twote](https://mobile.twitter.com/atcb/status/1158480783666888704) about how to preprocess ALL your syntax-highlighting using some VSCode API's. I put this off as too complicated, but [Khrome](https://khrome.dev) tipped me off that the open source [shiki](https://github.com/octref/shiki) library from the Vue ecosystem does the same thing and so I managed to get that in.
 
 ## Differences
 
@@ -56,7 +56,7 @@ For these reasons, the (default, no throttling) Lighthouse scores tell the corre
   - Best Practices: 93
   - SEO: 89
   - PWA: yes
-- [Sapper version](https://5d7c2bf230bb95de0eea060a--scout-videos-51664.netlify.com/writing/netlify-redirects-i18n/): 
+- [Sapper version](https://5d7c3ee00da452f2caf76ae8--scout-videos-51664.netlify.com/writing/netlify-redirects-i18n/): 
   - Performance: 100
   - Accessibility: 86
   - Best Practices: 86
@@ -66,6 +66,6 @@ For these reasons, the (default, no throttling) Lighthouse scores tell the corre
 
 Finally, the Sapper site does not use CSS-in-JS. This is a very controversial topic with pros and cons so I put it last. In particular, if you have not spent time appreciating [some basic facts of CSS in JS from proponents](https://mxstbr.com/thoughts/css-in-js/), as well as [some nuances in implementation](https://github.com/styled-components/styled-components/issues/2377), then your debate will not be very well informed.
 
-The old site has a [Dark Theme Toggle](https://github.com/sw-yx/gatsby-theme-dev-blog/blob/master/packages/gatsby-theme-dev-blog/src/components/Header/ThemeToggler.js). This Sapper implementation does not.
+The old site has a [Dark Theme Toggle](https://github.com/sw-yx/gatsby-theme-dev-blog/blob/master/packages/gatsby-theme-dev-blog/src/components/Header/ThemeToggler.js). Also a responsive mobile navigation. This Sapper implementation does not.
 
 However, I expect [animations to be a lot easier with Svelte](https://svelte.dev/tutorial/animate) as it is a first class citizen. This frees me up to play a lot more with animations in future.
