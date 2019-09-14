@@ -1,5 +1,5 @@
 ---
-title: "JAMstack or 'Pilha de Atolamento'? Let Your User Decide (i18n in Gatsby + Netlify)"
+title: JAMstack or 'Pilha de Atolamento'? Let Your User Decide (i18n in Gatsby + Netlify)
 slug: netlify-redirects-i18n
 categories: ['Tech', 'Netlify']
 started: 2019-08-19

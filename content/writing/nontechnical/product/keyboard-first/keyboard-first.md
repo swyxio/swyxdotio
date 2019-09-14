@@ -17,7 +17,7 @@ Slack calls it a quick switcher, Linear calls it a Feature Spotlight (after mac 
 
 I recently prototyped an Omnibox for Netlify:
 
-![omnibox](./netlify-omnibox.gif)
+![omnibox](./assets/netlify-omnibox.gif)
 
 I like this UI paradigm a lot. I think speed is only one factor of what it offers. It also offers "constant time execution". In that whatever I want to do, I don't have to remember or look up what the precise command is, I can just punch in Cmd+K, type in what I want, and hope that the omnibox
 

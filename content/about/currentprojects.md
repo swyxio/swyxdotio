@@ -45,6 +45,5 @@ notes_to_self: so as not to have this show up on rss feed
 - Oct 16-18 - JAMStackConf SF
 - Oct 19 - Silicon Valley Code Camp
 - Oct 25 - [React Advanced](https://reactadvanced.com)
-- Oct 25 - React Conf?
 - Nov 9 - Oredev
-- Nov 12-15 - poconos techbash
+- Nov 12-13 - No Code Conf (attending)

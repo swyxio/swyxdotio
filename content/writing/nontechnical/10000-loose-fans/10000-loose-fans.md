@@ -3,7 +3,7 @@ title: 10,000 Loose Fans
 slug: 10000-loose-fans
 categories: ['Advice']
 date: 2019-08-18
-banner: './swyxtwitteranalytics.png'
+banner: './assets/swyxtwitteranalytics.png'
 keywords: ['twitter']
 ---
 
@@ -23,7 +23,7 @@ First, some numbers.
 
 Here's my Twitter Analytics halfway through August 2019:
 
-![./swyxtwitteranalytics.png](./swyxtwitteranalytics.png)
+![./swyxtwitteranalytics.png](./assets/swyxtwitteranalytics.png)
 
 It's better to get an idea of a full month, so looking at July:
 
@@ -50,7 +50,7 @@ For better or worse, I don't do any of that. I value anecdotally experienced eng
 
 I wasn't planning for this but I recently felt this sheer awe in a [recent tweet](https://mobile.twitter.com/swyx/status/1162200868592029697). I was thinking through a modal interaction I'd implemented before and see all over:
 
-![modaltweet.png](modaltweet.png)
+![modaltweet.png](./assets/modaltweet.png)
 
 I simply tweeted that because it was something I was working through and didn't know. To this day I don't know what kind of response any individual tweet will get.
 
