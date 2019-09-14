@@ -10,7 +10,11 @@ exports.getData = async (category, slug) => {
 }
 
 exports.getInitialData = async () => {
-  let _talks = await get_posts('content/talks', 'talks')
+  let [_talks, _writing] = await Promise.all([
+    get_posts('content/talks', 'talks'),
+    get_posts('content/writing', 'writing'),
+  ])
+
   _talks = _talks.filter((x) => x.metadata.date < new Date())
   const talks = extractSlugObjectFromArray(_talks)
   const talks_index = _talks.map((v) => ({
@@ -19,7 +23,7 @@ exports.getInitialData = async () => {
     date: v.metadata.date,
   }))
   talks.talks_index = talks_index
-  let _writing = await get_posts('content/writing', 'writing')
+
   _writing = _writing.filter((x) => x.metadata.date < new Date())
   const writing = extractSlugObjectFromArray(_writing)
   const writing_index = _writing.map((v) => ({

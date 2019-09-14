@@ -1,7 +1,7 @@
 ---
 title: Notes on 'Metaphysics and JavaScript'
 slug: svelte-metaphysics
-categories: ['Tech']
+categories: ['Tech', 'Svelte', 'React']
 banner: ./assets/metaphysics1.jpg
 url: https://docs.google.com/presentation/d/1_aeM_UkwS9qaSzHDz87zC9bmtvbuLbPof7RnN96SJKE/edit?usp=sharing
 date: 2019-08-28
