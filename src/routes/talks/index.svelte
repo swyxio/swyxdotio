@@ -47,12 +47,13 @@
   <meta property="og:url" content="https://www.swyx.io/talks/">
   <meta property="og:type" content="article">
   <meta property="og:title" content="swyx | Talks">
-  <meta property="og:description" content="shawn / @swyx / site">
+  <meta name="Description" content="all of swyx's talks">
+  <meta property="og:description" content="all of swyx's talks">
   <meta property="og:image" content="https://www.swyx.io/swyx.jpg">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:creator" content="https://twitter.com/swyx/">
   <meta name="twitter:title" content="swyx | Talks">
-  <meta name="twitter:description" content="shawn / @swyx / site">
+  <meta name="twitter:description" content="all of swyx's talks">
   <meta name="twitter:image" content="https://www.swyx.io/swyx.jpg">
 </svelte:head>
 

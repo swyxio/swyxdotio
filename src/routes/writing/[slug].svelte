@@ -14,9 +14,13 @@
 </script>
 
 <script>
+  import { stores } from '@sapper/app';
+  const { page } = stores();
+  export let slug = $page.params.slug
   export let post
   export let seoCategory = "swyx Writing"
   export let seoTitle = `${seoCategory} | ${post.metadata.title}`
+  export let seoDescription = post.metadata.desc || post.metadata.description || seoTitle
   export let category = "writing"
 </script>
 
@@ -73,15 +77,16 @@
 
 <svelte:head>
     <title>{seoTitle}</title>
-    <meta property="og:url" content={`https://www.swyx.io/${category}/${params.slug}`}>
+    <meta property="og:url" content={`https://www.swyx.io/${category}/${slug}`}>
     <meta property="og:type" content="article">
     <meta property="og:title" content={seoCategory}>
-    <meta property="og:description" content="shawn / @swyx / site">
+    <meta name="Description" content={seoDescription}>
+    <meta property="og:description" content={seoDescription}>
     <meta property="og:image" content="https://www.swyx.io/swyx.jpg">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:creator" content="https://twitter.com/swyx/">
     <meta name="twitter:title" content={seoCategory}>
-    <meta name="twitter:description" content="shawn / @swyx / site">
+    <meta name="twitter:description" content={seoDescription}>
     <meta name="twitter:image" content="https://www.swyx.io/swyx.jpg">
 </svelte:head>
 

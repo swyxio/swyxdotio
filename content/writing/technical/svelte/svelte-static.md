@@ -11,20 +11,20 @@ This blog now uses [Svelte & Sapper](https://sapper.svelte.dev/) as a static sit
 Through the magic of [Netlify's Immutable Deploys](https://www.netlify.com/blog/2018/10/05/netlify-and-the-functional-immutable-reactive-deploy/?utm_source=blog&utm_medium=swyxdotio&utm_campaign=devex), we can directly compare them on representative live URL's for a recent blogpost of mine:
 
 - [With React/Gatsby](https://5d7699e172ae430007210374--scout-videos-51664.netlify.com/writing/netlify-redirects-i18n): **138kb**
-- [With Svelte/Sapper](https://5d7c3ee00da452f2caf76ae8--scout-videos-51664.netlify.com/writing/netlify-redirects-i18n/): **9kb**
+- [With Svelte/Sapper](https://5d7c46e60da4524431f76aef--scout-videos-51664.netlify.com/writing/netlify-redirects-i18n/): **9kb**
 - For the curious, I also recently wrote about using [Next.js as a Static Site Generator](https://scotch.io/@sw-yx/using-nextjs-as-a-static-site-generator-for-netlify) as well, but don't expect much difference.
 
 > ⚠️To be very clear - this post is not even close to being an apples to apples benchmark, and I spend some effort below explaining why it isn't. If you aren't prepared to read this post with a critical mind and understanding that this is a random work in progress report, please stop here.
 
 ## Screenshots
 
-### Gatsby version
+### Gatsby version (138kb)
 
-![screenshot of Gatsby site with 138kb of JS](./assets/sveltegatsby.png)
+![screenshot of Gatsby site with 138kb of JS](./assets/sveltegatsby.jpeg)
 
-### Sapper version
+### Sapper version (9kb)
 
-![screenshot of Sapper site with 9kb of JS](./assets/sveltesvelte.png)
+![screenshot of Sapper site with 9kb of JS](./assets/sveltesvelte.jpeg)
 
 ## Differences and Similarities
 
@@ -46,9 +46,9 @@ There are material differences in implementation that make the two sites not com
 
 Sapper is by far less mature, and not designed to have an upfront content ingestion pipeline with pluggable lifecycles. I spent a significant amount of time coding up the markdown ingestion for my site, which in Gatsby is as trivial as adding a couple of source and transform plugins.
 
-As [Una Kravets as noted](https://mobile.twitter.com/Una/status/687690138550288384), images are a critically important part of web performance. [Gatsby-Image](https://www.gatsbyjs.org/packages/gatsby-image/) not only preprocesses images to resize them down via standard techniques, but also helps you rapidly [load superfast images for a nice progressive upgrade effect]((https://using-gatsby-image.gatsbyjs.org/)). My colleague [Phil Hawksworth recently wrote on CSS Tricks about how to achieve your own lazy loading](https://css-tricks.com/tips-for-rolling-your-own-lazy-loading/) - so you definitely don't need Gatsby for this - but it is nice to have a blessed, maintained, tested, well documented, adaptable approach. This Sapper site does not (yet!) do any of that.
+As [Una Kravets as noted](https://mobile.twitter.com/Una/status/687690138550288384), images are a critically important part of web performance. [Gatsby-Image](https://www.gatsbyjs.org/packages/gatsby-image/) not only preprocesses images to resize them down via standard techniques, but also helps you rapidly [load superfast images for a nice progressive upgrade effect](https://using-gatsby-image.gatsbyjs.org/). My colleague [Phil Hawksworth recently wrote on CSS Tricks about how to achieve your own lazy loading](https://css-tricks.com/tips-for-rolling-your-own-lazy-loading/) - so you definitely don't need Gatsby for this - but it is nice to have a blessed, maintained, tested, well documented, adaptable approach. This Sapper site does not (yet!) do any of that.
 
-For these reasons, the (default, no throttling) Lighthouse scores tell the corresponding story. These are all going to vary based on the specific implementation details of the site so don't pay this *too* much mind, but not that they're all... *alright*. Definitely not a failing grade:
+For these reasons, the (default, no throttling) Lighthouse scores tell the corresponding story. These are all going to vary based on the specific implementation details of the site (in particular, how much time/effort I spend on it) so don't pay this *too* much mind, but not that they're all... *alright*. Definitely not a failing grade:
 
 - [Gatsby version](https://5d7699e172ae430007210374--scout-videos-51664.netlify.com/writing/netlify-redirects-i18n):
   - Performance: 100
@@ -56,12 +56,12 @@ For these reasons, the (default, no throttling) Lighthouse scores tell the corre
   - Best Practices: 93
   - SEO: 89
   - PWA: yes
-- [Sapper version](https://5d7c3ee00da452f2caf76ae8--scout-videos-51664.netlify.com/writing/netlify-redirects-i18n/): 
+- [Sapper version](https://5d7c46e60da4524431f76aef--scout-videos-51664.netlify.com/writing/netlify-redirects-i18n/): 
   - Performance: 100
   - Accessibility: 93
-  - Best Practices: 86
-  - SEO: 78
-  - PWA: no (i didn't spend time on a manifest)
+  - Best Practices: 93
+  - SEO: 89
+  - PWA: 4/7 (i didn't spend time on a manifest)
 
 
 Finally, the Sapper site does not use CSS-in-JS. This is a very controversial topic with pros and cons so I put it last. In particular, if you have not spent time appreciating [some basic facts of CSS in JS from proponents](https://mxstbr.com/thoughts/css-in-js/), as well as [some nuances in implementation](https://github.com/styled-components/styled-components/issues/2377), then your debate will not be very well informed.
