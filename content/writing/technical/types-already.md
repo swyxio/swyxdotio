@@ -288,7 +288,7 @@ This is the wrong take.
 
 When we start off exploring a problem, we start off with a vague idea of the solution. As we progress, we learn more about the problem, or priorities change, and unless we've done it a million times we probably picked something wrong along the way, whether it be function API, data structure, or something larger scale.
 
-![](http://www.methodsandtools.com/archive/refact8.png)
+![chart](https://www.methodsandtools.com/archive/refact8.png)
 
 The question is then to either stick with it until it breaks or to refactor the moment you can sense that you're going to outgrow whatever you used to have. I'll assume you accept that there are often benefits to refactoring. So why do we avoid refactoring?
 

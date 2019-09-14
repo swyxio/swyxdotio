@@ -52,6 +52,22 @@
     font-weight: 500;
   } */
 
+
+  .content :global(a) {
+    text-decoration: none;
+    background-image: linear-gradient(45deg,#b6bedf,#9a6a9e);
+    background-position: 0% 100%;
+    background-repeat: no-repeat;
+    background-size: 0% 100%;
+    transition: background-size cubic-bezier(0,.5,0,1) 0.3s;
+  }
+
+  .content :global(a):hover,
+  .content :global(a):focus {
+    text-decoration: none;
+    background-size: 100% 100%;
+  }
+
   .content :global(pre) {
     background-color: #f9f9f9;
     box-shadow: inset 1px 1px 5px rgba(0, 0, 0, 0.05);

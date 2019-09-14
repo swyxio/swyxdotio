@@ -23,6 +23,7 @@
     list-style-type: none;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
+    grid-gap: 3rem 1.5rem;
   }
   @media (max-width: 400px) {
     ul {
@@ -31,15 +32,10 @@
   }
   li {
     margin-bottom: 1.5rem;
+    background: linear-gradient(45deg,#337bd8,#6433d8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
-
-  /* h1, figure, p {
-		text-align: center;
-		margin: 0 auto;
-	} */
-  /* img {
-    max-width: 95%;
-  } */
 </style>
 
 <svelte:head>
@@ -65,13 +61,11 @@
 <ul>
   {#each posts as post}
   <li>
-    <strong>
       <a rel="prefetch" href="/talks/{post.slug}">
         {post.title}
       </a>
-    </strong>
     <br />
-    - {new Date(post.date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+    - <em>{new Date(post.date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</em>
   </li>
   {/each}
 </ul>

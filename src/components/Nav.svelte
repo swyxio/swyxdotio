@@ -19,6 +19,15 @@
     padding: 0;
     display: flex;
   }
+  @media (max-width: 480px) {
+    ul {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+    } 
+    li.divider {
+      display: none
+    }
+  }
 
   /* clearfix */
   ul::after {
@@ -75,16 +84,25 @@
     top: -1px;
   }
 
-  a {
+  a, span {
     text-decoration: none;
     padding: 1em 0.5em;
     display: block
   }
-  
+
+  span {
+    background: linear-gradient(to right,#647bd8,#93199f);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: bold;
+  }
 </style>
 
 <nav class={isFooter && 'footerNav' || 'headerNav'}>
   <ul>
+    <li>
+      <span>swyx.io</span>
+    </li>
     <li>
       <a class={segment === undefined ? 'selected' : ''} href=".">home</a>
     </li>

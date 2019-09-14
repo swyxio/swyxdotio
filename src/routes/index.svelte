@@ -11,20 +11,6 @@
     margin: 0 0 0.5em 0;
   }
 
-  /* figure {
-    margin: 0 0 1em 0;
-  }
-
-  img {
-    width: 100%;
-    max-width: 400px;
-    margin: 0 0 1em 0;
-  }
-
-  p {
-    margin: 1em auto;
-  } */
-
   @media (min-width: 480px) {
     h1 {
       font-size: 4em;
@@ -38,14 +24,3 @@
 
 <h1>swyx's site!</h1>
 <h2>Latest Post: <a href="/writing/svelte-static"><b>Static Svelte: JavaScript Blogging with 80% less JavaScript</b></a></h2>
-<!-- 
-<figure>
-  <img alt="Borat" src="great-success.png" />
-  <figcaption>HIGH FIVE!</figcaption>
-</figure>
-
-<p>
-  <strong>
-    Try editing this file (src/routes/index.svelte) to test live reloading.
-  </strong>
-</p> -->

@@ -22,7 +22,7 @@
     line-height: 1.5;
     list-style-type: none;
     display: grid;
-    grid-gap: 3rem 1rem;
+    grid-gap: 3rem 1.5rem;
     grid-template-columns: 1fr 1fr 1fr;
   }
   @media (max-width: 400px) {
@@ -32,6 +32,9 @@
   }
   li {
     margin-bottom: 1.5rem;
+    background: linear-gradient(to right,#647bd8,#93199f);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
   /* h1, figure, p {
@@ -72,7 +75,7 @@
       </a>
 
     <br />
-    - {new Date(post.date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+    - <em>{new Date(post.date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</em>
   </li>
   {/each}
 </ul>
