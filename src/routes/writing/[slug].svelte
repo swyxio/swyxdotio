@@ -81,8 +81,7 @@
     background-size: 100% 100%;
     /* font-size: 2em; */
   }
-  .content :global(a):hover::after,
-  .content :global(a):focus::after {
+  .content :global(a):hover::after {
     content: " (" attr(data-href) ")";
   }
 

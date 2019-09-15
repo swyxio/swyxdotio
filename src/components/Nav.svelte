@@ -1,6 +1,6 @@
 <script>
-  export let segment
-  export let isFooter = false
+  export let segment;
+  export let isFooter = false;
 </script>
 
 <style>
@@ -31,7 +31,7 @@
 
   /* clearfix */
   ul::after {
-    content: '';
+    content: "";
     display: block;
     clear: both;
   }
@@ -46,8 +46,35 @@
     animation: spin 1s linear infinite;
   }
   @keyframes spin {
+    10% {
+      transform: rotate(10deg);
+    }
+    20% {
+      transform: rotate(-10deg);
+    }
+    30% {
+      transform: rotate(10deg);
+    }
+    40% {
+      transform: rotate(-10deg);
+    }
+    50% {
+      transform: rotate(10deg);
+    }
+    60% {
+      transform: rotate(-10deg);
+    }
+    70% {
+      transform: rotate(10deg);
+    }
+    80% {
+      transform: rotate(-10deg);
+    }
+    90% {
+      transform: rotate(10deg);
+    }
     100% {
-      transform: rotate(360deg);
+      transform: rotate(-10deg);
     }
   }
   li.divider {
@@ -61,7 +88,7 @@
 
   .headerNav .selected::after {
     position: absolute;
-    content: '';
+    content: "";
     width: calc(100% - 1em);
     height: 2px;
     background-color: rgb(255, 62, 0);
@@ -71,7 +98,7 @@
 
   .footerNav .selected::before {
     position: absolute;
-    content: '';
+    content: "";
     width: calc(100% - 1em);
     height: 2px;
     background-color: rgb(255, 62, 0);

@@ -11,9 +11,11 @@ const makeSlug = makeSlugProcessor(SLUG_PRESERVE_UNICODE)
 
 exports.get_posts = getPosts
 async function getPosts(contentPath, linkPrefix = '') {
-  const highlighter = await shiki.getHighlighter({ theme: 'Material-Theme-Palenight' })
+  const highlighter = await shiki.getHighlighter({
+    theme: 'Material-Theme-Palenight'
+  })
   const potato = await Promise.all(
-    fs.readdirSync(contentPath).map(async (file) => {
+    fs.readdirSync(contentPath).map(async file => {
       const fullFilePath = path.join(contentPath, file)
       if (fs.lstatSync(fullFilePath).isDirectory()) {
         // recursive
@@ -60,22 +62,24 @@ async function getPosts(contentPath, linkPrefix = '') {
 					</h${level}>`
       }
 
-      const temp = content.replace(/^\t+/gm, (match) => match.split('\t').join('  '))
+      const temp = content.replace(/^\t+/gm, match =>
+        match.split('\t').join('  ')
+      )
       const html = marked(temp, {
         gfm: true,
         breaks: true,
         headerIds: true,
         headerPrefix: 'id_',
-        renderer,
+        renderer
       })
 
       const newSlug = slug
       return {
         html,
         metadata,
-        slug: newSlug,
+        slug: newSlug
       }
-    }),
+    })
   )
   // potato.forEach((x) => {
   //   if (x && x.slug === 'typescript-generics') {
@@ -85,8 +89,14 @@ async function getPosts(contentPath, linkPrefix = '') {
 
   return potato
     .filter(Boolean)
-    .filter((x) => (x.metadata ? (typeof x.metadata.published === 'undefined' ? true : x.metadata.published) : true))
-    .reduce((acc, cur) => (Array.isArray(cur) ? [...acc, ...cur] : [...acc, cur]), [])
+    .filter(x => x.metadata && x.metadata.title) // require metadata and title
+    .filter(x =>
+      typeof x.metadata.published === 'undefined' ? true : x.metadata.published
+    ) // take out published false
+    .reduce(
+      (acc, cur) => (Array.isArray(cur) ? [...acc, ...cur] : [...acc, cur]),
+      []
+    )
     .sort((a, b) => {
       if (!a.metadata) {
         console.log('nometadata', Object.keys(a))
