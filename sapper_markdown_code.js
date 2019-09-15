@@ -87,21 +87,26 @@ async function getPosts(contentPath, linkPrefix = '') {
   //   }
   // })
 
-  return potato
-    .filter(Boolean)
-    .filter(x => x.metadata && x.metadata.title) // require metadata and title
-    .filter(x =>
-      typeof x.metadata.published === 'undefined' ? true : x.metadata.published
-    ) // take out published false
-    .reduce(
-      (acc, cur) => (Array.isArray(cur) ? [...acc, ...cur] : [...acc, cur]),
-      []
-    )
-    .sort((a, b) => {
-      if (!a.metadata) {
-        console.log('nometadata', Object.keys(a))
-      }
-      return a.metadata.pubdate < b.metadata.pubdate ? 1 : -1
-    })
-    .filter(Boolean)
+  return (
+    potato
+      .filter(Boolean)
+      .reduce(
+        (acc, cur) => (Array.isArray(cur) ? [...acc, ...cur] : [...acc, cur]),
+        []
+      )
+      .filter(x => x.metadata && Boolean(x.metadata.title)) // require metadata and title
+      // .map(x => {
+      //   console.log(Object.keys(x.metadata))
+      //   return x
+      // })
+      .filter(x =>
+        typeof x.metadata.published === 'undefined'
+          ? true
+          : x.metadata.published
+      ) // take out published false
+      .sort((a, b) => {
+        return a.metadata.pubdate < b.metadata.pubdate ? 1 : -1
+      })
+      .filter(Boolean)
+  )
 }
