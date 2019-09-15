@@ -1,5 +1,6 @@
 <style>
-  h1, h2 {
+  h1,
+  h2 {
     text-align: center;
     margin: 0 auto;
   }
@@ -23,4 +24,9 @@
 </svelte:head>
 
 <h1>swyx's site!</h1>
-<h2>Latest Post: <a href="/writing/svelte-static"><b>Static Svelte: JavaScript Blogging with 80% less JavaScript</b></a></h2>
+<h2>
+  Latest Post:
+  <a href="/writing/svelte-static">
+    <b>Static Svelte: JavaScript Blogging with 80% less JavaScript</b>
+  </a>
+</h2>

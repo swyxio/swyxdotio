@@ -45,6 +45,7 @@
   "scripts": {
     "start": "ssg dev",
     "build": "ssg export --timeout=10000",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "prettify": "prettier --write src/**/*"
   }
 }
