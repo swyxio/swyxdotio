@@ -36,7 +36,7 @@ It seems like a really good way to be bad at getting data quickly is to not have
 
 Some plugin systems encourage tacking plugin after plugin with no way to debug apart from just running the code and seeing if it works. Plugins should be led by an introspection API that can be logged out and studied without actually executing. A strong parallel is GraphQL's schema system and GraphiQL.
 
-In short: have a [Dry Run](https://mobile.twitter.com/swyx/status/1172212419764064256).
+In short: have a [Dry Run](https://mobile.twitter.com/swyx/status/1172212419764064256). (more [Dry Run examples](https://twitter.com/aj_kerrigan/status/1172964279127068673?s=20) here)
 
 ## Use synchronous I/O in an asynchronous environment
 

@@ -1,6 +1,6 @@
 <script>
   export let segment;
-  export let isFooter = false
+  export let isFooter = false;
 </script>
 
 <style>
@@ -23,9 +23,9 @@
     ul {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
-    } 
+    }
     li.divider {
-      display: none
+      display: none;
     }
   }
 
@@ -43,15 +43,15 @@
   }
   li:hover {
     font-size: 50px;
-    animation:spin 1s linear infinite;
+    animation: spin 1s linear infinite;
   }
   @keyframes spin {
     100% {
-      transform:rotate(360deg)
+      transform: rotate(360deg);
     }
   }
   li.divider {
-    width: 100%
+    width: 100%;
   }
 
   .selected {
@@ -79,21 +79,22 @@
     top: -1px;
   }
 
-  a, span {
+  a,
+  span {
     text-decoration: none;
     padding: 1em 0.5em;
-    display: block
+    display: block;
   }
 
   span {
-    background: linear-gradient(to right,#647bd8,#93199f);
+    background: linear-gradient(to right, #647bd8, #93199f);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     font-weight: bold;
   }
 </style>
 
-<nav class={isFooter && 'footerNav' || 'headerNav'}>
+<nav class={(isFooter && 'footerNav') || 'headerNav'}>
   <ul>
     <li>
       <span>swyx.io</span>
@@ -123,19 +124,13 @@
     </li>
     <li class="divider">{''}</li>
     <li class="external">
-      <a href="https://tinyletter.com/swyx">
-        mailinglist
-      </a>
+      <a href="https://tinyletter.com/swyx">mailinglist</a>
     </li>
     <li class="external">
-      <a href="https://twitter.com/swyx">
-        twitter
-      </a>
+      <a href="https://twitter.com/swyx">twitter</a>
     </li>
     <li class="external">
-      <a href="https://github.com/sw-yx/swyxdotio">
-        github
-      </a>
+      <a href="https://github.com/sw-yx/swyxdotio">github</a>
     </li>
   </ul>
 </nav>

@@ -2,26 +2,27 @@
   export async function preload({ params, query }) {
     // the `slug` parameter is available because
     // this file is called [slug].svelte
-    const res = await this.fetch(`data/writing___ssg___${params.slug}.json`)
-    const data = await res.json()
+    const res = await this.fetch(`data/writing___ssg___${params.slug}.json`);
+    const data = await res.json();
 
     if (res.status === 200) {
-      return { post: data }
+      return { post: data };
     } else {
-      this.error(res.status, data.message)
+      this.error(res.status, data.message);
     }
   }
 </script>
 
 <script>
-  import { stores } from '@sapper/app';
+  import { stores } from "@sapper/app";
   const { page } = stores();
-  export let slug = $page.params.slug
-  export let post
-  export let seoCategory = "swyx Writing"
-  export let seoTitle = `${seoCategory} | ${post.metadata.title}`
-  export let seoDescription = post.metadata.desc || post.metadata.description || seoTitle
-  export let category = "writing"
+  export let slug = $page.params.slug;
+  export let post;
+  export let seoCategory = "swyx Writing";
+  export let seoTitle = `${seoCategory} | ${post.metadata.title}`;
+  export let seoDescription =
+    post.metadata.desc || post.metadata.description || seoTitle;
+  export let category = "writing";
 </script>
 
 <style>
@@ -65,22 +66,26 @@
     display: block;
   }
 
-
   .content :global(a) {
     text-decoration: none;
-    background-image: linear-gradient(45deg,#b6bedf,#9a6a9e);
+    background-image: linear-gradient(45deg, #c3c9df, #e0c0e3);
     background-position: 0% 100%;
     background-repeat: no-repeat;
     background-size: 0% 100%;
-    transition: background-size cubic-bezier(0,.5,0,1) 0.3s;
+    transition: all cubic-bezier(0, 0.5, 0, 1) 0.3s;
   }
 
   .content :global(a):hover,
   .content :global(a):focus {
     text-decoration: none;
     background-size: 100% 100%;
+    /* font-size: 2em; */
   }
-  
+  .content :global(a):hover::after,
+  .content :global(a):focus::after {
+    content: " (" attr(data-href) ")";
+  }
+
   /* figure */
   h1 {
     text-align: center;
@@ -92,18 +97,18 @@
 </style>
 
 <svelte:head>
-    <title>{seoTitle}</title>
-    <meta property="og:url" content={`https://www.swyx.io/${category}/${slug}`}>
-    <meta property="og:type" content="article">
-    <meta property="og:title" content={seoCategory}>
-    <meta name="Description" content={seoDescription}>
-    <meta property="og:description" content={seoDescription}>
-    <meta property="og:image" content="https://www.swyx.io/swyx.jpg">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:creator" content="https://twitter.com/swyx/">
-    <meta name="twitter:title" content={seoCategory}>
-    <meta name="twitter:description" content={seoDescription}>
-    <meta name="twitter:image" content="https://www.swyx.io/swyx.jpg">
+  <title>{seoTitle}</title>
+  <meta property="og:url" content={`https://www.swyx.io/${category}/${slug}`} />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content={seoCategory} />
+  <meta name="Description" content={seoDescription} />
+  <meta property="og:description" content={seoDescription} />
+  <meta property="og:image" content="https://www.swyx.io/swyx.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:creator" content="https://twitter.com/swyx/" />
+  <meta name="twitter:title" content={seoCategory} />
+  <meta name="twitter:description" content={seoDescription} />
+  <meta name="twitter:image" content="https://www.swyx.io/swyx.jpg" />
 </svelte:head>
 
 <h1>{post.metadata.title}</h1>
