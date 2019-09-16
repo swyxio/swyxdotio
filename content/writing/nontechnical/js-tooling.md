@@ -1,7 +1,8 @@
 ---
 title: Why JavaScript Tooling Sucks
 slug: js-tooling
-categories: ['Tech']
+description: JavaScript Tooling is just too hard to use, and it's not your fault.
+categories: ['Tech', 'JavaScript']
 date: 2019-09-15
 ---
 
@@ -71,9 +72,7 @@ Yes, we will have a new frontend framework every so often (not every day, nor ev
 
 This is extremely wasteful and duplicative and [insecure](https://medium.com/hackernoon/im-harvesting-credit-card-numbers-and-passwords-from-your-site-here-s-how-9a8cb347c5b5) and exhausting and hard to learn.
 
-**We know.**
-
-It's also the best way to ensure we have tried and tested ideas before committing them forever to some monolithic thing everyone has to use. If some tool goes bad, we have another waiting in the wings. If the alternative thing is materially better, the incumbent will initially ignore it but eventually try to catch up. It may fail to do so.
+**We know.** It's also the best way to ensure we have tried and tested ideas before committing them forever to some monolithic thing everyone has to use. If some tool goes bad, we have another waiting in the wings. If the alternative thing is materially better, the incumbent will initially ignore it but eventually try to catch up. It may fail to do so.
 
 I'm not saying JavaScript is a real, perfect-information meritocracy. ["Use the Right tool for the job" is a cop-out](https://twitter.com/swyx/status/1171549189064613888) - the vast majority of us don't have time or risk tolerance to try anything other than what everyone else uses.
 
@@ -83,9 +82,9 @@ Which in fact means that we don't bother checking if we're using the right tool,
 
 _JavaScript Tooling Sucks because it is stacks on stacks of brittle abstraction_
 
-I'll break the writing style of this column so far by relating a recent incident. I can do this because I don't have an editor tut-tutting at me and then have to risk hurting their feelings. If I lose you, though, [let me know.](https://twitter.com/swyx)
+I'll break the writing style of this column so far by relating a recent incident. I can do this because I don't have an editor tut-tutting at me. If I lose you, though, [let me know.](https://twitter.com/swyx)
 
-By default, all `npm install`s assign packages with the caret (`^`) which matches minor and major versions of a package, assuming that packages follow [semver](https://www.jvandemo.com/a-simple-guide-to-semantic-versioning/). However, [semver is a social contract](https://twitter.com/sophiebits/status/1063601210144387072) - trivially, if any users rely on bugs, then a bugfix is a breaking change, so semver relies on the definition of a bug, which has the very technical definition of "software not working as we thought we intended". More importantly, semver isn't enforced in any meaningful way when published, so it can't be relied upon when downloading.
+By default, all `npm install`s assign packages with the caret (`^`) which matches minor and major versions of a package, assuming that packages follow [semver](https://www.jvandemo.com/a-simple-guide-to-semantic-versioning/). However, [semver is a social contract](https://twitter.com/sophiebits/status/1063601210144387072) - trivially, if any users rely on bugs, then a bugfix is a breaking change, so semver relies on the definition of a bug, which has the very technical definition of "software not working as we thought we intended". More importantly, semver isn't enforced in any meaningful way when published, so it can't be relied upon when downloading. Yet that is exactly what we do when we use the caret by default.
 
 [`event-stream` happened](https://blog.npmjs.org/post/180565383195/details-about-the-event-stream-incident), and a package was removed even though it was on the register, so all JS tooling and apps built on that tooling started failing. Package management security is above my paygrade, but the reason it had so much _impact_ was because of a single character: `^`.
 
@@ -99,6 +98,8 @@ I changed my mind.
 
 A lot of prominent developers like to say that you should treat `node_modules` like your own code, but that just doesn't ring true, and makes it sound like it's your fault. It's near impossible ([Brian from Begin](https://twitter.com/brianleroux) comes to mind as an exception) to own your entire dependency chain all the way down. [Thomas Young was the Last Man Who Knew Everything](https://en.wikipedia.org/wiki/The_Last_Man_Who_Knew_Everything) and he died in 1829.
 
+Rich Harris, He who Kicks Hornet Nests for Fun, also pointed out [the flaws of the small modules approach](https://medium.com/@Rich_Harris/small-modules-it-s-not-quite-that-simple-3ca532d65de4). In particular, he picks on discoverability and software integrity: "**Everyone has an idea about how to make it easier to find needles in the haystack, but no-one bothers to ask what all this hay is doing here in the first place.**" He was largely ignored - how do you stop an absolutely massive community in its tracks?
+
 Even if you're the model developer, you are not an island. You will work with people who are not model developers, and who don't own their tools. Therefore, it is a statistical eventuality that you will start using tools you don't know you use. I call this the Hashimoto lemma, after one of [Mitchell Hashimoto's reponses on Why Multicloud](https://www.reddit.com/r/devops/comments/91afzz/why_multicloud/?utm_source=share&utm_medium=ios_app).
 
 Basically, if our entire toolchain/productivity strategy relies on owning every dependency just to be reliable, we should probably explore other ideas. (To be clear: I don't have one. Just thinking out loud.)
@@ -109,13 +110,13 @@ _JavaScript Tooling Sucks because we don't make them and we don't treat people w
 
 You don't have to know _everything_, but that doesn't mean not caring about the makers behind the tools you use. But this is a real problem, and it is an _epidemic_.
 
-It may not feel that way, but you are probably an extreme outlier if you spend significant time making JavaScript tooling. The download numbers don't lie. TypeScript has 412. Webpack has 547 contributors. Babel has 757. React has 1331. And you know there's even a power law within _that_ where most of those contributors just fixed typos and docs (not that this is bad at all!). All of these tools have at least 3 orders of magnitude more users than contributors.
+It may not feel that way, but you are probably an extreme outlier if you spend significant time making JavaScript tooling. The download numbers don't lie. TypeScript has 412. Webpack has 547 contributors. Babel has 757. React has 1331. All of these tools have at least 3 orders of magnitude more users than contributors. And you know there's even a power law within _that_ where most of those contributors just fixed typos and docs (not that this is bad at all!).
 
 If you are a regular JavaScript Jane or TypeScript Tom, you don't work on tooling. You don't even know or care who the maintainers of the tools you use are. You work at a Fortune 500 company, or a struggling startup, or a flashy digital agency, or you're between jobs and trying to change careers, and you just want what everyone wants: _get stuff to show up on screen_!
 
 This asymmetry means that a _vast_ other-ness applies when users of tools interact with makers of tools. And because of the relative knowledge difference, as well as just general support goodwill, it's the makers of the tools who often have to bend over backwards to help users diagnose and even fill out basic bug reports.
 
-This problem extends even more pervasively than bad bug reports, though. JavaScript educators make millions teaching how to use tools, while the toolmakers beg for dollars on Patreon and GitHub. Engineering managers and CTOs make _multiple_ millions while being "above all this" and obsessing over [pretty charts](https://www.thoughtworks.com/radar/tools). If you've ever, like them, had a "wait and see" approach to tools instead of diving in and checking it out and helping, you've been a part of the problem, like I have.
+This problem extends even more pervasively than bad bug reports, though. JavaScript educators make millions teaching how to use tools, while the toolmakers beg for dollars on Patreon and GitHub. Engineering managers and CTOs make _multiple_ millions while being "above all this" and obsessing over [pretty charts](https://www.thoughtworks.com/radar/tools). If you've ever, like them, had a "wait and see" approach to tools instead of diving in and checking it out and helping, you've been a part of the problem, like I have. Tools, especially baby ones, don't just get better on their own accord. They need **you** to get better.
 
 What's worse is, _there is a rational explanation for all of this_. There _really is_ value in putting together a bunch of things you didn't make and selling it as a cohesive package. It _really is_ wise to be more cautious in some tech choices. But for goodness sake don't stop trying things out and contributing back. And don't ever feel smug about treating toolmakers like tools.
 
@@ -150,8 +151,6 @@ Solutions I do like:
 - I highly recommend [Joseph Jacks' thinking on "Open Core"](https://medium.com/open-consensus/2-open-core-definition-examples-tradeoffs-e4d0c044da7c) and [OSS business models](https://medium.com/open-consensus/3-oss-business-model-progressions-dafd5837f2d). However, do note that all of these are forms of trading off increasingly less open cooperation and software for more money.
 
 ![OSS business models](https://miro.medium.com/max/1541/1*xzERBcXu7PtNbzZ8wKM9mQ.png)
-
-I haven't read Richard Stallman's entire body of work, so I cannot endorse him, but this kind of conversation usually ends up at some form of [Stallman was Right!](https://www.reddit.com/r/OutOfTheLoop/comments/4wwp1z/who_is_stallman_and_why_is_it_so_significant_when/) exclamation. I wouldn't go to his extreme, but I do like the idea that open source software should be freely readable, remixable, reusable, with standard licenses everyone understands.
 
 Meditations on economics of open business models aside, expecting extrinsic motivation to beat intrinsic motivation is a bad bet. But we can't help it, we're addicted to it. [Dan Pink's Drive](https://www.amazon.com/Drive-Surprising-Truth-About-Motivates/dp/1594484805) puts it best:
 

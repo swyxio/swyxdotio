@@ -26,7 +26,7 @@
 <h1>swyx's site!</h1>
 <h2>
   Latest Post:
-  <a href="/writing/svelte-static">
-    <b>Static Svelte: JavaScript Blogging with 80% less JavaScript</b>
+  <a href="/writing/js-tooling">
+    <b>Why JavaScript Tooling Sucks</b>
   </a>
 </h2>
