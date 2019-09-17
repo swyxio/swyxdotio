@@ -39,9 +39,7 @@ async function getPosts(contentPath, linkPrefix = '') {
       metadata.dateString = date.toDateString()
 
       const renderer = new marked.Renderer()
-
       renderer.link = link_renderer
-
       renderer.code = (source, lang = 'javascript') => {
         // const plang = langs[lang] || 'javascript'
         lang = lang.split(':')[0]
@@ -50,7 +48,6 @@ async function getPosts(contentPath, linkPrefix = '') {
         return highlighter.codeToHtml(source, lang)
         // return `<pre class='language-${plang}'><code>${highlighted}</code></pre>`
       }
-
       renderer.heading = (text, level, rawtext) => {
         const fragment = makeSlug(rawtext)
 

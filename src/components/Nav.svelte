@@ -39,11 +39,11 @@
   li {
     display: block;
     float: left;
-    transition: all 1s;
+    /* transition: all 1s; */
   }
-  li:hover {
+  /* li:hover {
     font-size: 1.25rem;
-  }
+  } */
   li.divider {
     width: 100%;
   }
@@ -103,7 +103,7 @@
 
 <nav class={(isFooter && 'footerNav') || 'headerNav'}>
   <ul>
-    <li>
+    <li class="me">
       <span>swyx.io</span>
     </li>
     <li>

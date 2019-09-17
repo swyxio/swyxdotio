@@ -1,19 +1,16 @@
 <script context="module">
   export function preload({ params, query }) {
-    return this.fetch(`data/writing___ssg___writing_index.json`)
-      .then((r) => r.json())
-      .then((_posts) => {
-        const posts = _posts.sort((b, a) => new Date(a.date) - new Date(b.date))
-        return { posts }
-      })
-      .catch((err) => {
-        this.error(500, err.message)
-      })
+    return this.fetch(`data/writing___ssg___index.json`)
+      .then(r => r.json())
+      .then(posts => ({ posts: Object.values(posts) }))
+      .catch(err => {
+        this.error(500, err.message);
+      });
   }
 </script>
 
 <script>
-  export let posts
+  export let posts;
 </script>
 
 <style>
@@ -32,7 +29,7 @@
   }
   li {
     margin-bottom: 1.5rem;
-    background: linear-gradient(to right,#647bd8,#93199f);
+    background: linear-gradient(to right, #647bd8, #93199f);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
@@ -44,38 +41,52 @@
   /* img {
     max-width: 95%;
   } */
+  article {
+    padding: 1rem;
+  }
 </style>
 
 <svelte:head>
   <title>swyx | Writing</title>
-  <meta property="og:url" content="https://www.swyx.io/writing/">
-  <meta property="og:type" content="article">
-  <meta property="og:title" content="swyx | Writing">
-  <meta name="Description" content="all of swyx's personal and work writing">
-  <meta property="og:description" content="all of swyx's personal and work writing">
-  <meta property="og:image" content="https://www.swyx.io/swyx.jpg">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:creator" content="https://twitter.com/swyx/">
-  <meta name="twitter:title" content="swyx | Writing">
-  <meta name="twitter:description" content="all of swyx's personal and work writing">
-  <meta name="twitter:image" content="https://www.swyx.io/swyx.jpg">
+  <meta property="og:url" content="https://www.swyx.io/writing/" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="swyx | Writing" />
+  <meta name="Description" content="all of swyx's personal and work writing" />
+  <meta
+    property="og:description"
+    content="all of swyx's personal and work writing" />
+  <meta property="og:image" content="https://www.swyx.io/swyx.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:creator" content="https://twitter.com/swyx/" />
+  <meta name="twitter:title" content="swyx | Writing" />
+  <meta
+    name="twitter:description"
+    content="all of swyx's personal and work writing" />
+  <meta name="twitter:image" content="https://www.swyx.io/swyx.jpg" />
 </svelte:head>
 
-<h1>Writing</h1>
-<!-- <pre>
+<article>
+  <h1>Writing</h1>
+  <!-- <pre>
   {JSON.stringify(posts)}
 </pre> -->
 
-<ul>
-  {#each posts as post}
-  <li>
-
-      <a rel="prefetch" href="/writing/{post.slug}">
-        {post.title}
-      </a>
-
-    <br />
-    - <em>{new Date(post.date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</em>
-  </li>
-  {/each}
-</ul>
+  <ul>
+    {#each posts as post}
+      <li>
+        <a rel="prefetch" href="/writing/{post.metadata.slug}">
+          {post.metadata.title}
+        </a>
+        <br />
+        -
+        <em>
+          {new Date(post.metadata.date).toLocaleDateString(undefined, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          })}
+        </em>
+      </li>
+    {/each}
+  </ul>
+</article>

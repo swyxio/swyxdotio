@@ -1,12 +1,16 @@
 <script context="module">
   export async function preload({ params, query }) {
-    // the `slug` parameter is available because
-    // this file is called [slug].svelte
-    const res = await this.fetch(`data/writing___ssg___${params.slug}.json`);
+    const writingIndex = await this.fetch(
+      `data/writing___ssg___index.json`
+    ).then(x => x.json());
+    const post = writingIndex[params.slug];
+    // console.log({ post });
+    const uid = post.uid;
+    const res = await this.fetch(`data/writing___ssg___${uid}.json`);
     const data = await res.json();
-
+    post.html = data;
     if (res.status === 200) {
-      return { post: data };
+      return { post };
     } else {
       this.error(res.status, data.message);
     }
@@ -34,6 +38,9 @@
 		so we have to use the :global(...) modifier to target
 		all elements inside .content
 	*/
+  .content {
+    padding: 1em;
+  }
   .content :global(h2) {
     font-size: 1.4em;
     font-weight: 500;
@@ -65,24 +72,31 @@
     margin: 0 auto;
     display: block;
   }
-
+  /* 
   .content :global(a) {
     text-decoration: none;
-    background-image: linear-gradient(45deg, #c3c9df, #e0c0e3);
+    background-image: 
     background-position: 0% 100%;
     background-repeat: no-repeat;
     background-size: 0% 100%;
     transition: all cubic-bezier(0, 0.5, 0, 1) 0.3s;
-  }
+  } */
 
-  .content :global(a):hover,
-  .content :global(a):focus {
-    text-decoration: none;
+  .content :global(a)::before {
+    /* text-decoration: none;
     background-size: 100% 100%;
-    /* font-size: 2em; */
+    font-size: 2em; */
+    content: attr(href);
+    position: absolute;
+    transform: translateY(0rem);
+    background: linear-gradient(45deg, #c3c9df, #e0c0e3);
+    visibility: visible;
+    transition: all 0.5s;
+    opacity: 0;
   }
-  .content :global(a):hover::after {
-    content: " (" attr(data-href) ")";
+  .content :global(a):hover::before {
+    opacity: 1;
+    transform: translateY(1.5rem);
   }
 
   /* figure */

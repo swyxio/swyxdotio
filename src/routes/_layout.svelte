@@ -1,23 +1,30 @@
 <script>
-  import Nav from '../components/Nav.svelte'
-  export let segment
+  import Nav from "../components/Nav.svelte";
+  export let segment;
 </script>
 
 <style>
   main {
+    flex: 1;
     position: relative;
     max-width: 56em;
-    padding: 2em;
     margin: 0 auto;
     box-sizing: border-box;
     line-height: 1.5em;
   }
+  .layout {
+    display: flex;
+    min-height: 95vh;
+    flex-direction: column;
+  }
 </style>
 
-<Nav {segment} />
+<div class="layout">
+  <Nav {segment} />
 
-<main>
-  <slot />
-</main>
+  <main>
+    <slot />
+  </main>
 
-<Nav isFooter {segment} />
+  <Nav isFooter {segment} />
+</div>

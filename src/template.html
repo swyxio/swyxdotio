@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang='en'>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
@@ -16,18 +16,39 @@
 	     lazily loaded when it precaches secondary pages -->
     %sapper.styles%
 
-
-
-	  <style>
+    <style>
       body {
         margin: 0;
-        background: rgb(254, 254, 218);
-        font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+          Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+          'Segoe UI Symbol';
         font-weight: 400;
         font-size: 18px;
         color: #333;
       }
-      code, pre {
+
+      body {
+        background: rgb(254, 254, 218);
+      }
+      body:before {
+        content: '';
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: -1;
+        margin: -5px;
+        border-radius: inherit;
+        background: linear-gradient(#e66465, #9198e5);
+      }
+      #sapper {
+        background: rgb(254, 254, 218);
+        min-height: calc(100vh - 10px);
+        margin: 5px;
+      }
+      code,
+      pre {
         font-family: 'Inconsolata', monospace;
         font-weight: 400;
         line-height: 1.2;
@@ -35,8 +56,12 @@
       pre {
         overflow-x: auto;
       }
-      h1, h2, h3 {
-        font-family: Rajdhani, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      h1,
+      h2,
+      h3 {
+        font-family: Rajdhani, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+          Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+          'Segoe UI Symbol';
         margin: 0;
         margin-top: 20px;
         font-weight: 400;
@@ -53,9 +78,14 @@
       h3 {
         font-size: 20px;
       }
-  
-      a { text-decoration: none; color: rgb(37, 49, 218); }
-      strong { font-weight: 800; }
+
+      a {
+        text-decoration: none;
+        color: rgb(37, 49, 218);
+      }
+      strong {
+        font-weight: 800;
+      }
     </style>
 
     <!-- This contains the contents of the <svelte:head> component, if
@@ -71,6 +101,5 @@
 	     and anything else it needs to hydrate the app and
 	     initialise the router -->
     %sapper.scripts%
-
   </body>
 </html>
