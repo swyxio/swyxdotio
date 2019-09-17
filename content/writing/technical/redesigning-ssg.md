@@ -10,7 +10,6 @@ On the back of [Bad Ways to Get Data](/writing/bad-ways-to-get-data), I want to 
 
 - generate a manifest upfront. This means firing off the minimum viable request to index everything, as defined by the user. Do NOT attempt to read everything up front as that blocks execution.
 - offer easy profiling. instead of ad hoc console.logs, use `debug` to provide reusable log events.
-- Estimate time for completion
 - Define a transparent plugin interface - pass the input of the main function to a plugin, get the output and pass it out.
   - i don't like passing in a set of strings or objects and letting the thing opaquely call the thing
 - (not data related) use a temp folder to store all the Sapper boilerplate
@@ -25,6 +24,7 @@ On the back of [Bad Ways to Get Data](/writing/bad-ways-to-get-data), I want to 
 Reach goals:
 
 - TypeScript?
+- Estimate time for completion
 - offer incremental builds by diffing a prior manifest (cheap to read) and/or the actual generated file system (a better source of truth, but more expensive to read)
   - In dev, watch and reload individual files
   - how do you figure out the dependency tree from here?
@@ -106,3 +106,11 @@ async function myPluginPlugin(name) {
   return getSlice
 }
 ```
+
+---
+
+after thinking it through, i dont like this anymore. if everything is run once, there is no sense sequestering it inside a function. this isn't the right use case for plugins.
+
+I reference [Component Story Format](https://medium.com/storybookjs/component-story-format-66f4c32366df) in this - they broke it up, and now it's far more reusable. It makes sense. I don't have an excuse.
+
+I'll just stick to individual exports for now.

@@ -30,14 +30,20 @@ Goal: what's available.
     - https://templates.netlify.com/
     - more ways (Siri, Wand, Watch, CodeSandbox) https://community.netlify.com/t/common-issue-deploying-a-site-to-netlify-different-approaches/146
 - Functions
-  - add a sample proxy function
+  - add a sample JS and Go function
   - setting Functions folder in app
   - setting Functions folder in netlify.toml
+  - Event Triggered Functions
+    - `deploy-building`, `deploy-succeeded`, `deploy-failed`, `deploy-locked`, `deploy-unlocked`
+    - Env variables
+      - INCOMING_HOOK_TITLE, INCOMING_HOOK_URL, INCOMING_HOOK_BODY https://www.netlify.com/docs/webhooks/#build-hook-metadata
+  - AWS Lambda versions: AWS_LAMBDA_JS_RUNTIME nodejs10.x
 - Defaults
   - [HTTPS](https://www.netlify.com/docs/ssl/)
   - [Deploy Previews](https://www.netlify.com/docs/continuous-deployment/#branches-deploys)
     - [Branch deploys](https://www.netlify.com/docs/continuous-deployment/#branches-deploys)
     - Split testing
+      - `split-test-activated`, `split-test-deactivated`, `split-test-modified`
   - Distributed Deploys, Atomic Deploys, Instant Rollbacks
 - Post Processing
   - Forms **separate video**
@@ -135,9 +141,88 @@ Goal: what's available.
 # Part 4: 📈 Netlify Addons
 
 - Analytics
-- Forms => **separate video**
-- Identity => **separate video**
-- NetlifyCMS => **separate video**
+  - What unique visitors are
+  - Missing files
+- Functions
+- Large Media
+- Forms
+  - Introducing Forms in plain HTML
+  - File Uploads
+  - Customize Thank you page
+  - Slack/Email/Webhook notifications
+  - `submission-created`
+  - Spam Filtering
+    - Akismet
+    - Honeypot
+    - Recaptcha
+  - Forms in Single Page Apps
+  - Forms in Gatsby
+  - Notifications
+  - Zapier
+  - Retrieving form info in function
+- Password Protection and Role Based Access Control
+  - https://www.netlify.com/docs/visitor-access-control/#password-protection
+  - https://www.netlify.com/docs/visitor-access-control/#role-based-access-controls-with-jwt-tokens
+- Identity
+  - Enable
+  - Identity on a boilerplate
+  - Adding `netlify-identity-widget`
+  - Important settings
+    - open signup vs invite only
+    - confirm vs don't confirm
+    - External providers
+  - Metadata
+    - user metadata
+    - app metadata
+  - Identity and functions
+    - Metadata management
+  - Email templates
+  - Event Triggered Functions
+    - identity-validate: Triggered when an Identity user tries to sign up via Identity.
+    - identity-signup: Triggered when an Identity user signs up via Netlify Identity.
+      - Note: this fires for only email+password signups, not for signups via external providers e.g. Google/GitHub
+    - identity-login: Triggered when an Identity user logs in via Netlify Identity.
+  - Paid features
+    - Branded OAuth
+    - SSO
+    - custom sender
+    - Audit log
+- NetlifyCMS
+  - Clone from Template
+  - Concepts and Config
+    - Admin Endpoint
+    - Git Gateway
+    - Backend
+    - Invite users
+      - Netlify Identity
+      - Other Backends
+    - Media and Public folders
+    - Editorial Workflow
+    - Filter (published?)
+  - Collections
+    - Folder collection
+    - File collection
+  - Scheduled Posts
+  - Media
+    - Cloudinary
+- Addon Marketplace https://www.netlify.com/docs/partner-add-ons/
+  - Fauna DB
+  - Very Good Security
+- Premium Addons
+  - Support
+  - Performance ADN
+- Make Your Own Netlify Client
+  - Example User clients
+    - https://github.com/stefanjudis/netlify-menubar
+    - https://github.com/johnnyxbell/netlify-menubar-status
+    - https://github.com/netlify/cli
+    - Netlify App
+  - https://www.netlify.com/docs/api/
+  - https://open-api.netlify.com/
+  - Netlify Libraries
+    - https://github.com/netlify/js-client
+    - https://github.com/netlify/open-api
+    - https://github.com/netlify/cli-utils/
 
 # Part 5: ❓ Learn More
 
