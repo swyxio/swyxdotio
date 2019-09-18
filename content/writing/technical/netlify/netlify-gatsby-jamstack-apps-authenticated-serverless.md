@@ -7,7 +7,7 @@ description: Gatsby is more than a simple static site generator. It uses JavaScr
 published: false
 ---
 
-When interacting with a backend, a JAMstack app can do everything a mobile app can do, without the tyranny of the app store. This is a fundamental insight that goes as deep as the fight for a more open,  secure, decoupled, faster web.
+When interacting with a backend, a JAMstack app can do everything a mobile app can do, without the tyranny of the app store. This is a fundamental insight that goes as deep as the fight for a more open, secure, decoupled, faster web.
 
 Static site generators (SSGs) are traditionally used to generate markup HTML for static sites, and even [e-commerce sites](https://css-tricks.com/lets-build-a-jamstack-e-commerce-store-with-netlify-functions/), but the modern generation of JavaScript SSGs are enabling full-blown, blazing fast web apps. Gatsby uses JavaScript to rehydrate Markup into a fully dynamic React app - which means you can use APIs to do all sorts of dynamic functionality!
 
@@ -47,7 +47,7 @@ The beauty of serverless functions is that it is incrementally adoptable - **you
 
 We'll assume you have a Gatsby site ready to go already, preferably linked to a Git remote like GitHub. If you don't have one, fork and download [gatsby-starter-default](https://app.netlify.com/start/deploy?repository=https://github.com/gatsbyjs/gatsby-starter-default). Let's walk through the steps to add Netlify Functions:
 
-1. **Install Netlify CLI and login**: 
+1. **Install Netlify CLI and login**:
 
 ```bash
 npm i -g netlify-cli
@@ -56,7 +56,7 @@ netlify login # to link your free Netlify account
 
 Pretty straightforward.
 
-2. **Create your Netlify instance for your Gatsby site**: 
+2. **Create your Netlify instance for your Gatsby site**:
 
 ```bash
 netlify init
@@ -84,12 +84,12 @@ You'll be presented with an autocomplete list. We'll pick the `token-hider` exam
 Notice that `token-hider.js` includes this line:
 
 ```js
-const { API_SECRET = "shiba" } = process.env
+const { API_SECRET = 'shiba' } = process.env
 ```
 
 This is meant to simulate API secrets that you don't want to expose to the frontend. You can set these as [build environment variables](https://www.netlify.com/docs/continuous-deployment/?utm_source=blog&utm_medium=freecodecamp&utm_campaign=devex#environment-variables) on your site's Netlify Dashboard. You can name them whatever you like, and for the purposes of our demo we've provided a default, but of course feel free to modify this code however you like. It's Just JavaScript™!
 
-4. **Make sure function dependencies are installed with `netlify-lambda`** (Optional but Recommended) 
+4. **Make sure function dependencies are installed with `netlify-lambda`** (Optional but Recommended)
 
 Notice that your function comes with its own `package.json` and `node_modules`. This means each function can have their own independently managed dependencies, but you also need to make sure these dependencies are installed when you deploy or when someone else clones your repo. You can either check them into git (ugh!), or write a bash script to do this installation. But don't worry, there's a simple utility to automate this:
 
@@ -122,12 +122,12 @@ How are both the Gatsby dev server and the Netlify Functions server both availab
 You can hit your Netlify Function from anywhere in your Gatsby app! For example, in any event handler or lifecycle method, insert:
 
 ```js
-fetch("/.netlify/functions/token-hider")
+fetch('/.netlify/functions/token-hider')
   .then(response => response.json())
   .then(console.log)
 ```
 
-and watch a list of dog images pop up in your console.  If you are new to React, I highly recommend [reading through the React docs](https://reactjs.org/docs/handling-events.html) to understand where and how to insert event handlers so you can, for example, [respond to a button click](https://reactjs.org/docs/handling-events.html).
+and watch a list of dog images pop up in your console. If you are new to React, I highly recommend [reading through the React docs](https://reactjs.org/docs/handling-events.html) to understand where and how to insert event handlers so you can, for example, [respond to a button click](https://reactjs.org/docs/handling-events.html).
 
 ## Adding Authentication
 
@@ -140,24 +140,24 @@ It's a different tier of concern, which makes it hard to write about in the same
 ## Adding Netlify Identity and Authenticated Pages to Gatsby
 
 1. **Enable Netlify Identity**: Netlify Identity doesn't come enabled by default. You'll have to head to your site admin (eg `https://app.netlify.com/sites/YOUR_AWESOME_SITE/identity`) to turn it on. [Read the docs](https://www.netlify.com/docs/identity/?utm_source=blog&utm_medium=freecodecamp&utm_campaign=devex) for further info on what you can do, for example add Facebook or Google social sign-on!
-2. **Install dependencies**: `npm install gatsby-plugin-netlify-identity react-netlify-identity-widget  @reach/dialog @reach/tabs @reach/visually-hidden gatsby-plugin-create-client-paths`
+2. **Install dependencies**: `npm install gatsby-plugin-netlify-identity react-netlify-identity-widget @reach/dialog @reach/tabs @reach/visually-hidden gatsby-plugin-create-client-paths`
 3. **Configure Gatsby**: for dynamic-ness!
 
-```jsx:title=gatsby-config.js
+```jsx
 // gatsby-config.js
 module.exports = {
   plugins: [
     {
       resolve: `gatsby-plugin-create-client-paths`,
-      options: { prefixes: [`/app/*`] },
+      options: { prefixes: [`/app/*`] }
     },
     {
       resolve: `gatsby-plugin-netlify-identity`,
       options: {
-        url: "https://YOUR_AWESOME_SITE_INSTANCE_HERE.netlify.com",
-      },
-    },
-  ],
+        url: 'https://YOUR_AWESOME_SITE_INSTANCE_HERE.netlify.com'
+      }
+    }
+  ]
 }
 ```
 
@@ -167,13 +167,13 @@ This sets up everything under the `/app` route to be dynamic on the clientside, 
 
 The widget is implemented as an accessible modal with `@reach/dialog`, so you need to put it somewhere in your app:
 
-```jsx:title=src/app/login.js
+```jsx
 // src/app/login.js
-import React from "react"
-import { navigate } from "gatsby"
+import React from 'react'
+import { navigate } from 'gatsby'
 
-import { IdentityModal } from "react-netlify-identity-widget"
-import "react-netlify-identity-widget/styles.css" // delete if you want to bring your own CSS
+import { IdentityModal } from 'react-netlify-identity-widget'
+import 'react-netlify-identity-widget/styles.css' // delete if you want to bring your own CSS
 
 export default function Login() {
   const [dialog, setDialog] = React.useState(false)
@@ -184,8 +184,8 @@ export default function Login() {
       <IdentityModal
         showDialog={dialog}
         onCloseDialog={() => setDialog(false)}
-        onLogin={user => navigate("/app/profile")}
-        onSignup={user => navigate("/app/profile")}
+        onLogin={user => navigate('/app/profile')}
+        onSignup={user => navigate('/app/profile')}
       />
     </div>
   )
@@ -198,17 +198,17 @@ As you might expect, you can use that Context in the rest of your app. `react-ne
 
 `useIdentityContext` returns an `identity` object, and [you can see the plethora of data and methods it exposes to you on the docs](https://github.com/sw-yx/react-netlify-identity#user-content-usage). Let's use them to implement a `NavBar` component!
 
-```jsx:title=src/app/components/NavBar.js
+```jsx
 // src/app/components/NavBar.js
-import React from "react"
-import { Link, navigate } from "gatsby"
-import { useIdentityContext } from "react-netlify-identity-widget"
+import React from 'react'
+import { Link, navigate } from 'gatsby'
+import { useIdentityContext } from 'react-netlify-identity-widget'
 
 export default function NavBar() {
   const { user, isLoggedIn, logoutUser } = useIdentityContext()
   let message = isLoggedIn
     ? `Hello, ${user.user_metadata && user.user_metadata.full_name}`
-    : "You are not logged in"
+    : 'You are not logged in'
   const handleClick = async event => {
     event.preventDefault()
     await logoutUser()
@@ -221,7 +221,13 @@ export default function NavBar() {
         <span>Navigate the app: </span>
         <Link to="/app/">Main</Link>
         <Link to="/app/profile">Profile</Link>
-        {isLoggedIn ? (<a href="/" onClick={handleClick}>Logout</a>) : (<Link to="/app/login">Login</Link>)}
+        {isLoggedIn ? (
+          <a href="/" onClick={handleClick}>
+            Logout
+          </a>
+        ) : (
+          <Link to="/app/login">Login</Link>
+        )}
       </nav>
     </div>
   )
@@ -230,31 +236,28 @@ export default function NavBar() {
 
 5. **Write the rest of your app**: Because of our configuration in `gatsby-plugin-create-client-paths`, any sub paths in `src/pages/app` will be exempt from Gatsby static generation. To keep the dividing line between app and site crystal clear, I like to have all my dynamic Gatsby code in a dedicated `app` folder. This means you can use `@reach/router` with `react-netlify-identity-widget` to write a standard dynamic React app with private, authenticated routes. Here's some sample code to give you an idea of how to hook them up:
 
-```jsx:title=src/app/app.js
+```jsx
 // src/app/app.js
-import React from "react"
-import { Router } from "@reach/router"
-import Layout from "../components/layout"
-import NavBar from "./components/NavBar"
-import Profile from "./profile"
-import Main from "./main"
-import Login from "./login"
-import { useIdentityContext } from "react-netlify-identity-widget"
-import { navigate } from "gatsby"
+import React from 'react'
+import { Router } from '@reach/router'
+import Layout from '../components/layout'
+import NavBar from './components/NavBar'
+import Profile from './profile'
+import Main from './main'
+import Login from './login'
+import { useIdentityContext } from 'react-netlify-identity-widget'
+import { navigate } from 'gatsby'
 
 function PrivateRoute(props) {
   const { isLoggedIn } = useIdentityContext()
   const { component: Component, location, ...rest } = props
 
-  React.useEffect(
-    () => {
-      if (!isLoggedIn && location.pathname !== `/app/login`) {
-        // If the user is not logged in, redirect to the login page.
-        navigate(`/app/login`)
-      }
-    },
-    [isLoggedIn, location]
-  )
+  React.useEffect(() => {
+    if (!isLoggedIn && location.pathname !== `/app/login`) {
+      // If the user is not logged in, redirect to the login page.
+      navigate(`/app/login`)
+    }
+  }, [isLoggedIn, location])
   return isLoggedIn ? <Component {...rest} /> : null
 }
 function PublicRoute(props) {
@@ -289,12 +292,12 @@ The best way to do authenticated actions inside serverless functions is to do it
 // in your gatsby app
 const { user } = useIdentityContext()
 // in an event handler
-fetch("/.netlify/functions/auth-hello", {
+fetch('/.netlify/functions/auth-hello', {
   headers: {
-    Accept: "application/json",
-    "Content-Type": "application/json",
-    Authorization: "Bearer " + user.token.access_token, // like this
-  },
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: 'Bearer ' + user.token.access_token // like this
+  }
 }).then(/* etc */)
 ```
 
@@ -304,7 +307,7 @@ If even this is too much boilerplate, you can even use the fetch wrapper that sh
 // in your gatsby app
 const { authedFetch } = useIdentityContext()
 // in an event handler
-authedFetch("/.netlify/functions/auth-hello").then(/* etc */)
+authedFetch('/.netlify/functions/auth-hello').then(/* etc */)
 ```
 
 And then inside your Netlify function, you can now check the `user` object or pass it on to your end API or database:
@@ -318,8 +321,8 @@ async function handler(event, context) {
     return {
       statusCode: 200,
       body: JSON.stringify({
-        msg: "super secret info only available to authenticated users",
-        user,
+        msg: 'super secret info only available to authenticated users',
+        user
       })
     }
   } else {
@@ -327,8 +330,8 @@ async function handler(event, context) {
       statusCode: 401,
       body: JSON.stringify({
         msg:
-          "Error: No authentication detected! Note that netlify-lambda doesn't locally emulate Netlify Identity.",
-      }),
+          "Error: No authentication detected! Note that netlify-lambda doesn't locally emulate Netlify Identity."
+      })
     }
   }
 }

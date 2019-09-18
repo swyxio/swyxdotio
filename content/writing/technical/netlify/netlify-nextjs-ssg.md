@@ -95,7 +95,7 @@ In the static export process we previously wrote about, we didn't need to write 
 
 With Next.js 9, we can declare a file structure like this:
 
-```
+```bash
 - /pages
   - index.js
   - about.js

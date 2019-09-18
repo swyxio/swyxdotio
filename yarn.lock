@@ -3461,7 +3461,7 @@ supports-color@^6.0.0, supports-color@^6.1.0:
   dependencies:
     has-flag "^3.0.0"
 
-svelte@^3.0.0:
+svelte@^3.12.1:
   version "3.12.1"
   resolved "https://registry.yarnpkg.com/svelte/-/svelte-3.12.1.tgz#ddfacd43272ac3255907c682b74ee7d3d8b06b0c"
   integrity sha512-t29WJNjHIqfrdMcVXqIyRfgLEaNz7MihKXTpb8qHlbzvf0WyOOIhIlwIGvl6ahJ9+9CLJwz0sjhFNAmPgo8BHg==

@@ -1,5 +1,5 @@
 ---
-title: "Turning the Static Dynamic: Gatsby + Netlify Functions + Netlify Identity"
+title: 'Turning the Static Dynamic: Gatsby + Netlify Functions + Netlify Identity'
 date: 2018-12-26
 slug: gatsby-static-dynamic
 categories: ['Tech', 'Netlify', 'Gatsby']
@@ -70,23 +70,23 @@ For more info or configuration options (e.g. in different branches and build env
 
 4. **Proxy the emulated functions for local development**: Head to `gatsby-config.js` and add this to your `module.exports`:
 
-```jsx:title=gatsby-config.js
+```jsx
 var proxy = require('http-proxy-middleware')
 
 module.exports = {
   // for avoiding CORS while developing Netlify Functions locally
   // read more: https://www.gatsbyjs.org/docs/api-proxy/#advanced-proxying
-  developMiddleware: (app) => {
+  developMiddleware: app => {
     app.use(
       '/.netlify/functions/',
       proxy({
         target: 'http://localhost:9000',
         pathRewrite: {
-          '/.netlify/functions/': '',
-        },
-      }),
+          '/.netlify/functions/': ''
+        }
+      })
     )
-  },
+  }
   // ...
 }
 ```
@@ -101,8 +101,8 @@ export function handler(event, context, callback) {
     // return null to show no errors
     statusCode: 200, // http status code
     body: JSON.stringify({
-      msg: 'Hello, World! ' + Math.round(Math.random() * 10),
-    }),
+      msg: 'Hello, World! ' + Math.round(Math.random() * 10)
+    })
   })
 }
 ```
@@ -111,7 +111,7 @@ Now you are ready to access this API from anywhere in your Gatsby app! For examp
 
 ```js
 fetch('/.netlify/functions/hello')
-  .then((response) => response.json())
+  .then(response => response.json())
   .then(console.log)
 ```
 
@@ -133,15 +133,15 @@ It's a different tier of concern, which makes it hard to write about in the same
 2. **Install dependencies**: `npm install netlify-identity-widget gatsby-plugin-create-client-paths`
 3. **Configure Gatsby**: for dynamic-ness!
 
-```jsx:title=gatsby-config.js
+```jsx
 module.exports = {
   plugins: [
     {
       resolve: `gatsby-plugin-create-client-paths`,
-      options: { prefixes: [`/app/*`] },
-    },
+      options: { prefixes: [`/app/*`] }
+    }
     // ...
-  ],
+  ]
   // ... (including what you also wrote earlier)
 }
 ```
@@ -150,7 +150,7 @@ module.exports = {
 
 Here's a usable example that stores your user in local storage:
 
-```jsx:title=service/auth.js
+```jsx
 import netlifyIdentity from 'netlify-identity-widget'
 
 export const isBrowser = () => typeof window !== 'undefined'
@@ -166,14 +166,15 @@ export const getUser = () =>
     ? JSON.parse(window.localStorage.getItem('netlifyUser'))
     : {}
 
-const setUser = (user) => window.localStorage.setItem('netlifyUser', JSON.stringify(user))
+const setUser = user =>
+  window.localStorage.setItem('netlifyUser', JSON.stringify(user))
 
-export const handleLogin = (callback) => {
+export const handleLogin = callback => {
   if (isLoggedIn()) {
     callback(getUser())
   } else {
     netlifyIdentity.open()
-    netlifyIdentity.on('login', (user) => {
+    netlifyIdentity.on('login', user => {
       setUser(user)
       callback(user)
     })
@@ -186,7 +187,7 @@ export const isLoggedIn = () => {
   return !!user
 }
 
-export const logout = (callback) => {
+export const logout = callback => {
   netlifyIdentity.logout()
   netlifyIdentity.on('logout', () => {
     setUser({})
@@ -197,7 +198,7 @@ export const logout = (callback) => {
 
 5. **Write your app**: Now, any sub paths in `src/pages/app` will be exempt from Gatsby static generation. To keep the dividing line between app and site crystal clear, I like to have all my dynamic Gatsby code in a dedicated `app` folder. This means you can use `@reach/router` with `netlify-identity-widget` to write a standard dynamic React app. Here's some sample code to give you an idea of how to hook them up:
 
-```jsx:title=app.js
+```jsx
 import React from 'react'
 import { Router } from '@reach/router' // comes with gatsby v2
 import Layout from '../components/layout'
@@ -229,7 +230,7 @@ function PublicRoute(props) {
 export default App
 ```
 
-```jsx:title=components/NavBar.js
+```jsx
 import React from 'react'
 import { Link, navigate } from 'gatsby'
 import { getUser, isLoggedIn, logout } from '../services/auth'
@@ -238,7 +239,8 @@ export default () => {
   const content = { message: '', login: true }
   const user = getUser()
   if (isLoggedIn()) {
-    content.message = `Hello, ${user.user_metadata && user.user_metadata.full_name}`
+    content.message = `Hello, ${user.user_metadata &&
+      user.user_metadata.full_name}`
   } else {
     content.message = 'You are not logged in'
   }
@@ -249,7 +251,7 @@ export default () => {
         flex: '1',
         justifyContent: 'space-between',
         borderBottom: '1px solid #d1c1e0',
-        backgroundColor: 'aliceblue',
+        backgroundColor: 'aliceblue'
       }}
     >
       <span>{content.message}</span>
@@ -263,7 +265,7 @@ export default () => {
         {isLoggedIn() ? (
           <a
             href="/"
-            onClick={(event) => {
+            onClick={event => {
               event.preventDefault()
               logout(() => navigate(`/app/login`))
             }}
@@ -279,7 +281,7 @@ export default () => {
 }
 ```
 
-```jsx:title=components/PrivateRoute.js
+```jsx
 import React from 'react'
 import { isLoggedIn } from '../services/auth'
 import { navigate } from 'gatsby'
@@ -303,13 +305,13 @@ class PrivateRoute extends React.Component {
 export default PrivateRoute
 ```
 
-```jsx:title=login.js
+```jsx
 import React from 'react'
 import { navigate } from 'gatsby'
 import { handleLogin, isLoggedIn } from './services/auth'
 
 class Login extends React.Component {
-  handleSubmit = () => handleLogin((user) => navigate(`/app/profile`))
+  handleSubmit = () => handleLogin(user => navigate(`/app/profile`))
   render() {
     return (
       <>
@@ -338,8 +340,8 @@ fetch('/.netlify/functions/auth-hello', {
   headers: {
     Accept: 'application/json',
     'Content-Type': 'application/json',
-    Authorization: 'Bearer ' + user.token.access_token, // like this
-  },
+    Authorization: 'Bearer ' + user.token.access_token // like this
+  }
 }).then(/* etc */)
 ```
 
@@ -353,14 +355,14 @@ And then inside a Lambda function, you can now access the `user` object:
 export function handler(event, context, callback) {
   if (context.clientContext) {
     const {
-      user, // actual user info you can use for your serverless functions
+      user // actual user info you can use for your serverless functions
     } = context.clientContext
     callback(null, {
       statusCode: 200,
       body: JSON.stringify({
         msg: 'auth-hello: ' + Math.round(Math.random() * 10),
-        user,
-      }),
+        user
+      })
     })
   } else {
     console.log(`
@@ -372,8 +374,8 @@ export function handler(event, context, callback) {
       statusCode: 200,
       body: JSON.stringify({
         msg:
-          "auth-hello - no authentication detected. Note that netlify-lambda doesn't locally emulate Netlify Identity.",
-      }),
+          "auth-hello - no authentication detected. Note that netlify-lambda doesn't locally emulate Netlify Identity."
+      })
     })
   }
 }
