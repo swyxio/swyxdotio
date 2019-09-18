@@ -49,9 +49,10 @@
   }
 
   .content :global(pre) {
-    background-color: #f9f9f9;
+    font-size: 80%;
+    background-color: #292d3e;
     box-shadow: inset 1px 1px 5px rgba(0, 0, 0, 0.05);
-    padding: 0.5em;
+    padding: 1em;
     border-radius: 2px;
     overflow-x: auto;
   }

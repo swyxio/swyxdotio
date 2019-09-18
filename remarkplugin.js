@@ -30,7 +30,7 @@ let _preset = {
     require('rehype-format'),
     [require('remark-frontmatter'), ['yaml']],
     require('rehype-slug'),
-    require('rehype-shiki'),
+    [require('rehype-shiki'), { theme: 'Material-Theme-Palenight' }],
     require('rehype-stringify')
   ]
 }
