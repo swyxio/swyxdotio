@@ -1,10 +1,10 @@
 const fs = require('fs')
 const path = require('path')
 
-const writingPlugin = require('./remarkplugin')({
+const writingPlugin = require('@ssgjs/source-remark')({
   dirPath: 'content/writing'
 })
-const talksPlugin = require('./remarkplugin')({
+const talksPlugin = require('@ssgjs/source-remark')({
   dirPath: 'content/talks'
 })
 
