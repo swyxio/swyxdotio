@@ -1,6 +1,7 @@
 <style>
   article {
     padding: 1rem;
+    text-align: center;
   }
 </style>
 

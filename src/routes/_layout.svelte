@@ -4,25 +4,23 @@
 </script>
 
 <style>
-  main {
+  main.layoutmain {
     flex: 1;
     position: relative;
-    max-width: 56em;
-    margin: 0 auto;
     box-sizing: border-box;
     line-height: 1.5em;
   }
-  .layout {
+  div.layout {
     display: flex;
-    min-height: 95vh;
     flex-direction: column;
+    min-height: 95vh;
   }
 </style>
 
 <div class="layout">
   <Nav {segment} />
 
-  <main>
+  <main class="layoutmain">
     <slot />
   </main>
 

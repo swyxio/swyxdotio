@@ -40,6 +40,8 @@
 	*/
   .content {
     padding: 1em;
+    max-width: 56em;
+    margin: 0 auto;
   }
   .content :global(h2) {
     font-size: 1.4em;
@@ -72,41 +74,26 @@
     margin: 0 auto;
     display: block;
   }
-  /* 
-  .content :global(a) {
-    text-decoration: none;
-    background-image: 
-    background-position: 0% 100%;
-    background-repeat: no-repeat;
-    background-size: 0% 100%;
-    transition: all cubic-bezier(0, 0.5, 0, 1) 0.3s;
-  } */
-
-  .content :global(a)::before {
-    /* text-decoration: none;
-    background-size: 100% 100%;
-    font-size: 2em; */
-    content: attr(href);
-    position: absolute;
-    transform: translateY(0rem);
-    background: linear-gradient(45deg, #c3c9df, #e0c0e3);
-    visibility: visible;
-    transition: all 0.5s;
-    opacity: 0;
+  @media (min-width: 640px) {
+    .content :global(a)::before {
+      content: attr(href);
+      position: absolute;
+      transform: translate(-10rem, 1.5rem) scale(0);
+      background: linear-gradient(45deg, #c3c9df, #e0c0e3);
+      visibility: visible;
+      transition: all 0.5s;
+      opacity: 0;
+    }
+    .content :global(a):hover::before {
+      opacity: 1;
+      transform: translateY(1.5rem) scale(1);
+    }
   }
-  .content :global(a):hover::before {
-    opacity: 1;
-    transform: translateY(1.5rem);
-  }
-
   /* figure */
   h1 {
     text-align: center;
     margin: 0 auto;
   }
-  /* img {
-    max-width: 80%;
-  } */
 </style>
 
 <svelte:head>

@@ -36,6 +36,8 @@
   }
   article {
     padding: 1rem;
+    max-width: 56em;
+    margin: 0 auto;
   }
 </style>
 
@@ -60,7 +62,7 @@
     {#each posts as post}
       <li>
         <a rel="prefetch" href="/talks/{post.metadata.slug}">
-          {post.metadata.title}
+          <strong>{post.metadata.title}</strong>
         </a>
         <br />
         -

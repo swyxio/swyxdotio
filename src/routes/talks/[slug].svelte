@@ -94,6 +94,8 @@
 
   .content {
     padding: 1em;
+    max-width: 56em;
+    margin: 0 auto;
   }
 
   .content :global(img) {
@@ -201,7 +203,9 @@
   </div>
 {/if}
 <div class="content">
-  <p>{description}</p>
+  {#if description}
+    <p>{description}</p>
+  {/if}
   {#if post.html}
     {@html post.html}
   {/if}
