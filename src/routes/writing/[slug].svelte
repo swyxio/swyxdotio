@@ -19,6 +19,7 @@
 
 <script>
   import { stores } from '@sapper/app'
+  import SlugTemplate from '../_slug.svelte'
   const { page } = stores()
   export let slug = $page.params.slug
   export let post
@@ -30,67 +31,6 @@
 </script>
 
 <style>
-  /*
-		By default, CSS is locally scoped to the component,
-		and any unused styles are dead-code-eliminated.
-		In this page, Svelte can't know which elements are
-		going to appear inside the {{{post.html}}} block,
-		so we have to use the :global(...) modifier to target
-		all elements inside .content
-	*/
-  .content {
-    padding: 1em;
-    max-width: 56em;
-    margin: 0 auto;
-  }
-  .content :global(h2) {
-    font-size: 1.4em;
-    font-weight: 500;
-  }
-
-  .content :global(pre) {
-    font-size: 80%;
-    background-color: #292d3e;
-    box-shadow: inset 1px 1px 5px rgba(0, 0, 0, 0.05);
-    padding: 1em;
-    border-radius: 2px;
-    overflow-x: auto;
-  }
-
-  .content :global(pre) :global(code) {
-    background-color: transparent;
-    padding: 0;
-  }
-
-  .content :global(ul) {
-    line-height: 1.5;
-  }
-
-  .content :global(li) {
-    margin: 0 0 0.5em 0;
-  }
-
-  .content :global(img) {
-    max-width: 80%;
-    margin: 0 auto;
-    display: block;
-  }
-  @media (min-width: 480px) {
-    .content :global(a)::before {
-      content: attr(href);
-      position: absolute;
-      transform: translate(-10rem, 1.5rem) scale(0);
-      background: linear-gradient(45deg, #c3c9df, #e0c0e3);
-      visibility: visible;
-      transition: all 0.5s;
-      opacity: 0;
-    }
-    .content :global(a):hover::before {
-      opacity: 1;
-      transform: translateY(1.5rem) scale(1);
-    }
-  }
-  /* figure */
   h1 {
     text-align: center;
     margin: 0 auto;
@@ -112,21 +52,7 @@
   <meta name="twitter:image" content="https://www.swyx.io/swyx.jpg" />
 </svelte:head>
 
-<h1>{post.metadata.title}</h1>
-
-<div class="content">
+<SlugTemplate>
+  <h1>{post.metadata.title}</h1>
   {@html post.html}
-</div>
-<!-- 
-<div class="content">
-  {#if post.image}
-  <figure>
-    <img src={`/assets/${post.image}`} alt={post.title} />
-    <figcaption>{post.title}</figcaption>
-  </figure>
-  {:else}
-  <a href="{post.url}">{post.url}</a>
-  {/if} {#if post.description}
-  <div>{post.description}</div>
-  {/if}
-</div> -->
+</SlugTemplate>

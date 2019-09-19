@@ -16,6 +16,8 @@ I gave another version of this at Middev Con 2019
 - https://vimeo.com/showcase/6204270/video/352567930
 - https://www.youtube.com/watch?v=PoqWF9BKtOE
 
+## Table of Contents
+
 ## final copy
 
 There is a lot of developer and investment interest in JAMStack technologies, from the serverless movement to new authentication models to continuous atomic deployment to the static site generator renaissance. But with so many new terms and options, it is hard for people to figure out where to start.
@@ -29,7 +31,7 @@ You do not need to know GraphQL, but you can get a head start by reading <a href
 
 ## Description
 
-## I'm the best person to speak on this subject because I have been heavily involved in the JAMstack ecosystem for years and regularly write and teach about this topic. I wrote this post https://www.gatsbyjs.org/blog/2018-12-17-turning-the-static-dynamic/ for the Gatsby Blog and it was one of their most popular ever, indicating a lot of interest in a "full stack" instruction for turning static sites into fully capable web apps. I also work at Netlify and was the lead dev on the Netlify Dev CLI and can explain all the details about how to get effective at serverless functions and deployment! All technologies used in this workshop are in-demand and open source.
+I'm the best person to speak on this subject because I have been heavily involved in the JAMstack ecosystem for years and regularly write and teach about this topic. I wrote this post https://www.gatsbyjs.org/blog/2018-12-17-turning-the-static-dynamic/ for the Gatsby Blog and it was one of their most popular ever, indicating a lot of interest in a "full stack" instruction for turning static sites into fully capable web apps. I also work at Netlify and was the lead dev on the Netlify Dev CLI and can explain all the details about how to get effective at serverless functions and deployment! All technologies used in this workshop are in-demand and open source.
 
 ## Links:
 

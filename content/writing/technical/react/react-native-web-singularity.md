@@ -8,6 +8,8 @@ banner: './assets/react-native-web-singularity.jpeg'
 
 Bottom line up front: There is a possible "React Native Web Singularity", when it starts being a better standalone choice for developing for the mobile web than `react-dom`. If this speculation comes true, this would be gamechanging.
 
+## Table of Contents
+
 ## Context
 
 I spent a couple hours looking into [React Native Web](https://github.com/necolas/react-native-web) today. I want to preface this with the very important acknowledgements that I have no knowledge of the React team's plans, and I have not ever built anything with React Native Web so I am really just speculating and thinking out loud.

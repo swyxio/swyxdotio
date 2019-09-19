@@ -10,6 +10,8 @@ desc: a 1hr netlify workshop introducing people to TS
 description: TypeScript is a megatrend in JavaScript, going from 46% of npm survey respondents in 2018 to 62% in 2019. This is an introduction to TypeScript for those familiar with JavaScript with a Q&A at the end. A 1hr internal Netlify lunch & learn.
 ---
 
+## Table of Contents
+
 ## Twitter Comments
 
 - [From Leslie](https://mobile.twitter.com/lesliecdubs/status/1168968624956198915)

@@ -12,6 +12,8 @@ In working on my [Sapper export library](https://www.npmjs.com/package/ssg), I r
 - an extremely simple tweak of the default Sapper app generates 100k very content light pages in 95 seconds (0.001s/page)
 - [Gatsby v2](https://github.com/gatsbyjs/gatsby/pull/6226/) built about 5000 pages in 37 seconds, 25k pages in 7.5mins (0.01 - 0.02s/page)
 
+## Table of Contents
+
 ## Do Expensive Reads Over and Over
 
 So I was at least an order of magnitude off of where I should be. I originally thought that this was justified, as I'd been told Sapper uses puppeteer to crawl pages, but this was wrong. I thought it might be json serialization/desrialization over the local server, but this was wrong.
@@ -20,7 +22,7 @@ It was the fetching of the data.
 
 Because I had handcooked my own data process to be a single function that, when called, returned a Big Ball of Data, it was easy to code each page call to fetch this Big Ball every single page despite not needing it. If the reads were expensive (which they were, with [syntax highlighting](https://github.com/octref/shiki)), then they were executed for each file, for each page, over and over and over again.
 
-Once I realized this, the fix was obvious. Refactor the data pipeline to have an upfront data read, dump it somewhere as a static, postprocessed file, and then only refer to that static file where reads are guaranteed to be cheap. 
+Once I realized this, the fix was obvious. Refactor the data pipeline to have an upfront data read, dump it somewhere as a static, postprocessed file, and then only refer to that static file where reads are guaranteed to be cheap.
 
 As of writing, this blog now exports its ~100 pages in 7s (0.07s/page). Still slow but half as bad.
 
@@ -50,7 +52,7 @@ There's a need to store indexes that cut across slices. Should we do that during
 
 ## Have No Idea if You Need to Redo Work
 
-[Immediate mode](https://en.wikipedia.org/wiki/Immediate_mode_(computer_graphics)) is easy to debug and write, because you throw away all state and so you are only responsible for declaring new state, however of course Retained mode can be more efficient if you do it right.
+[Immediate mode](<https://en.wikipedia.org/wiki/Immediate_mode_(computer_graphics)>) is easy to debug and write, because you throw away all state and so you are only responsible for declaring new state, however of course Retained mode can be more efficient if you do it right.
 
 The way to do this is to have the idea of "pure functions" in data fetches. Given this assumption, you can memoize on these inputs, and skip fetches.
 
@@ -67,6 +69,6 @@ The halting problem is intractable, but you can at least give a credible estimat
 
 I think this lesson is a general one from the Database world - before making big data queries, make a [Query Plan](https://en.wikipedia.org/wiki/Query_plan)! Also called a manifest. I guess the difference between a plan and a manifest is that a manifest can have useful info for others to consume, while a plan has no such obligation.
 
-You can then make optimizations *across* the plan, as well as memoize parts of it based off a manifest, and so on. 
+You can then make optimizations _across_ the plan, as well as memoize parts of it based off a manifest, and so on.
 
 That any large data pipeline should learn lessons from the data world seems so brutally obvious in retrospect, but we consistently fail to design prototypes and API's that respect this basic principle.

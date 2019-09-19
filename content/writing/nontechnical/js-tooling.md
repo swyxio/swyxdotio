@@ -16,6 +16,8 @@ If you clicked on this title with an open mind, you probably don't exist, but we
 
 These are hypotheses, not presented as objective facts. **I'm trying to explain, not justify**. All my blogposts come with an implicit "In My Current Opinion" disclaimer and I am constantly looking to change my mind (someday I'll get around to putting this in a "Terms of Use" because some people don't understand the social contract around personal blogging and [epistemic status](https://devonzuegel.com/post/epistemic-statuses-are-lazy-and-that-is-a-good-thing)). There are also massive benefits to JS tooling I don't cover.
 
+## Table of Contents
+
 ## JavaScript wasn't made for this
 
 _JavaScript Tooling Sucks because JavaScript wasn't designed with business critical tooling and apps in mind_

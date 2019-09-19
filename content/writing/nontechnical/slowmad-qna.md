@@ -11,6 +11,8 @@ The other thing about [Netlify Year One](https://www.swyx.io/writing/netlify-yea
 
 Here are my takeaways. TL;DR: it wasn't all roses! I am settled into a long term lease now in NYC and it was a fun travel season while it lasted.
 
+## Table of Contents
+
 ## What is a "slowmad"?
 
 I think the idea of a "digital nomad" is very overrated. Travel isn't something to be glorified. It can be very disruptive and I don't get as much out of sightseeing as I could just browsing the wikipedia page of the thing (lame, I know). I like getting to know a place, traveling for a purpose, meeting people. Slow travel. I like the Slowmad idea.

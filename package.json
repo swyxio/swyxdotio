@@ -5,7 +5,7 @@
   "author": "sw-yx <swyx@dontemail.me>",
   "license": "MIT",
   "dependencies": {
-    "@ssgjs/source-remark": "^0.0.1",
+    "@ssgjs/source-remark": "^0.0.3",
     "compression": "^1.7.1",
     "mdsvex": "^0.4.0",
     "polka": "next",

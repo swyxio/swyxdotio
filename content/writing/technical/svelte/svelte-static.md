@@ -1,5 +1,5 @@
 ---
-title: "Static Svelte: JavaScript Blogging with 93% less JavaScript"
+title: 'Static Svelte: JavaScript Blogging with 93% less JavaScript'
 subtitle: Why Svelte is a Perfect Fit For Blogging
 slug: svelte-blogging-fit
 categories: ['Tech', 'Svelte']
@@ -30,14 +30,15 @@ Through the magic of [Netlify's Immutable Deploys](https://www.netlify.com/blog/
 
 ### Similarities
 
-First, the similarities must be noted, for any reasonable discussion to be had. For example, the *reductio ad finem* conclusion of the premise of this post is to use any old static site generator like [Jekyll or Hugo](https://www.staticgen.com/) since it will result in *no* JS payload.
+First, the similarities must be noted, for any reasonable discussion to be had. For example, the _reductio ad finem_ conclusion of the premise of this post is to use any old static site generator like [Jekyll or Hugo](https://www.staticgen.com/) since it will result in _no_ JS payload.
 
 **Costs and Benefits of JS Blogging**
 
 However, both Gatsby and Sapper offer clientside rehydration, which makes the subsequent page navigation very fast. It is also easy to:
+
 - progressively add dynamic features without a major refactor
 - code in reusable components
-- and leverage the vast JS ecosystem to add functionality. 
+- and leverage the vast JS ecosystem to add functionality.
 
 Yes, these are all available through other means. I'm aware.
 
@@ -51,7 +52,7 @@ However, there are no-JS solutions for syntax highlighting, since I don't intend
 
 **High End Lighthouse Score**
 
-The default, no throttling Lighthouse scores are totally fine. I'm not going to be read by the next billion users when I don't even have 200 subscribers on [my mailing list](https://tinyletter.com/swyx). These are all going to vary based on the specific implementation details of the site (in particular, how much time/effort I spend on it) so don't pay this *too* much mind, but not that they're all... *alright*. Definitely not a failing grade:
+The default, no throttling Lighthouse scores are totally fine. I'm not going to be read by the next billion users when I don't even have 200 subscribers on [my mailing list](https://tinyletter.com/swyx). These are all going to vary based on the specific implementation details of the site (in particular, how much time/effort I spend on it) so don't pay this _too_ much mind, but not that they're all... _alright_. Definitely not a failing grade:
 
 - [Gatsby version](https://5d7699e172ae430007210374--scout-videos-51664.netlify.com/writing/netlify-redirects-i18n):
   - Performance: 100
@@ -59,7 +60,7 @@ The default, no throttling Lighthouse scores are totally fine. I'm not going to 
   - Best Practices: 93
   - SEO: 89
   - PWA: yes
-- [Sapper version](https://5d7c46e60da4524431f76aef--scout-videos-51664.netlify.com/writing/netlify-redirects-i18n/): 
+- [Sapper version](https://5d7c46e60da4524431f76aef--scout-videos-51664.netlify.com/writing/netlify-redirects-i18n/):
   - Performance: 100
   - Accessibility: 100
   - Best Practices: 93

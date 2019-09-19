@@ -18,6 +18,7 @@
 
 <script>
   import { stores } from '@sapper/app'
+  import SlugTemplate from '../_slug.svelte'
   const { page } = stores()
   export let slug = $page.params.slug
   export let post
@@ -39,24 +40,11 @@
       videoId = null
     }
   }
-  $: console.log({ post })
+  // $: console.log({ post })
 </script>
 
 <style>
-  /*
-		By default, CSS is locally scoped to the component,
-		and any unused styles are dead-code-eliminated.
-		In this page, Svelte can't know which elements are
-		going to appear inside the {{{post.html}}} block,
-		so we have to use the :global(...) modifier to target
-		all elements inside .content
-	*/
-  /* .content :global(h2) {
-    font-size: 1.4em;
-    font-weight: 500;
-  } */
-
-  .content :global(a) {
+  /* .content :global(a) {
     text-decoration: none;
     background-image: linear-gradient(45deg, #b6bedf, #9a6a9e);
     background-position: 0% 100%;
@@ -69,8 +57,8 @@
   .content :global(a):focus {
     text-decoration: none;
     background-size: 100% 100%;
-  }
-
+  } */
+  /* 
   .content :global(pre) {
     font-size: 80%;
     background-color: #292d3e;
@@ -80,32 +68,7 @@
     margin-right: -1em;
     border-radius: 2px;
     overflow-x: auto;
-  }
-
-  .content :global(pre) :global(code) {
-    background-color: transparent;
-    padding: 0;
-  }
-
-  .content :global(ul) {
-    line-height: 1.5;
-  }
-
-  .content :global(li) {
-    margin: 0 0 0.5em 0;
-  }
-
-  .content {
-    padding: 1em;
-    max-width: 56em;
-    margin: 0 auto;
-  }
-
-  .content :global(img) {
-    max-width: 80%;
-    margin: 0 auto;
-    display: block;
-  }
+  } */
 
   h1,
   h2 {
@@ -161,6 +124,7 @@
   <meta name="twitter:description" content={seoDescription} />
   <meta name="twitter:image" content="https://www.swyx.io/swyx.jpg" />
 </svelte:head>
+
 <div class="talkHeaderDiv">
   <h1>{post.metadata.title}</h1>
   <h2>
@@ -205,7 +169,7 @@
       aria-hidden="true" />
   </div>
 {/if}
-<div class="content">
+<SlugTemplate>
   {#if description}
     <p>{description}</p>
   {/if}
@@ -213,17 +177,4 @@
     {@html post.html}
   {/if}
   <pre id="metadataDisplay">{JSON.stringify(post.metadata, null, 2)}</pre>
-</div>
-<!-- 
-<div class="content">
-  {#if post.image}
-  <figure>
-    <img src={`/assets/${post.image}`} alt={post.title} />
-    <figcaption>{post.title}</figcaption>
-  </figure>
-  {:else}
-  <a href="{post.url}">{post.url}</a>
-  {/if} {#if post.description}
-  <div>{post.description}</div>
-  {/if}
-</div> -->
+</SlugTemplate>

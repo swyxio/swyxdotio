@@ -15,6 +15,8 @@ This post is for skeptics and newcomers to type systems, and aims to articulate 
 2. Then we'll step back and try to think about what this phenomenon tells us about how we want to code.
 3. Lastly, we'll ask some (leading!) questions that should arise from these insights.
 
+## Table of Contents
+
 ## 1A: Types in Names
 
 Regardless of language, your journey with types starts almost as soon as you learn to code. The basic list data structure invites a corresponding plural:
@@ -112,7 +114,7 @@ We also fake our way toward enums this way:
 const colors = {
   BLUE: Symbol(1),
   GREEN: Symbol(2),
-  RED: Symbol(3),
+  RED: Symbol(3)
 }
 ```
 
@@ -123,9 +125,12 @@ More pressing is encoding types in complex values.
 This usually happens when you have arrays of objects and the objects are different in some ways and similar in others:
 
 ```js
-const animals = [{ name: 'Fido', legs: 4, says: 'woof' }, { name: 'Kermit', legs: 2, marriedTo: 'Piggy' }]
+const animals = [
+  { name: 'Fido', legs: 4, says: 'woof' },
+  { name: 'Kermit', legs: 2, marriedTo: 'Piggy' }
+]
 // will have bugs if an animal with both `says` and `marriedTo` exists
-animals.forEach((animal) => {
+animals.forEach(animal => {
   if (animal.says) {
     // i guess it's a dog?
   }
@@ -143,16 +148,16 @@ const animals = [
     type: 'dog', // new!
     name: 'Fido',
     legs: 4,
-    says: 'woof',
+    says: 'woof'
   },
   {
     type: 'frog', // new!
     name: 'Kermit',
     legs: 2,
-    marriedTo: 'Piggy',
-  },
+    marriedTo: 'Piggy'
+  }
 ]
-animals.forEach((animal) => {
+animals.forEach(animal => {
   if (animal.type === 'dog') {
     // must be a dog!
   }
@@ -240,7 +245,7 @@ Type Systems can shorten this feedback by yet another order of magnitude, to sec
 const Foo = {
   getData() {
     return 'data'
-  },
+  }
 }
 Foo['getdata']() // Error: undefined is not a function
 ```
@@ -251,7 +256,7 @@ JavaScript is intentionally lazy evaluation by design. Instead of the dreaded an
 const Foo = {
   getData() {
     return 'data'
-  },
+  }
 }
 Foo['getdata']() // Property 'getdata' does not exist on type '{ getData(): string; }'. Did you mean 'getData'?
 ```
