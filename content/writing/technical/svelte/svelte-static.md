@@ -20,11 +20,11 @@ Through the magic of [Netlify's Immutable Deploys](https://www.netlify.com/blog/
 
 ### Gatsby version (138kb)
 
-![screenshot of Gatsby site with 138kb of JS](./assets/sveltegatsby.jpeg)
+![screenshot of Gatsby site with 138kb of JS](/assets/sveltegatsby.jpeg)
 
 ### Sapper version (9kb)
 
-![screenshot of Sapper site with 9kb of JS](./assets/sveltesvelte.jpeg)
+![screenshot of Sapper site with 9kb of JS](/assets/sveltesvelte.jpeg)
 
 ## Differences and Similarities
 

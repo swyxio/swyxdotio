@@ -1,10 +1,4 @@
 <script>
-  // hack for getting rid of the base element because f it
-  import { onMount } from 'svelte'
-  onMount(async () => {
-    const base = [...document.head.children].find(x => x.nodeName === 'BASE')
-    if (base) base.remove()
-  })
   import Nav from '../components/Nav.svelte'
   export let segment
 </script>

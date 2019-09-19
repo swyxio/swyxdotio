@@ -18,6 +18,13 @@
 </script>
 
 <script>
+  // hack for adding location onto anchor links bc of base element
+  import { onMount } from 'svelte'
+  onMount(async () => {
+    ;[...document.querySelectorAll('a[href^="#"]')].map(
+      x => (x.href = document.location + new URL(x.href).hash)
+    )
+  })
   import { stores } from '@sapper/app'
   import SlugTemplate from '../_slug.svelte'
   const { page } = stores()
