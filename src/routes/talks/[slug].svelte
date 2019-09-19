@@ -1,11 +1,11 @@
 <script context="module">
   export async function preload({ params, query }) {
-    const talkIndex = await this.fetch(`data/talks___ssg___index.json`).then(
+    const talkIndex = await this.fetch(`/data/talks___ssg___index.json`).then(
       x => x.json()
     )
     const post = talkIndex[params.slug]
     const uid = post.uid
-    const res = await this.fetch(`data/talks___ssg___${uid}.json`)
+    const res = await this.fetch(`/data/talks___ssg___${uid}.json`)
     const data = await res.json()
     post.html = data
     if (res.status === 200) {

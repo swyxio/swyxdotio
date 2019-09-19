@@ -1,6 +1,6 @@
 <script context="module">
   export function preload({ params, query }) {
-    return this.fetch(`data/talks___ssg___index.json`)
+    return this.fetch(`/data/talks___ssg___index.json`)
       .then(r => r.json())
       .then(posts => ({ posts: Object.values(posts) }))
       .catch(err => {
@@ -32,6 +32,7 @@
     margin-bottom: 1.5rem;
     background: linear-gradient(45deg, #337bd8, #6433d8);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
   }
   article {

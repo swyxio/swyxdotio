@@ -1,12 +1,12 @@
 <script context="module">
   export async function preload({ params, query }) {
     const writingIndex = await this.fetch(
-      `data/writing___ssg___index.json`
+      `/data/writing___ssg___index.json`
     ).then(x => x.json())
     const post = writingIndex[params.slug]
     // console.log({ post });
     const uid = post.uid
-    const res = await this.fetch(`data/writing___ssg___${uid}.json`)
+    const res = await this.fetch(`/data/writing___ssg___${uid}.json`)
     const data = await res.json()
     post.html = data
     if (res.status === 200) {

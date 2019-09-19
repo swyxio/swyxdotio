@@ -1,6 +1,6 @@
 <script>
-  export let segment;
-  export let isFooter = false;
+  export let segment
+  export let isFooter = false
 </script>
 
 <style>
@@ -41,7 +41,7 @@
 
   /* clearfix */
   ul::after {
-    content: "";
+    content: '';
     display: block;
     clear: both;
   }
@@ -65,7 +65,7 @@
 
   .headerNav .selected::after {
     position: absolute;
-    content: "";
+    content: '';
     width: calc(100% - 1em);
     height: 2px;
     background-color: rgb(255, 62, 0);
@@ -75,7 +75,7 @@
 
   .footerNav .selected::before {
     position: absolute;
-    content: "";
+    content: '';
     width: calc(100% - 1em);
     height: 2px;
     background-color: rgb(255, 62, 0);
@@ -92,6 +92,7 @@
   span {
     background: linear-gradient(to right, #647bd8, #93199f);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     font-weight: bold;
   }
@@ -123,7 +124,7 @@
     <li>
       <a
         class={'block ' + (segment === 'about' ? 'selected' : '')}
-        href="about">
+        href="/about">
         about
       </a>
     </li>
@@ -132,7 +133,7 @@
       <a
         rel="prefetch"
         class={'block ' + (segment === 'writing' ? 'selected' : '')}
-        href="writing">
+        href="/writing">
         writing
       </a>
     </li>
@@ -140,8 +141,8 @@
       <a
         rel="prefetch"
         class={'block ' + (segment === 'talks' ? 'selected' : '')}
-        href="talks">
-        talks
+        href="/talks">
+        speaking
       </a>
     </li>
     <li class="divider">{''}</li>

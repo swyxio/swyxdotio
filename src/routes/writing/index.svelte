@@ -1,16 +1,16 @@
 <script context="module">
   export function preload({ params, query }) {
-    return this.fetch(`data/writing___ssg___index.json`)
+    return this.fetch(`/data/writing___ssg___index.json`)
       .then(r => r.json())
       .then(posts => ({ posts: Object.values(posts) }))
       .catch(err => {
-        this.error(500, err.message);
-      });
+        this.error(500, err.message)
+      })
   }
 </script>
 
 <script>
-  export let posts;
+  export let posts
 </script>
 
 <style>
@@ -31,6 +31,7 @@
     margin-bottom: 1.5rem;
     background: linear-gradient(to right, #647bd8, #93199f);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
   }
   article {
