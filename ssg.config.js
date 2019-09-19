@@ -13,7 +13,9 @@ exports.getDataSlice = async (key, uid) => {
   if (key === 'writing') {
     return writingPlugin.getDataSlice(uid)
   } else if (key === 'talks') {
-    return talksPlugin.getDataSlice(uid)
+    return talksPlugin.getDataSlice(uid).then(potato => {
+      return potato
+    })
   }
   if (typeof result === 'undefined')
     throw new Error('no data found for ' + slug)

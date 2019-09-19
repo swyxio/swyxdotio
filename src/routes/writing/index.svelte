@@ -22,7 +22,7 @@
     grid-gap: 3rem 1.5rem;
     grid-template-columns: 1fr 1fr 1fr;
   }
-  @media (max-width: 400px) {
+  @media (max-width: 480px) {
     ul {
       grid-template-columns: 1fr;
     }

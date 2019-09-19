@@ -100,6 +100,7 @@ Goal: what's available.
     - Build
     - Package & optimize
     - Save cache
+    - (post processing)
     - Deploy
     - Output manifest
   - Concurrent Builds and Canceling Builds
@@ -148,8 +149,9 @@ Goal: what's available.
 - Forms
   - Introducing Forms in plain HTML
   - File Uploads
-  - Customize Thank you page
-  - Slack/Email/Webhook notifications
+  - Customize Post-Submit page
+  - Slack/Email/Webhook Notifications
+  - Zapier
   - `submission-created`
   - Spam Filtering
     - Akismet
@@ -157,9 +159,7 @@ Goal: what's available.
     - Recaptcha
   - Forms in Single Page Apps
   - Forms in Gatsby
-  - Notifications
-  - Zapier
-  - Retrieving form info in function
+  - AJAX form submissions
 - Password Protection and Role Based Access Control
   - https://www.netlify.com/docs/visitor-access-control/#password-protection
   - https://www.netlify.com/docs/visitor-access-control/#role-based-access-controls-with-jwt-tokens
@@ -167,6 +167,10 @@ Goal: what's available.
   - Enable
   - Identity on a boilerplate
   - Adding `netlify-identity-widget`
+  - Adding `react-netlify-identity-widget`
+    - `react-netlify-identity`
+    - `gatsby-plugin-react-netlify-identity`
+    - `gotrue-js`
   - Important settings
     - open signup vs invite only
     - confirm vs don't confirm
@@ -176,12 +180,13 @@ Goal: what's available.
     - app metadata
   - Identity and functions
     - Metadata management
+    - Retrieving form info in function
   - Email templates
   - Event Triggered Functions
-    - identity-validate: Triggered when an Identity user tries to sign up via Identity.
-    - identity-signup: Triggered when an Identity user signs up via Netlify Identity.
+    - `identity-validate`: before sign up
+    - `identity-signup`: on sign up
       - Note: this fires for only email+password signups, not for signups via external providers e.g. Google/GitHub
-    - identity-login: Triggered when an Identity user logs in via Netlify Identity.
+    - `identity-login`: on log in
   - Paid features
     - Branded OAuth
     - SSO

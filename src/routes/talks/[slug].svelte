@@ -2,42 +2,44 @@
   export async function preload({ params, query }) {
     const talkIndex = await this.fetch(`data/talks___ssg___index.json`).then(
       x => x.json()
-    );
-    const post = talkIndex[params.slug];
-    const uid = post.uid;
-    const res = await this.fetch(`data/talks___ssg___${uid}.json`);
-    const data = await res.json();
+    )
+    const post = talkIndex[params.slug]
+    const uid = post.uid
+    const res = await this.fetch(`data/talks___ssg___${uid}.json`)
+    const data = await res.json()
+    post.html = data
     if (res.status === 200) {
-      return { post };
+      return { post }
     } else {
-      this.error(res.status, data.message);
+      this.error(res.status, data.message)
     }
   }
 </script>
 
 <script>
-  import { stores } from "@sapper/app";
-  const { page } = stores();
-  export let slug = $page.params.slug;
-  export let post;
-  export let description = post.metadata.desc || post.metadata.description;
-  export let seoCategory = "swyx Talks";
-  export let seoTitle = `${seoCategory} | ${post.metadata.title}`;
-  export let seoDescription = description || seoTitle;
-  export let category = "talks";
-  export let date = post.metadata.dateString || "no date specified";
-  export let topic = post.metadata.topic ? post.metadata.topic + " @ " : "";
+  import { stores } from '@sapper/app'
+  const { page } = stores()
+  export let slug = $page.params.slug
+  export let post
+  export let description = post.metadata.desc || post.metadata.description
+  export let seoCategory = 'swyx Talks'
+  export let seoTitle = `${seoCategory} | ${post.metadata.title}`
+  export let seoDescription = description || seoTitle
+  export let category = 'talks'
+  export let date = post.metadata.dateString || 'no date specified'
+  export let topic = post.metadata.topic ? post.metadata.topic + ' @ ' : ''
 
-  export let videoId = post.metadata.video || post.metadata.video_url;
+  export let videoId = post.metadata.video || post.metadata.video_url
   if (videoId) {
-    if (videoId.startsWith("https://www.youtube.com/watch")) {
-      videoId = new URL(videoId).searchParams.get("v");
-    } else if (videoId.startsWith("https://youtu.be/")) {
-      videoId = videoId.slice(17);
+    if (videoId.startsWith('https://www.youtube.com/watch')) {
+      videoId = new URL(videoId).searchParams.get('v')
+    } else if (videoId.startsWith('https://youtu.be/')) {
+      videoId = videoId.slice(17)
     } else {
-      videoId = null;
+      videoId = null
     }
   }
+  $: console.log({ post })
 </script>
 
 <style>
@@ -70,7 +72,8 @@
   }
 
   .content :global(pre) {
-    background-color: #f9f9f9;
+    font-size: 80%;
+    background-color: #292d3e;
     box-shadow: inset 1px 1px 5px rgba(0, 0, 0, 0.05);
     padding: 0.5em;
     margin-left: -1em;

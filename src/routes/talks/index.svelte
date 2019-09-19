@@ -4,13 +4,13 @@
       .then(r => r.json())
       .then(posts => ({ posts: Object.values(posts) }))
       .catch(err => {
-        this.error(500, err.message);
-      });
+        this.error(500, err.message)
+      })
   }
 </script>
 
 <script>
-  export let posts;
+  export let posts
   // $: console.log({ posts });
 </script>
 
@@ -23,7 +23,7 @@
     grid-template-columns: 1fr 1fr 1fr;
     grid-gap: 3rem 1.5rem;
   }
-  @media (max-width: 400px) {
+  @media (max-width: 480px) {
     ul {
       grid-template-columns: 1fr;
     }

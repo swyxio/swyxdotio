@@ -2,31 +2,31 @@
   export async function preload({ params, query }) {
     const writingIndex = await this.fetch(
       `data/writing___ssg___index.json`
-    ).then(x => x.json());
-    const post = writingIndex[params.slug];
+    ).then(x => x.json())
+    const post = writingIndex[params.slug]
     // console.log({ post });
-    const uid = post.uid;
-    const res = await this.fetch(`data/writing___ssg___${uid}.json`);
-    const data = await res.json();
-    post.html = data;
+    const uid = post.uid
+    const res = await this.fetch(`data/writing___ssg___${uid}.json`)
+    const data = await res.json()
+    post.html = data
     if (res.status === 200) {
-      return { post };
+      return { post }
     } else {
-      this.error(res.status, data.message);
+      this.error(res.status, data.message)
     }
   }
 </script>
 
 <script>
-  import { stores } from "@sapper/app";
-  const { page } = stores();
-  export let slug = $page.params.slug;
-  export let post;
-  export let seoCategory = "swyx Writing";
-  export let seoTitle = `${seoCategory} | ${post.metadata.title}`;
+  import { stores } from '@sapper/app'
+  const { page } = stores()
+  export let slug = $page.params.slug
+  export let post
+  export let seoCategory = 'swyx Writing'
+  export let seoTitle = `${seoCategory} | ${post.metadata.title}`
   export let seoDescription =
-    post.metadata.desc || post.metadata.description || seoTitle;
-  export let category = "writing";
+    post.metadata.desc || post.metadata.description || seoTitle
+  export let category = 'writing'
 </script>
 
 <style>
@@ -75,7 +75,7 @@
     margin: 0 auto;
     display: block;
   }
-  @media (min-width: 640px) {
+  @media (min-width: 480px) {
     .content :global(a)::before {
       content: attr(href);
       position: absolute;
