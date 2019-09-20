@@ -1,5 +1,5 @@
 ---
-title: Develop, Test, and Deploy Serverless Functions with Netlify
+title: Develop, Test, and Deploy Serverless Functions
 slug: netlify-functions-lunchnlearn
 topic: Netlify
 venues: SmashingConf

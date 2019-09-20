@@ -1,5 +1,6 @@
 ---
-title: "Python <3 the JAMstack (Case Study: Portray Docs on Netlify)"
+title: 'Python <3 the JAMstack'
+subtitle: 'Case Study: Portray Docs on Netlify'
 published: true
 slug: netlify-python-ssg
 description: How to deploy Python projects to Netlify

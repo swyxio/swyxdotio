@@ -3,8 +3,8 @@ const fs = require('fs')
 const path = require('path')
 
 module.exports = screenshot
-async function screenshot(PostArray) {
-  const headless = true
+async function screenshot(PostArray, headful = null) {
+  const headless = !headful
   // const headless = false // for debug
   const browser = await puppeteer.launch({ headless })
   const page = await browser.newPage()
@@ -15,6 +15,11 @@ async function screenshot(PostArray) {
   for (const post of PostArray) {
     i++
     const [slug, text, subtitle] = post
+    if (text.length > 59)
+      console.log(
+        'warning: post "' + slug + '" has a long title that will look bad: ',
+        text
+      )
     const html = getHtml({
       fileType: 'jpg',
       text,

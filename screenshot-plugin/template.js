@@ -53,15 +53,27 @@ function getCss(theme, fontSize) {
         background-image: url("https://www.swyx.io/swyx-og-card-blank.png");
         background-size: cover;
         font-family: 'Inter', sans-serif;
-        padding-left: 1rem;
         object-fit: cover;
-        height: 600px;
-        width: 1200px;
+        width: auto;
+        min-height: calc(100vh - 20px);
+        margin: 5px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
     }
 
+    body:before {
+      content: '';
+      position: fixed;
+      max-width: 100vw;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: -1;
+      border-radius: inherit;
+      background: linear-gradient(#e66465, #9198e5);
+    }
     code {
         color: #D400FF;
         font-family: 'Vera';
@@ -107,13 +119,19 @@ function getCss(theme, fontSize) {
       font-weight: bold;
     }
     .heading {
-        font-size: ${sanitizeHtml(fontSize)};
-        font-style: normal;
-        color: ${foreground};
-        line-height: 1.25;
-        width: 60vw;
+      padding: 1rem;
+      font-size: ${sanitizeHtml(fontSize)};
+      font-style: normal;
+      color: ${foreground};
+      line-height: 1.25;
+      width: 60vw;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
     .subtitle {
+      padding: 1rem;
       font-size: 2em;
       font-style: normal;
       color: ${foreground};
@@ -122,7 +140,8 @@ function getCss(theme, fontSize) {
     }
     
     .footer {
-      width: 45vw;
+      padding: 1rem;
+      width: 40vw;
       font-size: 3rem;
       display: flex;
       justify-content: space-between;
@@ -145,11 +164,16 @@ module.exports = function getHtml(parsedReq) {
         <div class="heading">${emojify(
           md ? marked(text) : sanitizeHtml(text)
         )}</div>
-        ${subtitle ? `<div class="subtitle">${subtitle}</div>` : ''}
+        ${
+          subtitle
+            ? `<div class="subtitle">${subtitle}</div>`
+            : `
         <div class="footer">
         <div>swyx.io</div>
         <div>@swyx</div>
         </div>
+        `
+        }
       </div>
     </body>
 </html>`

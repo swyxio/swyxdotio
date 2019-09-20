@@ -1,5 +1,5 @@
 ---
-title: Learning React and TypeScript in Public with Shawn "swyx" Wang
+title: Learning React and TypeScript in Public
 slug: reactroundup-podcast
 topic: Learn In Public
 venues: podcast

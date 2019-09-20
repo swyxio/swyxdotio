@@ -6,7 +6,7 @@ categories: ['Tech', 'Blogging']
 date: 2019-09-20
 ---
 
-![this page's own og image](https://www.swyx.io/writing/jamstack-og-images.png)
+![this page's own og image](https://www.swyx.io/og_image/writing/jamstack-og-images.png)
 
 This blog now offers RSS and proper `og:image` cards. It's relatively easy to implement RSS with [the `rss` package on npm](https://www.npmjs.com/package/rss), but no such library exists for image generation. It's worth discussing the state of the art and how you can do your own.
 

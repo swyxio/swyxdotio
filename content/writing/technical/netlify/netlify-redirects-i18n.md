@@ -1,5 +1,6 @@
 ---
-title: JAMstack or 'Pilha de Atolamento'? Let Your User Decide (i18n in Gatsby + Netlify)
+title: JAMstack or 'Pilha de Atolamento'?
+subtitle: Let Your User Decide (i18n in Gatsby + Netlify)
 slug: netlify-redirects-i18n
 categories: ['Tech', 'Netlify']
 started: 2019-08-19
@@ -61,7 +62,7 @@ Then configure the plugin accordingly:
 module.exports = {
   siteMetadata: {
     // ...
-    languages: ['en', 'pt'],
+    languages: ['en', 'pt']
   },
   plugins: [
     // ...
@@ -71,10 +72,10 @@ module.exports = {
         langKeyForNull: 'any',
         langKeyDefault: 'en', // or pick your preferred default
         useLangKeyLayout: true,
-        prefixDefault: true, // adds a route for your default language, en
-      },
-    },
-  ],
+        prefixDefault: true // adds a route for your default language, en
+      }
+    }
+  ]
 }
 ```
 

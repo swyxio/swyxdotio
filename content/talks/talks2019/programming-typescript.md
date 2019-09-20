@@ -1,5 +1,6 @@
 ---
-title: Cultural Learnings of Programming for Make Benefit Glorious Users of TypeScript
+title: Programming TypeScript
+subtitle: Cultural Learnings of Programming for Make Benefit Glorious Users of TypeScript
 slug: programming-typescript
 topic: typescript
 venues: TypeScriptNYC
