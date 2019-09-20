@@ -5,13 +5,14 @@
   "author": "sw-yx <swyx@dontemail.me>",
   "license": "MIT",
   "dependencies": {
-    "@ssgjs/source-remark": "^0.0.7",
+    "@ssgjs/source-remark": "^0.0.8",
     "compression": "^1.7.1",
     "mdsvex": "^0.4.0",
     "polka": "next",
     "sapper": "^0.27.8",
     "sirv": "^0.4.0",
-    "ssg": "^0.0.15"
+    "ssg": "^0.0.16",
+    "url-join": "^4.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",

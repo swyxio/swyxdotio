@@ -1,5 +1,6 @@
 const fs = require('fs')
 const path = require('path')
+const generateRSS = require('./generateRSS')
 
 const writingPlugin = require('@ssgjs/source-remark')({
   dirPath: 'content/writing'
@@ -26,9 +27,16 @@ let mainIndex = {} // failed attempt to keep in memory
 exports.createIndex = async () => {
   console.log('getting intial data')
   mainIndex.talks = await talksPlugin.createIndex()
-  console.log('Number of talks:', mainIndex.talks.length)
+  console.log('Number of talks:', Object.keys(mainIndex.talks).length)
   mainIndex.writing = await writingPlugin.createIndex()
-  console.log('Number of posts:', _writing.length)
-
+  console.log('Number of posts:', Object.keys(mainIndex.writing).length)
   return mainIndex
+}
+
+exports.postExport = mainIndex => {
+  generateRSS(mainIndex, {
+    baseUrl: 'https://swyx.io',
+    rssFeedUrl: 'https://swyx.io/rss.xml',
+    rssFaviconUrl: 'https://swyx.io/favicon.png'
+  })
 }

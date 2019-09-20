@@ -665,10 +665,10 @@
   resolved "https://registry.yarnpkg.com/@polka/url/-/url-1.0.0-next.3.tgz#7a56e747ec94622e8513b406c53cc1729799de09"
   integrity sha512-Uom7l6OeP6vcf85lMImelYu5WKVWjXyhkpi9WsRdRzlJFJFPVhjBtBCktgDUj7dk1N5FURUdegSZ5XOjxf8JZg==
 
-"@ssgjs/source-remark@^0.0.7":
-  version "0.0.7"
-  resolved "https://registry.yarnpkg.com/@ssgjs/source-remark/-/source-remark-0.0.7.tgz#236d39adb54c9246d1e03133f164a57d1fedf1d4"
-  integrity sha512-YX31qQe6Wf5HemKFPsr1jO5dpw2QBGxD2EkOv2AfiseGGMFD4GyUVMYLB/B/pDXs8dU6xAnCCOqGypjhbRSQ+Q==
+"@ssgjs/source-remark@^0.0.8":
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/@ssgjs/source-remark/-/source-remark-0.0.8.tgz#cef9a64038fc438551460f7b3dbbe378490f06ec"
+  integrity sha512-zKM0lXhP/z3KuvfqPNLmPodw4eDqZ+xCmqdoM/4LSqlPkGtFZkjhstRVdx0V+aYEtiSEVIydGCqUtENOhPnHaQ==
   dependencies:
     front-matter "^3.0.2"
     immer "^4.0.0"
@@ -3357,10 +3357,10 @@ sprintf-js@~1.0.2:
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
   integrity sha1-BOaSb2YolTVPPdAVIDYzuFcpfiw=
 
-ssg@^0.0.15:
-  version "0.0.15"
-  resolved "https://registry.yarnpkg.com/ssg/-/ssg-0.0.15.tgz#5e11b23b160e9ba110c678c908c6006a28382456"
-  integrity sha512-u7bM4T/3yIUhG3X4ZZZ8LJ2F+mPVx75Vk/uG2+0DjaiV1fxGqyhuHIhSvtg8dhcDWnjUJqOBpEzzcrCrUQCM4w==
+ssg@^0.0.16:
+  version "0.0.16"
+  resolved "https://registry.yarnpkg.com/ssg/-/ssg-0.0.16.tgz#1e992a3ada05ac3cd3233a140688d68eb45135a8"
+  integrity sha512-zlx1kINf1oxldSwUMR8IFWEoIU2mO+uZM0Q1Gd1McfD71BhMa661awnHQtVSd8/5qAzO62KYwG/rWZWrGOQc9w==
   dependencies:
     chalk "^2.4.2"
     chokidar "^3.0.2"
@@ -3801,6 +3801,11 @@ urix@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/urix/-/urix-0.1.0.tgz#da937f7a62e21fec1fd18d49b35c2935067a6c72"
   integrity sha1-2pN/emLiH+wf0Y1Js1wpNQZ6bHI=
+
+url-join@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/url-join/-/url-join-4.0.1.tgz#b642e21a2646808ffa178c4c5fda39844e12cde7"
+  integrity sha512-jk1+QP6ZJqyOiuEI9AEWQfju/nB2Pw466kbA0LEZljHwKeMgd9WrAEgEGxjPDD2+TNbbb37rTyhEfrCXfuKXnA==
 
 url-parse-lax@^1.0.0:
   version "1.0.0"
