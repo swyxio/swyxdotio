@@ -53,7 +53,11 @@ module.exports = async function generateRSS(mainIndex, opts) {
       if (item.metadata.url) {
         itemDescription += ` (External Link: <a href="${item.metadata.url}">${item.metadata.url}</a>)`
       }
-      PostArray.push([category + '/' + item.metadata.slug, item.metadata.title])
+      PostArray.push([
+        category + '/' + item.metadata.slug,
+        item.metadata.title,
+        item.metadata.subtitle
+      ])
       feed.item({
         title: item.metadata.title,
         url: urljoin(baseUrl, category, item.metadata.slug),
