@@ -20,7 +20,6 @@
     }
     var fuse = new Fuse(posts.map(x => x.metadata), options)
     results = fuse.search(searchterm)
-    console.log({ results, searchterm, posts })
   }
 </script>
 

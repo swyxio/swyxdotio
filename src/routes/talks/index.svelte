@@ -49,12 +49,16 @@
   <meta property="og:title" content="swyx | Talks" />
   <meta name="Description" content="all of swyx's talks" />
   <meta property="og:description" content="all of swyx's talks" />
-  <meta property="og:image" content="https://www.swyx.io/speaking.png" />
+  <meta
+    property="og:image"
+    content="https://www.swyx.io/og_image/speaking.png" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:creator" content="https://twitter.com/swyx/" />
   <meta name="twitter:title" content="swyx | Talks" />
   <meta name="twitter:description" content="all of swyx's talks" />
-  <meta name="twitter:image" content="https://www.swyx.io/speaking.png" />
+  <meta
+    name="twitter:image"
+    content="https://www.swyx.io/og_image/speaking.png" />
 </svelte:head>
 
 <article>

@@ -31,8 +31,10 @@
   export let slug = $page.params.slug
   export let post
   export let seoCategory = 'swyx Writing'
-let seoSubtitle = post.metadata.subtitle
-  export let seoTitle = seoSubtitle ? `${post.metadata.title}: ${seoSubtitle}` : `${seoCategory} | ${post.metadata.title}`
+  let seoSubtitle = post.metadata.subtitle
+  export let seoTitle = seoSubtitle
+    ? `${post.metadata.title}: ${seoSubtitle}`
+    : `${seoCategory} | ${post.metadata.title}`
   export let seoDescription =
     post.metadata.desc || post.metadata.description || seoTitle
   export let category = 'writing'
@@ -42,6 +44,11 @@ let seoSubtitle = post.metadata.subtitle
   h1 {
     text-align: center;
     margin: 0 auto;
+  }
+  #postSubtitle {
+    text-align: center;
+    margin: 0 auto;
+    font-style: italic;
   }
 </style>
 
@@ -54,20 +61,31 @@ let seoSubtitle = post.metadata.subtitle
   <meta property="og:description" content={seoDescription} />
   <meta
     property="og:image"
-    content="https://www.swyx.io/{category}/{slug}.png" />
+    content="https://www.swyx.io/og_image/{category}/{slug}.png" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:creator" content="https://twitter.com/swyx/" />
-  <meta name="twitter:title" content={seoTitle} />
-  <meta name="twitter:description" content={seoDescription} />
+  <meta name="twitter:domain" value="swyx.io" />
+  <meta name="twitter:creator" value="https://twitter.com/swyx/" />
+  <meta name="twitter:title" value={seoTitle} />
+  <meta name="twitter:description" value={seoDescription} />
   <meta
     name="twitter:image"
-    content="https://www.swyx.io/{category}/{slug}.png" />
+    content="https://www.swyx.io/og_image/{category}/{slug}.png" />
+  <meta name="twitter:label1" value="Published on" />
+  <meta
+    name="twitter:data1"
+    value={new Date(post.metadata.date).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    })} />
+  <meta name="twitter:label2" value="Reading Time" />
+  <meta name="twitter:data2" value="10 minutes" />
 </svelte:head>
 
 <SlugTemplate>
-  <h1>{post.metadata.title}</h1>
+  <h1 id="postTitle">{post.metadata.title}</h1>
   {#if seoSubtitle}
-  <h2>{seoSubtitle}</h2>
+    <h2 id="postSubtitle">{seoSubtitle}</h2>
   {/if}
   {@html post.html}
 </SlugTemplate>

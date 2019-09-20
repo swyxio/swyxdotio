@@ -29,10 +29,14 @@
   const { page } = stores()
   export let slug = $page.params.slug
   export let post
-  export let description = post.metadata.desc || post.metadata.description
   export let seoCategory = 'swyx Talks'
-  export let seoTitle = `${seoCategory} | ${post.metadata.title}`
-  export let seoDescription = description || seoTitle
+
+  let seoSubtitle = post.metadata.subtitle
+  export let seoTitle = seoSubtitle
+    ? `${post.metadata.title}: ${seoSubtitle}`
+    : `${seoCategory} | ${post.metadata.title}`
+  export let seoDescription =
+    post.metadata.desc || post.metadata.description || seoTitle
   export let category = 'talks'
   export let date = post.metadata.dateString || 'no date specified'
   export let topic = post.metadata.topic ? post.metadata.topic + ' @ ' : ''
@@ -51,32 +55,6 @@
 </script>
 
 <style>
-  /* .content :global(a) {
-    text-decoration: none;
-    background-image: linear-gradient(45deg, #b6bedf, #9a6a9e);
-    background-position: 0% 100%;
-    background-repeat: no-repeat;
-    background-size: 0% 100%;
-    transition: background-size cubic-bezier(0, 0.5, 0, 1) 0.3s;
-  }
-
-  .content :global(a):hover,
-  .content :global(a):focus {
-    text-decoration: none;
-    background-size: 100% 100%;
-  } */
-  /* 
-  .content :global(pre) {
-    font-size: 80%;
-    background-color: #292d3e;
-    box-shadow: inset 1px 1px 5px rgba(0, 0, 0, 0.05);
-    padding: 0.5em;
-    margin-left: -1em;
-    margin-right: -1em;
-    border-radius: 2px;
-    overflow-x: auto;
-  } */
-
   h1,
   h2 {
     text-align: center;
@@ -126,14 +104,14 @@
   <meta property="og:description" content={seoDescription} />
   <meta
     property="og:image"
-    content="https://www.swyx.io/{category}/{slug}.png" />
+    content="https://www.swyx.io/og_image/{category}/{slug}.png" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:creator" content="https://twitter.com/swyx/" />
   <meta name="twitter:title" content={seoTitle} />
   <meta name="twitter:description" content={seoDescription} />
   <meta
     name="twitter:image"
-    content="https://www.swyx.io/{category}/{slug}.png" />
+    content="https://www.swyx.io/og_image/{category}/{slug}.png" />
 </svelte:head>
 
 <div class="talkHeaderDiv">
@@ -181,8 +159,8 @@
   </div>
 {/if}
 <SlugTemplate>
-  {#if description}
-    <p>{description}</p>
+  {#if seoDescription}
+    <p>Description: {seoDescription}</p>
   {/if}
   {#if post.html}
     {@html post.html}

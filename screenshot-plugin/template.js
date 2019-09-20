@@ -52,6 +52,7 @@ function getCss(theme, fontSize) {
         background: ${background};
         background-image: url("https://www.swyx.io/swyx-og-card-blank.png");
         background-size: cover;
+        font-family: 'Inter', sans-serif;
         padding-left: 1rem;
         object-fit: cover;
         height: 600px;
@@ -106,14 +107,19 @@ function getCss(theme, fontSize) {
       font-weight: bold;
     }
     .heading {
-        font-family: 'Inter', sans-serif;
         font-size: ${sanitizeHtml(fontSize)};
         font-style: normal;
         color: ${foreground};
         line-height: 1.25;
         width: 60vw;
     }
-    
+    .subtitle {
+      font-size: 2em;
+      font-style: normal;
+      color: ${foreground};
+      line-height: 1.25;
+      width: 50vw;
+    }
     
     .footer {
       width: 45vw;
@@ -125,7 +131,7 @@ function getCss(theme, fontSize) {
 }
 
 module.exports = function getHtml(parsedReq) {
-  const { text, theme, md, fontSize } = parsedReq
+  const { text, subtitle, theme, md, fontSize } = parsedReq
   return `<!DOCTYPE html>
 <html>
     <meta charset="utf-8">
@@ -139,6 +145,7 @@ module.exports = function getHtml(parsedReq) {
         <div class="heading">${emojify(
           md ? marked(text) : sanitizeHtml(text)
         )}</div>
+        ${subtitle ? `<div class="subtitle">${subtitle}</div>` : ''}
         <div class="footer">
         <div>swyx.io</div>
         <div>@swyx</div>
