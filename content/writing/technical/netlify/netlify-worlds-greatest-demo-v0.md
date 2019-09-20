@@ -139,97 +139,109 @@ Goal: what's available.
   - netlify-lambda install
   - netlify-lambda build
 
-# Part 4: 📈 Netlify Addons
+# Part 4: 🗒️ Netlify Forms
 
-- Analytics
-  - What unique visitors are
-  - Missing files
-- Functions
-- Large Media
-- Forms
-  - Introducing Forms in plain HTML
-  - File Uploads
-  - Customize Post-Submit page
-  - Slack/Email/Webhook Notifications
-  - Zapier
-  - `submission-created`
-  - Spam Filtering
-    - Akismet
-    - Honeypot
-    - Recaptcha
-  - Forms in Single Page Apps
-  - Forms in Gatsby
-  - AJAX form submissions
-- Password Protection and Role Based Access Control
+- Introducing Forms in plain HTML
+- File Uploads
+- Customize Post-Submit page
+- Slack/Email/Webhook Notifications
+- Zapier
+- `submission-created`
+- Spam Filtering
+  - Akismet
+  - Honeypot
+  - Recaptcha
+- Forms in Single Page Apps
+- Forms in Gatsby
+- AJAX form submissions
+
+# Part 5: 🆔 Netlify Identity
+
+- Before Identity: Password Protection and Role Based Access Control
   - https://www.netlify.com/docs/visitor-access-control/#password-protection
   - https://www.netlify.com/docs/visitor-access-control/#role-based-access-controls-with-jwt-tokens
 - Identity
-  - Enable
+  - Enable Netlify Identity
   - Identity on a boilerplate
   - Adding `netlify-identity-widget`
-  - Adding `react-netlify-identity-widget`
-    - `react-netlify-identity`
-    - `gatsby-plugin-react-netlify-identity`
-    - `gotrue-js`
   - Important settings
     - open signup vs invite only
     - confirm vs don't confirm
     - External providers
+    - Email templates
   - Metadata
-    - user metadata
-    - app metadata
-  - Identity and functions
-    - Metadata management
-    - Retrieving form info in function
-  - Email templates
+    - User metadata
+    - App metadata
+  - `gotrue-js` and friends
+    - `gotrue`
+    - `react-netlify-identity`
+    - `react-netlify-identity-widget`
+    - `gatsby-plugin-react-netlify-identity`
+  - Authenticated Functions: Identity + Functions
+    - `netlify functions:invoke`
   - Event Triggered Functions
     - `identity-validate`: before sign up
     - `identity-signup`: on sign up
       - Note: this fires for only email+password signups, not for signups via external providers e.g. Google/GitHub
     - `identity-login`: on log in
+  - Forms + Identity + Functions
+    - Metadata management
+    - Retrieving Netlify Form info in Function
   - Paid features
     - Branded OAuth
     - SSO
-    - custom sender
+    - Custom sender
     - Audit log
-- NetlifyCMS
-  - Clone from Template
-  - Concepts and Config
-    - Admin Endpoint
-    - Git Gateway
-    - Backend
-    - Invite users
-      - Netlify Identity
-      - Other Backends
-    - Media and Public folders
-    - Editorial Workflow
-    - Filter (published?)
-  - Collections
-    - Folder collection
-    - File collection
-  - Scheduled Posts
-  - Media
-    - Cloudinary
+
+# Part 6: ✍️ Netlify CMS
+
+- Clone from Template
+- Concepts and Config
+  - Admin Endpoint
+  - Git Gateway
+  - Backend
+  - Invite users
+    - Netlify Identity
+    - Other Backends
+  - Media and Public folders
+  - Editorial Workflow
+  - Filter (published?)
+- Collections
+  - Folder collection
+  - File collection
+- Scheduled Posts
+- Media
+  - Cloudinary
+
+# Part 7: ➕ Netlify Addons: Everything Else!
+
+- Analytics
+  - What unique visitors are
+  - Missing files
+- Large Media
 - Addon Marketplace https://www.netlify.com/docs/partner-add-ons/
   - Fauna DB
   - Very Good Security
 - Premium Addons
   - Support
   - Performance ADN
-- Make Your Own Netlify Client
-  - Example User clients
-    - https://github.com/stefanjudis/netlify-menubar
-    - https://github.com/johnnyxbell/netlify-menubar-status
-    - https://github.com/netlify/cli
-    - Netlify App
-  - https://www.netlify.com/docs/api/
-  - https://open-api.netlify.com/
-  - Netlify Libraries
-    - https://github.com/netlify/js-client
-    - https://github.com/netlify/open-api
-    - https://github.com/netlify/cli-utils/
 
-# Part 5: ❓ Learn More
+# Part 8: 🍻 Netlify API
+
+- Make Your Own Netlify Client
+- Example User clients
+  - https://github.com/stefanjudis/netlify-menubar
+  - https://github.com/johnnyxbell/netlify-menubar-status
+  - https://github.com/netlify/cli
+  - Netlify App
+- https://www.netlify.com/docs/api/
+- https://open-api.netlify.com/
+- Netlify Libraries
+  - https://github.com/netlify/js-client
+  - https://github.com/netlify/open-api
+  - https://github.com/netlify/cli-utils/
+
+# Part 9: ❓ Learn More
 
 - Troubleshoot
   - http://community.netlify.com

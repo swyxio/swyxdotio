@@ -665,10 +665,10 @@
   resolved "https://registry.yarnpkg.com/@polka/url/-/url-1.0.0-next.3.tgz#7a56e747ec94622e8513b406c53cc1729799de09"
   integrity sha512-Uom7l6OeP6vcf85lMImelYu5WKVWjXyhkpi9WsRdRzlJFJFPVhjBtBCktgDUj7dk1N5FURUdegSZ5XOjxf8JZg==
 
-"@ssgjs/source-remark@^0.0.6":
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/@ssgjs/source-remark/-/source-remark-0.0.6.tgz#ce5e8192c58d109a43a32872cc89750de1e37791"
-  integrity sha512-GyBU549EnyEKsVPXtovvvvsBjUSGWfZDwylVKy0Oa06Be5RcI6SPF0k+15M35i+OqjEhZ3b5JC9yAOgjnxb9BQ==
+"@ssgjs/source-remark@^0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@ssgjs/source-remark/-/source-remark-0.0.7.tgz#236d39adb54c9246d1e03133f164a57d1fedf1d4"
+  integrity sha512-YX31qQe6Wf5HemKFPsr1jO5dpw2QBGxD2EkOv2AfiseGGMFD4GyUVMYLB/B/pDXs8dU6xAnCCOqGypjhbRSQ+Q==
   dependencies:
     front-matter "^3.0.2"
     immer "^4.0.0"

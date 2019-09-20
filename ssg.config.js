@@ -25,22 +25,10 @@ exports.getIndex = () => {
 let mainIndex = {} // failed attempt to keep in memory
 exports.createIndex = async () => {
   console.log('getting intial data')
-
-  let _talks = await talksPlugin.createIndex()
-  console.log('Number of talks:', _talks.length)
-  _talks = _talks.filter(x => new Date(x.metadata.date) <= new Date())
-  mainIndex.talks = extractSlugObjectFromArray(_talks)
-
-  let _writing = await writingPlugin.createIndex()
+  mainIndex.talks = await talksPlugin.createIndex()
+  console.log('Number of talks:', mainIndex.talks.length)
+  mainIndex.writing = await writingPlugin.createIndex()
   console.log('Number of posts:', _writing.length)
-  _writing = _writing.filter(x => new Date(x.metadata.date) <= new Date())
-  mainIndex.writing = extractSlugObjectFromArray(_writing)
 
   return mainIndex
-}
-
-function extractSlugObjectFromArray(arr) {
-  let obj = {}
-  arr.forEach(item => (obj[item.metadata.slug] = item))
-  return obj
 }
