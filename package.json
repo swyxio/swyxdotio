@@ -7,11 +7,16 @@
   "dependencies": {
     "@ssgjs/source-remark": "^0.0.8",
     "compression": "^1.7.1",
+    "marked": "^0.7.0",
     "mdsvex": "^0.4.0",
     "polka": "next",
+    "puppeteer": "^1.20.0",
+    "puppeteer-core": "^1.20.0",
+    "rss": "^1.2.2",
     "sapper": "^0.27.8",
     "sirv": "^0.4.0",
     "ssg": "^0.0.16",
+    "twemoji": "^12.1.3",
     "url-join": "^4.0.1"
   },
   "devDependencies": {

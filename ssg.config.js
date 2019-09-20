@@ -34,9 +34,12 @@ exports.createIndex = async () => {
 }
 
 exports.postExport = mainIndex => {
+  // https://www.npmjs.com/package/rss#user-content-example-usage
   generateRSS(mainIndex, {
     baseUrl: 'https://swyx.io',
     rssFeedUrl: 'https://swyx.io/rss.xml',
-    rssFaviconUrl: 'https://swyx.io/favicon.png'
+    rssFaviconUrl: 'https://swyx.io/favicon.png',
+    authorName: 'shawn @swyx wang',
+    categories: ['Technology', 'JavaScript', 'React', 'Svelte']
   })
 }

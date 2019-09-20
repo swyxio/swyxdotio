@@ -1,23 +1,46 @@
-function required(obj, key) {
-  if (typeof obj[key] === 'undefined') {
-    console.error('Error: ' + key + ' is required')
-    process.exit(1)
-  }
-  return obj[key]
-}
 const urljoin = require('url-join')
 const fs = require('fs')
 const path = require('path')
+const RSS = require('rss')
 
 module.exports = function generateRSS(mainIndex, opts) {
   const rssExportPath = opts.rssExportPath || '__sapper__/export/rss.xml'
-  const title = opts.title || 'RSS Feed'
+  const authorName = required(opts, 'authorName')
   const baseUrl = required(opts, 'baseUrl')
   const rssFeedUrl = required(opts, 'rssFeedUrl')
-  const rssDescription = opts.rssDescription || 'RSS Feed for ' + rssFeedUrl
   const rssFaviconUrl = required(opts, 'rssFaviconUrl')
+  const {
+    title = opts.title || 'RSS Feed',
+    description = opts.rssDescription || 'RSS Feed for ' + rssFeedUrl,
+    feed_url = rssFeedUrl,
+    site_url = baseUrl,
+    image_url = rssFaviconUrl,
+    docs = 'http://example.com/rss/docs.html',
+    managingEditor = authorName,
+    webMaster = authorName,
+    copyright = '2019 ' + authorName,
+    language = 'en',
+    categories = ['Tech', 'Blog'],
+    pubDate = new Date().toUTCString(),
+    ttl = '60'
+  } = opts
+  const feed = new RSS({
+    title,
+    description,
+    feed_url,
+    site_url,
+    image_url,
+    docs,
+    managingEditor,
+    webMaster,
+    copyright,
+    language,
+    categories,
+    pubDate,
+    ttl
+  })
 
-  let allItems = []
+  // let allItems = []
   Object.keys(mainIndex).forEach(category => {
     const subIndex = mainIndex[category]
     Object.values(subIndex).forEach(item => {
@@ -28,42 +51,25 @@ module.exports = function generateRSS(mainIndex, opts) {
       if (item.metadata.url) {
         itemDescription += ` (External Link: <a href="${item.metadata.url}">${item.metadata.url}</a>)`
       }
-      allItems.push({
-        itemTitle: item.metadata.title,
-        itemUrl: urljoin(baseUrl, category, item.metadata.slug),
-        itemDescription,
-        itemPubDate: item.metadata.pubdate
+      feed.item({
+        title: item.metadata.title,
+        url: urljoin(baseUrl, category, item.metadata.slug),
+        description: itemDescription,
+        date: item.metadata.pubdate
+        // todo: enclosure?
       })
     })
   })
-  allItems = allItems.sort((a, b) => (a.itemPubDate > b.itemPubDate ? -1 : 1))
-
-  const xmlString = `<?xml version="1.0" encoding="UTF-8" ?>
-<rss version="2.0">
-<channel>
-	<title>${title}</title>
-	<link>${rssFeedUrl}</link>
-	<description>${rssDescription}</description>
-	<image>
-		<url>${rssFaviconUrl}</url>
-    <title>${title}</title>
-    <link>${rssFeedUrl}</link>
-	</image>
-	${allItems
-    .map(
-      item => `
-		<item>
-			<title>${item.itemTitle}</title>
-			<link>${item.itemUrl}</link>
-			<description><![CDATA[${item.itemDescription}]]></description>
-			<pubDate>${item.itemPubDate.toUTCString()}</pubDate>
-		</item>
-	`
-    )
-    .join('\n')}
-</channel>
-</rss>`
+  // allItems = allItems.sort((a, b) => (a.itemPubDate > b.itemPubDate ? -1 : 1))
 
   console.log('writing RSS file...')
-  fs.writeFileSync(path.resolve(rssExportPath), xmlString)
+  fs.writeFileSync(path.resolve(rssExportPath), feed.xml())
+}
+
+function required(obj, key) {
+  if (typeof obj[key] === 'undefined') {
+    console.error('Error: ' + key + ' is required')
+    process.exit(1)
+  }
+  return obj[key]
 }

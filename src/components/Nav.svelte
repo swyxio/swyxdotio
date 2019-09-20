@@ -114,11 +114,8 @@
 <nav class={(isFooter && 'footerNav') || 'headerNav'}>
   <ul>
     <li class="me block">
-      <span>swyx.io</span>
-    </li>
-    <li>
-      <a class={'block ' + (segment === undefined ? 'selected' : '')} href=".">
-        home
+      <a href=".">
+        <span>swyx.io</span>
       </a>
     </li>
     <li>
@@ -145,9 +142,12 @@
         speaking
       </a>
     </li>
+    <li>
+      <a class="block" href="https://tinyletter.com/swyx">mailinglist</a>
+    </li>
     <li class="divider">{''}</li>
     <li class="mobileExternal block">
-      <a href="https://tinyletter.com/swyx">
+      <a href="https://swyx.io/rss.xml" target="_blank">
         <svg
           class="icon"
           viewBox="0 0 24 24"
@@ -155,12 +155,14 @@
           stroke-linejoin="round"
           stroke-width="2"
           aria-hidden="true">
-
           <path
-            d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1
-            0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-          <polyline points="22,6 12,13 2,6" />
-
+            d="M6.503 20.752c0 1.794-1.456 3.248-3.251 3.248-1.796
+            0-3.252-1.454-3.252-3.248 0-1.794 1.456-3.248 3.252-3.248 1.795.001
+            3.251 1.454 3.251 3.248zm-6.503-12.572v4.811c6.05.062 10.96 4.966
+            11.022
+            11.009h4.817c-.062-8.71-7.118-15.758-15.839-15.82zm0-3.368c10.58.046
+            19.152 8.594 19.183
+            19.188h4.817c-.03-13.231-10.755-23.954-24-24v4.812z" />
         </svg>
       </a>
 
@@ -204,25 +206,27 @@
 
     </li>
     <li class="external block">
-      <a href="https://tinyletter.com/swyx">
+      <a href="https://swyx.io/rss.xml" title="RSS" target="_blank">
         <svg
           class="icon"
-          viewBox="0 0 24 24"
+          viewBox="0 0 30 30"
           stroke-linecap="round"
           stroke-linejoin="round"
           stroke-width="2"
           aria-hidden="true">
-
           <path
-            d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1
-            0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-          <polyline points="22,6 12,13 2,6" />
-
+            d="M6.503 20.752c0 1.794-1.456 3.248-3.251 3.248-1.796
+            0-3.252-1.454-3.252-3.248 0-1.794 1.456-3.248 3.252-3.248 1.795.001
+            3.251 1.454 3.251 3.248zm-6.503-12.572v4.811c6.05.062 10.96 4.966
+            11.022
+            11.009h4.817c-.062-8.71-7.118-15.758-15.839-15.82zm0-3.368c10.58.046
+            19.152 8.594 19.183
+            19.188h4.817c-.03-13.231-10.755-23.954-24-24v4.812z" />
         </svg>
       </a>
     </li>
     <li class="external block">
-      <a href="https://twitter.com/swyx" target="_blank" rel="noopener">
+      <a href="https://twitter.com/swyx" title="twitter" target="_blank" rel="noopener">
         <svg
           class="icon"
           viewBox="0 0 24 24"
@@ -241,6 +245,7 @@
     </li>
     <li class="external block">
       <a
+      title="github source of this site"
         href="https://github.com/sw-yx/swyxdotio"
         target="_blank"
         rel="noopener">
