@@ -121,19 +121,19 @@
   <title>{seoTitle}</title>
   <meta property="og:url" content={`https://www.swyx.io/${category}/${slug}`} />
   <meta property="og:type" content="article" />
-  <meta property="og:title" content={seoCategory} />
+  <meta property="og:title" content={seoTitle} />
   <meta name="Description" content={seoDescription} />
   <meta property="og:description" content={seoDescription} />
   <meta
     property="og:image"
-    content="https://www.swyx.io/${category}/${slug}.png" />
+    content="https://www.swyx.io/{category}/{slug}.png" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:creator" content="https://twitter.com/swyx/" />
-  <meta name="twitter:title" content={seoCategory} />
+  <meta name="twitter:title" content={seoTitle} />
   <meta name="twitter:description" content={seoDescription} />
   <meta
     name="twitter:image"
-    content="https://www.swyx.io/${category}/${slug}.png" />
+    content="https://www.swyx.io/{category}/{slug}.png" />
 </svelte:head>
 
 <div class="talkHeaderDiv">

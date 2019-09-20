@@ -7,6 +7,7 @@
   "dependencies": {
     "@ssgjs/source-remark": "^0.0.8",
     "compression": "^1.7.1",
+    "fuse.js": "^3.4.5",
     "marked": "^0.7.0",
     "mdsvex": "^0.4.0",
     "polka": "next",
@@ -44,6 +45,7 @@
     "start": "ssg dev",
     "build": "ssg export --timeout=10000",
     "postinstall": "patch-package",
-    "prettify": "prettier --write src/**/*"
+    "prettify": "prettier --write src/**/*",
+    "screenshot": "node screenshot-plugin/cli.js"
   }
 }

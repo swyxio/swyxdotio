@@ -1,5 +1,5 @@
 <script>
-  import { fade, fly } from "svelte/transition";
+  import { fade, fly } from 'svelte/transition'
 </script>
 
 <style>
@@ -13,9 +13,7 @@
   <title>About</title>
 </svelte:head>
 
-<article
-  in:fly={{ y: 200, duration: 2000, delay: 500 }}
-  out:fade={{ scale: 0, duration: 300 }}>
+<article>
   <h1>About this site</h1>
 
   <p>This is the 'about' page. There's not much here.</p>

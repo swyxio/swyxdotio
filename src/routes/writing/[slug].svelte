@@ -31,7 +31,8 @@
   export let slug = $page.params.slug
   export let post
   export let seoCategory = 'swyx Writing'
-  export let seoTitle = `${seoCategory} | ${post.metadata.title}`
+let seoSubtitle = post.metadata.subtitle
+  export let seoTitle = seoSubtitle ? `${post.metadata.title}: ${seoSubtitle}` : `${seoCategory} | ${post.metadata.title}`
   export let seoDescription =
     post.metadata.desc || post.metadata.description || seoTitle
   export let category = 'writing'
@@ -48,22 +49,25 @@
   <title>{seoTitle}</title>
   <meta property="og:url" content={`https://www.swyx.io/${category}/${slug}`} />
   <meta property="og:type" content="article" />
-  <meta property="og:title" content={seoCategory} />
+  <meta property="og:title" content={seoTitle} />
   <meta name="Description" content={seoDescription} />
   <meta property="og:description" content={seoDescription} />
   <meta
     property="og:image"
-    content="https://www.swyx.io/${category}/${slug}.png" />
+    content="https://www.swyx.io/{category}/{slug}.png" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:creator" content="https://twitter.com/swyx/" />
-  <meta name="twitter:title" content={seoCategory} />
+  <meta name="twitter:title" content={seoTitle} />
   <meta name="twitter:description" content={seoDescription} />
   <meta
     name="twitter:image"
-    content="https://www.swyx.io/${category}/${slug}.png" />
+    content="https://www.swyx.io/{category}/{slug}.png" />
 </svelte:head>
 
 <SlugTemplate>
   <h1>{post.metadata.title}</h1>
+  {#if seoSubtitle}
+  <h2>{seoSubtitle}</h2>
+  {/if}
   {@html post.html}
 </SlugTemplate>
