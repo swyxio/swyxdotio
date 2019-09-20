@@ -6,12 +6,14 @@
     overflow: auto;
   }
   .content :global(h2) {
-    font-size: 1.4em;
-    font-weight: 500;
+    font-weight: bold;
+  }
+  .content :global(h3) {
+    font-weight: bold;
   }
 
   .content :global(pre) {
-    font-size: 80%;
+    font-size: 90%;
     background-color: #292d3e;
     box-shadow: inset 1px 1px 5px rgba(0, 0, 0, 0.05);
     padding: 1em;
@@ -36,6 +38,9 @@
 
   .content :global(li) {
     margin: 0 0 0.5em 0;
+  }
+  .content :global(.icon-link) {
+    font-size: smaller;
   }
 
   .content :global(img) {

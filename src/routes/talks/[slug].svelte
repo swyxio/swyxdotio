@@ -89,6 +89,15 @@
   .talkHeaderDiv a {
     color: white;
   }
+
+  @media (min-width: 480px) {
+    .talkHeaderDiv h1 {
+      font-size: 60px;
+    }
+    .talkHeaderDiv h2 {
+      font-size: 40px;
+    }
+  }
   .svgwave {
     width: 100%;
     margin-bottom: -1vh;

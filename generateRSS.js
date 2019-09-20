@@ -47,7 +47,7 @@ module.exports = async function generateRSS(mainIndex, opts) {
     const subIndex = mainIndex[category]
     Object.values(subIndex).forEach(item => {
       let itemDescription = item.metadata.subtitle
-        ? `[${item.metadata.subtitle}]`
+        ? `[${item.metadata.subtitle}] `
         : ''
       itemDescription +=
         item.metadata.description ||

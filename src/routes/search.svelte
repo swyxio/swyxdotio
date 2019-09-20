@@ -4,6 +4,7 @@
       .then(r => r.json())
       .then(posts => ({ posts: Object.values(posts) }))
       .catch(err => {
+        throw err // try to see what the error is
         this.error(500, err.message)
       })
   }
@@ -11,9 +12,11 @@
 
 <script>
   import Fuse from 'fuse.js'
+  import { onMount } from 'svelte'
   let searchterm = ''
   export let posts
   let results = []
+  $: console.log({ posts })
   $: {
     var options = {
       keys: ['title', 'slug', 'desc', 'description']
@@ -21,6 +24,12 @@
     var fuse = new Fuse(posts.map(x => x.metadata), options)
     results = fuse.search(searchterm)
   }
+  onMount(async () => {
+    if (document.location.pathname !== '/search/') {
+      searchterm = document.location.pathname.split('/').join(' ')
+      console.log('setting searchterm', searchterm)
+    }
+  })
 </script>
 
 <style>
