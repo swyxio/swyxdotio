@@ -51,12 +51,16 @@
   <meta property="og:title" content={seoCategory} />
   <meta name="Description" content={seoDescription} />
   <meta property="og:description" content={seoDescription} />
-  <meta property="og:image" content="https://www.swyx.io/swyx.jpg" />
+  <meta
+    property="og:image"
+    content="https://www.swyx.io/${category}/${slug}.png" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:creator" content="https://twitter.com/swyx/" />
   <meta name="twitter:title" content={seoCategory} />
   <meta name="twitter:description" content={seoDescription} />
-  <meta name="twitter:image" content="https://www.swyx.io/swyx.jpg" />
+  <meta
+    name="twitter:image"
+    content="https://www.swyx.io/${category}/${slug}.png" />
 </svelte:head>
 
 <SlugTemplate>

@@ -2,8 +2,10 @@ const urljoin = require('url-join')
 const fs = require('fs')
 const path = require('path')
 const RSS = require('rss')
+const screenshot = require('./screenshot-plugin/screenshot')
 
-module.exports = function generateRSS(mainIndex, opts) {
+// https://github.com/zeit/og-image
+module.exports = async function generateRSS(mainIndex, opts) {
   const rssExportPath = opts.rssExportPath || '__sapper__/export/rss.xml'
   const authorName = required(opts, 'authorName')
   const baseUrl = required(opts, 'baseUrl')
@@ -40,7 +42,7 @@ module.exports = function generateRSS(mainIndex, opts) {
     ttl
   })
 
-  // let allItems = []
+  let PostArray = []
   Object.keys(mainIndex).forEach(category => {
     const subIndex = mainIndex[category]
     Object.values(subIndex).forEach(item => {
@@ -51,6 +53,7 @@ module.exports = function generateRSS(mainIndex, opts) {
       if (item.metadata.url) {
         itemDescription += ` (External Link: <a href="${item.metadata.url}">${item.metadata.url}</a>)`
       }
+      PostArray.push([category + '/' + item.metadata.slug, item.metadata.title])
       feed.item({
         title: item.metadata.title,
         url: urljoin(baseUrl, category, item.metadata.slug),
@@ -60,8 +63,7 @@ module.exports = function generateRSS(mainIndex, opts) {
       })
     })
   })
-  // allItems = allItems.sort((a, b) => (a.itemPubDate > b.itemPubDate ? -1 : 1))
-
+  await screenshot(PostArray)
   console.log('writing RSS file...')
   fs.writeFileSync(path.resolve(rssExportPath), feed.xml())
 }

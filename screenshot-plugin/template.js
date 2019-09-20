@@ -110,7 +110,7 @@ function getCss(theme, fontSize) {
         font-size: ${sanitizeHtml(fontSize)};
         font-style: normal;
         color: ${foreground};
-        line-height: 1.8;
+        line-height: 1.25;
         width: 60vw;
     }
     
@@ -125,7 +125,7 @@ function getCss(theme, fontSize) {
 }
 
 module.exports = function getHtml(parsedReq) {
-  const { text, theme, md, fontSize, images, widths, heights } = parsedReq
+  const { text, theme, md, fontSize } = parsedReq
   return `<!DOCTYPE html>
 <html>
     <meta charset="utf-8">
