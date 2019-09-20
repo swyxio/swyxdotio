@@ -119,28 +119,28 @@ function getCss(theme, fontSize) {
       font-weight: bold;
     }
     .heading {
-      padding: 1rem;
+      padding-left: 3rem;
       font-size: ${sanitizeHtml(fontSize)};
       font-style: normal;
       color: ${foreground};
       line-height: 1.25;
-      width: 60vw;
+      width: 55vw;
       flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: center;
     }
     .subtitle {
-      padding: 1rem;
+      padding: 3rem;
       font-size: 2em;
       font-style: normal;
       color: ${foreground};
       line-height: 1.25;
-      width: 50vw;
+      width: 40vw;
     }
     
     .footer {
-      padding: 1rem;
+      padding: 2rem;
       width: 40vw;
       font-size: 3rem;
       display: flex;

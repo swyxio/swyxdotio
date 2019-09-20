@@ -36,6 +36,7 @@ exports.createIndex = async () => {
 exports.postExport = async mainIndex => {
   // https://www.npmjs.com/package/rss#user-content-example-usage
   await generateRSS(mainIndex, {
+    title: 'swyx.io Writing and Speaking',
     baseUrl: 'https://swyx.io',
     rssFeedUrl: 'https://swyx.io/rss.xml',
     rssFaviconUrl: 'https://swyx.io/favicon.png',

@@ -45,6 +45,9 @@
     text-align: center;
     margin: 0 auto;
   }
+  h2 {
+    width: 60%;
+  }
   #postSubtitle {
     text-align: center;
     margin: 0 auto;

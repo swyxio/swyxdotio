@@ -42,18 +42,21 @@ module.exports = async function generateRSS(mainIndex, opts) {
     ttl
   })
 
-  let PostArray = []
+  let PostsToScreenshot = []
   Object.keys(mainIndex).forEach(category => {
     const subIndex = mainIndex[category]
     Object.values(subIndex).forEach(item => {
-      let itemDescription =
+      let itemDescription = item.metadata.subtitle
+        ? `[${item.metadata.subtitle}]`
+        : ''
+      itemDescription +=
         item.metadata.description ||
         item.metadata.desc ||
         'No description offered - suggest one! <a href="https://github.com/sw-yx/swyxdotio/issues/new">https://github.com/sw-yx/swyxdotio/issues/new</a>'
       if (item.metadata.url) {
         itemDescription += ` (External Link: <a href="${item.metadata.url}">${item.metadata.url}</a>)`
       }
-      PostArray.push([
+      PostsToScreenshot.push([
         category + '/' + item.metadata.slug,
         item.metadata.title,
         item.metadata.subtitle
@@ -67,7 +70,7 @@ module.exports = async function generateRSS(mainIndex, opts) {
       })
     })
   })
-  await screenshot(PostArray)
+  // await screenshot(PostsToScreenshot)
   console.log('writing RSS file...')
   fs.writeFileSync(path.resolve(rssExportPath), feed.xml())
 }
