@@ -1,3 +1,36 @@
+## React Suspense Workers
+
+React Suspense doesn't work without a caching layer, so every Suspense
+library has built one - except in service workers! In this talk we go
+through what React Suspense is, then explore a prototype of how
+"Suspense Workers" could be useful in future Concurrent React apps.
+
+## Better Docs with Docz
+
+We all know good documentation is important for adoption and developer
+experience - isn't it worth investing in tooling to make it easier?
+Docz burst onto the scene this year as a fantastic new way to make
+great documentation for your React libraries with MDX. Let's take it
+out for a spin!
+
+## You Gotta Love JAMStack
+
+The JAMStack stands for JavaScript, APIs, and Markup, and at first glance it seems a truism - of course everyone uses that, right? What kind of stack is that? At its core, however, it describes a new architecture for web apps and sites that is at the confluence of multiple trends in serverless, JavaScript frameworks, static site generators, and Git-centric workflows. At the center of it all: The All-Powerful Frontend Developer!
+
+JAMStack, Serverless, Devops, Frontend
+
+## Reusable Time Travel with React Hooks and Immer
+
+Learn how and why to make a `useTimeTravel` React hook that we can use to make Tolerant User Interfaces - and a discussion about how custom hooks open the doors to reusable behavior that make great UX so much easier to write!
+
+## How To Do Everything with Half A Stack
+
+The JAMStack stands for JavaScript, APIs, and Markup, and at first glance it seems a truism - of course everyone uses that, right? What kind of stack is that? At its core, however, it describes a new architecture for web apps and sites that is at the confluence of multiple trends in serverless, JavaScript frameworks, static site generators, and Git-centric workflows. The Half Stack may give the impression of incompleteness, but in truth, it is becoming ever more important as backend services get commoditized and product development and differentiation moves ever forward toward who matters: the Users.
+
+JAMStack, Serverless, Devops, Frontend
+
+pitch: I work at Netlify and have seen many stories about how Frontend developers have been able to build on the JAMstack and I feel like this is a really good story for the "HalfStack" audience. This isn't a sales pitch, as many companies are involved in the JAMstack. This is a fellow halfstack developer telling everyone about all the cool options they now have and giving ideas they can take home with them for the next projects.
+
 ## The Dawn of Hybrid Site Generators
 
 There is a sea change afoot in the worlds of frontend frameworks and

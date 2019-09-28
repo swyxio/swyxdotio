@@ -17,5 +17,9 @@ author: swyx
   - gatsby plugins
   - meteor plugins
 
+thoughts on api design
+
 - Links
   - all plugin systems are bad https://twitter.com/acdlite/status/1073401531070767104
+  - guessable APIs https://johno.com/guessable
+  - there forever: https://mobile.twitter.com/jessfraz/status/1103995360685502466

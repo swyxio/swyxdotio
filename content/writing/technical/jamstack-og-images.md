@@ -154,3 +154,10 @@ Finally, for one-off calls and index pages that are a special case, I wrote a [s
 ## More than just a couple hours
 
 Having done this a couple times now, I will confess that it does take more than a couple hours to do right if you are rolling your own system and don't have convenient, existing plugins to work with for your framework. Truth in advertising! Although I feel that this process would be helped a lot more by having a CLI-and-library for doing these templates and screenshots. I've made the beginnings of one in this project - if you're keen on extracting this to be a reusable library, [get in touch!](https://twitter.com/swyx)
+
+More things others have done [based on replies](https://twitter.com/swyx/status/1175055254360154116):
+
+- [Social generator](https://github.com/contentz-tech/social)
+- [puppeteer-social-image](https://github.com/chrisvxd/puppeteer-social-image)
+- [puppet master](https://github.com/saasify-sh/puppet-master) hosted service with saasify
+- https://www.npmjs.com/package/gatsby-plugin-printer

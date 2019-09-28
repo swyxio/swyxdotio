@@ -8,7 +8,7 @@ date: 2019-09-15
 
 **JavaScript Tooling is just too hard to use, and [it's not your fault](https://www.theverge.com/2017/5/25/15686870/walt-mossberg-final-column-the-disappearing-computer).**
 
-If you clicked on this title ready to agree, you are part of the problem. Don't worry, so am I. I work on JavaScript Tooling and I think my tools can be a lot better. "[Let he is without sin](https://en.wiktionary.org/wiki/let_him_who_is_without_sin_cast_the_first_stone)" and all that.
+If you clicked on this title ready to agree, you are part of the problem. Don't worry, so am I. I work on JavaScript Tooling and I think my tools can be a lot better. "[Let he who is without sin](https://en.wiktionary.org/wiki/let_him_who_is_without_sin_cast_the_first_stone)" and all that.
 
 If you hate-clicked on this title ready to do an Epic Takedown™ of me, don't worry, I don't 100% agree with the premise of the title either. But you can probably find examples in your life where tooling sometimes _does_ suck. As JavaScripters, we spend a lot of time learning how to fix and paper over our tools and less time asking why. (This is rational behavior and the rest of this post proposes some reasons)
 
@@ -179,5 +179,5 @@ As to counter the individual points I made:
 - **Moving Target**: Increasing adoption of evergreen browsers are helping to offer a stable target. Although cross-browser inconsistencies still necessitate abstraction layers, their differences are far smaller and have less impact on tool choice then ever before.
 - **No One in Charge**: This is a feature, not a bug.
 - **Ownership**: I don't have ideas here.
-- **Toolmakers**: We are passing on _some_ knowledge. [Anders Hejlsberg](https://en.wikipedia.org/wiki/Anders_Hejlsberg), with his 35 years of language and tooling experience, is now working on TypeScript and training a generation of tooling engineers. We are actively passing on knowledge at developer conferences - see how [Christoph and Konstantin talk about "Building High-Quality JavaScript Tools"](https://developers.facebook.com/videos/f8-2017/building-high-quality-javascript-tools/), and in particular [what Christoph and team did to save Jest](https://www.youtube.com/watch?v=3YDiloj8_d0).
+- **Toolmakers**: We are passing on _some_ knowledge. [Anders Hejlsberg](https://en.wikipedia.org/wiki/Anders_Hejlsberg), with his 35 years of language and tooling experience, is now working on TypeScript and training a generation of tooling engineers. We are actively passing on knowledge at developer conferences - see how [Christoph and Konstantin talk about "Building High-Quality JavaScript Tools"](http://talkfrom.com/video?name=building-highquality-javascript-tools), and in particular [what Christoph and team did to save Jest](https://www.youtube.com/watch?v=3YDiloj8_d0).
 - **Funding**: Although I've explained my reservations, there are plenty of initiatives to help address open source funding and they are all needed. I would follow closely [Devon Zuegel of GitHub](https://increment.com/open-source/the-city-guide-to-open-source/) and also plug my friend [Travis Fischer](https://twitter.com/transitive_bs) if you are interested in this.

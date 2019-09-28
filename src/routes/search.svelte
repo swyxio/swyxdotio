@@ -16,7 +16,7 @@
   let searchterm = ''
   export let posts
   let results = []
-  $: console.log({ posts })
+  // $: console.log({ posts })
   $: {
     var options = {
       keys: ['title', 'slug', 'desc', 'description']

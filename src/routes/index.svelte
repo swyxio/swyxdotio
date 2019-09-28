@@ -1,5 +1,5 @@
 <script>
-  import { fade, fly } from "svelte/transition";
+  // import { fade, fly } from "svelte/transition";
 </script>
 
 <style>
@@ -27,14 +27,12 @@
   <title>swyx's site</title>
 </svelte:head>
 
-<article
-  in:fly={{ y: 200, duration: 2000, delay: 500 }}
-  out:fade={{ scale: 0, duration: 300 }}>
-  <h1 transition:fade>swyx's site!</h1>
+<article>
+  <h1>swyx's site!</h1>
   <h2>
     Latest Post:
-    <a href="/writing/js-tooling">
-      <b>Why JavaScript Tooling Sucks</b>
+    <a href="/writing/not-manager">
+      <b>Why I Won't Choose To Be A Manager</b>
     </a>
   </h2>
 </article>

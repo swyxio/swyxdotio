@@ -2,14 +2,6 @@
 
 Svelte has gained a lot of attention this year as a serious player in the web framework space by -not- playing the same game as everyone else: As Tom Dale predicted in 2017, Compilers are becoming the new "Frameworks". In this talk we take a serious exploration into Svelte from the perspective of React, and ask what we can learn from this exciting new paradigm, including the Big Question: Could Svelte dethrone React?
 
-## How To Do Everything with Half A Stack
-
-The JAMStack stands for JavaScript, APIs, and Markup, and at first glance it seems a truism - of course everyone uses that, right? What kind of stack is that? At its core, however, it describes a new architecture for web apps and sites that is at the confluence of multiple trends in serverless, JavaScript frameworks, static site generators, and Git-centric workflows. The Half Stack may give the impression of incompleteness, but in truth, it is becoming ever more important as backend services get commoditized and product development and differentiation moves ever forward toward who matters: the Users.
-
-JAMStack, Serverless, Devops, Frontend
-
-pitch: I work at Netlify and have seen many stories about how Frontend developers have been able to build on the JAMstack and I feel like this is a really good story for the "HalfStack" audience. This isn't a sales pitch, as many companies are involved in the JAMstack. This is a fellow halfstack developer telling everyone about all the cool options they now have and giving ideas they can take home with them for the next projects.
-
 ## The Future of Local Serverless Development
 
 The feedback cycle for serverful development is short - you just run it locally. That just isn't true for serverless development, where "deploy and pray" is the norm. This talk is a deep dive into the recently launched Netlify Dev, which is a new tool to improve the local development experience. We will explore how we can dramatically improve the setup and provisioning of serverless functions and third party APIs for event driven architectures.
@@ -58,10 +50,6 @@ I've been doing some research recently on bringing Vue's Single File Components 
 
 Ultimately I think a framework agnostic SFC spec may be possible, and that it can cover a whole lot more than "templates", styling, and Javascript. I will have practical demos, but I also want people to go nuts thinking about what they can do when Compilers are the new Frameworks.
 
-## Reusable Time Travel with React Hooks and Immer
-
-Learn how and why to make a `useTimeTravel` React hook that we can use to make Tolerant User Interfaces - and a discussion about how custom hooks open the doors to reusable behavior that make great UX so much easier to write!
-
 ## What Humans Can Learn from Machine Learning
 
 Over the last half century, we've taught Machines to speak, move, react, see, think, and now to teach themselves. Is it game over for Humans? On the contrary, because we're now able to see and adjust the variables of learning, we've learned a great deal about _how_ to learn. In this talk, we explore five tricks of general computational learning algorithms and how we can apply them in our own learning!
@@ -86,12 +74,6 @@ Oredev:
 - You will learn about epsilon exhaustion and Probably Approximately Correct learning (this is a real ML term!)
 - You will learn about Simulated Annealing and the best way to search a possible solution space while converging on schedule
 - You will learn to apply the difference between Supervised and Unsupervised Learning and why generalization is more important than memorization
-
-## You Gotta Love JAMStack
-
-The JAMStack stands for JavaScript, APIs, and Markup, and at first glance it seems a truism - of course everyone uses that, right? What kind of stack is that? At its core, however, it describes a new architecture for web apps and sites that is at the confluence of multiple trends in serverless, JavaScript frameworks, static site generators, and Git-centric workflows. At the center of it all: The All-Powerful Frontend Developer!
-
-JAMStack, Serverless, Devops, Frontend
 
 ## A Skeptic's Intro to the JAMStack
 
@@ -245,18 +227,3 @@ examples all drawn from personal experience.
 Pitch
 
 I've given lots of technical talks, but this is my first time proposing a soft skills talk. A year ago I wrote an essay called "Learn in Public" that ended up helping many developers (https://twitter.com/swyx/status/1009174159690264579). Despite all the code I've written, that short essay may have been the most impactful thing I've ever written. I've since done a lot more thinking and collecting various examples and inspirations (and practicing the messaging in podcasts!) and I think this is something that could help other developers as much as it has helped me. I hope to give the audience something that will stay with them long after they have moved on from the jobs, frameworks, and languages they currently work with.
-
-## React Suspense Workers
-
-React Suspense doesn't work without a caching layer, so every Suspense
-library has built one - except in service workers! In this talk we go
-through what React Suspense is, then explore a prototype of how
-"Suspense Workers" could be useful in future Concurrent React apps.
-
-## Better Docs with Docz
-
-We all know good documentation is important for adoption and developer
-experience - isn't it worth investing in tooling to make it easier?
-Docz burst onto the scene this year as a fantastic new way to make
-great documentation for your React libraries with MDX. Let's take it
-out for a spin!
