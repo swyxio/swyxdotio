@@ -7,7 +7,7 @@ import { terser } from 'rollup-plugin-terser'
 import config from '@ssgjs/sapper/config/rollup.js'
 import pkg from './package.json'
 import { mdsvex } from 'mdsvex'
-
+import path from 'path'
 const mode = process.env.NODE_ENV
 const dev = mode === 'development'
 const legacy = !!process.env.SAPPER_LEGACY_BUILD
@@ -19,9 +19,22 @@ const onwarn = (warning, onwarn) =>
 const dedupe = importee =>
   importee === 'svelte' || importee.startsWith('svelte/')
 
+const extensions = ['.svelte', '.svexy', '.svx', '.md']
+const preprocess = mdsvex({
+  // extension: '.svexy', // the default is '.svexy', if you lack taste, you might want to change it
+  // layout: path.join(__dirname, './DefaultLayout.svelte'), // this needs to be an absolute path
+  // parser: md => md.use(SomePlugin), // you can add markdown-it plugins if the feeling takes you
+  // // you can add markdown-it options here, html is always true
+  // markdownOptions: {
+  // 	typographer: true,
+  // 	linkify: true,
+  // 	highlight: (str, lang) => whatever(str, lang), // this should be a real function if you want to highlight
+  // },
+})
+
 export default {
   client: {
-    input: config.client.input(),
+    input: 'node_modules/ssg/defaultSrcFiles/client.js',
     output: config.client.output(),
     plugins: [
       replace({
@@ -32,19 +45,8 @@ export default {
         dev,
         hydratable: true,
         emitCss: true,
-        // whatever file extension you want to use has to go here as well
-        extensions: ['.svelte', '.svexy', '.svx', '.md'], // here actually
-        preprocess: mdsvex({
-          // extension: '.svexy', // the default is '.svexy', if you lack taste, you might want to change it
-          // layout: path.join(__dirname, './DefaultLayout.svelte'), // this needs to be an absolute path
-          // parser: md => md.use(SomePlugin), // you can add markdown-it plugins if the feeling takes you
-          // // you can add markdown-it options here, html is always true
-          // markdownOptions: {
-          // 	typographer: true,
-          // 	linkify: true,
-          // 	highlight: (str, lang) => whatever(str, lang), // this should be a real function if you want to highlight
-          // },
-        })
+        extensions, // defined above
+        preprocess // defined above
       }),
       resolve({
         browser: true,
@@ -86,7 +88,7 @@ export default {
   },
 
   server: {
-    input: config.server.input(),
+    input: 'node_modules/ssg/defaultSrcFiles/server.js',
     output: config.server.output(),
     plugins: [
       replace({
@@ -96,19 +98,8 @@ export default {
       svelte({
         generate: 'ssr',
         dev,
-        // whatever file extension you want to use has to go here as well
-        extensions: ['.svelte', '.svexy', '.svx', '.md'], // here actually
-        preprocess: mdsvex({
-          // extension: '.svexy', // the default is '.svexy', if you lack taste, you might want to change it
-          // layout: path.join(__dirname, './DefaultLayout.svelte'), // this needs to be an absolute path
-          // parser: md => md.use(SomePlugin), // you can add markdown-it plugins if the feeling takes you
-          // // you can add markdown-it options here, html is always true
-          // markdownOptions: {
-          // 	typographer: true,
-          // 	linkify: true,
-          // 	highlight: (str, lang) => whatever(str, lang), // this should be a real function if you want to highlight
-          // },
-        })
+        extensions, // defined above
+        preprocess // defined above
       }),
       resolve({
         dedupe
@@ -124,7 +115,7 @@ export default {
   },
 
   serviceworker: {
-    input: config.serviceworker.input(),
+    input: 'node_modules/ssg/defaultSrcFiles/service-worker.js',
     output: config.serviceworker.output(),
     plugins: [
       resolve(),

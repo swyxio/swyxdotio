@@ -70,9 +70,9 @@ module.exports = async function generateRSS(mainIndex, opts) {
       })
     })
   })
-  // await screenshot(PostsToScreenshot)
   console.log('writing RSS file...')
   fs.writeFileSync(path.resolve(rssExportPath), feed.xml())
+  return screenshot(PostsToScreenshot) // is a promise
 }
 
 function required(obj, key) {

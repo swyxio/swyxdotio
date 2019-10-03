@@ -1,4 +1,4 @@
-const { getDataSlice, getIndex } = require('../../../ssg.config')
+const { getDataSlice, getIndex } = require('ssg/readConfig')
 
 export async function get(req, res) {
   const { key___ssg___uid } = req.params

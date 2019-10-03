@@ -3554,10 +3554,10 @@ sprintf-js@~1.0.2:
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
   integrity sha1-BOaSb2YolTVPPdAVIDYzuFcpfiw=
 
-ssg@^0.0.19:
-  version "0.0.19"
-  resolved "https://registry.yarnpkg.com/ssg/-/ssg-0.0.19.tgz#04e7e0c94ef8b5728577e641d31dd40a451e21d1"
-  integrity sha512-czcueexpP4HF9G53wS6Z8p9TqhAtsFUv2Jr+NuKg0UaYuMYFvm/OziHMpY9w5DazBchdk/WnnlnOfQ3QuAcRVw==
+ssg@^0.0.20:
+  version "0.0.20"
+  resolved "https://registry.yarnpkg.com/ssg/-/ssg-0.0.20.tgz#023f8924e604b7e6374e0d0f76e317841ba5b6da"
+  integrity sha512-INjoqxxISh+rDBusi8BgpELNVP5uofFWwN5MpbhJctAC/df6klpAqFKGpFnftKzDlmnTxFD2ISBGnqyUCF86UQ==
   dependencies:
     chalk "^2.4.2"
     chokidar "^3.0.2"

@@ -66,7 +66,7 @@
   <meta
     property="og:image"
     content="https://www.swyx.io/og_image/{category}/{slug}.png" />
-  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:card" content="summary" />
   <meta name="twitter:domain" value="swyx.io" />
   <meta name="twitter:creator" value="https://twitter.com/swyx/" />
   <meta name="twitter:title" value={seoTitle} />
