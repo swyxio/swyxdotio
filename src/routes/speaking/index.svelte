@@ -1,6 +1,6 @@
 <script context="module">
   export function preload({ params, query }) {
-    return this.fetch(`/data/talks___ssg___index.json`)
+    return this.fetch(`/data/speaking___ssg___index.json`)
       .then(r => r.json())
       .then(posts => ({ posts: Object.values(posts) }))
       .catch(err => {
@@ -43,30 +43,30 @@
 </style>
 
 <svelte:head>
-  <title>swyx | Talks</title>
-  <meta property="og:url" content="https://www.swyx.io/talks/" />
+  <title>swyx | Speaking</title>
+  <meta property="og:url" content="https://www.swyx.io/speaking/" />
   <meta property="og:type" content="article" />
-  <meta property="og:title" content="swyx | Talks" />
-  <meta name="Description" content="all of swyx's talks" />
-  <meta property="og:description" content="all of swyx's talks" />
+  <meta property="og:title" content="swyx | Speaking" />
+  <meta name="Description" content="all of swyx's speaking" />
+  <meta property="og:description" content="all of swyx's speaking" />
   <meta
     property="og:image"
     content="https://www.swyx.io/og_image/speaking.png" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:creator" content="https://twitter.com/swyx/" />
-  <meta name="twitter:title" content="swyx | Talks" />
-  <meta name="twitter:description" content="all of swyx's talks" />
+  <meta name="twitter:title" content="swyx | Speaking" />
+  <meta name="twitter:description" content="all of swyx's speaking" />
   <meta
     name="twitter:image"
     content="https://www.swyx.io/og_image/speaking.png" />
 </svelte:head>
 
 <article>
-  <h1>Talks</h1>
+  <h1>Speaking</h1>
   <ul>
     {#each posts as post}
       <li>
-        <a rel="prefetch" href="/talks/{post.metadata.slug}">
+        <a rel="prefetch" href="/speaking/{post.metadata.slug}">
           <strong>{post.metadata.title}</strong>
         </a>
         <br />

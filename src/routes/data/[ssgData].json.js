@@ -1,12 +1,13 @@
 const { getDataSlice, getIndex } = require('ssg/readConfig')
 
 export async function get(req, res) {
-  const { key___ssg___uid } = req.params
-  const splitSlug = key___ssg___uid.split('___ssg___')
+  const { ssgData } = req.params
+  const splitSlug = ssgData.split('___ssg___')
   const key = splitSlug[0]
   const uid = splitSlug[1]
   const mainIndex = getIndex()
   let data
+  // console.log('getting', key, uid)
   if (uid === 'index') {
     data = mainIndex[key]
   } else {

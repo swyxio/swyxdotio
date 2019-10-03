@@ -137,8 +137,8 @@
     <li>
       <a
         rel="prefetch"
-        class={'block ' + (segment === 'talks' ? 'selected' : '')}
-        href="/talks">
+        class={'block ' + (segment === 'speaking' ? 'selected' : '')}
+        href="/speaking">
         speaking
       </a>
     </li>

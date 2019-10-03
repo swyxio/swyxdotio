@@ -1,46 +1,58 @@
 const fs = require('fs')
 const path = require('path')
 const generateRSS = require('./generateRSS')
-
-const writingPlugin = require('@ssgjs/source-remark')({
-  dirPath: 'content/writing'
+const remark = require('@ssgjs/source-remark')
+const writing = remark({
+  dirPath: 'content/writing',
+  onCreateIndex: idx => console.log('Number of talks:', Object.keys(idx).length)
 })
-const talksPlugin = require('@ssgjs/source-remark')({
-  dirPath: 'content/talks'
+const speaking = remark({
+  dirPath: 'content/talks',
+  onCreateIndex: idx => console.log('Number of posts:', Object.keys(idx).length)
 })
 
+// used only in rss feed for now but can repeat elsewhere
+const sitedata = {
+  title: 'swyx.io Writing and Speaking',
+  baseUrl: 'https://swyx.io',
+  rssFeedUrl: 'https://swyx.io/rss.xml',
+  rssFaviconUrl: 'https://swyx.io/favicon.png',
+  authorName: 'shawn @swyx wang',
+  categories: ['Technology', 'JavaScript', 'React', 'Svelte']
+}
+
+// optional config
+// exports.ssgDotFolder = '.ssg'
+
+// optional data plugins. must be object, so we can namespace
+exports.plugins = {
+  writing,
+  speaking
+}
+
+// optional. called repeatedly, can be expensive
 exports.getDataSlice = async (key, uid) => {
-  let result // initialize to undefined
-  if (key === 'writing') {
-    return writingPlugin.getDataSlice(uid)
-  } else if (key === 'talks') {
-    return talksPlugin.getDataSlice(uid)
-  }
-  if (typeof result === 'undefined')
-    throw new Error('no data found for ' + slug)
-  return result
+  console.log('optional getDataSlice action')
+
+  // // not needed but.. just in case
+  // if (key === 'writing') {
+  //   return writing.getDataSlice(uid)
+  // } else if (key === 'talks') {
+  //   return speaking.getDataSlice(uid)
+  // }
+  // throw new Error('no data found for key: ' + key + ' uid: ' + uid)
 }
-exports.getIndex = () => {
-  return require(path.resolve('.ssg/data.json'))
-}
-let mainIndex = {} // failed attempt to keep in memory
-exports.createIndex = async () => {
+
+// mandatory. called once, should be cheap
+exports.createIndex = async (mainIndex = {}) => {
   console.log('getting intial data')
-  mainIndex.talks = await talksPlugin.createIndex()
-  console.log('Number of talks:', Object.keys(mainIndex.talks).length)
-  mainIndex.writing = await writingPlugin.createIndex()
-  console.log('Number of posts:', Object.keys(mainIndex.writing).length)
+  console.log(Object.keys(mainIndex))
+  // can add more data to index here
   return mainIndex
 }
 
+// optional lifecycle hook
 exports.postExport = async mainIndex => {
-  // https://www.npmjs.com/package/rss#user-content-example-usage
-  return generateRSS(mainIndex, {
-    title: 'swyx.io Writing and Speaking',
-    baseUrl: 'https://swyx.io',
-    rssFeedUrl: 'https://swyx.io/rss.xml',
-    rssFaviconUrl: 'https://swyx.io/favicon.png',
-    authorName: 'shawn @swyx wang',
-    categories: ['Technology', 'JavaScript', 'React', 'Svelte']
-  })
+  // sitedata fits https://www.npmjs.com/package/rss#user-content-example-usage
+  return generateRSS(mainIndex, sitedata)
 }

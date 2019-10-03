@@ -1,5 +1,7 @@
 /growing https://www.youtube.com/watch?v=_ahvzDzKdB0
-/jsconfhi /talks/babel-macros/
-/reactrally /talks/react-not-reactive/
-/hooks /talks/react-hooks/
+/jsconfhi /speaking/babel-macros/
+/reactrally /speaking/react-not-reactive/
+/hooks /speaking/react-hooks/
+/talks  /speaking
+/talks/*  /speaking/:splat
 /* /search 200
