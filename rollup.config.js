@@ -4,7 +4,7 @@ import commonjs from 'rollup-plugin-commonjs'
 import svelte from 'rollup-plugin-svelte'
 import babel from 'rollup-plugin-babel'
 import { terser } from 'rollup-plugin-terser'
-import config from 'sapper/config/rollup.js'
+import config from '@ssgjs/sapper/config/rollup.js'
 import pkg from './package.json'
 import { mdsvex } from 'mdsvex'
 
@@ -13,8 +13,11 @@ const dev = mode === 'development'
 const legacy = !!process.env.SAPPER_LEGACY_BUILD
 
 const onwarn = (warning, onwarn) =>
-  (warning.code === 'CIRCULAR_DEPENDENCY' && /[/\\]@sapper[/\\]/.test(warning.message)) || onwarn(warning)
-const dedupe = (importee) => importee === 'svelte' || importee.startsWith('svelte/')
+  (warning.code === 'CIRCULAR_DEPENDENCY' &&
+    /[/\\]@sapper[/\\]/.test(warning.message)) ||
+  onwarn(warning)
+const dedupe = importee =>
+  importee === 'svelte' || importee.startsWith('svelte/')
 
 export default {
   client: {
@@ -23,7 +26,7 @@ export default {
     plugins: [
       replace({
         'process.browser': true,
-        'process.env.NODE_ENV': JSON.stringify(mode),
+        'process.env.NODE_ENV': JSON.stringify(mode)
       }),
       svelte({
         dev,
@@ -41,11 +44,11 @@ export default {
           // 	linkify: true,
           // 	highlight: (str, lang) => whatever(str, lang), // this should be a real function if you want to highlight
           // },
-        }),
+        })
       }),
       resolve({
         browser: true,
-        dedupe,
+        dedupe
       }),
       commonjs(),
 
@@ -58,28 +61,28 @@ export default {
             [
               '@babel/preset-env',
               {
-                targets: '> 0.25%, not dead',
-              },
-            ],
+                targets: '> 0.25%, not dead'
+              }
+            ]
           ],
           plugins: [
             '@babel/plugin-syntax-dynamic-import',
             [
               '@babel/plugin-transform-runtime',
               {
-                useESModules: true,
-              },
-            ],
-          ],
+                useESModules: true
+              }
+            ]
+          ]
         }),
 
       !dev &&
         terser({
-          module: true,
-        }),
+          module: true
+        })
     ],
 
-    onwarn,
+    onwarn
   },
 
   server: {
@@ -88,7 +91,7 @@ export default {
     plugins: [
       replace({
         'process.browser': false,
-        'process.env.NODE_ENV': JSON.stringify(mode),
+        'process.env.NODE_ENV': JSON.stringify(mode)
       }),
       svelte({
         generate: 'ssr',
@@ -105,18 +108,19 @@ export default {
           // 	linkify: true,
           // 	highlight: (str, lang) => whatever(str, lang), // this should be a real function if you want to highlight
           // },
-        }),
+        })
       }),
       resolve({
-        dedupe,
+        dedupe
       }),
-      commonjs(),
+      commonjs()
     ],
     external: Object.keys(pkg.dependencies).concat(
-      require('module').builtinModules || Object.keys(process.binding('natives')),
+      require('module').builtinModules ||
+        Object.keys(process.binding('natives'))
     ),
 
-    onwarn,
+    onwarn
   },
 
   serviceworker: {
@@ -126,12 +130,12 @@ export default {
       resolve(),
       replace({
         'process.browser': true,
-        'process.env.NODE_ENV': JSON.stringify(mode),
+        'process.env.NODE_ENV': JSON.stringify(mode)
       }),
       commonjs(),
-      !dev && terser(),
+      !dev && terser()
     ],
 
-    onwarn,
-  },
+    onwarn
+  }
 }

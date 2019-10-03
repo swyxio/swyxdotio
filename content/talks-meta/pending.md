@@ -1,4 +1,38 @@
-## Does Svelte Make Me Look Fat?
+## JSConfHI Brainstorm
+
+- How Svelte Works
+
+Svelte is an exciting, newer JavaScript framework that was designed from the ground up with compilation and developer experience in mind. Yet the compiler can be a black box - how can a tiny framework ship so many features? This talk is a deep dive into Svelte's compiler and runtime to demystify this brilliant approach to solving the tradeoff between DX and UX.
+
+Organizers: Hi Organizers! I went through the Svelte source code in the process of making my own Svelte based static site generator and I learned a ton of fascinating lessons. I think people might be scared off of learning a new thing because of the black box nature of compilers. But Tom Dale was right when he said that Compilers are the new Frameworks. I'd love to share what a framework, designed as a compiler from the ground up with no API baggage, can look like and why that is so important for building fast while shipping the least amount of JavaScript.
+
+(unused)
+Compilers are the new Frameworks: Angular is working on Ivy, Ember is firing up Octane, and Vue compiles Single File Components.
+Vue uses a compiler for Single File Components, Angular's Ivy slashes bundle size by excluding unused functionality, and Ember Octane compiles down to bytecode.
+
+- Learning In Public
+
+Developers are used to the idea of constant learning, especially in the fast moving Javascript ecosystem. But how often do we take a step back from learning to consider -how- we learn? In this talk we explore how Learning in Public can accelerate your career, bring value to your professional network, and ultimately make you a better developer, with examples all drawn from personal experience.
+
+Hi Organizers! I think learning how to learn is the only meta-skill we can focus on that will outlive JavaScript. I've been a vocal proponent of the "Learn in Public" motto as it has helped me tremendously in my own career and technical skills, while also benefiting the community in the best possible win-win way. I've presented this talk at a couple of meetups and it was very well received, but am still looking to present it at a conference to get the message out!
+
+- Solving "Works on My Machine" with Netlify Dev
+
+  It's 2020, yet the process of development is still remarkably coupled to deployment. Far too many important production details, like serverless functions, redirects, and API integrations, rely on the "deploy and pray" methodology. This requires duplicative and complex config and still doesn't solve the problem of long iteration cycles. Instead of shipping our code up, why not pull our production environment down?
+
+  This talk is a deep dive into the recently launched Netlify Dev, which is a new tool to improve the local development experience, yet solving "works on my machine" syndrome by simulating Edge routing logic via WASM. We will cover how Netlify Dev achieves a zero config experience with any project like Gatsby and Nuxt.js, while remaining technology agnostic. We will explore how we can dramatically improve the setup and provisioning of serverless functions and third party APIs for event driven architectures. And finally conclude with some ideas on possible directions for the future, and an invitation to discuss, collaborate, and build the future together.
+
+- Node CLIs: The Missing Manual
+
+Command Line Interfaces power a surprising amount of what JavaScript developers do. You can't `npm install`, run a `webpack` build, or `create-react-app` without a CLI. But if these tools improve developer experience and productivity so much, why don't we make more for ourselves? Because _nobody taught us how_. Unfamiliarity causes even more frustration when things go wrong, because if we don't know how CLI's work, we can't debug them. And things go wrong often, because we aren't taught how to write great CLI's. This is the comprehensive talk you always wished you'd had!
+
+Organizers: Hi Organizers! I've spent a significant amount of time working on Node.js CLI's, having had to fix problems up and down my toolchain, and helping to maintain tsdx, Gatsby, docz and react-static, and finally working on Netlify Dev, a significant product launch that is entirely CLI based. I've had to learn a lot of informal lessons and it seems everybody learns this way, which completely doesn't make sense for something this important. So this is my talk to organize the dizzying wide world of CLI knowledge out there for the JS community and to get them building and contributing more to CLI's!
+
+- The TypeScript Generics Talk for Kids Who Can't Math Good and Want to Do Code Good Too
+- Why JS Tooling Sucks
+- Write React from Scratch
+
+## Does Svelte Make React Look Fat?
 
 Svelte has gained a lot of attention this year as a serious player in the web framework space by -not- playing the same game as everyone else: As Tom Dale predicted in 2017, Compilers are becoming the new "Frameworks". In this talk we take a serious exploration into Svelte from the perspective of React, and ask what we can learn from this exciting new paradigm, including the Big Question: Could Svelte dethrone React?
 

@@ -7,18 +7,13 @@ date: 2019-09-24
 published: false
 ---
 
-Just planning out my demo:
+Hi everyone! I'm swyx and I'm happy to be sharing this walkthrough with you!
 
-Prerequisites:
+I learned Web Dev through FreeCodeCamp 3 years ago and back then I struggled a lot with getting my projects online, at first through Cloud9 and then Heroku. I only found Netlify a year later and realized that deploying and scaling is a lot easier with the JAMstack approach, especially with modern front-end frameworks like React and Vue. So this is the video series I wish I had when I started out!
 
-- a static site
-- a "build" step
+# How to Build Everything with Netlify in 4 hours
 
-Touch points:
-
-Goal: what's available.
-
-# Part 1: 🗺️ Netlify Edge
+## Part 1: 🗺️ Netlify Edge
 
 - 4 methods
   - Netlify Drop
@@ -76,7 +71,7 @@ Goal: what's available.
   - Faster deploys https://url.netlify.com/BJiLMscDB
   - Enterprise https://url.netlify.com/B1zvGsqDS
 
-# Part 2: ⚒️ Netlify Build
+## Part 2: ⚒️ Netlify Build
 
 - Netlify ❤️ Build Tools and SSGs
   - StaticGen.com https://url.netlify.com/ryQFMscwr
@@ -123,7 +118,7 @@ Goal: what's available.
   - https://gist.github.com/sw-yx/c53634e7e63f0015e43c16bc26832283
   - https://scotch.io/@sw-yx/netlify-environment-variables-the-cheat-codes-of-the-internet
 
-# Part 3: 👩🏼‍💻 Netlify Dev
+## Part 3: 👩🏼‍💻 Netlify Dev
 
 - Netlify Dev
   - Docs https://url.netlify.com/B1k5Xjcvr
@@ -140,7 +135,7 @@ Goal: what's available.
   - netlify-lambda install
   - netlify-lambda build
 
-# Part 4: 🗒️ Netlify Forms
+## Part 4: 🗒️ Netlify Forms
 
 - Introducing Forms in plain HTML
 - File Uploads
@@ -156,7 +151,7 @@ Goal: what's available.
 - Forms in Gatsby
 - AJAX form submissions
 
-# Part 5: 🆔 Netlify Identity
+## Part 5: 🆔 Netlify Identity
 
 - Before Identity: Password Protection and Role Based Access Control
   - Netlify Password Protection https://url.netlify.com/Sk1fQoqvB
@@ -194,7 +189,7 @@ Goal: what's available.
     - Audit log
     - Custom sender
 
-# Part 6: ✍️ NetlifyCMS
+## Part 6: ✍️ NetlifyCMS
 
 - Concepts and Config
   - Admin Endpoint: /admin
@@ -229,7 +224,7 @@ Goal: what's available.
   - Uploadcare
   - Netlify Large Media
 
-# Part 7: ➕ Netlify Addons: Everything Else!
+## Part 7: ➕ Netlify Addons: Everything Else!
 
 - Analytics
   - Netlify Analytics Product Page https://url.netlify.com/SkNVQs9wB
@@ -263,7 +258,7 @@ Goal: what's available.
   - Support
   - Performance ADN
 
-# Part 8: 🍻 Netlify API
+## Part 8: 🍻 Netlify API
 
 - Make Your Own Netlify Client
 - Example Clients
@@ -278,7 +273,7 @@ Goal: what's available.
   - https://github.com/netlify/open-api
   - https://github.com/netlify/cli-utils/
 
-# Part 9: ❓ Learn More
+## Part 9: ❓ Learn More
 
 - Status
   - https://twitter.com/netlifystatus
