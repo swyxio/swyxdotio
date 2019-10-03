@@ -16,7 +16,7 @@
     "puppeteer-core": "^1.20.0",
     "rss": "^1.2.2",
     "sirv": "^0.4.0",
-    "ssg": "^0.0.21",
+    "ssg": "^0.0.22",
     "twemoji": "^12.1.3",
     "url-join": "^4.0.1"
   },
@@ -43,6 +43,7 @@
   },
   "scripts": {
     "start": "ssg dev",
+    "serve": "serve __sapper__/export",
     "build": "ssg export --timeout=10000",
     "postinstall": "patch-package",
     "prettify": "prettier --write src/**/*",

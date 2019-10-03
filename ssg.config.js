@@ -46,7 +46,7 @@ exports.getDataSlice = async (key, uid) => {
 // mandatory. called once, should be cheap
 exports.createIndex = async (mainIndex = {}) => {
   console.log('getting intial data')
-  console.log(Object.keys(mainIndex))
+  // console.log(Object.keys(mainIndex))
   // can add more data to index here
   return mainIndex
 }
