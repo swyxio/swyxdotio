@@ -2,14 +2,8 @@ const fs = require('fs')
 const path = require('path')
 const generateRSS = require('./generateRSS')
 const remark = require('@ssgjs/source-remark')
-const writing = remark({
-  dirPath: 'content/writing',
-  onCreateIndex: idx => console.log('Number of talks:', Object.keys(idx).length)
-})
-const speaking = remark({
-  dirPath: 'content/talks',
-  onCreateIndex: idx => console.log('Number of posts:', Object.keys(idx).length)
-})
+const writing = remark({ dirPath: 'content/writing' })
+const speaking = remark({ dirPath: 'content/talks' })
 
 // used only in rss feed for now but can repeat elsewhere
 const sitedata = {
@@ -46,8 +40,9 @@ exports.getDataSlice = async (key, uid) => {
 // mandatory. called once, should be cheap
 exports.createIndex = async (mainIndex = {}) => {
   console.log('getting intial data')
-  // console.log(Object.keys(mainIndex))
   // can add more data to index here
+  console.log('Number of talks:', Object.keys(mainIndex.speaking).length)
+  console.log('Number of articles:', Object.keys(mainIndex.writing).length)
   return mainIndex
 }
 
