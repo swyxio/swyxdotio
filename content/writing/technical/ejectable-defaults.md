@@ -7,6 +7,8 @@ date: 2019-10-05
 description: Borrowing heavily from Gatsby Themes to improve the Sapper developer experience, and a discussion of how Ejectable Defaults fits with the Zero Config movement
 ---
 
+## Table of Contents
+
 ## TL;DR
 
 **Bottom Line Up Front: Ejectable Defaults are Great!**
