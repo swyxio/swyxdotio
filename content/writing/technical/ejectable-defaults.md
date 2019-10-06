@@ -284,7 +284,7 @@ exports.onCreateWebpackConfig = ({
 }
 ```
 
-but offer some niceties like ` actions.replaceWebpackConfig(config)` if you need it.
+but offer some niceties like ` actions.replaceWebpackConfig` if you need it.
 
 React-Static uses [a plugin with many many lifecycles](https://github.com/react-static/react-static/blob/master/docs/plugins/node-api.md#webpack-functionfunction) to modify its config:
 
