@@ -32,9 +32,24 @@ const preprocess = mdsvex({
   // },
 })
 
+const clientInput = path.resolve(
+  process.cwd(),
+  'node_modules/ssg/defaultSrcFiles/client.js'
+)
+const serverInput = {
+  server: path.resolve(
+    process.cwd(),
+    'node_modules/ssg/defaultSrcFiles/server.js'
+  )
+}
+const swInput = path.resolve(
+  process.cwd(),
+  'node_modules/ssg/defaultSrcFiles/service-worker.js'
+)
+
 export default {
   client: {
-    input: 'node_modules/ssg/defaultSrcFiles/client.js',
+    input: clientInput,
     output: config.client.output(),
     plugins: [
       replace({
@@ -88,7 +103,7 @@ export default {
   },
 
   server: {
-    input: 'node_modules/ssg/defaultSrcFiles/server.js',
+    input: serverInput,
     output: config.server.output(),
     plugins: [
       replace({
@@ -115,7 +130,7 @@ export default {
   },
 
   serviceworker: {
-    input: 'node_modules/ssg/defaultSrcFiles/service-worker.js',
+    input: swInput,
     output: config.serviceworker.output(),
     plugins: [
       resolve(),

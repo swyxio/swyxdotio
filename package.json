@@ -44,7 +44,8 @@
   "scripts": {
     "start": "ssg dev",
     "serve": "serve __sapper__/export",
-    "build": "ssg export --timeout=10000",
+    "build": "ssg export",
+    "nobuild": "ssg export --build false",
     "postinstall": "patch-package",
     "prettify": "prettier --write src/**/*",
     "screenshot": "node screenshot-plugin/cli.js"
