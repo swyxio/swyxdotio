@@ -4,6 +4,7 @@ slug: ejectable-defaults
 subtitle: Zero Config First, Full Config Later
 categories: ['Tech', 'JavaScript', 'DX']
 date: 2019-10-05
+description: Borrowing heavily from Gatsby Themes to improve the Sapper developer experience, and a discussion of how Ejectable Defaults fits with the Zero Config movement
 ---
 
 ## TL;DR
@@ -75,7 +76,7 @@ Since you're going for opinionatedness, it's tempting to go all the way. The les
 
 `create-react-app` did this, banking on a hard no config requirement. This is a very difficult battle to fight, because needs understandably differ, and you could continue using the thing *if they just added one flag for your thing*. You name it, the CRA maintainers have had to fight it off, from customizing Babel configs to Webpack configs to differential bundling to absolute module resolution...
 
-Certain configs are widespread enough that they "don't count" towards a no-config requirement. For example, most everybody (except CRA) allow you to specify a `.babelrc` to tweak your Babel plugins, even if they don't let you directly modify the underlying webpack or rollup config. `tsconfig.json` has also arguably reached this level of ubiquity. It pretty much serves the same purpose as `.babelrc`.
+Certain configs are widespread enough that they "don't count" towards a no-config requirement. For example, most everybody (except CRA) allow you to specify a `.babelrc` to tweak your Babel plugins, even if they don't let you directly modify the underlying webpack or rollup config. `tsconfig.json` has also arguably reached this level of ubiquity.
 
 What's common among them is that they are all flat static files - they just contain simple values, with no executable code. I'll have a followup blogpost on the benefits of Formats over Functions. (let me know if you Have Thoughts on this)
 

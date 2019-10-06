@@ -114,7 +114,7 @@
   <meta
     property="og:image"
     content="https://www.swyx.io/og_image/{category}/{slug}.png" />
-  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:creator" content="https://twitter.com/swyx/" />
   <meta name="twitter:title" content={seoTitle} />
   <meta name="twitter:description" content={seoDescription} />
