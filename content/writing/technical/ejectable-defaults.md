@@ -84,7 +84,7 @@ What's common among them is that they are all flat static files - they just cont
 
 But if you wanted more control, CRA forced you into a scary irreversible decision: `eject`. Eject is a bad word. So bad that CRA even surveys you asking you why you felt you had to eject.
 
-THe problem is, everyone eventually wants more control. I won't bother elaborating, I trust you get this.
+The problem is, everyone eventually wants more control. I won't bother elaborating, I trust you get this.
 
 ## Optional Config
 
@@ -118,7 +118,7 @@ So Chris spun up a [wonderful little CLI](https://github.com/ChristopherBiscardi
 
 So the combination of shadowable components and the ability to eject them for further work solves this seemingly intractable tradeoff between wanting to offer a low config developer experience, yet a progressive and reversible upgrade for users who feel they might need more power.
 
-## You don't need Full Shadowing
+## Shadowing without Webpack
 
 Chris implemented [Component Shadowing as a webpack plugin](https://www.christopherbiscardi.com/post/using-gatsby-component-shadowing-without-gatsby/) you can use without using Gatsby, but what if you want to extend this concept outside of webpack?
 
