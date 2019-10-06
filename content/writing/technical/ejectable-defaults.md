@@ -183,6 +183,8 @@ So I did the simplest possible thing I could think of:
     if (!require('fs').existsSync(input)) {
       input = path.resolve(__dirname, '../runtime/internal/fallback.rollup.js') // opted for a different name so it is easier to find
     }
+    // ...
+  }
 ```
 
 If I tried the same approach as the other subjects we already discussed, I would have to take on rollup maintenance burden and offer ways to modify it. I was keen on finding another way. So this is what I ended up with - to be clear I didnt think this through very hard, but it seems an interesting solution.
@@ -191,7 +193,7 @@ I then implemented [the `eject` code](https://github.com/sw-yx/ssg/blob/d253f841
 
 - I had to ship the ejectable files separately because of technicalities with project governance but arguably the files you eject should be the same files you use in the fallback
 - i use Jon Schlinkert's [enquirer](https://github.com/enquirer/enquirer) as best in class CLI UI library. Usual caveats apply with [anything in the Schlinkerverse](https://www.reddit.com/r/webdev/comments/8kq21d/new_to_web_development_is_it_normal_to_have_so/).
-- knowing the difference between `path.resolve(__dirname` and `path.resolve(process.cwd` is very helpful
+- knowing the difference between `__dirname` and `process.cwd` is very helpful
 - copying files is a potentially destructive action. Prompt for overwrite and also preserve the old file:
 
 ```ts
