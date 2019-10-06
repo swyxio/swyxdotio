@@ -31,8 +31,8 @@
   <h1>swyx's site!</h1>
   <h2>
     Latest Post:
-    <a href="/writing/not-manager">
-      <b>Why I Won't Choose To Be A Manager</b>
+    <a href="/writing/ejectable-defaults">
+      <b>Ejectable Defaults: Zero Config First, Full Config Later</b>
     </a>
   </h2>
 </article>

@@ -27,14 +27,7 @@ exports.plugins = {
 // optional. called repeatedly, can be expensive
 exports.getDataSlice = async (key, uid) => {
   console.log('optional getDataSlice action')
-
-  // // not needed but.. just in case
-  // if (key === 'writing') {
-  //   return writing.getDataSlice(uid)
-  // } else if (key === 'talks') {
-  //   return speaking.getDataSlice(uid)
-  // }
-  // throw new Error('no data found for key: ' + key + ' uid: ' + uid)
+  // etc
 }
 
 // mandatory. called once, should be cheap
