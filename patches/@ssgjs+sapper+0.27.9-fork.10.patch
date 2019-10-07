@@ -1,0 +1,18 @@
+diff --git a/node_modules/@ssgjs/sapper/dist/export.js b/node_modules/@ssgjs/sapper/dist/export.js
+index 6b1d535..1e41392 100644
+--- a/node_modules/@ssgjs/sapper/dist/export.js
++++ b/node_modules/@ssgjs/sapper/dist/export.js
+@@ -1865,7 +1865,12 @@ async function _export({
+ 	// swyx: introduced to solve race condition
+ 	// https://github.com/sveltejs/sapper/issues/893#issuecomment-538811020
+ 	function checkWritingDone(currentUrl) {
+-		if (latestUrl != currentUrl || queue.getLength() > 0) ; else {
++		if (latestUrl != currentUrl || queue.getLength() > 0) {
++			setTimeout(() => {
++				latestUrl = currentUrl
++				checkWritingDone(currentUrl)
++			}, 1000)
++		}; else {
+ 			proc.kill();
+ 		}
+ 	}
