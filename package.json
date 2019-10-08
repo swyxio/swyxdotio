@@ -5,12 +5,11 @@
   "author": "sw-yx <swyx@dontemail.me>",
   "license": "MIT",
   "dependencies": {
-    "@ssgjs/sapper": "^0.27.9-fork.10",
     "fuse.js": "^3.4.5",
     "marked": "^0.7.0",
     "puppeteer": "^1.20.0",
     "rss": "^1.2.2",
-    "ssg": "^0.0.37",
+    "ssg": "^0.0.38",
     "twemoji": "^12.1.3",
     "url-join": "^4.0.1"
   },
