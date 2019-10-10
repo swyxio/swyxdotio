@@ -1,10 +1,39 @@
-## Build Custom CLI Tooling with OClif and React-Ink
+# Build Custom CLI Tooling with OClif and React-Ink
+
+## Workshop description
+
+Across companies like Facebook, Salesforce, Atlassian and Stripe, developer productivity is an increasing area of investment, leading to the rise of dedicated infrastructure teams for JavaScript and other languages. Even at smaller scales, given the amount of repetitive tasks we do, it would be worth it to occasionally invest in custom tooling - if only it were easier to get started. Meanwhile, over the past 2 years, great new frameworks in CLI tooling have arisen in JavaScript that would be extremely accessible to a wide audience.
+
+Today, you can't do anything in JavaScript without bumping into a CLI. Want to install a library? `yarn add` it. Want a React app? `create-react-app`.  Want to format your JavaScript? `prettier --write`. Want your types checked? `tsc`. Bundling? Pick from `webpack`, `rollup`, or `parcel`. Deploying? `now` or `netlify deploy`. CLI's are everywhere, and even if you don't write them, sooner or later you'll have to debug them.
+
+Yet, nobody's teaching how this all works.
+
+This workshop serves as a comprehensive survey of the state of the art of CLI tooling for the ambitious developer looking to make an impact in open source, across their company, and even in their own productivity. 
+
+Topics Include:
+
+- Create a Simple CLI
+- Pass Args and flags to a CLI
+- Set up testing for a CLI
+- Add filesystem state to a CLI
+- Scaffold boilerplates (e.g. templates)
+- Polish the CLI with colors, spinners, etc.
+- Spawn child processes so other CLIs can run
+- Control logging & output from other processes
+
+As Dan Abramov recently said: "Here's a thing that I learned at FB that I wish I knew much earlier. Invest in building custom tools! It can be a script you could write in a day. And at small and medium companies, even a little effort can yield a huge return."
+
+This workshop is the "missing manual" for writing Node CLI's. We hope you'll benefit from it as much as we have creating it.
+
+
+
+## CFP
 
 > Why is this topic important for somebody to learn?
 
 _What problems does it solve for the learner? What's the real world context where knowledge gained from the course could be applied? (This helps us figure out promotional angles, as well as next steps for the learner to follow.)_
 
-Across companies like Salesforce, Atlassian and Stripe, developer productivity is an increasing area of investment, leading to the rise of dedicated infrastructure teams for JavaScript and other languages. Even at smaller scales, given the amount of repetitive tasks we do, it would be worth it to occasionally invest in custom tooling - if only it were easier to get started. Meanwhile, over the past 2 years, great new frameworks in CLI tooling have arisen in JavaScript that would be extremely accessible to a wide audience.
+Across companies like Facebook, Salesforce, Atlassian and Stripe, developer productivity is an increasing area of investment, leading to the rise of dedicated infrastructure teams for JavaScript and other languages. Even at smaller scales, given the amount of repetitive tasks we do, it would be worth it to occasionally invest in custom tooling - if only it were easier to get started. Meanwhile, over the past 2 years, great new frameworks in CLI tooling have arisen in JavaScript that would be extremely accessible to a wide audience.
 
 This workshop serves as a comprehensive survey of the state of the art of CLI tooling for the ambitious developer looking to make an impact in open source, across their company, and even in their own productivity. As Dan Abramov recently said: "Here's a thing that I learned at FB that I wish I knew much earlier. Invest in building custom tools! It can be a script you could write in a day. And at small and medium companies, even a little effort can yield a huge return."
 

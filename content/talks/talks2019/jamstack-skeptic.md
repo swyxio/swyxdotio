@@ -1,11 +1,12 @@
 
 ---
-title: A Skeptic's Intro to the JAMStack
+title: A Skeptic's Intro to the JAMstack
 slug: jamstack-skeptic
 topic: JAMstack
 venues: Asbury Agile
 date: 2019-10-04
 url: https://www.asburyagile.com/schedule
+video: https://www.youtube.com/watch?v=DD6KTAGrj3E
 desc: An introduction to the JAMstack from a skeptical perspective
 description: A delightful exploration of how JavaScript web apps, serverless APIs, the static-site renaissance, and Git-centric workflows are enabling a whole new architecture, from a fellow skeptic wary of marketing acronyms.
 ---
