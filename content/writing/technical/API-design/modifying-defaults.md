@@ -67,7 +67,7 @@ I was recently tempted to save the user some of that pain by providing a modifie
 // complex set of imports and code for getExt1/2/3()
 export async function myPlugin({ modifyExtensions }) {
   let extensions = await Promise.all([getExt1(), getExt2(), getExt3()])
-  if (!modifyExtensions) extensions = await modifyExtensions(extensions)
+  if (modifyExtensions) extensions = await modifyExtensions(extensions)
   // use extensions
 }
 ```
