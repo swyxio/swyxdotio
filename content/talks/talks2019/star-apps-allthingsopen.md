@@ -1,5 +1,5 @@
 ---
-title: STAR Apps
+title: STAR Apps (All Things Open)
 slug: star-apps-allthingsopen
 topic: STAR
 venues: All Things Open

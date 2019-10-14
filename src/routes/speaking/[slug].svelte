@@ -1,8 +1,8 @@
 <script context="module">
   export async function preload({ params, query }) {
-    const talkIndex = await this.fetch(`/data/speaking___ssg___index.json`).then(
-      x => x.json()
-    )
+    const talkIndex = await this.fetch(
+      `/data/speaking___ssg___index.json`
+    ).then(x => x.json())
     const post = talkIndex[params.slug]
     const uid = post.uid
     const res = await this.fetch(`/data/speaking___ssg___${uid}.json`)
@@ -37,6 +37,7 @@
     : `${seoCategory} | ${post.metadata.title}`
   export let seoDescription =
     post.metadata.desc || post.metadata.description || seoTitle
+  export let displayDescription = post.metadata.description || seoDescription
   export let category = 'speaking'
   export let date = post.metadata.dateString || 'no date specified'
   export let topic = post.metadata.topic ? post.metadata.topic + ' @ ' : ''
@@ -168,8 +169,8 @@
   </div>
 {/if}
 <SlugTemplate>
-  {#if seoDescription}
-    <p>Description: {seoDescription}</p>
+  {#if displayDescription}
+    <p>Description: {displayDescription}</p>
   {/if}
   {#if post.html}
     {@html post.html}

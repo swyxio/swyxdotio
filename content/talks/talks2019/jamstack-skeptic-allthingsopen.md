@@ -1,5 +1,5 @@
 ---
-title: A Skeptic's Intro to the JAMstack
+title: A Skeptic's Intro to the JAMstack (All Things Open)
 slug: jamstack-skeptic
 topic: JAMstack
 venues: All Things Open
