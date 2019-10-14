@@ -1,6 +1,6 @@
 ---
 title: A Skeptic's Intro to the JAMstack (All Things Open)
-slug: jamstack-skeptic
+slug: jamstack-skeptic-allthingsopen
 topic: JAMstack
 venues: All Things Open
 date: 2019-10-14
