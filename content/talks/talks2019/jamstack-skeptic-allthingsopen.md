@@ -5,6 +5,7 @@ topic: JAMstack
 venues: All Things Open
 date: 2019-10-14
 video: https://www.youtube.com/watch?v=yzY1vIQmVUA&feature=youtu.be
+tweet: https://twitter.com/swyx/status/1183886538251423744
 url: https://allthingsopen.org/schedule/
 desc: An introduction to the JAMstack from the context of other stacks in 20 minutes
 description: A delightful exploration of how JavaScript web apps, serverless APIs, the static-site renaissance, and Git-centric workflows are enabling a whole new architecture, from a fellow skeptic wary of marketing acronyms.

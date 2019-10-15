@@ -4,7 +4,10 @@ slug: netlify-jamstack-indiehackers
 categories: ['Tech', 'Netlify']
 date: 2019-09-02
 published: true
+canonical: https://www.indiehackers.com/article/jamstack-for-indie-hackers-b07f7a943d
 ---
+
+_This article was [published on Indie Hackers](https://www.indiehackers.com/article/jamstack-for-indie-hackers-b07f7a943d)!_
 
 You can make money _with_ the JAMstack or _on_ the JAMstack. I have spent the last year at Netlify, working at the heart of the JAMstack ecosystem, and when [Derrick Reimer](https://derrickreimer.com) reached out to have a chat about [StaticKit](http://statickit.com), I immediately realized that what I've learned could be helpful to a broader Indie Hacker audience. Here's what I know.
 
