@@ -66,3 +66,7 @@ I very consciously phrase my decision as not _choosing_ to be a manager, rather 
 > [Some are born managers, some achieve managerness, and some have managerness thrust upon 'em](https://www.sparknotes.com/nofear/shakespeare/twelfthnight/page_110/)
 
 I won't choose to do it, but if I am so unlucky as to _have_ to do it, you better believe I will do the best I can.
+
+## References
+
+- http://keavy.com/work/thriving-on-the-technical-leadership-path/
