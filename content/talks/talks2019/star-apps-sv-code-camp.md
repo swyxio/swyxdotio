@@ -1,14 +1,13 @@
 ---
-title: STAR Apps (All Things Open)
-slug: star-apps-allthingsopen
+title: STAR Apps (SV Code Camp)
+slug: star-apps-svcodecamp
 topic: STAR
-venues: All Things Open
-date: 2019-10-14
-url: https://allthingsopen.org/schedule/
-video: https://www.youtube.com/watch?v=vLVnwlrMDD0
-tweet: https://twitter.com/swyx/status/1183884912321060864
+venues: SV Code Camp
+date: 2019-10-19
+url: https://www.siliconvalley-codecamp.com/Session/2019/star-apps-design-systems-typescript-apollo-graphql-and-react
+video: https://www.youtube.com/watch?v=avJkYrfvutk
 article: https://css-tricks.com/star-apps-a-new-generation-of-front-end-tooling-for-development-workflows/
-desc: A 20 min talk about Storybook, TypeScript, Apollo GraphQL, and React
+desc: A 1hr talk about Storybook, TypeScript, Apollo GraphQL, and React
 description: A new front-end stack is emerging, with one theme - constraints that scale. They involve building Design Systems for visual consistency, using TypeScript for internal consistency, Apollo GraphQL for data manipulation, and server- or statically-rendered React for data representation. In this talk we explore how these trends fit together, and _why_ leading product teams from AirBnb to the New York Times are embracing them.
 ---
 
