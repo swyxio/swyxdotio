@@ -30,4 +30,6 @@ while of course also helping people in the US. Mostly I also like the idea that 
 
 By allocating $10k to FreeCodeCamp I'm effectively treating FCC as a bootcamp with deferred payment. For reference, I paid $17k to go to [Full Stack Academy](https://www.fullstackacademy.com/). They had stronger in person tuition, and also got me my first job, so it feels about right. I also like the idea that FCC just needs to produce 30 of me a year, out of a pipeline of millions (google says 350k students/month), to meet its annual budget.
 
+## [DONATE HERE](https://paypal.me/freecodecamp)
+
 ![https://pbs.twimg.com/media/EHaeZOIWkAE9lRP?format=jpg&name=medium](https://pbs.twimg.com/media/EHaeZOIWkAE9lRP?format=jpg&name=medium)
