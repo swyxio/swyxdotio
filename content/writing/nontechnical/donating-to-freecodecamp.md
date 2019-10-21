@@ -12,7 +12,7 @@ I'm frankly just not a big donor, period. 2-3 disastrous financial decisions fro
 
 But I also care a lot about impact - is my dollar going to someone that really needs it - and the relationship I have to the cause.
 
-On these two counts, FreeCodeCamp comes up tops. Quincy and team have proven themselves to do a lot with very little. But recent outages have forced Quincy to [draw attention to their $300k budget](https://www.freecodecamp.org/news/freecodecamp-servers-update-october-2019/). To be clear, they also get a lot of free services from companies. But they could definitely use more cash. Quincy
+On these two counts, FreeCodeCamp comes up tops. Quincy and team have proven themselves to do a lot with very little. But recent outages have forced Quincy to [draw attention to their $300k budget](https://www.freecodecamp.org/news/freecodecamp-servers-update-october-2019/). To be clear, they also get a lot of free services from companies. But they could definitely use more cash. Quincy is also very scrupulous around how he does fundraising - no ads, no nags - which I strongly identify with and want to reward.
 
 I also care a lot about keeping quality coding education free. When I decided to explore learning to code, I wasn't sure if I was cut out for it. So I kept my day job, and [just did something on freecodecamp every day for 6 months](https://www.freecodecamp.org/forum/t/no-zero-days-my-roadmap-from-javascript-noob-to-full-stack-developer-in-12-months/164514). It was a struggle, but completing FCC was what gave me the confidence that this was actually something I could do and was worth quitting my job and investing actual money in. My story isn't even special - at least I had a job to keep me going. Others have less.
 
