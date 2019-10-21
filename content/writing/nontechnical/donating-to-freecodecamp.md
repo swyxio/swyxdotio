@@ -1,5 +1,5 @@
 ---
-title: Donating my $10k to FreeCodeCamp
+title: Donating $10k to FreeCodeCamp
 slug: donating-to-freecodecamp
 description: I benefited from FreeCodeCamp and would like to give back
 categories: ['Tech']
