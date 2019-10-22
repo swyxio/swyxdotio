@@ -9,7 +9,7 @@ description: My notes on Alex Russell's views on Mobile Web and React/JS
 
 Anyone active in Web Dev Twitter will have a certain trepidation when [Alex Russell](https://twitter.com/slightlylate/) gets involved.
 
-As a rule, I never comment on his threads. In general, the scale and problems he focuses on aren't ones I share, so I have nothing of value to add, nor am I ever going to change any of his opinions. I will also admit to being intimidated by general shoutyness and experience - as he will remind you, he is a Senior Staff Engineer at Google. I'm just a scrub that learned to code to get a better job, yknow? I have no business being involved in arguments that feel "above my paygrade" (I know we all have a role to play, etc., but the feeling is valid).
+As a rule, I never comment on his threads. In general, the scale and problems he focuses on aren't ones I share, so I have nothing of value to add, nor am I ever going to change any of his opinions. I will also admit to being intimidated by general shoutyness and experience. I'm just a scrub that learned to code to get a better job, yknow? I have no business being involved in arguments that feel "above my paygrade" (I know we all have a role to play, etc., but the feeling is valid).
 
 However, meeting Alex was an inevitability given where I work, and it finally happened this week!
 
