@@ -1,5 +1,5 @@
 ---
-title: The Suspense is Almost Over (React Podcast)
+title: The Suspense is Almost Over - React Podcast
 slug: react-podcast-suspense
 topic: React
 venues: podcast
