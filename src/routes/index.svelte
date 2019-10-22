@@ -31,8 +31,8 @@
   <h1>swyx's site!</h1>
   <h2>
     Latest Post:
-    <a href="/writing/very-late">
-      <b>Very Late: Fighting for the Open Web</b>
+    <a href="/writing/donating-to-freecodecamp">
+      <b>Donating $10k to FreeCodeCamp</b>
     </a>
   </h2>
 </article>

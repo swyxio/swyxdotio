@@ -1,11 +1,11 @@
 ---
-title: Be Wrong with Shawn Swyx Wang
+title: The Suspense is Almost Over (React Podcast)
 slug: react-podcast-suspense
 topic: React
 venues: podcast
 date: 2019-10-22
 url: https://reactpodcast.com/69
-desc: A disussion about what we know about Suspense and Concurrent React, before it is released
+desc: A Pre-ReactConf Concurrent React Rundown with Swyx
 ---
 
 
