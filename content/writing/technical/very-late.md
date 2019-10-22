@@ -75,7 +75,7 @@ It's no surprise that Alex (who co-invented PWAs) views growing the scope of PWA
 
 PWAs of course, also help solve perf by caching assets via service workers, so we get a 2-for-1 deal here.
 
-My hesitation to all this is that I'm not sure it _would_ save the mobile web. Apple literally has hundreds of billions of market value at stake making native apps and the app store proprietary to Apple. If I could wave a magic wand and grant Alex his current 40-50 specific wishes, I don't have any confidence the balance would swing significantly in favor of the mobile web. Partially, this is because we can't imagine something we've never seen, so this hypothetical counterargument already isn't helpful, but also because Apple would simply add more shit tomorrow to re-tilt the playing field.
+My hesitation to all this is that I'm not sure it _would_ save the mobile web. Apple literally has hundreds of billions of market value at stake making native apps and the app store proprietary to Apple. If I could wave a magic wand and grant Alex his current 40-50 specific wishes, I don't have any confidence the balance would swing significantly in favor of the mobile web (of course it'd balance a lot more). Partially, this is because we can't imagine something we've never seen, so this hypothetical counterargument already isn't helpful, but also because Apple would simply add more shit tomorrow to re-tilt the playing field.
 
 Of course, Alex works at Google (and constantly points out his own conflict of interest, no need to do it for him) and Android has its cross to bear too, but Alex recently won a fight to list PWAs on par with Native Apps on the Android Play Store and so there has been good, substantive progress on this front. Apple continues to insist, for example, that [every browser on iOS uses Safari's Webkit](https://www.howtogeek.com/184283/why-third-party-browsers-will-always-be-inferior-to-safari-on-iphone-and-ipad/) - ([more on this from Alex](https://convopage.com/c/1176856950086275072)), so there isn't even room to compete on browser features, and then on top of that comparatively underinvests in Safari (Chrome has ~1000 engineers on it, Safari has ~100). Alex thinks **the web community should sue Apple** for anticompetitive behavior and frankly I find it hard to disagree here.
 
@@ -118,11 +118,11 @@ The second criticism is the much gnarlier one, because there is no direct causal
 
 Alex understands all this. So of course he is going to want the React team to use their influence more here. He says he has three things he wants to see (this is important but my memory is also hazy, please forgive me if I misrepresent him here):
 
-- a much smaller `create-react-app` (i'm not sure what specifically can be smaller in production, I didn't ask)
+- much better documentation and default tooling for asserting bundle size limits
 - differential loading (aka the `module`/`nomodule` pattern) supported everywhere
 - outright size of React and React-Dom getting smaller each year
 
-He doesn't see improvement on all 3 fronts, so he has written off React as caring about perf and regards using it as "unethical". 
+He doesn't see improvement on all 3 fronts.
 
 > from swyx
 
