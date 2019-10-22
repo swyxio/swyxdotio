@@ -6,13 +6,13 @@ categories: ['Tech']
 date: 2018-10-22
 ---
 
-Anyone active in Web Dev Twitter will have a certain trepidation when Alex Russell gets involved.
+Anyone active in Web Dev Twitter will have a certain trepidation when [Alex Russell](https://twitter.com/slightlylate/) gets involved.
 
-As a rule, I never comment on his threads. In general, the scale and problems he focuses on aren't ones I share, so I have nothing of value to add, nor am I ever going to change any of his opinions. I will also admit to being intimidated by general shoutyness and experience - as he will remind you, he is a Senior Staff Engineer at Google. I'm just a scrub that learned to code to get a new, better, job, yknow? I have no business being involved in arguments that feel "above my paygrade" (I know we all have a role to play, etc., but the feeling is valid).
+As a rule, I never comment on his threads. In general, the scale and problems he focuses on aren't ones I share, so I have nothing of value to add, nor am I ever going to change any of his opinions. I will also admit to being intimidated by general shoutyness and experience - as he will remind you, he is a Senior Staff Engineer at Google. I'm just a scrub that learned to code to get a better job, yknow? I have no business being involved in arguments that feel "above my paygrade" (I know we all have a role to play, etc., but the feeling is valid).
 
-Meeting Alex was an inevitability given where I work, however, and it finally happened this week!
+However, meeting Alex was an inevitability given where I work, and it finally happened this week!
 
-I thought it might be valuable to interpret his arguments through me, a not-yelling-at-you fellow member of the React/JS Framework community who just got here trying to make a living. As much as I love React and JS and the lifechanging opportunities it has given, I think a lot of his arguments make sense, and I think "my people" might benefit via me acting as interpreter.
+I thought it might be valuable to interpret his arguments through me, a **not-yelling-at-you** fellow member of the React/JS Framework community who just got here trying to make a living. As much as I love React and JS and the lifechanging opportunities it has given, I think a lot of his arguments make sense, and I think "my people" might benefit via me acting as interpreter.
 
 ## Table of Contents
 
@@ -35,7 +35,7 @@ There is also, in the second half, a discussion about React, which gets very mud
 
 This first argument is more a factual one than anything subjective:
 
-- the web does fine on desktop vs native desktop apps. nobody has any issues there.
+- the web does fine on desktop vs native desktop apps. nobody has any issues there. In fact Alex says he has reports of Chromium being >50% of desktop cycles, aka we spend the majority of our time in web rather than native on desktop. However...
 - it is a fact that mobile has overtaken desktop as the primary computing/consumption platform, and is continuing to take share with no end in sight.
 - it is a fact that on mobile, time spent on mobile native apps hugely dominate time spent on mobile web apps. The general number Alex uses is ~7% on mobile web, and in some countries as little as 5%. This number is _still dropping_. Mobile web is essentially "MIA" (this is the topic of [Alex's talk](https://vimeo.com/364402896)).
 - it is a fact that mobile native apps are less open than mobile web apps.
@@ -54,7 +54,7 @@ Of course this feels incongruous given anecdotal stories of people doing well le
 
 > swyx here: these are mostly my reflections
 
-It's a fact that Mobile Web is losing, but _why_ it's losing has a lot of reasons, and the debate gets fantastically muddled here. Everyone has their pet topic (my pet peeve is the people that primarily blame bootcamps) but here are the big ones:
+It's a fact that Mobile Web is losing, but _why_ it's losing has a lot of reasons, and the debate gets fantastically muddled here. Everyone has their pet topic (my pet peeve is the people that immediately blame bootcamps, which shows you their biases) but here are the big ones:
 
 - **Mobile Perf**: web developers irresponsibily use too much JS which causes poor performance on mobile phones, leading to a much better UX on mobile apps
 - **Capability**: mobile web apps simply don't have the same capabilities that native apps have. There's the big ones, like having access to large file storage and non sandboxed execution capabilities (I'll mention more next), but also the little nuances like touch interaction and animation performance and default component behavior that make mobile web UX subpar (and are the cause of awesome projects like React Native Web and Dom and Ionic etc)
@@ -70,7 +70,7 @@ I'm eliding a loong, loong list of disadvantages mobile web has to mobile apps i
 
 It's no surprise that Alex (who co-invented PWAs) views growing the scope of PWAs as a primary solution for this issue. Part of Alex's job involves shepherding through a lot of the web API additions necessary to add the same capabilities native apps have. He's working on some really cool stuff - native filesystem storage, WebUSB, WebBluetooth, Serial, HID, SMS Receiver API, Contact access and about 40? more that he leads. ([Project Fugu appears to have about 100+ items](https://docs.google.com/spreadsheets/d/1de0ZYDOcafNXXwMcg4EZhT0346QM-QFvZfoD8ZffHeA/edit))
 
-In particular he is very keen on adding native-like notifications to PWAs, which I don't think anybody is clamoring for (hah, understatement?), but of course they drive engagement and Alex is so committed to saving mobile web that he will fight for notifications that "nobody" wants. The truth, of course, is that we users, by our actions, let them work on us, indicating we do want them, therefore app makers also want them.
+**Notifications, notifications, notifications**: In particular he is very keen on adding native-like notifications to PWAs, which I don't think anybody is clamoring for (hah, understatement?), but of course they drive engagement and Alex is so committed to saving mobile web that he will fight for notifications that "nobody" wants. The truth, of course, is that we users, by our actions, let them work on us, indicating we do want them, therefore app makers also want them.
 
 PWAs of course, also help solve perf by caching assets via service workers, so we get a 2-for-1 deal here.
 
@@ -144,63 +144,7 @@ Just linking to Alex's other comments on React, for my reference:
 
 The final important piece to cover was the "Never-Slow Mode" for Chromium. [Here's the proposal](https://github.com/slightlyoff/never_slow_mode), and here is [some](https://www.infoq.com/news/2019/02/chrome-never-slow-mode/) [media](https://www.xda-developers.com/google-chrome-never-slow-mode/) [coverage](https://arstechnica.com/gadgets/2019/02/with-experimental-never-slow-mode-chrome-tries-to-stop-web-devs-making-it-slow/) to explain in English.
 
-I think this could be a fantastic idea on mobile browsers. I direct your attention to the [Per-interaction Resource Limits](https://github.com/slightlyoff/never_slow_mode#per-interaction-resource-limits):
-
-
-<table>
-  <thead>
-    <tr>
-      <td>Type</td>
-      <td>Per-Resource Limit</td>
-      <td>Cumulative Limit</td>
-      <td>Scope</td>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Connections</td>
-      <td>n/a</td>
-      <td>10</td>
-      <td>document</td>
-    </tr>
-    <tr>
-      <td><code>&lt;iframe&gt;</code></td>
-      <td>n/a</td>
-      <td>10, depth 2</td>
-      <td>global</td>
-    </tr>
-    <tr>
-      <td>Script</td>
-      <td>50 KiB</td>
-      <td>500 KiB</td>
-      <td>document</td>
-    </tr>
-    <tr>
-      <td>External Stylesheets</td>
-      <td>100 KiB</td>
-      <td>200 KiB</td>
-      <td>document</td>
-    </tr>
-    <tr>
-      <td>Web Fonts</td>
-      <td>100 KiB</td>
-      <td>100 KiB</td>
-      <td>document</td>
-    </tr>
-    <tr>
-      <td>Images</td>
-      <td>1 MiB</td>
-      <td>2 MiB</td>
-      <td>document</td>
-    </tr>
-    <tr>
-      <td>Main-thread Execution</td>
-      <td>n/a</td>
-      <td>200ms</td>
-      <td>document</td>
-    </tr>
-  </tbody>
-</table>
+I think this could be a fantastic idea on mobile browsers. I direct your attention to the [Per-interaction Resource Limits](https://github.com/slightlyoff/never_slow_mode#per-interaction-resource-limits).
 
 This is essentially building the good parts of AMP into the browser, without the unethical search ad and URL shit Google is pulling with the current AMP. You can quibble about the exact numbers, and maybe have a looser setting for initial adoption, but this is directionally what the mobile web needs. As someone on roaming data often I want to know when I'm being forced to load a ton of JS, and for the sites to be shamed and threats of bouncing (if possible) to be real.
 
