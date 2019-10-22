@@ -3,29 +3,33 @@ title: 'Very Late: Fighting for the Open Web'
 subtitle: What I Learned from meeting Alex Russell
 slug: very-late
 categories: ['Tech']
-date: 2018-10-20
-published: false
+date: 2018-10-22
 ---
 
 Anyone active in Web Dev Twitter will have a certain trepidation when Alex Russell gets involved.
 
-As a rule, I never comment on his threads. In general, the scale and problems he focuses on aren't ones I share, so I have nothing of value to add, nor am I going to change any of his opinions. I will also admit to being intimidated by general shoutyness and experience - as he will remind you, he is a Senior Staff Engineer at Google. I'm just a scrub that learned to code to get a new, better, job, yknow? I have no business being involved in arguments that feel "above my paygrade" (I know we all have a role to play, etc., but the feeling is valid).
+As a rule, I never comment on his threads. In general, the scale and problems he focuses on aren't ones I share, so I have nothing of value to add, nor am I ever going to change any of his opinions. I will also admit to being intimidated by general shoutyness and experience - as he will remind you, he is a Senior Staff Engineer at Google. I'm just a scrub that learned to code to get a new, better, job, yknow? I have no business being involved in arguments that feel "above my paygrade" (I know we all have a role to play, etc., but the feeling is valid).
 
 Meeting Alex was an inevitability given where I work, however, and it finally happened this week!
 
 I thought it might be valuable to interpret his arguments through me, a not-yelling-at-you fellow member of the React/JS Framework community who just got here trying to make a living. As much as I love React and JS and the lifechanging opportunities it has given, I think a lot of his arguments make sense, and I think "my people" might benefit via me acting as interpreter.
 
+## Table of Contents
+
 ## Preface: Not Safe for Twitter
 
 First - a preface from me. There are a number of reasons why this topic is "NSFT" - it is complex, multicausal, high stakes, personal, situation-dependent, with bad-faith behavior and easy strawmen on both sides.
 
-As humans we exist in the middle of all this chaos, so our discussion is filled with this stuff, however it is not very helpful for clear thinking. I struggle with understanding things when arguments get conflated and goalposts shift, so I prefer to organize arguments into primary categories so they can be addressed, with of course the understanding that they are related in some way.
+As humans we exist in the middle of all this chaos, so our discussion is filled with this stuff, however it is not very helpful for clear thinking. I struggle with understanding things when arguments get conflated and goalposts shift. I prefer to organize arguments into primary categories so they can be addressed, with of course the understanding that they are related in some way.
 
-So the rest of this recount will try to split up the arguments so they can be discussed "cleanly".
+So the rest of this recount will try to split up the arguments so they can be discussed "cleanly", recognizing it is a little futile to do so but trying anyway.
 
 ## Death of Mobile Web = Death of Open Web
 
 > swyx here: Alex mostly assumes you know and agree with this, so all of this is assumed context whenever you talk to him
+
+![https://cloud.netlifyusercontent.com/assets/344dbf88-fdf9-42bb-adb4-46f01eedd629/4401052b-487f-4349-a901-5fbe018b4a6f/9-will-pwas-replace-native-mobile-apps.png](https://cloud.netlifyusercontent.com/assets/344dbf88-fdf9-42bb-adb4-46f01eedd629/4401052b-487f-4349-a901-5fbe018b4a6f/9-will-pwas-replace-native-mobile-apps.png) - more on [Will PWAs Replace Native Mobile Apps?
+](https://www.smashingmagazine.com/2018/12/pwa-native-mobile-apps/)
 
 This first argument is more a factual one than anything subjective:
 
@@ -48,7 +52,7 @@ Of course this feels incongruous given anecdotal stories of people doing well le
 
 > swyx here: these are mostly my reflections
 
-It's a fact that Mobile Web is losing, but _why_ it's losing has a lot of reasons, and the debate gets fantastically muddled here. Everyone has their pet topic (my pet peeve is the people that primarily blame bootcamps) but it is intellectually dishonest to only harp on that and not consider other reasons:
+It's a fact that Mobile Web is losing, but _why_ it's losing has a lot of reasons, and the debate gets fantastically muddled here. Everyone has their pet topic (my pet peeve is the people that primarily blame bootcamps) but here are the big ones:
 
 - **Mobile Perf**: web developers irresponsibily use too much JS which causes poor performance on mobile phones, leading to a much better UX on mobile apps
 - **Capability**: mobile web apps simply don't have the same capabilities that native apps have. There's the big ones, like having access to large file storage and non sandboxed execution capabilities (I'll mention more next), but also the little nuances like touch interaction and animation performance and default component behavior that make mobile web UX subpar (and are the cause of awesome projects like React Native Web and Dom and Ionic etc)
@@ -62,19 +66,19 @@ I'm eliding a loong, loong list of disadvantages mobile web has to mobile apps i
 
 > swyx mostly interpreting Alex here, altho a lot of this was assumed context
 
-It's no surprise that Alex (who co-invented PWAs) views growing the scope of PWAs as a primary solution for this issue. Part of Alex's job involves shepherding through a lot of the web API additions necessary to add the same capabilities native apps have. He's working on some really cool stuff - filesystem storage, WebBluetooth, and about 40? more that he can list on demand.
+It's no surprise that Alex (who co-invented PWAs) views growing the scope of PWAs as a primary solution for this issue. Part of Alex's job involves shepherding through a lot of the web API additions necessary to add the same capabilities native apps have. He's working on some really cool stuff - native filesystem storage, WebUSB, WebBluetooth, Serial, HID, SMS Receiver API, Contact access and about 40? more that he leads. ([Project Fugu appears to have about 100+ items](https://docs.google.com/spreadsheets/d/1de0ZYDOcafNXXwMcg4EZhT0346QM-QFvZfoD8ZffHeA/edit))
 
-In particular he is very keen on adding native-like notifications to PWAs, which I don't think anybody is clamoring for (hah, understatement?), but of course they drive engagement and Alex is so committed to saving mobile web that he will fight for notifications that "nobody" wants (the truth, of course, is that we users, by our actions, let them work on us, indicating we do want them, therefore app makers also want them).
+In particular he is very keen on adding native-like notifications to PWAs, which I don't think anybody is clamoring for (hah, understatement?), but of course they drive engagement and Alex is so committed to saving mobile web that he will fight for notifications that "nobody" wants. The truth, of course, is that we users, by our actions, let them work on us, indicating we do want them, therefore app makers also want them.
 
 PWAs of course, also help solve perf by caching assets via service workers, so we get a 2-for-1 deal here.
 
 My hesitation to all this is that I'm not sure it _would_ save the mobile web. Apple literally has hundreds of billions of market value at stake making native apps and the app store proprietary to Apple. If I could wave a magic wand and grant Alex his current 40-50 specific wishes, I don't have any confidence the balance would swing significantly in favor of the mobile web. Partially, this is because we can't imagine something we've never seen, so this hypothetical counterargument already isn't helpful, but also because Apple would simply add more shit tomorrow to re-tilt the playing field.
 
-Of course, Alex works at Google (and constantly points out his own conflict of interest, no need to do it for him) and Android has its cross to bear too, but Alex recently won a fight to list PWAs on par with Native Apps on the Android Play Store and so there has been good, substantive progress on this front. Apple continues to insist, for example, that [every browser on iOS uses Safari's Webkit](https://www.howtogeek.com/184283/why-third-party-browsers-will-always-be-inferior-to-safari-on-iphone-and-ipad/), so there isn't even room to compete on browser features, and then on top of that comparatively underinvests in Safari (Chrome has ~1000 engineers on it, Safari has ~100).
+Of course, Alex works at Google (and constantly points out his own conflict of interest, no need to do it for him) and Android has its cross to bear too, but Alex recently won a fight to list PWAs on par with Native Apps on the Android Play Store and so there has been good, substantive progress on this front. Apple continues to insist, for example, that [every browser on iOS uses Safari's Webkit](https://www.howtogeek.com/184283/why-third-party-browsers-will-always-be-inferior-to-safari-on-iphone-and-ipad/) - ([more on this from Alex](https://convopage.com/c/1176856950086275072)), so there isn't even room to compete on browser features, and then on top of that comparatively underinvests in Safari (Chrome has ~1000 engineers on it, Safari has ~100). Alex thinks **the web community should sue Apple** for anticompetitive behavior and frankly I find it hard to disagree here.
 
 > 100% swyx here
 
-Incentives explain everything, and I'm sure Apple has good reasons I haven't been exposed to yet. But you see why I'm doubtful PWAs can be a solution for this. The runaway success of Apple's integrated strategy has created a system where, even if you leveled the playing field today, it would still tilt back towards native apps (altho to be clear it'd be a lot better than what we have today). Still, it's no reason to not try, and a defeatist attitude of "this is how its going to play out anyway" doesn't really help anyone.
+Incentives explain everything, and I'm sure Apple has good reasons I haven't been exposed to yet. But you see why I'm doubtful PWAs can be a solution for this. The runaway success of Apple's integrated strategy has created a system where, even if you leveled the playing field today, it may still tilt back towards native apps (altho to be clear it'd be a lot better than what we have today). Still, it's no reason to not try - after all, the web really did win Desktop - and a defeatist attitude of "this is how its going to play out anyway" doesn't really help anyone.
 
 ## But it's also about Perf: Alex's Problems with React
 
@@ -86,7 +90,7 @@ This of course manifests the most in terms of mobile web performance. We tend to
 
 [Alex's standards for critical-path assets](https://infrequently.org/2017/10/can-you-afford-it-real-world-web-performance-budgets/) are probably lower (higher?) than yours, but at least they are publicly documented and argued from a consistent foundation. I'll not argue the validity of the budget (130-170kb compressed, which is around 1MB uncompressed), but just try to interpret how React figures among other frameworks here in his eyes.
 
-It's well known that React is around 30kb compressed, so, while significant, it is far from the whole budget, and it is totally feasible to create React apps that meet his performance budgets. In fact, in that same blogpost he mentions Next.js as a preferred tool that embeds "strong opinions about app structure, code splitting, and build targets". Alex is _not irrationally against React_ on principle. However he like many others views React alongside its ecosystem, and it is here that two main types of criticisms are leveled.
+It's well known that React is around 30kb compressed, so, while significant, it is far from the whole budget, and it is totally feasible to create React apps that meet his performance budgets. In fact, in that same blogpost he mentions Next.js as a preferred tool that embeds "strong opinions about app structure, code splitting, and build targets". Alex is _not irrationally against React_ on principle. However he like many others judges React alongside its ecosystem, and it is here that two main types of criticisms are leveled.
 
 > the structure and discussion of these criticisms come entirely from swyx
 
@@ -95,12 +99,13 @@ The first criticism is the easy one to address - the sheer size of sites, regard
 - React is often used where it is not needed, for example in blogs (note, I am not saying that React is _never_ needed in blogs, just saying it is _often_ not needed in blogs)
 - This argument is pretty much a result of React's dominance in frameworks; an easy tell is trying to see if the argument still makes sense if you swapped out Vue for React. If it does, then you're not really talking about React at all.
 - Still, the valid logic to focus on is the amount of JS served for the functionality given. Are you being wasteful if you serve 30kb of JS to do something you can do with 3kb? Absolutely. We should strive to do better for our readers.
-- However, we must also clearly delineate that this is a different and smaller offense than busting the performance budget. I will also forever be a staunch defender that people should do whatever they want on their personal blogs, because **"breakable toys"** are important, and you should always have a place to practice your craft even if the exact use doesnt quite fit. (someday I will have a separate blogpost "In Defence of Hammers")
+- However, we must also clearly delineate that this is a different and smaller offense than busting the performance budget. I will also forever be a staunch defender that people should do whatever they want on their personal blogs, because ["breakable toys"](https://www.oreilly.com/library/view/apprenticeship-patterns/9780596806842/ch05s03.html) are important, and you should always have a place to practice your craft even if the exact use doesnt quite fit. (someday I will have a separate blogpost "[In Defence of Hammers](/writing/hammers)")
 
-React does wonders for making sites. You can easily add progressive image upgrades, and clientside navigation, and interactive demos. I held out on this one for a long, long while (Helps when your paycheck depends on it). But eventually I found that you can do the same with less with Svelte/Sapper and so began the painful process of moving over.
+React does wonders for making sites. You can easily add progressive image upgrades, and clientside navigation, and interactive demos. I held out on this one for a long, long while (Helps when your paycheck depends on it). But eventually I found that you can do the same with less with Svelte/Sapper and so began the painful process of moving over. As you can see from this site, it's not great yet. But it's workable.
 
 The second criticism is the much gnarlier one, because there is no direct causal link - the overall resulting size of apps made by React devs:
 
+- For example, [Imgur sends you 1.21mb of JS, including React to show you an image](https://twitter.com/csswizardry/status/1185604806901207045).
 - again, React gets an undue amount of flak because it is currently in pole position. Anyone can create bad sites with any stack.
 - selection bias also applies - anyone picking Preact or Svelte at this point is also going to care about bundle size and that affects their subsequent choices.
 - blaming npm is a really bad take, I'm sorry
@@ -108,24 +113,124 @@ The second criticism is the much gnarlier one, because there is no direct causal
 
 > from Alex
 
-Alex understands all this. So of course he is going to want the React team to use their influence more here. He has three things he wants to see (this is important but my memory is also hazy, please forgive me if I misrepresent him here):
+Alex understands all this. So of course he is going to want the React team to use their influence more here. He says he has three things he wants to see (this is important but my memory is also hazy, please forgive me if I misrepresent him here):
 
 - a much smaller `create-react-app` (i'm not sure what specifically can be smaller in production, I didn't ask)
 - differential loading (aka the `module`/`nomodule` pattern) supported everywhere
 - outright size of React and React-Dom getting smaller each year
 
-He doesn't see improvement on all 3 fronts, so he has written off React as caring about perf and regards using it as
+He doesn't see improvement on all 3 fronts, so he has written off React as caring about perf and regards using it as "unethical". 
 
 > from swyx
 
-I haven't understood why CRA hasn't implemented differential loading yet, so I can't counter or comment, but it does make a lot of sense to have it by default. I would also point out that React has indeed made code splitting a lot easier with React.lazy, and of course Next.js and Gatsby make page code splitting trivial.
+Again, an extremely strong statement here and the React team would prefer React to be measured by other metrics. I'd leave it at that.
 
-## Asset Proposal
+I haven't understood why [CRA hasn't implemented differential loading yet](https://github.com/facebook/create-react-app/pull/4964), so I can't counter or comment, but it does make a lot of sense to have it by default. 
 
-## Yes, There was More
+I would also point out that React has indeed made code splitting a lot easier with React.lazy, and of course Next.js and Gatsby make page code splitting trivial. Vendor chunks make subsequent loads a lot lighter as well, and [Michael Jackson has gone so far as to propose CDN loading of React](https://www.youtube.com/watch?v=2rhkgB8Cohc) which gets cached across sites.
 
-Alex had also deliciously hot takes on some other Google initiatives that are related to this topic but aren't ultimately core, so I left them out. If you ever get the chance to ask him, though, I highly recommend bringing those up :)
+> Off topic Alex comments
 
-## Alex in his own Words
+Just linking to Alex's other comments on React, for my reference:
+
+- [An abridged list of requirements to use React the way FB does for mobile web](https://twitter.com/slightlylate/status/1159286674817351681)
+- [Why *not* to build React into the Browser](https://threader.app/thread/1135342338606153729)
+
+## Never-Slow Mode
+
+The final important piece to cover was the "Never-Slow Mode" for Chromium. [Here's the proposal](https://github.com/slightlyoff/never_slow_mode), and here is [some](https://www.infoq.com/news/2019/02/chrome-never-slow-mode/) [media](https://www.xda-developers.com/google-chrome-never-slow-mode/) [coverage](https://arstechnica.com/gadgets/2019/02/with-experimental-never-slow-mode-chrome-tries-to-stop-web-devs-making-it-slow/) to explain in English.
+
+I think this could be a fantastic idea on mobile browsers. I direct your attention to the [Per-interaction Resource Limits](https://github.com/slightlyoff/never_slow_mode#per-interaction-resource-limits):
+
+
+<table>
+  <thead>
+    <tr>
+      <td>Type</td>
+      <td>Per-Resource Limit</td>
+      <td>Cumulative Limit</td>
+      <td>Scope</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Connections</td>
+      <td>n/a</td>
+      <td>10</td>
+      <td>document</td>
+    </tr>
+    <tr>
+      <td><code>&lt;iframe&gt;</code></td>
+      <td>n/a</td>
+      <td>10, depth 2</td>
+      <td>global</td>
+    </tr>
+    <tr>
+      <td>Script</td>
+      <td>50 KiB</td>
+      <td>500 KiB</td>
+      <td>document</td>
+    </tr>
+    <tr>
+      <td>External Stylesheets</td>
+      <td>100 KiB</td>
+      <td>200 KiB</td>
+      <td>document</td>
+    </tr>
+    <tr>
+      <td>Web Fonts</td>
+      <td>100 KiB</td>
+      <td>100 KiB</td>
+      <td>document</td>
+    </tr>
+    <tr>
+      <td>Images</td>
+      <td>1 MiB</td>
+      <td>2 MiB</td>
+      <td>document</td>
+    </tr>
+    <tr>
+      <td>Main-thread Execution</td>
+      <td>n/a</td>
+      <td>200ms</td>
+      <td>document</td>
+    </tr>
+  </tbody>
+</table>
+
+This is essentially building the good parts of AMP into the browser, without the unethical search ad and URL shit Google is pulling with the current AMP. You can quibble about the exact numbers, and maybe have a looser setting for initial adoption, but this is directionally what the mobile web needs. As someone on roaming data often I want to know when I'm being forced to load a ton of JS, and for the sites to be shamed and threats of bouncing (if possible) to be real.
+
+In fact I liked it so much, I was surprised [it had to be opted into](https://github.com/slightlyoff/never_slow_mode#why-would-anyone-ever-opt-in-to-nsm) with a Feature Policy: `Feature-Policy: allow-slow 'none'; geolocation 'none'`. This dramatically reduces the potential immediate impact of Never-Slow mode. Alex is sympathetic but says Feature Policies are effective, despite being opt-in and therefore small in scope. The "[outrageous](https://github.com/slightlyoff/never_slow_mode#references--acknowledgements)" effectiveness of TLS is an inspiration here.
+
+To be clear, implementing this is going to cause several years of confusion for web developers, who will need webpack plugins and more to get their assets in order for this. But once we have stable standards, tooling can emerge remarkably quickly to help meet those standards (OSS is *very* good at this) and the result really is better defaults.
+
+And we can all stop yelling at each other and get building.
+
+## Conclusion: So, can the Open Web be saved?
+
+As pessimistic as Alex often sounds, I think the reason he is still out there making talks and twitter threads is because he is still optimistic that something can be done. As you've seen in this entire recap, there are many angles to attack this:
+
+- Adding PWA capabilities
+- Suing Apple
+- Improving JS (and overall web) Perf
+- Never-Slow Mode
+
+The numbers are dire but the story isn't over yet. It's **very late** on the [Doomsday Clock](https://en.wikipedia.org/wiki/Doomsday_Clock) of the Open Web, but the clock has not yet struck 12.
+
+## Postscripts
+
+### Yes, There was More
+
+Alex had also deliciously hot takes on some other Google initiatives that are related to this topic but aren't ultimately core to the debate, so I left them out. If you ever get the chance to ask him, though, I highly recommend bringing those up if you can guess what they are :)
+
+### Alex in his own Words
 
 An important caveat to the above is that this is an incomplete recollection from someone with a holey memory, about a conversation had over a couple hours of drinks, so this isn't going to be the best representation of his thoughts. Any misrepresentation is my fault and you shouldn't take my precise phrasing as something he'd sign off on as he has not reviewed this blogpost. However he did just give a talk at Fronteers Conf on [the Mobile Web: MIA](https://vimeo.com/364402896) where you can hear his words for yourself.
+
+### References and Other Perspectives
+
+I think this is a tremendously complex and important topic and I certainly won't do it justice alone. I'm going to update this article over time with links to other related pieces I recommend reading to get a few different voices:
+
+- [Tim Kadlec: Using the Platform](https://timkadlec.com/remembers/2019-10-21-using-the-platform/): "Use the platform until you can’t, then augment what’s missing. And when you augment, do so with care because the responsibility of ensuring the security, accessibility, and performance that the platform tries to give you by default now falls entirely on you."
+- [Anil Dash: The Web We Lost](https://twitter.com/anildash/status/1060754945434157056): "the tech industry fought like hell to erect barriers against platforms like MySpace & Neopets that were letting underrepresented folks actually *make* the web instead of just consuming it."
+- [Addy Osmani](https://twitter.com/slightlylate/status/783343244725760000?lang=en): "You can make React fast enough, but you have to put in the work"

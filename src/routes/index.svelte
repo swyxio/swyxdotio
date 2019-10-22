@@ -31,8 +31,8 @@
   <h1>swyx's site!</h1>
   <h2>
     Latest Post:
-    <a href="/writing/ejectable-defaults">
-      <b>Ejectable Defaults: Zero Config First, Full Config Later</b>
+    <a href="/writing/very-late">
+      <b>Very Late: Fighting for the Open Web</b>
     </a>
   </h2>
 </article>
