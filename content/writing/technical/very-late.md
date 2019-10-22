@@ -100,7 +100,7 @@ It's well known that React is around 30kb compressed, so, while significant, it 
 The first criticism is the easy one to address - **the sheer size of sites, regardless of budget**:
 
 - React is often used where it is not needed, for example in blogs (note, I am not saying that React is _never_ needed in blogs, just saying it is _often_ not needed in blogs)
-- This argument is pretty much a result of React's dominance in frameworks; an easy tell is trying to see if the argument still makes sense if you swapped out Vue for React. If it does, then you're not really talking about React at all.
+- **Substitution rule** works here - blaming React is pretty much a result of React's dominance in frameworks (and, yes, Gatsby makes it easy, but a Gatsby would have appeared if some other framework was on top)
 - Still, the valid logic to focus on is the amount of JS served for the functionality given. Are you being wasteful if you serve 30kb of JS to do something you can do with 3kb? Absolutely. We should strive to do better for our readers.
 - However, we must also clearly delineate that this is a different and smaller offense than busting the performance budget. I will also forever be a staunch defender that people should do whatever they want on their personal blogs, because ["breakable toys"](https://www.oreilly.com/library/view/apprenticeship-patterns/9780596806842/ch05s03.html) are important, and you should always have a place to practice your craft even if the exact use doesnt quite fit. (someday I will have a separate blogpost "[In Defence of Hammers](/writing/hammers)")
 
