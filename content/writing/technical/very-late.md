@@ -24,6 +24,8 @@ As humans we exist in the middle of all this chaos, so our discussion is filled 
 
 So the rest of this recount will try to split up the arguments so they can be discussed "cleanly", recognizing it is a little futile to do so but trying anyway.
 
+There is also, in the second half, a discussion about React, which gets very muddled with JS in general because it is the current dominant JS framework. I choose to apply **the substitution rule** here - if you swap React for some other framework out of the argument and it still makes sense, then you're not really arguing about React.
+
 ## Death of Mobile Web = Death of Open Web
 
 > swyx here: Alex mostly assumes you know and agree with this, so all of this is assumed context whenever you talk to him
@@ -94,19 +96,19 @@ It's well known that React is around 30kb compressed, so, while significant, it 
 
 > the structure and discussion of these criticisms come entirely from swyx
 
-The first criticism is the easy one to address - the sheer size of sites, regardless of budget:
+The first criticism is the easy one to address - **the sheer size of sites, regardless of budget**:
 
 - React is often used where it is not needed, for example in blogs (note, I am not saying that React is _never_ needed in blogs, just saying it is _often_ not needed in blogs)
 - This argument is pretty much a result of React's dominance in frameworks; an easy tell is trying to see if the argument still makes sense if you swapped out Vue for React. If it does, then you're not really talking about React at all.
 - Still, the valid logic to focus on is the amount of JS served for the functionality given. Are you being wasteful if you serve 30kb of JS to do something you can do with 3kb? Absolutely. We should strive to do better for our readers.
 - However, we must also clearly delineate that this is a different and smaller offense than busting the performance budget. I will also forever be a staunch defender that people should do whatever they want on their personal blogs, because ["breakable toys"](https://www.oreilly.com/library/view/apprenticeship-patterns/9780596806842/ch05s03.html) are important, and you should always have a place to practice your craft even if the exact use doesnt quite fit. (someday I will have a separate blogpost "[In Defence of Hammers](/writing/hammers)")
 
-React does wonders for making sites. You can easily add progressive image upgrades, and clientside navigation, and interactive demos. I held out on this one for a long, long while (Helps when your paycheck depends on it). But eventually I found that you can do the same with less with Svelte/Sapper and so began the painful process of moving over. As you can see from this site, it's not great yet. But it's workable.
+React does wonders for making sites. You can easily add progressive image upgrades, and clientside navigation, and interactive demos. I held out on this one for a long, long while (Helps when your paycheck depends on it). But eventually I found that [you can do the same with less with Svelte/Sapper and so began the painful process of moving over](/writing/svelte-static). As you can see from this site, it's not great yet. But it's workable.
 
-The second criticism is the much gnarlier one, because there is no direct causal link - the overall resulting size of apps made by React devs:
+The second criticism is the much gnarlier one, because there is no direct causal link - **the overall resulting size of apps** made by React devs:
 
-- For example, [Imgur sends you 1.21mb of JS, including React to show you an image](https://twitter.com/csswizardry/status/1185604806901207045).
-- again, React gets an undue amount of flak because it is currently in pole position. Anyone can create bad sites with any stack.
+- For example, [Imgur sends you 1.2mb of JS, including React, to show you an image](https://twitter.com/csswizardry/status/1185604806901207045).
+- **Substitiution rule applies**: React gets an undue amount of flak because it is currently in pole position. Anyone can create bad sites with any stack.
 - selection bias also applies - anyone picking Preact or Svelte at this point is also going to care about bundle size and that affects their subsequent choices.
 - blaming npm is a really bad take, I'm sorry
 - however, it is just generally true overall that production React apps continue to be irresponsibly big and the React ecosystem could do more to encourage saner defaults.
@@ -128,6 +130,8 @@ Again, an extremely strong statement here and the React team would prefer React 
 I haven't understood why [CRA hasn't implemented differential loading yet](https://github.com/facebook/create-react-app/pull/4964), so I can't counter or comment, but it does make a lot of sense to have it by default. 
 
 I would also point out that React has indeed made code splitting a lot easier with React.lazy, and of course Next.js and Gatsby make page code splitting trivial. Vendor chunks make subsequent loads a lot lighter as well, and [Michael Jackson has gone so far as to propose CDN loading of React](https://www.youtube.com/watch?v=2rhkgB8Cohc) which gets cached across sites.
+
+Also, of course, the actual majority of the JS we add is **Business Requirements**, as [Jason and Sunil put so eloquently](https://twitter.com/_developit/status/1186264151334764546). Again, **the substitution rule applies**: if some other framework were the dominant paradigm and not React, would this problem still exist?
 
 > Off topic Alex comments
 
