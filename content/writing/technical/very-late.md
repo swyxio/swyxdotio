@@ -4,6 +4,7 @@ subtitle: What I Learned from meeting Alex Russell
 slug: very-late
 categories: ['Tech']
 date: 2018-10-22
+description: Interpretation and commentary of Alex Russell's views on Mobile Web and React/JS
 ---
 
 Anyone active in Web Dev Twitter will have a certain trepidation when [Alex Russell](https://twitter.com/slightlylate/) gets involved.
