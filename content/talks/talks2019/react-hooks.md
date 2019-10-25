@@ -27,6 +27,7 @@ description: The design of React Hooks requires a good understanding of closures
 ## further references
 
 - https://dev.to/kayis/react-hooks-demystified-2af6
+- Rodrigo Pombo's work on Didact and https://buildyourownreact.now.sh
 
 ## Livecoding plan
 
