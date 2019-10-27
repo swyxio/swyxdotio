@@ -15,7 +15,10 @@
 </script>
 
 <style>
-  ul {
+  h2 {
+    font-weight: 700;
+  }
+  ul.allTalks {
     margin: 0 0 1em 0;
     line-height: 1.5;
     list-style-type: none;
@@ -24,7 +27,7 @@
     grid-gap: 3rem 1.5rem;
   }
   @media (max-width: 480px) {
-    ul {
+    ul.allTalks {
       grid-template-columns: 1fr;
     }
   }
@@ -63,7 +66,32 @@
 
 <article>
   <h1>Speaking</h1>
-  <ul>
+
+  <h2>My Best Talks</h2>
+  <div>
+    I have done a bunch of talks and podcast appearances. The best of which are:
+    <ul>
+      <li>
+        <a href="/speaking/react-hooks">Getting Closure on Hooks</a>
+      </li>
+      <li>
+        <a href="/speaking/react-not-reactive">Why React is not Reactive</a>
+      </li>
+
+      <li>
+        <a href="/speaking/contributing-to-react">Contributing to React</a>
+      </li>
+      <li>
+        <a href="/speaking/learn-in-public">Learn In Public</a>
+      </li>
+      <li>
+        <a href="/speaking/babel-macros">Babel Macros (the Moana talk)</a>
+      </li>
+    </ul>
+  </div>
+
+  <h2>All Talks</h2>
+  <ul class="allTalks">
     {#each posts as post}
       <li>
         <a rel="prefetch" href="/speaking/{post.metadata.slug}">

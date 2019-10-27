@@ -13,11 +13,11 @@ But there is an open secret behind the current generation of "No Code" tools - *
 
 "No Code" tools generate code. "No Code" tools run on _mountains_ of code. "No Code" tools can even interact with your code. They still require technical users - people who can debug, people who can think in abstractions, and, above all, people who know how to glue just the right tools together in the right way to produce business value.
 
-If you're thinking that sounds like a developer, you'd be right. Just like "serverless" just means "not your servers", "no code" means "not your code".
+If you're thinking that that set of skills sounds like what developers do, you'd be right. Just like "serverless" just means "not your servers", "no code" just means "not your code".
 
 ## The API Economy + "No Code" = The GUI Economy
 
-You may have heard of [the API Economy](https://a16z.com/2018/03/09/api-world-summit/) - the idea that as software increasingly [eats the world](https://techcrunch.com/2016/06/07/software-is-eating-the-world-5-years-later/), a whole generation of software companies are arising to tackle individual hard problems in software. The average person on the street will never hear of Stripe or Twilio, but they may be customers of some startups which in turn are customers of Stripe or Twilio for payments or communication.
+You may have heard of [the API Economy](https://a16z.com/2018/03/09/api-world-summit/) - the idea that as software increasingly [eats the world](https://techcrunch.com/2016/06/07/software-is-eating-the-world-5-years-later/), a whole generation of software companies are arising to specialize in individual hard problems in software so you don't have to. The average person on the street will never hear of Stripe or Twilio, but they may be customers of some startups which in turn are customers of Stripe or Twilio for payments or communication.
 
 Where developers used to be responsible for the full stack of code and integration needed to make these capabilities possible, API companies make adding commoditized functionality as easy as dropping in a few lines of code. This makes sense on multiple dimensions: it transforms a high *fixed, upfront, uncertain* cost, into a *variable, deferred, predictable* expense, and a specialized service is likely to be more robust and cheaper (due to scale) than a self-written one. This is hugely beneficial for both sides, which has resulted in an entire economy of API's blossoming for every "hard problem" imaginable:
 
@@ -25,7 +25,7 @@ Where developers used to be responsible for the full stack of code and integrati
 
 _Source: [Bessemer Venture Partners](https://www.slideshare.net/ByronDeeter/state-of-the-cloud-2017-72021644)_
 
-One (unforeseen?) outcome of the API economy is how hugely enabling it has been for individual developers as well. Suddenly, if you understood HTTP and REST, you now had access to the PhD-level search capabilities of [Algolia](https://www.algolia.com), or the nationwide banking relationships forged by [Plaid](https://plaid.com/). This isn't a threat to developers, nor is it something "real" developers wouldn't use - it just redefined what the job is. Instead of doing the same undifferentiated heavy lifting every other developer does, the developer can now focus on writing just the core code the business needs to deliver on its unique value proposition, leaving other specialists to deliver on theirs. Developer salaries _rose_, instead of fell, through this API Economy transformation.
+One (unforeseen?) outcome of the API economy is how hugely enabling it has been for individual developers as well. Suddenly, if you understood HTTP and REST, you now had access to the PhD-level search capabilities of [Algolia](https://www.algolia.com), or the nationwide banking relationships forged by [Plaid](https://plaid.com/). This isn't a threat to developers, nor is it something "real" developers wouldn't use - it just redefined what the job is. Instead of doing the same undifferentiated heavy lifting every other developer does, the developer can now focus on writing just the core code the business needs to deliver on its unique value proposition, leaving other specialists to deliver on theirs. With this reduction in the surface area of responsibilities, you might expect some threat to the tune of "APIs are taking our jobs" or "Platforms are taking our jobs". However, Developer salaries _rose_, instead of fell, through this API Economy transformation.
 
 This is the context with which I now approach the current "No Code" movement.
 
@@ -61,41 +61,61 @@ _Source: [XState](https://xstate.js.org/docs/)_
 
 _Source: [Vue CLI](https://cli.vuejs.org/guide/cli-service.html#using-the-binary)_
 
-**Visual Command Line Interfaces**. At first this seems an oxymoron. Aren't Command Line Interfaces (CLI's) the canonical opposite of GUI's? Recently, this line is being blurred in creative and interesting ways. [Vue CLI](https://cli.vuejs.org) led the way building a full desktop app layer atop their CLI, to ease discoverability and visualization. But the desire to graphically represent code execution state and options is as old as CLI's - from [the most basic spinners](https://github.com/sindresorhus/ora#readme) to [navigatable, interactive forms and templates](https://github.com/enquirer/enquirer/) to [writing entire layout engines and interactive renders with React](https://github.com/vadimdemedes/ink). Nobody argues that this is a less legitimate way to execute code!
+**Visual Command Line Interfaces**. At first this seems an oxymoron. Aren't Command Line Interfaces (CLI's) the canonical opposite of GUI's? Recently, this line is being blurred in creative and interesting ways. [Vue CLI](https://cli.vuejs.org) led the way building a full desktop app layer atop their CLI, to ease discoverability and visualization. But the desire to graphically represent code execution state and options is as old as CLI's - from [the most basic spinners](https://github.com/sindresorhus/ora#readme) to [navigable, interactive forms and templates](https://github.com/enquirer/enquirer/) to [writing entire layout engines and interactive renders with React](https://github.com/vadimdemedes/ink). Nobody argues that this is a less legitimate way to execute code!
 
 ![https://www.portalzine.de/wp-content/uploads/sites/3/2019/02/visbug_browser_design_tool.jpg](https://www.portalzine.de/wp-content/uploads/sites/3/2019/02/visbug_browser_design_tool.jpg)
 
 _Source: [Visbug](https://github.com/GoogleChromeLabs/ProjectVisBug)_
 
-**Visual Interface Editing**. The "What You See Is What You Get" (WYSIWYG) experience is one fraught with history - because this is a particularly thorny problem, early attempts like FrontPage and Dreamweaver weren't particularly great at producing human readable and maintainable code. But web technologies have grown a lot since - [Firebug](https://blog.getfirebug.com/) allowed direct editing of sites 12 years ago, has a modern clone in [Visbug](https://github.com/GoogleChromeLabs/ProjectVisBug), and even has a built-in solution in the [`document.designMode`](https://developer.mozilla.org/en-US/docs/Web/API/Document/designMode) Browser API. Of course, [Webflow](https://webflow.com) is leading the vanguard in terms of "No Code" web design/authoring tools, even coming with intergrated CMS and Ecommerce solutions. Nobody should argue that this is a less legitimate way to write UI's!
+**Visual Interface Editing**. The "What You See Is What You Get" (WYSIWYG) experience is one fraught with history. Because this is a particularly thorny problem, early attempts like FrontPage and Dreamweaver weren't particularly great at producing human readable and maintainable code. But web technologies have grown a lot since - [Firebug](https://blog.getfirebug.com/) allowed direct editing of sites 12 years ago, has a modern clone in [Visbug](https://github.com/GoogleChromeLabs/ProjectVisBug), and even has a built-in solution in the [`document.designMode`](https://developer.mozilla.org/en-US/docs/Web/API/Document/designMode) Browser API. Of course, [Webflow](https://webflow.com) is leading the vanguard in terms of "No Code" web design/authoring tools, even coming with integrated CMS and Ecommerce solutions. Nobody should argue that this is a less legitimate way to write UI's!
 
-At the heart of all this is Developer Experience. At the end of the day, developers are humans too - we respond the same positive way to GUI's that the rest of our users do. If we learn to treat visual tools as friends instead of enemies, they can become massive productivity boosters for us as much as they do for our friends who don't do traditional coding.
+At the heart of all this is Developer Experience. At the end of the day, developers are humans too - we respond the same positive way to GUI's that the rest of our users do. If we learn to treat visual tools as friends instead of enemies, they can become massive productivity boosters for us as much as they do for our friends who don't do traditional coding. If anything, we should be *better* at it than them, because we are professionally trained to understand how to design and maintainable systems, and know the right questions to ask to figure out where abstractions start and end.
 
 ## Creation over Code
 
-The old, tired debate in code is that of ["convention over configuration"](https://en.wikipedia.org/wiki/Convention_over_configuration). What it misses is that these are more or less ways of shifting the responsibility of code around.
+The old, tired debate in programming is that of ["convention over configuration"](https://en.wikipedia.org/wiki/Convention_over_configuration), or vice versa. What it misses is that these are more or less evolutionary ways of shifting the responsibility of code between toolmaker and tool user. You can do it poorly, or you can do it well. At the end of the day, it is still code, and the end user doesn't really care what you used and how much you wrote.
+
+Gallons and petabytes of physical and digital ink have been spilled over progressively higher levels of abstractions in programming, from the earliest days of GOTO to the imperative/declarative divide, or the more recent movement from object oriented to functional paradigms. We've layered code on top of more code to make it easier and safer and more expressive, but through all this there has been no objectively measurable improvement in developer productivity from the point of view of the user.
+
+Maybe we've reached the limit of what increasing abstractions within code can do. To get to the next level, we have to abstract *over* code. Maybe instead of putting code at the center of our universe, with more code as the solution to every problem, we should emphasize *creation* instead, and consider everything that helps us get there.
+
+"No Code" isn't just something for website and app creators. It also presents tremendous opportunities for creators of developer tools. 
+
+I work at Netlify, which helps developers build and host JAMstack sites and apps. Netlify isn't classically considered a "No Code" tool, because you almost certainly need to code to create most of the sites that people create with Netlify. However, from the perspective of front-end developers, who form the majority of the audience of Netlify, it is "No Code" in one very important way: the back-end. Netlify takes on the responsibility of hiring and managing a world-class platform, product, and support team managing Kubernetes deployments, CDN cache invalidation, and incident respnse. On the flip side, all the backend concerns of Continuous Deployment, setting up a CDN, getting an SSL certificate for secure HTTPS hosting, configuring custom domains, and a dozen other important yet boring best practices, are abstracted away, enabling front-end developers to create and deploy their sites on par with world-class full-stack teams.
+
+If you are an entrepreneur seeking to make a dent serving developers, a reliable approach for traction is enabling an underserved segment of creators to do their thing, just a lot easier, with a No Code interface for all the incidental complexity that usually gets in their way.
+
+## Not All Roses
+
+I don't want to leave you with a mistaken impression that I am saying everything is automatically better with a "No Code" layer. It is still early days in this movement, and there are plenty of hard problems left to solve in this paradigm shift. 
+
+You will always have more programmatic power with code than with GUIs, even though we have started figuring out how to program control flow in GUIs. When is it better to stay inside GUIs, and when is it better to drop down, eject, or export to code? Can we make it a reversible instead of irreversible process?
+
+Discoverability is easier with GUIs, but information density, expressiveness, and often speed is sacrificed. How does app design evolve in the era of No Code tools? Many code tools work offline, whereas No Code Web GUIs often don't by default. How important is this?
+
+GUIs are expensive to write (the furious innovation in frontend frameworks is proof positive that we aren't done yet), so No Code tools, themselves, which are often GUIs that create GUIs, are even more expensive and hard to create. How can we make them simpler, cheaper, and more accessible by default?
+
+These are all unanswered questions and I look forward to all that we will discover about them in coming years.
+
+## Conclusion
+
+I'll confess my selection of title was somewhat clickbaity, but if you're a developer, product manager or technical founder, you've probably seen yourself in some of these debates raised in the perception of "No Code" and the challenges and opportunities it presents. Mostly, I wanted to, once and for all, completely demolish the misperception that "No Code" means no code is involved or that it is not for people who can code. I think this movement is a tremendously positive-sum win-win for both coders and noncoders alike, and the sooner we realize this, the more productive we can all become to use technology to solve actual hard problems in the world.
+
+---
+
+## Meta
+
+### Discarded
 
 
-
-goto -> imperative -> object oriented -> functional
+In every 
 
 - scaffolding
 - design tools -> design system pull out components
 - no need translation -> single source of truth
 - bezier curve
-- 
 
-## Not All Roses
-
-sd
-
-## Conclusion
-
-sd
-
----
-
-## Webflow Guidelines
+### Webflow Guidelines
 
 http://voiceandtone.webflow.io/patterns/blog-posts
 

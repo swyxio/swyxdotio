@@ -50,7 +50,7 @@ It's really lame to reconsider a career path because of a blogpost, but I'll con
 - Point 13: IT WILL TAKE UP EMOTIONAL SPACE AT THE EXPENSE OF YOUR PERSONAL LIFE.
   - One of my favorite jobs was my time trading currency options, when, after I was done with work, I could walk away and never take work home with me. I probably don't have enough emotional space/stability to support others when they need it most.
 - Point 15: MEETINGS.
-  - Oof. Yeah, I don't love them. Half of Sarah's week is just meetings. This one alone is almost a dealbreaker, if you abstractly consider management as just a series of meetings punctuated by emails and slack message scheduling more meetings.
+  - Oof. Yeah, I don't love them. Half of Sarah's week is just meetings. This one alone is almost a dealbreaker, if you abstractly consider management as just a series of meetings punctuated by emails and slack messages scheduling more meetings.
 
 I didn't agree with everything, and I was fine with some of the other points. But I agreed with enough. Objectively, my own behavior at Netlify and in prior companies has revealed that I would not enjoy being in management at best, and at worst, I would cause so much pain and cognitive dissonance that I would not last long.
 

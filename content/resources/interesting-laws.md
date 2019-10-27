@@ -5,6 +5,7 @@ category: Philosophy
 begun: 2019-01-22
 date: 2019-01-22
 author: swyx
+published: false
 ---
 
 - The Gell-Mann amnesia effect
