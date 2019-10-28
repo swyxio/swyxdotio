@@ -13,7 +13,7 @@
   #CTA {
     font-size: 2em;
     line-height: 1.25;
-    margin: 0 0 0.5em 0;
+    margin: 0 0 2em 0;
   }
   h1 {
     font-size: 2.8em;
@@ -60,8 +60,8 @@
   <div id="CTA">
     Latest Post:
     <div>
-      <a href="/writing/donating-to-freecodecamp">
-        <b>Donating $10k to FreeCodeCamp</b>
+      <a href="/writing/ensembles-vs-committees">
+        <b>Ensembles vs Committees</b>
       </a>
     </div>
   </div>
@@ -97,7 +97,11 @@
         <li>
           <h3>About</h3>
           <div>
-            My personal story, README, and
+            My personal story,
+            <a href="https://github.com/sw-yx/README/blob/master/README.md">
+              README
+            </a>
+            , and
             <a href="/speaking/freecodecamp-podcast">
               podcast with Quincy Larson
             </a>
@@ -115,10 +119,26 @@
           <div>
             I enjoy collecting helpful repos around topics, like
             <ul>
-              <li>React-TypeScript Cheatsheet</li>
-              <li>CLI Cheatsheet</li>
-              <li>Concurrent-React Notes</li>
-              <li>spark-joy</li>
+              <li>
+                <a
+                  href="https://github.com/typescript-cheatsheets/react-typescript-cheatsheet/">
+                  React-TypeScript Cheatsheet
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://github.com/sw-yx/cli-cheatsheet/blob/master/README.md">
+                  CLI Cheatsheet
+                </a>
+              </li>
+              <li>
+                <a href="https://github.com/sw-yx/concurrent-react-notes">
+                  Concurrent-React Notes
+                </a>
+              </li>
+              <li>
+                <a href="https://github.com/sw-yx/spark-joy/">spark-joy</a>
+              </li>
             </ul>
           </div>
         </li>
@@ -156,9 +176,24 @@
         <li>
           <h3>Open Source</h3>
           <div>
-            I help maintain open source tooling at Netlify, as well as helped
-            work on some other OSS projects like Docz, TSDX, Gatsby's Showcase,
-            Sapper, etc.
+            I've helped maintain
+            <a href="https://github.com/netlify/cli">open</a>
+            <a href="https://github.com/sw-yx/react-netlify-identity/">
+              source
+            </a>
+            <a href="https://github.com/sw-yx/jamstack-hackathon-starter">
+              tooling
+            </a>
+            at Netlify, as well as helped work on some other OSS projects like
+            <a href="https://github.com/jaredpalmer/tsdx">TSDX</a>
+            ,
+            <a href="https://www.gatsbyjs.org/showcase/">Gatsby's Showcase</a>
+            ,
+            <a href="https://github.com/sveltejs/community">Svelte Community</a>
+            <a href="https://github.com/sw-yx/ssg">SSG</a>
+            ,
+            <a href="https://github.com/pedronauck/docz/">Docz</a>
+            (inactive), etc.
           </div>
         </li>
       </ul>
