@@ -1,5 +1,5 @@
 ---
-title: In Defense of Hammers
+title: In Defense of Hammers (stub)
 subtitle: Why "Right Tool for Most Jobs" beats "Right Tool for the Job"
 slug: hammers
 categories: ['Tech']

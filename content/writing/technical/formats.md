@@ -1,5 +1,5 @@
 ---
-title: Formats over Functions
+title: Formats over Functions (stub)
 subtitle: Why we should focus less on Implementation and more on Standardization
 slug: formats
 categories: ['Tech']
