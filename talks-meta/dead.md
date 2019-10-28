@@ -1,3 +1,34 @@
+
+## Reacting Ahead of Time
+
+What's faster than O(1)? Step changes in performance and scalability
+come from paradigm changes rather than incremental optimizations. The
+inexorable march forward in "table stakes" product requirements has
+forced developers to explore ways to push computation from client to
+server, from runtime to buildtime, from fat SPAs to code-split
+frameworks. Cutting edge UX is exploring how to prefetch and cache
+resources intelligently, trading off memory usage for compute time.
+Lastly, DX has also been pushed forward with fascinating ideas from
+hot reloading to GraphQL. Where is all this taking us?
+
+## Learning from 100,000 React Developers
+
+React communities exist in many spaces online, and they don't all overlap. In this talk we explore statistics and quotes from /r/reactjs, answering burning questions everybody wants to know:
+What technologies are people interested in? What do beginners struggle with? What are companies hiring for?
+
+At present growth rates, /r/reactjs will surpass 100,000 subscribers in April, and I feel React Amsterdam would be the perfect place to celebrate this benchmark and reflect on our learnings and what the broader community can take away from it.
+
+Talk structure:
+
+- Why do people like discussing React on Reddit?
+- The recent history of React in 2018 and 2019
+- Projects that React beginners can try
+- What do beginners struggle with? A visualization
+- Unresolved debates in React
+- What are the biggest library and blogpost launches?
+- What are companies hiring for?
+- Dark Matter Devs and why we all need to participate more in the online discussion
+
 ## React Suspense Workers
 
 React Suspense doesn't work without a caching layer, so every Suspense
