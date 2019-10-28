@@ -42,10 +42,4 @@ To combat this: Set deadlines, participation requirements.
 
 To combat this: Benevolent dictator.
 
-If I have done my job right I will have pissed off somebody reading this thread. If so, I want to hear it!
-
-I have no room for nuance here but I welcome criticism and hope to incorporate your feedback into an essay I may write in future.
-
-Let's hear your thoughts.
-
 _originally https://twitter.com/swyx/status/1066486842495782912_
