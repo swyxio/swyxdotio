@@ -12,10 +12,11 @@ October was almost the total opposite of September - Conference season came back
 In Nov I'll be rotating on to the product team for the next 3 months.
 
 - Talks:
-  - [Complete Intro to Netlify in 3.5 Hours](/speaking/netlify-freecodecamp-intro) - a collaboration with FreeCodeCamp.
+  - [Complete Intro to Netlify in 3.5 Hours](https://www.swyx.io/speaking/netlify-freecodecamp-intro) - a collaboration with FreeCodeCamp.
   - STAR Apps (at [All Things Open (20 min)](https://www.swyx.io/speaking/star-apps-allthingsopen) and [SV Code Camp (1 hr)](https://www.swyx.io/speaking/star-apps-svcodecamp)) - a talk-length fleshing out of [my CSS Tricks article](https://css-tricks.com/star-apps-a-new-generation-of-front-end-tooling-for-development-workflows/) from earlier this year.
   - [Concurrent React from Scratch](https://www.swyx.io/speaking/react-from-scratch) - an even more ambitious followup to my well received [Getting Closure on Hooks](https://www.swyx.io/speaking/react-hooks) talk from June, this time introducing the basics of React Fiber, Time Slicing, and Suspense from scratch. The video isn't up yet but I've put the code up.
 - Podcasts:
+  - [JAMstack & Serverless with Netlify](https://devmode.fm/episodes/jamstack-serverless-with-netlify) - I found the DevMode.FM podcast recently and started being a vocal fan, and they invited me on to explain Netlify.
   - [ReactConf Preview](https://www.swyx.io/speaking/react-podcast-suspense) - chantastic invited me back on the React Podcast (yay repeat appearance!) to recap what we knew about Concurrent React. I was very wrong about Relay, but everything else was roughly right.
 - Writing:
 
