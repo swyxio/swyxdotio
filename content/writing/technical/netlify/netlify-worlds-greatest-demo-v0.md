@@ -4,8 +4,9 @@ slug: netlify-worlds-greatest-demo-v0
 categories: ['Tech', 'Netlify']
 started: 2019-08-26
 date: 2019-09-24
-published: false
 ---
+
+_Note: this was published as the Complete Intro to Netlify on the FreeCodeCamp Channel_
 
 Hi everyone! I'm swyx and I'm happy to be sharing this walkthrough with you!
 
