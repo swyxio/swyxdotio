@@ -1,14 +1,14 @@
 ---
 title: 'Compile Svelte in Your Head (Lightning Talk)'
-slug: svelte-static
+slug: svelte-compile-lightning
 categories: ['Tech', 'Svelte']
 description: A lightning talk for Svelte Society Oct 1
 date: 2019-10-01
+topic: Svelte
+venues: SvelteSociety
 ---
 
 A great way to break the black box of Svelte is to look at the compiled output. This helps you understand both the runtime and the compiler.
-
-We're going to want to
 
 ## Hello World
 

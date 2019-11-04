@@ -1,8 +1,7 @@
 <script context="module">
   export function preload({ params, query }) {
-    return this.fetch(`/data/writing___ssg___index.json`)
-      .then(r => r.json())
-      .then(posts => ({ posts: Object.values(posts) }))
+    return this.ssgData({ key: 'writing' })
+      .then(posts => ({ posts }))
       .catch(err => {
         this.error(500, err.message)
       })
@@ -11,6 +10,7 @@
 
 <script>
   export let posts
+  // $: console.log({ posts })
 </script>
 
 <style>

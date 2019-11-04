@@ -1,4 +1,3 @@
-
 ---
 title: A Skeptic's Intro to the JAMstack
 slug: jamstack-skeptic

@@ -1,18 +1,7 @@
 <script context="module">
   export async function preload({ params, query }) {
-    const talkIndex = await this.fetch(
-      `/data/speaking___ssg___index.json`
-    ).then(x => x.json())
-    const post = talkIndex[params.slug]
-    const uid = post.uid
-    const res = await this.fetch(`/data/speaking___ssg___${uid}.json`)
-    const data = await res.json()
-    post.html = data
-    if (res.status === 200) {
-      return { post }
-    } else {
-      this.error(res.status, data.message)
-    }
+    const res = await this.ssgData({ key: 'speaking', id: params.slug })
+    return { post: res }
   }
 </script>
 
@@ -29,6 +18,7 @@
   const { page } = stores()
   export let slug = $page.params.slug
   export let post
+  // $: console.log({ post })
   export let seoCategory = 'swyx Speaking'
 
   let seoSubtitle = post.metadata.subtitle
@@ -39,7 +29,8 @@
     post.metadata.desc || post.metadata.description || seoTitle
   export let displayDescription = post.metadata.description || seoDescription
   export let category = 'speaking'
-  export let date = post.metadata.dateString || 'no date specified'
+  export let date =
+    new Date(post.metadata.date).toString().slice(4, 15) || 'no date specified'
   export let topic = post.metadata.topic ? post.metadata.topic + ' @ ' : ''
 
   export let videoId = post.metadata.video || post.metadata.video_url

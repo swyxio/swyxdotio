@@ -1,9 +1,9 @@
 const fs = require('fs')
 const path = require('path')
 const generateRSS = require('./generateRSS')
-const remark = require('@ssgjs/source-remark')
-const writing = remark({ dirPath: 'content/writing' })
-const speaking = remark({ dirPath: 'content/talks' })
+// const remark = require('@ssgjs/source-remark') // no longer active but was still usable in 0.38
+// const writing = remark({ dirPath: 'content/writing' })
+// const speaking = remark({ dirPath: 'content/talks' })
 
 // used only in rss feed for now but can repeat elsewhere
 const sitedata = {
@@ -20,8 +20,26 @@ const sitedata = {
 
 // optional data plugins. must be object, so we can namespace
 exports.plugins = {
-  writing,
-  speaking
+  writing: {
+    createIndex(mainIndex) {
+      return mainIndex.ssgCoreData.filter(item =>
+        item.shortFilePath.startsWith('writing/')
+      )
+    },
+    getDataSlice(uid, coreDataPlugin) {
+      return coreDataPlugin.getDataSlice(uid)
+    }
+  },
+  speaking: {
+    createIndex(mainIndex) {
+      return mainIndex.ssgCoreData.filter(item =>
+        item.shortFilePath.startsWith('talks/')
+      )
+    },
+    getDataSlice(uid, coreDataPlugin) {
+      return coreDataPlugin.getDataSlice(uid)
+    }
+  }
 }
 
 // optional. called repeatedly, can be expensive
@@ -30,9 +48,14 @@ exports.getDataSlice = async (key, uid) => {
   // etc
 }
 
+exports.coreDataOpts = {
+  coreDataDirPath: 'content'
+}
+
 // mandatory. called once, should be cheap
 exports.createIndex = async (mainIndex = {}) => {
   console.log('getting intial data')
+
   // can add more data to index here
   console.log('Number of talks:', Object.keys(mainIndex.speaking).length)
   console.log('Number of articles:', Object.keys(mainIndex.writing).length)

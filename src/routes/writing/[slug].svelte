@@ -1,19 +1,7 @@
 <script context="module">
   export async function preload({ params, query }) {
-    const writingIndex = await this.fetch(
-      `/data/writing___ssg___index.json`
-    ).then(x => x.json())
-    const post = writingIndex[params.slug]
-    // console.log({ post });
-    const uid = post.uid
-    const res = await this.fetch(`/data/writing___ssg___${uid}.json`)
-    const data = await res.json()
-    post.html = data
-    if (res.status === 200) {
-      return { post }
-    } else {
-      this.error(res.status, data.message)
-    }
+    const post = await this.ssgData({ key: 'writing', id: params.slug })
+    return { post }
   }
 </script>
 
@@ -31,12 +19,14 @@
   export let slug = $page.params.slug
   export let post
   export let seoCategory = 'swyx Writing'
-  let seoSubtitle = post.metadata.subtitle
+  $: console.log({ post })
+  let seoSubtitle = post.metadata && post.metadata.subtitle
   export let seoTitle = seoSubtitle
-    ? `${post.metadata.title}: ${seoSubtitle}`
-    : `${seoCategory} | ${post.metadata.title}`
-  export let seoDescription =
-    post.metadata.desc || post.metadata.description || seoTitle
+    ? `${post.metadata && post.metadata.title}: ${seoSubtitle}`
+    : `${seoCategory} | ${post.metadata && post.metadata.title}`
+  export let seoDescription = post.metadata
+    ? post.metadata.desc || post.metadata.description || seoTitle
+    : seoTitle
   export let category = 'writing'
 </script>
 

@@ -20,7 +20,7 @@ In Nov I'll be rotating on to the product team for the next 3 months.
   - [ReactConf Preview](https://www.swyx.io/speaking/react-podcast-suspense) - chantastic invited me back on the React Podcast (yay repeat appearance!) to recap what we knew about Concurrent React. I was very wrong about Relay, but everything else was roughly right.
 - Writing:
 
-  - [Donating \$10k to FreeCodeCamp](https://www.swyx.io/writing/donating-to-freecodecamp) - my response to FCC's call for donations, which has been picked up for a [#PayItBackwards campaign](https://www.freecodecamp.org/news/payitbackwards-alumni-donation/) for FCC's 5 year anniversary.
+  - [Donating $10k to FreeCodeCamp](https://www.swyx.io/writing/donating-to-freecodecamp) - my response to FCC's call for donations, which has been picked up for a [#PayItBackwards campaign](https://www.freecodecamp.org/news/payitbackwards-alumni-donation/) for FCC's 5 year anniversary.
 
   I haven't had much time to continue work on swyx.io yet. Mark Erikson gave me important feedback about the UX of the site, and conversations with Jared Palmer and closely studying 11ty have helped me narrow down what I want to do for SSG so I also put up a [roadmap](https://github.com/sw-yx/ssg#project-roadmap) for what I want to see. I'll present this at the new Svelte meetup on monday. (another thing I started in October)
 
