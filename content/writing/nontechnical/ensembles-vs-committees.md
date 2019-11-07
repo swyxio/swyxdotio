@@ -26,7 +26,7 @@ Is one always good and the other always bad?
 
 "Highs" preside: High energy, high utilization, high emotions.
 
-If it isn't clear: I am trying to be neutral here but I do have a bias toward Ensembles. I also recognize that just as you should pick the right tool for the job (caveat: see [In Defense of Hammers](./hammers)), you should form the right group for the job.
+If it isn't clear: I am trying to be neutral here but I do have a bias toward Ensembles. I also recognize that just as you should pick the right tool for the job (caveat: see [In Defense of Hammers](/writing/hammers)), you should form the right group for the job.
 
 You don't make Saturday Night Live by Committee. Nor should you make law by Ensemble.
 

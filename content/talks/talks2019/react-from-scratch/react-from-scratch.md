@@ -4,14 +4,11 @@ slug: react-from-scratch
 topic: React
 venues: ReactAdvanced London
 url: https://reactadvanced.com/
+video: https://www.youtube.com/watch?v=dFO4m7Y-yhs
 date: 2019-10-25
 desc: Cloning Concurrent React with React Fiber and discussing Time Slicing and Suspense
 description: In this talk, we’ll create an effective mental model of React Hooks by building a tiny clone of React! This will serve two purposes – to demonstrate the effective use of closures, and to show how you can build a Hooks clone in just 29 lines of readable JS. Finally, we arrive at how you get Custom Hooks and the Rules of Hooks out of this incredible mental model!
 ---
-
-## Video 
-
-not ready yet
 
 ## Final Codesandbox
 

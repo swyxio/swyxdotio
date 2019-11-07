@@ -19,7 +19,7 @@
   export let slug = $page.params.slug
   export let post
   export let seoCategory = 'swyx Writing'
-  $: console.log({ post })
+  // $: console.log({ post })
   let seoSubtitle = post.metadata && post.metadata.subtitle
   export let seoTitle = seoSubtitle
     ? `${post.metadata && post.metadata.title}: ${seoSubtitle}`
