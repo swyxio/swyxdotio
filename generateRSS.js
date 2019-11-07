@@ -44,8 +44,14 @@ module.exports = async function generateRSS(mainIndex, opts) {
 
   let PostsToScreenshot = []
   Object.keys(mainIndex).forEach(category => {
+    if (category === 'ssgCoreData') return // TODO: consider whether this is actually skippable
     const subIndex = mainIndex[category]
     Object.values(subIndex).forEach(item => {
+      const slug = item.slug
+      if (!slug) {
+        console.log({baseUrl, category, item})
+        return // early return
+      }
       let itemDescription = item.metadata.subtitle
         ? `[${item.metadata.subtitle}] `
         : ''
@@ -57,13 +63,13 @@ module.exports = async function generateRSS(mainIndex, opts) {
         itemDescription += ` (External Link: <a href="${item.metadata.url}">${item.metadata.url}</a>)`
       }
       PostsToScreenshot.push([
-        category + '/' + item.metadata.slug,
+        category + '/' + slug,
         item.metadata.title,
         item.metadata.subtitle
       ])
       feed.item({
         title: item.metadata.title,
-        url: urljoin(baseUrl, category, item.metadata.slug),
+        url: urljoin(baseUrl, category, slug),
         description: itemDescription,
         date: item.metadata.pubdate
         // todo: enclosure?
