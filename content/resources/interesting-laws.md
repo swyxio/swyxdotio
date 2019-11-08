@@ -16,6 +16,7 @@ published: false
 - super combo: https://twitter.com/secretGeek/status/1116217143933063169
 - Cromwell's rule https://en.wikipedia.org/wiki/Cromwell%27s_rule
 - Chesterton's Fence https://florentcrivello.com/index.php/2019/09/04/the-efficiency-destroying-magic-of-tidying-up/
+- polanyi's law https://en.wikipedia.org/wiki/Polanyi%E2%80%99s_paradox
 
 more:
 

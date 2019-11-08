@@ -71,3 +71,5 @@ yarn-error.log
 .netlify/
 __sapper__
 .ssg
+# Local Netlify folder
+.netlify
