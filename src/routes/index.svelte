@@ -171,6 +171,10 @@
                 </a>
               </li>
               <li>
+                My (upcoing) workshop on
+                <b>Building Custom CLI Tooling with OClif and React-Ink</b>
+              </li>
+              <li>
                 <a href="/speaking/netlify-freecodecamp-intro">
                   Complete Intro to Netlify in 3.5 hours
                 </a>

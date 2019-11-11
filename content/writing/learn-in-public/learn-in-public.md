@@ -45,3 +45,12 @@ _originally drafted [in a gist](https://gist.github.com/sw-yx/9720bd4a30606ca3ff
 - Cory House: [Becoming an Outlier](https://vimeo.com/97415346) and [The Art of Learning](https://www.bitnative.com/2013/12/14/programming-your-brain-the-art-of-learning-in-three-steps/) and [Lifestyle Systems](https://www.infoq.com/presentations/lifestyle-software-developer/)
 - Jeff Atwood: [How to stop sucking and be awesome instead](https://blog.codinghorror.com/how-to-stop-sucking-and-be-awesome-instead/)
 - Kent C Dodds: [Intentional Career Building](https://kentcdodds.com/blog/intentional-career-building)
+- Nathan Barry in his book Authority:
+
+> Back in 2007 Chris Coyier launched a site called css-tricks.com. It was a site dedi- cated to teaching people how to code websites. (CSS is the language that describes how websites should look.) When CSS-Tricks first came out I remember reading a tutorial and arrogantly thinking, “I know that already.” Chris and I were at about the same skill level, so I didn’t learn anything new from him.
+> This continued for a while as he kept putting out new tutorials. But over time, as friends started asking me CSS questions, I found it easier to link to one of Chris’s articles (since they were really well written) than explain everything myself.
+> Years later Chris ran a Kickstarter campaign to redesign his site. Those who con- tributed would get behind-the-scenes access to additional tutorials and content re- lated to the redesign.
+> The goal was set fairly low at $3,500. He quickly blew past the goal and by the end of the campaign had raised $89,697.
+> Incredible.
+> The point is that he did it with relative ease, all because he had built up an audi- ence who loved his work.
+> **He and I started at the same point and our skills progressed at about the same rate. The difference was that he taught and shared, whereas I kept what I was learning to myself. That made the difference between being able to make tens of thousands of dollars on a new project versus releasing to no one.**
