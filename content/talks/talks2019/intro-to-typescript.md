@@ -12,6 +12,11 @@ description: TypeScript is a megatrend in JavaScript, going from 46% of npm surv
 
 ## Table of Contents
 
+
+## The Meta-Language [Nov 2019 Edit]
+
+Cheng Lou's pair of talks on [Taming the Meta-Language](https://www.youtube.com/watch?v=_0T5OSSzxms) and [What's in a Language?](https://www.youtube.com/watch?v=24S5u_4gx7w) is very Reason-focused but is really about how we can get more mileage out of Types by encoding things into the language.
+
 ## Twitter Comments
 
 - [From Leslie](https://mobile.twitter.com/lesliecdubs/status/1168968624956198915)
