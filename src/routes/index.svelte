@@ -60,8 +60,8 @@
   <div id="CTA">
     Latest Post:
     <div>
-      <a href="/writing/ensembles-vs-committees">
-        <b>Ensembles vs Committees</b>
+      <a href="/writing/narrow-waists">
+        <b>Narrow Waists</b>
       </a>
     </div>
   </div>
@@ -71,77 +71,53 @@
       <h2>Start Here</h2>
       <ul>
         <li>
-          <h3>
-            <a href="/writing/learn-in-public">Learn in Public</a>
-          </h3>
+          <h3>Writing</h3>
           <div>
-            My most impactful essay, and the personal growth philosophy I and
-            many others follow.
-          </div>
-        </li>
-        <li>
-          <h3>
-            <a href="/writing/svelte-static">Static Svelte</a>
-          </h3>
-          <div>How this very site was written</div>
-        </li>
-        <li>
-          <h3>
-            <a href="/writing/rise-of-immer">Rise of Immer in React</a>
-          </h3>
-          <div>
-            A recap of Immutability in JavaScript and its relationship with
-            React
-          </div>
-        </li>
-        <li>
-          <h3>About</h3>
-          <div>
-            My personal story,
-            <a href="https://github.com/sw-yx/README/blob/master/README.md">
-              README
-            </a>
-            , and
-            <a href="/speaking/freecodecamp-podcast">
-              podcast with Quincy Larson
-            </a>
-            about learning to code.
-          </div>
-        </li>
-      </ul>
-    </div>
-    <hr />
-    <div>
-      <h2>My Best Work</h2>
-      <ul>
-        <li>
-          <h3>Cheatsheets</h3>
-          <div>
-            I enjoy collecting helpful repos around topics, like
+            I do a bunch of personal and work-related writing:
             <ul>
               <li>
-                <a
-                  href="https://github.com/typescript-cheatsheets/react-typescript-cheatsheet/">
-                  React-TypeScript Cheatsheet
-                </a>
+                <b>
+                  <a href="/writing/learn-in-public">Learn in Public</a>
+                </b>
+                <div>
+                  My most impactful essay, and the personal growth philosophy I
+                  and many others follow.
+                </div>
               </li>
               <li>
-                <a
-                  href="https://github.com/sw-yx/cli-cheatsheet/blob/master/README.md">
-                  CLI Cheatsheet
-                </a>
+                <b>
+                  <a href="/writing/svelte-static">Static Svelte</a>
+                </b>
+                <div>How this very site was written</div>
               </li>
               <li>
-                <a href="https://github.com/sw-yx/concurrent-react-notes">
-                  Concurrent-React Notes
-                </a>
+                <b>
+                  <a href="/writing/rise-of-immer">Rise of Immer in React</a>
+                </b>
+                <div>
+                  A recap of Immutability in JavaScript and its relationship
+                  with React
+                </div>
               </li>
               <li>
-                <a href="https://github.com/sw-yx/spark-joy/">spark-joy</a>
+                <b>About</b>
+                <div>
+                  My personal story,
+                  <a
+                    href="https://github.com/sw-yx/README/blob/master/README.md">
+                    README
+                  </a>
+                  , and
+                  <a href="/speaking/freecodecamp-podcast">
+                    podcast with Quincy Larson
+                  </a>
+                  about learning to code.
+                </div>
               </li>
             </ul>
           </div>
         </li>
+
         <li>
           <h3>Speaking</h3>
           <div>
@@ -169,6 +145,63 @@
                 <a href="/speaking/babel-macros">
                   Babel Macros (the Moana talk)
                 </a>
+              </li>
+            </ul>
+          </div>
+        </li>
+      </ul>
+
+    </div>
+    <hr />
+    <div>
+      <h2>Other Work (off-site)</h2>
+      <ul>
+        <li>
+          <h3>Teaching</h3>
+          <div>
+            I teach on
+            <a href="https://egghead.io/">Egghead.io</a>
+            and in other workshops:
+            <ul>
+              <li>
+                My course on
+                <a
+                  href="https://egghead.io/courses/design-systems-with-react-and-typescript-in-storybook">
+                  Design Systems with React + TypeScript
+                </a>
+              </li>
+              <li>
+                <a href="/speaking/netlify-freecodecamp-intro">
+                  Complete Intro to Netlify in 3.5 hours
+                </a>
+              </li>
+            </ul>
+          </div>
+        </li>
+        <li>
+          <h3>Cheatsheets</h3>
+          <div>
+            I enjoy collecting helpful repos around topics, like
+            <ul>
+              <li>
+                <a
+                  href="https://github.com/typescript-cheatsheets/react-typescript-cheatsheet/">
+                  React-TypeScript Cheatsheet
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://github.com/sw-yx/cli-cheatsheet/blob/master/README.md">
+                  CLI Cheatsheet
+                </a>
+              </li>
+              <li>
+                <a href="https://github.com/sw-yx/concurrent-react-notes">
+                  Concurrent-React Notes
+                </a>
+              </li>
+              <li>
+                <a href="https://github.com/sw-yx/spark-joy/">spark-joy</a>
               </li>
             </ul>
           </div>
