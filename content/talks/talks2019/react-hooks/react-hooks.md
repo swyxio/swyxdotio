@@ -28,6 +28,7 @@ description: The design of React Hooks requires a good understanding of closures
 
 - https://dev.to/kayis/react-hooks-demystified-2af6
 - Rodrigo Pombo's work on Didact and https://buildyourownreact.now.sh
+- (Nov 2019 edit) This uses snabdom https://dev.to/ameerthehacker/build-your-own-react-in-90-lines-of-javascript-1je2
 
 ## Livecoding plan
 

@@ -400,3 +400,8 @@ the svelte path
 
 - 15 min react + hooks clone
 - 10 min svelte clone??
+
+## other references
+
+
+- (Nov 2019 edit) This uses snabdom https://dev.to/ameerthehacker/build-your-own-react-in-90-lines-of-javascript-1je2
