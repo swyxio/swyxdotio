@@ -6,6 +6,7 @@ venues: OclifConf
 date: 2019-05-31
 url: https://oclif.io/conf
 video: https://www.youtube.com/watch?v=1_w1YWCHXFg
+video2: https://www.youtube.com/watch?v=ZueoIYnHiaI&feature=emb_title
 gist: https://gist.github.com/sw-yx/3af1e264b8460af8897768045b2c229f
 desc: better intelligence behind oclif
 description: Oclif does a lot of nice things, like offering flag and argument parsing, help documentation, and pluggability. That's good for the CLI developer. But what about the CLI user? Instead of viewing our CLI's as simple harnesses for procedure calls, how can we add an intelligent layer to interpret to user intent and guide them down a pit of success? How can we make our CLI's improve using information gained over time?
