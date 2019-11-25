@@ -5,18 +5,13 @@
   }
 </style>
 
+<!-- unused file for fast.com login -->
 <svelte:head>
   <title>Login</title>
-  <script
-    src="https://js.fast.co/button.js?key=4MAL2xyeOwXN6Zdr7Op5Qav0qYg1dnlB">
-
-  </script>
 </svelte:head>
 
 <article>
   <h1>Login</h1>
 
-  <p>
-    <fast-button />
-  </p>
+  <p />
 </article>
