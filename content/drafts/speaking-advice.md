@@ -162,8 +162,13 @@ fixing speaking voice: https://www.artofmanliness.com/articles/improve-your-spea
 - persuade w power
 - inspire your audience
 
+## Writing CFPs
+
+[How can I write CFPs](https://mobile.twitter.com/swyx/status/1198202505227685888)
+
 ## more
 
 - https://dev.to/emmawedekind/tips-for-first-time-speakers-3fcb
 - how to start a speech https://www.youtube.com/watch?v=w82a1FT5o88
 - Book: Present! A Techie's Guide to Public Speaking https://www.amazon.com/Present-Techies-Guide-Public-Speaking-ebook/dp/B01BCXHULK
+- Matty Stratton: https://player.fm/series/screaming-in-the-cloud-2504282/episode-39-give-10-bad-talks-all-in-a-row-and-then-get-fired

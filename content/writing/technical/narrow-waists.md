@@ -56,7 +56,19 @@ Another aspect of "narrow waists" are the typically very limited nature that fru
 I don't have a ton of examples for you as I am just writing up these thoughts, but I will revisit with more examples in future:
 
 - **Containers**: containers are the classic narrow waist in the physical world. I won't repeat the superlative descriptions of their impact, but will also note their endearing analogues in software.
-- **Specs**: narrow waists don't have to be tangible. A spec isnt core functional code, but describes how a protocol or interface should work. There can then be multiple implementations that fit or extend the spec, and they can all benefit from tooling or counterparts that are written for the ecosystem instead of for each implementation. In this category I like how the GraphQL spec has helped invisibly coordinate different parts of the GraphQL ecosystem for overall benefit. I dont have direct experience but I'm told Python typehints also have a spec-like behavior with multiple major implementations which has been very healthy for that ecosystem.
+- **Roads**: every vehicle can travel faster on roads (particularly highways) because we have a social pact that things are allowed to travel faster there
+- **Language**: every person can communicate with others around them if they speak the same language. A "lingua franca" superlanguage can make international trade and collaboration much smoother
+- **Newspapers/Yellow Pages**: for a period of time, they were the narrow waists for getting information, getting news, connecting with neighbors, looking up contact information
+- **Specs and Protocols**: narrow waists don't have to be tangible or functional. A spec isn't core functional code, but describes how a protocol or interface should work. There can then be multiple implementations that fit or extend the spec, and they can all benefit from tooling or counterparts that are written for the ecosystem instead of for each implementation. 
+  - **GraphQL**: In this category I like how the GraphQL spec has helped invisibly coordinate different parts of the GraphQL ecosystem for overall benefit. I dont have direct experience but I'm told Python typehints also have a spec-like behavior with multiple major implementations which has been very healthy for that ecosystem.
+  - **Email**: the [IMAP and SMTP](https://www.socketlabs.com/blog/smtp-or-imap/) protocols make email both universally deliverable and universally accessible by any client
+  - **RSS and Podcasts**: ditto
+  - **SMS**: ditto, any phone can receive and read SMS
+  - **BGP** the announcement process is decentralized and works as long as each AS meets specs
+    - as a distributed system, this isn't without controversy by any means, there are frequent [country-scale incidents of BGP hijacking](https://en.wikipedia.org/wiki/BGP_hijacking#Public_incidents) and [irresponsible implementations can screw up innocent participants](https://blog.cloudflare.com/how-verizon-and-a-bgp-optimizer-knocked-large-parts-of-the-internet-offline-today/)
+  - **x86 instruction set architecture**: any processor that implemented x86 could benefit from firmware/operating systems that speak it
+  - **Operating systems**: the three major systems - windows, linux, freebsd (macos) - make it so that programs that operate on them dont usually care about the underlying hardware, and the underlying hardware just needs to be able to support those OSes to support those end user software
 
+## When do they die?
 
-
+Quite relevant is the Newspaper/Yellow Pages example - Narrow Waists seem to have a deadlock dual network effect going on that is quite unbreakable, but nothing lasts forever. When do Narrow Waists fall?
