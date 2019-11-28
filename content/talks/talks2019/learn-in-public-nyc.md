@@ -1,6 +1,6 @@
 ---
 title: Learn In Public (NYC)
-slug: learn-in-public
+slug: learn-in-public-nyc
 topic: LearnInPublic
 venues: VueNYC
 date: 2019-07-31

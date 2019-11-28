@@ -42,6 +42,7 @@ Other methods I need to explore:
 - https://github.com/intuit/auto
 - https://egghead.io/lessons/javascript-how-to-write-a-javascript-library-automatically-running-tests-before-commits-with-ghooks
 - https://github.com/algolia/shipjs
+- Atlassian's [changesets tool](https://github.com/atlassian/changesets) cc [JessTelford](https://twitter.com/JessTelford/status/1179528676393672704)
 
 ## Automated Publishing
 
