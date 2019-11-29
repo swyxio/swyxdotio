@@ -81,7 +81,7 @@
         <a href="/speaking/contributing-to-react">Contributing to React</a>
       </li>
       <li>
-        <a href="/speaking/learn-in-public">Learn In Public</a>
+        <a href="/speaking/learn-in-public-nyc">Learn In Public</a>
       </li>
       <li>
         <a href="/speaking/babel-macros">Babel Macros (the Moana talk)</a>

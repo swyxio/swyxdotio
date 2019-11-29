@@ -77,7 +77,7 @@ We've loosely tried to do "virtual coffee chats" where I suggested adopting [Kno
 
 I guess what is important is we all seem to have a personal preference for the smaller company feel. It's less pay and more ownership. A pretty poor trade if you look at \$ per hour, but higher in terms of self actualization.
 
-**Public**: One last transition I made in this job is the public nature of my job in particular. In my previous job I had to apply for clearance to speak in public, due to financial regulations, despite my content having nothing to do with the company whatsoever. I did my writing and speaking on nights and weekends in my own time. Now I am _encouraged_ to write and speak on company time. I think this builds [portable capital](https://www.swyx.io/talks/learn-in-public) and assign a significant amount of nonmonetary value to this opportunity.
+**Public**: One last transition I made in this job is the public nature of my job in particular. In my previous job I had to apply for clearance to speak in public, due to financial regulations, despite my content having nothing to do with the company whatsoever. I did my writing and speaking on nights and weekends in my own time. Now I am _encouraged_ to write and speak on company time. I think this builds [portable capital](https://www.swyx.io/speaking/learn-in-public-nyc) and assign a significant amount of nonmonetary value to this opportunity.
 
 ## How do you maintain focus?
 

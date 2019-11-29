@@ -6,7 +6,7 @@ categories: ['Tech']
 date: 2019-11-10
 ---
 
-When talking about "Narrow Waists" I should clarify that I'm only referring to the term from the somewhat obscure "Internet Architecture" model of the different technology layers ([my notes here](https://dev.to/swyx/networking-essentials-architecture-and-principles-2g5e)): 
+When talking about "Narrow Waists" I should clarify that I'm only referring to the term from the somewhat obscure "Internet Architecture" model of the different technology layers ([my notes here](https://dev.to/swyx/networking-essentials-architecture-and-principles-2g5e)):
 
 ![https://res.cloudinary.com/practicaldev/image/fetch/s--y7YIZZVj--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://images.slideplayer.com/24/7320353/slides/slide_25.jpg](https://res.cloudinary.com/practicaldev/image/fetch/s--y7YIZZVj--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://images.slideplayer.com/24/7320353/slides/slide_25.jpg)
 
@@ -32,7 +32,7 @@ I'm spending all day today transiting between three cities (the return leg of on
 
 I have to do this all on time, or downstream dependencies are ruined (including beyond this immediate list of events). Yet there is very little guidance to doing it right apart from the raw cost of a mistake. Checking out of a hotel is as simple as returning the keycards - they couldn't care less where I head to next, or whether I'm checking out on time. I can take any number of transportation options to the airport - the airport doesn't care. When I check in to the airline, it's on me to make it through security and in general show up in time for boarding - if I miss it, the airline doesn't care apart from issuing a "last call".
 
-But also notable is the *lack* of some options. There is no first party "integrated" option where the hotel kicks me out on time with scheduled transportation to get in to the airport. Of course there are third party tour groups and concierges that do these, but the enforcement is weak. And unless you have a private flight, there is no getting around airport security. The Airport is the "narrow waist" everything else in the chain must work towards.
+But also notable is the _lack_ of some options. There is no first party "integrated" option where the hotel kicks me out on time with scheduled transportation to get in to the airport. Of course there are third party tour groups and concierges that do these, but the enforcement is weak. And unless you have a private flight, there is no getting around airport security. The Airport is the "narrow waist" everything else in the chain must work towards.
 
 ## Why Narrow Waists are Underrated
 
@@ -59,7 +59,7 @@ I don't have a ton of examples for you as I am just writing up these thoughts, b
 - **Roads**: every vehicle can travel faster on roads (particularly highways) because we have a social pact that things are allowed to travel faster there
 - **Language**: every person can communicate with others around them if they speak the same language. A "lingua franca" superlanguage can make international trade and collaboration much smoother
 - **Newspapers/Yellow Pages**: for a period of time, they were the narrow waists for getting information, getting news, connecting with neighbors, looking up contact information
-- **Specs and Protocols**: narrow waists don't have to be tangible or functional. A spec isn't core functional code, but describes how a protocol or interface should work. There can then be multiple implementations that fit or extend the spec, and they can all benefit from tooling or counterparts that are written for the ecosystem instead of for each implementation. 
+- **Specs and Protocols**: narrow waists don't have to be tangible or functional. A spec isn't core functional code, but describes how a protocol or interface should work. There can then be multiple implementations that fit or extend the spec, and they can all benefit from tooling or counterparts that are written for the ecosystem instead of for each implementation.
   - **GraphQL**: In this category I like how the GraphQL spec has helped invisibly coordinate different parts of the GraphQL ecosystem for overall benefit. I dont have direct experience but I'm told Python typehints also have a spec-like behavior with multiple major implementations which has been very healthy for that ecosystem.
   - **Email**: the [IMAP and SMTP](https://www.socketlabs.com/blog/smtp-or-imap/) protocols make email both universally deliverable and universally accessible by any client
   - **RSS and Podcasts**: ditto
@@ -72,3 +72,10 @@ I don't have a ton of examples for you as I am just writing up these thoughts, b
 ## When do they die?
 
 Quite relevant is the Newspaper/Yellow Pages example - Narrow Waists seem to have a deadlock dual network effect going on that is quite unbreakable, but nothing lasts forever. When do Narrow Waists fall?
+
+Notes:
+
+- Ben Thompson on [Integration and Monopoly](https://stratechery.com/2019/integration-and-monopoly/) (MSFT vs AAPL + GOOGL)
+  - integration provides for a superior user experience
+  - integration maximizes the likelihood of success for new products
+  - integration is incredibly profitable because it is, from a money-making perspective, a monopoly: Apple devices are the only ones that run iOS.

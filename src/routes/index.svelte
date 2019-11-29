@@ -139,7 +139,7 @@
                 </a>
               </li>
               <li>
-                <a href="/speaking/learn-in-public">Learn In Public</a>
+                <a href="/speaking/learn-in-public-nyc">Learn In Public</a>
               </li>
               <li>
                 <a href="/speaking/babel-macros">

@@ -5,10 +5,15 @@ topic: React
 venues: ReactAdvanced London
 url: https://reactadvanced.com/
 video: https://www.youtube.com/watch?v=dFO4m7Y-yhs
+video2: https://www.youtube.com/watch?v=8opFTK2shAc
 date: 2019-10-25
 desc: Cloning Concurrent React with React Fiber and discussing Time Slicing and Suspense
 description: In this talk, we’ll create an effective mental model of React Hooks by building a tiny clone of React! This will serve two purposes – to demonstrate the effective use of closures, and to show how you can build a Hooks clone in just 29 lines of readable JS. Finally, we arrive at how you get Custom Hooks and the Rules of Hooks out of this incredible mental model!
 ---
+
+## React Knowledgeable version
+
+I gave a [1hr Singlished version of this talk](https://www.youtube.com/watch?v=8opFTK2shAc), with a lot more mistakes but hopefully better explanations, and Q&A, at Shoppee on Nov 29.
 
 ## Final Codesandbox
 
@@ -19,46 +24,28 @@ Click here: https://codesandbox.io/s/reactadvanced-final-uwrx0
 - start state
 
 ```js
-import "./styles.css";
+import './styles.css'
 import {
   reconcileChildren,
   createElement,
   commitDeletion,
   createDom,
   updateDom
-} from "./utils";
-let nextUnitOfWork = null;
-let currentRoot = null;
-let wipRoot = null;
-let deletions = [];
-let wipFiber = null;
-let hookIndex = null;
+} from './utils'
+let nextUnitOfWork = null
+let currentRoot = null
+let wipRoot = null
+let deletions = []
+let wipFiber = null
+let hookIndex = null
 const React = { createElement }
 ```
 
 - declare with an element and a wipRoot
 
 ```js
-const container = document.getElementById("root");
-const element = React.createElement("h1", null, "Hello world");
-// const element = <h1>Hello world</h1>
-// const element = {
-//   type: "h1",
-//   props: {
-//     children: "Hello world",
-//   },
-// }
-const fiber = {
-  type: "h1",
-  props: { children: "Hello world" },
-  tag: HOST_COMPONENT,
-  parent: parentFiber,
-  child: childFiber,
-  sibling: null,
-  alternate: currentFiber,
-  effectTag: PLACEMENT,
-  hooks: []
-};
+const container = document.getElementById('root')
+const element = <h1>Hello world</h1>
 wipRoot = {
   // type: 'n/a', // a string or function
   dom: container,
@@ -70,7 +57,7 @@ wipRoot = {
   // child - link to first child
   // parent - link to parent
   // sibling - link to next sibling
-};
+}
 // traversal: https://github.com/facebook/react/issues/7942
 ```
 
@@ -82,19 +69,19 @@ render(element, container)
 
 function render(element, container) {
   const dom =
-    element.type === "TEXT_ELEMENT"
-      ? document.createTextNode("")
-      : document.createElement(element.type);
-  const isProperty = key => key !== "children";
+    element.type === 'TEXT_ELEMENT'
+      ? document.createTextNode('')
+      : document.createElement(element.type)
+  const isProperty = key => key !== 'children'
   Object.keys(element.props)
     .filter(isProperty)
     .forEach(name => {
-      dom[name] = element.props[name];
-    });
+      dom[name] = element.props[name]
+    })
   element.props.children.forEach(
     child => render(child, dom) // recursive call
-  );
-  container.appendChild(dom);
+  )
+  container.appendChild(dom)
 }
 ```
 
@@ -102,57 +89,34 @@ function render(element, container) {
 
 https://github.com/facebook/react/issues/7942
 
-```js
-let root = fiber;
-let node = fiber;
-while (true) {
-  // Do something with node
-  if (node.child) {
-    node = node.child;
-    continue;
-  }
-  if (node === root) {
-    return;
-  }
-  while (!node.sibling) {
-    if (!node.return || node.return === root) {
-      return;
-    }
-    node = node.return;
-  }
-  node = node.sibling;
-}
-```
-
 - reconciling fibers
 
 ```js
-nextUnitOfWork = wipRoot;
+nextUnitOfWork = wipRoot
 while (nextUnitOfWork) {
   nextUnitOfWork = performUnitOfWork(nextUnitOfWork)
 }
 commitWork(wipRoot.child)
 
 function performUnitOfWork(fiber) {
-  const isFunctionComponent =
-    fiber.type instanceof Function;
+  const isFunctionComponent = fiber.type instanceof Function
   if (isFunctionComponent) {
     // it is either a function component... (so call it)
-    wipFiber = fiber;
-    hookIndex = 0;
-    wipFiber.hooks = [];
-    const children = [fiber.type(fiber.props)];
-    reconcileChildren(fiber, children.flat());
+    wipFiber = fiber
+    hookIndex = 0
+    wipFiber.hooks = []
+    const children = [fiber.type(fiber.props)]
+    reconcileChildren(fiber, children.flat())
   } else {
     // or a host component... (so createDom)
-    if (!fiber.dom) fiber.dom = createDom(fiber);
-    reconcileChildren(fiber, fiber.props.children.flat());
+    if (!fiber.dom) fiber.dom = createDom(fiber)
+    reconcileChildren(fiber, fiber.props.children.flat())
   }
-  if (fiber.child) return fiber.child;
-  let nextFiber = fiber;
+  if (fiber.child) return fiber.child
+  let nextFiber = fiber
   while (nextFiber) {
-    if (nextFiber.sibling) return nextFiber.sibling;
-    nextFiber = nextFiber.parent;
+    if (nextFiber.sibling) return nextFiber.sibling
+    nextFiber = nextFiber.parent
   }
 }
 function commitWork(fiber) {
@@ -166,54 +130,12 @@ function commitWork(fiber) {
     domParent.appendChild(fiber.dom)
   } else if (fiber.effectTag === 'UPDATE' && fiber.dom != null) {
     updateDom(fiber.dom, fiber.alternate.props, fiber.props)
-  }
-   else if (fiber.effectTag === 'DELETION') {
+  } else if (fiber.effectTag === 'DELETION') {
     commitDeletion(fiber, domParent)
   }
   commitWork(fiber.child)
   commitWork(fiber.sibling)
 }
-```
-
-- add useState hook
-
-```js
-function useState(initial) {
-  const oldHook = wipFiber?.alternate?.hooks[hookIndex];
-  const nothing = Symbol("__NONE__")
-  const hook = {
-    state: oldHook ? oldHook.state : initial,
-    pendingState: nothing
-  };
-  if (oldHook && oldHook.pendingState !== nothing) {
-    hook.state = oldHook.pendingState;
-  }
-  const setState = _setStateFunction => {
-    hook.pendingState = _setStateFunction;
-    wipRoot = {
-      dom: currentRoot.dom,
-      props: currentRoot.props,
-      alternate: currentRoot
-    };
-    nextUnitOfWork = wipRoot;
-    deletions = [];
-  };
-  wipFiber.hooks.push(hook);
-  hookIndex++;
-  return [hook.state, setState];
-}
-```
-
-w basic demo:
-
-```js
-const React = { useState, createElement };
-function App() {
-  const [state, setState] = React.useState(1);
-  const handler = () => setState(state + 1);
-  return <main><button onClick={handler}>Click me: {state}</button></main>
-}
-const element = <App />;
 ```
 
 - add simple work loop
@@ -261,6 +183,51 @@ function workLoop(deadline) {
 requestIdleCallback(workLoop)
 ```
 
+- add useState hook
+
+```js
+function useState(initial) {
+  const oldHook = wipFiber?.alternate?.hooks[hookIndex]
+  const nothing = Symbol('__NONE__')
+  const hook = {
+    state: oldHook ? oldHook.state : initial,
+    pendingState: nothing
+  }
+  if (oldHook && oldHook.pendingState !== nothing) {
+    hook.state = oldHook.pendingState
+  }
+  const setState = newState => {
+    hook.pendingState = newState
+    wipRoot = {
+      dom: currentRoot.dom,
+      props: currentRoot.props,
+      alternate: currentRoot
+    }
+    nextUnitOfWork = wipRoot
+    deletions = []
+  }
+  wipFiber.hooks.push(hook)
+  hookIndex++
+  return [hook.state, setState]
+}
+```
+
+w basic demo:
+
+```js
+// remember to expose useState!
+function App() {
+  const [state, setState] = React.useState(1)
+  const handler = () => setState(state + 1)
+  return (
+    <main>
+      <button onClick={handler}>Click me: {state}</button>
+    </main>
+  )
+}
+const element = <App />
+```
+
 - add final render method
 
 ```js
@@ -290,35 +257,32 @@ function createRoot(container) {
           children: [element]
         },
         alternate: currentRoot
-      };
-      deletions = [];
-      nextUnitOfWork = wipRoot;
+      }
+      deletions = []
+      nextUnitOfWork = wipRoot
     }
-  };
+  }
 }
-createRoot(container).render(element);
+createRoot(container).render(element)
 ```
 
 - add suspense
 
-fakeapi from https://codesandbox.io/s/vigorous-keller-3ed2b
-
 ```js
-import { fetchProfileData } from "./fakeApi";
-const initialResource = fetchProfileData(0);
+// fakeapi from https://codesandbox.io/s/vigorous-keller-3ed2b
+import { fetchProfileData } from './fakeApi'
+const initialResource = fetchProfileData(0)
 function App() {
-  const [resource, setResource] = React.useState(
-    initialResource
-  );
-  const [state, setState] = React.useState(0);
+  const [resource, setResource] = React.useState(initialResource)
+  const [state, setState] = React.useState(0)
   const handler = () => {
-    let newState = state + 1;
-    if (newState > 3) newState = 0;
-    setState(newState);
-    setResource(fetchProfileData(newState));
-  };
-  const user = resource.user.read();
-  const posts = resource.posts.read();
+    let newState = state + 1
+    if (newState > 3) newState = 0
+    setState(newState)
+    setResource(fetchProfileData(newState))
+  }
+  const user = resource.user.read()
+  const posts = resource.posts.read()
   return (
     <main>
       <button onClick={handler}>Beatle {state + 1}</button>
@@ -329,7 +293,7 @@ function App() {
         ))}
       </div>
     </main>
-  );
+  )
 }
 ```
 
@@ -338,38 +302,38 @@ catch suspender
 ```js
 function workLoop(deadline) {
   // console.log("workloop start");
-  let shouldYield = false;
-  let suspendedWork = null;
+  let shouldYield = false
+  let suspendedWork = null
   // reconcile phase
   while (nextUnitOfWork && !shouldYield) {
     try {
-      nextUnitOfWork = performUnitOfWork(nextUnitOfWork);
+      nextUnitOfWork = performUnitOfWork(nextUnitOfWork)
     } catch (err) {
-      console.error("caught", err);
+      console.error('caught', err)
       if (err instanceof Promise) {
-        suspendedWork = nextUnitOfWork;
-        nextUnitOfWork = null;
+        suspendedWork = nextUnitOfWork
+        nextUnitOfWork = null
         err.then(() => {
-          wipRoot = currentRoot;
-          nextUnitOfWork = suspendedWork;
-        });
+          wipRoot = currentRoot
+          nextUnitOfWork = suspendedWork
+        })
       } else {
-        throw err;
+        throw err
       }
     }
-    shouldYield = deadline.timeRemaining() < 1;
+    shouldYield = deadline.timeRemaining() < 1
   }
   // commit phase
   if (!nextUnitOfWork && wipRoot) {
     // commitRoot
-    deletions.forEach(commitWork);
-    commitWork(wipRoot.child);
-    currentRoot = wipRoot;
-    wipRoot = null;
+    deletions.forEach(commitWork)
+    commitWork(wipRoot.child)
+    currentRoot = wipRoot
+    wipRoot = null
   }
-  requestIdleCallback(workLoop);
+  requestIdleCallback(workLoop)
 }
-requestIdleCallback(workLoop);
+requestIdleCallback(workLoop)
 ```
 
 ## References
@@ -402,6 +366,5 @@ the svelte path
 - 10 min svelte clone??
 
 ## other references
-
 
 - (Nov 2019 edit) This uses snabdom https://dev.to/ameerthehacker/build-your-own-react-in-90-lines-of-javascript-1je2
