@@ -181,3 +181,7 @@ As to counter the individual points I made:
 - **Ownership**: I don't have ideas here.
 - **Toolmakers**: We are passing on _some_ knowledge. [Anders Hejlsberg](https://en.wikipedia.org/wiki/Anders_Hejlsberg), with his 35 years of language and tooling experience, is now working on TypeScript and training a generation of tooling engineers. We are actively passing on knowledge at developer conferences - see how [Christoph and Konstantin talk about "Building High-Quality JavaScript Tools"](http://talkfrom.com/video?name=building-highquality-javascript-tools), and in particular [what Christoph and team did to save Jest](https://www.youtube.com/watch?v=3YDiloj8_d0).
 - **Funding**: Although I've explained my reservations, there are plenty of initiatives to help address open source funding and they are all needed. I would follow closely [Devon Zuegel of GitHub](https://increment.com/open-source/the-city-guide-to-open-source/) and also plug my friend [Travis Fischer](https://twitter.com/transitive_bs) if you are interested in this.
+
+## Other references
+
+- Seth Godin - [Why is software so bad?](https://www.akimbo.link/blog/s-5-e-14-why-is-software-so-bad)
