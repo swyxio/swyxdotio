@@ -13,7 +13,7 @@ description: In this talk, we’ll create an effective mental model of React Hoo
 
 ## React Knowledgeable version
 
-I gave a [1hr Singlished version of this talk](https://www.youtube.com/watch?v=8opFTK2shAc), with a lot more mistakes but hopefully better explanations, and Q&A, at Shoppee on Nov 29.
+I gave a [1hr Singlished version of this talk](https://www.youtube.com/watch?v=8opFTK2shAc), with a lot more mistakes but hopefully better explanations, and Q&A, at Shopee on Nov 29.
 
 ## Final Codesandbox
 
