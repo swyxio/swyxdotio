@@ -40,13 +40,27 @@ I think it's important, but not essential, to have some specificity to the goal.
 
 ## Audacious (and Worthy)
 
-The Audaciousness component of a BHAG is inspiring. Ideally your goal should be so audacious as to evoke laughter as to how ridiculous it is. There's a few ways to get there - doing something for the first time, or doing some big thing in a really short amount of time. Impacting lots of people is often more impressive than just impacting yourself - but don't do it for others, keep true to what you really want.
+The Audaciousness component of a BHAG is inspiring. Ideally your goal should be so audacious as to evoke laughter as to how ridiculous it is. There's a few ways to get there - doing something for the first time, or doing some big thing in a really short amount of time.
+
+How laughable would it be if [someone got up on stage and said this](https://www.inc.com/greg-satell/how-institute-for-healthcare-improvement-brought-quality-movement-to-healthcare.html):
+
+> I think we should save 100,000 lives.
+
+And then they followed it up with:
+
+> And I think we should do that by June 14, 2006--18 months from today.
+
+It's ridiculous! There's no plan involved! How do you measure multicausal impacts of things that don't happen?
+
+But it's memorable. Worthwhile. Directionally correct.
+
+Impacting lots of people is often more impressive than just impacting yourself - but don't do it for others (you'll never make them happy forever), keep true to what you really want.
 
 There's some relationship with Audacity and Reasonableness, in [the George Bernard Shaw sense of the word](https://www.goodreads.com/quotes/536961-the-reasonable-man-adapts-himself-to-the-world-the-unreasonable). An absurdly reasonable person can reason away not only everything currently wrong with the world, but also all our expectations of what we can do with the future. It takes some amount of **unreasonable audacity** to imply: "our own reasonable expectations are wrong, and we can do better".
 
 Also implied is that this goal should be worthwhile in some way. You could set out to build the Universe's Biggest Ball of Yarn or to set the Guiness World Record for Underwater Basket Weaving, but nobody's going to be very inspired by that.
 
-But, tell people you want to [make Humans a Multi-Planetary Species](https://www.liebertpub.com/doi/full/10.1089/space.2017.29009.emu) or to [own the Jets](https://www.nytimes.com/2018/12/28/sports/gary-vaynerchuk-jets-owner.html) or to [run a two hour marathon](https://www.youtube.com/watch?v=14xZ8iiFPYc), people will laugh, and then they do a very curious thing.
+But, tell people you want to [make Humans a Multi-Planetary Species](https://www.liebertpub.com/doi/full/10.1089/space.2017.29009.emu) or to [own the Jets](https://www.nytimes.com/2018/12/28/sports/gary-vaynerchuk-jets-owner.html) or to [run a two hour marathon](https://www.youtube.com/watch?v=14xZ8iiFPYc)or to [make a city lose 1 million pounds of fat](https://mosaicscience.com/story/fat-city) or to [eliminate Polio](https://en.wikipedia.org/wiki/Jonas_Salk#Polio_research), people will laugh, and then they do a very curious thing.
 
 _They start trying to help_. They tell their friends who can help. They volunteer ideas. They check in on you. They celebrate your progress with no jealousy, mourn setbacks with empathy.
 
