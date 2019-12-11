@@ -21,29 +21,19 @@ Let's start with Hello World: https://svelte.dev/tutorial/basics
 which compiles to
 
 ```js
-import {
-  SvelteComponent, // the base component class
-  detach, // node.parentNode.removeChild
-  element, // document.createElement
-  init, // we'll look at this
-  insert, // target.insertBefore(node, anchor || null)
-  safe_not_equal
-} from 'svelte/internal'
-
 function create_fragment(ctx) {
   var h1
   return {
     c() {
-      h1 = element('h1')
+      h1 = element('h1') // document.createElement
       h1.textContent = 'Hello world!'
     },
     m(target, anchor) {
-      insert(target, h1, anchor)
+      insert(target, h1, anchor) // target.insertBefore(node, anchor || null)
     },
-    // redacted stuff
     d(detaching) {
       if (detaching) {
-        detach(h1)
+        detach(h1) // node.parentNode.removeChild
       }
     }
   }
@@ -52,7 +42,7 @@ function create_fragment(ctx) {
 export default class App extends SvelteComponent {
   constructor(options) {
     super()
-    // attach $$
+    // we'll look at this next
     init(this, options, null, create_fragment, safe_not_equal, [])
   }
 }
@@ -69,7 +59,7 @@ export function init(
   component,
   options,
   instance,
-  create_fragment, /* etc */
+  create_fragment /* etc */,
   not_equal,
   prop_names
 ) {
@@ -80,7 +70,6 @@ export function init(
 
     // state
     props: prop_names,
-    update: noop,
     not_equal,
     bound: blank_object(),
 
@@ -88,6 +77,7 @@ export function init(
     on_mount: [],
     on_destroy: [],
     before_update: [],
+    update: noop,
     after_update: [],
     context: new Map(parent_component ? parent_component.$$.context : []),
 
@@ -101,7 +91,8 @@ export function init(
 
   if (options.target) {
     // omitted hydration and transition code
-    mount_component(component, options.target, options.anchor) // calls fragment.m(target, anchor);
+    mount_component(component, options.target, options.anchor)
+    // calls fragment.m(target, anchor);
   }
   // etc
 }
@@ -132,18 +123,14 @@ h1.svelte-yjl878 {
 and
 
 ```js
-import {
-  attr // (node, attribute, value) => node.setAttribute(attribute, value);
-  // etc
-} from 'svelte/internal'
-
 function create_fragment(ctx) {
   var h1
   return {
     c() {
       h1 = element('h1')
       h1.textContent = 'Hello world!'
-      attr(h1, 'class', 'svelte-yjl878') // new
+      attr(h1, 'class', 'svelte-yjl878')
+      // h1.setAttribute('class', 'svelte-yjl878')
     }
     // etc
   }
@@ -215,12 +202,6 @@ This lifting verbatim applies based on anything at the top level scope:
 ```
 
 ```js
-import {
-  // omitted imports
-  listen // runs node.addEventListener(event, handler, options)
-  // returns () => node.removeEventListener(event, handler, options);
-} from 'svelte/internal'
-
 function create_fragment(ctx) {
   var button, t0, t1, dispose // new!
   return {
@@ -272,11 +253,6 @@ Finally we add the assignment to make our pages interactive and see how data flo
 Compiles to:
 
 ```js
-import {
-  // omitted imports
-  set_data // (text, data) => text.data = data;
-} from 'svelte/internal'
-
 function create_fragment(ctx) {
   var button, t0, t1, dispose
   return {
@@ -286,12 +262,12 @@ function create_fragment(ctx) {
       t1 = text(ctx.count)
       dispose = listen(button, 'click', ctx.handleClick)
     },
-    // omitted m code
     p(changed, ctx) {
       if (changed.count) {
-        set_data(t1, ctx.count)
+        set_data(t1, ctx.count) // t1.data = ctx.count
       }
     }
+    // omitted m code
     // omitted d code
   }
 }
@@ -319,7 +295,7 @@ Based on what we have learned so far, a `.svelte` component gets compiled into:
   - `m()`: to mount the elements
   - `d()`: to detach the elements (and remove event listeners)
   - `p()`: to update elements with `set_*` functions
-- `<style>`: do both of:
+- `<style>`: do both; of:
   - output a css class
   - attach with `setAttribute`
 - `<script>`: either do:
@@ -334,3 +310,7 @@ The two source files to study alongside the REPL are:
 
 - https://github.com/sveltejs/svelte/blob/3d0a3cd943d6ab9991317777975aa3033627067d/src/runtime/internal/Component.ts#L72
 - https://github.com/sveltejs/svelte/blob/3d0a3cd943d6ab9991317777975aa3033627067d/src/runtime/internal/dom.ts
+
+## Postnotes
+
+Given as a talk at [React Knowledgeable](https://www.youtube.com/watch?v=FNmvcswdjV8)

@@ -3,6 +3,7 @@ title: Notes on Designing with the Mind in Mind
 slug: notes-designing-with-the-mind-in-mind
 categories: ['Notes', 'Design']
 date: 2019-11-07
+published: false
 ---
 
 Book report on Designing with the Mind in Mind: a Simple Guide to Understanding UI Design Guidelines
