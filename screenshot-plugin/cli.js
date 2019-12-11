@@ -3,11 +3,7 @@ const screenshot = require('./screenshot')
 ;(async function() {
   await screenshot(
     [
-      [
-        'writing/waterfall',
-        'Waterfall',
-        'What Software, Business, and the Chainsmokers have in common'
-      ]
+      ['writing/bhags', 'BHAGs', 'On Having Big Hairy Audacious Goals']
       // ['writing', "swyx's Blogposts and Writing"],
       // ['speaking', "swyx's Talks and Podcasts"]
       // [

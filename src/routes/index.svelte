@@ -60,8 +60,8 @@
   <div id="CTA">
     Latest Post:
     <div>
-      <a href="/writing/narrow-waists">
-        <b>Narrow Waists</b>
+      <a href="/writing/bhags">
+        <b>On Big Hairy Audacious Goals</b>
       </a>
     </div>
   </div>
