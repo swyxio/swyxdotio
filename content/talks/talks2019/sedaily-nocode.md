@@ -1,12 +1,15 @@
 ---
-title: No Code with Shawn Wang
+title: No Code JAMstack with Shawn Wang
 slug: sedaily-nocode
 topic: No Code
-venues: Podcast
+venues: SEDaily
 date: 2019-12-19
 url: https://softwareengineeringdaily.com/2019/12/19/no-code-with-shawn-wang/
 description: We know that no-code tools can create value. But how do they fit into the overall workflow of a software company? How should teams be arranged now that knowledge workers can build certain kinds of software without writing code? And how should no-code systems interface with the monoliths, microservices, and APIs that we have building for years?
 ---
+
+- [Podcast Link](https://softwareengineeringdaily.com/2019/12/19/no-code-with-shawn-wang/)
+- [Download Podcast](http://traffic.libsyn.com/sedaily/2019_12_19_SwyxLowCodeJAMStack.mp3)
 
 ## No Code
 
