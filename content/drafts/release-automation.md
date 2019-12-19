@@ -44,6 +44,8 @@ Other methods I need to explore:
 - https://github.com/algolia/shipjs
 - Atlassian's [changesets tool](https://github.com/atlassian/changesets) cc [JessTelford](https://twitter.com/JessTelford/status/1179528676393672704)
 
+Infinite Red on Circle CI: https://github.com/infinitered/open-source/blob/master/Continuous-Deployment-Setup-NPM.md
+
 ## Automated Publishing
 
 _to be completed_

@@ -12,6 +12,7 @@ I enjoyed listening to [Des and Paul's discussion of keyboard-first apps on thei
 - https://height.app/ (Collaborative work)
 - https://quill.chat/ (messaging for teams)
 - Slack
+- https://getcommande.com/ (open any document)
 
 Slack calls it a quick switcher, Linear calls it a Feature Spotlight (after mac osx), Height calls it Height command
 
