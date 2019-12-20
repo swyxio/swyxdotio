@@ -29,6 +29,7 @@ description: We know that no-code tools can create value. But how do they fit in
   - visual IDEs are winning over text editors
   - [Bret Victor - the Future of Programming](https://vimeo.com/71278954)
   - **EDIT: THINGS I FORGOT TO MENTION**
+  - Shopify and Wordpress are basically No Code platforms on top of Rails and PHP
   - there is also a trend of big platforms implementing internal no-code solutions:
     - [Slack Workflow Builder](https://slack.com/intl/en-sg/help/articles/360035692513-Guide-to-Workflow-Builder)
     - [Asana No Code solution](https://webflow.com/nocodeconf/session/making-automation-feel-more-human)
