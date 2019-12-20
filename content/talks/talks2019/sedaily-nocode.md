@@ -28,6 +28,11 @@ description: We know that no-code tools can create value. But how do they fit in
   - State machines in UI Development - [David Khourshid at React Rally](https://www.youtube.com/watch?v=VU1NKX6Qkxc)
   - visual IDEs are winning over text editors
   - [Bret Victor - the Future of Programming](https://vimeo.com/71278954)
+  - **EDIT: THINGS I FORGOT TO MENTION**
+  - there is also a trend of big platforms implementing internal no-code solutions:
+    - [Slack Workflow Builder](https://slack.com/intl/en-sg/help/articles/360035692513-Guide-to-Workflow-Builder)
+    - [Asana No Code solution](https://webflow.com/nocodeconf/session/making-automation-feel-more-human)
+    - [Salesforce No Code](https://webflow.com/nocodeconf/session/progressive-enhancement-a-mindset-for-designing-no-code-platforms)
 - What is available in the GUI economy?
   - CSS
   - CMS
