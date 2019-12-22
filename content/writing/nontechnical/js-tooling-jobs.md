@@ -134,6 +134,13 @@ A small and passionate part of the webdev community is working very hard to make
 
 However, legacy browsers still exist, and legacy, battletested code is still in wide use. I'm also not sure how transitive dependencies are handled ([the import map proposal](https://twitter.com/swyx/status/1208820201623437312) may help! but... how would you build your import maps?). But the overriding issue for the "no-build-tools" future is that the bar has been raised _so much higher_ than just "we want modules in JavaScript", as the rest of this blogpost has painted. We still want asset management, static types, prerendering, image optimization, and whatever else we take for granted in modern web apps. So despite the progress in ESM-everywhere, I don't see a clear path toward it materially impacting JavaScript in the near term.
 
+Here's [V8's advice](https://v8.dev/features/modules#bundle):
+
+> With modules, it becomes possible to develop websites without using bundlers such as webpack, Rollup, or Parcel. It’s fine to use native JS modules directly in the following scenarios:
+>
+> - during local development
+> - in production for small web apps with less than 100 modules in total and with a relatively shallow dependency tree (i.e. a maximum depth less than 5)
+
 [Addy Osmani put it like this](https://twitter.com/addyosmani/status/932494593832075264):
 
 > Imo module bundlers will be necessary for prod builds for a good while yet. In a few years, ES modules perf + modulepreload + H2 Push + Cache Digests might give us a compelling story, but it's a long road ahead. Modules for dev/authoring format may take off in short term.
