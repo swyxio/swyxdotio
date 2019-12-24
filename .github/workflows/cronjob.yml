@@ -3,7 +3,7 @@ name: cronjob
 on: 
   schedule:
     # * is a special character in YAML so you have to quote this string
-    - cron:  '* * * * *'
+    - cron:  '0 0 * * *'
 
 jobs:
   build:
@@ -11,6 +11,6 @@ jobs:
     steps:
 #     - uses: actions/checkout@v1
     - name: Run a one-line script
-      run: echo Hello, world!
+      run: echo Hello, world! Building your Netlify site!
     - name: Ping netlify Build
       run: curl -X POST -d {} ${{ secrets.NETLIFY_BUILD_HOOK }}
