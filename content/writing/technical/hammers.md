@@ -38,7 +38,7 @@ It assumes:
 
 **We can do better.**
 
-It wasn't a subtweet of anyone or anything, just a persistent pet peeve that bubbled through my unconscious that day.
+It wasn't a subtweet of anyone or anything, just a persistent pet peeve that bubbled through my unconscious that day. It got a surprising response for a throwaway thought, which often means I hit a nerve. (Even [a fair number of quote tweets](https://twitter.com/search?q=https%3A%2F%2Ftwitter.com%2Fswyx%2Fstatus%2F1171549189064613888&src=typed_query)!)
 
 I'd like to talk through each point.
 

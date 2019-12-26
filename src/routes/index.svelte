@@ -60,8 +60,8 @@
   <div id="CTA">
     Latest Post:
     <div>
-      <a href="/writing/bhags">
-        <b>On Big Hairy Audacious Goals</b>
+      <a href="/writing/hammers">
+        <b>In Defense of Hammers</b>
       </a>
     </div>
   </div>
