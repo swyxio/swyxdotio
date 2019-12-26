@@ -25,6 +25,9 @@ However, there are useful things we can take from ML
 - convert definites to maximum likelihood/probability densitiy estimation?
 - transfer learning as a bootstrap -> genetic evolution?
 - eager learning vs lazy learning
+- convergence
+  - will aliens be like us? yes if the conditions are same.
+  - evolution: convergence
 
 RL
 

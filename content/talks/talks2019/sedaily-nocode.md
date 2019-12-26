@@ -34,6 +34,7 @@ description: We know that no-code tools can create value. But how do they fit in
     - [Slack Workflow Builder](https://slack.com/intl/en-sg/help/articles/360035692513-Guide-to-Workflow-Builder)
     - [Asana No Code solution](https://webflow.com/nocodeconf/session/making-automation-feel-more-human)
     - [Salesforce No Code](https://webflow.com/nocodeconf/session/progressive-enhancement-a-mindset-for-designing-no-code-platforms)
+    - [iOS Shortcuts was an acquisition](https://thesweetsetup.com/ios-shortcuts-guide/)
 - What is available in the GUI economy?
   - CSS
   - CMS

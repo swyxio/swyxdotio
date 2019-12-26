@@ -29,3 +29,7 @@ The idea is sound, just not very relatable, because you have to be a specific su
 Waterfall is perhaps most famously known in software as a common punching bag for Agile/Lean startups. Here, waterfall isn't something aspirational, it's often a laughing stock. Oh, you don't release every 6 weeks/2 weeks/day/hour/minute? How quaint. Often, shitting on Waterfall is really an excuse for throwing out process, vision, substantive feedback and product management altogether, as well as keeping tech workers in a permanent state of manic nihilism ("I have no idea what I'll be working on next week!" vs "I have no idea if what I do this week means anything").
 
 It is also approached as a software production philosophy rather than as a product/feature release and marketing philosophy. Maybe Software can learn a thing or two from Business and Music.
+
+## More
+
+- https://martinfowler.com/bliki/WaterfallProcess.html

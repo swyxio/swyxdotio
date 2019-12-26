@@ -55,7 +55,6 @@ exports.coreDataOpts = {
 // mandatory. called once, should be cheap
 exports.createIndex = async (mainIndex = {}) => {
   console.log('getting intial data')
-
   // can add more data to index here
   console.log('Number of talks:', Object.keys(mainIndex.speaking).length)
   console.log('Number of articles:', Object.keys(mainIndex.writing).length)

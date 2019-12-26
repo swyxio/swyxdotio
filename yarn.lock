@@ -2579,9 +2579,10 @@ sprintf-js@~1.0.2:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
 
-ssg@^0.0.54:
-  version "0.0.54"
-  resolved "https://registry.yarnpkg.com/ssg/-/ssg-0.0.54.tgz#b18b12d0c6cc28577f9b0949fdc85ec8625258ac"
+ssg@^0.0.59:
+  version "0.0.59"
+  resolved "https://registry.yarnpkg.com/ssg/-/ssg-0.0.59.tgz#8400b5dcb7950823de3e209061c0d2ba8340e8b8"
+  integrity sha512-Yl4VxPxRn6LVLAe6WFCZ2ivXdbgyZJOBjJaAi6vlZMmIvGT6WLmDAznV1Oiq10A5w9xsi20L2euvbO5TNQi9JA==
   dependencies:
     "@sindresorhus/slugify" "^0.9.1"
     "@ssgjs/sapper" "^0.27.9-fork.17"

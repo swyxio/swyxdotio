@@ -1,7 +1,7 @@
 ---
 title: The Many Jobs of JS Build Tools
 subtitle: For non JS developers and new ones
-slug: js-tooling-jobs
+slug: jobs-of-js-build-tools
 categories: ['Tech']
 date: 2019-12-22
 published: false
@@ -11,7 +11,7 @@ _Essay status: Initial Draft_
 
 One of my regrets in [my recent SE Daily interview](https://www.swyx.io/speaking/sedaily-nocode) was my rather poor, panicked description of "Why Webpack" and "Why Gatsby". Jeff, the host, doesn't do much frontend coverage, whereas I have lived and breathed this stuff for the past 2+ years.
 
-It felt rather like that phenomenon of how "Fish have no word for Water" - Water just _is_. Having to justify the existence of Water from first principles called on explanation muscles I rarely use. And then when I checked Webpack's [Why Webpack](https://webpack.js.org/concepts/why-webpack/) docs, I felt it focused only on modules and didn't spend enough time on the other important jobs that build tools provide for us.
+It felt rather like that phenomenon of how "Fish have no word for Water" - Water just _is_. Having to justify the existence of Water from first principles called on explanation muscles I rarely use. And then when I checked Webpack's [Why Webpack](https://webpack.js.org/concepts/why-webpack/) docs, I felt it focused mostly on modules and didn't spend enough time on the other important jobs that build tools provide for us.
 
 I'd like another shot at explaining this.
 
@@ -40,9 +40,7 @@ For almost 20 years since creation in 1995, reusable JavaScript code looked some
 Variables are scoped to each file, so in order to make a script that depended on another script, you had to throw them on the global `window` object:
 
 ```js
-window.MyScript = {
-  /* etc */
-}
+window.MyScript = /* etc */
 ```
 
 and then the subsequent script would access that magic global on the window:
@@ -60,7 +58,7 @@ I will not dwell further on the importance of modules - refer to [Why Webpack](h
 
 Relying on script CDNs introduced security and latency costs, so the alternative was to _download_ the code and glue them together in the right way to create one (or more) custom JS bundles entirely within your control and hosted on your infrastructure. To gloss over a huge amount of development in the space (that I don't know much about), "task runners" arose to automate this process for you - [Grunt](https://gruntjs.com/), [Gulp](https://gulpjs.com/), [Broccoli](https://broccoli.build/).
 
-But something else also happened at the same time - Server-side JavaScript became a thing.
+But something else also happened at the same time - server-side JavaScript became a thing.
 
 ## Multiple Targets, Multiple Assets: the rise of Bundlers
 
@@ -82,7 +80,7 @@ The other thing about clientside JavaScript is the incremental rollout of new la
 
 On one hand, people wanted to use this syntax right away (or even before release), but they were handcuffed by the fact that they would have to wait for the various JavaScript engines to implement them, and _then_ for the individual browser updates to roll out to billions of users. That would take forever.
 
-So [Traceur](https://github.com/google/traceur-compiler) and eventually [Babel](https://babeljs.io/) arose to allow people to write modern JavaScript, but that would polyfill and "transpile" (compile from JavaScript to JavaScript) that code to the lowest common denominator understandable by all the engines the developer chooses to target.
+So [Traceur](https://github.com/google/traceur-compiler) and eventually [Babel](https://babeljs.io/) arose to allow people to write modern JavaScript, but that would "transpile" (compile from JavaScript to JavaScript) that code to the lowest common denominator understandable by all the engines the developer chooses to target. Similarly for new APIs (as opposed to new syntax, which Babel handles), you need to [polyfill](<https://en.wikipedia.org/wiki/Polyfill_(programming)>) them with tools like [core-js](https://github.com/zloirock/core-js).
 
 You technically could run these transpilations on their own, but more often than not you were including them somewhere in the plugin chain of your bundler for the creation of your final output JavaScript.
 
@@ -96,7 +94,7 @@ Again - you can compile-to-JS all of these independently, but more likely than n
 
 ## Production Optimizations
 
-The other job of task runners and eventually bundler plugins, apart from all this module, target, and language related work, is all production optimizations that were usually stuck on to the build pipeline. (Not core to bundling, but usually coupled with it) Here is a nonexhaustive list of optimizations in rough order of importance:
+The other job of task runners and eventually bundler plugins, apart from all this **module**, **target**, and **language** related work, is all production optimizations that were usually stuck on to the build pipeline. (Not core to bundling, but usually coupled with it) Here is a nonexhaustive list of optimizations in rough order of importance:
 
 - Reduce JS bundle size: [Strip out comments and minify JavaScript variable names](https://webpack.js.org/plugins/terser-webpack-plugin/). [Google Closure Compiler](https://developers.google.com/closure/compiler/docs/api-tutorial3) deserves special mention as best-in-class here although it is not native to the Webpack ecosystem. You can also [do the same for CSS](https://github.com/NMFR/optimize-css-assets-webpack-plugin) - in fact, utility-first CSS frameworks like [Tailwind](https://tailwindcss.com/docs/installation/#webpack) rely on build tools stripping out unused classes.
 - [Code Splitting](https://webpack.js.org/guides/code-splitting/): Making it trivial to reduce _initial_ bundle size, outputting multiple JavaScript chunks that are only loaded on demand
@@ -105,8 +103,8 @@ The other job of task runners and eventually bundler plugins, apart from all thi
 - [Creating HTML files](https://webpack.js.org/plugins/html-webpack-plugin/) that load your generated assets optimally: so you don't have to
 - [Inlining Critical CSS](http://developers.google.com/speed/docs/insights/OptimizeCSSDelivery) - so pages show up with important styles already loaded
 - [Injecting environment variables](https://webpack.js.org/plugins/environment-plugin/) - so you can vary Constants used in your code based on production/staging/other environments
-- PWA creation - plugins for an offline-first/cached speed ([1](https://github.com/NekR/offline-plugin), [2](https://github.com/arthurbergmz/webpack-pwa-manifest))
-- [Content Hashing](https://webpack.js.org/guides/caching/) - for cachebusting - less relevant with some modern CDN configurations
+- [PWA](https://blog.bitsrc.io/what-is-a-pwa-and-why-should-you-care-388afb6c0bad) creation - plugins for an offline-first/cached speed ([1](https://github.com/NekR/offline-plugin), [2](https://github.com/arthurbergmz/webpack-pwa-manifest))
+- [Content Hashing](https://webpack.js.org/guides/caching/) - for cachebusting - less relevant with some modern CDN configurations, but still can be relevant for browser caching scenarios
 - [Tree Shaking](https://webpack.js.org/guides/tree-shaking/) and [Dead Code Elimination](https://medium.com/@Rich_Harris/tree-shaking-versus-dead-code-elimination-d3765df85c80): static analysis for stripping out unused code also for the purpose of reducing JS bundle size - but overrated in terms of actual impact
 
 As you can see, enough of these are critical to modern web apps that build tools often become critically important for most teams and framework communities.
@@ -156,6 +154,7 @@ Other reads I recommend on this topic:
 - https://nystudio107.com/blog/an-annotated-webpack-4-config-for-frontend-web-development
 - https://webpack.js.org/concepts/why-webpack/
 - [Blogpost: Why would I use a Webpack?](http://tinselcity.net/whys/packers)
+- [Talk: Unbundling the JavaScript module bundler by Luciano Mammino](https://www.youtube.com/watch?v=WGlT921ixx4&feature=youtu.be)
 - [Webpack and Rollup: the same but different](https://medium.com/webpack/webpack-and-rollup-the-same-but-different-a41ad427058c)
 - [Comparing bundlers: Webpack, Rollup & Parcel](https://medium.com/js-imaginea/comparing-bundlers-webpack-rollup-parcel-f8f5dc609cfd)
 - [ESModules: A Cartoon Deep Dive](https://hacks.mozilla.org/2018/03/es-modules-a-cartoon-deep-dive/)
@@ -163,7 +162,7 @@ Other reads I recommend on this topic:
 
 ## Thanks
 
-Thanks to [Mark Erikson](https://twitter.com/acemarke) for reviewing an early draft of this!
+Thanks to [Mark Erikson](https://twitter.com/acemarke), [Robin Wieruch](https://twitter.com/rwieruch) and [Joe Previte](https://twitter.com/jsjoeio) for reviewing an early draft of this!
 
 ## Addendum on Hot Reloading
 
