@@ -122,3 +122,4 @@ Apart from Laurie I felt some of the other respondents had some interesting comm
 - [Tomasz](https://twitter.com/tlakomy/status/1171549864989249536): "Everyone uses what they know best and call it best practice"
 - [Will King](https://twitter.com/wking__/status/1171549928511946752): "[Only the Sith deal in absolutes](https://www.wking.dev/content/articles/only-sith-deal-in-absolutes/)"
 - [Ramon Garcia](https://twitter.com/rmngrc/status/1171675378555019264): "I think "right tool for the job from your toolbox" would be more correct. Doesn't assume you have unlimited time for investigating and find the best tool out there, and allows you to move on while using something you or your team has experience with."
+- [Max Goldstein](https://twitter.com/maxgoldst/status/1171649319419748353): "Good engineers examine each choice of algorithm; this is O(n). Great engineers pick the first algorithm that comes to mind; this is O(1)."
