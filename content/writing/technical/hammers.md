@@ -3,7 +3,8 @@ title: In Defense of Hammers
 subtitle: Why "Right Tool for Most Jobs" beats "Right Tool for the Job"
 slug: hammers
 categories: ['Tech']
-date: 2019-10-21
+begun: 2019-10-21
+date: 2019-12-26
 ---
 
 Let's say you needed a multipurpose tool. Which of these would you pick?
