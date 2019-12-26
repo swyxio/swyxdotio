@@ -21,6 +21,8 @@ The least helpful response is "it depends", because it is often unaccompanied by
 
 But I'm here to call out the RHS people as well.
 
+## Table of Contents
+
 ## Right Tool For the Job
 
 [In September, I observed that](https://twitter.com/swyx/status/1171549189064613888):
