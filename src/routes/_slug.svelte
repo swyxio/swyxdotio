@@ -73,8 +73,9 @@
   :global(#table-of-contents + ul) {
     width: 40%;
     min-width: 200px;
-    background: #eee;
-    font-size: 0.8em;
+    background: var(--bg-color-secondary);
+    /* font-size: 0.8em; */
+    /* position: sticky; */
     padding: 1em 2em;
     margin: 0 0 0.5em 0.5em;
   }

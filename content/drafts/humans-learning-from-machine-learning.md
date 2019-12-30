@@ -1,7 +1,7 @@
 ---
 title: What Humans Can Learn From Machine Learning
 slug: humans-learning-from-machine-learning
-category: Philosophy
+categories: Philosophy
 begun: 2019-01-21
 date: 2019-01-21
 author: swyx

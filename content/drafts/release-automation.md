@@ -1,7 +1,7 @@
 ---
 title: Best Practices in JavaScript Release Automation
 slug: release-automation
-category: Notes
+categories: Notes
 begun: 2019-04-20
 date: 2019-04-20
 author: swyx

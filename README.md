@@ -1,5 +1,10 @@
 This is the new new new new new swyx.io site. it is based on https://github.com/sw-yx/ssg.
 
+## Design inspirations
+
+- https://www.happyhues.co/palettes/4
+- https://mxb.dev/
+
 Old versions of this site can be viewed:
 
 - https://5d7699e172ae430007210374--scout-videos-51664.netlify.com (gatsby theme)

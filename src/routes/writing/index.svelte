@@ -11,6 +11,13 @@
 <script>
   export let posts
   // $: console.log({ posts })
+  function prettyDate(post) {
+    return new Date(post.metadata.date).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    })
+  }
 </script>
 
 <style>
@@ -19,7 +26,7 @@
     line-height: 1.5;
     list-style-type: none;
     display: grid;
-    grid-gap: 3rem 1.5rem;
+    grid-gap: 0rem 1.5rem;
     grid-template-columns: 1fr 1fr 1fr;
   }
   @media (max-width: 480px) {
@@ -29,15 +36,25 @@
   }
   li {
     margin-bottom: 1.5rem;
-    background: linear-gradient(to right, #647bd8, #93199f);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
   }
   article {
     padding: 1rem;
     max-width: 56em;
     margin: 0 auto;
+  }
+  a {
+    color: var(--brand-color-primary);
+  }
+  .postlist__meta {
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+    color: var(--text-color-secondary);
+  }
+  .postlist__tags {
+    font-family: Georgia, Times, serif;
+    text-transform: uppercase;
+    font-size: 0.875em;
+    letter-spacing: 3px;
   }
 </style>
 
@@ -65,26 +82,29 @@
 </svelte:head>
 
 <article>
-  <h1>Writing</h1>
-  <!-- <pre>
-  {JSON.stringify(posts)}
-</pre> -->
-
+  <header>
+    <h1>Writing</h1>
+  </header>
   <ul>
     {#each posts as post}
       <li>
         <a rel="prefetch" href="/writing/{post.metadata.slug}">
-          <strong>{post.metadata.title}</strong>
+          <h2>{post.metadata.title}</h2>
+          <div class="postlist__meta">
+            <time
+              class="postlist__date dt-published"
+              datetime={post.metadata.date}>
+              {prettyDate(post)}
+            </time>
+            <span aria-hidden="true">⋅</span>
+            <span class="postlist__tags p-category">
+              {post.metadata.categories && post.metadata.categories[0]}
+            </span>
+          </div>
         </a>
-        <br />
-        -
-        <em>
-          {new Date(post.metadata.date).toLocaleDateString(undefined, {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-          })}
-        </em>
+        <p class="postlist__excerpt p-summary">
+          {post.metadata.description || post.metadata.desc || post.metadata.subtitle || ''}
+        </p>
       </li>
     {/each}
   </ul>

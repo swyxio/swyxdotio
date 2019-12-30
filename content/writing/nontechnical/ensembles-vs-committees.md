@@ -3,7 +3,7 @@ title: Ensembles vs Committees
 slug: ensembles-vs-committees
 description: A useful dichotomy for team dynamics.
 subtitle: A useful dichotomy for team dynamics.
-category: ['General']
+categories: ['General']
 begun: 2018-11-24
 date: 2019-10-26
 ---
