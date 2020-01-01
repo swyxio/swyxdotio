@@ -11,7 +11,7 @@ Let's say you're sold on the idea of [Learning In Public](https://www.swyx.io/wr
 
 You want to start right away but are feeling intimidated at all the advice out there:
 
-- **"Hey read my blogpost on [Learning Gears](https://www.swyx.io/writing/learning-gears/)!"** lol who thought that was a good idea for #LearnInPublic newbies.
+- **"Hey read my blogpost on [Learning Gears](https://www.swyx.io/writing/learning-gears/)!"** lol typical me being too abstract😛
 - **"Just start a blog for the past you!"** but you've done that before - and no one read it - and you lost interest.
 - **"Ask people what they want to read!"** but you don't have people to ask, and people always say yes to free content anyway. Which you write and they then don't read. So you lose interest.
 - **"Don't worry it takes a while to get an audience!"** but all the people telling you that are unrelatable because they're already successful in your eyes, so you lose interest.
@@ -94,3 +94,9 @@ I virtually guarantee you get feedback on at least one. If you don't aim _too_ h
 Do this 12 times.
 
 You will end the year having learned a good deal and having made many new friends along the way. Including me... if you (_ahem_) tag me 😉
+
+## Examples
+
+this blogpost is still new, i'll be adding to these over time as I find and think of stuff
+
+- [My breakdown of the React Suspense demo](https://dev.to/swyx/a-walkthrough-of-that-react-suspense-demo--4j6a) the day after it was released, in 2018 when I was still getting started with React Twitter, and [you can see the response here](https://nitter.net/search?f=tweets&q=https%3A%2F%2Fdev.to%2Fswyx%2Fa-walkthrough-of-that-react-suspense-demo--4j6a%20)
