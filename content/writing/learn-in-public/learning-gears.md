@@ -37,9 +37,11 @@ Most people should aim for your **Connector** gear to be their default. This is 
 
 Examples:
 
-- samantha ming
-- b0rk
-- lin clark
+- [Samantha Ming](https://twitter.com/samantha_ming)
+- [b0rk](https://wizardzines.com/)
+- [Lin Clark](https://code-cartoons.com/)
+
+> See also: [The Ultimate Hack for Learning In Public](https://www.swyx.io/writing/learn-in-public-hack/) (expanding on "Pick Up What They Put Down")
 
 ### Miner
 
