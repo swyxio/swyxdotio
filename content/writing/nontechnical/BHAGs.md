@@ -83,3 +83,9 @@ The Audacity is almost made _more_ worthwhile (or ridiculous) by all that hair. 
 Aren't [Systems supposed to matter more than Goals](https://www.scottadamssays.com/2013/11/18/goals-vs-systems/)? If you set a ridiculous goal and have no plan to reach it, [that's a wish](https://quotationcelebration.wordpress.com/2017/11/17/a-goal-without-a-plan-is-just-a-wish-antoine-de-saint-exupery/).
 
 I guess I'd just mildly point out that systems and goals aren't mutually exclusive. If systems help you move further and more consistently, goals at least help you set direction. It's kinda ridiculous to argue that either have zero importance. Hairy goals help establish little checkpoints and goalposts for building the systems to get there.
+
+## Example BHAGs
+
+Just a list of nice things I see from people I know:
+
+- https://marcgrabanski.com/turning-35

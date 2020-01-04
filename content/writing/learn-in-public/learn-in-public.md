@@ -48,6 +48,7 @@ _originally drafted [in a gist](https://gist.github.com/sw-yx/9720bd4a30606ca3ff
 - Jeff Atwood: [How to stop sucking and be awesome instead](https://blog.codinghorror.com/how-to-stop-sucking-and-be-awesome-instead/)
 - Kent C Dodds: [Intentional Career Building](https://kentcdodds.com/blog/intentional-career-building)
 - LadyBug Podcast: [Blogging 101](https://ladybug.dev/episode/blogging-101/) (esp [Ali Spittel's Blog Post Workflow](https://dev.to/aspittel/my-blog-post-workflow-from-topic-to-publication-4n78))
+- Quincy Larson: [Build your Skills, Build your Reputation, Build your Network](https://twitter.com/ossia/status/1079942716480344065?s=12)
 - Nathan Barry in his book Authority:
 
 > Back in 2007 Chris Coyier launched a site called css-tricks.com. It was a site dedi- cated to teaching people how to code websites. (CSS is the language that describes how websites should look.) When CSS-Tricks first came out I remember reading a tutorial and arrogantly thinking, “I know that already.” Chris and I were at about the same skill level, so I didn’t learn anything new from him.

@@ -6,7 +6,6 @@ categories: ['Tech']
 date: 2019-10-20
 ---
 
-
 ## Why I don't usually donate
 
 I'm not a big donor to nonprofit organizations. I spent some early years seeing how they work from the inside and came away with a deep distaste for their general lack of accountability. Often it is spent on fundraising and personal perks. Nonprofits do not have a monopoly on doing good; for-profits not only create jobs, pay taxes and fill a need for customers, but also have market forces (imperfectly) driving them to stay efficient.

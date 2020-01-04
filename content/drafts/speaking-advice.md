@@ -172,3 +172,14 @@ fixing speaking voice: https://www.artofmanliness.com/articles/improve-your-spea
 - how to start a speech https://www.youtube.com/watch?v=w82a1FT5o88
 - Book: Present! A Techie's Guide to Public Speaking https://www.amazon.com/Present-Techies-Guide-Public-Speaking-ebook/dp/B01BCXHULK
 - Matty Stratton: https://player.fm/series/screaming-in-the-cloud-2504282/episode-39-give-10-bad-talks-all-in-a-row-and-then-get-fired
+- https://www.cfpland.com/guides/speaking/
+- usually you want light mode
+  - bad lighting conditions
+  - a11y contrast ratios
+- always repeat questions
+
+what to do when you get in trouble
+
+- i dont know, followup later
+- fix on the spot, explain what you got wrong
+  

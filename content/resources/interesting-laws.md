@@ -3,15 +3,24 @@ title: Interesting Laws
 slug: interesting-laws
 categories: Philosophy
 begun: 2019-01-22
-date: 2019-01-22
+date: 2020-01-04
 author: swyx
 published: false
 ---
 
 - The Gell-Mann amnesia effect
-- commoditize your complements
-- everything wants to be a CMS/Email/JS/Spreadsheet
+- Spolsky? Gwern? Commoditize your complements
+- Zawinski's law: everything wants to be a
+  - Email
+  - CMS
+  - Spreadsheet
+  - operating system - matt mullenweg
+  - "Stories" format for UGC
 - Poe's Law - satire vs extremism
+- Rules for how Networks Scale
+  - O(N): Sarnoff's Law - the value of a broadcast network increases in direct proportion with the number of users
+  - O(N^2): Metcalfe's Law - email is p2p - value is number of connections between two nodes
+  - O(2^N): Reed's Law - no of groups and subgroups inside the network - what people do inside social networks and games
 - Zipf's law on creation/consumption ratio
 - Wirth's Law: where computers get more powerful but software uses it all up
 - super combo: https://twitter.com/secretGeek/status/1116217143933063169

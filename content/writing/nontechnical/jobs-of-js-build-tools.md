@@ -1,13 +1,15 @@
 ---
 title: The Many Jobs of JS Build Tools
 subtitle: For non JS developers and new ones
+description: A discussion of why JS developers use build tools like Webpack and what we do with them, for non JS developers.
 slug: jobs-of-js-build-tools
 categories: ['Tech']
-date: 2019-12-22
+started: 2019-12-22
+date: 2020-01-05
 published: false
 ---
 
-_Essay status: Initial Draft_
+_Essay status: mostly baked, sat on this for about 3 weeks and got some amount of peer review_
 
 One of my regrets in [my recent SE Daily interview](https://www.swyx.io/speaking/sedaily-nocode) was my rather poor, panicked description of "Why Webpack" and "Why Gatsby". Jeff, the host, doesn't do much frontend coverage, whereas I have lived and breathed this stuff for the past 2+ years.
 
@@ -19,7 +21,7 @@ I'd like another shot at explaining this.
 
 The first thing to acknowledge is that build tools (which imply having a "build step" before deploying code, instead of directly being able to go from source code to deploy) aren't technically required.
 
-JavaScript is meant to be an [interpreted language](https://en.wikipedia.org/wiki/Interpreted_language) - write some in a script tag or in browser console, and it runs. No mandatory compile step unlike some other languages. So, then, to put a build step - that kinda looks like a compile step - in front of it evidently takes something away from that benefit.
+JavaScript is meant to be an [interpreted language](https://en.wikipedia.org/wiki/Interpreted_language) - write some in a `<script>` tag or in browser console, and it runs. No mandatory compile step unlike some other languages. So, then, to put a build step - that kinda looks like a compile step - in front of it evidently takes something away from that benefit.
 
 Some people I greatly admire, like [Luke](https://twitter.com/lukejacksonn/status/1208473242903687178?s=20) and [Brian](https://twitter.com/brianleroux/status/1115376303631298560), write their apps entirely without a build step. The universal result of doing this is lightning fast deploy times.
 
@@ -84,7 +86,9 @@ So [Traceur](https://github.com/google/traceur-compiler) and eventually [Babel](
 
 You technically could run these transpilations on their own, but more often than not you were including them somewhere in the plugin chain of your bundler for the creation of your final output JavaScript.
 
-One issue that divided the community for a long time was whether you should transpile _only your code_ or whether you should transpile _all code including your code's dependencies and so on_. With the former, you risked your app ugly-crashing if the dependencies weren't transpiled to your target browsers. The inverse was also a problem - if your dependencies preemptively transpiled to browsers you didn't really care about, their code was also _a lot bigger_ than you actually needed. With the latter, you took your fate in your own hands - at the cost of much longer build times. IMO the consensus has recently shifted to the latter, but with passionate disagreement - [more reading here](https://github.com/facebook/create-react-app/issues/1125#issuecomment-426120762). A final important note on JS compatibility - With the advent of evergreen browsers and the undying nature of legacy browsers, it is now common to use the [module/nomodule](https://philipwalton.com/articles/deploying-es2015-code-in-production-today/) pattern and build twice (one bundle for each group of browser targets, to ensure optimal size for evergreen browsers -and- maximum compatibility for legacy browsers).
+One issue that divided the community for a long time was whether you should transpile _only your code_ or whether you should transpile _all code including your code's dependencies and so on_. With the former, you risked your app ugly-crashing if the dependencies weren't transpiled to your target browsers (hurting developer experience). The inverse was also a problem - if your dependencies preemptively transpiled to browsers you didn't really care about, their code was also _a lot bigger_ than you actually needed (hurting user experience). 
+
+With the latter, you took your fate in your own hands - at the cost of much longer build times. IMO the consensus has recently shifted to the latter, but with passionate disagreement - [more reading here](https://github.com/facebook/create-react-app/issues/1125#issuecomment-426120762). A final important note on JS compatibility - With the advent of evergreen browsers and the undying nature of legacy browsers, it is now common to use the [module/nomodule](https://philipwalton.com/articles/deploying-es2015-code-in-production-today/) pattern and build twice (one bundle for each group of browser targets, to ensure optimal size for evergreen browsers -and- maximum compatibility for legacy browsers).
 
 Other non-standardized additions to JavaScript gained popularity as well. [React added JSX](https://reactjs.org/docs/introducing-jsx.html) as a way of keeping the HTML-like authoring experience of writing components inside JavaScript files. [Ractive](https://github.com/ractivejs/component-spec), [Vue](https://vuejs.org/v2/guide/single-file-components.html) and [Svelte](http://svelte.dev/) adopted Single File Components that lean on bundlers to compile to JS, CSS, and sometimes HTML. [Babel-Macros](https://www.swyx.io/speaking/babel-macros/) put metaprogramming and compile-time execution inside of Babel.
 
