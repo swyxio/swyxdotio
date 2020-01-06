@@ -164,6 +164,7 @@ Other reads I recommend on this topic:
 - [Comparing bundlers: Webpack, Rollup & Parcel](https://medium.com/js-imaginea/comparing-bundlers-webpack-rollup-parcel-f8f5dc609cfd)
 - [ESModules: A Cartoon Deep Dive](https://hacks.mozilla.org/2018/03/es-modules-a-cartoon-deep-dive/)
 - [ESModules Support vs Build Tools](https://www.contentful.com/blog/2017/04/04/es6-modules-support-lands-in-browsers-is-it-time-to-rethink-bundling/)
+- [Kyle Simpson on the divergence between Human-written JS and Machine-run JS](https://www.youtube.com/watch?v=lDLQA6lQSFg)
 
 ## Thanks
 
@@ -175,6 +176,6 @@ I don't have much experience in the details of HMR. These are notes from [Mark E
 
 - Module reloading: recompile, push new code to client, allow app to do something
 - "Plain" client reloading: just reimport and use affected modules. For React, this is mostly just reimport <App> and re-render.
-- "Clever" reloading: attempting to preserve state in the component tree, but this requires much more complex work. React-Hot-Loader works by using Babel to insert http://module.hot.accept()` and "proxy components" around every component it can identify, and moving the state up into the proxy component, but this is fragile. That's why the new "Fast Refresh" capability is actually half-built into React itself, with bundler-specific use of the APIs.
+- "Clever" reloading: attempting to preserve state in the component tree, but this requires much more complex work. React-Hot-Loader works by using Babel to insert `http://module.hot.accept()` and "proxy components" around every component it can identify, and moving the state up into the proxy component, but this is fragile. That's why the new "Fast Refresh" capability is actually half-built into React itself, with bundler-specific use of the APIs.
 
 [His full explanation of Webpack vs React's Hot reloading is on his blog.](https://blog.isquaredsoftware.com/2017/08/blogged-answers-webpack-hmr-vs-rhl/).
