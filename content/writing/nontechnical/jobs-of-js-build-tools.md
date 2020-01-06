@@ -1,7 +1,7 @@
 ---
 title: The Many Jobs of JS Build Tools
-subtitle: For non JS developers and new ones
-description: A discussion of why JS developers use build tools like Webpack and what we do with them, for non JS developers.
+subtitle: For new JS developers
+description: A discussion of why JS developers use build tools like Webpack and what we do with them, for new JS developers.
 slug: jobs-of-js-build-tools
 categories: ['Tech']
 started: 2019-12-22
@@ -15,6 +15,8 @@ One of my regrets in [my recent SE Daily interview](https://www.swyx.io/speaking
 It felt rather like that phenomenon of how "Fish have no word for Water" - Water just _is_. Having to justify the existence of Water from first principles called on explanation muscles I rarely use. And then when I checked Webpack's [Why Webpack](https://webpack.js.org/concepts/why-webpack/) docs, I felt it focused mostly on modules and didn't spend enough time on the other important jobs that build tools provide for us.
 
 I'd like another shot at explaining this.
+
+## Table of Contents
 
 ## Build Tools are Optional
 
