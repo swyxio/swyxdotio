@@ -53,7 +53,7 @@
       content: attr(href);
       position: absolute;
       transform: translate(-10rem, 1.5rem) scale(0);
-      background: linear-gradient(45deg, #c3c9df, #e0c0e3);
+      background: linear-gradient(45deg, var(--hover-color-primary),var(--hover-color-secondary));
       visibility: visible;
       transition: all 0.5s;
       opacity: 0;
