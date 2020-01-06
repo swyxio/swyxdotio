@@ -60,8 +60,8 @@
   <div id="CTA">
     Latest Post:
     <div>
-      <a href="/writing/learn-in-public-hack">
-        <b>The Ultimate Hack for Learning In Public</b>
+      <a href="/writing/jobs-of-js-build-tools">
+        <b>The Many Jobs of JS Build Tools</b>
       </a>
     </div>
   </div>

@@ -8,7 +8,7 @@ video: https://www.youtube.com/watch?v=dFO4m7Y-yhs
 video2: https://www.youtube.com/watch?v=8opFTK2shAc
 date: 2019-10-25
 desc: Cloning Concurrent React with React Fiber and discussing Time Slicing and Suspense
-description: In this talk, we’ll create an effective mental model of React Hooks by building a tiny clone of React! This will serve two purposes – to demonstrate the effective use of closures, and to show how you can build a Hooks clone in just 29 lines of readable JS. Finally, we arrive at how you get Custom Hooks and the Rules of Hooks out of this incredible mental model!
+description: In this talk, we’ll create an effective mental model of Concurrent React by building a tiny clone of React! We will start with a blank js file and learn about how React renders components, schedules Time-Slicing updates with a Work Loop, add Hooks, and end off with a mini-clone of Suspense!
 ---
 
 ## React Knowledgeable version

@@ -5,8 +5,7 @@ description: A discussion of why JS developers use build tools like Webpack and 
 slug: jobs-of-js-build-tools
 categories: ['Tech']
 started: 2019-12-22
-date: 2020-01-05
-published: false
+date: 2020-01-06
 ---
 
 _Essay status: mostly baked, sat on this for about 3 weeks and got some amount of peer review_

@@ -49,3 +49,8 @@ notes_to_self: so as not to have this show up on rss feed
 - Nov 11-12 - Chrome Dev summit?
 - Nov 12-13 - No Code Conf (attending) TO BOOK TRAVEL
 - Nov 18 - Egghead CLI Apps Workshop
+
+2020
+
+- Feb 13 - React online meetup
+- Jun 16 - Reactdelphia online meetup
