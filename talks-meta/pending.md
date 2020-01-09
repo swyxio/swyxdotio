@@ -1,7 +1,6 @@
 ## Thought Leadering 101
 
 
-
 ## JSConfHI Brainstorm
 
 - How Svelte Works

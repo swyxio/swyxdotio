@@ -55,3 +55,4 @@ Structure
   - 2ality https://2ality.com/2018/04/type-notation-typescript.html
   - sharifsbeat https://dev.to/busypeoples/notes-on-typescript-pick-exclude-and-higher-order-components-40cp
   - https://dev.to/busypeoples/-notes-on-typescript-react-and-generics-35c9
+  - testing types generics https://www.youtube.com/watch?v=nygcFEwOG8w&feature=share

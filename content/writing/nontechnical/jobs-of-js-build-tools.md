@@ -26,7 +26,7 @@ JavaScript is meant to be an [interpreted language](https://en.wikipedia.org/wik
 
 Some people I greatly admire, like [Luke](https://twitter.com/lukejacksonn/status/1208473242903687178?s=20) and [Brian](https://twitter.com/brianleroux/status/1115376303631298560), write their apps entirely without a build step. The universal result of doing this is lightning fast deploy times.
 
-## Modules done Badly
+## Only Scripts
 
 I wasn't around for much of this history, but as best as I can tell, build tools came to JavaScript primarily because we wanted a sane way to reuse code.
 
@@ -53,7 +53,7 @@ var MyScriptCore = window.MyScript
 console.log(MyScriptCore())
 ```
 
-This is all kinds of bad - causing a namespace pollution problem, and requiring scripts to be loaded in the exact right order or face inscrutable `undefined is not a function` errors.
+This is all kinds of bad - causing a namespace pollution problem, and requiring scripts to be loaded in the exact right order or face inscrutable `undefined is not a function` errors. What we really wanted was **modules**, rather than scripts.
 
 I will not dwell further on the importance of modules - refer to [Why Webpack](https://webpack.js.org/concepts/why-webpack/) and [Why Would I Use a Webpack?](http://tinselcity.net/whys/packers) if you need more convincing.
 
@@ -118,6 +118,7 @@ As you can see, enough of these are critical to modern web apps that build tools
 
 Secondary to Production Optimizations (which impact end users), modern bundlers also offer niceties for Developer Experience (which end users don't see):
 
+- Automatic Dependency Collection - Old school Task Runners and even Google Closure Compiler require you to manually declare all dependencies upfront. Bundlers like Webpack automatically build and infer your [dependency graph](https://webpack.js.org/concepts/dependency-graph/) based on what is imported and exported.
 - [Dev Server](https://webpack.js.org/configuration/dev-server/) - for Single Page Apps and JAMstack apps, there is no running Node server to run locally, so the bundler boots one up for local testing.
 - [Hot Module Replacement](https://webpack.js.org/concepts/hot-module-replacement/) - reduces the feedback loop of code changes by swapping out modules _while an app is running_, without a full reload. Reliant on having a running Dev Server. A higher level of hot reloading preserves the **state** of _components_ while changing them, not just modules - [this is an active area of development in React](https://overreacted.io/my-wishlist-for-hot-reloading/) and [a first class citizen in Elm](https://www.youtube.com/watch?v=Agu6jipKfYw). (See Addendum for more details)
 - [Source Maps](https://bendyworks.com/blog/getting-started-with-webpack-source-maps) - production code isn't human readable after all the production optimizations - bundlers can map source to production code, and browsers can request and display errors pointing to the original source if given a sourcemap. Useful both in production and in development.
@@ -165,10 +166,11 @@ Other reads I recommend on this topic:
 - [ESModules: A Cartoon Deep Dive](https://hacks.mozilla.org/2018/03/es-modules-a-cartoon-deep-dive/)
 - [ESModules Support vs Build Tools](https://www.contentful.com/blog/2017/04/04/es6-modules-support-lands-in-browsers-is-it-time-to-rethink-bundling/)
 - [Kyle Simpson on the divergence between Human-written JS and Machine-run JS](https://www.youtube.com/watch?v=lDLQA6lQSFg)
+- [Sean Larkin's Webpack Academy Workshop](https://docs.google.com/presentation/d/1RuTDSvfaEFBFQ-3OiyxtuPTaGhv-xv7OG4jt5mpIdUw/edit#slide=id.g3762099682_0_46) starts with 1 hour on Why Webpack - [view on Frontend Masters](https://frontendmasters.com/courses/webpack-fundamentals/)
 
 ## Thanks
 
-Thanks to [Mark Erikson](https://twitter.com/acemarke), [Robin Wieruch](https://twitter.com/rwieruch) and [Joe Previte](https://twitter.com/jsjoeio) for reviewing an early draft of this!
+Thanks to [Sean Larkin](https://twitter.com/theLarkInn/), [Mark Erikson](https://twitter.com/acemarke), [Robin Wieruch](https://twitter.com/rwieruch) and [Joe Previte](https://twitter.com/jsjoeio) for reviewing early drafts of this!
 
 ## Addendum on Hot Reloading
 

@@ -47,6 +47,7 @@ _originally drafted [in a gist](https://gist.github.com/sw-yx/9720bd4a30606ca3ff
 - Cory House: [Becoming an Outlier](https://vimeo.com/97415346) and [The Art of Learning](https://www.bitnative.com/2013/12/14/programming-your-brain-the-art-of-learning-in-three-steps/) and [Lifestyle Systems](https://www.infoq.com/presentations/lifestyle-software-developer/) and [The 7 Pillar Developer](https://www.youtube.com/watch?v=Nks_Fb5TUjs&feature=emb_title)
 - Jeff Atwood: [How to stop sucking and be awesome instead](https://blog.codinghorror.com/how-to-stop-sucking-and-be-awesome-instead/)
 - Kent C Dodds: [Intentional Career Building](https://kentcdodds.com/blog/intentional-career-building)
+- Patrick O’Shaughnessy: [Learn, Build, Share, Repeat](https://twitter.com/david_perell/status/1214559294273683456?s=20)
 - LadyBug Podcast: [Blogging 101](https://ladybug.dev/episode/blogging-101/) (esp [Ali Spittel's Blog Post Workflow](https://dev.to/aspittel/my-blog-post-workflow-from-topic-to-publication-4n78))
 - Quincy Larson: [Build your Skills, Build your Reputation, Build your Network](https://twitter.com/ossia/status/1079942716480344065?s=12)
 - Nathan Barry in his book Authority:
