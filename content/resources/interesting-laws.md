@@ -38,4 +38,5 @@ more:
 - https://www.timsommer.be/famous-laws-of-software-development/
 - campbell's law https://medium.com/coffee-and-junk/campbells-law-goodhart-s-law-when-you-are-measuring-to-fail-c6c64923ad7
 - amdahl's law: the theoretical speedup in latency of the execution of a task at fixed workload that can be expected of a system whose resources are improved (the "mythical man month" law)
+  - https://codahale.com//work-is-work/
 - dennard scaling: https://en.wikipedia.org/wiki/Dennard_scaling

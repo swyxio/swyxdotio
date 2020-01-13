@@ -174,6 +174,7 @@ fixing speaking voice: https://www.artofmanliness.com/articles/improve-your-spea
 - Book: Present! A Techie's Guide to Public Speaking https://www.amazon.com/Present-Techies-Guide-Public-Speaking-ebook/dp/B01BCXHULK
 - Matty Stratton: https://player.fm/series/screaming-in-the-cloud-2504282/episode-39-give-10-bad-talks-all-in-a-row-and-then-get-fired
 - https://www.cfpland.com/guides/speaking/
+- Ben Orenstein: How to Talk to Developers https://www.youtube.com/watch?v=l9JXH7JPjR4
 - usually you want light mode
   - bad lighting conditions
   - a11y contrast ratios

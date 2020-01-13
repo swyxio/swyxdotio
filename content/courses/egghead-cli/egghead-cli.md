@@ -70,3 +70,11 @@ This workshop is basically the Avengers of everything I've learned building CLI'
 _People learn best by doing. What will they build? What are some ideas for examples? What are some real-life "production" examples that might inspire the workshop example? This is a brainstorm. Nothing is too big or too small._
 
 A nice demo would be to "Create Your Own Create-React-App", with all the modern UX and DX niceties that are available today, but it gets people acquainted with all the tooling they need to build their own CLI tools by their imagination.
+
+## More
+
+- https://codahale.com//work-is-work/
+
+**Prioritize the development of force multipliers.**
+
+If an organization is largely working on the same types of problems it was in previous years, it’s cause for concern. **Teams dedicated to internal tooling should be staffed and given the explicit direction of building tools and optimizing processes to help increase their co-workers’ productivity.** If the percentage of the organization dedicated to improving how the organization works begins to fall, ask yourself–have we hit a global or local maximum? Go long on high-leverage tools, but stay grounded in whether or not they actually help.

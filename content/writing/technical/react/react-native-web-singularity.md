@@ -125,3 +125,4 @@ _PostScript: more resources for my reference_
 - [Expo Web tutorial](https://medium.com/@toastui/from-zero-to-publish-expo-web-react-native-for-web-tutorial-e3e020d6d3ff)
 - [Routing: React Router](https://github.com/edupooch/simple-crna-routing)
 - [Routing: React Navigation](https://pickering.org/using-react-native-react-native-web-and-react-navigation-in-a-single-project-cfd4bcca16d0)
+- Universal Navigation Strategy in React: https://dev.to/ythecombinator/driving-towards-a-universal-navigation-strategy-in-react-j60
