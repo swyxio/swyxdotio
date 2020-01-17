@@ -59,7 +59,7 @@ For the same amount of content stored, an organized mind will perform far superi
 
 ## Go Meta
 
-**Active over Reactive**: Active Learning is pull-based - You try to do something, find gaps, and go seek out what you need to get it done. Most learning starts out Reactive - you see something new, you learn it. Push-based. The problem is the content industry has swung waaaay too far towards drowning you under a deluge of content. Additionally, Reactive Learning isn't serving your goals - it serves someone else's. Though part of learning is learning what to learn, and Serendipity is a wonderful thing, Just-In-Case learning isn't very productive. The right mix of learning will probably include more Active Learning than is natural or feels comfortable. 
+**Active over Reactive**: Active Learning is **Pull-based** - You try to do something, find gaps, and go seek out what you need to get it done. Most learning starts out Reactive - you see something new, you learn it. **Push-based**. The problem is the content industry has swung waaaay too far towards drowning you under a deluge of content. Additionally, Reactive Learning isn't serving your goals - it serves someone else's. Though part of learning is learning what to learn, and Serendipity is a wonderful thing, **Just-In-Case** learning isn't very productive. The right mix of learning will probably include more Active Learning, **Just-in-Time**, than is natural or feels comfortable. 
 
 I confess I don't do this well at all and would welcome ideas for how to make active learning more of a habit.
 
