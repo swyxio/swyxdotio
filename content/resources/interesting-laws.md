@@ -30,6 +30,7 @@ published: false
 - Stigler's law https://en.wikipedia.org/wiki/Stigler%27s_law_of_eponymy
 - Ebbinghaus Effect (forgetting curve) https://www.psychestudy.com/cognitive/memory/ebbinghaus-forgetting-curve
 - Ebbinghaus Illusion (relative size of circles) https://en.wikipedia.org/wiki/Ebbinghaus_illusion
+- Law of Demeter https://en.wikipedia.org/wiki/Law_of_Demeter
 
 more:
 

@@ -4,7 +4,7 @@ slug: learn-in-private
 categories: Advice
 date: 2020-01-17
 author: swyx
-description: Some thoughts on how to Learn In Private well
+description: Of course I don't think that everything should be public. I don't even think everyone should Learn In Public. The majority of the time you are still learning in private. Here are some thoughts on how to do it well.
 ---
 
 *Essay status: Very raw, still taking additions, would like to add examples and quotes for each. Thanks to [Joe](https://twitter.com/jsjoeio), [Will](https://twitter.com/willjohnsonio) and [David](https://twitter.com/DavidWells) for comments and input.*
