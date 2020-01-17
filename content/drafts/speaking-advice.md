@@ -135,7 +135,7 @@ A **Cold Start** is a great form of pause - you don't always have to start by in
 
 Some cliches are easy to get audience engagement:
 
-- asking for a show of hands on a topic
+- asking for a show of hands on a topic - ESTIMATE THE % FOR PEOPLE WHO CANT SEE
 - including local favorites (or languages) in your talk
 - shouting out community leaders
 
@@ -179,6 +179,7 @@ fixing speaking voice: https://www.artofmanliness.com/articles/improve-your-spea
   - bad lighting conditions
   - a11y contrast ratios
 - always repeat questions
+- when you ask for show of hands, estimate out loud what % of hands raised for people who cant see
 
 what to do when you get in trouble
 

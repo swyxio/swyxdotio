@@ -80,6 +80,7 @@ Quite relevant is the Newspaper/Yellow Pages example - Narrow Waists seem to hav
   - integration provides for a superior user experience
   - integration maximizes the likelihood of success for new products
   - integration is incredibly profitable because it is, from a money-making perspective, a monopoly: Apple devices are the only ones that run iOS.
+- Marshall McLuhan: ["First we shape our tools, then our tools shape us"](https://twitter.com/david_perell/status/1216907743665278977?s=20)
 - Cory Doctorow and Joe Betts-Lacroix on [Adversarial Interoperability](https://blog.ycombinator.com/cory-doctorow-and-joe-betts-lacroix-on-adversarial-interoperability/)
   - if people dont let you interop, you do it anyway
   - If you remember, there were a couple of moments in, say, Mac OS's history where adversarial interoperability was totally pivotal. At one point, Microsoft had not just dominance in the operating system market and the applications market, but it was establishing dominance in the local networking market, intranets.
