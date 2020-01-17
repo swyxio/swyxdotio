@@ -4,6 +4,7 @@ slug: learn-in-private
 categories: Advice
 date: 2020-01-17
 author: swyx
+description: Some thoughts on how to Learn In Private well
 ---
 
 *Essay status: Very raw, still taking additions, would like to add examples and quotes for each.*
