@@ -13,3 +13,4 @@ This is a stub for a future blogpost. Please [yell at me](https://twitter.com/sw
 - Protocols > Platforms https://medium.com/@lightcoin/from-platforms-to-protocols-c5fe0bdd0fc7
 - graphql success
 - storybook's component story format
+- POSIX/libc https://twitter.com/b0rk/status/1217890878674624513?s=20

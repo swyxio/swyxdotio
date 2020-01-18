@@ -31,7 +31,7 @@ published: false
 - Ebbinghaus Effect (forgetting curve) https://www.psychestudy.com/cognitive/memory/ebbinghaus-forgetting-curve
 - Ebbinghaus Illusion (relative size of circles) https://en.wikipedia.org/wiki/Ebbinghaus_illusion
 - Law of Demeter https://en.wikipedia.org/wiki/Law_of_Demeter
-
+- Berkson's Paradox https://twitter.com/MWStory/status/1205486677369786369?s=20
 more:
 
 - http://utminers.utep.edu/omwilliamson/ENGL1311/fallacies.htm
