@@ -121,7 +121,10 @@ Run your abstract by a few developer friends, with no context. If they don't get
 
 ## Building a CFP Process
 
+
 Ok, so you've written one CFP. Congrats! You're not done.
+
+*You can see this [12 Minute Video of How I Write CFPs](https://www.youtube.com/watch?v=gCroOiPRfw0) explaining my process below*
 
 As you've probably heard, due to the selectivity and randomness, CFP submission is a numbers game. So it's more important that you build a sustainable CFP process than have any particular CFP get accepted. You'll be submitting **between 2-5 CFP's per conference**, and there are probably dozens of conferences each year that you are a good fit for. 
 
