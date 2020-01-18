@@ -6,7 +6,7 @@ date: 2020-01-18
 description: Some thoughts on writing your first few CFPs
 ---
 
-I'll assume you know [what a CFP is](https://speaking.io/plan/writing-a-cfp/) and want to get one accepted (so I dont have to justify the value of speaking) and are just here for my advice.
+I'll assume you know [what a CFP is](https://speaking.io/plan/writing-a-cfp/) and want to get one accepted (so I dont have to justify [the value of learning in public](https://www.swyx.io/speaking/learn-in-public/)) and are just here for my advice.
 
 ## Table of Contents
 
@@ -167,7 +167,7 @@ https://github.com/sw-yx/swyxdotio/tree/master/content/))
 People who have said they don't mind reviewing first timer CFPs:
 
 - https://twitter.com/shannon_crabill/status/1085343833079062528
-- [me!(https://twitter.com/swyx)
+- [me!](https://twitter.com/swyx)
 - (you?)
 
 ## Next Steps & Recommended Reads
