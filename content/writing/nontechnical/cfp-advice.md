@@ -99,6 +99,8 @@ If you can come up with a memorable name that encapsulates your core pitch, like
 
 Getting creative and eyecatching is helpful. Remember that CFP reviewers will mostly be scanning through hundreds of CFPs, usually in a Google sheet or table. Short titles stand out. Special buzzword keywords stand out. Again, scan through old published conference schedules to get an idea of what works.
 
+If none of the above fit, don't push it. Just take the most boring, practical title you can do that touches on the main technologies you'll be demonstrating. Sometimes plain and simple is best!
+
 ## Write an Abstract
 
 With your genre and title chosen, your abstract will practically write itself. You sketch an outline of the talk you want to do. If it helps, you can try to bullet point out all the things you want to do in your talk, then group and sort your points, and then use that as brainstorm fodder for your abstract. Don't give away the whole talk, but show just enough to pique interest.
