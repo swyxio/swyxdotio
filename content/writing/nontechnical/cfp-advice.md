@@ -24,6 +24,8 @@ My YouTube Watch List is 400+ videos long. When I have lunch or am bored, I pull
 
 (It also trains the YouTube algorithm to start recommending talks rather than entertainment)
 
+You can find great talks at [Sara Viera's Awesome Talks site](https://awesometalks.party/).
+
 ## Speak at a Meetup
 
 If you haven't spoken at a meetup yet, I **strongly** recommend you do so a couple times before you speak at a conference. This is your first best trial run to get your speaking nerves out of the way, iron out the presentation technologies you want to use and also to trial your content on people who aren't your dog. On the flip side, meetup organizers are generally always looking for speakers, because meetup attendees are a shy, lazy bunch :) so you will be doing them a favor. Some meetup organizers like [GitNation](https://gitnation.org/) actively use meetups to seed future conference speakers.
@@ -93,13 +95,24 @@ Your title is twice as important as your abstract. CFP reviewers will look at bo
 
 But no pressure: you can still tweak titles after getting accepted.
 
-To the extent that your genre dictates your title, just go with that. 
+To the extent that your genre dictates your title, just go with that. (I'll put all genre title examples above in the Genre section)
 
 If you can come up with a memorable name that encapsulates your core pitch, like [Never Write Another HoC](https://www.youtube.com/watch?v=BcVAq3YFiuc), do that. If your talk is good, its title will be quoted back to you with surprising frequency, so make it something you can live with.
+
+Examples: 
+
+- [Never Write Another HoC](https://www.youtube.com/watch?v=BcVAq3YFiuc)
+- [The Hard Parts of Open Source](https://www.youtube.com/watch?v=o_4EX4dPppA)
+- [What Is Success?](https://www.youtube.com/watch?v=uGlzRt-FYto)
+- [Simple Made Easy](https://www.youtube.com/watch?v=34_L7t7fD_U)
 
 Getting creative and eyecatching is helpful. Remember that CFP reviewers will mostly be scanning through hundreds of CFPs, usually in a Google sheet or table. Short titles stand out. Special buzzword keywords stand out. Again, scan through old published conference schedules to get an idea of what works.
 
 If none of the above fit, don't push it. Just take the most boring, practical title you can do that touches on the main technologies you'll be demonstrating. Sometimes plain and simple is best!
+
+Examples: 
+
+- *to be completed*
 
 ## Write an Abstract
 
