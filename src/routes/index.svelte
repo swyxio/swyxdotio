@@ -58,7 +58,7 @@
 <article>
   <h1>swyx's site!</h1>
   <div id="CTA">
-    Latest Post:
+    Featured Post:
     <div>
       <a href="/writing/learn-in-private">
         <b>How To Learn In Private</b>

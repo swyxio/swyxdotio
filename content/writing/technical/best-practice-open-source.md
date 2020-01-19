@@ -66,6 +66,7 @@ Of course, these steps don't take care of ALL the standards listed above - so fa
 
 This generates (according to their README):
 
+```markdown
 ### Github, Gitlab and Bitbucket
 * License 
   - MIT
@@ -95,6 +96,7 @@ This generates (according to their README):
 
 ### Bitbucket specific
 * In future versions
+```
 
 ## Other Useful Tools
 
