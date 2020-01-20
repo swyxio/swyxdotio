@@ -4,7 +4,7 @@ slug: collapsing-layers
 subtitle: Doing Less to Do More
 categories: ['Tech']
 date: 2020-01-20
-description: As Moore's Law ends, we must look at optimizing software for continued gains in speed and efficiency.
+description: As Moore's Law ends, devices multiply, and software becomes critical to life, we must take another look at our full stack for continued gains in efficiency, reliability and security.
 ---
 
 *Essay status: confident in framing, not confident in timing. Still looking for more examples*
