@@ -67,7 +67,7 @@ I really don't know anything about security, but this is a major dimension of co
 
 ## Dealing with the Cost
 
-Calling for a reversal in a 50 year trend in software bloat is, frankly, ridiculous. I understand that humans are really bad at responding to slow moving train wrecks. **Using nearly-free, tried and tested tech with known bugs is preferable to sinking a bunch of time into new, unproven tech with unknown bugs.**
+Calling for a reversal in a 50 year trend in software bloat is, frankly, ridiculous. I understand that humans are really bad at responding to slow moving train wrecks. Using **nearly-free, tried and tested tech with known bugs** is preferable to sinking a bunch of time into **new, unproven tech with unknown bugs.**
 
 Although the cost of ignoring these issues is rising due to the reasons listed above, we may need a distinct flashpoint event or movement or community that helps to galvanize and coordinate action at every layer of the stack. I confess I have no idea how to do this. I'd love more conversation about it.
 
@@ -99,7 +99,7 @@ I intend this to be a living list of current movements in collapsing layers, to 
 
 ## Challenges
 
-To be honest, I myself struggle to reconcile this idea with [Unix philosophy](https://en.wikipedia.org/wiki/Unix_philosophy). I feel a little better that [Linux itself is 15m lines of code](https://unix.stackexchange.com/questions/223746/why-is-the-linux-kernel-15-million-lines-of-code) - in other words - maybe its more about the simple number of layers than the actual depth or thickness of each layer. 
+To be honest, I myself struggle to reconcile this idea with [Unix philosophy](https://en.wikipedia.org/wiki/Unix_philosophy). I feel a little better that [Linux itself is 15m lines of code](https://unix.stackexchange.com/questions/223746/why-is-the-linux-kernel-15-million-lines-of-code) - in other words - maybe its more about the simple number of layers than the actual depth or thickness of each layer. Rich Harris puts it better than I can: [small modules may be better for developers at the cost of users](https://medium.com/@Rich_Harris/small-modules-it-s-not-quite-that-simple-3ca532d65de4).
 
 I do think that Collapsing Layers is only suitable for a more mature subset of technologies. If something is nascent, growing like a weed, prone to change - you probably still want to tack on more layers. [AWS is growing at 40% a year](https://www.zdnet.com/article/amazon-delivers-mixed-q3-results-as-aws-growth-slows/) and unusable? Fine, add [a second layer cloud](https://softwareengineeringdaily.com/2019/10/14/how-to-build-a-cloud-provider-with-anurag-goel/). Nondeveloper Prosumers want to make software en masse? [Fine, slap a GUI on everything](https://webflow.com/blog/no-code-is-a-lie).
 
