@@ -38,7 +38,7 @@ And it has nice UI prompts to help you add things if you are missing them.
 Here are some tools and bash scripts to run thanks to my friends [Tierney](https://twitter.com/bitandbang/status/1212223793898373120) and [Phil](https://twitter.com/philnash): 
 
 ```bash
-npx license mit > http://LICENSE.md  # initialize your license
+npx license mit > LICENSE.md  # initialize your license
 npx gitignore node  # initialize your gitignore
 npx covgen YOUR_EMAIL_ADDRESS # code of conduct
 git init # initialize git
