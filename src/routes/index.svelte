@@ -171,7 +171,7 @@
                 </a>
               </li>
               <li>
-                My (upcoing) workshop on
+                My (upcoming) workshop on
                 <b>Building Custom CLI Tooling with OClif and React-Ink</b>
               </li>
               <li>
