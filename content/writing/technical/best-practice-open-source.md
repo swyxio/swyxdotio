@@ -8,9 +8,12 @@ description: Quick and simple ways to set up Open Source Repos with Best Practic
 
 *Essay status: mostly baked. Meant for beginners to OSS.*
 
+## Table of Contents
+
 I often make the joke that GitHub doesn't do enough to encourage community standards:
 
 [![https://pbs.twimg.com/media/EA-CXDMWkAEtMKI?format=png&name=small](https://pbs.twimg.com/media/EA-CXDMWkAEtMKI?format=png&name=small)](https://twitter.com/swyx/status/1157286966733496323)
+
 
 ## Why Standards Are Important
 
@@ -111,6 +114,10 @@ This generates (according to their README):
 * In future versions
 ```
 
+## Make Your Own
+
+Isaac Schleuter, npm founder, [chimed in](https://twitter.com/izs/status/1219083765852491776?s=20) that you can actually make your own and it can be invoked via the `npm init` command! TIL!
+
 ## Other Useful Tools and Reads
 
 - https://github.com/donavon/init-readme
@@ -118,4 +125,5 @@ This generates (according to their README):
 - https://medium.com/@jdxcode/for-the-love-of-god-dont-use-npmignore-f93c08909d8d
 - https://twitter.com/DerekNonGeneric/status/1219063020250456064
 - https://egghead.io/courses/how-to-contribute-to-an-open-source-project-on-github
+- For large projects: enforcing CODEOWNERS: https://twitter.com/cramforce/status/1182349710121734145
 - (other tools? [Let me know](https://twitter.com/swyx))

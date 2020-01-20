@@ -60,8 +60,8 @@
   <div id="CTA">
     Featured Post:
     <div>
-      <a href="/writing/learn-in-private">
-        <b>How To Learn In Private</b>
+      <a href="/writing/collapsing-layers">
+        <b>Collapsing Layers</b>
       </a>
     </div>
   </div>
