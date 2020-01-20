@@ -11,9 +11,13 @@ description: As Moore's Law ends, we must look at optimizing software for contin
 
 **The future of technology is less layers, not more.**
 
+## Table of Contents
+
+## The Mess We're In
+
 As hardware has gotten faster and cheaper over time, we have chosen to stack layer after layer of software on top of each other in the name of ease of use (both taking away lower level concerns for those who would otherwise have to handcode it, and also enabling an ever-wider group of people to write software). This was the right move - enabling more people to use more software accelerated the demand for all technology, hardware included.
 
-Of course, we have always had frequent calls for a return to simplicity and more efficient software. [Niklaus Wirth](https://en.wikipedia.org/wiki/Wirth%27s_law) in 1995 [pled for Lean Software](http://doi.ieeecomputersociety.org/10.1109/2.348001). There is a delicious irony in the contrast between Moore's Law and Wirth's Law - this is a special case of [Jevons paradox](https://en.wikipedia.org/wiki/Jevons_paradox). My favorite modern framing of pits the former CEOs of Intel vs Microsoft: [What Andy giveth, Bill taketh away]https://en.wikipedia.org/wiki/Andy_and_Bill%27s_law).
+Of course, we have always had frequent calls for a return to simplicity and more efficient software. [Niklaus Wirth](https://en.wikipedia.org/wiki/Wirth%27s_law) in 1995 [pled for Lean Software](http://doi.ieeecomputersociety.org/10.1109/2.348001). There is a delicious irony in the contrast between Moore's Law and Wirth's Law - this is a special case of [Jevons paradox](https://en.wikipedia.org/wiki/Jevons_paradox). My favorite modern framing of pits the former CEOs of Intel vs Microsoft: [What Andy giveth, Bill taketh away](https://en.wikipedia.org/wiki/Andy_and_Bill%27s_law).
 
 In the 2010's we carried on as our predecessors did. [As the modern iteration of the joke goes](https://twitter.com/iamdevloper/status/926458505355235328?lang=en):
 
