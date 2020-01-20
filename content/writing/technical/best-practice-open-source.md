@@ -16,14 +16,14 @@ I often make the joke that GitHub doesn't do enough to encourage community stand
 
 These standards aren't just made up for shits and giggles. They genuinely help the open source community work better together:
 
-- Descriptions are important as short oneliners for people to understand what your repo is for.
-- Readme's are important for people to understand what your repo does and how to use it. I have [strong views here!](https://twitter.com/swyx/status/1218711368989278208)
-- Codes of Conduct help define what is permissible behavior in your community. And yes, every open source repo is a community.
-- CONTRIBUTING.md welcomes potential contributors and gives them information they need to get started. This is [particularly prone to unhelpful boilerplate](https://twitter.com/swyx/status/983467648997609477) - more thoughtful customization would help contributors.
-- Licenses are important so people know what they can or cannot do with your code. [GitHub's default is no license](https://twitter.com/swyx/status/1218711368989278208) - this is bad, because without a license, some people are technically not even allowed to LOOK at your code.
-- Issue and PR templates help maintainers ask basic checklist questions to improve the quality of issues and contributions (and waste less time on back-and-forth).
-- `.gitignore` is important because people often forget to ignore their `node_modules` and `.DS_Store` and other non-core folders.
-- (Nice to have) - CHANGELOG.md for updates.
+- **Descriptions** are important as short oneliners for people to understand what your repo is for.
+- **Readme's** are important for people to understand what your repo does and how to use it. I have [strong views here!](https://twitter.com/swyx/status/1218711368989278208)
+- **Codes of Conduct** help define what is permissible behavior in your community. And yes, every open source repo is a community.
+- `CONTRIBUTING.md` welcomes potential contributors and gives them information they need to get started. This is [particularly prone to unhelpful boilerplate](https://twitter.com/swyx/status/983467648997609477) - more thoughtful customization would help contributors. [Here is a great example from Kent C. Dodds](https://github.com/testing-library/react-testing-library/blob/master/CONTRIBUTING.md).
+- **Licenses** are important so people know what they can or cannot do with your code. [GitHub's default is no license](https://twitter.com/swyx/status/1218711368989278208) - this is bad, because without a license, some people are technically not even allowed to LOOK at your code.
+- **Issue and PR templates** help maintainers ask basic checklist questions to improve the quality of issues and contributions (and waste less time on back-and-forth).
+- `.gitignore` is important because people often forget to ignore their `node_modules` and `.DS_Store` and other non-core folders. Consider also adding `.vscode`
+- (optional) - `CHANGELOG.md`, `.nvmrc`, `.gitattributes`, `CODEOWNERS`, `.editorconfig`, `.prettierrc`, `SUPPORT`
 
 This isn't a huge list of stuff, but it can be a bit of a drag to set all this up manually especially if you operate [Open Source by Default](http://artsy.github.io/series/open-source-by-default/). Most of my own repos don't even meet these standards because it is such a drag to set them up. 
 
@@ -35,7 +35,7 @@ And it has nice UI prompts to help you add things if you are missing them.
 
 ## Automate It
 
-Here are some tools and bash scripts to run thanks to my friend [Tierney](https://twitter.com/bitandbang/status/1212223793898373120): 
+Here are some tools and bash scripts to run thanks to my friends [Tierney](https://twitter.com/bitandbang/status/1212223793898373120) and [Phil](https://twitter.com/philnash): 
 
 ```bash
 npx license mit > http://LICENSE.md  # initialize your license
@@ -47,16 +47,29 @@ npm init -y # initialize package.json, accept all defaults
 
 You can inline this into a oneliner bash command: `npx license mit > http://LICENSE.md && npx gitignore node && npx covgen YOUR_EMAIL_ADDRESS` (adding in git and npm init if you wish).
 
-[Kyle](https://twitter.com/kylewelch/status/1219011921812316160) puts this in his bash scripts to add making a directory, initializing npm and git, all in a single `init_repo` command:
+Note that in order to use `npm init -y` with decent defaults, you should set them:
+
+```bash
+npm set init.author.name "Your name"
+npm set init.author.email "your@email.com"
+npm set init.author.url "https://your-url.com"
+npm set init.license "MIT"
+npm set init.version "1.0.0"
+```
+
+[Kyle](https://twitter.com/kylewelch/status/1219011921812316160) and [Phil](https://philna.sh/blog/2019/01/10/how-to-start-a-node-js-project/) put this in bash scripts to add a few other steps all in a single `init_repo` command:
 
 ```bash
 init_repo() {
+  # delete any of the below per your preference
   mkcd $1
   git init
   npm init -y
-  npx license mit > LICENSE
+  npx license $(npm get init.license) -o "$(npm get init.author.name)" > LICENSE
   npx gitignore node
-  npx covgen kwelch0626@gmail.com
+  npx covgen "$(npm get init.author.email)"
+  git add -A
+  git commit -m "Initial commit"
 }
 ```
 
@@ -98,7 +111,11 @@ This generates (according to their README):
 * In future versions
 ```
 
-## Other Useful Tools
+## Other Useful Tools and Reads
 
 - https://github.com/donavon/init-readme
+- https://philna.sh/blog/2019/01/10/how-to-start-a-node-js-project/
+- https://medium.com/@jdxcode/for-the-love-of-god-dont-use-npmignore-f93c08909d8d
+- https://twitter.com/DerekNonGeneric/status/1219063020250456064
+- https://egghead.io/courses/how-to-contribute-to-an-open-source-project-on-github
 - (other tools? [Let me know](https://twitter.com/swyx))
