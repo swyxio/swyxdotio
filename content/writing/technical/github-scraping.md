@@ -9,7 +9,7 @@ description: A neat trick I discovered from Mikeal Rogers
 
 A common need I have in open source community work, especially with static site generators and the JAMstack, is scraping and updating data. For example, in the [Svelte Community](https://svelte-community.netlify.com/code) site we scrape the GitHub star count and last update, and ditto [Gatsby Starters](https://www.gatsbyjs.org/starters/). Of course, you could grab data clientside, and whatever you can't do clientside, you can throw up a serverless function to do this. 
 
-But sometimes it just makes sense to scrape data *once* instead of every time your users access your site. Typically you'd set up a cronjob and send the data into a database somewhere. With [GitHub Actions](https://github.com/features/actions), you can do this all inside GitHub, AND save a version controlled history of all data.
+But sometimes it just makes sense to scrape data *once* instead of every time your users access your site, especially if that data requires tokens your users may not have. Typically you'd set up a cronjob and send the data into a database somewhere. With [GitHub Actions](https://github.com/features/actions), you can do this all inside GitHub, AND save a version controlled history of all data.
 
 I noticed [Mikeal Rogers doing exactly this for his Daily OSS watcher](https://github.com/mikeal/daily) project, and so finally took some time to check out his code and make a minimal repro so others can take it as a base.
 
@@ -20,6 +20,8 @@ You can see my **demo in action** here: https://github.com/sw-yx/gh-action-data-
 - The action workflow is https://github.com/sw-yx/gh-action-data-scraping/blob/master/.github/workflows/scrape.yml
 - The node script that is executed is https://github.com/sw-yx/gh-action-data-scraping/blob/master/action.js
 - The scraped data is https://github.com/sw-yx/gh-action-data-scraping/tree/master/data
+
+For those new to npm, there is a simple [npm script](https://www.freecodecamp.org/news/introduction-to-npm-scripts-1dbb2ae01633/) defined in `package.json`. This is so you can manually run it while writing and testing your code. The action workflow calls this same exact action to reduce any discrepancies.
 
 ## The Script
 
@@ -35,11 +37,11 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@master # check out the repo this action is in, so that you have all prior data
     - name: Build
-      run: npm install
+      run: npm install # any dependencies you may need
     - name: Scrape
-      run: npm run action 
+      run: npm run action # actually run your npm script for scraping
       # env:
       #   WHATEVER_TOKEN: ${{ secrets.YOU_WANT }}
     - uses: mikeal/publish-to-github-action@master
