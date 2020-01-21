@@ -59,7 +59,9 @@ No matter what happens to high end, "full powered" computers, the *range* of com
 
 ### More Secure and Reliable Software
 
-Software used to be written for technical people, for occasional uses where lives and livelihoods did not depend on it. As [software eats the world](https://techcrunch.com/2016/06/07/software-is-eating-the-world-5-years-later/), these assumptions must change. Of course, most software is not life-or-death, but it is hard to deny that there is a tremendous demand for more reliable software, both from users in the form of fewer bugs and crashes and bad states, as well as from developers in the form of having a more stable substrate on which to write as well as deploying more reliable code per hour (since that is the ultimate limited resource).
+Software used to be written for technical people, for occasional uses where lives and livelihoods did not depend on it. As [software eats the world](https://techcrunch.com/2016/06/07/software-is-eating-the-world-5-years-later/), these assumptions must change.
+
+Of course, most software is not life-or-death, but it is hard to deny that there is a tremendous demand for more reliable software, both from users in the form of fewer bugs and crashes and bad states, as well as from developers in the form of having a more stable substrate on which to write as well as deploying more reliable code per hour (since that is the ultimate limited resource).
 
 I choose to focus on reliability, not speed, so as not to overlap with the above points - we always want faster software. But of course speed leaks into reliability, with timeouts and hidden race conditions and the like. It is a bolder assertion that we can outright achieve more reliable software as well by collapsing layers. I recognize that this is not a necessary result, and that it is somewhat unsubstantiated. But each layer is an abstraction, and [all non-trivial abstractions, to some degree, are leaky](https://www.joelonsoftware.com/2002/11/11/the-law-of-leaky-abstractions/). Fewer layers, fewer leaks, fewer bugs - at the cost of having to do more per-layer.
 
