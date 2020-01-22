@@ -53,5 +53,6 @@ notes_to_self: so as not to have this show up on rss feed
 2020
 
 - Feb 13 - React online meetup
+- Feb 19 - Svelte JSandFriends online meetup
 - Mar 30-31 - Reactathon SF
 - Jun 16 - Reactdelphia online meetup

@@ -173,6 +173,22 @@ People who have said they don't mind reviewing first timer CFPs:
 - [me!](https://twitter.com/swyx)
 - (you?)
 
+## Other Advice
+
+[Peggy Rayzis:](https://twitter.com/peggyrayzis/status/1220034800830091265)
+
+> It's CFP season! Here's the abstract template I use for crafting effective proposals:
+>
+> 1. State the problem
+> 2. State your solution
+> 3. What the audience will learn from your talk (optional: how you plan to teach it)
+>
+> 3-5 sentences max.
+>
+> I read hundreds of proposals for GraphQL Summit. For the first pass, I spend <30 seconds on each one.
+>
+> Get to the point quickly. Otherwise, you risk losing my attention, which usually is a rejection.
+
 ## Next Steps & Recommended Reads
 
 Phew, that was a long ass post. Hope it helps! Ping me if you get accepted, I will be cheering for you :)
