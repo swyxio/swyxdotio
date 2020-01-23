@@ -219,7 +219,11 @@ It's a good user experience to tell the user exactly what's going on with their 
 <!-- etc -->
 ```
 
-You can test the rejection case works by assigning `Promise.reject((_, nay) => setTimeout(() => nay({message: 'rejected'}), 1000)` to `promise`.
+You can test the rejection case works by assigning 
+
+```js
+promise = new Promise((yay, nay) => setTimeout(() => nay({message: 'rejected'}), 1000)
+```
 
 ## Moving Logic into the Store
 
