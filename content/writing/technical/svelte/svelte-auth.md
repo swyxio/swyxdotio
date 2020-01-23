@@ -6,6 +6,8 @@ description: This is my attempt today wrapping an Authentication workflow into a
 date: 2020-01-22
 ---
 
+## Table of Contents
+
 Chris Dhanaraj, one half of the AMAZING [Toolsday](https://twitter.com/toolsday?lang=en) duo with the equally talented [Una Kravets](https://twitter.com/una), and [serial mispronouncer of my name](https://spec.fm/podcasts/toolsday/311251), recently schooled me that [Svelte Stores are very similar to React Hooks](https://twitter.com/chrisdhanaraj/status/1214663440184164352). I objected at first, but Rich Harris confirmed he was right.
 
 This is my attempt today wrapping an Authentication workflow into a Svelte Store, just like I did with [Netlify Identity and React Hooks + Context](https://github.com/sw-yx/react-netlify-identity-widget). This example uses Amplify Auth, but really its going to be the exact same for any auth library/system.
@@ -17,6 +19,8 @@ You can see my Live Demo here: https://d1tdmagl19vwso.cloudfront.net/
 and the source code is at: https://github.com/sw-yx/svelte-amplify-auth-demo
 
 ![image](https://user-images.githubusercontent.com/6764957/72947142-2030c800-3d4f-11ea-8095-cd1df9d3920e.png)
+
+> *Sequel post: [Optimistic, Offline-First Apps with Svelte and Amplify DataStore](https://www.swyx.io/writing/svelte-amplify-datastore/)*
 
 ## Process - setup from Scratch
 
@@ -261,3 +265,5 @@ store.subscribe((value) => {
 Note some caveats - this may need an isomorphic wrapper if you are doing server side rendering, and that there are some security situations in which you should not store JWT's in localStorage. You can adapt your code to your needs but this will get you started.
 
 That's all I've got - even getting here took longer than I thought! I hope to return to DataStore at some point but figured I would write up what I have.
+
+> *Sequel post: [Optimistic, Offline-First Apps with Svelte and Amplify DataStore](https://www.swyx.io/writing/svelte-amplify-datastore/)*
