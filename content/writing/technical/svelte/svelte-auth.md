@@ -167,7 +167,6 @@ Now lets actually wire up the submit handler to sign up the user:
   let password = ""
   let email = ""
   function handleSubmit() {
-    $store = { username } // simulate login
     Auth.signUp({
       username,
       password,
