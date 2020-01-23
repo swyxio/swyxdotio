@@ -1,5 +1,6 @@
 ---
-title: Optimistic, Offline-First Apps with Svelte and Amplify DataStore
+title: Optimistic, Offline-First Apps 
+subtitle: with Svelte and Amplify DataStore
 slug: svelte-amplify-datastore
 categories: ['Tech', 'Svelte']
 description: This is my attempt adapting an Amplify DataStore tutorial to Svelte
