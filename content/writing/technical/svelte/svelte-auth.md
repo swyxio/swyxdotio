@@ -45,7 +45,7 @@ amplify init
 amplify add auth
 ```
 
-You will also need to modify Svelte's root js page to use amplify's generate configs ([adapting their Configuration docs](https://github.com/aws-amplify/amplify-js/blob/master/README.md#configuration)):
+You will also need to modify Svelte's root js page to use amplify's generated config files ([adapting their Configuration docs](https://github.com/aws-amplify/amplify-js/blob/master/README.md#configuration)):
 
 ```js
 // src/main.js
