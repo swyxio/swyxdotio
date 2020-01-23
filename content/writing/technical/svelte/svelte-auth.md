@@ -238,14 +238,14 @@ import Auth from '@aws-amplify/auth';
 
 export const store = writable(null);
 export const logout = () => store.set(null);
-export async function signIn(username, password) {
-  return Auth.signIn(username, password)
+export async function signUp(username, password, email) {
+  return Auth.signUp(username, password, email)
           .then((data) => void store.set(data));
 }
 // etc, as needed
 ```
 
-Now I can `import { logout, signIn } from './auth'` anywhere in my app and use this logic!
+Now I can `import { logout, signUp } from './auth'` anywhere in my app and use this logic!
 
 ## Draw the rest of the Owl
 
