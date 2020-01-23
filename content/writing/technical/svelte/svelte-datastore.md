@@ -23,6 +23,9 @@ You can see the source: https://github.com/sw-yx/svelte-amplify-datastore-demo
 
 and the deployed demo here: https://d1tdmagl19vwso.cloudfront.net/
 
+![sveltedatastore](https://user-images.githubusercontent.com/6764957/73031770-05238e00-3e0b-11ea-8bf8-67ca0f844c2c.gif)
+
+
 Concurrent Session CRUD seems to have a bug right now, filed at: https://github.com/aws-amplify/amplify-js/issues/4765
 
 ## Part 1 - Svelte + DataStore
