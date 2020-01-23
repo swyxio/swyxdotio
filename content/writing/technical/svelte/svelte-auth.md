@@ -2,6 +2,7 @@
 title: Writing an Authentication Store in Svelte
 slug: svelte-auth
 categories: ['Tech', 'Svelte']
+description: This is my attempt today wrapping an Authentication workflow into a Svelte Store
 date: 2020-01-22
 ---
 
