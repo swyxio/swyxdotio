@@ -62,7 +62,7 @@ Easy peasy! now let's actually grab some data from the store when the component 
   
   let notes = [] // in memory copy of all the results from DataStore queries
   const setNotes = v => void (notes = v) // helper to set the store
-  async function listNotes() {
+  function listNotes() {
     return DataStore.query(Note, Predicates.ALL).then(setNotes);
   }
 
@@ -96,7 +96,7 @@ Similarly, you can write simple event handlers that wrap around the basic DataSt
 
   // add, update, delete
   const handleAddNote = () => DataStore.save(new Note({ note: value })).then(listNotes).then(resetValue)
-  async function handleUpdateNote() {
+  function handleUpdateNote() {
     const original = await DataStore.query(Note, selectedId);
     await DataStore.save(
       Note.copyOf(original, (updated) => void (updated.note = value))
@@ -173,12 +173,12 @@ We can now wire up the CRUD wrappers and Display Modes together to create a full
     displayMode = 'add'
     listNotes().then(resetValue)
   }
-  async function handleSelect(note) {
+  function handleSelect(note) {
     value = note.note
     selectedId = note.id
     displayMode = 'update'
   }
-  async function listNotes() {
+  function listNotes() {
     return DataStore.query(Note, Predicates.ALL).then(setNotes);
   }
   function handleDelete(id) {
@@ -236,7 +236,7 @@ We can now wire up the CRUD wrappers and Display Modes together to create a full
 </div>
 ```
 
- It comes it at 100 lines of code, compared to 158 lines for the React example.
+It comes in at 100 lines of code, compared to 158 lines for the React example.
 
 You can see the source: https://github.com/sw-yx/svelte-amplify-datastore-demo and the deployed demo here: https://d1tdmagl19vwso.cloudfront.net/
 
@@ -306,4 +306,6 @@ I haven't done a whole lot of thining here, to be brutally honest. I just know i
 - [Richard on more important nuances](https://twitter.com/undef_obj/status/1213034443759243264)
 - [James Long - CRDTs for Mortals](https://twitter.com/swyx/status/1215631885239492610)
 - [Andrew Herron - To OT or CRDT, that is the question](https://www.tiny.cloud/blog/real-time-collaboration-ot-vs-crdt/)
+- [Thai Pangsakulyanont - Handling Optimistic Updates in a Separate Queue](https://www.youtube.com/watch?v=DWZj56qUNfs&app=desktop)
+  - [Richard's comments](https://twitter.com/undef_obj/status/1213020036484366336): What this is talking about is needing a deterministic synchronization protocol that has both safety and correctness in the system. Separate stores is one way to do this on the client, however it doesn't address the problem of dealing with conflicts
 - what else is required reading? [please let me know.](https://twitter.com/swyx)
