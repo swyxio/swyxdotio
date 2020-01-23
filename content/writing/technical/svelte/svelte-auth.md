@@ -174,7 +174,7 @@ Now lets actually wire up the submit handler to sign up the user:
         email,
       },
     }).then(user => {
-      $store = user // user object
+      $store = user //  save user object, representing a successful login
     })
   }
 </script>
@@ -197,15 +197,7 @@ It's a good user experience to tell the user exactly what's going on with their 
   let email = ""
   let promise // undefined at first
   function handleSubmit() {
-    promise = Auth.signUp({
-      username,
-      password,
-      attributes: {
-        email,
-      },
-    }).then(user => {
-      $store = user // user object
-    })
+    // etc...
   }
 </script>
 
