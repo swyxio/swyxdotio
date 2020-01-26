@@ -11,8 +11,8 @@ The [CSS Zen Garden](http://www.csszengarden.com/) era was hugely inspirational 
 
 ## Demo Up Front
 
-Try Live Demo at: https://svelte-zengarden.netlify.com/
-View Source at: https://github.com/sw-yx/svelte-zen-garden
+- Try Live Demo at: https://svelte-zengarden.netlify.com/
+- View Source at: https://github.com/sw-yx/svelte-zen-garden
 
 You can edit your CSS and it updates live.
 

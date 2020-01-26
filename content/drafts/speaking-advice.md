@@ -181,6 +181,18 @@ fixing speaking voice: https://www.artofmanliness.com/articles/improve-your-spea
 - always repeat questions
 - when you ask for show of hands, estimate out loud what % of hands raised for people who cant see
 
+
+Record your talk
+- quicktime mute thing
+
+FONT SIZE:
+- https://twitter.com/shanselman/status/854771024994369538?s=20
+- https://twitter.com/bradwilson/status/1072583309681659905?s=20
+
+DO NOT RAMBLE: https://twitter.com/shanselman/status/1063343188209848320?s=20
+
+mirror screen
+
 what to do when you get in trouble
 
 - i dont know, followup later
