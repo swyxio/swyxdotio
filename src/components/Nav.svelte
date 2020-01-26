@@ -3,7 +3,7 @@
   export let segment
   export let isFooter = false
   let showThemeEditor = false
-  let showEditor = () => void(showThemeEditor = true)
+  let toggleEditor = () => void(showThemeEditor = !showThemeEditor)
   let hideEditor = () => void(showThemeEditor = false)
 </script>
 
@@ -11,6 +11,9 @@
   .themeButton {
     background: none;
     color: var(--text-color);
+  }
+  .active {
+    background:lightsalmon;
   }
   .themeButtonContainer {
     display: flex;
@@ -158,8 +161,8 @@
     <li>
       <a class="block" href="https://tinyletter.com/swyx">mailinglist</a>
     </li>
-    <li class="themeButtonContainer">
-      <button class="themeButton" on:click|stopPropagation={showEditor}>change theme</button>
+    <li class="themeButtonContainer" class:showThemeEditor>
+      <button class="themeButton" on:click|stopPropagation={toggleEditor}>change theme</button>
     </li>
     <li class="divider">{''}</li>
     <li class="mobileExternal block">

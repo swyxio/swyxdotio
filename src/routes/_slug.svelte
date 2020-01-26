@@ -14,7 +14,7 @@
 
   .content :global(code) {
     font-size: 90%;
-    background-color: #292d3e;
+    background-color: rgba(29, 80, 80, 0.3);
     padding: 0.25em 0.5em;
   }
   .content :global(pre) {
@@ -78,6 +78,7 @@
   :global(#table-of-contents + ul) {
     width: 40%;
     min-width: 200px;
+    color: var(--link-color);
     background: var(--bg-color-secondary);
     /* font-size: 0.8em; */
     /* position: sticky; */

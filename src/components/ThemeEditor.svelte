@@ -1,5 +1,6 @@
 <script>
   import { themeStore } from '../theme.js'
+  import { fly } from 'svelte/transition';
   let noop = () => { /* noop */ }
   let selectedPreset = $themeStore.name
   let breakloop = 0
@@ -41,7 +42,7 @@
     justify-content: space-between;
   }
 </style>
-<div on:click|stopPropagation={noop}>
+<div on:click|stopPropagation={noop} transition:fly>
   <form id="themeEditor">
     <div>
       Preset:

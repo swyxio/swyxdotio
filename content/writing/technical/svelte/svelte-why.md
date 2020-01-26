@@ -20,15 +20,15 @@ I have to agree with Rich that a proper frontend framework should come with a st
 
 But Svelte keeps going. Transitions and Animations. State Management. Even the server-side rendering metaframework is first-class. Here is a list of First class Svelte features and their third party React equivalents
 
-- Static Scoped Styling - `<style>` vs Linaria/Astroturf/Styled-Components + Babel Plugin
-- Transitions: `transition:fn` and `in:fn/out:fn` vs React Transition Group
-- Animations: `animate:fn` vs React Spring/Framer Motion
-- Head management: `<svelte:head>` vs react-helmet/react-async-helmet
-- Class toggling: `bind:class` vs `classnames`
-- State management: Svelte Stores(?) vs Redux/Mobx
-- A11y linting: in the compiler vs eslint-react-a11y
-- SSR Metaframework: Sapper vs Next.js
-- Routing is a notable omission from both. Default starter CLIs are also loosely managed by both.
+- **Static Scoped Styling** - `<style>` vs Linaria/Astroturf/Styled-Components + Babel Plugin
+- **Transitions**: `transition:fn` and `in:fn/out:fn` vs React Transition Group
+- **Animations**: `animate:fn` vs React Spring/Framer Motion
+- **Head management**: `<svelte:head>` vs react-helmet/react-async-helmet
+- **Class toggling**: `bind:class` vs `classnames`
+- **State management**: Svelte Stores(?) vs Redux/Mobx
+- **A11y linting**: in the compiler vs `react-axe` and `eslint-plugin-jsx-a11y`
+- **SSR Metaframework**: Sapper vs Next.js
+- **Routing** is a notable omission from both. Default starter CLIs are also loosely managed by both.
 
 For someone like me where decision fatigue and the paradox of choice is very real, it is very nice to have first party solutions for many of these things. Of course, it comes at a cost of maintainers that are spread very thin.
 
@@ -141,10 +141,10 @@ Yes, that is a lot of syntax to hold in your head. That's why it is important to
 
 Svelte sets an extraordinarily high bar for a side project of a tiny group of people:
 
-- API docs
-- Tutorial
-- Gist-linked REPLs
-- Examples 
+- [API docs](https://svelte.dev/docs)
+- [Tutorial](https://svelte.dev/tutorial)
+- [Gist-linked REPLs](https://svelte.dev/repl)
+- [Examples](https://svelte.dev/examples)
 
 Recently, I was able to find `actions` would help solve my usecase [without even knowing they existed.](https://twitter.com/swyx/status/1220905001926696962)
 
