@@ -17,6 +17,8 @@ published: false
   - operating system - matt mullenweg
   - "Stories" format for UGC
 - Poe's Law - satire vs extremism
+- Hardware Laws
+  - Moore's Law vs Wright's Law
 - Rules for how Networks Scale
   - O(N): Sarnoff's Law - the value of a broadcast network increases in direct proportion with the number of users
   - O(N^2): Metcalfe's Law - email is p2p - value is number of connections between two nodes

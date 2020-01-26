@@ -76,6 +76,10 @@ Usually, successful many-word ideas have a Two Word Core. [The Law of Shitty Cli
 
 [The 7 Habits of Highly Effective People](http://www.quickmba.com/mgmt/7hab/) might win the prize for longest Two Word idea. Of course, these days, it just gets shortened to "7 Habits" 😉.
 
+## In Memoriam
+
+This post is dedicated to Clay Christensen, who pointed out the [Innovator's Dilemma](https://en.wikipedia.org/wiki/The_Innovator%27s_Dilemma), and Leila Janah, who showed that the best method of poverty alleviation is to [Give Work](https://www.leilajanah.com/book).
+
 ##  Appendix: One Worders
 
 Exceptions to the rule are noteworthy because of their rarity.
