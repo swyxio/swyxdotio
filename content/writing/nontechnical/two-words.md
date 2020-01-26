@@ -1,6 +1,6 @@
 ---
 title: Two Words
-subtitle: How to Sell Viral Ideas
+subtitle: The Secret of Viral Ideas
 slug: two-words
 categories: ['Ideas', 'Marketing']
 description: The best way to sell to, brand, persuade, or inspire people is to condense your idea down to Two Words.
