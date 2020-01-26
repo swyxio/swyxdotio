@@ -76,6 +76,12 @@ Usually, successful many-word ideas have a Two Word Core. [The Law of Shitty Cli
 
 [The 7 Habits of Highly Effective People](http://www.quickmba.com/mgmt/7hab/) might win the prize for longest Two Word idea. Of course, these days, it just gets shortened to "7 Habits" 😉.
 
+## How to Figure Out Your Two Words
+
+Two Words is the ultimate microcopy. It is at once trivial, yet important (by sheer memetic value). Obviously it has high marketing value, but finding a good Two Words to hang your hat on for the life of your idea is not easy.
+
+One way to figure it out is have people repeat back your idea in their words, after you give your spiel. Your words don't matter, theirs do. You don't need to adopt exactly what they use, but a message that doesn't take after repeated attempts is a problem.
+
 ## In Memoriam
 
 This post is dedicated to Clay Christensen, who pointed out the [Innovator's Dilemma](https://en.wikipedia.org/wiki/The_Innovator%27s_Dilemma), and Leila Janah, who showed that the best method of poverty alleviation is to [Give Work](https://www.leilajanah.com/book).
