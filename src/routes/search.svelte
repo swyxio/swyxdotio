@@ -55,7 +55,7 @@
   }
   article {
     padding: 1rem;
-    max-width: 56em;
+    max-width: 75ch;
     margin: 0 auto;
   }
 </style>
