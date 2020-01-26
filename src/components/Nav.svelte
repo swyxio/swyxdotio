@@ -1,9 +1,20 @@
 <script>
+  import ThemeEditor from './ThemeEditor.svelte'
   export let segment
   export let isFooter = false
+  let showThemeEditor = false
+  let showEditor = () => void(showThemeEditor = true)
+  let hideEditor = () => void(showThemeEditor = false)
 </script>
 
 <style>
+  .themeButton {
+    background: none;
+    color: var(--text-color);
+  }
+  .themeButtonContainer {
+    display: flex;
+  }
   nav.headerNav {
     border-bottom: 1px solid rgba(255, 62, 0, 0.1);
     font-weight: 300;
@@ -111,6 +122,8 @@
   }
 </style>
 
+<svelte:body on:click={hideEditor} />
+
 <nav class={(isFooter && 'footerNav') || 'headerNav'}>
   <ul>
     <li class="me block">
@@ -144,6 +157,9 @@
     </li>
     <li>
       <a class="block" href="https://tinyletter.com/swyx">mailinglist</a>
+    </li>
+    <li class="themeButtonContainer">
+      <button class="themeButton" on:click|stopPropagation={showEditor}>change theme</button>
     </li>
     <li class="divider">{''}</li>
     <li class="mobileExternal block">
@@ -291,3 +307,6 @@
     </li>
   </ul>
 </nav>
+{#if showThemeEditor}
+<ThemeEditor />
+{/if}

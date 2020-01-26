@@ -1,7 +1,35 @@
 <script>
   import Nav from '../components/Nav.svelte'
+  import { onMount, onDestroy } from 'svelte'
+  import { themeStore } from '../theme.js'
   export let segment
+
+  onMount(renderCSS)
+  onDestroy(() => {
+    if (typeof document === 'undefined') return // SSR
+    var ss = document.getElementById("unique-stylesheet-id")
+    ss.innerHTML = '' // not actually sure if i need this
+  })
+  let _themeStore // $ store syntax buggy
+  themeStore.subscribe(v => {
+    _themeStore = v
+    renderCSS()
+  })
+  function renderCSS() {
+    if (typeof document === 'undefined') return // SSR
+    var ss = document.getElementById("unique-stylesheet-id");
+    if (!ss) return // not rendered yet
+    let string = ``
+    if ($themeStore.bgColor) string += `--bg-color: ${$themeStore.bgColor};`
+    if ($themeStore.textColor) string += `--text-color: ${$themeStore.textColor};`
+    if ($themeStore.linkColor) string += `--link-color: ${$themeStore.linkColor};`
+    ss.innerHTML = `html { ${string} }`
+  }
 </script>
+
+<svelte:head>
+  <style id="unique-stylesheet-id"> </style>
+</svelte:head>
 
 <style>
   main.layoutmain {
