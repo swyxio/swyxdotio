@@ -23,7 +23,7 @@
       name: 'light',
       bgColor: "#d2bfb0",
       textColor: "#2a2966",
-      linkColor: "#5f000d"
+      linkColor: "#d4521d"
     },
     {
       name: 'default',
@@ -62,7 +62,7 @@
       <input type='color' bind:value={$themeStore.linkColor} placeholder='any css color value'>
     </label>
     {/if}
-    <span>This is a WIP feature! ideas welcome
+    <span>⚠️ This is a WIP feature! Ideas welcome
     </span>
   </form>
 </div>

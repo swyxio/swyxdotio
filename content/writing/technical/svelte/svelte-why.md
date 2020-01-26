@@ -16,7 +16,7 @@ There is absolutely some New Toy Syndrome going on. I don't deny that. It's fun 
 
 One of the first things that will probably hit you on first contact is that Svelte is very much on the Batteries Included side of frameworks, even more than Vue (which is a LOT more than React). (*i cant compare with other frameworks because I dont know them*)
 
-I have to agree with Rich that a proper frontend framework should come with a styling solution. One that lets you Just Write CSS [todo: link].
+I have to agree with Rich that a proper frontend framework should come with a styling solution. One that lets you [Just Write CSS](https://svelte.dev/blog/the-zen-of-just-writing-css).
 
 But Svelte keeps going. Transitions and Animations. State Management. Even the server-side rendering metaframework is first-class. Here is a list of First class Svelte features and their third party React equivalents
 
@@ -67,7 +67,7 @@ I think the bigger deal is **mental model**. It is just plain easier to directly
 
 Svelte, and Rich's programming style in general, is extremely mutable. Many people would recoil in horror at the way Rich uses state in modules. Many variables are just held in scope and directly mutated with setters. *Are you supposed to hold singleton values in ES modules?* I think many people already do, but pretend they don't by sticking a bunch of functions between them and the cold hard truth.
 
-I get the value of functional, immutable programming [TODO: link]. However, even React embraces local mutability [TODO: link]. Svelte is obviously a little more aggressive about the mutability, but mutability is still scoped within component and store boundaries. Rich even acknowledges (on Jlengstorf's livestream) that React got one-way data flow right.
+I get the value of [functional, immutable programming](https://www.netlify.com/blog/2018/10/05/netlify-and-the-functional-immutable-reactive-deploy/). However, [even React embraces local mutability](https://www.swyx.io/writing/rise-of-immer/). Svelte is obviously a little more aggressive about the mutability, but mutability is still scoped within component and store boundaries. [Rich even acknowledges](https://youtu.be/ogXETl_I0Dg) that React got one-way data flow right.
 
 By the way, Svelte allows for immutability too. You can mark arrays as immutable, for performance needs. It just isn't required to function.
 
@@ -75,7 +75,7 @@ By the way, Svelte allows for immutability too. You can mark arrays as immutable
 
 ### Two Way Binding
 
-Forms are hard in React [TODO: Link]. A typical React form would be something like:
+Forms are hard in React, hence [Formik](https://github.com/jaredpalmer/formik). A typical React form would be something like:
 
 ```js
 const submitForm = () => {/* etc */}

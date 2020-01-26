@@ -12,6 +12,11 @@
     font-weight: bold;
   }
 
+  .content :global(code) {
+    font-size: 90%;
+    background-color: #292d3e;
+    padding: 0.25em 0.5em;
+  }
   .content :global(pre) {
     font-size: 90%;
     background-color: #292d3e;
