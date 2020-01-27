@@ -48,14 +48,14 @@ More lists:
   - [Dennard Scaling](https://en.wikipedia.org/wiki/Dennard_scaling): as transistors get smaller, their power density stays constant, so that the power use stays in proportion with area; both voltage and current scale (downward) with length
   - [Wirth's Law](https://en.wikipedia.org/wiki/Wirth%27s_law) - this is a special case of [Jevons paradox](https://en.wikipedia.org/wiki/Jevons_paradox): *software is getting slower more rapidly than hardware is becoming faster* 
     - Spolsky wrote a great counterargument to this [on Bloatware](https://www.joelonsoftware.com/2001/03/23/strategy-letter-iv-bloatware-and-the-8020-myth/)
-  - [Amdahl's law](“When a measure becomes a target, it ceases to be a good measure.” ): the theoretical speedup in latency of the execution of a task at fixed workload that can be expected of a system whose resources are improved (the "mythical man month" law)
+  - [Amdahl's law](https://en.wikipedia.org/wiki/Amdahl%27s_law): the theoretical speedup in latency of the execution of a task at fixed workload that can be expected of a system whose resources are improved (the "mythical man month" law)
     - Also applied on Software and People https://codahale.com//work-is-work/
 
 
 ## Business of Tech
 
 
-  - Commoditize your complements - [Gwern]https://www.gwern.net/Complement), [Spolsky](https://www.joelonsoftware.com/2002/06/12/strategy-letter-v/)
+  - Commoditize your complements - [Gwern](https://www.gwern.net/Complement), [Spolsky](https://www.joelonsoftware.com/2002/06/12/strategy-letter-v/)
   - Rules for how Networks Scale (from [pmarca](https://a16z.com/2019/12/16/starting-greatness-0-to-1-mosaic-netscape-marc-andreessen/))
     - O(N): Sarnoff's Law - the value of a broadcast network increases in direct proportion with the number of users
     - O(N^2): Metcalfe's Law - email is p2p - value is number of connections between two nodes
