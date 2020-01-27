@@ -201,7 +201,8 @@ It's a good user experience to tell the user exactly what's going on with their 
   let email = ""
   let promise // undefined at first
   function handleSubmit() {
-    // etc...
+    promise = fetch('/myapi')
+      // etc...
   }
 </script>
 

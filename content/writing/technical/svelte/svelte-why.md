@@ -149,7 +149,7 @@ Svelte sets an extraordinarily high bar for an unfunded side project of a tiny g
 - [API docs](https://svelte.dev/docs)
 - [Tutorial](https://svelte.dev/tutorial)
 - [Gist-linked REPLs](https://svelte.dev/repl)
-- [Examples](https://svelte.dev/examples)
+- [Examples](https://svelte.dev/examples) - check out [this Chatbot example in 107 lines of code!!](https://svelte.dev/tutorial/update)
 
 You can probably count on two hands the number of JS OSS projects with this standard of docs, and most of those have some people working fulltime on it.
 

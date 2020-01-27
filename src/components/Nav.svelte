@@ -8,8 +8,25 @@
 </script>
 
 <style>
+  /* https://css-tricks.com/receding-background-modal-boxes/ */
+  .modalBackground{
+    transition: all 0.4s ease;
+    filter: blur(5px) grayscale(50%);
+    transform: scale(0.9);
+    height: 100vh;
+    width: 100vw;
+    position: fixed;
+  }
+  /* :global(#themeEditor){
+    transform: scale(1);
+    opacity: 1;
+    pointer-events: auto;
+  } */
+
+  /* misc */
   .themeButton {
     background: none;
+    border: none;
     color: var(--text-color);
   }
   .active {
@@ -125,7 +142,7 @@
   }
 </style>
 
-<svelte:body on:click={hideEditor} />
+<svelte:body on:click={hideEditor}/>
 
 <nav class={(isFooter && 'footerNav') || 'headerNav'}>
   <ul>
@@ -311,5 +328,6 @@
   </ul>
 </nav>
 {#if showThemeEditor}
+<div class="modalBackground"></div>
 <ThemeEditor />
 {/if}
