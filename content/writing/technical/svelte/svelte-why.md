@@ -14,17 +14,17 @@ There is absolutely some New Toy Syndrome going on. I don't deny that. It's fun 
 
 ## Batteries Included
 
-One of the first things that will probably hit you on first contact is that Svelte is very much on the Batteries Included side of frameworks, even more than Vue (which is a LOT more than React). (*i cant compare with other frameworks because I dont know them*)
+One of the first things that will probably hit you on first contact is that Svelte is very much on the Batteries Included side of frameworks, maybe more than Vue (which is a LOT more than React). (*i cant compare with other frameworks because I dont know them*)
 
 I have to agree with Rich that a proper frontend framework should come with a styling solution. One that lets you [Just Write CSS](https://svelte.dev/blog/the-zen-of-just-writing-css).
 
-But Svelte keeps going. Transitions and Animations. State Management. Even the server-side rendering metaframework is first-class. Here is a list of First class Svelte features and their third party React equivalents
+But Svelte keeps going. Transitions and Animations. State Management. Even the server-side rendering metaframework is first-party. Here is a list of first-party Svelte features and their third party React equivalents
 
 - **Static Scoped Styling** - `<style>` vs Linaria/Astroturf/Styled-Components + Babel Plugin
 - **Transitions**: `transition:fn` and `in:fn/out:fn` vs React Transition Group
 - **Animations**: `animate:fn` vs React Spring/Framer Motion
 - **Head management**: `<svelte:head>` vs react-helmet/react-async-helmet
-- **Class toggling**: `bind:class` vs `classnames`
+- **Class toggling**: `class:name` vs `classnames`
 - **State management**: Svelte Stores(?) vs Redux/Mobx
 - **A11y linting**: in the compiler vs `react-axe` and `eslint-plugin-jsx-a11y`
 - **SSR Metaframework**: Sapper vs Next.js
@@ -59,7 +59,7 @@ and an idiomatic React counter:
 
 ```js
 const [i, setI] = useState(0)
-<button onClick={() => setI(i + 1)}>count {i}</button>
+return <button onClick={() => setI(i + 1)}>count {i}</button>
 ```
 Rich makes a big deal about the concision, and it is true that in refactorings I have noticed about 15-30% less application code. But that's neither here nor there if tradeoffs negate the benefits of saving keystrokes. (this is contested, of course)
 
@@ -69,7 +69,7 @@ Svelte, and Rich's programming style in general, is extremely mutable. Many peop
 
 I get the value of [functional, immutable programming](https://www.netlify.com/blog/2018/10/05/netlify-and-the-functional-immutable-reactive-deploy/). However, [even React embraces local mutability](https://www.swyx.io/writing/rise-of-immer/). Svelte is obviously a little more aggressive about the mutability, but mutability is still scoped within component and store boundaries. [Rich even acknowledges](https://youtu.be/ogXETl_I0Dg) that React got one-way data flow right.
 
-By the way, Svelte allows for immutability too. You can mark arrays as immutable, for performance needs. It just isn't required to function.
+By the way, Svelte allows for immutability too. You can [toggle the compiler to immutable mode](https://svelte.dev/docs#svelte_options) at the component level, for performance needs. It just isn't required to function.
 
 ## $ugar $yntax
 
@@ -101,7 +101,7 @@ Whereas Svelte offers two-way binding and handy helpers:
 </form>
 ```
 
-I used to think two-way binding was bad. One can argue it makes code a bit less auditable. But now I think it optimises for what developers need to write the most. React forces you to write change handlers, which you often don't need. Data validation and transformation best belongs in submit handlers.
+I used to think two-way binding was bad. One can argue it makes code a bit less auditable. But now I think it optimises for what developers need to write the most. React forces you to write change handlers, which you often don't need. Data validation and transformation best belongs in submit handlers and pure functions in render.
 
 React of course famously prides itself on having a small API surface area. This has at once made 3rd party library compatibility and API preservation easier, but has also shifted a lot of learning and boilerplate burden to app authors. This isn't a criticism, it is a conscious tradeoff - for example, this enabled the React community to explore design patterns like HoCs and Render Props with zero change to the library.
 
@@ -109,9 +109,10 @@ React of course famously prides itself on having a small API surface area. This 
 
 I have [written about my love for Svelte Stores](https://www.swyx.io/writing/svelte-auth). The fact that with the `$` syntax, we can read from stores (and, for that matter, any Observable) is great, but we can also set them by assignment! 🤯 And the beauty of it is that it automates teardown of subscriptions:
 
+The no-sugar way to read from Svelte store:
+
 ```html
 <script>
-// normal way to read from svelte store
 import { onDestroy } from 'svelte'
 import { store } from './store.js'
 let localVar
@@ -122,11 +123,15 @@ onDestroy(unsub)
 const handler = () => store.set(localVar + 1)
 </script>
 <button on:click={handler}>{localVar}</button>
+```
 
+With the sugar syntax:
+
+```html
 <script>
-// sugar syntax - unsubscribe on unmount is also done for you
 import { store } from './store.js'
 const handler = () => $store += 1
+// unsubscribe on unmount is also done for you
 </script>
 <button on:click={handler}>{$store}</button>
 ```
@@ -139,22 +144,24 @@ Yes, that is a lot of syntax to hold in your head. That's why it is important to
 
 ## Good Docs
 
-Svelte sets an extraordinarily high bar for a side project of a tiny group of people:
+Svelte sets an extraordinarily high bar for an unfunded side project of a tiny group of people:
 
 - [API docs](https://svelte.dev/docs)
 - [Tutorial](https://svelte.dev/tutorial)
 - [Gist-linked REPLs](https://svelte.dev/repl)
 - [Examples](https://svelte.dev/examples)
 
-Recently, I was able to find `actions` would help solve my usecase [without even knowing they existed.](https://twitter.com/swyx/status/1220905001926696962)
+You can probably count on two hands the number of JS OSS projects with this standard of docs, and most of those have some people working fulltime on it.
+
+Recently, I was able to find `actions` would help solve my usecase [without even knowing they existed!](https://twitter.com/swyx/status/1220905001926696962)
 
 ## Simple Internals
 
 I actually think this is a SUPER underrated aspect of Svelte. I can [pull up the source code](https://github.com/sveltejs/svelte/tree/master/src), read it, follow it, and understand it. Wow! You can't say that for other frameworks, which, admittedly, have extremely different goals.
 
-However the simple internals and simple contracts let me be EXTREMELY confident in knowing when to eject or handwrite the code myself. Stores and Animations are explicitly designed this way, where the first party stuff is merely included for convenience but the expectation is that you could absolutely write your own if needed.
+However the simple internals and simple contracts let me be EXTREMELY confident in knowing when to eject or handwrite the code myself. Stores and Animations are explicitly designed this way, where the first party stuff is merely included for convenience but the expectation is that you WILL write your own if needed.
 
-[On a recent podcast](https://www.swyx.io/speaking/sedaily-nocode) Jeff Meyerson recently remarked something like "if React went in a different direction you could fork the code and maintain it". That's not true. [I've tried](https://www.swyx.io/speaking/contributing-to-react), and it is very hard to keep React's codebase in my head. 
+[On a recent podcast](https://www.swyx.io/speaking/sedaily-nocode) Jeff Meyerson remarked something like "if React went in a different direction you could fork the code and maintain it". That's not true. [I've tried contributing](https://www.swyx.io/speaking/contributing-to-react), and it is very hard to keep React's codebase in my head. 
 
 But, very conceivably, **I could fork and maintain Svelte myself**.
 
@@ -164,7 +171,7 @@ React is a very highly charged topic for many people, because of its impact. Sve
 
 ## Because I Can
 
-I do have the privilege that I am secure in my React knowledge, so I don't have to prove myself to feed myself. I do have free time because I don't have dependents. So being able to do this is absolutely a privilege.
+I do have the privilege that I am secure in my React knowledge, so I don't have to prove myself to feed myself. I do have free time because I don't have dependents. So being able to do this is absolutely a privilege, about on par with using free time to play Fortnite or follow sports.
 
 However I've also been challenged, at React meetups, on why I spend time on non React things. I strongly object to this view. I would assert that a React developer who only knows React will not understand React as well as someone who has come from, or knows well, other frameworks.
 
