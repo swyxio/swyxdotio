@@ -28,6 +28,7 @@
     background: none;
     border: none;
     color: var(--text-color);
+    cursor: pointer;
   }
   .active {
     background:lightsalmon;
