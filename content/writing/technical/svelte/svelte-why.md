@@ -39,7 +39,6 @@ To be fair to React, here are things React has first party that Svelte doesn't:
 - Suspense: https://github.com/sveltejs/svelte/issues/3203
 - Lazy/Code Splitting: https://github.com/sveltejs/svelte/issues/742 
 - Mobile/Native: https://github.com/halfnelson/svelte-native
-- useMemo/useCallback: 🤷🏽‍♂️
 - Streaming SSR: 🤷🏽‍♂️
 - Test Utilities: 🤷🏽‍♂️
 - I'm not sure about how events are normalized xbrowser but probably React does more
@@ -61,6 +60,7 @@ and an idiomatic React counter:
 const [i, setI] = useState(0)
 return <button onClick={() => setI(i + 1)}>count {i}</button>
 ```
+
 Rich makes a big deal about the concision, and it is true that in refactorings I have noticed about 15-30% less application code. But that's neither here nor there if tradeoffs negate the benefits of saving keystrokes. (this is contested, of course)
 
 I think the bigger deal is **mental model**. [Direct Manipulation](https://en.wikipedia.org/wiki/Direct_manipulation_interface) is a core human-computer interface principle. It is just plain easier to directly mutate variables by setting them, instead of pulling setters from the runtime and scheduling an async update (the majority of React beginners don't even know this, and we have learned to just accept it). It's not just more concise, it's genuinely simpler and more familiar. [Rich has argued that mutability is the fundamental mode we naturally want to interact with the DOM too.](http://swyx.io/writing/svelte-metaphysics)
@@ -138,7 +138,7 @@ const handler = () => $store += 1
 
 [Yehuda Katz recently said](https://twitter.com/samselikoff/status/1194622768274460672) that the value of React Hooks is in the self contained teardown mechanism. This lets Hooks be nicely bounded abstractions. I would apply this analogy to all frameworks too. After all, the biggest code saving of using a framework over vanilla JS is in not having to write teardown code for every element!
 
-Svelte is full of stuff like this. Have I told you about [promise unrolling??](https://twitter.com/swyx/status/1220052804485746690)
+Svelte is full of stuff like this. Have I told you about [promise unrolling??](https://twitter.com/swyx/status/1220052804485746690) Memoization? Try `$: a = b + c;` vs useMemo/useCallback!
 
 Yes, that is a lot of syntax to hold in your head. That's why it is important to have...
 
@@ -167,7 +167,7 @@ But, very conceivably, **I could fork and maintain Svelte myself**.
 
 ## No Baggage
 
-React is a very highly charged topic for many people, because of its impact. Svelte has negligible impact, and results in lighter JS bundles in many (not all) cases, so it's nicer to play around with and not get yelled at simply for using and talking about it.
+React is a very highly charged topic for many people, because of its impact. Svelte has much smaller impact, and results in lighter JS bundles in many (not all) cases, so it's nicer to play around with and not get yelled at simply for using and talking about it.
 
 ## Because I Can
 
