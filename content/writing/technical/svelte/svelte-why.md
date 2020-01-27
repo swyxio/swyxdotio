@@ -178,6 +178,6 @@ Svelte has had no problem attracting early adopters, but as it looks toward earl
 
 Community will be a major lever in this. [I'm involved](https://github.com/sveltejs/community) in this, again mainly because I hope to have fun and learn, but I'm far from sure I can do a good job of it. I have more existential needs I'm not taking care of.
 
-React has plenty going for it, and is [good enough](https://twitter.com/swyx/status/1221125270989692928) for a vast majority of people. Network effect alone may be insurmountable.
+React has plenty going for it, and is [good enough](https://twitter.com/swyx/status/1221125270989692928) for a vast majority of people. Network effect alone may be insurmountable. They also have [top notch release quality](https://reactjs.org/blog/2019/10/22/react-release-channels.html) and are working on awesome things no other framework is working on. If I were to start a new work app today, I'd still use React. I also think a compiler layer can be built for React to copy over some ideas from Svelte.
 
 For now, my approach is "**Svelte for sites, React for apps**".
