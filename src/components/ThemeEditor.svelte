@@ -48,14 +48,20 @@
     left: calc(25vw - 6rem);
     color: white;
   }
+  .PresetContainer {
+    display: flex;
+    align-items: center;
+  }
+
+  /* mobile */
   @media (max-width: 480px) {
     #themeEditor {
       left: 0;
     }
-  }
-  .PresetContainer {
-    display: flex;
-    align-items: center;
+    .customColorSelectorContainer {
+      display: flex;
+      flex-direction: column;
+    }
   }
 
 
@@ -130,15 +136,17 @@
       </select>
     </div>
     {#if selectedPreset === 'custom'}
-    <label> --bg-color:
-      <input type='color' bind:value={$themeStore.bgColor}  placeholder='any css color value'>
-    </label>
-    <label> --text-color:
-      <input type='color' bind:value={$themeStore.textColor}  placeholder='any css color value'>
-    </label>
-    <label> --link-color:
-      <input type='color' bind:value={$themeStore.linkColor} placeholder='any css color value'>
-    </label>
+    <div class="customColorSelectorContainer">
+      <label> --bg-color:
+        <input type='color' bind:value={$themeStore.bgColor}  placeholder='any css color value'>
+      </label>
+      <label> --text-color:
+        <input type='color' bind:value={$themeStore.textColor}  placeholder='any css color value'>
+      </label>
+      <label> --link-color:
+        <input type='color' bind:value={$themeStore.linkColor} placeholder='any css color value'>
+      </label>
+    </div>
     {/if}
     <span>⚠️ This is a WIP feature! Ideas welcome
     </span>
