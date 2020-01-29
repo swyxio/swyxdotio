@@ -126,19 +126,19 @@ I call this the Recipe rule - Recipe Blogs making you scroll through 10 pages of
 
 > The top 3️⃣ things I want to read in READMEs, vs. actual READMEs:
 > 
-> Introduction
-> License
-> Philosophy
-> Features
-> Compatibility
-> Contributing
-> Changelog
-> Community
-> Preface
-> Overview
-> Installation 1️⃣
-> Examples 2️⃣
-> API 3️⃣
+> - Introduction
+> - License
+> - Philosophy
+> - Features
+> - Compatibility
+> - Contributing
+> - Changelog
+> - Community
+> - Preface
+> - Overview
+> - Installation 1️⃣
+> - Examples 2️⃣
+> - API 3️⃣
 
 ## Levels
 
