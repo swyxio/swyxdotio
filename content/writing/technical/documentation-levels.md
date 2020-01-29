@@ -35,9 +35,16 @@ High level user centric goals of docs:
 - Experts: keep up with changes and future plans
 - Contributors: How to contribute, how the project is setup
 
+[Quote Dan Abramov](https://twitter.com/dan_abramov/status/1083472984252260352):
+
+> Top two mistakes in documentation:
+>
+> - Assuming people know everything
+> - Assuming people are stupid
+
 ## Brainstorming Docs Features
 
-I tried to loosely order this but ofc it is up to interpretation:
+I tried to loosely order this but ofc it is up to interpretation. A lot of this is my brainstorm, plus [Mark's summary of the great Divio blogpost](https://github.com/reduxjs/redux/issues/3609):
 
 - Answer questions where the user expects them
   - **One sentence description for github headline**
@@ -60,6 +67,22 @@ I tried to loosely order this but ofc it is up to interpretation:
 - API **Examples**
   - can colocate with API docs, but careful not to crowd out the docs
   - **make sure it is copy- and paste-able**. leave comments for where the user will have to fill in with their own code
+  - Only describe
+  - Code / information oriented
+  - Austere and to the point
+  - Structure around the code
+  - Be consistent and accurate
+- **How-To Guide/Cookbook/Recipes**
+  - copy and paste for common usecases
+  - Answer questions that a beginner might not formulate
+  - Can assume some understanding of the basics
+  - Provide a series of steps
+  - Focus on results
+  - Solve a specific problem
+  - Don't explain concepts
+  - Give some flexibility / ways to adapt
+  - Leave things out - keep it practical, not complete
+  - Name it well
 - Recovering from Failure
   - **Common Mistakes** (incl pre-emptive warnings - [Eleventy](http://11ty.io/) does a great job of this)
   - Link to community slack/gitter/twitter
@@ -67,6 +90,13 @@ I tried to loosely order this but ofc it is up to interpretation:
 - **Tutorial**
   - Explain acronyms, jargon
   - step through APIs
+  - Learn by doing
+  - Get the user started, even if it's not the "correct" way
+  - Make sure it works
+  - Ensure they see results immediately
+  - Tutorial must be repeatable
+  - Focus on concrete steps, not abstract concepts
+  - Provide minimum necessary explanation, and focus on only steps they need now
 - **Live Demos**
   - real use cases
   - dont force people to clone and install and run just to see your demo
@@ -78,14 +108,20 @@ I tried to loosely order this but ofc it is up to interpretation:
   - 3rd Party Blogs
   - Video Tutorials
   - Podcasts
-- Meta
+- Meta (as in [MetaLanguage](https://www.youtube.com/watch?v=_0T5OSSzxms))
   - Origin Story/Naming
+  - Conceptual Understanding
+    - Clarify and broaden coverage of a topic
+    - Provide background and context ("how X works with Y", "why a design decision", etc)
+    - Discuss alternatives and opinions
+    - Don't give instruction or technical reference
   - Who Uses Us
     - Logos
     - Quotes/endorsements/testimonials
     - Link to production use
   - Funding
-  - Migration docs from previous versions
+  - Migration from previous versions
+  - Versioned docs
   - Roadmap
   - Reader-friendly Changelog
   - Helping Contributors
@@ -94,6 +130,7 @@ I tried to loosely order this but ofc it is up to interpretation:
     - How it Works under the hood
     - CONTRIBUTING.md
     - Easy Local Edits - when someone spots something wrong, or wants to add something, how easy is it?
+- Search
 - Anti-Docs
   - **Project NonGoals** - things we will never do
   - **When NOT to use us**
@@ -120,7 +157,7 @@ Here's [Tania Rascia](https://twitter.com/taniarascia/status/1222361724143226881
 
 ## Bottom Line Up Front
 
-I call this the Recipe rule - Recipe Blogs making you scroll through 10 pages of life stories and long walks on the beach before showing the damn recipe.
+I call this the Recipe Rule - Recipe Blogs making you scroll through 10 pages of life stories and long walks on the beach before showing the damn recipe.
 
 [Here's David Khourshid](https://twitter.com/DavidKPiano/status/1046833198146228225): 
 
@@ -152,7 +189,7 @@ So let's split up those features above by levels - and pair the levels with wher
   - README with API docs - goal is to save yourself from looking at source code
 - **Level 1: v0.x**
   - *Example audience: greenfield early adopters. Ok with missing documentation, they are here for the idea. can contribute code/docs*
-  - One paragraph description with more context
+  - One paragraph description with more context - could be a sales pitch but also give an idea of when to use you
   - Feature list/Project Goals
   - Install + Config Instructions
 - **Level 2: v1**
@@ -162,10 +199,11 @@ So let's split up those features above by levels - and pair the levels with wher
   - Basic Examples
   - Live Demos
 - **Level 3: vX**
-  - *Example audience: early majority user. Wants ease of use, quick wins. Need to be very reliable. Needs backup to sell solution to team*
+  - *Example audience: early majority user. Wants ease of use, quick wins. Need to be very reliable. Needs content to sell solution to team*
   - Project Status badges
   - Tutorial
   - Third Party Plugins/Libraries
+  - How-To Guide/Cookbook/Recipes
   - User/Maintainer Content
     - Official Blog
     - Talks
@@ -176,8 +214,8 @@ So let's split up those features above by levels - and pair the levels with wher
   - Examples
     - [Svelte](https://twitter.com/swyx/status/1220905001926696962?s=20)
 - **Level 4: Production use for multiple years**
-  - *Example audience: expert user. Needs API stability, deep insight on how the project works and how it can solve problems. Needs to customize/adapt for at-scale/weird usecases*
-  - Growing the Meta
+  - *Example audience: expert user. Needs API stability/migration instructions, deep insight on how the project works and how it can solve problems. Needs to customize/adapt for at-scale/weird usecases*
+  - Growing the MetaLanguage
     - Origin Story/Naming
     - Who Uses Us
       - Logos
@@ -194,6 +232,8 @@ So let's split up those features above by levels - and pair the levels with wher
     - How it Works under the hood
     - CONTRIBUTING.md
     - Easy Local Edits - when someone spots something wrong, or wants to add something, how easy is it?
+  - Examples
+    - [Eleventy](https://www.11ty.dev/)
 - **Level 5: Community of Production users**
   - *Example audience: Industry beginner. They may not know any alternatives. You are the entire world to them.*
   - Explain acronyms, jargon
@@ -201,9 +241,9 @@ So let's split up those features above by levels - and pair the levels with wher
     - Different docs for different audiences (eg JS/Android/iOS)
     - Different languages
   - Examples
-    - [Django](https://docs.djangoproject.com/en/3.0/)
     - [Vue](https://vuejs.org/)
-    - [Eleventy](https://www.11ty.dev/)
+    - [Django](https://docs.djangoproject.com/en/3.0/)
+    - [React](https://reactjs.org)
 - **Level 6: ????**
   - What belongs here? how to push the boundaries of docs?
     - build docs into the tool
