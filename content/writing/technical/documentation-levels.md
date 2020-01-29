@@ -142,7 +142,7 @@ I call this the Recipe rule - Recipe Blogs making you scroll through 10 pages of
 
 ## Levels
 
-I also like [Brian Chesky's idea of growing customer experience by hotel analogy](https://mastersofscale.com/brian-chesky-handcrafted/). If a 1 star hotel is just a bed, a 4 star hotel has a pool, and 5 star hotel has a spa and concierge, etc. What is a 6 star hotel? 10 star? and so on.
+I also like [Brian Chesky's idea of growing customer experience by hotel analogy](https://mastersofscale.com/brian-chesky-handcrafted/). If a 1 star hotel is just a bed, a 3 star hotel has a gym, 4 star has a pool, and 5 star hotel has dining, spa and concierge, etc. What is a 6 star hotel? 10 star? and so on.
 
 So let's split up those features above by levels - and pair the levels with where the project is. Every level includes the prior level.
 
@@ -209,7 +209,7 @@ So let's split up those features above by levels - and pair the levels with wher
     - build docs into the tool
   - Docs that are Useful for non-users? 
 
-A more ambitious framing of this might put them into a pyramid "hierarchy of needs". However I don't think it is appropriate yet at this stage.
+A more ambitious framing of this might put them into a pyramid "hierarchy of needs". However I don't think it is appropriate yet at this stage while I explore this idea.
 
 ## Further Reading
 
