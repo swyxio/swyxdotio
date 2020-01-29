@@ -189,6 +189,8 @@ People who have said they don't mind reviewing first timer CFPs:
 >
 > Get to the point quickly. Otherwise, you risk losing my attention, which usually is a rejection.
 
+Phil Nash - [how to find CFPs](https://philna.sh/blog/2020/01/29/how-to-find-cfps-for-developer-conferences)
+
 ## Next Steps & Recommended Reads
 
 Phew, that was a long ass post. Hope it helps! Ping me if you get accepted, I will be cheering for you :)

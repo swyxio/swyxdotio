@@ -8,7 +8,7 @@ description: Learning from Slack and Refactoring UI to create color palettes, th
 
 This isn't a typical blogpost, because it reflects a failure to ship a feature I wanted, but I am noting down what I learned through this. I think I will come back and pick it back up again.
 
-> [The top feedback I got from this post](https://twitter.com/swyx/status/1222307420396875776) is that instead of HSL, I should try the [HSLuv](https://hsluv.org) color space. I will try that in future.
+> [The top feedback I got from this post](https://twitter.com/swyx/status/1222307420396875776) is that instead of HSL, I should try the [HSLuv](https://hsluv.org) or [CIELab/Lch](https://www.colourphil.co.uk/lab_lch_colour_space.shtml) color space. I will try that in future but for now sticking to RGB.
 
 ## Motivation - add Customizable Palette Theming
 
@@ -176,3 +176,4 @@ I feel pretty dumb about this but that's what happened today.
 - https://refactoringui.com/previews/building-your-color-palette/
 - https://slack.engineering/building-dark-mode-on-desktop-811508b5d15f
 - http://hslpicker.com/
+- https://medium.com/@marcintreder/design-system-sprint-2-one-color-palette-to-rule-them-all-d0114ed1f659

@@ -9,6 +9,8 @@ What is a megatrend?
 - Long shift
   - Generational
 - Platform shift/new technology enablement
+- Deployment Age over Installment age
+  - https://avc.com/2015/02/the-carlota-perez-framework/
 
 impossible to overinvest.
 
