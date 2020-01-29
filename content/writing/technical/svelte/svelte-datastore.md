@@ -245,7 +245,7 @@ You can see the source: https://github.com/sw-yx/svelte-amplify-datastore-demo a
 
 ## Part 2 - Why this is Important
 
-I wrote [Optimistic, Offline-first apps using serverless functions and GraphQL](https://twitter.com/swyx/status/1108663969466572800) in a private gist a year ago, and I believe that DataStore is the closest attempt at a framework for this since Meteor and [PouchDB](https://pouchdb.com/). ([Eric Vicenti](https://twitter.com/EricVicenti) also has a more nascent project, Aven Cloud), and I have yet to confirm if Firebase's SDK actually does this as well.
+I wrote [Optimistic, Offline-first apps using serverless functions and GraphQL](https://twitter.com/swyx/status/1108663969466572800) in a private gist a year ago, and I believe that DataStore is the closest attempt at a framework for this since Meteor and [PouchDB](https://pouchdb.com/). ([Eric Vicenti](https://twitter.com/EricVicenti) also has a more nascent project, Aven Cloud), and I have yet to confirm if Firebase's SDK actually does this as well. [Replicache](https://replicache.com) is a newer attempt at this problem.
 
 The main realization is that Offline-first and Optimistic UI are essentially the same thing, and given a well defined backend contract (like GraphQL), we can move a lot of this desirable functionality into a reusable frontend-framework-agnostic "data framework" that handles all this so the developer doesn't have to.
 
