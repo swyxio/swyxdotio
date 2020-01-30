@@ -5,7 +5,8 @@ const defaultTheme = {
   name: 'default',
   bgColor: '#1d1f21',
   textColor: '#eeeeee',
-  linkColor: '#2cb67d'
+  linkColor: '#2cb67d',
+  lineLength: '69ch'
 }
 let _themeStore = defaultTheme
 let subscribers = new Set()

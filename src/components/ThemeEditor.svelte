@@ -24,13 +24,15 @@
       name: 'light',
       bgColor: "#d2bfb0",
       textColor: "#2a2966",
-      linkColor: "#d4521d"
+      linkColor: "#d4521d",
+      lineLength: "69ch",
     },
     {
       name: 'default',
       bgColor: '#1d1f21',
       textColor: '#eeeeee',
-      linkColor: '#2cb67d'
+      linkColor: '#2cb67d',
+      lineLength: "69ch"
     },
   ]
 </script>
@@ -54,6 +56,8 @@
     </label>
     <label> --link-color:
       <input type='color' bind:value={$themeStore.linkColor} placeholder='any css color value'>
+    </label><label> --line-length:
+      <input type='text' bind:value={$themeStore.lineLength} placeholder='any css length eg 600px'>
     </label>
   </div>
   {/if}

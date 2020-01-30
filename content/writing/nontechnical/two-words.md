@@ -120,6 +120,10 @@ This is a living list - I will update as I go. [Tell me good candidates for the 
   - tristan harris: humane technology
   - think different
   - under armor: i will
+- Company Names
+  - Lucid Chart
+  - Under Armor
+  - Pager Duty
 - mottos:
   - naval: productize yourself
   - effective altruism

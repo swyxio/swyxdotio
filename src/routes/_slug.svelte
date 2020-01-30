@@ -1,7 +1,7 @@
 <style>
   .content {
     padding: 1em;
-    max-width: 75ch;
+    max-width: var(--line-length);
     margin: 0 auto;
     overflow: auto;
   }

@@ -23,6 +23,7 @@
     if ($themeStore.bgColor) string += `--bg-color: ${$themeStore.bgColor};`
     if ($themeStore.textColor) string += `--text-color: ${$themeStore.textColor};`
     if ($themeStore.linkColor) string += `--link-color: ${$themeStore.linkColor};`
+    if ($themeStore.lineLength) string += `--line-length: ${$themeStore.lineLength};`
     ss.innerHTML = `html { ${string} }`
   }
 </script>

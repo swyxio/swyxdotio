@@ -50,6 +50,7 @@ _originally drafted [in a gist](https://gist.github.com/sw-yx/9720bd4a30606ca3ff
 - Patrick O’Shaughnessy: [Learn, Build, Share, Repeat](https://twitter.com/david_perell/status/1214559294273683456?s=20)
 - LadyBug Podcast: [Blogging 101](https://ladybug.dev/episode/blogging-101/) (esp [Ali Spittel's Blog Post Workflow](https://dev.to/aspittel/my-blog-post-workflow-from-topic-to-publication-4n78))
 - Quincy Larson: [Build your Skills, Build your Reputation, Build your Network](https://twitter.com/ossia/status/1079942716480344065?s=12)
+- [Ali Spittel on syndicating content](https://podcasts.google.com/?feed=aHR0cHM6Ly9mZWVkcy5wb2R0cmFjLmNvbS9WR0F1bHBON01ZMVU&episode=aHR0cHM6Ly9tZWRpYS5ibHVicnJ5LmNvbS9hcnJlc3RlZGRldm9wcy9jb250ZW50LmJsdWJycnkuY29tL2FycmVzdGVkZGV2b3BzL2FycmVzdGVkLWRldm9wcy1wb2RjYXN0LWVwaXNvZGUxNDMubXAz&hl=en&ved=2ahUKEwiFwevO-KvnAhUwFzQIHdd-Dn4QjrkEegQICBAI&ep=6) on the Arrested DevOps podcast
 - Nathan Barry in his book Authority:
 
 > Back in 2007 Chris Coyier launched a site called css-tricks.com. It was a site dedi- cated to teaching people how to code websites. (CSS is the language that describes how websites should look.) When CSS-Tricks first came out I remember reading a tutorial and arrogantly thinking, “I know that already.” Chris and I were at about the same skill level, so I didn’t learn anything new from him.

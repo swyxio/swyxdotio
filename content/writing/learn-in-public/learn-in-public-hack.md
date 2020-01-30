@@ -64,6 +64,8 @@ Activity on the Internet has an insane [Zipf's law](https://en.wikipedia.org/wik
 
 Basically, the correct number of passive consumption is closer to 99%, and less than 1% even comment on newly created content. I'm not exaggerating in the least.
 
+> Cesar Kuriyama [randomly tweeted](https://twitter.com/CesarKuriyama/status/331652847806595072) at Jon Favreau about something he made that didnt get picked up. Jon [ended up writing Cesar's app into his classic movie, Chef.](](https://www.indiehackers.com/podcast/141-cesar-kuriyama-of-1-second-everyday) )
+
 In short, **people are lazy**. This also means you can get ahead via **strategic nonlaziness**.
 
 What's the strategy? Say it with me: **PICK UP WHAT THEY PUT DOWN**.
