@@ -143,7 +143,11 @@ I tried to loosely order this but ofc it is up to interpretation. A lot of this 
 
 ## Brevity as a MetaFeature
 
-Docs don't linearly increase in quality with word count. You cannot hedge by throwing more words at a problem. Try to have your target user persona in mind and write specifically for them, only what they need and what they don't yet know they need but will. Use links and other UI options to branch out for other user types. Be very conscious of visual hierarchy - don't put irrelevant details, in-depth explanations, jokes and anecdotes where someone is looking to get quick hits. Code examples should be small yet useful - don't dump entire apps that would take more time to customize than it would be to write from scratch.
+- Docs don't linearly increase in quality with word count. You cannot hedge by throwing more words at a problem. 
+- Try to have your target user persona in mind and write specifically for them, only what they need and what they are about to need. 
+- Use links and other UI options to branch out for other user types. 
+- Be very conscious of visual hierarchy - don't put irrelevant details, in-depth explanations, jokes and anecdotes where someone is looking to get quick hits. 
+- Code examples should be small yet useful - don't dump entire apps that would take more time to customize than it would be to write from scratch.
 
 Here's [Tania Rascia](https://twitter.com/taniarascia/status/1222361724143226881):
 
@@ -245,9 +249,12 @@ So let's split up those features above by levels - and pair the levels with wher
     - [Django](https://docs.djangoproject.com/en/3.0/)
     - [React](https://reactjs.org)
 - **Level 6: ????**
+  - "Too Big To Fail" projects?
   - What belongs here? how to push the boundaries of docs?
     - build docs into the tool
+  - Establishing a foundation or ECMA spec
   - Docs that are Useful for non-users? 
+  - [Corporate/professional docs team?](https://twitter.com/TensorNo/status/1222664055011213312)
 
 A more ambitious framing of this might put them into a pyramid "hierarchy of needs". However I don't think it is appropriate yet at this stage while I explore this idea.
 
