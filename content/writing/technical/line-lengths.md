@@ -32,7 +32,7 @@ If you're design blind like me, you won't immediately believe how important this
 
 ## CSS Units
 
-So given the above advice, it seems an obvious immediate win to apply `max-width: 69ch` to your blog content blocks. However I found that most people don't do this! Usually people seem to prefer specifying absolute pixels, or (rarer) using `%`'s of parent width, or (if you're Basecamp) spanning the middle sections of a grid system.
+So given the above advice, it seems an obvious immediate win to apply `max-width: 69ch` to your blog content blocks. However I found that most people don't do this! Usually people seem to prefer specifying absolute pixels, or (rarer) using `%`'s of parent width, or ([if you're Basecamp](https://twitter.com/swyx/status/1222980190260744193?s=20)) spanning the middle sections of a grid system.
 
 I found that a big reason this happens is many people don't seem to know the `ch` unit even exists! There are actually like [a dozen length units in CSS](https://css-tricks.com/the-lengths-of-css/), most of them not as useful.
 
@@ -51,6 +51,8 @@ Often in a blog you will want a consistent line length, but have some elements l
 
 ## Magic Numbers
 
+I know this is lazy, but I like to get real life magic numbers to try on my own things :)
+
 - Leigh likes `33em`: https://twitter.com/ExcitedLeigh/status/1223007439760412672?s=20
 - Patrick likes `44em`: https://twitter.com/concreteniche/status/1222774565643751425?s=20
 - This person likes `38rem`: https://jrl.ninja/etc/1/
@@ -62,6 +64,7 @@ Often in a blog you will want a consistent line length, but have some elements l
   - Medium Devices (≥768px): width: `720px`
   - Larger Devices (≥992px): width: `960px`
   - XLarge Devices (≥1200px): width: `1140px`
+- what else?
 
 ## Try it yourself!
 
