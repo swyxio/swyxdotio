@@ -150,7 +150,9 @@ class SvelteEngine extends TemplateEngine {
 module.exports = SvelteEngine;
 ```
 
-But if you want clientside interactivity... you will need a bundler to also output the JS
+So this is a nice way to use Svelte to write components, and output only HTML and CSS.
+
+But if you want clientside interactivity... you will need a bundler to also output the JS.
 
 ## Rollup Plugin Svelte
 
