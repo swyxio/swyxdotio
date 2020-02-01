@@ -69,6 +69,7 @@ I tried to loosely order this but ofc it is up to interpretation. A lot of this 
   - what it expects, what outcome to expect
   - Warn about mistakes just before people are likely to make them
   - comparison to deprecated APIs for old users to find them
+  - state at which version new APIs were added, or deprecated
 - API **Examples**
   - can colocate with API docs, but careful not to crowd out the docs
   - **make sure it is copy- and paste-able**. leave comments for where the user will have to fill in with their own code
