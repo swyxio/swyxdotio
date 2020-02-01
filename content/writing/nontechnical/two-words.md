@@ -39,7 +39,7 @@ Whatever you are into, whatever your field is, look at the successful movements 
 
 - Developers might like the idea of being a [Indie Hacker](http://indiehackers.com/) or [Digital Nomad](https://en.wikipedia.org/wiki/Digital_nomad). They explain Rust to each other as enabling [Fearless Concurrency](https://blog.rust-lang.org/2015/04/10/Fearless-Concurrency.html). I often explain [Netlify](https://www.netlify.com/) as [Serverless](https://serverless.com/) [Heroku](https://www.heroku.com/). Everyone uses [Open Source](https://en.wikipedia.org/wiki/Open_source).
 - Business minded startup folks are [Growth Hackers](https://andrewchen.co/how-to-be-a-growth-hacker-an-airbnbcraigslist-case-study/) and [Product Managers](https://medium.com/pminsider/the-history-and-evolution-of-product-management-part-1-23cb7a858f05)
-- Mottos: Naval tells us to [Productize Yourself](https://nav.al/productize-yourself). Bezos reminds shareholders it is always [Day One](https://www.forbes.com/sites/quora/2017/04/21/what-is-jeff-bezos-day-1-philosophy/). Don Valentine wants us to keep in mind [Who Cares?](https://sequoiacap.com/article/remembering-don-valentine/)
+- Mottos: Naval tells us to [Productize Yourself](https://nav.al/productize-yourself), gather "Specific Knowledge". Bezos reminds shareholders it is always [Day One](https://www.forbes.com/sites/quora/2017/04/21/what-is-jeff-bezos-day-1-philosophy/). Don Valentine wants us to keep in mind [Who Cares?](https://sequoiacap.com/article/remembering-don-valentine/)
 - The Health-conscious might be into [Intermittent Fasting](https://www.healthline.com/nutrition/intermittent-fasting-guide), [Quantified Self](https://en.wikipedia.org/wiki/Quantified_self), or even [Weight Watchers](https://www.weightwatchers.com/us/).
 - General socio-political movements can often take this form: [Lean In](https://leanin.org/), [Be Better](http://www.bebettermovement.com/), [Time's Up](https://timesupnow.org/)
 - [Time Well Spent](https://www.ted.com/talks/tristan_harris_how_a_handful_of_tech_companies_control_billions_of_minds_every_day?language=en) became [Humane Technology](https://humanetech.com/)
@@ -80,7 +80,11 @@ Usually, successful many-word ideas have a Two Word Core. [The Law of Shitty Cli
 
 ## How to Figure Out Your Two Words
 
-Two Words is the ultimate microcopy. It is at once trivial, yet important (by sheer memetic value). Obviously it has high marketing value, but finding a good Two Words to hang your hat on for the life of your idea is not easy.
+Two Words is the ultimate microcopy. It is at once trivial, yet important (by sheer memetic value). Obviously it has high marketing value, but finding a good Two Words to hang your hat on for the life of your idea is not easy. [As Naval says](https://twitter.com/naval/status/1133452743614451712):
+
+> Become the best in the world at what you do. Keep redefining what you do until this is true.
+
+Authenticity is critical - nobody can compete with you at being you.
 
 One way to figure it out is have people repeat back your idea in their words, after you give your spiel. Your words don't matter, theirs do. You don't need to adopt exactly what they use, but a message that doesn't take after repeated attempts is a problem.
 
@@ -125,7 +129,7 @@ This is a living list - I will update as I go. [Tell me good candidates for the 
   - Under Armor
   - Pager Duty
 - mottos:
-  - naval: productize yourself
+  - naval: productize yourself, specific knowledge
   - effective altruism
   - don valentine: Who Cares? (thanks rauchg)
   - vgr: premium mediocre
@@ -154,6 +158,7 @@ This is a living list - I will update as I go. [Tell me good candidates for the 
   - servant leadership
   - spiritual leadership??
   - law of shitty clickthroughs
+  - gatsby - content mesh
 - three worders
   - getting things done
   - time well spent

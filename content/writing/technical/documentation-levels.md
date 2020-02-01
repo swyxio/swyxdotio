@@ -46,6 +46,11 @@ High level user centric goals of docs:
 
 I tried to loosely order this but ofc it is up to interpretation. A lot of this is my brainstorm, plus [Mark's summary of the great Divio blogpost](https://github.com/reduxjs/redux/issues/3609):
 
+- Homepage/Readme:
+  - Set a good first impression
+  - Answer What is this?
+  - Answer What can it do for me?
+  - Answer Where to learn more?
 - Answer questions where the user expects them
   - **One sentence description for github headline**
   - One paragraph description with more context
@@ -88,6 +93,7 @@ I tried to loosely order this but ofc it is up to interpretation. A lot of this 
   - Link to community slack/gitter/twitter
   - **Known Issues**
 - **Tutorial**
+  - can take the form of **Getting Started**, assume no knowledge
   - Explain acronyms, jargon
   - step through APIs
   - Learn by doing
@@ -209,7 +215,7 @@ So let's split up those features above by levels - and pair the levels with wher
   - Third Party Plugins/Libraries
   - How-To Guide/Cookbook/Recipes
   - User/Maintainer Content
-    - Official Blog
+    - Official Blog/Project and Meeting Notes
     - Talks
     - 3rd Party Blogs
     - Video Tutorials
@@ -261,3 +267,4 @@ A more ambitious framing of this might put them into a pyramid "hierarchy of nee
 ## Further Reading
 
 - https://github.com/reduxjs/redux/issues/3609 has a bunch of great links
+- https://vimeo.com/32957711 John Resig on JQuery's OSS community
