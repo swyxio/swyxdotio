@@ -17,45 +17,46 @@ You are welcome to ping me for detailed thoughts on each of these, I didnt have 
 
 Evergreen Podcasts that are still worth going back through for (including Seasonal/Dead podcasts). This is a high compliment from me, although other categories also include podcasts I also LOVE.
 
-- **Dolly Parton's America** ([rss](http://feeds.wnyc.org/dolly-partons-america), [url](https://www.wnycstudios.org/podcasts/dolly-partons-america)) - I never grew up with Dolly and this fills a hole.
-- **A Very Fatal Murder** ([rss](http://feeds.megaphone.fm/veryfatalmurder)) - HILARIOUS ads
-- **Common Sense with Dan Carlin** ([rss](http://feeds.feedburner.com/dancarlin/commonsense?format=xml), [url](http://www.dancarlin.com/))
-- **The Last Days of August** ([rss](http://thebutterflyeffect.audible.libsynpro.com/rss), [url](https://www.audible.com/pd/The-Last-Days-of-August-Audiobook/))
-- **Office Hours with Spencer Rascoff** ([rss](http://officehourswithspencerrascoff.zillownetwork.libsynpro.com/rss), [url](http://zillow.com/office-hours)) CEO interviewing CEOs is the BEST.
-- **S-Town** ([rss](http://feeds.stownpodcast.org/stownpodcast), [url](https://stownpodcast.org/))
-- **American Innovations** ([rss](https://rss.art19.com/american-innovations-podcast), [url](https://art19.com/shows/american-innovations-podcast))
-- **Inside Star Wars** ([rss](https://rss.art19.com/inside-star-wars), [url](https://art19.com/shows/inside-star-wars))
+- **Dolly Parton's America** ([rss](http://feeds.wnyc.org/dolly-partons-america), [url](https://www.wnycstudios.org/podcasts/dolly-partons-america)) - I never grew up with Dolly and this fills a hole. One-season run.
+- **A Very Fatal Murder** ([rss](http://feeds.megaphone.fm/veryfatalmurder)) - HILARIOUS ads. One-season run.
+- **Common Sense with Dan Carlin** ([rss](http://feeds.feedburner.com/dancarlin/commonsense?format=xml), [url](http://www.dancarlin.com/)) - seems dormant but good to get a Carlin political rant.
+- **The Last Days of August** ([rss](http://thebutterflyeffect.audible.libsynpro.com/rss), [url](https://www.audible.com/pd/The-Last-Days-of-August-Audiobook/)) - One-season run.
+- **Office Hours with Spencer Rascoff** ([rss](http://officehourswithspencerrascoff.zillownetwork.libsynpro.com/rss), [url](http://zillow.com/office-hours)) CEO interviewing CEOs is the BEST. Seems dormant right now and he's no longer at Zillow.
+- **S-Town** ([rss](http://feeds.stownpodcast.org/stownpodcast), [url](https://stownpodcast.org/)) - the original podcast revival
+- **American Innovations** ([rss](https://rss.art19.com/american-innovations-podcast), [url](https://art19.com/shows/american-innovations-podcast)) - great history re-enactments
+- **Inside Star Wars** ([rss](https://rss.art19.com/inside-star-wars), [url](https://art19.com/shows/inside-star-wars)) - One-season run.
 - **Pessimists Archive Podcast** ([rss](http://feeds.soundcloud.com/users/soundcloud:users:220006686/sounds.rss), [url](http://www.pessimists.co/)) - people shit on tech since the dawn of time.
 - **Ear Hustle** ([rss](http://feeds.earhustlesq.com/earhustlesq), [url](https://www.earhustlesq.com/)) - great stories from prison
 - **Tribe of Mentors** ([rss](https://rss.art19.com/tribe-of-mentors), [url](https://art19.com/shows/tribe-of-mentors))
 - **Untold Stories** ([rss](https://feeds.megaphone.fm/untoldstories), [url](https://blockworksgroup.io/untold-stories-podcast))
-- **Acquired** ([rss](https://acquired.libsyn.com/rss), [url](https://acquired.fm/)) probably the highest quality Tech History podcast I have ever come across
+- **Acquired** ([rss](https://acquired.libsyn.com/rss), [url](https://acquired.fm/)) probably the highest quality recent Tech History podcast I have ever come across
 - **Soundtracking with Edith Bowman** ([rss](https://audioboom.com/channels/4794784.rss), [url](https://audioboom.com/channel/soundtrackingwithedithbowman)) - A-list celebs/directors talk about the sound behind their movies usually right after they come out
 - **Decrypted** ([rss](http://feeds.bloomberg.fm/BLM3923153289), [url](https://bloomberg.com/podcasts/decrypted)) - dead now, but aki ito and brad stone were really great
-- **Dan Carlin's Hardcore History** ([rss](http://feeds.feedburner.com/dancarlin/history?format=xml), [url](http://www.dancarlin.com/))
+- **Dan Carlin's Hardcore History** ([rss](http://feeds.feedburner.com/dancarlin/history?format=xml), [url](http://www.dancarlin.com/)) - very infrequent but good history
 - **Beyond the Screenplay** ([rss](https://anchor.fm/s/86e1204/podcast/rss), [url](https://anchor.fm/beyondthescreenplay))
 - **Mostly Nitpicking** ([rss](http://mostlynitpicking.libsyn.com/rss), [url](https://www.mostlynitpicking.com/)) - Nando is great at nitpicking pop culture
 - **Swindled** ([rss](https://feeds.megaphone.fm/ADL8288293115), [url](http://www.swindledpodcast.com/))
 - **The Reductress Minute** ([rss](https://rss.art19.com/the-reductress-minute), [url](https://art19.com/shows/the-reductress-minute)) - dead, but hilarious
-- **Behind The Tech with Kevin Scott** ([rss](http://behindthetech.mpsn.libsynpro.com/rss), [url](https://www.microsoft.com/en-us/behind-the-tech))
-- **The Missing Cryptoqueen** ([rss](https://podcasts.files.bbci.co.uk/p07nkd84.rss), [url](http://www.bbc.co.uk/programmes/p07nkd84))
+- **Behind The Tech with Kevin Scott** ([rss](http://behindthetech.mpsn.libsynpro.com/rss), [url](https://www.microsoft.com/en-us/behind-the-tech)) - Microsoft CTO interviewing his heroes, with Christina Warren
+- **The Missing Cryptoqueen** ([rss](https://podcasts.files.bbci.co.uk/p07nkd84.rss), [url](http://www.bbc.co.uk/programmes/p07nkd84)) - One-season run.
 - **Philosophy Bites** ([rss](http://philosophybites.libsyn.com/rss), [url](http://www.philosophybites.com/))
-- **The After On Podcast** ([rss](http://afteron.libsyn.com/rss), [url](https://www.after-on.com/)) - great futurism from a fascinating author
+- **The After On Podcast** ([rss](http://afteron.libsyn.com/rss), [url](https://www.after-on.com/)) - great futurism from a fascinating author. dead now
 - **Business Wars** ([rss](https://rss.art19.com/business-wars), [url](https://www.wondery.com/shows/business-wars/?utm_source=rss)) - replays of great business rivalries
-- **Internet History Podcast** ([rss](https://feedpress.me/InternetHistoryPodcast), [url](https://play.acast.com/s/internethistorypodcast)) - LOVE tech history
-- **Homecoming** ([rss](https://feeds.megaphone.fm/homecoming), [url](https://www.gimletmedia.com/homecoming))
+- **Internet History Podcast** ([rss](https://feedpress.me/InternetHistoryPodcast), [url](https://play.acast.com/s/internethistorypodcast)) - LOVE tech history. dead noe.
+- **Homecoming** ([rss](https://feeds.megaphone.fm/homecoming), [url](https://www.gimletmedia.com/homecoming)) - One-season run.
     
 ## Storytelling
 
 Sometimes you just want a good story.
 
+- **Partners** ([rss](https://feed.partners.show/), [url](https://www.partners.show/)) - Hrishi Hirway's new thing
 - **This American Life** ([rss](http://feed.thisamericanlife.org/talpodcast), [url](https://www.thisamericanlife.org/))
 - **Cautionary Tales** ([rss](https://feeds.megaphone.fm/cautionarytales), [url](https://www.pushkin.fm/))
 - **99% Invisible** ([rss](http://feeds.99percentinvisible.org/99percentinvisible), [url](http://99percentinvisible.org/))
 - **Radiolab** ([rss](http://feeds.wnyc.org/radiolab), [url](https://www.wnycstudios.org/podcasts/radiolab/projects/podcasts))
 - **Revisionist History** ([rss](https://feeds.megaphone.fm/revisionisthistory), [url](http://revisionisthistory.com/))
 - **Against the Rules with Michael Lewis** ([rss](https://feeds.megaphone.fm/against-the-rules), [url](https://atrpodcast.com/))
-- **The Moth** ([rss](http://feeds.feedburner.com/themothpodcast), [url](http://themoth.org/))
+- **The Moth** ([rss](http://feeds.feedburner.com/themothpodcast), [url](http://themoth.org/)) - probably the only podcast that has ever made me cry.
     
 ## Tech
 
@@ -147,14 +148,14 @@ Stuff happens, people react and report. I keep in touch with Finance stuff due t
 ### News: General
 
 - **The Daily** ([rss](http://rss.art19.com/the-daily), [url](https://www.nytimes.com/the-daily))
-- **Axios Pro Rata** ([rss](http://feeds.feedburner.com/pro-rata), [url](https://www.axios.com/tag/pro-rata-podcast))
-- **Stay Tuned with Preet** ([rss](https://rss.art19.com/stay-tuned-with-preet), [url](http://cafe.com/))
+- **Axios Pro Rata** ([rss](http://feeds.feedburner.com/pro-rata), [url](https://www.axios.com/tag/pro-rata-podcast)) - dan primack is a little overrated but gets good access.
+- **Stay Tuned with Preet** ([rss](https://rss.art19.com/stay-tuned-with-preet), [url](http://cafe.com/)) - preet is amazing and should someday run for office.
 - **The Intelligence** ([rss](https://rss.acast.com/theeconomisttheweekahead), [url](https://theintelligence.economist.com/))
-- **The Diplomat | Asia Geopolitics** ([rss](https://thediplomat.com/?feed=itunes&amp;podcast=asia-geopolitics), [url](http://thediplomat.com/category/podcasts/asia-geopolitics))
+- **The Diplomat | Asia Geopolitics** ([rss](https://thediplomat.com/?feed=itunes&amp;podcast=asia-geopolitics), [url](http://thediplomat.com/category/podcasts/asia-geopolitics)) - i dont know why these people are so interested in asia geopolitics lol but its great to tap into their world every now and then
     
 ### News: Tech
 
-- **Exponent** ([rss](http://exponent.fm/feed/), [url](http://exponent.fm/))
+- **Exponent** ([rss](http://exponent.fm/feed/), [url](http://exponent.fm/)) - Ben Thompson and James Allworth talk through Stratechery stuff.
 - **AWS Morning Brief** ([rss](https://feeds.transistor.fm/aws-morning-brief), [url](https://www.lastweekinaws.com/))
 - **AWS Podcast** ([rss](https://d3gih7jbfe3jlq.cloudfront.net/aws-podcast.rss), [url](https://aws.amazon.com/podcasts/aws-podcast/))
 - **Techmeme Ride Home** ([rss](https://rss.art19.com/techmeme-ridehome), [url](https://art19.com/shows/techmeme-ridehome))
