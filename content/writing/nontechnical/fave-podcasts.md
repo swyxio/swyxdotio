@@ -169,12 +169,13 @@ Stuff happens, people react and report. I keep in touch with Finance stuff due t
     
 ### News: Finance 
 
-- **What Goes Up** ([rss](https://feeds.megaphone.fm/whatgoesup), [url](https://www.bloomberg.com/podcasts/what_goes_up))
-- **Slate Money** ([rss](https://feeds.megaphone.fm/slatemoney), [url](http://www.slate.com/slatemoney))
+- **What Goes Up** ([rss](https://feeds.megaphone.fm/whatgoesup), [url](https://www.bloomberg.com/podcasts/what_goes_up)) - another chummy panel, no BS podcast
+- **Slate Money** ([rss](https://feeds.megaphone.fm/slatemoney), [url](http://www.slate.com/slatemoney)) - I have loved Felix Salmon from his days at Reuters.
 - **WSJ Heard On the Street** ([rss](http://feeds.wsjonline.com/wsj/podcast_heard_on_the_street))
-- **FT Alphachat** ([rss](http://rss.acast.com/ft-alphachat), [url](https://ftalphaville.ft.com/series/Alphachat))- **Odd Lots** ([rss](http://feeds.bloomberg.fm/BLM2009837477), [url](https://bloomberg.com/podcasts/odd_lots))
+- **FT Alphachat** ([rss](http://rss.acast.com/ft-alphachat), [url](https://ftalphaville.ft.com/series/Alphachat))
+- **Odd Lots** ([rss](http://feeds.bloomberg.fm/BLM2009837477), [url](https://bloomberg.com/podcasts/odd_lots)) - Joe Wiesenthal is just the right mix of no bullshit finance guy but also nice and surprisingly good at singing. Tracy Alloway keeps him in check.
 - **Money Talks from Economist Radio** ([rss](https://rss.acast.com/theeconomistmoneytalks), [url](https://www.economist.com/))
-- **Snacks Daily** ([rss](http://feeds.feedburner.com/marketsnacks-daily), [url](http://www.snacks.robinhood.com/))
+- **Snacks Daily** ([rss](http://feeds.feedburner.com/marketsnacks-daily), [url](http://www.snacks.robinhood.com/)) - for noobs but high energy and good to see what they see
 - **The Journal.** ([rss](https://video-api.wsj.com/podcast/rss/wsj/the-journal), [url](https://www.wsj.com/podcasts/the-journal))
 - **Exchanges at Goldman Sachs** ([rss](https://feeds.megaphone.fm/GLD9218176758), [url](http://www.goldmansachs.com/our-thinking/podcasts/index.html))
 - **Behind the Markets Podcast** ([rss](https://feeds.acast.com/public/shows/5b6afaddb794d5666cd13431), [url](https://businessradio.wharton.upenn.edu/programs/behind-the-markets))
@@ -213,10 +214,10 @@ A lot of podcasts are interviewing founders which is a mix of business and tech.
 - **Escape Velocity - with Dan Martell** ([rss](https://escapevelocitywithdan.libsyn.com/rss), [url](http://www.danmartell.com/))
 - **Subscribed Podcast** ([rss](http://customersuccess.libsyn.com/rss), [url](https://www.zuora.com/resource/podcast))
 - **Side Hustle School** ([rss](https://feeds.megaphone.fm/sidehustleschool), [url](http://sidehustleschool.com/))
-- **Mixergy - Startup Stories with 1000+ entrepreneurs and businesses** ([rss](https://mixergy.com/?feed=mixergy_feed&amp;rss_source=itunes&amp;), [url](https://mixergy.com/))
+- **Mixergy - Startup Stories with 1000+ entrepreneurs and businesses** ([rss](https://mixergy.com/?feed=mixergy_feed&amp;rss_source=itunes&amp;), [url](https://mixergy.com/)) - andrew warner presses his guests on details
 - **Business of Software Podcast** ([rss](https://anchor.fm/s/12e0dce4/podcast/rss), [url](https://anchor.fm/business-of-software-podcast))
 - **The Indie Hackers Podcast** ([rss](http://feeds.backtracks.fm/feeds/indiehackers/indiehackers/feed.xml), [url](https://www.indiehackers.com/))
-- **This Week in Startups - Audio** ([rss](http://feeds.feedburner.com/twist-audio), [url](https://thisweekinstartups.com/))
+- **This Week in Startups - Audio** ([rss](http://feeds.feedburner.com/twist-audio), [url](https://thisweekinstartups.com/)) - Jason is arrogant but earns it
 - **Wharton FinTech Podcast** ([rss](http://feeds.soundcloud.com/users/soundcloud:users:176298819/sounds.rss), [url](http://www.whartonfintech.org/))
 - **Double Your Freelancing Podcast** ([rss](https://rss.simplecast.com/podcasts/219/rss), [url](https://doubleyourfreelancing.com/podcast/))
 - **The Official Saastr Podcast: SaaS | Founders | Investors** ([rss](http://saastr.libsyn.com/rss), [url](http://www.saastr.com/))
@@ -231,8 +232,8 @@ A lot of podcasts are interviewing founders which is a mix of business and tech.
 A little more unstructured, but telling the story as it happens
 
 - **The Startup Chat with Steli and Hiten** ([rss](https://thestartupchat.com/feed/podcast/), [url](https://thestartupchat.com/))
-- **To Be Continuous** ([rss](https://www.heavybit.com/category/library/podcasts/to-be-continuous/feed/), [url](https://www.heavybit.com/library/podcasts/to-be-continuous/))
-- **Startups For the Rest of Us** ([rss](https://feeds.feedblitz.com/startupsfortherestofus&amp;x=1), [url](https://www.startupsfortherestofus.com/))
+- **To Be Continuous** ([rss](https://www.heavybit.com/category/library/podcasts/to-be-continuous/feed/), [url](https://www.heavybit.com/library/podcasts/to-be-continuous/)) - Paul Biggar of Darklang, Edith Harbaugh of LaunchDarkly
+- **Startups For the Rest of Us** ([rss](https://feeds.feedblitz.com/startupsfortherestofus&amp;x=1), [url](https://www.startupsfortherestofus.com/)) - Rob Walling
 - **The Forbes Interview** ([rss](https://rss.art19.com/forbes-interview), [url](https://art19.com/shows/forbes-interview))
 - **Building Infinite Red** ([rss](https://feeds.simplecast.com/2lZvFwSE), [url](https://building.infinite.red/))
 - **Inside Intercom Podcast** ([rss](https://rss.art19.com/inside-intercom), [url](https://www.intercom.com/blog/podcasts/))
@@ -247,11 +248,11 @@ A little more unstructured, but telling the story as it happens
 
 Stuff that didnt fit anywhere else :)
 
-- **The Psychology Podcast** ([rss](http://psychologypodcast.libsyn.com/rss), [url](http://www.thepsychologypodcast.com/))
-- **Psychology of Video Games Podcast** ([rss](https://www.spreaker.com/show/3329893/episodes/feed), [url](https://www.spreaker.com/show/psychology-of-video-games-podcast_1))
-- **The Happiness Lab with Dr. Laurie Santos** ([rss](https://feeds.megaphone.fm/happinesslab), [url](https://www.pushkin.fm/))
+- **The Psychology Podcast** ([rss](http://psychologypodcast.libsyn.com/rss), [url](http://www.thepsychologypodcast.com/)) - general academic psychology
+- **Psychology of Video Games Podcast** ([rss](https://www.spreaker.com/show/3329893/episodes/feed), [url](https://www.spreaker.com/show/psychology-of-video-games-podcast_1)) - games are applied psychology
+- **The Happiness Lab with Dr. Laurie Santos** ([rss](https://feeds.megaphone.fm/happinesslab), [url](https://www.pushkin.fm/)) - positive psychology
 - **Babbage from Economist Radio** ([rss](https://rss.acast.com/theeconomistbabbage), [url](https://www.economist.com/))
-- **Steal the Show with Michael Port** ([rss](http://michaelport.libsyn.com/rss), [url](http://stealtheshow.com/))
+- **Steal the Show with Michael Port** ([rss](http://michaelport.libsyn.com/rss), [url](http://stealtheshow.com/)) - speaking by professional speakers
 - **Get Together** ([rss](https://feeds.simplecast.com/Du5O1PAl), [url](https://www.gettogether.fm/))
 - **Intelligence Squared** ([rss](http://rss.acast.com/intelligencesquared), [url](http://www.intelligencesquared.com/))
 - **The Meb Faber Show** ([rss](http://mebfaber.libsyn.com/rss), [url](http://mebfaber.libsyn.com/podcast))
@@ -283,13 +284,14 @@ Stuff that didnt fit anywhere else :)
 
 ### Fun
 
-- **Wait Wait... Don't Tell Me!** ([rss](https://www.npr.org/rss/podcast.php?id=344098539), [url](http://www.npr.org/programs/wait-wait-dont-tell-me/))
-- **Ask Me Another** ([rss](https://www.npr.org/rss/podcast.php?id=510299), [url](https://www.npr.org/programs/ask-me-another/))
-- **The Weekly Planet** ([rss](https://rss.acast.com/theweeklyplanet), [url](https://play.acast.com/s/theweeklyplanet))
+- **Wait Wait... Don't Tell Me!** ([rss](https://www.npr.org/rss/podcast.php?id=344098539), [url](http://www.npr.org/programs/wait-wait-dont-tell-me/)) - Peter Sagal is amazing
+- **Ask Me Another** ([rss](https://www.npr.org/rss/podcast.php?id=510299), [url](https://www.npr.org/programs/ask-me-another/)) - i love Ophira
+- **The Weekly Planet** ([rss](https://rss.acast.com/theweeklyplanet), [url](https://play.acast.com/s/theweeklyplanet)) - aussie's shit talking is the best
 - **Change My View** ([rss](http://feeds.soundcloud.com/users/soundcloud:users:265133677/sounds.rss), [url](http://soundcloud.com/changemyview))
 - **The Good Place: The Podcast** ([rss](https://rss.art19.com/the-good-place-the-podcast), [url](https://art19.com/shows/the-good-place-the-podcast))
-- **Office Ladies** ([rss](https://www.omnycontent.com/d/playlist/aaea4e69-af51-495e-afc9-a9760146922b/75a86d39-9e0e-4e9a-b948-aae301805fe6/514362cf-31b4-4ed2-af40-aae301805ffd/podcast.rss), [url](https://www.earwolf.com/show/office-ladies/))- **Friday Night Comedy from BBC Radio 4** ([rss](https://podcasts.files.bbci.co.uk/p02pc9pj.rss), [url](http://www.bbc.co.uk/programmes/p02pc9pj))
-- **The West Wing Weekly** ([rss](http://feeds.feedburner.com/westwingweekly), [url](http://thewestwingweekly.com/))
+- **Office Ladies** ([rss](https://www.omnycontent.com/d/playlist/aaea4e69-af51-495e-afc9-a9760146922b/75a86d39-9e0e-4e9a-b948-aae301805fe6/514362cf-31b4-4ed2-af40-aae301805ffd/podcast.rss), [url](https://www.earwolf.com/show/office-ladies/))
+- **Friday Night Comedy from BBC Radio 4** ([rss](https://podcasts.files.bbci.co.uk/p02pc9pj.rss), [url](http://www.bbc.co.uk/programmes/p02pc9pj))
+- **The West Wing Weekly** ([rss](http://feeds.feedburner.com/westwingweekly), [url](http://thewestwingweekly.com/)) - ended now. but still amazing
 - **Harry Potter and the Sacred Text** ([rss](http://feeds.harrypottersacredtext.com/harrypottersacredtext), [url](http://harrypottersacredtext.com/))
 - **CLUBLIFE** ([rss](https://feeds.acast.com/public/shows/clublife-by-tiesto), [url](http://www.tiesto.com/))
 - **Eelke Kleijn | DAYS like NIGHTS Radio** ([rss](http://feeds.soundcloud.com/users/soundcloud:users:1525250/sounds.rss), [url](http://www.eelkekleijn.nl/))
@@ -316,11 +318,11 @@ Stuff that didnt fit anywhere else :)
 
 High volume things that are occasionally good but I really skim
 
-- **The Talk Show With John Gruber** ([rss](https://daringfireball.net/thetalkshow/rss), [url](https://daringfireball.net/thetalkshow))
-- **The Tim Ferriss Show** ([rss](https://rss.art19.com/tim-ferriss-show), [url](https://tim.blog/podcast))
-- **Channel 9** ([rss](http://channel9.msdn.com/Feeds/RSS/mp3), [url](https://channel9.msdn.com/))
-- **BxJS Weekly** ([rss](https://anchor.fm/s/e8806f4/podcast/rss), [url](https://bxjs.dev/))
-- **The Moment with Brian Koppelman** ([rss](http://feeds.megaphone.fm/themomentwithbriankoppelman), [url](http://www.cadence13.com/))
-- **All Songs Considered** ([rss](https://www.npr.org/rss/podcast.php?id=510019), [url](https://www.npr.org/allsongs))
-- **The Joe Rogan Experience** ([rss](http://joeroganexp.joerogan.libsynpro.com/rss), [url](https://www.joerogan.com/))
-- **Whiskey Ginger w/ Andrew Santino** ([rss](https://feeds.simplecast.com/EV5uPq3u), [url](http://andrewsantino.com/))
+- **The Talk Show With John Gruber** ([rss](https://daringfireball.net/thetalkshow/rss), [url](https://daringfireball.net/thetalkshow)) - i hate the rambling but ben thompson swings by every now and then
+- **The Tim Ferriss Show** ([rss](https://rss.art19.com/tim-ferriss-show), [url](https://tim.blog/podcast)) - it's Tim.
+- **Channel 9** ([rss](http://channel9.msdn.com/Feeds/RSS/mp3), [url](https://channel9.msdn.com/)) - a glimpse into microsoft-land
+- **BxJS Weekly** ([rss](https://anchor.fm/s/e8806f4/podcast/rss), [url](https://bxjs.dev/)) - decent js coverage from someone who has way too much time doing this :)
+- **The Moment with Brian Koppelman** ([rss](http://feeds.megaphone.fm/themomentwithbriankoppelman), [url](http://www.cadence13.com/)) - celebs, writers
+- **All Songs Considered** ([rss](https://www.npr.org/rss/podcast.php?id=510019), [url](https://www.npr.org/allsongs)) - occasionally boring but sometimes really good
+- **The Joe Rogan Experience** ([rss](http://joeroganexp.joerogan.libsynpro.com/rss), [url](https://www.joerogan.com/)) - celebs
+- **Whiskey Ginger w/ Andrew Santino** ([rss](https://feeds.simplecast.com/EV5uPq3u), [url](http://andrewsantino.com/)) - celebs
