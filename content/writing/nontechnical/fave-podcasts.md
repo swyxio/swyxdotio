@@ -6,7 +6,7 @@ description: 250 Podcasts I enjoy listening to
 date: 2020-02-02
 ---
 
-I recently switched from Apple to Android (post to come about THAT one...) and had to port my podcast subscriptions from Overcast. I figured I would categorize and post commentary here for those who may be interested.
+I recently switched from iPhone to Android (post to come about THAT one...) and had to port my podcast subscriptions from Overcast. I figured I would categorize and post commentary here for those who may be interested.
 
 You are welcome to ping me for detailed thoughts on each of these, I didnt have time to write them down.
 
@@ -17,30 +17,32 @@ You are welcome to ping me for detailed thoughts on each of these, I didnt have 
 
 Evergreen Podcasts that are still worth going back through for (including Seasonal/Dead podcasts). This is a high compliment from me, although other categories also include podcasts I also LOVE.
 
-- **Dolly Parton's America** ([rss](http://feeds.wnyc.org/dolly-partons-america), [url](https://www.wnycstudios.org/podcasts/dolly-partons-america))
-- **A Very Fatal Murder** ([rss](http://feeds.megaphone.fm/veryfatalmurder))
+- **Dolly Parton's America** ([rss](http://feeds.wnyc.org/dolly-partons-america), [url](https://www.wnycstudios.org/podcasts/dolly-partons-america)) - I never grew up with Dolly and this fills a hole.
+- **A Very Fatal Murder** ([rss](http://feeds.megaphone.fm/veryfatalmurder)) - HILARIOUS ads
 - **Common Sense with Dan Carlin** ([rss](http://feeds.feedburner.com/dancarlin/commonsense?format=xml), [url](http://www.dancarlin.com/))
 - **The Last Days of August** ([rss](http://thebutterflyeffect.audible.libsynpro.com/rss), [url](https://www.audible.com/pd/The-Last-Days-of-August-Audiobook/))
-- **Office Hours with Spencer Rascoff** ([rss](http://officehourswithspencerrascoff.zillownetwork.libsynpro.com/rss), [url](http://zillow.com/office-hours))
+- **Office Hours with Spencer Rascoff** ([rss](http://officehourswithspencerrascoff.zillownetwork.libsynpro.com/rss), [url](http://zillow.com/office-hours)) CEO interviewing CEOs is the BEST.
 - **S-Town** ([rss](http://feeds.stownpodcast.org/stownpodcast), [url](https://stownpodcast.org/))
 - **American Innovations** ([rss](https://rss.art19.com/american-innovations-podcast), [url](https://art19.com/shows/american-innovations-podcast))
 - **Inside Star Wars** ([rss](https://rss.art19.com/inside-star-wars), [url](https://art19.com/shows/inside-star-wars))
-- **Pessimists Archive Podcast** ([rss](http://feeds.soundcloud.com/users/soundcloud:users:220006686/sounds.rss), [url](http://www.pessimists.co/))
-- **Ear Hustle** ([rss](http://feeds.earhustlesq.com/earhustlesq), [url](https://www.earhustlesq.com/))
-- **Tribe of Mentors** ([rss](https://rss.art19.com/tribe-of-mentors), [url](https://art19.com/shows/tribe-of-mentors))- **Untold Stories** ([rss](https://feeds.megaphone.fm/untoldstories), [url](https://blockworksgroup.io/untold-stories-podcast))
-- **Acquired** ([rss](https://acquired.libsyn.com/rss), [url](https://acquired.fm/))
-- **Soundtracking with Edith Bowman** ([rss](https://audioboom.com/channels/4794784.rss), [url](https://audioboom.com/channel/soundtrackingwithedithbowman))
+- **Pessimists Archive Podcast** ([rss](http://feeds.soundcloud.com/users/soundcloud:users:220006686/sounds.rss), [url](http://www.pessimists.co/)) - people shit on tech since the dawn of time.
+- **Ear Hustle** ([rss](http://feeds.earhustlesq.com/earhustlesq), [url](https://www.earhustlesq.com/)) - great stories from prison
+- **Tribe of Mentors** ([rss](https://rss.art19.com/tribe-of-mentors), [url](https://art19.com/shows/tribe-of-mentors))
+- **Untold Stories** ([rss](https://feeds.megaphone.fm/untoldstories), [url](https://blockworksgroup.io/untold-stories-podcast))
+- **Acquired** ([rss](https://acquired.libsyn.com/rss), [url](https://acquired.fm/)) probably the highest quality Tech History podcast I have ever come across
+- **Soundtracking with Edith Bowman** ([rss](https://audioboom.com/channels/4794784.rss), [url](https://audioboom.com/channel/soundtrackingwithedithbowman)) - A-list celebs/directors talk about the sound behind their movies usually right after they come out
+- **Decrypted** ([rss](http://feeds.bloomberg.fm/BLM3923153289), [url](https://bloomberg.com/podcasts/decrypted)) - dead now, but aki ito and brad stone were really great
 - **Dan Carlin's Hardcore History** ([rss](http://feeds.feedburner.com/dancarlin/history?format=xml), [url](http://www.dancarlin.com/))
 - **Beyond the Screenplay** ([rss](https://anchor.fm/s/86e1204/podcast/rss), [url](https://anchor.fm/beyondthescreenplay))
-- **Mostly Nitpicking** ([rss](http://mostlynitpicking.libsyn.com/rss), [url](https://www.mostlynitpicking.com/))
+- **Mostly Nitpicking** ([rss](http://mostlynitpicking.libsyn.com/rss), [url](https://www.mostlynitpicking.com/)) - Nando is great at nitpicking pop culture
 - **Swindled** ([rss](https://feeds.megaphone.fm/ADL8288293115), [url](http://www.swindledpodcast.com/))
-- **The Reductress Minute** ([rss](https://rss.art19.com/the-reductress-minute), [url](https://art19.com/shows/the-reductress-minute))
+- **The Reductress Minute** ([rss](https://rss.art19.com/the-reductress-minute), [url](https://art19.com/shows/the-reductress-minute)) - dead, but hilarious
 - **Behind The Tech with Kevin Scott** ([rss](http://behindthetech.mpsn.libsynpro.com/rss), [url](https://www.microsoft.com/en-us/behind-the-tech))
 - **The Missing Cryptoqueen** ([rss](https://podcasts.files.bbci.co.uk/p07nkd84.rss), [url](http://www.bbc.co.uk/programmes/p07nkd84))
 - **Philosophy Bites** ([rss](http://philosophybites.libsyn.com/rss), [url](http://www.philosophybites.com/))
-- **The After On Podcast** ([rss](http://afteron.libsyn.com/rss), [url](https://www.after-on.com/))
-- **Business Wars** ([rss](https://rss.art19.com/business-wars), [url](https://www.wondery.com/shows/business-wars/?utm_source=rss))
-- **Internet History Podcast** ([rss](https://feedpress.me/InternetHistoryPodcast), [url](https://play.acast.com/s/internethistorypodcast))
+- **The After On Podcast** ([rss](http://afteron.libsyn.com/rss), [url](https://www.after-on.com/)) - great futurism from a fascinating author
+- **Business Wars** ([rss](https://rss.art19.com/business-wars), [url](https://www.wondery.com/shows/business-wars/?utm_source=rss)) - replays of great business rivalries
+- **Internet History Podcast** ([rss](https://feedpress.me/InternetHistoryPodcast), [url](https://play.acast.com/s/internethistorypodcast)) - LOVE tech history
 - **Homecoming** ([rss](https://feeds.megaphone.fm/homecoming), [url](https://www.gimletmedia.com/homecoming))
     
 ## Storytelling
@@ -69,11 +71,11 @@ Technical podcasts by people who code
 - **SitePen** ([rss](https://www.sitepen.com/feed/), [url](https://www.sitepen.com/))    
 - **React Podcast** ([rss](http://feeds.feedburner.com/reactjspodcast), [url](http://reactpodcast.com/))
 - **React Podcast (old)** ([rss](https://rss.simplecast.com/podcasts/6265/rss), [url](http://reactpodcast.com/))
-- **Syntax - Tasty Web Development Treats** ([rss](https://feed.syntax.fm/rss), [url](https://syntax.fm/))
+- **Syntax - Tasty Web Development Treats** ([rss](https://feed.syntax.fm/rss), [url](https://syntax.fm/)) - probably at the top of the game in this category
 - **Toolsday** ([rss](https://rss.simplecast.com/podcasts/4211/rss))
-- **Full Stack Radio** ([rss](https://rss.simplecast.com/podcasts/279/rss), [url](http://fullstackradio.com/))
+- **Full Stack Radio** ([rss](https://rss.simplecast.com/podcasts/279/rss), [url](http://fullstackradio.com/)) - everything adam wathan  does is gold
 - **ShopTalk Show** ([rss](https://shoptalkshow.com/feed/podcast), [url](https://shoptalkshow.com/))
-- **Programming by MGechev** ([rss](http://feeds.soundcloud.com/users/soundcloud:users:760338451/sounds.rss), [url](https://podcast.mgechev.com/))
+- **Programming by MGechev** ([rss](http://feeds.soundcloud.com/users/soundcloud:users:760338451/sounds.rss), [url](https://podcast.mgechev.com/)) - still pretty new, but very high quality algorithms stuff
 - **The Undefined Podcast** ([rss](https://feeds.simplecast.com/8lcA0Is7), [url](https://undefined.fm/))
 - **Ladybug Podcast** ([rss](https://pinecast.com/feed/ladybug-podcast), [url](https://ladybug.dev/))
 - **That's my JAMstack** ([rss](https://pinecast.com/feed/thats-my-jamstack), [url](https://thatsmyjamstack.com/))
@@ -82,22 +84,23 @@ Technical podcasts by people who code
 - **The Babel Podcast** ([rss](https://feeds.transistor.fm/the-babel-podcast), [url](https://podcast.babeljs.io/))
 - **Chats with Kent C. Dodds** ([rss](https://feeds.simplecast.com/X_wS_WYh), [url](https://kentcdodds.com/chats-with-kent-podcast))
 - **3 Minutes with Kent** ([rss](https://www.briefs.fm/3-minutes-with-kent.xml), [url](https://www.briefs.fm/3-minutes-with-kent))
-- **CodePen Radio** ([rss](https://blog.codepen.io/feed/podcast/), [url](https://blog.codepen.io/))
-- **Front End Happy Hour** ([rss](https://feeds.soundcloud.com/users/soundcloud:users:206137365/sounds.rss), [url](http://frontendhappyhour.com/))
+- **CodePen Radio** ([rss](https://blog.codepen.io/feed/podcast/), [url](https://blog.codepen.io/)) - love learning about codepen from codepen
+- **Front End Happy Hour** ([rss](https://feeds.soundcloud.com/users/soundcloud:users:206137365/sounds.rss), [url](http://frontendhappyhour.com/)) - drinks format is amazing
 - **Fish and Scripts** ([rss](https://anchor.fm/s/cf40bd0/podcast/rss), [url](https://www.fishandscripts.com/))
 
 ### Tech: Cloud
 
-- **Screaming in the Cloud** ([rss](https://feeds.transistor.fm/screaming-in-the-cloud), [url](https://screaminginthecloud.com/))
-- **Arrested DevOps** ([rss](https://www.arresteddevops.com/episode/index.xml), [url](https://www.arresteddevops.com/))
-- **The New Stack Makers** ([rss](http://feeds.soundcloud.com/users/soundcloud:users:107605642/sounds.rss), [url](http://soundcloud.com/thenewstackmakers))
+- **Screaming in the Cloud** ([rss](https://feeds.transistor.fm/screaming-in-the-cloud), [url](https://screaminginthecloud.com/)) - corey teaches me a ton about aws
+- **Serverless Chats** ([rss](https://feeds.transistor.fm/serverless-chats), [url](https://www.serverlesschats.com/)) - really good
+- **Arrested DevOps** ([rss](https://www.arresteddevops.com/episode/index.xml), [url](https://www.arresteddevops.com/)) - i am newer to this but i like matty
+- **The New Stack Makers** ([rss](http://feeds.soundcloud.com/users/soundcloud:users:107605642/sounds.rss), [url](http://soundcloud.com/thenewstackmakers)) - oddball but occasionally good guests
+- **Google Cloud Platform Podcast** ([rss](https://feeds.feedburner.com/GcpPodcast), [url](https://www.gcppodcast.com/)) - from gcp folk - just nice to keep tabs
 
 ### Tech: AI/ML
 
 - **The TWIML AI Podcast (formerly This Week in Machine Learning &amp; Artificial Intelligence)** ([rss](http://twimlai.libsyn.com/rss), [url](https://twimlai.com/))
 - **Not So Standard Deviations** ([rss](http://nssdeviations.libsyn.com/rss), [url](http://nssdeviations.com/))
-- **Serverless Chats** ([rss](https://feeds.transistor.fm/serverless-chats), [url](https://www.serverlesschats.com/))
-- **Autonocast** ([rss](https://damon-lavrinc-zzza.squarespace.com/blog?format=rss), [url](http://www.autonocast.com/))
+- **Autonocast** ([rss](https://damon-lavrinc-zzza.squarespace.com/blog?format=rss), [url](http://www.autonocast.com/)) - really good insiders podcast on autonomous driving
 - **Data Engineering Podcast** ([rss](https://www.dataengineeringpodcast.com/feed/mp3/), [url](https://www.dataengineeringpodcast.com/))
 
 ### Tech: Design
@@ -110,23 +113,23 @@ Technical podcasts by people who code
 
 - **Hanselminutes - Fresh Talk and Tech for Developers** ([rss](https://feeds.simplecast.com/gvtxUiIf), [url](https://www.hanselminutes.com/))
 - **The Bike Shed** ([rss](https://feeds.fireside.fm/bikeshed/rss), [url](https://www.bikeshed.fm/))
-- **The freeCodeCamp Podcast** ([rss](http://freecodecamp.libsyn.com/rss), [url](https://www.freecodecamp.org/))
+- **The freeCodeCamp Podcast** ([rss](http://freecodecamp.libsyn.com/rss), [url](https://www.freecodecamp.org/)) - I'm on here!
 - **Function with Anil Dash** ([rss](https://feeds.megaphone.fm/function), [url](https://glitch.com/culture/function/))
 - **Darknet Diaries** ([rss](https://feeds.megaphone.fm/darknetdiaries), [url](https://darknetdiaries.com/))
-- **Software Engineering Daily** ([rss](https://softwareengineeringdaily.com/feed/podcast/), [url](https://softwareengineeringdaily.com/archives/))
+- **Software Engineering Daily** ([rss](https://softwareengineeringdaily.com/feed/podcast/), [url](https://softwareengineeringdaily.com/archives/)) - I'm on here! also [previously wrote a whole piece on it](https://www.swyx.io/writing/faves-se-daily)
 - **The Changelog** ([rss](https://changelog.com/podcast/feed), [url](https://changelog.com/podcast))
 - **On The Metal** ([rss](https://feeds.transistor.fm/on-the-metal-0294649e-ec23-4eab-975a-9eb13fd94e06), [url](https://onthemetal.fm/))
 - **Talk Python To Me - Python conversations for passionate developers** ([rss](https://talkpython.fm/episodes/rss), [url](https://talkpython.fm/))
-- **Acquired** ([rss](https://acquired.libsyn.com/rss), [url](https://acquired.fm/))
+- **Acquired** ([rss](https://acquired.libsyn.com/rss), [url](https://acquired.fm/)) - ALLTIME GREAT podcast
 - **Under the Radar** ([rss](https://www.relay.fm/radar/feed), [url](https://www.relay.fm/radar))
 - **Software Engineering Radio - The Podcast for Professional Software Developers** ([rss](http://feeds.feedburner.com/se-radio), [url](https://www.se-radio.net/))
 - **The Laravel Snippet** ([rss](https://feeds.transistor.fm/laravel-snippet), [url](https://laravel.com/))
 - **BookBytes** ([rss](https://www.orbit.fm/bookbytes/feed.rss), [url](https://www.orbit.fm/bookbytes))
 - **Soft Skills Engineering** ([rss](http://feeds.feedburner.com/SoftSkillsEngineering), [url](https://softskills.audio/))
 - **React Native Radio** ([rss](https://feeds.feedwrench.com/react-native-radio.rss), [url](https://devchat.tv/react-native-radio))
-- **Giant Robots Smashing Into Other Giant Robots** ([rss](https://feeds.fireside.fm/giantrobots/rss), [url](https://www.giantrobots.fm/))
+- **Giant Robots Smashing Into Other Giant Robots** ([rss](https://feeds.fireside.fm/giantrobots/rss), [url](https://www.giantrobots.fm/)) - winner: best name
 - **GraphQL Radio** ([rss](http://feeds.soundcloud.com/users/soundcloud:users:302309511/sounds.rss), [url](http://graphqlradio.com/))
-- **egghead.io developer chats** ([rss](https://feeds.simplecast.com/saRCLXVY), [url](https://egghead.io/))
+- **egghead.io developer chats** ([rss](https://feeds.simplecast.com/saRCLXVY), [url](https://egghead.io/)) - I'm on here
 - **devMode.fm** ([rss](https://devmode.fm/rss), [url](https://devmode.fm/))
 - **The Python Podcast.__init__** ([rss](https://www.podcastinit.com/feed/mp3/), [url](https://www.pythonpodcast.com/))
 - **Coding Blocks** ([rss](http://feeds.podtrac.com/tBPkjrcL0_m0), [url](https://www.codingblocks.net/))
@@ -136,7 +139,6 @@ Technical podcasts by people who code
 
 - **The Visual Developers Podcast** ([rss](https://feeds.transistor.fm/the-visual-developers-podcast), [url](https://visualdev.fm/))
 - **BuiltOnAir** ([rss](https://feeds.transistor.fm/builtonair), [url](https://builtonair.com/))
-
 
 ## News
 
@@ -161,11 +163,9 @@ Stuff happens, people react and report. I keep in touch with Finance stuff due t
 - **Editor's Picks from The Economist** ([rss](https://rss.acast.com/theeconomisteditorspicks), [url](http://www.economist.com/))
 - **The Information's 411** ([rss](https://anchor.fm/s/9add758/podcast/rss), [url](https://anchor.fm/tom-dotan6))
 - **Pivot** ([rss](https://feeds.megaphone.fm/pivot), [url](https://www.vox.com/pivot-with-kara-swisher-and-scott-galloway))
-- **Google Cloud Platform Podcast** ([rss](https://feeds.feedburner.com/GcpPodcast), [url](https://www.gcppodcast.com/))
-- **Decrypted** ([rss](http://feeds.bloomberg.fm/BLM3923153289), [url](https://bloomberg.com/podcasts/decrypted))
-- **Above Avalon** ([rss](https://www.aboveavalon.com/podcast?format=RSS), [url](https://www.aboveavalon.com/podcast/))
-- **The WIRED Podcast** ([rss](https://www.wired.co.uk/rss/podcast/wired-podcast), [url](https://www.wired.co.uk/))
-- **The Vergecast** ([rss](https://feeds.megaphone.fm/vergecast), [url](https://www.theverge.com/the-vergecast))
+- **Above Avalon** ([rss](https://www.aboveavalon.com/podcast?format=RSS), [url](https://www.aboveavalon.com/podcast/)) - all about Apple
+- **The WIRED Podcast** ([rss](https://www.wired.co.uk/rss/podcast/wired-podcast), [url](https://www.wired.co.uk/)) - Vergecast but british
+- **The Vergecast** ([rss](https://feeds.megaphone.fm/vergecast), [url](https://www.theverge.com/the-vergecast)) - I enjoy the "no bullshit" tech industry chats
     
 ### News: Finance 
 
@@ -197,13 +197,12 @@ A lot of podcasts are interviewing founders which is a mix of business and tech.
 
 - **How I Built This with Guy Raz** ([rss](https://www.npr.org/rss/podcast.php?id=510313), [url](http://www.npr.org/series/490248027/how-i-built-this))
 - **7-Figure Small with Brian Clark** ([rss](https://www.spreaker.com/show/3469652/episodes/feed), [url](https://unemployable.com/))
-- **Founders Talk** ([rss](https://changelog.com/founderstalk/feed), [url](https://changelog.com/founderstalk))
 - **Below the Line with James Beshara** ([rss](https://anchor.fm/s/9f0ca04/podcast/rss), [url](https://anchor.fm/belowtheline))
 - **Startup School Radio** ([rss](http://feeds.soundcloud.com/users/soundcloud:users:150759713/sounds.rss), [url](http://www.aaronkharris.com/))
-- **Invest Like the Best** ([rss](https://investlikethebest.libsyn.com/rss), [url](http://investorfieldguide.com/))
+- **Invest Like the Best** ([rss](https://investlikethebest.libsyn.com/rss), [url](http://investorfieldguide.com/)) - surprisingly good investor/founder guests.
 - **Level Up Your Course Podcast with Janelle Allen: Create Online Courses that Change Lives** ([rss](https://feeds.simplecast.com/Wysy3LER), [url](http://zencourses.co/show))
 - **How to Start a Startup** ([rss](https://awesound.com/@ycombinator/feed/how-to-start-a-startup), [url](https://awesound.com/ycombinator/podcast/how-to-start-a-startup))
-- **Masters of Scale with Reid Hoffman** ([rss](https://rss.art19.com/masters-of-scale), [url](http://www.mastersofscale.com/))
+- **Masters of Scale with Reid Hoffman** ([rss](https://rss.art19.com/masters-of-scale), [url](http://www.mastersofscale.com/)) - weirdly overproduced podcast from Reid remixing his former founder interviews
 - **Entrepreneurial Thought Leaders** ([rss](https://rss.art19.com/entrepreneurial-thought-leaders), [url](https://art19.com/shows/entrepreneurial-thought-leaders))
 - **The SaaS Podcast - SaaS, Startups, Growth Hacking &amp; Entrepreneurship** ([rss](http://conversionaid.libsyn.com/rss), [url](http://thesaaspodcast.com/))
 - **Masters in Business** ([rss](http://feeds.bloomberg.fm/BLM8864403288), [url](https://bloomberg.com/podcasts/masters_in_business))
@@ -261,7 +260,7 @@ Stuff that didnt fit anywhere else :)
 - **Akimbo: A Podcast from Seth Godin** ([rss](http://rss.acast.com/akimbo), [url](http://www.akimbo.link/))
 - **The TED Interview** ([rss](https://feeds.feedburner.com/TedInterview), [url](https://www.ted.com/podcasts/ted-interview))
 - **TED Talks Daily** ([rss](http://feeds.feedburner.com/TEDTalks_audio), [url](https://www.ted.com/talks))
-- **Artificial Intelligence (AI Podcast) with Lex Fridman** ([rss](https://lexfridman.com/category/ai/feed/), [url](https://lexfridman.com/ai/))
+- **Artificial Intelligence (AI Podcast) with Lex Fridman** ([rss](https://lexfridman.com/category/ai/feed/), [url](https://lexfridman.com/ai/)) - has become more of a generalist podcast recently, but gets the top of the field
 - **Freakonomics Radio** ([rss](https://www.omnycontent.com/d/playlist/aaea4e69-af51-495e-afc9-a9760146922b/14a43378-edb2-49be-8511-ab0d000a7030/d1b9612f-bb1b-4b85-9c0c-ab0d004ab37a/podcast.rss), [url](http://freakonomics.com/))
 - **seanwes podcast** ([rss](https://seanwes.com/feed/podcast), [url](http://seanwes.com/podcast))
 - **Mike's Notes** ([rss](http://feeds.soundcloud.com/users/soundcloud:users:77097804/sounds.rss), [url](http://thewaiterspad.com/))
