@@ -74,6 +74,8 @@ Prepositions, Conjunctions, and other articles are "free" as in they don't reall
 
 Numbers could be free too. The [4-Hour Workweek](https://fourhourworkweek.com/) hyphenates the number.
 
+Some words are used so frequently together they tokenize to basically be one word. DevOps. Web Design (ergo *Responsive* Web Design).
+
 Usually, successful many-word ideas have a Two Word Core. [The Law of Shitty Clickthroughs](https://andrewchen.co/the-law-of-shitty-clickthroughs/) isn't about "The Law of". Nobody wants to be the Poor Dad in **Rich Dad, Poor Dad**. 
 
 [The 7 Habits of Highly Effective People](http://www.quickmba.com/mgmt/7hab/) might win the prize for longest Two Word idea. Of course, these days, it just gets shortened to "7 Habits" 😉.
@@ -159,6 +161,10 @@ This is a living list - I will update as I go. [Tell me good candidates for the 
   - spiritual leadership??
   - law of shitty clickthroughs
   - gatsby - content mesh
+  - rails - convention over configuration
+  - dev ops
+  - responsive webdesign
+  - inclusive components
 - three worders
   - getting things done
   - time well spent

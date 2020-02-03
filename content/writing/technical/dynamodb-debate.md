@@ -33,8 +33,13 @@ pro:
   - Where you might see performance problems with DynamoDB.
 
 
+
 cons:
 
 - https://www.alexdebrie.com/posts/dynamodb-no-bad-queries/
   - Pagination: This pagination can bite you as you scale. When your data is small or in testing, you might not need to page through results, or it might just be a single follow-up request to fetch the second page of results. As your data grows, you may find this access pattern taking longer and longer as multiple pages are needed.
   - Hot keys :The second, and more pernicious, way that your DynamoDB table will have trouble as it scales is through hot keys.
+
+
+Medium:
+  - SQL is fine, NoSQL is for ORM: https://seldo.com/posts/orm_is_an_antipattern
