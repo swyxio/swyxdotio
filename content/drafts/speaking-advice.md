@@ -180,6 +180,7 @@ fixing speaking voice: https://www.artofmanliness.com/articles/improve-your-spea
   - a11y contrast ratios
 - always repeat questions
 - when you ask for show of hands, estimate out loud what % of hands raised for people who cant see
+- skip the slides https://www.stephaniemorillo.co/post/2017/09/14/skip-the-talk-slides-share-your-talks-information and transcribe
 
 
 Record your talk
