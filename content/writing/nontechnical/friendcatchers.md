@@ -41,14 +41,14 @@ Basically: **"Fill holes in the Internet".**
 *(This is swyx talking)* A Friendcatcher performs these functions:
 
 - Solves someone's problem.  Some indications: 
-  - Reader's Googling stops at you. 
+  - Reader's Google journey stops at you. 
   - Reader repeatedly returns to refer to your thing.
   - Reader tells you.
 - Establishes your expertise and association with the problem
 - Makes the reader look smart/funny/informed when they share your thing
   - It is "Retweetable" - doesn't contain miscellaneous/unrelated junk, is timeless
 - Gives the reader a benefit, which you can cash in on in future
-  - [Reciprocity is powerful](https://www.influenceatwork.com/principles-of-persuasion/)
+  - [Reciprocity is weaponized karma](https://www.influenceatwork.com/principles-of-persuasion/)
 - Does its job without your involvement after creation
   - This is [Leverage](https://www.youtube.com/watch?v=GtyWqj2ESiQ), a form of [Productize Yourself](https://nav.al/productize-yourself)
 
