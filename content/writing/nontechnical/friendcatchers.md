@@ -9,15 +9,17 @@ description: Patrick McKenzie's simple concept for making friends on the Interne
 
 A **"Friendcatcher"** is something you offer for free, that helps you catch friends.
 
-Because it is passive, it is an asset. Just like a [Dreamcatcher](https://legomenon.com/dreamcatcher-meaning-legend-history-origins.html) can be hung over your bed once and catches bad dreams for you through the night, a "Friendcatcher" (*one word, not hyphenated*) catches friends for you without you even trying.
+Because it is passive, it is an asset. Just like a [Dreamcatcher](https://legomenon.com/dreamcatcher-meaning-legend-history-origins.html) can be hung over your bed once and catches bad dreams for you through the night, a "Friendcatcher" (*one word, not hyphenated*) catches friends for you for the rest of your career.
 
-The concept comes from [Patrick McKenzie](https://twitter.com/search?q=from%3Apatio11%20friend-catcher&src=typed_query), who in turn says it came from his mom. As loud and well known as he is, this concept doesn't seem widely known, and that is a pity. I first heard of it at Microconf, and it's unintentionally informed my most successful online projects so far.
+The concept comes from [Patrick McKenzie](https://twitter.com/search?q=from%3Apatio11%20friend-catcher&src=typed_query), who in turn says it came from his mom. As loud and well known as he is, this concept doesn't seem widely known, and that is a pity. I first heard of it at [Microconf](https://twitter.com/microconf), and it's unintentionally informed my most successful online projects so far.
 
 ## Friendcatching for Dummies
 
 [In the words of Patrick's mom](https://youtu.be/PtmUJye7t4c?t=744):
 
-> Patrick, you should learn to cook. Don't learn to cook because you want to eat food - learn to cook because if you learn to cook you will have an excuse for the rest of your life to bring people over to your house. **No one who knows how to cook will ever lack for friends.**
+> Patrick, you should learn to cook. Don't learn to cook because you want to eat food - learn to cook because if you learn to cook you will have an excuse for the rest of your life to bring people over to your house.
+>
+> **No one who knows how to cook will ever lack for friends.**
 
 Patrick's mom wasn't talking about content strategy, or customer research, but she might as well have been.
 
@@ -52,7 +54,13 @@ Basically: **"Fill holes in the Internet".**
 - Does its job without your involvement after creation
   - This is [Leverage](https://www.youtube.com/watch?v=GtyWqj2ESiQ), a form of [Productize Yourself](https://nav.al/productize-yourself)
 
+## "Learn in Public" Friendcatchers
+
 A **"Learn in Public" Friendcatcher** also invites readers to ask about things you don't answer, and to correct things you got wrong. This is **open source, collaborative knowledge.**
+
+In terms of [Learning Gears](https://www.swyx.io/writing/learning-gears), Friendcatchers are produced by Connectors, not Explorers. You know something others don't, and build the resources that Explorers will find that serve as landmarks and maps for their journey.
+
+Creating a good Friendcatcher is great, because it is something you can pour resources into continually refining and making better, and continues working even if you step away. This makes a lot more mileage out of your daily efforts than other forms of content, for example things that are news related or a less ambitious talk.
 
 ## Examples of Friendcatchers
 
