@@ -3,7 +3,7 @@ title: Friendcatchers
 slug: friendcatchers
 subtitle: Win Friends Online While You Sleep
 categories: ['Advice']
-date: 2019-02-03
+date: 2020-02-03
 description: Patrick McKenzie's simple concept for making friends on the Internet.
 ---
 
@@ -34,7 +34,7 @@ The ideal Friendcatcher is (thanks to [Christian Genco](https://microconf.gen.co
 - **Resonant**: People say "F*** yeah this is what I need!" when they see your thing. Pay attention to pain.
 - **Underserved**: 101 guides are overdone. Do the 201 guide. Cover intersections of technologies.
 
-Basically: "Fill holes in the Internet".
+Basically: **"Fill holes in the Internet".**
 
 ## What a Friendcatcher does for you
 
@@ -75,9 +75,12 @@ Includes some of mine. Note I wasn't consciously going for "friendcatchers"
   - https://github.com/typescript-cheatsheets/react-typescript-cheatsheet
 - The "Nugget"
   - Steve Schoger's 🔥 Tweets https://twitter.com/i/events/994601867987619840
+- Blogging
+  - [Patrick in 2010](https://news.ycombinator.com/item?id=1002272): *Blogging is also a friendcatcher, sometimes even literally for me. It gets you opportunities you would not have if you did not blog. I am here at a SEO-skeptical company getting paid handsomely to make them scads because I blogged.* 
 
 ## Sources
 
+- He has been talking about this for 11 years: https://hn.algolia.com/?dateRange=all&page=0&prefix=false&query=friendcatchers&sort=byPopularity&type=comment
 - 2014: https://training.kalzumeus.com/newsletters/archive/content-marketing-strategy
   - *Fog Creek and Basecamp (formerly known as 37signals) both were extraordinarily successful with using writing as a friendcatcher both for their philosophies of the world and, secondarily, for their paid products. Many SaaS companies have cottoned onto the fact that writing (and podcasting, and making videos, and the like) is often less expensive than leasing traffic from Google on a monthly basis. Unfortunately, many make mistakes in tactics and strategies which blunt the good that writing can do for their audience and their business.*
 - 2016: https://businessofsoftware.org/2016/07/hiring-at-scale-patrick-mckenzie-starfighter-bos-usa-2015/
