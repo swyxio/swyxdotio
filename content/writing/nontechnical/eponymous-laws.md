@@ -78,6 +78,9 @@ More lists:
   - [1% Rule](https://en.wikipedia.org/wiki/1%25_rule_(Internet_culture)) -  90% of the participants of a community only view content, 9% of the participants edit content, and 1% of the participants actively create new content.
     - application of [Zipf's Law](https://en.wikipedia.org/wiki/Zipf%27s_law)
   - [Goodhart's Law](https://medium.com/@coffeeandjunk/campbells-law-goodhart-s-law-when-you-are-measuring-to-fail-c6c64923ad7) - “When a measure becomes a target, it ceases to be a good measure.” 
+  - Joseph effects and Noah effects
+    - https://www.perell.com/blog/news-in-the-age-of-abundance
+    - *"Joseph effects – seven fat years here, seven lean years there – occurred when markets were evolving gradually and continuously. Noah effects were cataclysms – the Flood, or the week of September 11 2001, when the New York Stock Exchange closed for five days and dropped 7.5 per cent on re-opening.”*
 
 ## Related (for future blogposts)
 

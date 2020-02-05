@@ -1,0 +1,26 @@
+So we've had a lot of issues with the project, it can be off putting for candidates and severely slow the hiring process. More important (to me at least) is that I don't think it is fair - it biases toward candidates that spend the full time, and actually over it. We have no enforcement for the time spent, so instead I will suggest this we do something that is:
+- more aligned with how we work (distributed and remote)
+- with time to think not on the call
+- paired while developing
+- limited scope on time and features (fair on time)
+- better signal on collaboration
+
+So here is what I'm thinking from a tactical perspective:
+- we have a project (or multiple, per team for instance). Initial one I'd like to do for platform is a ticket API in go. 
+- we fork the repo for just them, it has 2 issues and 1 open PR
+- before the first call we will send them these:
+  - a PR for them to review and comment on. 
+  - an open issue where about adding a small scoped feature
+  - an open issue about doing some large distributed system task
+- first interview is to review the PR feedback and fix the PR itself
+- second interview is to talk through the small feature and implement it together
+- third interview is after they've written up a solution (design doc) for the large distributed system issue. 
+- these interviews are done one after another, but can be spaced a bit out. For instance, if they want to do the back to back pairing (1&2) then take a moment before doing 3. 
+
+An example of what I'm thinking for the first project is:
+- a ticketing API that has the basic CRUD capabilities & mysql
+- PR tries to add rate limiting, has bugs like: bucketing allows bursts through, unchecked params, swallowed errors
+- feature is to add queueing (submit a request, get a token you can poll on)
+- design doc is to build large testing framework (e.g. 1m customers for the same small tickets in a 5min period)
+
+And in terms of scalability from our org perspective, I was thinking of creating a separate org where we can keep these projects. Then a script/action that will do the needful and create a new project for the candidates.
