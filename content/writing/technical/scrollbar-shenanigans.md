@@ -6,7 +6,7 @@ date: 2020-02-06
 description: Styling scrollbars for my space on the Internet
 ---
 
-If you visit this site on a Webkit browser (Chrome, Safari, Opera, new Edge) you will see a new fancy scrollbar:
+If you visit this site on a desktop Webkit browser (Chrome, Safari, Opera, new Edge) you will see a new fancy scrollbar:
 
 ![zengarden](https://user-images.githubusercontent.com/6764957/73976710-cae4e100-4920-11ea-976e-cc5e1d3373bd.gif)
 
@@ -35,7 +35,7 @@ body::-webkit-scrollbar-thumb {
 
 Or even better, try it out on [Svelte Zen Garden](https://svelte-zengarden.netlify.com/).
 
-## The PseudoSelectors
+## The PseudoElements
 
 You have to specify `::-webkit-scrollbar` for any styling to work. (Try removing it, you'll see) It doesn't really matter what you specify, so you can specify a nonsensical property, but you need something:
 
@@ -56,6 +56,31 @@ body::-webkit-scrollbar {
 You can specify any [CSS length unit](https://www.swyx.io/writing/line-lengths) - I found `vw` a nice one as it scales down as you resize the window smaller and never gets too small.
 
 Once you've specified `::-webkit-scrollbar`, you can then style `::-webkit-scrollbar-track` (the bigger gutter of the scrollbar) and `::-webkit-scrollbar-thumb` (the smaller thing that actually moves as you scroll).
+
+Those 3 are good enough to use, but [there is a full list of other elements and selectors](https://css-tricks.com/custom-scrollbars-in-webkit/):
+
+```css
+::-webkit-scrollbar              { /* 1 */ }
+::-webkit-scrollbar-button       { /* 2 */ }
+::-webkit-scrollbar-track        { /* 3 */ }
+::-webkit-scrollbar-track-piece  { /* 4 */ }
+::-webkit-scrollbar-thumb        { /* 5 */ }
+::-webkit-scrollbar-corner       { /* 6 */ }
+::-webkit-resizer                { /* 7 */ }
+
+/* pseudo-class selectors */
+:horizontal
+:vertical
+:decrement
+:increment
+:start
+:end 
+:double-button
+:single-button
+:no-button
+:
+
+```
 
 You can style them *almost* however you like!
 
@@ -94,7 +119,7 @@ Media queries work!
 
 You can target scrollbars on any `overflow: scroll` element, not just `body`!
 
-Note: The styling applies to horizontal as well as vertical scrollbars.
+Note: Unspecified, styling applies to horizontal as well as vertical scrollbars, which you can customize with `:horizontal` and `:vertical`.
 
 ## Not Everything Works
 
@@ -102,6 +127,15 @@ It doesnt work on mobile!
 
 Setting `cursor: pointer` doesn't work, but it'd be fun to change the cursor on scrollbar hover.
 
+## Don't Do This
 
+You can [put your scrollbar on the left!](https://twitter.com/chordbug/status/1101645780962734081)
 
+## Crazy Scrollbar Examples On The Web
 
+Of course most people should be more subtle with their scrollbars.
+
+But I like a little personality.
+
+- [CSS Tricks](https://css-tricks.com/)
+- Where else?
