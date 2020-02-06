@@ -3,6 +3,7 @@ title: Scrollbar Shenanigans
 slug: scrollbar-shenanigans
 categories: ['CSS']
 date: 2020-02-06
+description: Styling scrollbars for my space on the Internet
 ---
 
 If you visit this site on a Webkit browser (Chrome, Safari, Opera, new Edge) you will see a new fancy scrollbar:
