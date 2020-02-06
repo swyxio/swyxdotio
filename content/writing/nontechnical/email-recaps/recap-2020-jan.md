@@ -3,6 +3,7 @@ title: Jan 2020 Recap
 slug: recap-2020-jan
 categories: ['Reflections']
 date: 2020-02-05
+description: a belated recap, highlighting my best writing over the past couple months
 ---
 
 Hello mailing list friends!
