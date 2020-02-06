@@ -3,6 +3,7 @@ title: Scaling Coding Communities
 slug: scaling-coding-communities
 categories: ['Reflections']
 date: 2020-02-04
+description: People who can scale coding communities are 🔥 🔥 🔥
 ---
 
 I just came off organizing [Svelte Society 4](https://www.downtomeet.com/Svelte-Society-NYC/Svelte-Society-NYC-4-Fab-Feb-1162378) today.
