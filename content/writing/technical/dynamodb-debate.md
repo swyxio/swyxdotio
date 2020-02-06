@@ -43,3 +43,7 @@ cons:
 
 Medium:
   - SQL is fine, NoSQL is for ORM: https://seldo.com/posts/orm_is_an_antipattern
+
+Unrated:
+  - https://twitter.com/jeremy_daly/status/1225478326615203841
+  - https://www.alexdebrie.com/posts/dynamodb-single-table/

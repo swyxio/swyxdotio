@@ -9,9 +9,10 @@ What is a megatrend?
 - Long shift
   - Generational
 - Platform shift/new technology enablement
-- Deployment Age over Installment age
+- Discovery -> Deployment Age over Installment age
   - https://avc.com/2015/02/the-carlota-perez-framework/
   - https://stratechery.com/2020/the-end-of-the-beginning/
+  - tuur demeester 3 ages of bitcoin
 
 impossible to overinvest.
 

@@ -1,7 +1,9 @@
-I recently switched from Apple to Android (post to come about THAT one...) and had to port my podcast subscriptions from Overcast. Instead of 
-
-### Awesome Back Catalog
-
+<?xml version="1.0"?>
+<opml version="1.0">
+  <head>
+    <title>Overcast Podcast Subscriptions</title>
+  </head>
+  <body>
 <outline type="rss" text="Dolly Parton's America" title="Dolly Parton's America" xmlUrl="http://feeds.wnyc.org/dolly-partons-america" htmlUrl="https://www.wnycstudios.org/podcasts/dolly-partons-america"/>
 <outline type="rss" text="A Very Fatal Murder" title="A Very Fatal Murder" xmlUrl="http://feeds.megaphone.fm/veryfatalmurder" htmlUrl=""/>
 <outline type="rss" text="Common Sense with Dan Carlin" title="Common Sense with Dan Carlin" xmlUrl="http://feeds.feedburner.com/dancarlin/commonsense?format=xml" htmlUrl="http://www.dancarlin.com/"/>
@@ -28,9 +30,6 @@ I recently switched from Apple to Android (post to come about THAT one...) and h
 <outline type="rss" text="Business Wars" title="Business Wars" xmlUrl="https://rss.art19.com/business-wars" htmlUrl="https://www.wondery.com/shows/business-wars/?utm_source=rss"/>
 <outline type="rss" text="Internet History Podcast" title="Internet History Podcast" xmlUrl="https://feedpress.me/InternetHistoryPodcast" htmlUrl="https://play.acast.com/s/internethistorypodcast"/>
 <outline type="rss" text="Homecoming" title="Homecoming" xmlUrl="https://feeds.megaphone.fm/homecoming" htmlUrl="https://www.gimletmedia.com/homecoming"/>
-    
-### Storytelling
-
 <outline type="rss" text="This American Life" title="This American Life" xmlUrl="http://feed.thisamericanlife.org/talpodcast" htmlUrl="https://www.thisamericanlife.org/"/>
 <outline type="rss" text="Cautionary Tales" title="Cautionary Tales" xmlUrl="https://feeds.megaphone.fm/cautionarytales" htmlUrl="https://www.pushkin.fm/"/>
 <outline type="rss" text="99% Invisible" title="99% Invisible" xmlUrl="http://feeds.99percentinvisible.org/99percentinvisible" htmlUrl="http://99percentinvisible.org/"/>
@@ -39,9 +38,6 @@ I recently switched from Apple to Android (post to come about THAT one...) and h
 <outline type="rss" text="Revisionist History" title="Revisionist History" xmlUrl="https://feeds.megaphone.fm/revisionisthistory" htmlUrl="http://revisionisthistory.com/"/>
 <outline type="rss" text="Against the Rules with Michael Lewis" title="Against the Rules with Michael Lewis" xmlUrl="https://feeds.megaphone.fm/against-the-rules" htmlUrl="https://atrpodcast.com/"/>
 <outline type="rss" text="The Moth" title="The Moth" xmlUrl="http://feeds.feedburner.com/themothpodcast" htmlUrl="http://themoth.org/"/>
-    
-### Tech
-
 <outline type="rss" text="Hanselminutes - Fresh Talk and Tech for Developers" title="Hanselminutes - Fresh Talk and Tech for Developers" xmlUrl="https://feeds.simplecast.com/gvtxUiIf" htmlUrl="https://www.hanselminutes.com/"/>
 <outline type="rss" text="The Bike Shed" title="The Bike Shed" xmlUrl="https://feeds.fireside.fm/bikeshed/rss" htmlUrl="https://www.bikeshed.fm/"/>
 <outline type="rss" text="Exponent" title="Exponent" xmlUrl="http://exponent.fm/feed/" htmlUrl="http://exponent.fm/"/>
@@ -101,22 +97,13 @@ I recently switched from Apple to Android (post to come about THAT one...) and h
 <outline type="rss" text="CodePen Radio" title="CodePen Radio" xmlUrl="https://blog.codepen.io/feed/podcast/" htmlUrl="https://blog.codepen.io/"/>
 <outline type="rss" text="Front End Happy Hour" title="Front End Happy Hour" xmlUrl="https://feeds.soundcloud.com/users/soundcloud:users:206137365/sounds.rss" htmlUrl="http://frontendhappyhour.com/"/>
 <outline type="rss" text="DevRel Radio" title="DevRel Radio" xmlUrl="http://devrelradio.libsyn.com/rss" htmlUrl="http://devrelrad.io/"/>
-    
-### No Code
-
 <outline type="rss" text="The Visual Developers Podcast" title="The Visual Developers Podcast" xmlUrl="https://feeds.transistor.fm/the-visual-developers-podcast" htmlUrl="https://visualdev.fm/"/>
 <outline type="rss" text="BuiltOnAir" title="BuiltOnAir" xmlUrl="https://feeds.transistor.fm/builtonair" htmlUrl="https://builtonair.com/"/>
-
-### News: General
-
 <outline type="rss" text="The Daily" title="The Daily" xmlUrl="http://rss.art19.com/the-daily" htmlUrl="https://www.nytimes.com/the-daily"/>
 <outline type="rss" text="Axios Pro Rata" title="Axios Pro Rata" xmlUrl="http://feeds.feedburner.com/pro-rata" htmlUrl="https://www.axios.com/tag/pro-rata-podcast"/>
 <outline type="rss" text="Stay Tuned with Preet" title="Stay Tuned with Preet" xmlUrl="https://rss.art19.com/stay-tuned-with-preet" htmlUrl="http://cafe.com/"/>
 <outline type="rss" text="The Intelligence" title="The Intelligence" xmlUrl="https://rss.acast.com/theeconomisttheweekahead" htmlUrl="https://theintelligence.economist.com/"/>
 <outline type="rss" text="The Diplomat | Asia Geopolitics" title="The Diplomat | Asia Geopolitics" xmlUrl="https://thediplomat.com/?feed=itunes&amp;podcast=asia-geopolitics" htmlUrl="http://thediplomat.com/category/podcasts/asia-geopolitics"/>
-    
-### News: Tech
-
 <outline type="rss" text="AWS Morning Brief" title="AWS Morning Brief" xmlUrl="https://feeds.transistor.fm/aws-morning-brief" htmlUrl="https://www.lastweekinaws.com/"/>
 <outline type="rss" text="AWS Podcast" title="AWS Podcast" xmlUrl="https://d3gih7jbfe3jlq.cloudfront.net/aws-podcast.rss" htmlUrl="https://aws.amazon.com/podcasts/aws-podcast/"/>
 <outline type="rss" text="Techmeme Ride Home" title="Techmeme Ride Home" xmlUrl="https://rss.art19.com/techmeme-ridehome" htmlUrl="https://art19.com/shows/techmeme-ridehome"/>
@@ -130,9 +117,6 @@ I recently switched from Apple to Android (post to come about THAT one...) and h
 <outline type="rss" text="Above Avalon" title="Above Avalon" xmlUrl="https://www.aboveavalon.com/podcast?format=RSS" htmlUrl="https://www.aboveavalon.com/podcast/"/>
 <outline type="rss" text="The WIRED Podcast" title="The WIRED Podcast" xmlUrl="https://www.wired.co.uk/rss/podcast/wired-podcast" htmlUrl="https://www.wired.co.uk/"/>
 <outline type="rss" text="The Vergecast" title="The Vergecast" xmlUrl="https://feeds.megaphone.fm/vergecast" htmlUrl="https://www.theverge.com/the-vergecast"/>
-    
-### News: Finance 
-
 <outline type="rss" text="What Goes Up" title="What Goes Up" xmlUrl="https://feeds.megaphone.fm/whatgoesup" htmlUrl="https://www.bloomberg.com/podcasts/what_goes_up"/>
 <outline type="rss" text="Slate Money" title="Slate Money" xmlUrl="https://feeds.megaphone.fm/slatemoney" htmlUrl="http://www.slate.com/slatemoney"/>
 <outline type="rss" text="WSJ Heard On the Street" title="WSJ Heard On the Street" xmlUrl="http://feeds.wsjonline.com/wsj/podcast_heard_on_the_street" htmlUrl=""/>
@@ -143,9 +127,6 @@ I recently switched from Apple to Android (post to come about THAT one...) and h
 <outline type="rss" text="The Journal." title="The Journal." xmlUrl="https://video-api.wsj.com/podcast/rss/wsj/the-journal" htmlUrl="https://www.wsj.com/podcasts/the-journal"/>
 <outline type="rss" text="Exchanges at Goldman Sachs" title="Exchanges at Goldman Sachs" xmlUrl="https://feeds.megaphone.fm/GLD9218176758" htmlUrl="http://www.goldmansachs.com/our-thinking/podcasts/index.html"/>
 <outline type="rss" text="Behind the Markets Podcast" title="Behind the Markets Podcast" xmlUrl="https://feeds.acast.com/public/shows/5b6afaddb794d5666cd13431" htmlUrl="https://businessradio.wharton.upenn.edu/programs/behind-the-markets"/>
-
-### Founder Chats
-
 <outline type="rss" text="To Be Continuous" title="To Be Continuous" xmlUrl="https://www.heavybit.com/category/library/podcasts/to-be-continuous/feed/" htmlUrl="https://www.heavybit.com/library/podcasts/to-be-continuous/"/>
 <outline type="rss" text="Startups For the Rest of Us" title="Startups For the Rest of Us" xmlUrl="https://feeds.feedblitz.com/startupsfortherestofus&amp;x=1" htmlUrl="https://www.startupsfortherestofus.com/"/>
 <outline type="rss" text="The Twenty Minute VC: Venture Capital | Startup Funding | The Pitch" title="The Twenty Minute VC: Venture Capital | Startup Funding | The Pitch" xmlUrl="http://thetwentyminutevc.libsyn.com/rss" htmlUrl="http://www.thetwentyminutevc.com/"/>
@@ -192,9 +173,6 @@ I recently switched from Apple to Android (post to come about THAT one...) and h
 <outline type="rss" text="Evolving for the Next Billion by GGV Capital" title="Evolving for the Next Billion by GGV Capital" xmlUrl="http://ggvc996.libsyn.com/rss" htmlUrl="http://nextbn.ggvc.com/"/>
 <outline type="rss" text="Analyse Asia with Bernard Leong" title="Analyse Asia with Bernard Leong" xmlUrl="http://analyseasia.libsyn.com/rss" htmlUrl="https://analyse.asia/"/>
 <outline type="rss" text="Build Your SaaS &#x2013; bootstrap in 2020" title="Build Your SaaS &#x2013; bootstrap in 2020" xmlUrl="https://feeds.transistor.fm/build-your-saas" htmlUrl="https://saas.transistor.fm/"/>
-    
-### Misc Topics
-
 <outline type="rss" text="The Psychology Podcast" title="The Psychology Podcast" xmlUrl="http://psychologypodcast.libsyn.com/rss" htmlUrl="http://www.thepsychologypodcast.com/"/>
 <outline type="rss" text="Psychology of Video Games Podcast" title="Psychology of Video Games Podcast" xmlUrl="https://www.spreaker.com/show/3329893/episodes/feed" htmlUrl="https://www.spreaker.com/show/psychology-of-video-games-podcast_1"/>
 <outline type="rss" text="The Happiness Lab with Dr. Laurie Santos" title="The Happiness Lab with Dr. Laurie Santos" xmlUrl="https://feeds.megaphone.fm/happinesslab" htmlUrl="https://www.pushkin.fm/"/>
@@ -229,9 +207,6 @@ I recently switched from Apple to Android (post to come about THAT one...) and h
 <outline type="rss" text="The Art of Manliness" title="The Art of Manliness" xmlUrl="https://www.omnycontent.com/d/playlist/aaea4e69-af51-495e-afc9-a9760146922b/6081eee7-c459-4e12-a1ab-aadc000fc4a7/413a6904-4d72-4be8-9421-aadc000fc4ba/podcast.rss" htmlUrl="https://www.artofmanliness.com/"/>
 <outline type="rss" text="Your Undivided Attention" title="Your Undivided Attention" xmlUrl="https://feeds.simplecast.com/rZ0cYk12" htmlUrl="https://your-undivided-attention.simplecast.com/"/>
 <outline type="rss" text="Simplify" title="Simplify" xmlUrl="https://feeds.simplecast.com/J_wTfaPG" htmlUrl="http://www.blinkist.com/simplify"/>
-
-### Fun
-
 <outline type="rss" text="Wait Wait... Don't Tell Me!" title="Wait Wait... Don't Tell Me!" xmlUrl="https://www.npr.org/rss/podcast.php?id=344098539" htmlUrl="http://www.npr.org/programs/wait-wait-dont-tell-me/"/>
 <outline type="rss" text="Ask Me Another" title="Ask Me Another" xmlUrl="https://www.npr.org/rss/podcast.php?id=510299" htmlUrl="https://www.npr.org/programs/ask-me-another/"/>
 <outline type="rss" text="The Weekly Planet" title="The Weekly Planet" xmlUrl="https://rss.acast.com/theweeklyplanet" htmlUrl="https://play.acast.com/s/theweeklyplanet"/>
@@ -261,10 +236,6 @@ I recently switched from Apple to Android (post to come about THAT one...) and h
 <outline type="rss" text="The Hamilcast: A Hamilton Podcast" title="The Hamilcast: A Hamilton Podcast" xmlUrl="https://thehamilcast.libsyn.com/rss" htmlUrl="https://www.thehamilcast.com/"/>
 <outline type="rss" text="Twenty Thousand Hertz" title="Twenty Thousand Hertz" xmlUrl="http://feeds.megaphone.fm/20k" htmlUrl="http://www.20k.org/"/>
 <outline type="rss" text="Tiny Desk Concerts - Audio" title="Tiny Desk Concerts - Audio" xmlUrl="https://www.npr.org/rss/podcast.php?id=510306" htmlUrl="https://www.npr.org/tinydeskconcerts"/>
-    
-
-### To Skim
-
 <outline type="rss" text="The Talk Show With John Gruber" title="The Talk Show With John Gruber" xmlUrl="https://daringfireball.net/thetalkshow/rss" htmlUrl="https://daringfireball.net/thetalkshow"/>
 <outline type="rss" text="The Tim Ferriss Show" title="The Tim Ferriss Show" xmlUrl="https://rss.art19.com/tim-ferriss-show" htmlUrl="https://tim.blog/podcast"/>
 <outline type="rss" text="Channel 9" title="Channel 9" xmlUrl="http://channel9.msdn.com/Feeds/RSS/mp3" htmlUrl="https://channel9.msdn.com/"/>
@@ -273,3 +244,5 @@ I recently switched from Apple to Android (post to come about THAT one...) and h
 <outline type="rss" text="All Songs Considered" title="All Songs Considered" xmlUrl="https://www.npr.org/rss/podcast.php?id=510019" htmlUrl="https://www.npr.org/allsongs"/>
 <outline type="rss" text="The Joe Rogan Experience" title="The Joe Rogan Experience" xmlUrl="http://joeroganexp.joerogan.libsynpro.com/rss" htmlUrl="https://www.joerogan.com/"/>
 <outline type="rss" text="Whiskey Ginger w/ Andrew Santino" title="Whiskey Ginger w/ Andrew Santino" xmlUrl="https://feeds.simplecast.com/EV5uPq3u" htmlUrl="http://andrewsantino.com/"/>
+</body>
+</opml>
