@@ -10,7 +10,11 @@ I pottered around a bit with Django today, blasting through [the tutorial](https
 
 I figured I should try deploying it to [Render.com](http://render.com/) to learn both.
 
+## TL;DR
+
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy)
+
+## Steps
 
 The official [Render tutorial for Django](https://render.com/docs/deploy-django) uses PostGres, which means the web server and database takes up your two free deployments. It also [had issues when I tried it](https://github.com/render-examples/django-quick-start/issues/1). So I wanted to try a "from scratch" Django project, from the official tutorial, using SQLite.
 
@@ -25,6 +29,8 @@ The official [Render tutorial for Django](https://render.com/docs/deploy-django)
 I had previously [tried and failed](https://github.com/render-examples/django-quick-start/issues/1) to use Render's Django Quick Start repo, so if you had `DJANGO_SETTINGS_MODULE` set to `config.settings.production`, Django will be looking for a file that doesn't exist and fail nastily. Delete it.
 
 With that, your Django app should be up and running. Mine is deployed at: https://django-test-9g3f.onrender.com/ and you can see the stateful voting app in action at https://django-test-9g3f.onrender.com/polls. https://django-test-9g3f.onrender.com/admin also works.
+
+## Failure/Todo
 
 You'll observe that all static assets fail to load in production, despite it working in local development. I reckon this is some misconfiguration of the static assets finding that I did. The official example has [other static file finding strategies](https://github.com/render-examples/django-quick-start/blob/c48c0ced13ed6a17c2708334548f248a0763a531/config/settings/base.py#L140-L154) i have yet to explore.
 
