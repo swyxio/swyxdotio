@@ -87,4 +87,5 @@ More lists:
 - Cognitive Biases
 - Logical Fallacies:
   - http://utminers.utep.edu/omwilliamson/ENGL1311/fallacies.htm
+  - simpson's paradox https://twitter.com/G_S_Bhogal/status/1225561131122597896
 

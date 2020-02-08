@@ -69,17 +69,15 @@ Those 3 are good enough to use, but [there is a full list of other elements and 
 ::-webkit-resizer                { /* 7 */ }
 
 /* pseudo-class selectors */
-:horizontal
-:vertical
-:decrement
-:increment
-:start
-:end 
-:double-button
-:single-button
-:no-button
-
-
+:horizontal {}
+:vertical {}
+:decrement {}
+:increment {}
+:start {}
+:end  {}
+:double-button {}
+:single-button {}
+:no-button {}
 ```
 
 You can style them *almost* however you like!
