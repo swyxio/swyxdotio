@@ -14,7 +14,7 @@ I figured I should try deploying it to [Render.com](http://render.com/) to learn
 
 ## TL;DR
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://dashboard.render.com/iac/new?repoOwner=sw-yx&repoName=django-quick-start&branch=master&provider=GITHUB)
 
 ## Steps
 
@@ -51,6 +51,8 @@ services:
   - key: DJANGO_SECRET_KEY
     generateValue: true       # will generate a base64-encoded 256-bit secret
 ```
+
+Most "[Deploy to Render](https://render.com/docs/deploy-to-render)" buttons take the referer url to determine which repo to deploy, but you can customize this by just linking directly to the dashboard with the right path variables e.g. https://dashboard.render.com/iac/new?repoOwner=sw-yx&repoName=django-quick-start&branch=master&provider=GITHUB
 
 ## Failures and Todos
 
