@@ -10,6 +10,8 @@ I pottered around a bit with Django today, blasting through [the tutorial](https
 
 I figured I should try deploying it to [Render.com](http://render.com/) to learn both.
 
+## Table of Contents
+
 ## TL;DR
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy)
