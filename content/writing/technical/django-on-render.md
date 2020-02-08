@@ -30,7 +30,27 @@ I had previously [tried and failed](https://github.com/render-examples/django-qu
 
 With that, your Django app should be up and running. Mine is deployed at: https://django-test-9g3f.onrender.com/ and you can see the stateful voting app in action at https://django-test-9g3f.onrender.com/polls. https://django-test-9g3f.onrender.com/admin also works.
 
-## Failure/Todo
+## Render.yaml
+
+IAAC is important for scaling/reproducability, and a nice one click deploy experience. The docs aren't fully fleshed out yet but fortunately there is [a decent sample YAML file published](https://render.com/docs/yaml-spec). I was also able to find plenty of examples by [searching GitHub](https://github.com/search?q=filename%3Arender.yaml&type=Code).
+
+```yaml
+services: 
+- type: web
+  name: djangotutorial
+  env: python
+  buildCommand: "./build.sh"        # ensure it's a string
+  startCommand: cd mysite && gunicorn mysite.wsgi:application
+  repo: https://github.com/sw-yx/django-quick-start.git # optional
+  # plan: standard # optional
+  healthCheckPath: /
+  # autoDeploy: false             # optional
+  envVars:
+  - key: DJANGO_SECRET_KEY
+    generateValue: true       # will generate a base64-encoded 256-bit secret
+```
+
+## Failures and Todos
 
 You'll observe that all static assets fail to load in production, despite it working in local development. I reckon this is some misconfiguration of the static assets finding that I did. The official example has [other static file finding strategies](https://github.com/render-examples/django-quick-start/blob/c48c0ced13ed6a17c2708334548f248a0763a531/config/settings/base.py#L140-L154) i have yet to explore.
 
