@@ -185,6 +185,10 @@ fixing speaking voice: https://www.artofmanliness.com/articles/improve-your-spea
 - https://acloud.guru/series/serverlessconf-nyc-2019/view/the-cloud-is-a-scam
 
 
+practice time
+
+- Most people consider doing 30 practice runs for a talk to be overkill, but I think Gary Bernhardt has it right when he says that, if you're giving a 30-minute talk to a 300 person audience, that's 150 person-hours watching your talk, so it's not obviously unreasonable to spend 15 hours practicing (and 30 practice runs will probably be less than 15 hours since you can cut a number of the runs short and/or repeatedly practice problem sections).
+
 Record your talk
 - quicktime mute thing
 

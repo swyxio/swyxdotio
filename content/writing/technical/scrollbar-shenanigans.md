@@ -78,7 +78,7 @@ Those 3 are good enough to use, but [there is a full list of other elements and 
 :double-button
 :single-button
 :no-button
-:
+
 
 ```
 
@@ -91,16 +91,16 @@ You can add fancy gradient patterns! Pick gradients from [Lea Verou](https://lea
 ```css
 /* other selectors omitted */
 body::-webkit-scrollbar-thumb {
-    border-radius: 10px;
-    background-color: #D62929;
-    background-image: -webkit-linear-gradient(45deg,
-                                              rgba(255, 255, 255, .2) 25%,
-                                              transparent 25%,
-                                              transparent 50%,
-                                              rgba(255, 255, 255, .2) 50%,
-                                              rgba(255, 255, 255, .2) 75%,
-                                              transparent 75%,
-                                              transparent)
+  border-radius: 10px;
+  background-color: #D62929;
+  background-image: -webkit-linear-gradient(45deg,
+                                            rgba(255, 255, 255, .2) 25%,
+                                            transparent 25%,
+                                            transparent 50%,
+                                            rgba(255, 255, 255, .2) 50%,
+                                            rgba(255, 255, 255, .2) 75%,
+                                            transparent 75%,
+                                            transparent)
 }
 ```
 
