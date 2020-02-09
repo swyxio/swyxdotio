@@ -203,7 +203,7 @@
         </svg>
       </a>
 
-      <a href="https://twitter.com/swyx" target="_blank" rel="noopener">
+      <a href="https://twitter.com/swyx" target="_blank" rel="me">
         <svg
           class="icon"
           viewBox="0 0 24 24"
@@ -267,7 +267,7 @@
         href="https://twitter.com/swyx"
         title="twitter"
         target="_blank"
-        rel="noopener">
+        rel="me">
         <svg
           class="icon"
           viewBox="0 0 24 24"
