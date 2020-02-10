@@ -88,3 +88,6 @@ Of course, "Big L" is just a model of reality, it isn't actual reality. One of t
 I've talked a big game about learning, but I do also acknowledge that learning is not everything. You have to be doing, and you have to be living. [How will you measure your life?](https://hbr.org/2010/07/how-will-you-measure-your-life) It's also likely a function of the people you meet and the years you live productively. What insights can we glean there?
 
 Maybe *that* is the *real* Big L we should be chasing, at the end of the day.
+
+
+> This thought [originated in a tweet](https://twitter.com/swyx/status/1226762243917991936?s=20).
