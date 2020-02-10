@@ -61,3 +61,9 @@ I also notice that Sales are handled by affiliates like [Edureka](http://edureka
 | Price range ($/mo) | 50-300    | 1-8k      |
 | Sales style      | Self Serve        | Affiliate/"Call us"       |
 | Jobs to Do     | Automate + Site/Apps | Automate with existing tools       |
+
+## High Level Thesis
+
+I think RPA justifies its high cost by automating away the even higher cost of dreary boring human work. There is a lot of [TPS report filing](https://www.mentalfloss.com/article/57338/what-tps-report) out there in the world. The less you have to rip 'n replace systems, and the more you can just rip 'n replace humans who work with those systems, that's what you want to go with.
+
+NoCode tools are more greenfield - startups and smaller cos want to grow topline, so there is a more site/app building focus.
