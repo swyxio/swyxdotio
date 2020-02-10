@@ -9,7 +9,7 @@ date: 2020-02-10
 
 If you are a lifelong/[infinite learner](https://www.sachinrekhi.com/how-to-be-an-infinite-learner), you want to get the most out of the time you dedicate to learning. What are the determinants of how much you learn over time?
 
-## Table of Contents
+![Alt Text](https://dev-to-uploads.s3.amazonaws.com/i/63yl17w3d4eep4shubr3.png)
 
 In the formal study of algorithms, [Big O](https://en.wikipedia.org/wiki/Big_O_notation) is often used to succinctly state how costs scale as a function of the amount of work to do. I think we can also take this notation to talk about different forms of learning over time.
 
@@ -17,7 +17,7 @@ Big O is handy because it allows engineers to talk in terms of orders of magnitu
 
 In this post I sketch out `Big L` notation, which plots your learning as a function of `N` years of experience, with `P` peers. Note that while `Big O` is a cost curve (higher is worse), `Big L` is a benefit curve (higher is better).
 
-![Alt Text](https://dev-to-uploads.s3.amazonaws.com/i/63yl17w3d4eep4shubr3.png)
+## Table of Contents
 
 ## Learning in Private
 
