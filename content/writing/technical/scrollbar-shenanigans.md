@@ -10,7 +10,7 @@ If you visit this site on a desktop Webkit browser (Chrome, Safari, Opera, new E
 
 ![zengarden](https://user-images.githubusercontent.com/6764957/73976710-cae4e100-4920-11ea-976e-cc5e1d3373bd.gif)
 
-This is a result of me constantly admiring the chunky fat scrollbar on CSS Tricks. They have a really good guide on it: https://css-tricks.com/the-current-state-of-styling-scrollbars/. For now this is a webkit prefixed feature, but `scrollbar-gutter` is [on its way to being a standardized CSS property](https://css-tricks.com/almanac/properties/s/scrollbar-gutter/) in [Overflow Module Level 4](https://drafts.csswg.org/css-overflow-4/#scollbar-gutter-property).
+This is a result of me constantly admiring the chunky fat scrollbar on CSS Tricks. They have a really good guide on it: https://css-tricks.com/the-current-state-of-styling-scrollbars/. I'm told this is a webkit prefixed feature, but `scrollbar-gutter` is [on its way to being a standardized CSS property](https://css-tricks.com/almanac/properties/s/scrollbar-gutter/) in [Overflow Module Level 4](https://drafts.csswg.org/css-overflow-4/#scollbar-gutter-property), but it seems [there will also be](https://twitter.com/simevidas/status/1225643974687260673) `scrollbar-color` and `scrollbar-width`.
 
 I like that it is kind of a frivolous thing that has a natural fallback (on non Webkit and on mobile) so you don't have to worry about getting fancy.
 

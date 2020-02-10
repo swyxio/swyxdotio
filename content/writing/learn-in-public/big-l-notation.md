@@ -31,7 +31,7 @@ This person's learning function is lossy - they learn things and forget things a
 
 **This is the normal learner.**
 
-### L(N) - The Continuous Learner
+### L(N) - The Infinite Learner
 
 This person learns something new every year and keeps it. Mistakes are not repeated. This requires constantly pushing boundaries and building a system ([principles](https://www.principles.com/), [habits](https://jamesclear.com/habits), or [a second brain](https://www.buildingasecondbrain.com/)) for the stuff the human mind naturally forgets.
 
