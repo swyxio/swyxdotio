@@ -17,6 +17,8 @@ Big O is handy because it allows engineers to talk in terms of orders of magnitu
 
 In this post I sketch out `Big L` notation, which plots your learning as a function of `N` years of experience, with `P` peers. Note that while `Big O` is a cost curve (higher is worse), `Big L` is a benefit curve (higher is better).
 
+![Alt Text](https://dev-to-uploads.s3.amazonaws.com/i/63yl17w3d4eep4shubr3.png)
+
 ## Learning in Private
 
 ### L(1) - The One Trick Pony
@@ -51,7 +53,7 @@ Learning can compound *forwards* as well as backwards. If the `L(N)` learner bui
 
 ## Learning in Public
 
-When it comes to learning in public, we introduce another input `P` to learning. It means whatever you want it to mean - "People", "Peers", "Possible Mentors", or [Community](https://www.swyx.io/writing/scaling-coding-communities). 
+When it comes to [learning in public](https://www.swyx.io/writing/learn-in-public/), we introduce another input `P` to learning. It means whatever you want it to mean - "People", "Peers", "Possible Mentors", or [Community](https://www.swyx.io/writing/scaling-coding-communities). 
 
 Of course, these exist when you are learning in private. You have to learn *from* someone. Most people's `P` are constant and they don't pay any attention to it.
 
