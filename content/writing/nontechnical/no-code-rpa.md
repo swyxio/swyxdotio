@@ -4,9 +4,10 @@ subtitle: Is Robotic Process Automation just Enterprise™ NoCode?
 slug: no-code-rpa
 categories: ['No Code']
 date: 2020-02-09
+description: Is Robotic Process Automation just Enterprise™ NoCode? Yes, and... No.
 ---
 
-I [spent some time](https://twitter.com/swyx/status/1226678489832730624) looking into RPA ([Robotic Process Automation](https://en.wikipedia.org/wiki/Robotic_process_automation)) today. RPA seems to be Enterprise Edition #NoCode and the pricing disparity is wild. 
+I [spent some time](https://twitter.com/swyx/status/1226678489832730624) looking into RPA ([Robotic Process Automation](https://en.wikipedia.org/wiki/Robotic_process_automation)) today. RPA seems to be Enterprise Edition #NoCode and the pricing disparity is wild. But there are real differences and I am trying to note them down here.
 
 ## No Code Players
 
