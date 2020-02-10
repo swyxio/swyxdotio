@@ -183,7 +183,7 @@ fixing speaking voice: https://www.artofmanliness.com/articles/improve-your-spea
 - skip the slides https://www.stephaniemorillo.co/post/2017/09/14/skip-the-talk-slides-share-your-talks-information and transcribe
 - corey quinn storytelling
 - https://acloud.guru/series/serverlessconf-nyc-2019/view/the-cloud-is-a-scam
-
+- https://css-tricks.com/emcee-tips-for-a-conference-or-meetup/
 
 practice time
 

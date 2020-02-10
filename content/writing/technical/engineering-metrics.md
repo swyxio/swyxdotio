@@ -25,3 +25,15 @@ Open questions
 
 - Dalia Havens https://twitter.com/nmeans/status/1152018971433922561
   - https://www.youtube.com/watch?v=6QC1OwoddD8
+
+## to process
+
+- https://www.youtube.com/watch?v=goihWvyqRow
+- https://6figuredev.com/podcast/episode-130-progression-into-devops/
+  - Throughput
+  Lead Time – from concept to deployed
+  Deployment Frequency – how frequent new code is deployed
+  - Stability
+  Change Failure – how often a deployment breaks some thing
+  Time to Restore – how quickly to recover from broken (either fix or revert)
+  Availability – how often service is good and available to be consumed

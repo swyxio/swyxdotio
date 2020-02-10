@@ -4,7 +4,7 @@ subtitle: Is Robotic Process Automation just Enterprise™ NoCode?
 slug: no-code-rpa
 categories: ['No Code']
 date: 2020-02-09
-description: Is Robotic Process Automation just Enterprise™ NoCode? Yes, and... No.
+description: RPA seems to be NoCode Enterprise Edition™ and the pricing disparity is wild. But there are real differences and I am trying to note them down here.
 ---
 
 I [spent some time](https://twitter.com/swyx/status/1226678489832730624) looking into RPA ([Robotic Process Automation](https://en.wikipedia.org/wiki/Robotic_process_automation)) today. RPA seems to be Enterprise Edition #NoCode and the pricing disparity is wild. But there are real differences and I am trying to note them down here.
@@ -35,7 +35,7 @@ I [spent some time](https://twitter.com/swyx/status/1226678489832730624) looking
 
 ## Comparison with RPA
 
-RPA does "Workflow Automation" and "NLP/OCR" more than the latter "Site Builders" and "App builders" stuff. But what they DO do, is very focused on the enterprise usecase. For example:
+RPA does "Workflow Automation" and "NLP/OCR" stuff more than the latter "Site Builders" and "App Builders" stuff. But what they DO do, is very focused on the enterprise usecase. For example:
 
 - [Excel Automation](https://www.youtube.com/watch?v=MBl-3Yb30FA&t=5491s)
 - [PDF Automation](https://www.youtube.com/watch?v=MBl-3Yb30FA&t=9986s)
