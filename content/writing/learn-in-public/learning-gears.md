@@ -73,3 +73,5 @@ When you have a good sense of the terrain and see other Explorers you can help, 
 If you find yourself tripping over gold, start **Mining**. If it turns out a dud, switch gears. No sweat.
 
 Three gears of learning, all in Public. We're cheering you on.
+
+> See Also: [Big L Notation](https://www.swyx.io/writing/big-l-notation) (expanding on why "Learn In Public" is the fastest way to learn)
