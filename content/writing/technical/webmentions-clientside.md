@@ -1,7 +1,8 @@
 ---
 title: Clientside Webmentions
 slug: clientside-webmentions
-categories: ['IndieWeb']
+subtitle: Joining the IndieWeb with Svelte
+categories: ['IndieWeb', 'Svelte']
 date: 2020-02-11
 description: How you can enhance your blog with webmentions without adding heavy build times.
 ---
