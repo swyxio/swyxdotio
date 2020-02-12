@@ -12,13 +12,15 @@
       .then(x => x.type)
     getMentions().then(x => {
       mentions = x
+      console.log({ mentions })
       fetchState = 'done'
+      return fetchMore()
     })
   })
   function getMentions() {
     return fetch(
       // `https://webmention.io/api/mentions?page=${page}&per-page=20&sort-by=published&target=${target}`,
-      `https://webmention.io/api/mentions?page=${page}&per-page=50&target=${target}/` // trailing slash impt
+      `https://webmention.io/api/mentions?page=${page}&per-page=20&target=${target}/` // trailing slash impt
     )
       .then(x => x.json())
       .then(x => x.links.filter(x => x.activity.type !== 'like'))
@@ -36,7 +38,9 @@
   function cleanString(str) {
     const withSlash = target + '/'
     const linky = `<a href="${withSlash}">${withSlash}</a>`
-    return str.replace(linky, '')
+    return str
+      .replace(linky, '') // drop self referential <a> tags
+      .replace('<script>', '<$cript>') // sneaky sneaky!
   }
 </script>
 
@@ -135,7 +139,7 @@
       {/await}
     </div>
     {#if fetchState === 'fetching'}
-
+      <div />
     {:else if mentions.length === 0}
       <div>
         No replies yet.
@@ -153,7 +157,7 @@
               <a
                 target="_blank"
                 rel="noopener"
-                href={link.data.url}
+                href={link.data.author.url}
                 color="blue">
                 <img
                   width="40"
@@ -166,7 +170,6 @@
               {#if link.activity.type === 'repost'}
                 {link.data.author.name}
                 <a href={link.data.url}>retweeted</a>
-                on {link.data.published.slice(0, 10)}
               {:else}
                 <div font-family="system" color="text" font-weight="bold">
                   {link.data.author.name}
@@ -179,17 +182,13 @@
                   </a>
                   on
                   <span color="tertiary">
-                    · {link.data.published.slice(0, 10)}
+                    {link.data.published.slice(0, 10)}
                   </span>
                 </div>
-
                 <div>
-                  <blockquote
-                    font-family="system"
-                    color="tertiary"
-                    font-size="2">
+                  <p font-family="system" color="tertiary" font-size="2">
                     {@html cleanString(link.data.content)}
-                  </blockquote>
+                  </p>
                 </div>
               {/if}
             </div>
