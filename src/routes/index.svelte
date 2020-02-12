@@ -100,9 +100,6 @@
     list-style-type: none;
     padding: 0;
   }
-  hr {
-    margin: 3rem 1rem;
-  }
   .WebMentionReply {
     margin-top: 16px;
     margin-bottom: 16px;
@@ -144,8 +141,8 @@
   <div id="CTA">
     Featured Post:
     <div>
-      <a href="/writing/collapsing-layers">
-        <b>Collapsing Layers</b>
+      <a href="/writing/big-l-notation">
+        <b>Big L Notation: Modeling Rates of Learning</b>
       </a>
     </div>
   </div>

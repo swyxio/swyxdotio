@@ -1,6 +1,6 @@
 ---
 title: Big L Notation
-subtitle: Modelling Rates of Learning
+subtitle: Modeling Rates of Learning
 desc: In this post I sketch out `Big L` notation, which plots your learning as a function of `N` years of experience, with `P` peers.
 slug: big-l-notation
 categories: ['Learn In Public']
