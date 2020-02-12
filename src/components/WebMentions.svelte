@@ -12,7 +12,6 @@
       .then(x => x.type)
     getMentions().then(x => {
       mentions = x
-      console.log({ mentions })
       fetchState = 'done'
       return fetchMore()
     })
@@ -107,7 +106,7 @@
   <a
     target="_blank"
     rel="noopener"
-    href="https://indieweb.org/Webmention"
+    href="http://swyx.io/writing/clientside-webmentions"
     color="blue">
     <svg
       xmlns="http://www.w3.org/2000/svg"

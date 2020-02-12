@@ -165,6 +165,7 @@ https://github.com/sw-yx/swyxdotio/tree/master/content/))
 - [React Rally Bad Example Proposal](https://speak.reactrally.com/events/react-rally-2019)
 - [David Khourshid's React Rally CFP](https://docs.google.com/document/d/1uT4aimBXzLmSH7rOxnOYGX1iyHw76mKrs5jnwq3TWrg/edit?usp=sharing)
 - [Devon Lindsey's React Rally CFP](https://docs.google.com/document/d/1qm33pkoy1T2gUiQm9SfEjKU8tXXPPLMaoKNM5U23LOY/edit?usp=sharing)
+- [Motherlode of CFP Examples from Will Larson](https://lethain.com/cfp-examples/) also check [Tweet Thread](https://mobile.twitter.com/lethain/status/1221128652194103296)
 - (others?)
 
 People who have said they don't mind reviewing first timer CFPs:

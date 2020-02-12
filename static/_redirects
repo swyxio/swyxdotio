@@ -5,4 +5,3 @@
 /hooks /speaking/react-hooks/
 /talks  /speaking
 /talks/*  /speaking/:splat
-/* /search 200

@@ -1,10 +1,62 @@
 <script>
-  // import { fade, fly } from "svelte/transition";
+  let page = 0
+  export let target
+  if (!target) console.error('error: no target')
+  let mentions = []
+  let groupedMention = new Map()
+  $: {
+    // group each mention by url
+    groupedMention = new Map()
+    mentions.forEach(mention => {
+      let url = mention['repost-of'] || mention['in-reply-to'] || mention['mention-of']
+      if (groupedMention.has(url)) {
+        let others = groupedMention.get(url)
+        groupedMention.set(url, [...others, mention])
+      } else {
+        groupedMention.set(url, [mention])
+      }
+    })
+  }
+  let fetchState = 'fetching'
+  import { onMount } from 'svelte'
+  onMount(() => {
+    getMentions().then(x => {
+      mentions = x
+      fetchState = 'done'
+      return fetchMore()
+    })
+  })
+  function getMentions() {
+    return fetch(`/.netlify/functions/webmentions?page=${page}`)
+      .then(x => x.json())
+      .then(x => x.children.filter(x => x['wm-property'] !== 'like-of'))
+      .then(_mentions => {
+        console.log({ _mentions })
+        return _mentions
+      })
+  }
+  const fetchMore = () => {
+    page += 1
+    getMentions().then(x => {
+      if (x.length) {
+        mentions = [...mentions, ...x]
+      } else {
+        fetchState = 'nomore'
+      }
+    })
+  }
+  function cleanString(str) {
+    const withSlash = target + '/'
+    const linky = `<a href="${withSlash}">${withSlash}</a>`
+    return str
+      .replace(linky, '') // drop self referential <a> tags
+      .replace('<script>', '<$cript>') // sneaky sneaky!
+  }
 </script>
 
 <style>
   h1,
-  h2,
+  /* h2, */
   #CTA {
     text-align: center;
     margin: 0 auto;
@@ -26,35 +78,63 @@
     h1 {
       font-size: 4em;
     }
-    #Cards {
-      flex-direction: row !important;
-    }
   }
-  #Cards {
-    display: flex;
-    flex-direction: column;
-  }
-  #Cards > div {
-    flex: 1;
-  }
-  h2 {
-    font-size: 2em;
-    text-transform: uppercase;
-    font-weight: 700;
-    margin: 0 0 0.5em 0;
+
+  #WebMentions {
+    margin: 0 auto;
+    font-style: italic;
+    width: 80%;
+    min-width: 300px;
   }
   h3 {
-    /* font-size: 2em;
-    text-transform: uppercase; */
-    font-weight: 700;
-    /* margin: 0 0 0.5em 0; */
+    display: inline;
+  }
+  .WebMentionsContainer {
+    border: 1px dashed var(--link-color);
+    padding: 1rem;
+    margin-top: 1rem;
+    color: var(--text-color);
+  }
+  .WebMentionsContainer ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  hr {
+    margin: 3rem 1rem;
+  }
+  .WebMentionReply {
+    margin-top: 16px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+  .Avatar {
+    margin-right: 16px;
+    width: 40px;
+    flex: 0 0 auto;
+    align-self: start;
+  }
+  .Avatar img {
+    width: 40px;
+    max-width: 100%;
+    height: 40px;
+    margin: 0px;
+    border-radius: 50%;
+  }
+  .FetchMore {
+    width: 20ch;
+    font-size: 1.5rem;
+    background-color: transparent;
+    color: var(--link-color);
+    border: 0;
+    text-align: left;
   }
 </style>
 
 <svelte:head>
   <title>swyx's site</title>
 </svelte:head>
-
 <article>
   <h1>swyx's site!</h1>
   <div id="CTA">
@@ -65,175 +145,109 @@
       </a>
     </div>
   </div>
-  <hr />
-  <div id="Cards">
-    <div>
-      <h2>Start Here</h2>
-      <ul>
-        <li>
-          <h3>Writing</h3>
-          <div>
-            I do a bunch of personal and work-related writing:
-            <ul>
-              <li>
-                <b>
-                  <a href="/writing/learn-in-public">Learn in Public</a>
-                </b>
-                <div>
-                  My most impactful essay, and the personal growth philosophy I
-                  and many others follow.
-                </div>
-              </li>
-              <li>
-                <b>
-                  <a href="/writing/svelte-static">Static Svelte</a>
-                </b>
-                <div>How this very site was written</div>
-              </li>
-              <li>
-                <b>
-                  <a href="/writing/rise-of-immer">Rise of Immer in React</a>
-                </b>
-                <div>
-                  A recap of Immutability in JavaScript and its relationship
-                  with React
-                </div>
-              </li>
-              <li>
-                <b>About</b>
-                <div>
-                  My personal story,
-                  <a
-                    href="https://github.com/sw-yx/README/blob/master/README.md">
-                    README
-                  </a>
-                  , and
-                  <a href="/speaking/freecodecamp-podcast">
-                    podcast with Quincy Larson
-                  </a>
-                  about learning to code.
-                </div>
-              </li>
-            </ul>
-          </div>
-        </li>
-
-        <li>
-          <h3>Speaking</h3>
-          <div>
-            I have done a bunch of talks and podcast appearances. The best of
-            which are:
-            <ul>
-              <li>
-                <a href="/speaking/react-hooks">Getting Closure on Hooks</a>
-              </li>
-              <li>
-                <a href="/speaking/react-not-reactive">
-                  Why React is not Reactive
-                </a>
-              </li>
-
-              <li>
-                <a href="/speaking/contributing-to-react">
-                  Contributing to React
-                </a>
-              </li>
-              <li>
-                <a href="/speaking/learn-in-public-nyc">Learn In Public</a>
-              </li>
-              <li>
-                <a href="/speaking/babel-macros">
-                  Babel Macros (the Moana talk)
-                </a>
-              </li>
-            </ul>
-          </div>
-        </li>
-      </ul>
-
-    </div>
-    <hr />
-    <div>
-      <h2>Other Work (off-site)</h2>
-      <ul>
-        <li>
-          <h3>Teaching</h3>
-          <div>
-            I teach on
-            <a href="https://egghead.io/">Egghead.io</a>
-            and in other workshops:
-            <ul>
-              <li>
-                My course on
-                <a
-                  href="https://egghead.io/courses/design-systems-with-react-and-typescript-in-storybook">
-                  Design Systems with React + TypeScript
-                </a>
-              </li>
-              <li>
-                My (upcoming) workshop on
-                <b>Building Custom CLI Tooling with OClif and React-Ink</b>
-              </li>
-              <li>
-                <a href="/speaking/netlify-freecodecamp-intro">
-                  Complete Intro to Netlify in 3.5 hours
-                </a>
-              </li>
-            </ul>
-          </div>
-        </li>
-        <li>
-          <h3>Cheatsheets</h3>
-          <div>
-            I enjoy collecting helpful repos around topics, like
-            <ul>
-              <li>
-                <a
-                  href="https://github.com/typescript-cheatsheets/react-typescript-cheatsheet/">
-                  React-TypeScript Cheatsheet
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://github.com/sw-yx/cli-cheatsheet/blob/master/README.md">
-                  CLI Cheatsheet
-                </a>
-              </li>
-              <li>
-                <a href="https://github.com/sw-yx/concurrent-react-notes">
-                  Concurrent-React Notes
-                </a>
-              </li>
-              <li>
-                <a href="https://github.com/sw-yx/spark-joy/">spark-joy</a>
-              </li>
-            </ul>
-          </div>
-        </li>
-        <li>
-          <h3>Open Source</h3>
-          <div>
-            I've helped maintain
-            <a href="https://github.com/netlify/cli">open</a>
-            <a href="https://github.com/sw-yx/react-netlify-identity/">
-              source
-            </a>
-            <a href="https://github.com/sw-yx/jamstack-hackathon-starter">
-              tooling
-            </a>
-            at Netlify, as well as helped work on some other OSS projects like
-            <a href="https://github.com/jaredpalmer/tsdx">TSDX</a>
-            ,
-            <a href="https://www.gatsbyjs.org/showcase/">Gatsby's Showcase</a>
-            ,
-            <a href="https://github.com/sveltejs/community">Svelte Community</a>
-            <a href="https://github.com/sw-yx/ssg">SSG</a>
-            ,
-            <a href="https://github.com/pedronauck/docz/">Docz</a>
-            (inactive), etc.
-          </div>
-        </li>
-      </ul>
+  <div id="WebMentions">
+    <h3 font-family="system" font-size="4" font-weight="bold">Mentions</h3>
+    <a
+      target="_blank"
+      rel="noopener"
+      href="http://swyx.io/writing/clientside-webmentions"
+      color="blue">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="0.75em"
+        height="0.75em"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#999"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10" />
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+        <line x1="12" y1="17" x2="12" y2="17" />
+      </svg>
+    </a>
+    <div class="WebMentionsContainer">
+      {#if fetchState === 'fetching'}
+        <div />
+      {:else if mentions.length === 0}
+        <div>
+          No replies yet.
+          <a
+            href="https://twitter.com/intent/tweet/?text=My%20thoughts%20on%20{target}">
+            Tweet about this post
+          </a>
+          and it will show up here!
+        </div>
+      {:else}
+        <ul>
+          {#each [...groupedMention.entries()] as [link, mentions]}
+            <li>
+              <h3>Post: <a href="link">{link}</a></h3>
+              {#each mentions as mention}
+              <div class="WebMentionReply">
+                  <div class="Avatar">
+                    <a
+                      target="_blank"
+                      rel="noopener"
+                      href={mention.author.url}
+                      color="blue">
+                      <img
+                        width="40"
+                        height="40"
+                        alt="avatar of {mention.author.name}"
+                        src={mention.author.photo} />
+                    </a>
+                  </div>
+                  <div>
+                    {#if mention['wm-property'] === 'repost-of'}
+                      {mention.author.name}
+                      <a href={mention.url}>retweeted</a>
+                    {:else}
+                      <div font-family="system" color="text" font-weight="bold">
+                        {mention.author.name}
+                        <a
+                          target="_blank"
+                          rel="noopener"
+                          href={mention.url}
+                          color="blue">
+                          replied
+                        </a>
+                        on
+                        <span color="tertiary">
+                          {mention.published.slice(0, 10)}
+                        </span>
+                      </div>
+                      <div>
+                        <p font-family="system" color="tertiary" font-size="2">
+                          {@html cleanString(mention.content.text)}
+                        </p>
+                      </div>
+                    {/if}
+                  </div>
+              </div>
+              {/each}
+            </li>
+          {/each}
+          {#if fetchState !== 'nomore'}
+            <li>
+              <button class="FetchMore" on:click={fetchMore}>
+                Fetch More...
+              </button>
+            </li>
+          {:else}
+            <li>
+              No further replies found.
+              <a
+                href="https://twitter.com/intent/tweet/?text=My%20thoughts%20on%20{target}">
+                Tweet about this post
+              </a>
+              and it will show up here!
+            </li>
+          {/if}
+        </ul>
+      {/if}
     </div>
   </div>
+
 </article>

@@ -15,6 +15,15 @@ I searched Webmention implementations on GitHub and found [Max Stoiber's impl](h
 
 > ⚠️ For this post I will assume you've already followed Max's advice on setting up [webmention.io](https://mxb.dev/blog/using-webmentions-on-static-sites/) (add the twitter link with `rel="me"`) and then setting up the backfeed with [Bridgy](https://brid.gy/). I don't know any other services that perform these functions - we have to be thankful to folks like [Aaron Parecki](https://github.com/aaronpk) for the fact that these even work.
 
+## Clientside Webmention.io Widget
+
+You can use their provided Webmention widget ([docs](https://webmention.io/)):
+
+```html
+<span data-webmention-count data-url="https://example.com/page/100"></span> mentions
+<script type="text/javascript" src="https://webmention.io/js/mentions.js"></script>
+```
+
 ## Simple Count
 
 This is the endpoint to hit: `https://webmention.io/api/count.json?target=URL_TO_YOUR_POST/`. ⚠️ NOTE: You will need that trailing slash for this request to work! I probably wasted 2 hours figuring this out.
@@ -208,6 +217,5 @@ Instead I switched to another implementation that appended infinitely to an arra
       </li>
     {/if}
 ```
-
 
 And that's the clientside webmentions you see live now 👇🏽.
