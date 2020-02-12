@@ -183,7 +183,7 @@
         <ul>
           {#each [...groupedMention.entries()] as [link, mentions]}
             <li>
-              <h3>Post: <a href="link">{link}</a></h3>
+              <h3>Post: <a href={link}>{link}</a></h3>
               {#each mentions as mention}
               <div class="WebMentionReply">
                   <div class="Avatar">
