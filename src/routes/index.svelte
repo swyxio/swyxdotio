@@ -8,7 +8,8 @@
     // group each mention by url
     groupedMention = new Map()
     mentions.forEach(mention => {
-      let url = mention['repost-of'] || mention['in-reply-to'] || mention['mention-of']
+      let url =
+        mention['repost-of'] || mention['in-reply-to'] || mention['mention-of']
       if (groupedMention.has(url)) {
         let others = groupedMention.get(url)
         groupedMention.set(url, [...others, mention])
@@ -130,6 +131,9 @@
     border: 0;
     text-align: left;
   }
+  .PostHeader {
+    background-color: var(--bg-color-secondary);
+  }
 </style>
 
 <svelte:head>
@@ -167,25 +171,27 @@
         <line x1="12" y1="17" x2="12" y2="17" />
       </svg>
     </a>
+    {' - '}
+    <a
+      href="https://twitter.com/intent/tweet/?text=My%20thoughts%20on%20{target}">
+      Tweet about any of my posts
+    </a>
+    and it will show up here!
     <div class="WebMentionsContainer">
       {#if fetchState === 'fetching'}
-        <div />
-      {:else if mentions.length === 0}
-        <div>
-          No replies yet.
-          <a
-            href="https://twitter.com/intent/tweet/?text=My%20thoughts%20on%20{target}">
-            Tweet about this post
-          </a>
-          and it will show up here!
-        </div>
+        <div>🌀</div>
       {:else}
         <ul>
           {#each [...groupedMention.entries()] as [link, mentions]}
             <li>
-              <h3>Post: <a href={link}>{link}</a></h3>
+              <div class="PostHeader">
+                <h3>
+                  Post:
+                  <a href={link}>{link}</a>
+                </h3>
+              </div>
               {#each mentions as mention}
-              <div class="WebMentionReply">
+                <div class="WebMentionReply">
                   <div class="Avatar">
                     <a
                       target="_blank"
@@ -220,12 +226,12 @@
                       </div>
                       <div>
                         <p font-family="system" color="tertiary" font-size="2">
-                          {@html cleanString(mention.content.text)}
+                          {@html cleanString(mention.content.html)}
                         </p>
                       </div>
                     {/if}
                   </div>
-              </div>
+                </div>
               {/each}
             </li>
           {/each}
@@ -234,15 +240,6 @@
               <button class="FetchMore" on:click={fetchMore}>
                 Fetch More...
               </button>
-            </li>
-          {:else}
-            <li>
-              No further replies found.
-              <a
-                href="https://twitter.com/intent/tweet/?text=My%20thoughts%20on%20{target}">
-                Tweet about this post
-              </a>
-              and it will show up here!
             </li>
           {/if}
         </ul>
