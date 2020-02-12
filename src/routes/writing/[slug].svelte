@@ -8,6 +8,7 @@
 <script>
   // hack for adding location onto anchor links bc of base element
   import { onMount } from 'svelte'
+  import WebMentions from '../../components/WebMentions.svelte'
   onMount(async () => {
     ;[...document.querySelectorAll('a[href^="#"]')].map(
       x => (x.href = document.location + new URL(x.href).hash)
@@ -82,4 +83,5 @@
     <h2 id="postSubtitle">{seoSubtitle}</h2>
   {/if}
   {@html post.html}
+  <WebMentions target={`https://www.swyx.io/${category}/${slug}`} />
 </SlugTemplate>
