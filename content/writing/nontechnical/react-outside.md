@@ -22,6 +22,8 @@ Something I struggled a lot with when [first trying to understand React Suspense
 
 [![https://pbs.twimg.com/media/DZWu8i0XkAEx4mr?format=jpg&name=medium](https://pbs.twimg.com/media/DZWu8i0XkAEx4mr?format=jpg&name=medium)](https://twitter.com/swyx/status/978880884031066112?s=20)
 
+*(see [here](https://twitter.com/swyx/status/1187514920621006848) for updated version post release)*
+
 For most of us, this was completely alien, and for many of us today, it still is. You don't need to know these concepts and jargon to *use* Concurrent React, just like you don't need to know how a car works to drive one. 
 
 But for new abstractions, it is always wise to look under the hood if you can, so that **when the inevitable abstraction leak occurs, you know what to do**. 
