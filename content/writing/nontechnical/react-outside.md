@@ -92,5 +92,7 @@ I think this is where [React as a UI Runtime](https://overreacted.io/react-as-a-
 
 As Venkat quotes in his talk, "*We can solve any problem by introducing an extra level of indirection*". Concurrent React achieves maximum responsiveness by rendering each Fiber bit by bit, lazily (hence the stark difference in the [Stack vs Fiber Sierpinski Reconciler demo](https://claudiopro.github.io/react-fiber-vs-stack-demo/)). It *also* solves for the API design issue of Algebraic Effects and one-ups [other scheduling frameworks](https://github.com/facebook/react/issues/7942#issuecomment-254987818) by introducing this extra layer of indirection called React Fiber.
 
+Venkat's talk also discusses why functional programming isn't as inefficient as it might seem, because of intermediate representations. This is analogous to the Fiber data structure itself, which enables the intended suspend-and-resume nature of Suspense, which is very efficient because no extra work is done.
+
 
 
