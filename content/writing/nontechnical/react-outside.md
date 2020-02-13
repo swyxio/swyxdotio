@@ -72,4 +72,13 @@ Where is the cooperative, voluntary yielding in React Suspense? We don't write i
 
 Third talk is [Let’s Get Lazy: Explore the Real Power of Streams by Venkat Subramaniam](https://www.youtube.com/watch?v=F73kB4XZQ4I)
 
-I had a problem with Concurrent React being described as "cooperative scheduling" for a while because I never sau
+For a while, I had a problem with Concurrent React being described as "cooperative scheduling" because, as Wikipedia says:
+
+> Processes voluntarily yield control periodically or when idle or logically blocked in order to enable multiple applications to be run concurrently. This type of multitasking is called "cooperative" because **all programs must cooperate for the entire scheduling scheme to work**. 
+
+But there is no explicit cooperation going on in React! Or is there?
+
+I think this is where [React as a UI Runtime](https://overreacted.io/react-as-a-ui-runtime/) and [React Fiber](https://www.swyx.io/speaking/react-from-scratch/) come in. Every component is a Fiber, and every Fiber is a unitary piece of work whose children can be rendered later. 
+
+As Venkat quotes in his talk, "*We can solve any problem by introducing an extra level of indirection*". Concurrent React achieves maximum responsiveness by rendering each Fiber bit by bit, lazily (hence the stark difference in the [Stack vs Fiber Sierpinski Reconciler demo](https://claudiopro.github.io/react-fiber-vs-stack-demo/)). It *also* solves for the API design issue of Algebraic Effects and one-ups [other scheduling frameworks](https://github.com/facebook/react/issues/7942#issuecomment-254987818) by introducing this extra layer of indirection called React Fiber.
+
