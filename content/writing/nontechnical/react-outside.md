@@ -10,7 +10,7 @@ date: 2020-02-12
 
 Something I struggled a lot with when [first trying to understand React Suspense](https://sw-yx.js.org/2018/03/01/that-react-suspense-demo) was the onslaught of jargon that suddenly seemed relevant:
 
-[![https://mobile.twitter.com/swyx/status/978880884031066112/photo/1](https://mobile.twitter.com/swyx/status/978880884031066112/photo/1)](https://twitter.com/swyx/status/978880884031066112?s=20)
+[![https://pbs.twimg.com/media/DZWu8i0XkAEx4mr?format=jpg&name=medium](https://pbs.twimg.com/media/DZWu8i0XkAEx4mr?format=jpg&name=medium)](https://twitter.com/swyx/status/978880884031066112?s=20)
 
 For most of us, this was completely alien, and for many of us today, it still is. You don't need to know these concepts and jargon to *use* Concurrent React, just like you don't need to know how a car works to drive one. 
 
@@ -81,4 +81,6 @@ But there is no explicit cooperation going on in React! Or is there?
 I think this is where [React as a UI Runtime](https://overreacted.io/react-as-a-ui-runtime/) and [React Fiber](https://www.swyx.io/speaking/react-from-scratch/) come in. Every component is a Fiber, and every Fiber is a unitary piece of work whose children can be rendered later. 
 
 As Venkat quotes in his talk, "*We can solve any problem by introducing an extra level of indirection*". Concurrent React achieves maximum responsiveness by rendering each Fiber bit by bit, lazily (hence the stark difference in the [Stack vs Fiber Sierpinski Reconciler demo](https://claudiopro.github.io/react-fiber-vs-stack-demo/)). It *also* solves for the API design issue of Algebraic Effects and one-ups [other scheduling frameworks](https://github.com/facebook/react/issues/7942#issuecomment-254987818) by introducing this extra layer of indirection called React Fiber.
+
+
 
