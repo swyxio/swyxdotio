@@ -70,7 +70,7 @@ Confused already? I know I am. What even are Algebraic Effects?
 
 The second talk is [Daan Leijen's Asynchrony with Algebraic Effects](https://www.youtube.com/watch?v=hrBq8R_kxI0&app=desktop) in Koka.  This is the talk that made them accessible to me. Because I like [two word](https://www.swyx.io/writing/two-words) summaries, I mostly go with "resumable exceptions". 
 
-However this glosses over an important design goal, which is able to write components without worrying about what is in their children or around them. Sophie calls this [facilitating local reasoning](https://sophiebits.com/2020/01/01/fast-maintainable-db-patterns.html), which you again see if you look at [DataLoader](https://github.com/graphql/dataloader) from the GraphQL world.
+However this glosses over an important design goal, which is able to write components without worrying about what is in their children or siblings. That's how you get non-leaky abstractions. [Sophie](https://twitter.com/sophiebits) calls this [facilitating local reasoning](https://sophiebits.com/2020/01/01/fast-maintainable-db-patterns.html), which you again see if you look at [DataLoader](https://github.com/graphql/dataloader) from the GraphQL world.
 
 All good. But wait, didn't Raymond Hettinger also say about Async:
 
