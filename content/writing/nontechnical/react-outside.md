@@ -32,7 +32,9 @@ You know what you get when you get when you google [Fibers](https://en.wikipedia
 
 ---
 
-I was reminded of this today when watching two excellent talks from outside the JavaScript world. I will recommend them to you here.
+I was reminded of this today when watching some excellent talks from outside the JavaScript world today. 
+
+I will recommend them to you here, in brief and completely insufficient context - I just want to leave pointers.
 
 ## Learning Async from the Python world
 
@@ -67,5 +69,7 @@ All good. But wait, didn't Raymond Hettinger also say about Async:
 Where is the cooperative, voluntary yielding in React Suspense? We don't write it or see it!
 
 ## Learning Lazy Eval from the Java world
+
+Third talk is [Let’s Get Lazy: Explore the Real Power of Streams by Venkat Subramaniam](https://www.youtube.com/watch?v=F73kB4XZQ4I)
 
 I had a problem with Concurrent React being described as "cooperative scheduling" for a while because I never sau
