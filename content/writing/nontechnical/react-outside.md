@@ -6,7 +6,17 @@ categories: ['React']
 date: 2020-02-12
 ---
 
-## Why Even Understand Concurrent React
+## Table of Contents
+
+## TL;DR
+
+Watch these 3 talks:
+
+- [Raymond Hettinger's Keynote on Concurrency](https://www.youtube.com/watch?v=9zinZmE3Ogk) in Python
+- [Daan Leijen's Asynchrony with Algebraic Effects](https://www.youtube.com/watch?v=hrBq8R_kxI0&app=desktop) in Koka
+- [Let’s Get Lazy: Explore the Real Power of Streams by Venkat Subramaniam](https://www.youtube.com/watch?v=F73kB4XZQ4I) in Java/Haskell/Scala
+
+## Why Even Try
 
 Something I struggled a lot with when [first trying to understand React Suspense](https://sw-yx.js.org/2018/03/01/that-react-suspense-demo) was the onslaught of jargon that suddenly seemed relevant:
 
@@ -16,7 +26,7 @@ For most of us, this was completely alien, and for many of us today, it still is
 
 But for new abstractions, it is always wise to look under the hood if you can, so that **when the inevitable abstraction leak occurs, you know what to do**. 
 
-More to the point, if you are going to advocate for refactoring to use React Suspense in your company, you will want to convincingly *explain why* it is worth it to bosses that don't care and have actual issues with money attached for you to pick up. 
+More to the point, if you are going to advocate for refactoring to use React Suspense in your company, you will want to convincingly *explain* what it is and how it does what it does, to bosses that don't care and have actual issues with money attached for you to pick up. 
 
 2 years on from [JSConf Iceland](https://www.youtube.com/watch?v=nLF0n9SACd4), this is the final, arduous challenge for React Suspense.
 
@@ -58,9 +68,9 @@ Confused already? I know I am. What even are Algebraic Effects?
 
 ## Learning Algebraic Effects from Koka
 
-The second talk is [Daan Leijen's Asynchrony with Algebraic Effects](https://www.youtube.com/watch?v=hrBq8R_kxI0&app=desktop).  This is the talk that made AE accessible to me
+The second talk is [Daan Leijen's Asynchrony with Algebraic Effects](https://www.youtube.com/watch?v=hrBq8R_kxI0&app=desktop) in Koka.  This is the talk that made them accessible to me. Because I like [two word](https://www.swyx.io/writing/two-words) summaries, I mostly go with "resumable exceptions". 
 
-Because I like [two word](https://www.swyx.io/writing/two-words) summaries, I mostly go with "resumable exceptions". However this glosses over an important design goal, which is able to write components without worrying about what is in their children or around them. Sophie calls this [facilitating local reasoning](https://sophiebits.com/2020/01/01/fast-maintainable-db-patterns.html), which you again see if you look at [DataLoader](https://github.com/graphql/dataloader) from the GraphQL world.
+However this glosses over an important design goal, which is able to write components without worrying about what is in their children or around them. Sophie calls this [facilitating local reasoning](https://sophiebits.com/2020/01/01/fast-maintainable-db-patterns.html), which you again see if you look at [DataLoader](https://github.com/graphql/dataloader) from the GraphQL world.
 
 All good. But wait, didn't Raymond Hettinger also say about Async:
 
@@ -70,7 +80,7 @@ Where is the cooperative, voluntary yielding in React Suspense? We don't write i
 
 ## Learning Lazy Eval from the Java world
 
-Third talk is [Let’s Get Lazy: Explore the Real Power of Streams by Venkat Subramaniam](https://www.youtube.com/watch?v=F73kB4XZQ4I)
+Third talk is [Let’s Get Lazy: Explore the Real Power of Streams by Venkat Subramaniam](https://www.youtube.com/watch?v=F73kB4XZQ4I) using Java, but also Haskell and Scala.
 
 For a while, I had a problem with Concurrent React being described as "cooperative scheduling" because, as Wikipedia says:
 
@@ -78,7 +88,7 @@ For a while, I had a problem with Concurrent React being described as "cooperati
 
 But there is no explicit cooperation going on in React! Or is there?
 
-I think this is where [React as a UI Runtime](https://overreacted.io/react-as-a-ui-runtime/) and [React Fiber](https://www.swyx.io/speaking/react-from-scratch/) come in. Every component is a Fiber, and every Fiber is a unitary piece of work whose children can be rendered later. 
+I think this is where [React as a UI Runtime](https://overreacted.io/react-as-a-ui-runtime/) and [React Fiber](https://www.swyx.io/speaking/react-from-scratch/) come in. Every component is a Fiber, and every Fiber is a unitary piece of work whose children and siblings can be rendered later (aka Time Slicing), and can be committed later too (aka Suspense). 
 
 As Venkat quotes in his talk, "*We can solve any problem by introducing an extra level of indirection*". Concurrent React achieves maximum responsiveness by rendering each Fiber bit by bit, lazily (hence the stark difference in the [Stack vs Fiber Sierpinski Reconciler demo](https://claudiopro.github.io/react-fiber-vs-stack-demo/)). It *also* solves for the API design issue of Algebraic Effects and one-ups [other scheduling frameworks](https://github.com/facebook/react/issues/7942#issuecomment-254987818) by introducing this extra layer of indirection called React Fiber.
 
