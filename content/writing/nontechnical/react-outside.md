@@ -40,13 +40,13 @@ But you know who's gotten good at explaining these concepts? **Non-frontend deve
 
 You know what you get when you get when you google [Fibers](https://en.wikipedia.org/wiki/Fiber_(computer_science)) and [Time Slicing](https://en.wikipedia.org/wiki/Preemption_(computing)#Time_slice)? Links to Operating System articles! Because that's where we took the ideas from! Maybe we should look at how *those* people explain their ideas! (except please do it [more coherently than I did](https://www.swyx.io/speaking/react-not-reactive/)).
 
----
+## Looking Outside
 
 I was reminded of this today when watching some excellent talks from outside the JavaScript world today. 
 
 I will recommend them to you here, in brief and completely insufficient context - I just want to leave pointers.
 
-## Learning Async from the Python world
+### Learning Async from the Python world
 
 First was [Raymond Hettinger's Keynote on Concurrency](https://www.youtube.com/watch?v=9zinZmE3Ogk) in Python. In this talk he discusses two contrasting concurrency models - [threading vs async](https://pybay.com/site_media/slides/raymond2017-keynote/intro.html#threads-vs-async). 
 
@@ -66,7 +66,7 @@ Yup, the nonblocking version of everything we do, otherwise known as our [fallba
 
 Confused already? I know I am. What even are Algebraic Effects?
 
-## Learning Algebraic Effects from Koka
+### Learning Algebraic Effects from Koka
 
 The second talk is [Daan Leijen's Asynchrony with Algebraic Effects](https://www.youtube.com/watch?v=hrBq8R_kxI0&app=desktop) in Koka.  This is the talk that made them accessible to me. Because I like [two word](https://www.swyx.io/writing/two-words) summaries, I mostly go with "resumable exceptions". 
 
@@ -78,7 +78,7 @@ All good. But wait, didn't Raymond Hettinger also say about Async:
 
 Where is the cooperative, voluntary yielding in React Suspense? We don't write it or see it!
 
-## Learning Lazy Eval from the Java world
+### Learning Lazy Eval from the Java world
 
 Third talk is [Let’s Get Lazy: Explore the Real Power of Streams by Venkat Subramaniam](https://www.youtube.com/watch?v=F73kB4XZQ4I) using Java, but also Haskell and Scala.
 
