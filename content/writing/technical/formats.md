@@ -14,3 +14,9 @@ This is a stub for a future blogpost. Please [yell at me](https://twitter.com/sw
 - graphql success
 - storybook's component story format
 - POSIX/libc https://twitter.com/b0rk/status/1217890878674624513?s=20
+
+
+value of values - rich hickey
+- transitive property of values all the way down
+- big data = values
+- git = values
