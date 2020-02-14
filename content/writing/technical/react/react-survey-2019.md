@@ -8,7 +8,13 @@ date: 2020-02-13
 
 ![https://pbs.twimg.com/media/EQrqygkW4AIxT0c?format=jpg&name=large](https://pbs.twimg.com/media/EQrqygkW4AIxT0c?format=jpg&name=large)
 
-I presented at [This Dot's online React meetup today](https://twitter.com/ThisDotLabs/status/1228049999537360897?s=20). Here are [the slides that I made](https://docs.google.com/presentation/d/1M-JUtp9I5_gSk8OpV9Adk9sYzhoU-VNcwz9RUJ1-8Sw/edit#slide=id.p) - only possible by the survey and data munging effort of [/u/timmonsjg](http://reddit.com/u/timmonsjg) on Reddit.
+I presented at [This Dot's online React meetup today](https://twitter.com/ThisDotLabs/status/1228049999537360897?s=20). 
+
+## Here are [the slides that I made](https://docs.google.com/presentation/d/1M-JUtp9I5_gSk8OpV9Adk9sYzhoU-VNcwz9RUJ1-8Sw/edit#slide=id.p) 
+
+Note that I do not at all take credit for the survey - I only made the slides and gave initial ideas - The survey and data munging only happened with the heavy lifting made of [/u/timmonsjg](http://reddit.com/u/timmonsjg) and reviews from the mod team on Reddit.
+
+## TL;DW
 
 Here are some pull quote facts for the lazy:
 
