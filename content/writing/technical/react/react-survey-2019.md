@@ -31,6 +31,7 @@ Here are some pull quote facts for the lazy:
 - **Styling**
   - Wew. even less consensus.
   - Sass > Styled Components > Vanilla CSS > everything else
+  - Tailwind very small % despite [Twitter hype](https://twitter.com/lesliecdubs/status/1227816837800484864?s=20). My rationalization is that it is VERY hard to change CSS tooling on production apps. Greenfield apps may have a very different split.
 - **Hooks vs Classes**
   - 64% now code primarily in Hooks
   - 17% an equal mix of Hooks and Classes
