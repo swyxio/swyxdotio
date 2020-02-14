@@ -6,7 +6,7 @@ categories: ['React']
 date: 2020-02-13
 ---
 
-![https://pbs.twimg.com/media/EQrqygkW4AIxT0c?format=jpg&name=large](https://pbs.twimg.com/media/EQrqygkW4AIxT0c?format=jpg&name=large)
+[![https://pbs.twimg.com/media/EQrqygkW4AIxT0c?format=jpg&name=large](https://pbs.twimg.com/media/EQrqygkW4AIxT0c?format=jpg&name=large)](https://docs.google.com/presentation/d/1M-JUtp9I5_gSk8OpV9Adk9sYzhoU-VNcwz9RUJ1-8Sw/edit?usp=sharing)
 
 I presented at [This Dot's online React meetup today](https://twitter.com/ThisDotLabs/status/1228049999537360897?s=20). 
 
