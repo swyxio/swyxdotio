@@ -1,6 +1,6 @@
 ---
-title: The 2019 State of /r/ReactJS Survey
-subtitle: Results and Learnings from our first proper Survey
+title: 2019 /r/ReactJS Survey Results
+subtitle: Lessons from the Front Page of React
 slug: react-survey-2019
 categories: ['React']
 date: 2020-02-13
