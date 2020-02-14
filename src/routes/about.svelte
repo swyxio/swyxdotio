@@ -145,7 +145,7 @@
           <h3>Teaching</h3>
           <div>
             I teach on
-            <a href="https://egghead.io/">Egghead.io</a>
+            <a href="https://egghead.io/">egghead.io</a>
             and in other workshops:
             <ul>
               <li>
