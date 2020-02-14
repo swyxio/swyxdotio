@@ -101,9 +101,9 @@ I didn't present this as it was less relevant to the meetup attendees but the ma
 - people generally happy with the state of moderation
 - 50% of respondents check /r/reactjs daily
 - people want less newbie questions and blogspam
-- people want more curation at all levels
+- people want more curation at all levels. for free of course.
 
-I also adopted the branding of "/r/Reactjs is the Front Page of React" inspired by Reddit's "Front Page of the Internet" branding.
+I also adopted the branding of "**/r/Reactjs is the Front Page of React**" inspired by Reddit's "[Front Page of the Internet](https://www.quora.com/How-and-why-is-Reddit-known-as-the-front-page-of-the-internet)" branding.
 
 ## Things we could have done better
 
