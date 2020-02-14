@@ -107,8 +107,18 @@ I also adopted the branding of "/r/Reactjs is the Front Page of React" inspired 
 
 ## Things we could have done better
 
+We made a metric TON of mistakes. For example, running this survey in the dead of December at our seasonal traffic low when nobody is at work or wants to think or talk about work.
+
 We also collected people's `package.json`s in an attempt to look at dependency correlations. It would have probably yielded some VERY promising insights unavailable anywhere else (particularly in closed source codebases). However, I don't think we did it very well (eg, not warning people in advance, so that if you were doing the survey on mobile you suddenly were ambushed with this "pls dump your deps here" question that you would need to head back to a laptop for) and so not many people did this.
 
-We didn't ask anything about linting, or IDEs, or animations, or specific questions on adoption of React Native.
+We didn't ask anything about linting, or vim/IDEs, or Prettier, or animations, or specific questions on adoption of React Native.
 
-What is maybe more important, we didn't ask good questions about what people want more in their coding journeys. What problems do they have in learning? What arguments do they have at work? We could have focused a lot more on asking these questions in order to probe deeper on solving "real" problems rather than stay at surface level numbers.
+What is maybe more important, we didn't ask GOOD questions about what people want.    
+- What problems do they have in learning? 
+- What arguments do they have at work? 
+- Do they feel better or worse about the state of React today?
+- What is one "crazy idea" that they wish someone would make (or build into React)?
+
+We could have focused a lot more on asking these questions in order to probe deeper on solving "real" problems rather than stay at surface level numbers.
+
+Next year I want to get past surface level shit and get deeper to the heart of understanding what people want and what people struggle with. Do that well and I think we give creators the intel to serve the community better. I'm realizing that that is ultimately the role of the community moderator - not to provide the answers but to provide the platform for great answers to emerge.
