@@ -55,7 +55,10 @@ Here are some pull quote facts for the lazy:
 
 ## Qualitative
 
-- What does well
+## What does well
+
+I think at this point I have a pretty good eye for what does well on Reddit. High effort stuff that inspires people, preferably open source. See the slides or go to /r/reactjs itself and sort by top all time posts to see examples.
+
   - Interactive Demos
   - React Native Demos
   - Portfolios
@@ -69,6 +72,8 @@ Here are some pull quote facts for the lazy:
   - React Core Team
 
 ### What people want more of
+
+These are gleaned responses from survey answers.
 
 ![https://pbs.twimg.com/media/EQrqygiWoAEoAnb?format=jpg&name=large](https://pbs.twimg.com/media/EQrqygiWoAEoAnb?format=jpg&name=large)
 
@@ -98,10 +103,10 @@ Here are some pull quote facts for the lazy:
 
 I didn't present this as it was less relevant to the meetup attendees but the main takeaways:
 
-- people generally happy with the state of moderation
+- People are generally happy with the state of moderation (yay!)
 - 50% of respondents check /r/reactjs daily
-- people want less newbie questions and blogspam
-- people want more curation at all levels. for free of course.
+- a small but vocal set of people want less newbie questions and blogspam. We are discussing this actively.
+- people want more curation at all levels (for free of course).
 
 I also adopted the branding of "**/r/Reactjs is the Front Page of React**" inspired by Reddit's "[Front Page of the Internet](https://www.quora.com/How-and-why-is-Reddit-known-as-the-front-page-of-the-internet)" branding.
 
@@ -119,6 +124,6 @@ What is maybe more important, we didn't ask GOOD questions about what people wan
 - Do they feel better or worse about the state of React today?
 - What is one "crazy idea" that they wish someone would make (or build into React)?
 
-We could have focused a lot more on asking these questions in order to probe deeper on solving "real" problems rather than stay at surface level numbers.
+We could have focused a lot more on asking these questions in order to probe deeper on solving "real" problems rather than staying at surface level numbers that don't really help swing any decisions.
 
-Next year I want to get past surface level shit and get deeper to the heart of understanding what people want and what people struggle with. Do that well and I think we give creators the intel to serve the community better. I'm realizing that that is ultimately the role of the community moderator - not to provide the answers but to provide the platform for great answers to emerge.
+Next year I want to get past surface level shit and get deeper to the heart of understanding what people want and what people struggle with. Do that well and I think we give creators the intel to serve the community better. I'm realizing that that is ultimately the role of the community moderator - not to provide the answers but to **provide the platform for great answers to emerge**.
