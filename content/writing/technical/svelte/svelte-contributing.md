@@ -1,11 +1,25 @@
 ---
 title: How to Contribute to Open Source Frameworks
-subtitle: for First Time Contributors, with Svelte example
+subtitle: A 9 Step Guide for First Time Contributors
 slug: svelte-contributing
 categories: ['Tech', 'Svelte']
 description: One of the best ways to level up in programming is to contribute to a high quality open source project, especially a framework.
 date: 2020-02-15
 ---
+
+## TL;DR
+
+1. **Setup**
+2. **Look for similar code**
+3. **Look for similar tests**
+4. **Write your own test**
+5. **Run your tests**
+6. **Write your code**
+7. **Pass local tests**
+8. **Fix fixtures**
+9. mystery.. read on!
+
+## Background
 
 I've [contributed to React](https://www.swyx.io/speaking/contributing-to-react/) before, and though I didn't become a regular contributor, it definitely gave me a deeper appreciation of how React worked internally, and how a high quality open source framework is run (which is a whole nother level of abstraction from normal app code). 
 
@@ -36,7 +50,7 @@ For example, there should be an open issue acknowledged by maintainers. Don't sk
 
 Here are the high level steps to follow:
 
-1. Setup
+1. **Setup**
   - Fork the repo
   - `git clone` it locally
   - `npm install` 
@@ -45,30 +59,30 @@ Here are the high level steps to follow:
     - You're gonna have to run it at the end, so might as well run it at the start to make sure you have everything setup right. Sometimes you need to setup extra env vars and stuff like that. For Svelte, nothing is needed, just run `npm test`
   - Read `CONTRIBUTING.md`
     - many projects have uninformative `CONTRIBUTING.md`'s, but often you at least get some good hints on project structure and contribution requirements (e.g. a [CLA](https://en.wikipedia.org/wiki/Contributor_License_Agreement))
-2. Look for similar code
+2. **Look for similar code**
 	- it is unlikely that you're contributing something totally novel, so hopefully there is something similar nearby
 	- For me, I found [this code](https://github.com/sveltejs/svelte/blob/2b3c2daafb854d04100e0648910083d493bcb1d7/src/runtime/internal/keyed_each.ts#L111), which was used [here](https://github.com/sveltejs/svelte/blob/6250046c052eb360e51b272c55870cff71f41a70/src/compiler/compile/render_dom/wrappers/EachBlock.ts#L377). It isn't EXACTLY a copy and paste job, but it gave me enough context that my solution was going to look the same.
-3. Look for similar tests
+3. **Look for similar tests**
 	- That code is (hopefully) tested - so let's look for the corresponding tests!
 	- For me, I used the error `Cannot have duplicate keys in a keyed each` and [found this test](https://github.com/sveltejs/svelte/tree/1a343b165c577429e968cea48607cccabf714b9b/test/runtime/samples/keyed-each-dev-unique).
 	- There are also often several different ways to test things, so use this as an opportunity to study which approach is used to test which kinds of features - you may have to defend your choice in future.
-4. Write your own test
+4. **Write your own test**
   - I copied the test out and adapted it to expect the error/warning I was aiming to add
 	- For Svelte, you can [prototype it in the REPL](https://svelte.dev/repl/hello-world?version=3) to ensure your test case fails as you expect
-5. Run your tests
+5. **Run your tests**
 	- To know that the test is properly written, and that you understand the test harness, you should run your test to see it *fail* first before you try to make it succeed.
   - In Svelte, you can run `npm test` for all tests and `npm run test -- -g REGEX_FOR_SPECIFIC_TESTS` for individual groups of tests by regex so that you can iterate faster. For me, I ended up running `npm run test -- -g dev-warning-each-block` - you get this instruction from `CONTRIBUTING.md`
-6. Write your code
+6. **Write your code**
 	- Now you know how your test fails, time to make your tests pass!
 	- You may run into other dependencies, and have to yak shave a bit. For me, I ran into the new and not-well documented `code-red` dependency, and [sent in a PR](https://github.com/Rich-Harris/code-red/pull/34) to update the docs for myself and for others. I think it is quite common to run into further documentation issues while working on an existing PR, because existing maintainers have the info in their heads, and so this is often a further contribution opportunity.
 	- By now you have seen a decent part of the codebase - try to match the code style/conventions of the surrounding code, including Prettier/Linting settings.
-7. Pass local tests
+7. **Pass local tests**
 	- Bounce between 6 and 7 ad infinitum until you are sure your tests fail and pass in the right scenarios and not in each others' scenarios.
 	- Speed is important here - run local test groups (eg `npm run test -- -g REGEX_FOR_SPECIFIC_TESTS`) rather than rerun all tests every time (eg `npm run test`)
 	- Because Svelte is a compiler, when you run the test, every test folder gets an `/_output` folder generated with the intermediate compiled code, which you can manually inspect to ensure where your code is going wrong
-8. Fix fixtures
+8. **Fix fixtures**
 	- If you affect any output code, you will probably break some fixtures and snapshots. Make sure nothing untoward is going on, then copy and paste into the fixtures to update them!
-9. Blog about it, do a Talk about it
+9. **Blog about it, do a Talk about it**
 	- What, you expect me not to encourage you to pass on your knowledge? 
 
 ## [Here is the final PR](https://github.com/sveltejs/svelte/pull/4419) I made.
