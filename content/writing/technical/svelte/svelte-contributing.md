@@ -36,6 +36,8 @@ One of the best ways to level up in programming is to contribute to a high quali
 1. You learn to think one level lower in terms of abstraction. With an app, you are typically consuming code ([according to Seldo, 97% of app code is OSS code](https://medium.com/npm-inc/this-year-in-javascript-2018-in-review-and-npms-predictions-for-2019-3a3d7e5298ef)). With an OSS library or framework, you are writing code to be consumed by other code, with probably wider usecases than you have experience with. Be ready for the "this doesn't work on Windows" or "What about IE11" or "Did you consider React Native?" or any number of cases you may not normally think about.
 2. You can get by only manually testing things in an app. But with an OSS framework, nobody has time to manually test everything for regressions with every PR. So an extensive test suite and CI automation is a must - this is to *save time* rather than a *nice to have*. Ditto documentation, error messages, etc etc. So you level up by being forced to think through all these factors that a typical app developer might normally skip for expedience.
 
+And, of course, as a user of the open source project, if anything goes wrong in future, you are extremely well equipped to dig into the internals to figure out the fix.
+
 ## What to Contribute
 
 One of the best ways to contribute to a high quality open source project (or even an app at a new job) is to work on something with a small scope and add tests. In fact [you can even skip adding functionality - Just add tests and people will thank you!](https://twitter.com/swyx/status/1064742523426430976?s=20). 
