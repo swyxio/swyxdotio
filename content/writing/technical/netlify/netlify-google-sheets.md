@@ -243,3 +243,8 @@ exports.handler = async (event, context) => {
 ```
 
 
+## Other resources
+
+- You may find writing Google Apps Scripts easier. But it is "intel inside".
+- here is prior art but i think it is v3. https://github.com/grod220/CCS-B.B.Warfield/blob/master/lambda/googleSheets.js
+
