@@ -6,9 +6,9 @@ categories: ['Tech', 'Netlify']
 date: 2020-02-14
 ---
 
-Google Sheets' API is very hard to use. I've tried and failed a few times. I finally figured it out today. Its worth it mainly because free usage is way cheaper than Airtable, but accordingly its docs absolutely fucking suck. 
+Google Sheets' API is very hard to use. I've tried and failed a few times. I finally figured it out today. Its worth it mainly because free usage is way cheaper than Airtable, but accordingly its docs aren't really incentivized to help you figure out how to use them. 
 
-anyway I figured it out. i'm tired so i cant write as nicely as I normally do but here are my notes.
+Anyway I figured it out. i'm tired so i cant write as nicely as I normally do but here are my notes.
 
 ## [Demo Here](https://github.com/sw-yx/netlify-google-spreadsheet-demo/)
 

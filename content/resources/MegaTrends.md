@@ -30,4 +30,8 @@ impossible to overinvest.
   - DATA. wow. holy shit. TV sucks.
   - Tencent and the Chinese government now limit minors to two hours of gameplay per day.
 
+- the metaverse is here
+  - epic games - marshmellow concert
+  - mobile is 45% of gaming sales
+
 Todo: ask andy rackis about https://www.matthewball.vc/all/7reasonsgaming
