@@ -96,6 +96,10 @@ You can't force these things on people. Two Word ideas perform best when they gi
 
 This post is dedicated to Clay Christensen, who pointed out the [Innovator's Dilemma](https://en.wikipedia.org/wiki/The_Innovator%27s_Dilemma), and Leila Janah, who showed that the best method of poverty alleviation is to [Give Work](https://www.leilajanah.com/book).
 
+## Resources
+
+- "X your Y": https://twitter.com/nathanbarry/status/1221996517797425152?s=20
+
 ##  Appendix: One Worders
 
 Exceptions to the rule are noteworthy because of their rarity.

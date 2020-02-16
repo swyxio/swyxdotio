@@ -91,3 +91,8 @@ _originally drafted [in a gist](https://gist.github.com/sw-yx/9720bd4a30606ca3ff
 > Incredible.
 > The point is that he did it with relative ease, all because he had built up an audi- ence who loved his work.
 > **He and I started at the same point and our skills progressed at about the same rate. The difference was that he taught and shared, whereas I kept what I was learning to myself. That made the difference between being able to make tens of thousands of dollars on a new project versus releasing to no one.**
+
+Nathan in general has a lot of riffs on LIP:
+
+- https://nathanbarry.com/4-ideas/
+- https://nathanbarry.com/consumer-to-creator/

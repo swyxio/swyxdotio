@@ -37,7 +37,7 @@
     flex: 1;
     position: relative;
     box-sizing: border-box;
-    line-height: 1.5em;
+    line-height: 1.8em;
     margin-top: auto;
     margin-bottom: auto;
   }

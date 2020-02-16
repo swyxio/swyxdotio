@@ -2,51 +2,47 @@
   import { themeStore } from '../theme.js'
   import { fly } from 'svelte/transition';
   let noop = () => { /* noop */ }
-  let selectedPreset = $themeStore.name
   let breakloop = 0
   let loopLimit = 1000000 // prevent against accidental infinite loop
   $: {
     if (breakloop  < loopLimit) {
-      if (selectedPreset !== 'custom') setPreset()
-      console.log($themeStore)
-      // console.log({ breakloop })
+      if ($themeStore.name !== 'custom') {
+        const presetThemes = [
+          {
+            name: 'custom'
+          },
+          {
+            name: 'light',
+            bgColor: "#eeeeee",
+            textColor: "#323179",
+            linkColor: "#3a90ef",
+            lineLength: "69ch",
+          },
+          {
+            name: 'default',
+            bgColor: '#1d1f21',
+            textColor: '#eeeeee',
+            linkColor: '#2cb67d',
+            lineLength: "69ch"
+          },
+        ]
+        let temp = presetThemes.find(theme => theme.name === $themeStore.name)
+        $themeStore = temp
+      }
     }
   }
-  function setPreset() {
-    let temp = presetThemes.find(theme => theme.name === selectedPreset)
-    $themeStore = temp
-  }
-  const presetThemes = [
-    {
-      name: 'custom'
-    },
-    {
-      name: 'light',
-      bgColor: "#d2bfb0",
-      textColor: "#2a2966",
-      linkColor: "#d4521d",
-      lineLength: "69ch",
-    },
-    {
-      name: 'default',
-      bgColor: '#1d1f21',
-      textColor: '#eeeeee',
-      linkColor: '#2cb67d',
-      lineLength: "69ch"
-    },
-  ]
 </script>
 
 <form id="themeEditor" on:click|stopPropagation={noop} transition:fly>
   <div class="PresetContainer">
     Preset:
-    <select class="select-css" bind:value={selectedPreset} name="themeSelector" id="themeSelector">
+    <select class="select-css" bind:value={$themeStore.name} name="themeSelector" id="themeSelector">
       <option>custom</option>
       <option>light</option>
       <option>default</option>
     </select>
   </div>
-  {#if selectedPreset === 'custom'}
+  {#if $themeStore.name === 'custom'}
   <div class="customColorSelectorContainer">
     <label> --bg-color:
       <input type='color' bind:value={$themeStore.bgColor}  placeholder='any css color value'>

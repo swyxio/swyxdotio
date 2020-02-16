@@ -36,7 +36,9 @@
     color: #6a737d;
     border-left: 0.25em solid #dfe2e5;
   }
-
+  .content :global(a) {
+    border-bottom: 2px solid #F26111;
+  }
   .content :global(ul) {
     line-height: 1.5;
   }

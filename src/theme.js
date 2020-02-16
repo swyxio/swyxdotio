@@ -1,6 +1,7 @@
 // need access to localstorage but cant call onmount with ssr
 // so write our own custom store!
 
+// todo: detect browser preference darkmode
 const defaultTheme = {
   name: 'default',
   bgColor: '#1d1f21',
@@ -12,15 +13,15 @@ let _themeStore = defaultTheme
 let subscribers = new Set()
 let broadcast = () => subscribers.forEach(cb => cb(_themeStore))
 let saveToStorage = () => {
-  // if (_themeStore && typeof window !== undefined)
-  //   window.localStorage.setItem('themeStore', JSON.stringify(_themeStore))
+  if (_themeStore && typeof document !== 'undefined')
+    localStorage.setItem('swyx_io_themeStore', JSON.stringify(_themeStore))
 }
 export const themeStore = {
   subscribe(cb) {
-    // if (subscribers.size < 1 && typeof window !== undefined) {
-    //   let temp = window.localStorage.getItem('themeStore')
-    //   _themeStore = temp ? JSON.parse(temp) : defaultTheme
-    // }
+    if (subscribers.size < 1 && typeof document !== 'undefined') {
+      let temp = localStorage.getItem('swyx_io_themeStore')
+      _themeStore = temp ? JSON.parse(temp) : defaultTheme
+    }
     cb(_themeStore)
     subscribers.add(cb)
     return () => void subscribers.delete(cb)
