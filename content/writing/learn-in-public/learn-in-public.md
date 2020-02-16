@@ -96,3 +96,4 @@ Nathan in general has a lot of riffs on LIP:
 
 - https://nathanbarry.com/4-ideas/
 - https://nathanbarry.com/consumer-to-creator/
+- https://www.smashingmagazine.com/2013/06/how-to-launch-anything/

@@ -1,6 +1,5 @@
 ---
 title: On Sales
-subtitle: How Charity Majors helped me close a door
 slug: not-manager
 categories: ['Reflections']
 begun: 2019-11-25

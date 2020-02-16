@@ -12,3 +12,7 @@ Justin Kan: 5 min gratitude journal
 - what are the things you're grateful for
 - what are the things you're going to do to make today great?
 - negative visualization
+
+https://joplinapp.org/
+
+https://neilkakkar.com/the-human-log.html

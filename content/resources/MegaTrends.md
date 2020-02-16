@@ -35,3 +35,9 @@ impossible to overinvest.
   - mobile is 45% of gaming sales
 
 Todo: ask andy rackis about https://www.matthewball.vc/all/7reasonsgaming
+
+
+creator economy https://a16z.com/2020/02/06/100-true-fans/
+graphql migration
+collapsing layers
+space race 
