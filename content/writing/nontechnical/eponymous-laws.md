@@ -50,6 +50,7 @@ More lists:
     - Spolsky wrote a great counterargument to this [on Bloatware](https://www.joelonsoftware.com/2001/03/23/strategy-letter-iv-bloatware-and-the-8020-myth/)
   - [Amdahl's law](https://en.wikipedia.org/wiki/Amdahl%27s_law): the theoretical speedup in latency of the execution of a task at fixed workload that can be expected of a system whose resources are improved (the "mythical man month" law)
     - Also applied on Software and People https://codahale.com//work-is-work/
+    - adding manpower to a late sofrware project makes it later - Brooks’ Law
 
 
 ## Business of Tech
