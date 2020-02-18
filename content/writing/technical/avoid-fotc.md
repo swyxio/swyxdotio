@@ -19,31 +19,21 @@ Here's the code snippet for implementing custom theming in your Svelte/Sapper ap
 
 ```html
 <script>
-  import { onMount, onDestroy } from 'svelte'
+  import { onMount } from 'svelte'
   import { themeStore } from '../theme.js' // a writable store
-  export let segment
 
   onMount(renderCSS)
-  onDestroy(() => {
-    if (typeof document === 'undefined') return // SSR
-    var ss = document.getElementById("unique-stylesheet-id")
-    ss.innerHTML = '' // not actually sure if i need this
-  })
-  let _themeStore // $ store syntax buggy
-  themeStore.subscribe(v => {
-    _themeStore = v
-    renderCSS()
-  })
+  themeStore.subscribe(renderCSS) // subscribe to theme updates elsewhere in the UI
   function renderCSS() {
     if (typeof document === 'undefined') return // SSR
-    var ss = document.getElementById("unique-stylesheet-id");
-    if (!ss) return // not rendered yet
+    const stylesheet = document.getElementById("unique-stylesheet-id");
+    if (!stylesheet) return // not rendered yet
     let string = ``
     if ($themeStore.bgColor) string += `--bg-color: ${$themeStore.bgColor};`
     if ($themeStore.textColor) string += `--text-color: ${$themeStore.textColor};`
     if ($themeStore.linkColor) string += `--link-color: ${$themeStore.linkColor};`
     if ($themeStore.lineLength) string += `--line-length: ${$themeStore.lineLength};`
-    ss.innerHTML = `html { ${string} }`
+    stylesheet.innerHTML = `html { ${string} }`
   }
 </script>
 
@@ -57,14 +47,13 @@ Here's the code snippet for implementing custom theming in your Svelte/Sapper ap
       if (temp) {
         temp = JSON.parse(temp) // store object
         if (typeof document === 'undefined') return // SSR
-        var ss = document.getElementById("unique-stylesheet-id");
-        if (!ss) return // not rendered yet
+        const stylesheet = document.getElementById("unique-stylesheet-id");
         let string = ``
         if (temp.bgColor) string += `--bg-color: ${temp.bgColor};`
         if (temp.textColor) string += `--text-color: ${temp.textColor};`
         if (temp.linkColor) string += `--link-color: ${temp.linkColor};`
         if (temp.lineLength) string += `--line-length: ${temp.lineLength};`
-        ss.innerHTML = `html { ${string} }`
+        stylesheet.innerHTML = `html { ${string} }`
       }
     })()
   </script>
