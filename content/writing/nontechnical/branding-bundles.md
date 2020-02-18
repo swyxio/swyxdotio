@@ -2,7 +2,7 @@
 title: Branding Bundles
 slug: branding-bundles
 subtitle: Effective Marketing of Incremental Progress
-description: The CSS4 movement taught me that the best way to communicate a group of benefits is to slap a label on it.
+description: The best way to communicate a group of benefits is to slap a label on it.
 categories: ['Marketing']
 date: 2020-02-16
 ---
