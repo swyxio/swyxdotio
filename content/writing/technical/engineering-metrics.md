@@ -21,6 +21,12 @@ Open questions
 
 - Documentation?
 
+DX metrics
+
+- OSS projects created (github, codepen, codesandbox)
+- Sales contacts collected
+- Direct response tracking
+
 ## Sources
 
 - Dalia Havens https://twitter.com/nmeans/status/1152018971433922561
