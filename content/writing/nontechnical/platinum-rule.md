@@ -4,7 +4,7 @@ subtitle: and the Silver Rule
 slug: platinum-rule
 categories: ['Reflections']
 date: 2020-02-18
-description: You've heard of the Golden Rule? "Treat others as you want to be treated." I think it's incomplete. Introducing the Platinum and Silver Rules.
+description: You've heard of the Golden Rule? "Treat others as you want to be treated." Introducing the Platinum and Silver Rules.
 ---
 
 You've heard of the Golden Rule: **Treat others as you want to be treated**.
