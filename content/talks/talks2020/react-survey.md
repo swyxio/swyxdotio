@@ -1,6 +1,6 @@
 ---
 title: State of /r/ReactJS
-slug: react-survey-2019
+slug: react-survey-2019-talk
 topic: React
 venues: ThisDotMedia
 date: 2020-02-19
