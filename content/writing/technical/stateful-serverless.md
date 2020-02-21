@@ -107,7 +107,42 @@ However, what actually happens is a little messier:
 
 I first learned about this from [Guillermo Rauch's Stateful Serverless Applications talk at PrismaDay 2019](https://www.youtube.com/watch?v=lUyln5m6AhY&app=desktop) - and it forever changed the way I thought about Serverless.
 
-As you can see from the [AWS Note on Container Reuse](https://aws.amazon.com/blogs/compute/container-reuse-in-lambda/), a significant amount of state in the environment can be reused, even if it can't be relied on. You can even **write to the filesystem** in `/tmp` and it will stick around! FYI - [initialization is also free](https://twitter.com/alexbdebrie/status/1192120017137127425), so you can stick some heavy require code in there if you don't mind longer cold starts.
+As you can see from the [AWS Note on Container Reuse](https://aws.amazon.com/blogs/compute/container-reuse-in-lambda/), a significant amount of state in the environment can be reused, even if it can't be relied on. You can even **write to the filesystem** in `/tmp` and it will stick around! 
+
+As [Guillermo notes in his talk](https://youtu.be/lUyln5m6AhY?t=889), this means that other stateful processes in the container will also resume upon subsequent invocations of the same container:
+
+- `setTimeout` and `setInterval`
+- child processes (and their children)
+- Sockets might need to reconnect
+
+## Spot the bug
+
+It was the nuances described above that caused me to face this bug today. 
+
+Here is the pseudocode, see if you can spot the bug:
+
+```js
+exports.handler = async function(event, context) {
+  let data = JSON.parse(event.body || "{}");
+  sendData(data);
+  return { statusCode: 200, body: "OK" };
+};
+function sendData(data) {
+  const https = require("https");
+  const options = {/* misc */};
+  const req = https.request(options);
+  req.write(data);
+  req.end();
+}
+```
+
+Can you spot the bug?
+
+Give up?
+
+`req.write(data)` and `req.end()` are queued child process operations, and the `handler` function returns/terminates before they actually have a chance to complete. It is only when the next function invocation gets called does the container wake up again and execute the prior `req`. So we only see the effect of the first `sendData` on the 2nd function invocation, and so on.
+
+FYI - [initialization is also free](https://twitter.com/alexbdebrie/status/1192120017137127425), so you can stick some heavy require code in there if you don't mind longer cold starts.
 
 ## Oh, about Cold Starts
 
