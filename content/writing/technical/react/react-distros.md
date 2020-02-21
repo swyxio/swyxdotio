@@ -4,9 +4,8 @@ subtitle: and The Deployment Age of JavaScript Frameworks
 slug: react-distros
 categories: ['React']
 date: 2020-02-19
+description: Why we no longer have frontend framework wars, and musing on the state of React metaframeworks today and tomorrow
 ---
-
-## Table of Contents
 
 James K Nelson [raised an interesting point](https://twitter.com/james_k_nelson/status/1229649680872558592) recently:
 
@@ -19,6 +18,8 @@ James K Nelson [raised an interesting point](https://twitter.com/james_k_nelson/
 In case you, like me, weren't sure what bootloaders are, Google says a "*Bootloader is a piece of code that runs before any operating system is running. Bootloader are used to boot other operating systems, usually each operating system has a set of bootloaders specific for it*". I guess Webpack's runtime is that, but it is also a compiling mechanism from, well, `/src` to `/dist`.
 
 Anyway, the analogy [rings true](https://twitter.com/dan_abramov/status/1229884766394232838). I'd like to expand on it a little.
+
+## Table of Contents
 
 ## The Carlota Perez Framework
 
@@ -40,9 +41,13 @@ The concerns of the Installation Age are growth and innovation, often resulting 
 
 I think the turning point for JS Frameworks began a year or two ago. We no longer have a new frontend framework every month. [React has been on top of Hacker News Job Board for 31 months](https://www.reddit.com/r/reactjs/comments/f4kr7h/another_year_on_top_for_react_hacker_news_hiring/). But it isn't just React - Vue and Angular both have found very stable adoption among sizable companies who are not going to migrate anytime soon.
 
+![https://pbs.twimg.com/media/ERNOUTnXUAAZlAN?format=jpg&name=medium](https://pbs.twimg.com/media/ERNOUTnXUAAZlAN?format=jpg&name=medium)
+
 The Deployment Age has led to the rise of metaframeworks - frameworks built around frameworks to **literally address deployment concerns** the original frameworks were not designed for. React has Next.js and Gatsby, Vue has [Nuxt.js](https://nuxtjs.org/) and [Gridsome](https://gridsome.org/), Svelte has [Sapper](https://sapper.svelte.dev/), and [Angular even got Scully recently](https://www.youtube.com/watch?list=PLz8Iz-Fnk_eTpvd49Sa77NiF8Uqq5Iykx&v=ugTx-14jRrI&feature=emb_title). In most cases, the frameworks were designed for taking control of a single DOM element and managing a tree of dynamic elements in it, and their metaframework extends that to cover the entire site/app, including routing and static/server side rendering. 
 
-I always liken metaframeworks to the Hulkbuster armor wrapping around the Iron Man suit, because they are heavier but more powerful, but also because I'm a massive Marvel fan.
+I always liken metaframeworks to the Hulkbuster armor wrapping around the Iron Man suit, because they are heavier but more powerful, but also because I'm a massive Marvel nerd.
+
+![https://media2.giphy.com/media/jrTVYXOVxUASI/giphy.gif](https://media2.giphy.com/media/jrTVYXOVxUASI/giphy.gif)
 
 ## React Distros
 
@@ -78,13 +83,13 @@ Here is an incomplete list of React Distros:
 
 There are even metaframeworks atop metaframeworks:
 
-- [Navi](https://github.com/frontarm/navi) and [CURA](Create Universal React App) - James' projects that add some level of routing and SSR on top of CRA
+- [Navi](https://github.com/frontarm/navi) and [CURA](https://github.com/frontarm/create-universal-react-app) - James' projects that add some level of routing and SSR on top of CRA
 - [Docz](https://www.docz.site/) - Static Rendering of Docs with default TypeScript and MDX setups on top of Gatsby
 - [Expo](https://expo.io/) - an excellent React Native distro focused on developer experience
 - [React Native Web](https://github.com/necolas/react-native-web) - a RN distro for the web. See [my post on the RN singularity](https://www.swyx.io/writing/react-native-web-singularity/)
 - [React XP](https://microsoft.github.io/reactxp/) - Microsoft's RN distro that includes building to Windows native apps
 
-And [Parcel](https://parceljs.org/) and likely [Rome](http://romejs.dev/) follow the [Collapsing Layers](https://www.swyx.io/writing/collapsing-layers/) thesis and collapse the metaframework into the build tool (instead of having the metaframework circumscribe the build tool).
+And [Parcel](https://parceljs.org/) and likely [Rome](http://romejs.dev/) follow the [Collapsing Layers](https://www.swyx.io/writing/collapsing-layers/) thesis and collapse the metaframework into the build tool (instead of having the metaframework circumscribe the build tool). React Native of course has [Metro](https://facebook.github.io/metro/), a dedicated bundler, and [Hermes](https://hermesengine.dev/) a dedicated JS engine.
 
 ## What other React Distros should exist?
 
@@ -92,13 +97,13 @@ However I agree with James that there should be more React Distros, especially a
 
 > But anyway, here's my ideal React distro:
 > 
-> ・ Out-of-the-box SSR
-> ・ CSS-in-JS is easy － if you want it
-> ・ Sane defaults for routing and data fetching/caching, and...
-> ・ Works without GraphQL
-> ・ Builds like CRA, but...
-> ・ Allows Webpack configuration
-> ・ And 🙅‍♂️ to fs-based routing
+>  - Out-of-the-box SSR
+>  - CSS-in-JS is easy － if you want it
+>  - Sane defaults for routing and data fetching/caching, and...
+>  - Works without GraphQL
+>  - Builds like CRA, but...
+>  - Allows Webpack configuration
+>  - And 🙅‍♂️ to fs-based routing
 
 I agree with most of these except I like fs-based routing 😂
 
@@ -126,3 +131,5 @@ As Tom Dale observed in 2017, [Compilers are the new Frameworks](https://tomdale
 Why should only app makers get React Distros?
 
 I first made friends with Travis Fischer through discovering [create-react-library](https://www.npmjs.com/package/create-react-library). I also help maintain [TSDX](https://github.com/jaredpalmer/tsdx), a toolchain for building React + TypeScript libraries like [Formik](https://github.com/jaredpalmer/formik). As we start being able to bet on a stable foundation in the Deployment Phase, we can start making tools to help us make tools.
+
+![https://pbs.twimg.com/media/ERNJ-dlXYAAfv81?format=jpg&name=medium](https://pbs.twimg.com/media/ERNJ-dlXYAAfv81?format=jpg&name=medium)

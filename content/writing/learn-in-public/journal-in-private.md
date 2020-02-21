@@ -16,3 +16,5 @@ Justin Kan: 5 min gratitude journal
 https://joplinapp.org/
 
 https://neilkakkar.com/the-human-log.html
+
+https://nesslabs.com/dear-diary
