@@ -27,7 +27,7 @@ exports.handler = async (event, context) => {
 };
 ```
 
-You can see this in action here: https://github.com/sw-yx/stateful-serverless with the deployed endpoint here https://stateful-serverless-demo.netlify.com/.netlify/functions/hello-world
+You can see this in action here (https://github.com/sw-yx/stateful-serverless) with the deployed endpoint [here](https://stateful-serverless-demo.netlify.com/.netlify/functions/hello-world). (Note if you navigate to this in the server you may often double-ping the function with your OPTIONS requests).
 
 Now: What is the result of pinging the `hello-world` function repeatedly? You might reasonably expect that you'll get `{"message":"Hello, abc is 1"}` over and over.
 
@@ -140,7 +140,7 @@ Can you spot the bug?
 
 Give up?
 
-`req.write(data)` and `req.end()` are queued child process operations, and the `handler` function returns/terminates before they actually have a chance to complete. It is only when the next function invocation gets called does the container wake up again and execute the prior `req`. So we only see the effect of the first `sendData` on the 2nd function invocation, and so on.
+`https.request` is an asynchronous operation, and the `handler` function returns/terminates before it has a chance to complete. It is only when the next function invocation gets called does the container wake up again and continue executing the request. So we only see the effect of the first `sendData` on the 2nd function invocation, and so on.
 
 FYI - [initialization is also free](https://twitter.com/alexbdebrie/status/1192120017137127425), so you can stick some heavy require code in there if you don't mind longer cold starts.
 
@@ -149,6 +149,8 @@ FYI - [initialization is also free](https://twitter.com/alexbdebrie/status/11921
 It is a myth that you can simply [periodically ping lambdas to avoid cold starts](https://serverless.com/blog/keep-your-lambdas-warm/) every [5-15 mins](http://stackoverflow.com/questions/42877521/is-it-possible-to-keep-an-aws-lambda-function-warm?noredirect=1#comment72860693_42877521), like you would a health check on a server. It helps but it doesn't solve it.
 
 [**Lambda cold starts** are about concurrent executions](https://hackernoon.com/im-afraid-you-re-thinking-about-aws-lambda-cold-starts-all-wrong-7d907f278a4f). It happens when Lambda decides it needs to initialize another container to handle your function invocation. This is why you can't rely on singleton state in your serverless functions, even though they are stateful. 
+
+> Note: I tried to simulate this with Netlify Functions, but couldn't figure it out. They just always acted like they belonged to one container. I suspect that is Lambda optimizing for us, but can't be sure. Please hit me up if you can do it?
 
 However it is also why sending a periodic ping doesn't solve all your cold start problems - it just warms the functions you use the least. This is why [Brian LeRoux](https://twitter.com/brianleroux) has concluded the only reliable way to avoid cold starts is simply to make sure your function is [<1mb of JS](https://twitter.com/brianleroux) (you can do more with faster runtimes like Go).
 

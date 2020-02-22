@@ -18,6 +18,8 @@ For live demo check https://netlify-google-spreadsheet-demo.netlify.com/
 
 ## How to get the env vars: an incomplete tutorial
 
+These are my notes from when I ran it through the first time - in case you need it, [here is another walkthrough](https://blog.kintohub.com/how-to-use-google-spreadsheet-for-your-backend-database-29df9b832a96) with possibly better screenshots and instructions. You should be able to piece it together from here.
+
 1. make a google sheet. its id from url will be `GOOGLE_SPREADSHEET_ID_FROM_URL`
 
 2. head to google console and make sure the Sheets API is enabled https://console.developers.google.com/apis/library/sheets.googleapis.com?project=sixth-storm-268221. you may need to set up a "project" for this if this is your first time.

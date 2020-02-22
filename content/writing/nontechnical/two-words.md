@@ -41,7 +41,7 @@ Whatever you are into, whatever your field is, look at the successful movements 
 - Business minded startup folks are [Growth Hackers](https://andrewchen.co/how-to-be-a-growth-hacker-an-airbnbcraigslist-case-study/) and [Product Managers](https://medium.com/pminsider/the-history-and-evolution-of-product-management-part-1-23cb7a858f05)
 - Mottos: Naval tells us to [Productize Yourself](https://nav.al/productize-yourself), gather "Specific Knowledge". Bezos reminds shareholders it is always [Day One](https://www.forbes.com/sites/quora/2017/04/21/what-is-jeff-bezos-day-1-philosophy/). Don Valentine wants us to keep in mind [Who Cares?](https://sequoiacap.com/article/remembering-don-valentine/)
 - The Health-conscious might be into [Intermittent Fasting](https://www.healthline.com/nutrition/intermittent-fasting-guide), [Quantified Self](https://en.wikipedia.org/wiki/Quantified_self), or even [Weight Watchers](https://www.weightwatchers.com/us/).
-- General socio-political movements can often take this form: [Lean In](https://leanin.org/), [Be Better](http://www.bebettermovement.com/), [Time's Up](https://timesupnow.org/)
+- General socio-political movements can often take this form: [Lean In](https://leanin.org/), [Be Better](http://www.bebettermovement.com/), [Time's Up](https://timesupnow.org/), [Me Too](https://en.wikipedia.org/wiki/Tarana_Burke)
 - [Time Well Spent](https://www.ted.com/talks/tristan_harris_how_a_handful_of_tech_companies_control_billions_of_minds_every_day?language=en) became [Humane Technology](https://humanetech.com/)
 - Greta Thunberg's [School Strike for Climate](https://time.com/person-of-the-year-2019-greta-thunberg/) became #ClimateStrike.
 
