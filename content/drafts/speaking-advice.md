@@ -210,3 +210,4 @@ what to do when you get in trouble
 Notes:
 
 - demo video - speaker lab with grant baldwin
+- https://thespeakerlab.com/mike-kim/

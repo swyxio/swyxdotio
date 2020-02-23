@@ -5,13 +5,13 @@
   "author": "sw-yx <swyx@dontemail.me>",
   "license": "MIT",
   "dependencies": {
-    "@ssgjs/source-devto": "^0.0.5",
+    "@ssgjs/source-devto": "^0.0.8",
     "dotenv-safe": "^8.2.0",
     "fuse.js": "^3.4.6",
     "marked": "^0.8.0",
     "puppeteer": "^2.0.0",
     "rss": "^1.2.2",
-    "ssg": "^0.0.59",
+    "ssg": "^0.0.62",
     "twemoji": "^12.1.4",
     "url-join": "^4.0.1"
   },

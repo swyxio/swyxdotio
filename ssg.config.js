@@ -33,13 +33,11 @@ exports.plugins = {
         (b, a) => a.metadata.date - b.metadata.date
       )
     },
-    getDataSlice(uid, coreDataPlugin) {
-      let slice = coreDataPlugin.getDataSlice(uid)
-      if (slice) {
-        return slice
-      } else {
-        return devToPlugin.getDataSlice(uid)
-      }
+    async getDataSlice(uid, coreDataPlugin) {
+      let slice = await coreDataPlugin.getDataSlice(uid)
+      if (slice) return slice
+      // else its a devto
+      return await devToPlugin.getDataSlice(uid)
     }
   },
   speaking: {
