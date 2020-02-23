@@ -19,7 +19,8 @@ async function screenshot(
     const [slug, text, subtitle] = post
 
     // prep
-    const filePath = path.resolve(`static/og_image/${slug}.png`)
+    // const filePath = path.resolve(`static/og_image/${slug}.png`)
+    const filePath = path.resolve(`__sapper__/export/og_image/${slug}.png`)
     ensureDirectoryExistence(filePath)
     if (fs.existsSync(filePath)) continue // skip any images that were already there
 

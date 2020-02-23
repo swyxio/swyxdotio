@@ -206,3 +206,7 @@ what to do when you get in trouble
 - i dont know, followup later
 - fix on the spot, explain what you got wrong
   
+
+Notes:
+
+- demo video - speaker lab with grant baldwin

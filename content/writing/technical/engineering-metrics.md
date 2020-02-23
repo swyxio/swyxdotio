@@ -43,3 +43,5 @@ DX metrics
   Change Failure – how often a deployment breaks some thing
   Time to Restore – how quickly to recover from broken (either fix or revert)
   Availability – how often service is good and available to be consumed
+
+- https://github.com/dwmkerr/hacker-laws#user-content-goodharts-law

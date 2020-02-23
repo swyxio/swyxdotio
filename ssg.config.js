@@ -1,9 +1,11 @@
+require('dotenv-safe').config()
 const fs = require('fs')
 const path = require('path')
 const generateRSS = require('./generateRSS')
-// const remark = require('@ssgjs/source-remark') // no longer active but was still usable in 0.38
-// const writing = remark({ dirPath: 'content/writing' })
-// const speaking = remark({ dirPath: 'content/talks' })
+require('dotenv-safe').config()
+const devToPlugin = require('@ssgjs/source-devto')({
+  apiKey: process.env.DEV_TO_API_KEY
+})
 
 // used only in rss feed for now but can repeat elsewhere
 const sitedata = {
@@ -21,13 +23,23 @@ const sitedata = {
 // optional data plugins. must be object, so we can namespace
 exports.plugins = {
   writing: {
-    createIndex(mainIndex) {
-      return mainIndex.ssgCoreData.filter(item =>
+    async createIndex(mainIndex) {
+      let writingIndex = mainIndex.ssgCoreData.filter(item =>
         item.shortFilePath.startsWith('writing/')
+      )
+      let devToIndex = await devToPlugin.createIndex()
+      console.log(`importing ${devToIndex.length} articles from dev.to`)
+      return [...writingIndex, ...devToIndex].sort(
+        (b, a) => a.metadata.date - b.metadata.date
       )
     },
     getDataSlice(uid, coreDataPlugin) {
-      return coreDataPlugin.getDataSlice(uid)
+      let slice = coreDataPlugin.getDataSlice(uid)
+      if (slice) {
+        return slice
+      } else {
+        return devToPlugin.getDataSlice(uid)
+      }
     }
   },
   speaking: {

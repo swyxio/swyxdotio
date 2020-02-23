@@ -248,5 +248,7 @@ exports.handler = async (event, context) => {
 ## Other resources
 
 - You may find writing Google Apps Scripts easier. But it is "intel inside".
+- https://dev.to/sarthakganguly/google-sheets-as-your-web-backend-4a65
+- https://blog.kintohub.com/how-to-use-google-spreadsheet-for-your-backend-database-29df9b832a96
 - here is prior art but i think it is v3. https://github.com/grod220/CCS-B.B.Warfield/blob/master/lambda/googleSheets.js
 
