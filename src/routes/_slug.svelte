@@ -33,8 +33,8 @@
 
   .content :global(blockquote) {
     padding: 0 1em;
-    color: #6a737d;
-    border-left: 0.25em solid #dfe2e5;
+    font-style: italic;
+    border-left: 0.25em solid var(--brand-color-primary);
   }
   .content :global(a) {
     border-bottom: 2px solid #F26111;

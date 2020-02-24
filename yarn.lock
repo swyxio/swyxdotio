@@ -913,10 +913,10 @@
     string-hash "^1.1.3"
     svelte-preprocess "^3.2.2"
 
-"@ssgjs/source-devto@^0.0.8":
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/@ssgjs/source-devto/-/source-devto-0.0.8.tgz#28afc565ce6d8baeccf2a9606285ac3112c46cbc"
-  integrity sha512-azfu1GXoB76JlE+OFQ1T8qUchJVFD3bcM3NXlAqqTDwjTH/eJ2gyDZKGDEJL5SJZcg+FJEPQVushnak57kSStw==
+"@ssgjs/source-devto@^0.0.9":
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/@ssgjs/source-devto/-/source-devto-0.0.9.tgz#fe70324398546814d9198b32701611720ab06aea"
+  integrity sha512-D4V6LJcrXDbP98gRSiSUdL688wBb6Vtv6zG1/Qb2VJ3D9dd/Wi0ZZg5GrXcxCLarV+tkdx/GvqCpvZJVRjJpFg==
   dependencies:
     front-matter "^3.0.2"
     immer "^4.0.0"

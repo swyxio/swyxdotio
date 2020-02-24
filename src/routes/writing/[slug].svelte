@@ -21,6 +21,10 @@
   export let post
   export let seoCategory = 'swyx Writing'
   // $: console.log({ post })
+  let slugForWebmentions = slug
+  if (post.metadata && post.metadata.oldSlugs && post.metadata.oldSlugs[0]) {
+    slug = post.metadata.oldSlugs[0]
+  } 
   let seoSubtitle = post.metadata && post.metadata.subtitle
   export let seoTitle = seoSubtitle
     ? `${post.metadata && post.metadata.title}: ${seoSubtitle}`

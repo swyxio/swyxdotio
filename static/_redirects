@@ -5,3 +5,4 @@
 /hooks /speaking/react-hooks/
 /talks  /speaking
 /talks/*  /speaking/:splat
+/writing/js-observability /writing/js-tools-metrics-logs-traces

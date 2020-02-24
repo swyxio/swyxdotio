@@ -5,7 +5,7 @@
   "author": "sw-yx <swyx@dontemail.me>",
   "license": "MIT",
   "dependencies": {
-    "@ssgjs/source-devto": "^0.0.8",
+    "@ssgjs/source-devto": "^0.0.9",
     "dotenv-safe": "^8.2.0",
     "fuse.js": "^3.4.6",
     "marked": "^0.8.0",
