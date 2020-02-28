@@ -45,3 +45,7 @@ DX metrics
   Availability – how often service is good and available to be consumed
 
 - https://github.com/dwmkerr/hacker-laws#user-content-goodharts-law
+
+
+
+https://en.m.wikipedia.org/wiki/Application_performance_management

@@ -20,6 +20,8 @@ const sitedata = {
 // optional config
 // exports.ssgDotFolder = '.ssg'
 
+let RSSData = []
+
 // optional data plugins. must be object, so we can namespace
 exports.plugins = {
   writing: {
@@ -35,9 +37,12 @@ exports.plugins = {
     },
     async getDataSlice(uid, coreDataPlugin) {
       let slice = await coreDataPlugin.getDataSlice(uid)
-      if (slice) return slice
-      // else its a devto
-      return await devToPlugin.getDataSlice(uid)
+      if (!slice) {
+        // else its a devto
+        slice = await devToPlugin.getDataSlice(uid)
+      }
+      RSSData.push(slice)
+      return slice
     }
   },
   speaking: {
@@ -74,5 +79,8 @@ exports.createIndex = async (mainIndex = {}) => {
 // optional lifecycle hook
 exports.postExport = async mainIndex => {
   // sitedata fits https://www.npmjs.com/package/rss#user-content-example-usage
+  // return generateRSS({ writing: RSSData }, sitedata)
+  // todo: dont use mainIndex - must accumulate dataslices for the html
+  // cant store rssdata in memory either bc this file gets read twice
   return generateRSS(mainIndex, sitedata)
 }

@@ -16,8 +16,7 @@ async function screenshot(
   let i = 0
   for (const post of PostArray) {
     i++
-    const [metadata, text, subtitle] = post
-    const slug = metadata.slug
+    const { slug, text, subtitle } = post
 
     // prep
     // const filePath = path.resolve(`static/og_image/${slug}.png`)

@@ -47,9 +47,9 @@ module.exports = async function generateRSS(mainIndex, opts) {
     if (category === 'ssgCoreData') return // TODO: consider whether this is actually skippable
     const subIndex = mainIndex[category]
     Object.values(subIndex).forEach(item => {
-      const slug = item.slug
+      const slug = item.metadata.slug || item.slug
       if (!slug) {
-        console.log({baseUrl, category, item})
+        console.log({ baseUrl, category, item })
         return // early return
       }
       let itemDescription = item.metadata.subtitle
@@ -62,17 +62,27 @@ module.exports = async function generateRSS(mainIndex, opts) {
       if (item.metadata.url) {
         itemDescription += ` (External Link: <a href="${item.metadata.url}">${item.metadata.url}</a>)`
       }
-      PostsToScreenshot.push([
-        category + '/' + slug,
-        item.metadata.title,
-        item.metadata.subtitle
-      ])
+      PostsToScreenshot.push({
+        slug: category + '/' + slug,
+        text: item.metadata.title,
+        subtitle: item.metadata.subtitle
+      })
+      // console.log(Object.keys(item))
+      // console.log('--')
+      // console.log(Object.keys(item.metadata))
       feed.item({
         title: item.metadata.title,
         url: urljoin(baseUrl, category, slug),
         description: itemDescription,
-        date: item.metadata.pubdate
+        date: item.metadata.pubdate,
         // todo: enclosure?
+        custom_elements: item.html && [
+          {
+            'content:encoded': {
+              _cdata: item.html
+            }
+          }
+        ]
       })
     })
   })

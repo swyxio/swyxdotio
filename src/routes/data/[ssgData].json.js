@@ -1,5 +1,6 @@
 const { getDataSlice, getIndex } = require('ssg/readConfig')
 
+const seenSlices = new Map()
 export async function get(req, res) {
   const { ssgData } = req.params
   const splitSlug = ssgData.split('___ssg___')
@@ -11,7 +12,13 @@ export async function get(req, res) {
   if (uid === 'index') {
     data = mainIndex[key]
   } else {
-    data = await getDataSlice(key, uid)
+    const keyuid = key + uid
+    if (seenSlices.has(keyuid)) {
+      data = seenSlices.get(keyuid)
+    } else {
+      data = await getDataSlice(key, uid)
+      seenSlices.set(keyuid, data)
+    }
   }
   if (typeof data !== 'undefined') {
     res.writeHead(200, { 'Content-Type': 'application/json' })
