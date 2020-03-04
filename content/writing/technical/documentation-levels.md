@@ -269,3 +269,8 @@ A more ambitious framing of this might put them into a pyramid "hierarchy of nee
 
 - https://github.com/reduxjs/redux/issues/3609 has a bunch of great links
 - https://vimeo.com/32957711 John Resig on JQuery's OSS community
+- Google on Technical Writing https://developers.google.com/tech-writing
+- IA questions https://medium.com/eightshapes-llc/information-architecture-lenses-8a3929a106dd
+- Personas https://articles.uie.com/when-it-comes-to-personas-the-real-value-is-in-the-scenarios/
+- Empathy mapping https://www.nngroup.com/articles/ux-mapping-cheat-sheet/
+  - and journey mapping https://www.nngroup.com/articles/storyboards-visualize-ideas/

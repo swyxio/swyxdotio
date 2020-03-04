@@ -17,4 +17,6 @@ https://joplinapp.org/
 
 https://neilkakkar.com/the-human-log.html
 
+https://twitter.com/CrazyPolymath/status/1110172639782264832?s=20
+
 https://nesslabs.com/dear-diary

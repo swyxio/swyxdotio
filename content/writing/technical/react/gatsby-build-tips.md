@@ -12,3 +12,5 @@ no cache busting
 - https://www.netlify.com/blog/2017/02/23/better-living-through-caching/
 - https://www.npmjs.com/package/gatsby-plugin-remove-fingerprints
 - https://jakearchibald.com/2016/caching-best-practices/
+
+dev mode - slice - wesbos https://twitter.com/wesbos/status/1234583291812089858?s=20

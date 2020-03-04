@@ -211,3 +211,4 @@ Notes:
 
 - demo video - speaker lab with grant baldwin
 - https://thespeakerlab.com/mike-kim/
+- verbal fillers https://medium.com/age-of-awareness/how-long-are-you-going-to-uhh-keep-using-those-verbal-fillers-1be0ce044499

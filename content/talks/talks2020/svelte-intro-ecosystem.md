@@ -1,11 +1,12 @@
 ---
-title: How Svelte Works
-slug: how-svelte-works
+title: Intro to Svelte and Svelte Ecosystem
+slug: svelte-intro-ecosystem
 topic: Svelte
 venues: JSandFriends
 date: 2020-02-19
 url: https://www.eventbrite.com/e/javascript-and-friends-online-meetup-svelte-tickets-90472245923
-description: A broad ranging introduction to Svelte, the next-generation JS framework.
+video: https://www.youtube.com/watch?v=XQi4kd-6SSQ&feature=youtu.be
+description: Svelte is an exciting, newer JavaScript framework that was designed from the ground up with compilation and developer experience in mind. Yet the compiler can be a black box - how can a tiny framework ship so many features? This talk is a deep dive into Svelte's compiler and runtime to demystify this brilliant approach to solving the tradeoff between DX and UX.
 ---
 
 - Why: Tradeoff of Functionality and Size

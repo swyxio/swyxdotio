@@ -4,8 +4,10 @@ date: 2019-09-11
 slug: netlify-gatsby-jamstack-apps-authenticated-serverless
 categories: ['Tech', 'Netlify', 'Gatsby']
 description: Gatsby is more than a simple static site generator. It uses JavaScript to rehydrate Markup into a fully dynamic React app - which means you can use APIs to do all sorts of dynamic functionality!
-published: false
+canonical_url: https://www.freecodecamp.org/news/building-jamstack-apps/
 ---
+
+*Canonical link: https://www.freecodecamp.org/news/building-jamstack-apps/*
 
 When interacting with a backend, a JAMstack app can do everything a mobile app can do, without the tyranny of the app store. This is a fundamental insight that goes as deep as the fight for a more open, secure, decoupled, faster web.
 
@@ -64,7 +66,7 @@ netlify init
 
 You will be prompted for a "build command", which for Gatsby is `yarn build`, and a "publish directory", which for Gatsby is `public`. You can also save this in a [netlify.toml config file](https://www.netlify.com/docs/netlify-toml-reference/?utm_source=blog&utm_medium=freecodecamp&utm_campaign=devex), or the CLI will create it for you:
 
-```toml:title=netlify.toml
+```
 [build]
   command = "yarn build"
   functions = "functions"
