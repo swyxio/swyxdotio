@@ -73,6 +73,7 @@ More lists:
   - [Chesterton's Fence](https://florentcrivello.com/index.php/2019/09/04/the-efficiency-destroying-magic-of-tidying-up/) - you should never take down a fence before knowing why it was put up
   - [Ebbinghaus Effect](https://www.psychestudy.com/cognitive/memory/ebbinghaus-forgetting-curve) - mathematical model of how we forget - aka [forgetting curve](https://en.wikipedia.org/wiki/Forgetting_curve)
     - also notable for the visual [Ebbinghaus Illusion (relative size of circles)](https://en.wikipedia.org/wiki/Ebbinghaus_illusion)
+  - [Ringelmann effect](https://en.wikipedia.org/wiki/Ringelmann_effect) - work less when group is larger
   - [Stigler's Law](https://en.wikipedia.org/wiki/Stigler's_law_of_eponymy) - no scientific discovery is named after its original discoverer. Maximum meta!
     - Mark Twain: "*"It takes a thousand men to invent a telegraph, or a steam engine, or a phonograph, or a photograph, or a telephone or any other important thing — and the last man gets the credit and we forget the others. He added his little mite — that is all he did. These object lessons should teach us that ninety-nine parts of all things that proceed from the intellect are plagiarisms, pure and simple; and the lesson ought to make us modest. But nothing can do that.*"
   - [Berkson's Paradox](https://twitter.com/MWStory/status/1205486677369786369?s=20) - positive correlations become negative because of filters that trade factors off.

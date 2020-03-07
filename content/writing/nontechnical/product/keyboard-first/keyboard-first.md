@@ -33,3 +33,8 @@ They discussed:
   - Intercom has messages and inbox and submenus, its much more complex
 - Speed is probably a feature not a product - hard to pitch some software purely on how fast it is
 - You can be so workflow obssessed that you overserve yourself and have a smaller market because of too many peculiarities
+
+
+## Notes from future
+
+- CLUI https://blog.repl.it/clui
