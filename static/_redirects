@@ -6,3 +6,4 @@
 /talks  /speaking
 /talks/*  /speaking/:splat
 /writing/js-observability /writing/js-tools-metrics-logs-traces
+/writing/no-controlled-dom /writing/no-controlled-forms

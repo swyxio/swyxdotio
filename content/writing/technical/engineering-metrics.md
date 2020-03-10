@@ -20,6 +20,7 @@ published: false
 Open questions
 
 - Documentation?
+- Batesian Mimicry https://seekingalpha.com/article/217019-a-batesian-mimicry-explanation-of-business-cycles
 
 DX metrics
 

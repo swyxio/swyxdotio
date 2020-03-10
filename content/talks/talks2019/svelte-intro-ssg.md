@@ -5,6 +5,7 @@ categories: ['Tech', 'Svelte']
 description: A lightning talk for Svelte Society November
 date: 2019-11-04
 topic: Svelte
+video: https://www.youtube.com/watch?v=JEH0V-zNGUk
 venues: SvelteSociety
 ---
 

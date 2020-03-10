@@ -5,6 +5,7 @@ topic: JAMstack
 venues: Oredev
 date: 2019-11-07
 url: https://oredev.org/
+video: https://www.youtube.com/watch?v=QgKvRylmPfk
 desc: An introduction to the JAMstack from a historical perspective as the next evolution from LAMP and MEAN stacks
 description: 20 years ago, Michael Kunze coined the LAMP stack to describe the success of open source architecture on the web, but it also betrayed the server-centric world of the time. 5 years ago, Val Karpov described the MEAN stack as a JavaScript centric alternative straddling frontend and backend worlds. A lot has happened since then. React rose to dominance, AWS Lambda started the Serverless movement, the "API economy" arose to serve developers, and Static Site Generators came back in a big way. What is driving this new stack of Javascript, APIs, and Markup?
 ---
