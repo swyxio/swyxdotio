@@ -65,9 +65,12 @@ I confess I don't do this well at all and would welcome ideas for how to make ac
 
 **Compare and Contrast Multiple Perspectives**: I find a shocking number of devs cannot objectively hold competing ideas in their head at the same time. They just loudly state their point of view over and over and over again and attack the weakest argument of their opponents. This is unacceptable to me. The 5th Habit of the 7 Habits is [Seek First to Understand, then To Be Understood](https://www.franklincovey.com/the-7-habits/habit-5.html). You are more effective if you can summarize the *best* arguments of all major parties in a way that *THEY* agree with. This is an unjudgmental "schools of thought" based mode of learning I wish more people adopted. 
 
-As a bonus, once you can do this well, you also become more persuasive to people who **disagree** with you. Because you took the time to understand them. This is sometimes called [Steel-manning](https://lifehacker.com/utilize-the-steel-man-tactic-to-argue-more-effectivel-1632402742), as opposed to [Straw-man arguments](https://en.wikipedia.org/wiki/Straw_man).
+As a bonus, once you can do this well, you also become more persuasive to people who **disagree** with you. Because you took the time to understand them. This is sometimes called [Steel-manning](https://lifehacker.com/utilize-the-steel-man-tactic-to-argue-more-effectivel-1632402742) ([more from Andrew Chen](https://twitter.com/andrewchen/status/1190721336252829696?s=20)), as opposed to [Straw-man arguments](https://en.wikipedia.org/wiki/Straw_man).
 
 **Distinguish Game vs Metagame**: Much of learning is focused on how to do better at the Game you're playing, whatever the game is. But the best players recognize that *the rules of the game* are changing even while it is being played. If they are smart, or passionate, they are also actively involved in *changing the rules of the game* while they are playing it. If you don't want to keep "fighting the last war", and arriving at the top of your game only to have the game change on you, you must also pay attention to how the game is changing while you play it. Often, this takes the form of realizing that there's a bigger game out there than the one you once thought your whole world.
 
-
 > See Also: [Big L Notation](https://www.swyx.io/writing/big-l-notation) (expanding on why "Learn In Public" is the fastest way to learn)
+
+## Further References
+
+- Sarah Drasner: [Learning to Learn](https://css-tricks.com/learning-to-learn/)

@@ -47,3 +47,4 @@ Medium:
 Unrated:
   - https://twitter.com/jeremy_daly/status/1225478326615203841
   - https://www.alexdebrie.com/posts/dynamodb-single-table/
+  - transactional isolation https://fauna.com/blog/a-comparison-of-scalable-database-isolation-levels

@@ -214,3 +214,11 @@ Notes:
 - verbal fillers https://medium.com/age-of-awareness/how-long-are-you-going-to-uhh-keep-using-those-verbal-fillers-1be0ce044499
 - https://overcast.fm/+LFCm_2QDQ
 - https://m.subbu.org/on-public-speaking-22719c2010b7
+- [How to use YouTube?](https://thespeakerlab.com/amy-landino/)
+- how to use a blog
+- dont eat a lot before talk 
+
+
+Keynoting
+- https://www.youtube.com/watch?v=FKTxC9pl-WM&feature=youtu.be
+- https://twitter.com/swyx/status/1217599461385474048?s=20

@@ -27,3 +27,7 @@ Now I use the "ABCD" framework:
 (credit to 
 @shl
  for this!)
+
+
+ https://danluu.com/corp-eng-blogs/
+ https://twitter.com/michael_nielsen/status/1237871186752573442 terry tao

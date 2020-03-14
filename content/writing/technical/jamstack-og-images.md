@@ -161,3 +161,4 @@ More things others have done [based on replies](https://twitter.com/swyx/status/
 - [puppeteer-social-image](https://github.com/chrisvxd/puppeteer-social-image)
 - [puppet master](https://github.com/saasify-sh/puppet-master) hosted service with saasify
 - https://www.npmjs.com/package/gatsby-plugin-printer
+- Validate your Twitter ogdata https://cards-dev.twitter.com/validator
