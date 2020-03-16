@@ -31,3 +31,8 @@ Now I use the "ABCD" framework:
 
  https://danluu.com/corp-eng-blogs/
  https://twitter.com/michael_nielsen/status/1237871186752573442 terry tao
+
+
+PG: writing usefully: http://paulgraham.com/useful.html, http://www.paulgraham.com/talk.html
+
+ Stephen King: on writing https://www.amazon.com/dp/B000FC0SIM/ref=dp-kindle-redirect?_encoding=UTF8&btkr=1

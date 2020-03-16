@@ -217,6 +217,12 @@ Notes:
 - [How to use YouTube?](https://thespeakerlab.com/amy-landino/)
 - how to use a blog
 - dont eat a lot before talk 
+- virtual speaking: https://thespeakerlab.com/virtual-speaker/
+- Grant Baldwin's Successful Speaker framework
+  - Topic Trifecta
+  - S - select: pick an industry. 7 major industries: corporations, associations, nonprofits
+  - P - pic
+  - E - 
 
 
 Keynoting

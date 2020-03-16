@@ -42,6 +42,8 @@ You can find conferences via community listings:
 - https://conferences.css-tricks.com/
 - https://twitter.com/moztechcfps
 - https://twitter.com/cfp_land
+- https://twitter.com/callingallpaper
+- https://confs.tech/
 
 If you're new to conferences, "the game" can be rather opaque, so here are some basic, general facts (each conf will have exceptions!): 
 
@@ -200,6 +202,7 @@ I'm of course not the only source of advice on this stage. Here are other advice
 
 - Dan Abramov: [Preparing for a Tech Talk](https://overreacted.io/preparing-for-tech-talk-part-1-motivation/)
 - [CFPLand Guide to Speaking](https://www.cfpland.com/guides/speaking/)
+- [How to get into Speaking with Karl Hughes of CFPLand](https://www.codewithjason.com/rails-with-jason-podcast/karl-hughes/)
 - (you?)
 
 I will also be following up this post with my thoughts on speaking advice - giving the actual talk!

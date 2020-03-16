@@ -169,8 +169,7 @@ module.exports = function getHtml(parsedReq) {
             ? `<div class="subtitle">${subtitle}</div>`
             : `
         <div class="footer">
-        <div>swyx.io</div>
-        <div>@swyx</div>
+          <div>swyx.io</div>
         </div>
         `
         }

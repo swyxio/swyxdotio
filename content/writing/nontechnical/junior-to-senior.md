@@ -9,3 +9,5 @@ published: false
 when junior: say yes to everything. focus on figuring out how to do it
 
 when senior: say no to things until it is right. 
+
+charity majors - when you have a gut feel about code and people trust you
