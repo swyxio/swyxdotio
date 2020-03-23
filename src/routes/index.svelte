@@ -141,8 +141,8 @@
   <div id="CTA">
     Featured Post:
     <div>
-      <a href="/writing/big-l-notation">
-        <b>Big L Notation: Modeling Rates of Learning</b>
+      <a href="/writing/farewell-netlify">
+        <b>Farewell, Netlify</b>
       </a>
     </div>
   </div>
