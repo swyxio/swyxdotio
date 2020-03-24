@@ -36,3 +36,5 @@ Now I use the "ABCD" framework:
 PG: writing usefully: http://paulgraham.com/useful.html, http://www.paulgraham.com/talk.html
 
  Stephen King: on writing https://www.amazon.com/dp/B000FC0SIM/ref=dp-kindle-redirect?_encoding=UTF8&btkr=1
+
+ Scott Adams: https://dilbertblog.typepad.com/the_dilbert_blog/2007/06/the_day_you_bec.html
