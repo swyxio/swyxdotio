@@ -7,7 +7,7 @@ date: 2020-01-20
 description: As Moore's Law ends, devices multiply, and software becomes critical to life, we must take another look at our full stack for continued gains in efficiency, reliability and security.
 ---
 
-*Essay status: confident in framing, not confident in timing. Still looking for more examples*
+_Essay status: confident in framing, not confident in timing. Still looking for more examples_
 
 **The future of technology is less layers, not more.**
 
@@ -19,21 +19,23 @@ As hardware has gotten faster and cheaper over time, we have chosen to stack lay
 
 But it was the right move - enabling more people to write and use more software accelerated the demand for all technology, hardware included.
 
-Of course, we have always had frequent calls for a return to simplicity and more efficient software. [Niklaus Wirth](https://en.wikipedia.org/wiki/Wirth%27s_law) in 1995 [pled for Lean Software](http://doi.ieeecomputersociety.org/10.1109/2.348001). There is a delicious irony in the contrast between Moore's Law and Wirth's Law - this is a special case of [Jevons paradox](https://en.wikipedia.org/wiki/Jevons_paradox). My favorite modern framing of pits the former CEOs of Intel vs Microsoft: [What Andy giveth, Bill taketh away](https://en.wikipedia.org/wiki/Andy_and_Bill%27s_law). [Joe Armstrong](https://en.wikipedia.org/wiki/Joe_Armstrong_(programmer)) gave a great Strange Loop talk on this fittingly titled [The Mess We're In](https://www.youtube.com/watch?v=lKXe3HUG2l4). At the OS level, [Casey Muratori](https://caseymuratori.com/about) notes that Linux + FreeBSD itself is irreducible bloat, and calls it the [Thirty-Million Line Problem](https://www.youtube.com/watch?v=kZRE7HIO3vk&feature=youtu.be) - (thanks [Richard Feldman](https://twitter.com/rtfeldman) for the pointer!)
+Of course, we have always had frequent calls for a return to simplicity and more efficient software. [Niklaus Wirth](https://en.wikipedia.org/wiki/Wirth%27s_law) in 1995 [pled for Lean Software](http://doi.ieeecomputersociety.org/10.1109/2.348001). There is a delicious irony in the contrast between Moore's Law and Wirth's Law - this is a special case of [Jevons paradox](https://en.wikipedia.org/wiki/Jevons_paradox). My favorite modern framing of pits the former CEOs of Intel vs Microsoft: [What Andy giveth, Bill taketh away](https://en.wikipedia.org/wiki/Andy_and_Bill%27s_law). [Joe Armstrong](<https://en.wikipedia.org/wiki/Joe_Armstrong_(programmer)>) gave a great Strange Loop talk on this fittingly titled [The Mess We're In](https://www.youtube.com/watch?v=lKXe3HUG2l4). At the OS level, [Casey Muratori](https://caseymuratori.com/about) notes that Linux + FreeBSD itself is irreducible bloat, and calls it the [Thirty-Million Line Problem](https://www.youtube.com/watch?v=kZRE7HIO3vk&feature=youtu.be) - (thanks [Richard Feldman](https://twitter.com/rtfeldman) for the pointer!)
 
 In the 2010's we carried on as our predecessors did. [As the modern iteration of the joke goes](https://twitter.com/iamdevloper/status/926458505355235328?lang=en):
 
 > 1969:
+>
 > - what're you doing with that 2KB of RAM?
 > - sending people to the moon
 
 > 2018:
+>
 > - what're you doing with that 1.5GB of RAM?
 > - running Slack
 
 Another favorite stat I like comes from [Jake and Surma](https://www.youtube.com/watch?v=TsTt7Tja30Q) on the size of Minesweeper on Windows:
 
-- Windows 95: 9.6kb 
+- Windows 95: 9.6kb
 - Windows Vista: 4MB
 - Windows 10: 105MB
 
@@ -43,9 +45,9 @@ Another favorite stat I like comes from [Jake and Surma](https://www.youtube.com
 
 Three factors at play: the slowing of Moore's law, the rise of mobile and wearable devices, and the demand for more secure and reliable software.
 
-### Moore's Law 
+### Moore's Law
 
-Rumors of Moore's law's death have been greatly exaggerated before, but we still hold it to be broadly true. In 2016 the industry collectively agreed it would [die by 2021](https://www.techrepublic.com/article/moores-law-dead-in-2021-heres-what-the-next-revolution-will-mean/), but right on target, [Intel in 2019 said it was back on](https://venturebeat.com/2019/10/24/intel-ceo-7nm-in-2021-will-put-us-back-on-moores-law-cadence/). Of course technically, the law as stated has [died a few "deaths" already](https://www.extremetech.com/extreme/203490-moores-law-is-dead-long-live-moores-law):  we just kept shifting the bar from transistor density to power consumption to marginal cost. So what makes this time any different?
+Rumors of Moore's law's death have been greatly exaggerated before, but we still hold it to be broadly true. In 2016 the industry collectively agreed it would [die by 2021](https://www.techrepublic.com/article/moores-law-dead-in-2021-heres-what-the-next-revolution-will-mean/), but right on target, [Intel in 2019 said it was back on](https://venturebeat.com/2019/10/24/intel-ceo-7nm-in-2021-will-put-us-back-on-moores-law-cadence/). Of course technically, the law as stated has [died a few "deaths" already](https://www.extremetech.com/extreme/203490-moores-law-is-dead-long-live-moores-law): we just kept shifting the bar from transistor density to power consumption to marginal cost. So what makes this time any different?
 
 Moore's law won't suffer a dramatic death, it will just slow and become irrelevant compared to progress seen by adopting other chip architectures. We will move from 10nm to 7nm to 5nm and there's a quantum effect-imposed hard limit down near 1nm. But each process node upgrade is getting slower, and more expensive. Meanwhile, we are already shunting plenty of calculations to GPUs, even on smartphones. This is a "collapsing of layers" between workload and chipset, and of course similar movements are happening for all large scale workloads like [cryptocurrency mining](https://en.bitcoin.it/wiki/ASIC) and [machine learning](https://en.wikipedia.org/wiki/Tensor_processing_unit) applications. For general computing consumer hardware, Moore's law is already effectively dead - laptops have not materially gained clock speed in a decade, and we have simply added multiple cores and GPUs.
 
@@ -55,7 +57,7 @@ There is still hope - anything from [quantum computers](https://ai.googleblog.co
 
 ### Mobile and Wearable Devices
 
-No matter what happens to high end, "full powered" computers, the *range* of computers has also broadened tremendously in our lifetimes and will continue to do so. Just like PCs lagged behind Mainframes, smartphones lag behind PCs, and wearable devices like watches and headphones will lag even further. All of these will always need faster processing at low power at low cost. We cannot conceivably write software for these devices like we do for PCs.
+No matter what happens to high end, "full powered" computers, the _range_ of computers has also broadened tremendously in our lifetimes and will continue to do so. Just like PCs lagged behind Mainframes, smartphones lag behind PCs, and wearable devices like watches and headphones will lag even further. All of these will always need faster processing at low power at low cost. We cannot conceivably write software for these devices like we do for PCs.
 
 ### More Secure and Reliable Software
 
@@ -75,9 +77,9 @@ Although the cost of ignoring these issues is rising due to the reasons listed a
 
 However, I do like one concept that has taken in my mind in the past year. The simple phrasing: **layers that belong together, should live together**. In backend API design, it is well known that sorting, filtering and paging of database results belong at the same layer of the stack, since trying to place one thing at a different layer to the other requires so much transmission of information that you basically end up merging layers poorly. So in terms of cost, the collapsing of layers pays for itself because we were paying for the cost anyway through needing to punch holes in layers that ought to have been designed together but never were, through accident of history.
 
-I wonder what other layers "belong together". 
+I wonder what other layers "belong together".
 
-**We might also add layers to reduce layers**. In 2016 Dan Abramov kicked off [a movement to bundle layers in the JavaScript ecosystem](https://increment.com/development/the-melting-pot-of-javascript/). The idea here is that, yes, we are adding layers, but we can reduce a bunch of layers to implementation detail. So from the outside it looks like just one layer, while on the inside there are of course a bunch of layers that are collectively managed by a generous open source community (socializing the cost). 
+**We might also add layers to reduce layers**. In 2016 Dan Abramov kicked off [a movement to bundle layers in the JavaScript ecosystem](https://increment.com/development/the-melting-pot-of-javascript/). The idea here is that, yes, we are adding layers, but we can reduce a bunch of layers to implementation detail. So from the outside it looks like just one layer, while on the inside there are of course a bunch of layers that are collectively managed by a generous open source community (socializing the cost).
 
 This is a "cheat", of course - a bunch of layers stuck together with duct tape and elbow grease. We aren't really collapsing layers at all, and it is leaky as hell - but it works to prove out the demand for simplicity, and paves the way [for other tools](https://parceljs.org/) designed from the ground up to handle this.
 
@@ -106,3 +108,7 @@ To be honest, I myself struggle to reconcile this idea with [Unix philosophy](ht
 I do think that Collapsing Layers is only suitable for a more mature subset of technologies. If something is nascent, growing like a weed, prone to change - you probably still want to tack on more layers. [AWS is growing at 40% a year](https://www.zdnet.com/article/amazon-delivers-mixed-q3-results-as-aws-growth-slows/) and unusable? Fine, add [a second layer cloud](https://softwareengineeringdaily.com/2019/10/14/how-to-build-a-cloud-provider-with-anurag-goel/). Nondeveloper Prosumers want to make software en masse? [Fine, slap a GUI on everything](https://webflow.com/blog/no-code-is-a-lie).
 
 Jim Barksdale is famous for noting that there are [two ways of making money in business: bundling and unbundling](https://hbr.org/2014/07/marc-andreessen-and-jim-barksdale-on-how-to-make-money). This is often applied to the business of software, but one can argue the same for technology architecture. It's time to bundle the basics.
+
+## Further Notes
+
+- https://tonsky.me/blog/disenchantment/

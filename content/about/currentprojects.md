@@ -55,4 +55,7 @@ notes_to_self: so as not to have this show up on rss feed
 - Feb 13 - React online meetup
 - Feb 19 - Svelte JSandFriends online meetup
 - Mar 30-31 - Reactathon SF
+- Apr 8 - BEJS online https://twitter.com/BeJS_
+- Apr 15-17 - MagnoliaJS https://twitter.com/MagnoliaJSconf
+- May 1-2 - ByteConf React
 - Jun 16 - Reactdelphia online meetup
