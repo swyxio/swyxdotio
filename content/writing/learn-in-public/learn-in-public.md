@@ -11,27 +11,27 @@ If there's a golden rule, it's this one, so I put it first. All the other rules 
 
 You already know that you will never be done learning. But most people "learn in private", and lurk. They consume content without creating any themselves. Again, that's fine, but we're here to talk about being in the top quintile. What you do here is to have **a habit of creating learning exhaust**:
 
-- Write blogs and tutorials and cheatsheets. 
-- Speak at meetups and conferences. 
-- Ask and answer things on Stackoverflow or Reddit. **Avoid** the walled gardens like Slack and Discord, they're not public. 
-- Make Youtube videos or Twitch streams. 
-- Start a newsletter. 
+- Write blogs and tutorials and cheatsheets.
+- Speak at meetups and conferences.
+- Ask and answer things on Stackoverflow or Reddit. **Avoid** the walled gardens like Slack and Discord, they're not public.
+- Make Youtube videos or Twitch streams.
+- Start a newsletter.
 - Draw cartoons ([people](https://code-cartoons.com/) [loooove](https://wizardzines.com/) [cartoons](https://arkwright.github.io/scaling-react-server-side-rendering.html)!).
 
 Whatever your thing is, **make the thing you wish you had found** when you were learning. **Don't judge** your results by "claps" or retweets or stars or upvotes - just talk to yourself from 3 months ago. I keep an almost-daily dev blog written for no one else but me.
 
-Guess what? It's not about reaching as many people as possible with your content. If you can do that, great, remember me when you're famous. But chances are that *by far* the biggest beneficiary of you trying to help past you is *future you*. If others benefit, that's icing.
+Guess what? It's not about reaching as many people as possible with your content. If you can do that, great, remember me when you're famous. But chances are that _by far_ the biggest beneficiary of you trying to help past you is _future you_. If others benefit, that's icing.
 
 Oh you think you're done? Don't stop there:
 
-- Enjoyed a coding video? Reach out to the speaker/instructor and thank them, and ask questions. 
-- Make PR's to libraries you use. 
-- Make your own libraries no one will ever use. 
-- **Clone stuff you like, from scratch, to see how they work**. 
-- Teach workshops. 
-- Go to conferences and summarize what you learned. 
+- Enjoyed a coding video? Reach out to the speaker/instructor and thank them, and ask questions.
+- Make PR's to libraries you use.
+- Make your own libraries no one will ever use.
+- **Clone stuff you like, from scratch, to see how they work**.
+- Teach workshops.
+- Go to conferences and summarize what you learned.
 
-There's always one level deeper. But at every step of the way: *Document what you did and the problems you solved.*
+There's always one level deeper. But at every step of the way: _Document what you did and the problems you solved._
 
 The subheading under this rule would be: **Try your best to be right, but don't worry when you're wrong.** Repeatedly. If you feel uncomfortable, or like an impostor, good. You're pushing yourself. Don't assume you know everything, but try your best anyway, and let the internet correct you when you are inevitably wrong. Wear your noobyness on your sleeve.
 

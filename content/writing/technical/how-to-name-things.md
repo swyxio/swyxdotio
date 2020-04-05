@@ -141,7 +141,7 @@ If you're still spending a lot of organizational energy bickering over a name...
 
 ## Code Complete [Nov 2019 Edit]
 
-The volumninous *Code Complete* offers an entire chapter on the Power of Variable Names. This has a lot of good advice. Here are some nice examples pulled from the book:
+The volumninous _Code Complete_ offers an entire chapter on the Power of Variable Names. This has a lot of good advice. Here are some nice examples pulled from the book:
 
 - Name length:
   - Too long: `numberOfPeopleOnTheUsOlympicTeam`, `numberOfSeatsInTheStadium`, `maximumNumberOfPointsInModernOlympics`
@@ -154,23 +154,26 @@ The volumninous *Code Complete* offers an entire chapter on the Power of Variabl
   - Bad: `flag = 0x1; statusFlag = 0x80; printFlag = 16; computeFlag = 0;`
   - Better: `dataReady = true; characterType = CONTROL_CHARACTER; reportType = ReportType_Annual; recalcNeeded = false;`
 - Useful Boolean names should imply `true` or `false`:
- - `done`: Use done to indicate whether something is done. The variable can indi- cate whether a loop is done or some other operation is done. Set done to false before something is done, and set it to true when something is completed.
- - `error`: Use error to indicate that an error has occurred. Set the variable to false when no error has occurred and to true when an error has occurred.
- - `found`: Use found to indicate whether a value has been found. Set found to false when the value has not been found and to true once the value has been found. Use found when searching an array for a value, a file for an employee ID, a list of paychecks for a certain paycheck amount, and so on.
- - `success`or `ok`: Use success or ok to indicate whether an operation has been suc- cessful. Set the variable to false when an operation has failed and to true when an operation has succeeded. If you can, replace success with a more specific name that describes precisely what it means to be successful. If the program is success- ful when processing is complete, you might use processingComplete instead. If the program is successful when a value is found, you might use found instead.
- - Bad: `status`, `sourceFile`
- - Better: `statusOK`, `sourceFileAvailable`
- - acceptable - `is*` prefix. doesnt work for everything
- - stay positive - avoid double negatives! `if (!notFound)`
+- `done`: Use done to indicate whether something is done. The variable can indi- cate whether a loop is done or some other operation is done. Set done to false before something is done, and set it to true when something is completed.
+- `error`: Use error to indicate that an error has occurred. Set the variable to false when no error has occurred and to true when an error has occurred.
+- `found`: Use found to indicate whether a value has been found. Set found to false when the value has not been found and to true once the value has been found. Use found when searching an array for a value, a file for an employee ID, a list of paychecks for a certain paycheck amount, and so on.
+- `success`or `ok`: Use success or ok to indicate whether an operation has been suc- cessful. Set the variable to false when an operation has failed and to true when an operation has succeeded. If you can, replace success with a more specific name that describes precisely what it means to be successful. If the program is success- ful when processing is complete, you might use processingComplete instead. If the program is successful when a value is found, you might use found instead.
+- Bad: `status`, `sourceFile`
+- Better: `statusOK`, `sourceFileAvailable`
+- acceptable - `is*` prefix. doesnt work for everything
+- stay positive - avoid double negatives! `if (!notFound)`
 - When You Should Have a Naming Convention
   - When multiple programmers are working on a project
   - When you plan to turn a program over to another programmer for modifica-
-tions and maintenance (which is nearly always)
+    tions and maintenance (which is nearly always)
   - When your programs are reviewed by other programmers in your organization
   - When your program is so large that you can’t hold the whole thing in your brain at once and must think about it in pieces
   - When the program will be long-lived enough that you might put it aside for a few weeks or months before working on it again
   - When you have a lot of unusual terms that are common on a project and want to have standard terms or abbreviations to use in coding
 
+## More References
+
+- Naming Components: https://open-ui.org/analysis/component-matrix
 
 ## Your Opinion Here!
 
