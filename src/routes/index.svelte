@@ -131,6 +131,9 @@
   .PostHeader {
     background-color: var(--bg-color-secondary);
   }
+  .PostHeader a {
+    overflow-wrap: break-word;
+  }
 </style>
 
 <svelte:head>
