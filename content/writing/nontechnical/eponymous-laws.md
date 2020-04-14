@@ -31,6 +31,9 @@ Sometimes they are just plain funny, sometimes they are so true it hurts.
   - design - clients that don't know what they want but definitely don't want what you show them
 - [Postel's Law](https://en.wikipedia.org/wiki/Robustness_principle) aka Robustness principle: "be conservative in what you do, liberal in what you accept"
 - [Hyrum's Law](https://www.hyrumslaw.com/): "With a sufficient number of users of an API, it does not matter what you promise in the contract - all observable behaviors of your system will be depended on by somebody."
+  - https://shoptalkshow.com/407/
+    - ~28 mins in: `window.event` was a nonstandard api but every browser except firefox implemented it. Then firefox implemented it, and JIRA broke.
+    - 30 mins in: JS Objects aren't supposed to have stable order. But every browser basically implemented them with stable order. Now browser that wants to do a performance optimization wants to use unstable order, but cannot, because apps now rely on it
 - [Law of Demeter](https://en.wikipedia.org/wiki/Law_of_Demeter) - a given object should assume as little as possible about anything else - its neighbors and subcomponents
   - how to square this against "be liberal in what you accept, conservative in what you output"?
 
@@ -80,6 +83,8 @@ More lists:
 - [1% Rule](<https://en.wikipedia.org/wiki/1%25_rule_(Internet_culture)>) - 90% of the participants of a community only view content, 9% of the participants edit content, and 1% of the participants actively create new content.
   - application of [Zipf's Law](https://en.wikipedia.org/wiki/Zipf%27s_law)
 - [Goodhart's Law](https://medium.com/@coffeeandjunk/campbells-law-goodhart-s-law-when-you-are-measuring-to-fail-c6c64923ad7) - “When a measure becomes a target, it ceases to be a good measure.”
+  - Related HN: https://news.ycombinator.com/item?id=17320640
+  - What's Immeasurably Important? https://www.collaborativefund.com/blog/immeasurably-important/
 - Joseph effects and Noah effects
   - https://www.perell.com/blog/news-in-the-age-of-abundance
   - _"Joseph effects – seven fat years here, seven lean years there – occurred when markets were evolving gradually and continuously. Noah effects were cataclysms – the Flood, or the week of September 11 2001, when the New York Stock Exchange closed for five days and dropped 7.5 per cent on re-opening.”_

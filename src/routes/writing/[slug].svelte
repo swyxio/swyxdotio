@@ -24,7 +24,7 @@
   let slugForWebmentions = slug
   if (post.metadata && post.metadata.oldSlugs && post.metadata.oldSlugs[0]) {
     slug = post.metadata.oldSlugs[0]
-  } 
+  }
   let seoSubtitle = post.metadata && post.metadata.subtitle
   export let seoTitle = seoSubtitle
     ? `${post.metadata && post.metadata.title}: ${seoSubtitle}`
@@ -41,7 +41,7 @@
     margin: 0 auto;
   }
   h2 {
-    width: 60%;
+    /* width: 60%; */
     min-width: 300px;
   }
   #postSubtitle {

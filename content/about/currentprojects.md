@@ -61,3 +61,4 @@ notes_to_self: so as not to have this show up on rss feed
 - Apr 26 - Svelte Society Day
 - May 1-2 - ByteConf React
 - Jun 16 - Reactdelphia online meetup
+- June 23 - https://www.jsconf.be/ Operating System of You

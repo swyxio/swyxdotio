@@ -141,8 +141,8 @@
   <div id="CTA">
     Featured Post:
     <div>
-      <a href="/writing/farewell-netlify">
-        <b>Farewell, Netlify</b>
+      <a href="/writing/i-m-writing-a-book-45a8">
+        <b>I'm Writing a Book!</b>
       </a>
     </div>
   </div>
