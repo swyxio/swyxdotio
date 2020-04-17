@@ -99,8 +99,6 @@ You will end the year having learned a good deal and having made many new friend
 
 ## Examples
 
-this blogpost is still new, i'll be adding to these over time as I find and think of stuff
-
 - [My breakdown of the React Suspense demo](https://dev.to/swyx/a-walkthrough-of-that-react-suspense-demo--4j6a) the day after it was released, in 2018 when I was still getting started with React Twitter, and [you can see the response here](https://nitter.net/search?f=tweets&q=https%3A%2F%2Fdev.to%2Fswyx%2Fa-walkthrough-of-that-react-suspense-demo--4j6a%20)
 - [Me summarizing Boris Cherny's TypeScript book](https://nitter.net/swyx/status/1135525665971695617#m)
 - [Me summarzing Evan You's podcast appearance](https://nitter.net/swyx/status/1199619073836867585#m)
