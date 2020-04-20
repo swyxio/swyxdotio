@@ -4,6 +4,7 @@
 /reactrally /speaking/react-not-reactive/
 /hooks /speaking/react-hooks/
 /talks  /speaking
+/career  https://gumroad.com/products/bAZJq/
 /youtube  https://www.youtube.com/channel/UCzJpE2zKwAFZ8JwMerlNquw
 /talks/*  /speaking/:splat
 /writing/js-observability /writing/js-tools-metrics-logs-traces
