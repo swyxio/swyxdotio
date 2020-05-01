@@ -174,6 +174,7 @@ The volumninous _Code Complete_ offers an entire chapter on the Power of Variabl
 ## More References
 
 - Naming Components: https://open-ui.org/analysis/component-matrix
+- Naming Git Branches: https://deepsource.io/blog/git-branch-naming-conventions/
 
 ## Your Opinion Here!
 

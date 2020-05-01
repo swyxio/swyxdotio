@@ -50,7 +50,7 @@
 </svelte:head>
 
 <article>
-  <h1>About Swyx!</h1>
+  <h1>About Swyx (aka Shawn Wang)</h1>
   <div id="Cards">
     <div>
       <h2>Start Here</h2>

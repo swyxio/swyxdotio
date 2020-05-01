@@ -61,6 +61,7 @@ notes_to_self: so as not to have this show up on rss feed
 - Apr 26 - Svelte Society Day
 - Apr 29 - Svelte Bay Area https://www.meetup.com/Svelte-Js-Bay-Area/events/270076782/
   - With Svelte 3, Svelte has reached a stable and great foundation for writing fast and interactive web experiences. The next stage in Svelte's growth is Community, not Code. Let's have a chat about how to scale a framework for adoption, by filling in the metalanguage around the language
-- May 1-2 - ByteConf React
+- May 1-2 - ByteConf React - concurrent react talk
+- May 28 12pm PST - Eggheadio talk - concurrent react talk
 - Jun 16 - Reactdelphia online meetup
 - June 23 - https://www.jsconf.be/ Operating System of You
