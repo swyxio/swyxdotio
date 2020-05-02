@@ -4,7 +4,7 @@ slug: react-from-scratch
 topic: React
 venues: ByteConfReact
 url: https://www.bytesized.xyz/react-2020
-video: https://www.youtube.com/watch?v=MeEADrueBIA
+video: https://youtu.be/yeyiA9U8Ep8
 date: 2020-05-02
 desc: Cloning Concurrent React with React Fiber and discussing Time Slicing and Suspense
 description: In this talk, we’ll create an effective mental model of Concurrent React by building a tiny clone of React! We will start with a blank js file and learn about how React renders components, schedules Time-Slicing updates with a Work Loop, add Hooks, and end off with a mini-clone of Suspense!
