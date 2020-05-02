@@ -4,12 +4,26 @@ slug: react-from-scratch
 topic: React
 venues: ByteConfReact
 url: https://www.bytesized.xyz/react-2020
+video: https://www.youtube.com/watch?v=MeEADrueBIA
 date: 2020-05-02
 desc: Cloning Concurrent React with React Fiber and discussing Time Slicing and Suspense
 description: In this talk, we’ll create an effective mental model of Concurrent React by building a tiny clone of React! We will start with a blank js file and learn about how React renders components, schedules Time-Slicing updates with a Work Loop, add Hooks, and end off with a mini-clone of Suspense!
 ---
 
 This is version 2 of my Concurrent React From Scratch talk - I gave [version 1](https://swyx.io/speaking/react-from-scratch-v1) in ReactAdvanced London previously.
+
+You can find the codesandbox here: https://codesandbox.io/s/react-byteconf-1f7mq
+
+Resources referenced:
+
+- Didact: https://github.com/pomber/didact
+- Andrew Clark: https://github.com/acdlite/react-fiber-architecture
+- Lin Clark: https://www.youtube.com/watch?v=ZCuYPiUIONs
+- React traversal: https://github.com/facebook/react/issues/7942#issuecomment-254987818
+- Sierpinski demo: https://claudiopro.github.io/react-fiber-vs-stack-demo/
+- Brandon Dail's time slicing profiles: https://twitter.com/aweary/status/1255606432621162496/
+- React's official resources on Suspense for Data Fetching: https://reactjs.org/blog/2019/11/06/building-great-user-experiences-with-concurrent-mode-and-suspense.html
+- React Query: https://github.com/tannerlinsley/react-query
 
 ## Step 1 - simple rendering a text element
 

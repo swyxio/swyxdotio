@@ -58,7 +58,9 @@
         <li>
           <h3>Writing</h3>
           <div>
-            I do a bunch of personal and work-related writing:
+            I do a bunch of
+            <a href="/writing">personal and work-related writing</a>
+            :
             <ul>
               <li>
                 <b>

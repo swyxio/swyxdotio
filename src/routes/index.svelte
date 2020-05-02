@@ -174,9 +174,9 @@
     {' - '}
     <a
       href="https://twitter.com/intent/tweet/?text=My%20thoughts%20on%20{target}">
-      Tweet about any of my posts
+      Tweet about
     </a>
-    and it will show up here!
+    any of my posts and it will show up here!
     <div class="WebMentionsContainer">
       {#if fetchState === 'fetching'}
         <div>🌀</div>
