@@ -12,7 +12,9 @@ description: In this talk, we’ll create an effective mental model of Concurren
 
 This is version 2 of my Concurrent React From Scratch talk - I gave [version 1](https://swyx.io/speaking/react-from-scratch-v1) in ReactAdvanced London previously.
 
-You can find the codesandbox here: https://codesandbox.io/s/react-byteconf-1f7mq
+[You can find the codesandbox here](https://codesandbox.io/s/react-byteconf-1f7mq).
+
+A good post-talk conversation with [Kent C Dodds, Dan Abramov, and Andrew Clark followed](https://twitter.com/swyx/status/1256630016604909569).
 
 Resources referenced:
 
