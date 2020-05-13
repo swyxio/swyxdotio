@@ -38,3 +38,18 @@ PG: writing usefully: http://paulgraham.com/useful.html, http://www.paulgraham.c
  Stephen King: on writing https://www.amazon.com/dp/B000FC0SIM/ref=dp-kindle-redirect?_encoding=UTF8&btkr=1
 
  Scott Adams: https://dilbertblog.typepad.com/the_dilbert_blog/2007/06/the_day_you_bec.html
+
+
+
+
+## How to write well?
+
+- Writing well
+	- AIDA - attention interest desire action
+	- get to the point, add rhythm https://twitter.com/david_perell/status/1127348174404890625
+	- more tips: https://twitter.com/david_perell/status/1116485842615377921
+	- talk like you write: http://www.paulgraham.com/talk.html
+	- rapid prototyping: https://terrytao.wordpress.com/advice-on-writing-papers/write-a-rapid-prototype-first/
+	- writing for work: https://danluu.com/corp-eng-blogs/
+	- better writer: https://dilbertblog.typepad.com/the_dilbert_blog/2007/06/the_day_you_bec.html
+- The Benefits of Writing A Lot For My Software Career

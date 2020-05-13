@@ -142,10 +142,12 @@
 <article>
   <h1>swyx's site!</h1>
   <div id="CTA">
-    Featured Post:
-    <div>
-      <a href="/writing/i-m-writing-a-book-45a8">
+    <a href="/writing/i-m-writing-a-book-45a8">
         <b>I'm Writing a Book!</b>
+      </a> Featured Post:
+    <div>
+      <a href="/writing">
+        <b>IE11 Mainstream End Of Life in Oct 2020</b>
       </a>
     </div>
   </div>

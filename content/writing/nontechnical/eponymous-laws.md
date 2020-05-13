@@ -30,6 +30,7 @@ Sometimes they are just plain funny, sometimes they are so true it hurts.
   - applicable in AI - we find it hard to describe common sense
   - design - clients that don't know what they want but definitely don't want what you show them
 - [Postel's Law](https://en.wikipedia.org/wiki/Robustness_principle) aka Robustness principle: "be conservative in what you do, liberal in what you accept"
+- [Parkinson's Law](https://en.wikipedia.org/wiki/Parkinson%27s_law) is well known, but has several interesting corollaries: the Stock-Sanford Corollary states that "If you wait until the last minute, it only takes a minute to do."
 - [Hyrum's Law](https://www.hyrumslaw.com/): "With a sufficient number of users of an API, it does not matter what you promise in the contract - all observable behaviors of your system will be depended on by somebody."
   - https://shoptalkshow.com/407/
     - ~28 mins in: `window.event` was a nonstandard api but every browser except firefox implemented it. Then firefox implemented it, and JIRA broke.
@@ -94,5 +95,5 @@ More lists:
 - Cognitive Biases
 - Logical Fallacies:
   - http://utminers.utep.edu/omwilliamson/ENGL1311/fallacies.htm
-  - simpson's paradox https://twitter.com/G_S_Bhogal/status/1225561131122597896
+  - Simpson's paradox https://twitter.com/G_S_Bhogal/status/1225561131122597896
 - https://github.com/dwmkerr/hacker-laws

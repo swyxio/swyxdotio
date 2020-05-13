@@ -23,21 +23,21 @@ Every idea attempts to condense itself until it hits Two Words. Those ideas whic
 
 ## What?
 
-I first noticed the **Two Words** phenomenon when thinking about why some taglines catch on more than others. With admittedly a lot of effort, [Dharmesh Shah](https://twitter.com/dharmesh) and [Brian Halligan](https://en.wikipedia.org/wiki/Brian_Halligan) were able to obsolete an entire generation of marketing software by inventing [Inbound Marketing](https://www.hubspot.com/inbound-marketing). 
+I first noticed the **Two Words** phenomenon when thinking about why some taglines catch on more than others. With admittedly a lot of effort, [Dharmesh Shah](https://twitter.com/dharmesh) and [Brian Halligan](https://en.wikipedia.org/wiki/Brian_Halligan) were able to obsolete an entire generation of marketing software by inventing [Inbound Marketing](https://www.hubspot.com/inbound-marketing).
 
 All of a sudden, it became clear to marketers that top of line CRMs were insufficient. Marketers could educate each other what inbound marketing was - the phrase itself implied the existence of outbound marketing, and the natural desirability one over the other was obvious but not too obvious. It allowed people to carve out [sections of the new real estate created](https://www.google.com/search?q=types+of+inbound+marketing), benefiting them but also growing the entire category.
 
 You see this a lot with books as well. Taleb popularized the idea of the [Black Swan](https://en.wikipedia.org/wiki/The_Black_Swan:_The_Impact_of_the_Highly_Improbable). Seth Godin made a career out of unforgettable imagery with [Purple Cow](https://www.amazon.com/Purple-Cow-New-Transform-Remarkable/dp/1591843170). Of course, we don't have to stick to the color gimmick: Peter Drucker brought the [Effective Executive](https://www.amazon.com/Effective-Executive-Definitive-Harperbusiness-Essentials/dp/0060833459) in vogue, James Carse wants us to play [Infinite Games](https://www.amazon.com/Finite-Infinite-Games-James-Carse/dp/1476731713), and Robert Kiyosaki, despite his 4 word book title, tellingly sells his idea at [RichDad.com](https://www.richdad.com/). Amazon is the [Everything Store](https://www.amazon.com/Everything-Store-Jeff-Bezos-Amazon-ebook/dp/B00BWQW73E), Facebook is the [Social Network](https://en.wikipedia.org/wiki/The_Social_Network). Techbros are particularly fond of the [Miracle Morning](https://www.miraclemorning.com/) and VGR's [Premium Mediocre](https://www.ribbonfarm.com/2017/08/17/the-premium-mediocre-life-of-maya-millennial/). Even as you read this, people are enthusiastically telling their friends about the benefits of [Radical Candor](https://www.radicalcandor.com/) and [Digial Minimalism](https://www.amazon.com/Digital-Minimalism-Choosing-Focused-Noisy/dp/0525536515), the threats of [Surveillance Capitalism](https://en.wikipedia.org/wiki/Surveillance_capitalism), and making themselves better via [Atomic Habits](https://www.amazon.com/Atomic-Habits-Proven-Build-Break/dp/0735211299). Kanye literally began his career with [Two Words](https://genius.com/Kanye-west-two-words-lyrics).
 
-Brands? Andy Rachleff pitchess Wealthfront as [Self-Driving Money](https://www.youtube.com/watch?v=mpB8yZSv7r0). Apple is for people who [Think Different](https://www.youtube.com/watch?v=cFEarBzelBs), Tesla stands for [Sustainable Transport](https://www.tesla.com/blog/mission-tesla). 
+Brands? Andy Rachleff pitchess Wealthfront as [Self-Driving Money](https://www.youtube.com/watch?v=mpB8yZSv7r0). Apple is for people who [Think Different](https://www.youtube.com/watch?v=cFEarBzelBs), Tesla stands for [Sustainable Transport](https://www.tesla.com/blog/mission-tesla).
 
-Politics? [Frank Luntz](https://en.wikipedia.org/wiki/Frank_Luntz) has it down to a science. You've heard of *death taxes*, *energy exploration* and *climate change* because of him.
+Politics? [Frank Luntz](https://en.wikipedia.org/wiki/Frank_Luntz) has it down to a science. You've heard of _death taxes_, _energy exploration_ and _climate change_ because of him.
 
-In Marie Kondo’s books, she uses the Japanese word ときめく (tokimeku) as her guiding principle, literally “to flutter,” “to throb,” “to palpitate,” or “to beat fast,” as your heart would when it feels excited. When Cathy Hirano translated *The Life-Changing Magic of Tidying Up*, she considered “bring pleasure,” “speak to your heart,” “brighten your world,” “give you a thrill,” and “make you happy” in translating *tokimeku*. [She settled on "Spark Joy" and the rest is history](https://www.dictionary.com/e/what-does-marie-kondo-mean-when-she-says-spark-joy/).
+In Marie Kondo’s books, she uses the Japanese word ときめく (tokimeku) as her guiding principle, literally “to flutter,” “to throb,” “to palpitate,” or “to beat fast,” as your heart would when it feels excited. When Cathy Hirano translated _The Life-Changing Magic of Tidying Up_, she considered “bring pleasure,” “speak to your heart,” “brighten your world,” “give you a thrill,” and “make you happy” in translating _tokimeku_. [She settled on "Spark Joy" and the rest is history](https://www.dictionary.com/e/what-does-marie-kondo-mean-when-she-says-spark-joy/).
 
 But **Two Words** isn't just for people trying to sell you things. It scales right down to identities.
 
-If you can pitch *yourself* in two words, you stand an extraordinarily good chance of being remembered and called on for your area of expertise. Neil deGrasse Tyson delights in being your [Personal Astrophysicist](https://www.vice.com/en_us/article/3bj7yn/neil-degrasse-tyson-is-your-and-everyone-elses-personal-astrophysicist-1026). In How I Met Your Mother, Barney Stinson takes pride in the fact that he has [a "guy for everything"](https://www.youtube.com/watch?v=r5wsiMRYm2Y). This is the ultimate faux luxury - making people feel better/smarter/more powerful by the mere fact that they know you. Taking gender out of it, you want to be everybody's go-to person for your thing. Hence the [Points Guy](https://thepointsguy.com/), the [RideShare Guy](https://therideshareguy.com/). You don't even need to be the World Expert on your thing. Just plant your flag, put out your bag signal, make it easy for people to know what to call on you for. I have been "the ______ guy" in my office for everything from Excel to food recommendations.
+If you can pitch _yourself_ in two words, you stand an extraordinarily good chance of being remembered and called on for your area of expertise. Neil deGrasse Tyson delights in being your [Personal Astrophysicist](https://www.vice.com/en_us/article/3bj7yn/neil-degrasse-tyson-is-your-and-everyone-elses-personal-astrophysicist-1026). In How I Met Your Mother, Barney Stinson takes pride in the fact that he has [a "guy for everything"](https://www.youtube.com/watch?v=r5wsiMRYm2Y). This is the ultimate faux luxury - making people feel better/smarter/more powerful by the mere fact that they know you. Taking gender out of it, you want to be everybody's go-to person for your thing. Hence the [Points Guy](https://thepointsguy.com/), the [RideShare Guy](https://therideshareguy.com/). You don't even need to be the World Expert on your thing. Just plant your flag, put out your bag signal, make it easy for people to know what to call on you for. I have been "the **\_\_** guy" in my office for everything from Excel to food recommendations.
 
 Whatever you are into, whatever your field is, look at the successful movements that are going on and spot the Two Words:
 
@@ -66,21 +66,21 @@ For maximum virality, ideas should be:
 - Different - sets itself apart from the norm in some way
 - Important
 
-The easiest way to attach yourself to something important and yet differentiate yourself is to add a word to an existing important word. Hence: *Inbound* Marketing. *Servant* Leadership. *Atomic* Habits. Bonus points if you imply that *not* doing your thing would be ridiculous. Who's against [Effective Altruism](https://www.effectivealtruism.org/)? Is anyone *for* InHumane Technology?
+The easiest way to attach yourself to something important and yet differentiate yourself is to add a word to an existing important word. Hence: _Inbound_ Marketing. _Servant_ Leadership. _Atomic_ Habits. Bonus points if you imply that _not_ doing your thing would be ridiculous. Who's against [Effective Altruism](https://www.effectivealtruism.org/)? Is anyone _for_ InHumane Technology?
 
 The Two Word Idea is the **Minimum Viable** Concept.
 
 ## Free Words
 
-Two Word ideas don't literally have to be Two Words. 
+Two Word ideas don't literally have to be Two Words.
 
 Prepositions, Conjunctions, and other articles are "free" as in they don't really count. "Just Do It", "Good to Great", "Crossing the Chasm", [Disagree and Commit](https://www.inc.com/justin-bariso/it-took-jeff-bezos-only-three-words-to-drop-the-best-advice-youll-hear-today.html) or [Learn in Public](https://www.swyx.io/writing/learn-in-public/) anyone? VC Idea Pitches are often mocked as derivative [X for Y](https://andrewchen.co/x-for-y-startup-ideas/) cargo culting. It works.
 
 Numbers could be free too. The [4-Hour Workweek](https://fourhourworkweek.com/) hyphenates the number.
 
-Some words are used so frequently together they tokenize to basically be one word. DevOps. Web Design (ergo *Responsive* Web Design).
+Some words are used so frequently together they tokenize to basically be one word. DevOps. Web Design (ergo _Responsive_ Web Design).
 
-Usually, successful many-word ideas have a Two Word Core. [The Law of Shitty Clickthroughs](https://andrewchen.co/the-law-of-shitty-clickthroughs/) isn't about "The Law of". Nobody wants to be the Poor Dad in **Rich Dad, Poor Dad**. 
+Usually, successful many-word ideas have a Two Word Core. [The Law of Shitty Clickthroughs](https://andrewchen.co/the-law-of-shitty-clickthroughs/) isn't about "The Law of". Nobody wants to be the Poor Dad in **Rich Dad, Poor Dad**.
 
 [The 7 Habits of Highly Effective People](http://www.quickmba.com/mgmt/7hab/) might win the prize for longest Two Word idea. Of course, these days, it just gets shortened to "7 Habits" 😉.
 
@@ -94,7 +94,7 @@ Authenticity is critical - nobody can compete with you at being you.
 
 One way to figure it out is have people repeat back your idea in their words, after you give your spiel. Your words don't matter, theirs do. You don't need to adopt exactly what they use, but a message that doesn't take after repeated attempts is a problem.
 
-You can't force these things on people. Two Word ideas perform best when they give people the words to describe something they already want to talk about. There has to be some *innate* agreement to it already. And it's a viral loop - if the words come unbidden, people think of your idea/brand naturally. This is why Nike's heavily invests in **Just Do It** - it comes up even without talking about sport apparel.
+You can't force these things on people. Two Word ideas perform best when they give people the words to describe something they already want to talk about. There has to be some _innate_ agreement to it already. And it's a viral loop - if the words come unbidden, people think of your idea/brand naturally. This is why Nike's heavily invests in **Just Do It** - it comes up even without talking about sport apparel.
 
 ## In Memoriam
 
@@ -103,8 +103,9 @@ This post is dedicated to Clay Christensen, who pointed out the [Innovator's Dil
 ## Resources
 
 - "X your Y": https://twitter.com/nathanbarry/status/1221996517797425152?s=20
+- Mental models that are all 2 words: https://twitter.com/G_S_Bhogal/status/1225561131122597896
 
-##  Appendix: One Worders
+## Appendix: One Worders
 
 Exceptions to the rule are noteworthy because of their rarity.
 
@@ -183,4 +184,3 @@ This is a living list - I will update as I go. [Tell me good candidates for the 
   - highly effective people
   - microsoft: Be What's Next
   - totota: let’s go places. mercedes: The best or nothing. bmw: Ultimate Driving Machine. tesla: sustainable transport
-

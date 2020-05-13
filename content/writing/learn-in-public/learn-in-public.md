@@ -7,6 +7,8 @@ date: 2018-06-19
 description: The fastest way to learn, grow your career, and build your network.
 ---
 
+*Translations: [한국어](https://velog.io/@kwanwooi/%EA%B3%B5%EA%B0%9C%EC%A0%81%EC%9C%BC%EB%A1%9C-%ED%95%99%EC%8A%B5%ED%95%98%EB%9D%BC)*
+
 If there's a golden rule, it's this one, so I put it first. All the other rules are more or less elaborations of this rule #1.
 
 You already know that you will never be done learning. But most people "learn in private", and lurk. They consume content without creating any themselves. Again, that's fine, but we're here to talk about being in the top quintile. What you do here is to have **a habit of creating learning exhaust**:

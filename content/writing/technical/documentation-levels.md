@@ -9,9 +9,9 @@ description: People can't use your code without docs. People might get overwhelm
 
 We had an [interesting discussion](https://twitter.com/swyx/status/1222365733436346369) yesterday on what makes great docs (in this context we are only talking about OSS docs). We all know docs are important, but we can't necessarily articulate what makes good docs. It's more of a "I'll know it when I see it" situation.
 
-- No docs is bad. 
-- More docs is good. 
-- A pile of disorganized, out of date docs is bad. 
+- No docs is bad.
+- More docs is good.
+- A pile of disorganized, out of date docs is bad.
 - The best docs are the ones I don't have to read (until just before I need them, or visual affordances make them unnecessary).
 
 Can we do better than this vague intuition?
@@ -22,7 +22,7 @@ Can we do better than this vague intuition?
 
 There are docs extremists - they aren't happy until every last thing is spelled out, and they want every project to have tip top docs quality. The thing is, docs do have a maintenance cost, and docs are expensive (in developer time) to write. Possibly the only thing worse than no docs are out-of-date docs that don't help you figure out if they are out of date. The idea of docs driven design is a popular solution for this - if you know you have perfect discipline - but it doesn't answer the question of what kinds of docs you can offer to help the user.
 
-I think we need to articulate a spectrum of acceptable docs. The maturity of docs should match the maturity of the project. 
+I think we need to articulate a spectrum of acceptable docs. The maturity of docs should match the maturity of the project.
 
 I'm not a technical writer or documentarian so I don't know if there is existing thinking on this, but this is mine so far.
 
@@ -150,16 +150,16 @@ I tried to loosely order this but ofc it is up to interpretation. A lot of this 
 
 ## Brevity as a MetaFeature
 
-- Docs don't linearly increase in quality with word count. You cannot hedge by throwing more words at a problem. 
-- Try to have your target user persona in mind and write specifically for them, only what they need and what they are about to need. 
-- Use links and other UI options to branch out for other user types. 
-- Be very conscious of visual hierarchy - don't put irrelevant details, in-depth explanations, jokes and anecdotes where someone is looking to get quick hits. 
+- Docs don't linearly increase in quality with word count. You cannot hedge by throwing more words at a problem.
+- Try to have your target user persona in mind and write specifically for them, only what they need and what they are about to need.
+- Use links and other UI options to branch out for other user types.
+- Be very conscious of visual hierarchy - don't put irrelevant details, in-depth explanations, jokes and anecdotes where someone is looking to get quick hits.
 - Code examples should be small yet useful - don't dump entire apps that would take more time to customize than it would be to write from scratch.
 
 Here's [Tania Rascia](https://twitter.com/taniarascia/status/1222361724143226881):
 
 > - specific goals, laid out upfront
-> - prerequisites 
+> - prerequisites
 > - demo with source code
 > - irrelevant details, in-depth explanations, and anecdotes removed
 > - small! blocks of code
@@ -170,10 +170,10 @@ Here's [Tania Rascia](https://twitter.com/taniarascia/status/1222361724143226881
 
 I call this the Recipe Rule - Recipe Blogs making you scroll through 10 pages of life stories and long walks on the beach before showing the damn recipe.
 
-[Here's David Khourshid](https://twitter.com/DavidKPiano/status/1046833198146228225): 
+[Here's David Khourshid](https://twitter.com/DavidKPiano/status/1046833198146228225):
 
 > The top 3️⃣ things I want to read in READMEs, vs. actual READMEs:
-> 
+>
 > - Introduction
 > - License
 > - Philosophy
@@ -195,22 +195,22 @@ I also like [Brian Chesky's idea of growing customer experience by hotel analogy
 So let's split up those features above by levels - and pair the levels with where the project is. Every level includes the prior level.
 
 - **Level 0: Basic proof of concept**
-  - *Example audience: you/colleagues/hobbyists*
+  - _Example audience: you/colleagues/hobbyists_
   - One sentence description for github headline
   - README with API docs - goal is to save yourself from looking at source code
 - **Level 1: v0.x**
-  - *Example audience: greenfield early adopters. Ok with missing documentation, they are here for the idea. can contribute code/docs*
+  - _Example audience: greenfield early adopters. Ok with missing documentation, they are here for the idea. can contribute code/docs_
   - One paragraph description with more context - could be a sales pitch but also give an idea of when to use you
   - Feature list/Project Goals
   - Install + Config Instructions
 - **Level 2: v1**
-  - *Example audience: brownfield early adopters. Ok with bugs, they have some problem that isnt well addressed. Needs convincing.*
+  - _Example audience: brownfield early adopters. Ok with bugs, they have some problem that isnt well addressed. Needs convincing._
   - Comparison vs comparable libraries
   - Problem Statement - what you solve, how the developer/end user is better off with your thing than handwritten. aka Why You Exist
   - Basic Examples
   - Live Demos
 - **Level 3: vX**
-  - *Example audience: early majority user. Wants ease of use, quick wins. Need to be very reliable. Needs content to sell solution to team*
+  - _Example audience: early majority user. Wants ease of use, quick wins. Need to be very reliable. Needs content to sell solution to team_
   - Project Status badges
   - Tutorial
   - Third Party Plugins/Libraries
@@ -225,7 +225,7 @@ So let's split up those features above by levels - and pair the levels with wher
   - Examples
     - [Svelte](https://twitter.com/swyx/status/1220905001926696962?s=20)
 - **Level 4: Production use for multiple years**
-  - *Example audience: expert user. Needs API stability/migration instructions, deep insight on how the project works and how it can solve problems. Needs to customize/adapt for at-scale/weird usecases*
+  - _Example audience: expert user. Needs API stability/migration instructions, deep insight on how the project works and how it can solve problems. Needs to customize/adapt for at-scale/weird usecases_
   - Growing the MetaLanguage
     - Origin Story/Naming
     - Who Uses Us
@@ -246,21 +246,21 @@ So let's split up those features above by levels - and pair the levels with wher
   - Examples
     - [Eleventy](https://www.11ty.dev/)
 - **Level 5: Community of Production users**
-  - *Example audience: Industry beginner. They may not know any alternatives. You are the entire world to them.*
+  - _Example audience: Industry beginner. They may not know any alternatives. You are the entire world to them._
   - Explain acronyms, jargon
   - "1 to N" Docs
     - Different docs for different audiences (eg JS/Android/iOS)
     - Different languages
   - Examples
     - [Vue](https://vuejs.org/)
-    - [Django](https://docs.djangoproject.com/en/3.0/)
+    - [Django](https://docs.djangoproject.com/en/3.0/) - some [meta thoughts here](https://jacobian.org/2009/nov/10/what-to-write/)
     - [React](https://reactjs.org)
 - **Level 6: ????**
   - "Too Big To Fail" projects?
   - What belongs here? how to push the boundaries of docs?
     - build docs into the tool
   - Establishing a foundation or ECMA spec
-  - Docs that are Useful for non-users? 
+  - Docs that are Useful for non-users?
   - [Corporate/professional docs team?](https://twitter.com/TensorNo/status/1222664055011213312)
 
 A more ambitious framing of this might put them into a pyramid "hierarchy of needs". However I don't think it is appropriate yet at this stage while I explore this idea.
@@ -270,6 +270,16 @@ A more ambitious framing of this might put them into a pyramid "hierarchy of nee
 - https://www.divio.com/blog/documentation/
 - https://github.com/reduxjs/redux/issues/3609 has a bunch of great links
 - https://vimeo.com/32957711 John Resig on JQuery's OSS community
+- everything in this thread https://twitter.com/adamwathan/status/1257641015835611138
+- https://jacobian.org/2009/nov/10/what-to-write/ Django contributor's thoughts on Django docs
+- https://spec.fm/podcasts/toolsday/318867 Toolsday on Inspirational Doc Sites
+  - Shopify Polaris
+  - Svelte Docs
+  - Stripe API Docs
+  - Cypress Docs
+  - Gatsby
+  - Google Codelabs
+  - Polly
 - Google on Technical Writing https://developers.google.com/tech-writing
 - IA questions https://medium.com/eightshapes-llc/information-architecture-lenses-8a3929a106dd
 - Personas https://articles.uie.com/when-it-comes-to-personas-the-real-value-is-in-the-scenarios/

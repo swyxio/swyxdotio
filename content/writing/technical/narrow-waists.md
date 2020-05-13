@@ -67,7 +67,7 @@ I don't have a ton of examples for you as I am just writing up these thoughts, b
   - **SMS**: ditto, any phone can receive and read SMS
   - **BGP** the announcement process is decentralized and works as long as each AS meets specs
     - as a distributed system, this isn't without controversy by any means, there are frequent [country-scale incidents of BGP hijacking](https://en.wikipedia.org/wiki/BGP_hijacking#Public_incidents) and [irresponsible implementations can screw up innocent participants](https://blog.cloudflare.com/how-verizon-and-a-bgp-optimizer-knocked-large-parts-of-the-internet-offline-today/)
-  - **x86 instruction set architecture**: any processor that implemented x86 could benefit from firmware/operating systems that speak it
+  - **x86 instruction set architecture**: any processor that implemented x86 could benefit from firmware/operating systems that speak it - https://a16z.com/2020/04/24/a16z-podcast-the-narrow-waist-of-the-internet/ 26 mins in
   - **Operating systems**: the three major systems - windows, linux, freebsd (macos) - make it so that programs that operate on them dont usually care about the underlying hardware, and the underlying hardware just needs to be able to support those OSes to support those end user software
 
 ## When do they die?
