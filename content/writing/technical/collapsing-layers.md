@@ -112,3 +112,4 @@ Jim Barksdale is famous for noting that there are [two ways of making money in b
 ## Further Notes
 
 - https://tonsky.me/blog/disenchantment/
+- [Unikernels: The Next Stage of Linux’s Dominance](https://dl.acm.org/doi/pdf/10.1145/3317550.3321445)
