@@ -104,6 +104,7 @@
 <div id="WebMentions">
   <h3 font-family="system" font-size="4" font-weight="bold">Webmentions</h3>
   <a
+    aria-label="Clientside Webmentions"
     target="_blank"
     rel="noopener"
     href="http://swyx.io/writing/clientside-webmentions"
