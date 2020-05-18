@@ -31,12 +31,15 @@ Sometimes they are just plain funny, sometimes they are so true it hurts.
   - design - clients that don't know what they want but definitely don't want what you show them
 - [Postel's Law](https://en.wikipedia.org/wiki/Robustness_principle) aka Robustness principle: "be conservative in what you do, liberal in what you accept"
 - [Parkinson's Law](https://en.wikipedia.org/wiki/Parkinson%27s_law) is well known, but has several interesting corollaries: the Stock-Sanford Corollary states that "If you wait until the last minute, it only takes a minute to do."
-- [Hyrum's Law](https://www.hyrumslaw.com/): "With a sufficient number of users of an API, it does not matter what you promise in the contract - all observable behaviors of your system will be depended on by somebody." - [Even bugs will be relied on!](https://twitter.com/acemarke/status/1261761355712954368?s=20). example - Python Ordered Dicts
+- [Hyrum's Law](https://www.hyrumslaw.com/): "With a sufficient number of users of an API, it does not matter what you promise in the contract - all observable behaviors of your system will be depended on by somebody." - [Even bugs will be relied on!](https://twitter.com/acemarke/status/1261761355712954368?s=20).
+  - [Relevant XKCD](https://xkcd.com/1172/)
+  - example - Python Ordered Dicts!
   - https://shoptalkshow.com/407/
     - ~28 mins in: `window.event` was a nonstandard api but every browser except firefox implemented it. Then firefox implemented it, and JIRA broke.
     - 30 mins in: JS Objects aren't supposed to have stable order. But every browser basically implemented them with stable order. Now browser that wants to do a performance optimization wants to use unstable order, but cannot, because apps now rely on it
 - [Law of Demeter](https://en.wikipedia.org/wiki/Law_of_Demeter) - a given object should assume as little as possible about anything else - its neighbors and subcomponents
   - how to square this against "be liberal in what you accept, conservative in what you output"?
+  - what happens to Unix Philosophy when you defensively code everything?
 
 Some people combine laws:
 

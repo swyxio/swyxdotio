@@ -25,7 +25,7 @@
   if (post.metadata && post.metadata.oldSlugs && post.metadata.oldSlugs[0]) {
     slug = post.metadata.oldSlugs[0]
   }
-  let seoSubtitle = post.metadata && post.metadata.subtitle
+  $: seoSubtitle = post.metadata && post.metadata.subtitle
   export let seoTitle = seoSubtitle
     ? `${post.metadata && post.metadata.title}: ${seoSubtitle}`
     : `${seoCategory} | ${post.metadata && post.metadata.title}`
