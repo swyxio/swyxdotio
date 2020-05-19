@@ -3,13 +3,13 @@
   export let segment
   export let isFooter = false
   let showThemeEditor = false
-  let toggleEditor = () => void(showThemeEditor = !showThemeEditor)
-  let hideEditor = () => void(showThemeEditor = false)
+  let toggleEditor = () => void (showThemeEditor = !showThemeEditor)
+  let hideEditor = () => void (showThemeEditor = false)
 </script>
 
 <style>
   /* https://css-tricks.com/receding-background-modal-boxes/ */
-  .modalBackground{
+  .modalBackground {
     transition: all 0.4s ease;
     filter: blur(5px) grayscale(50%);
     transform: scale(0.9);
@@ -31,7 +31,7 @@
     cursor: pointer;
   }
   .active {
-    background:lightsalmon;
+    background: lightsalmon;
   }
   .themeButtonContainer {
     display: flex;
@@ -143,7 +143,7 @@
   }
 </style>
 
-<svelte:body on:click={hideEditor}/>
+<svelte:body on:click={hideEditor} />
 
 <nav class={(isFooter && 'footerNav') || 'headerNav'}>
   <ul>
@@ -159,7 +159,11 @@
         about
       </a>
     </li>
-
+    <li>
+      <a class={'block ' + (segment === 'now' ? 'selected' : '')} href="/now">
+        now
+      </a>
+    </li>
     <li>
       <a
         rel="prefetch"
@@ -180,7 +184,9 @@
       <a class="block" href="https://tinyletter.com/swyx">mailinglist</a>
     </li>
     <li class="themeButtonContainer" class:showThemeEditor>
-      <button class="themeButton" on:click|stopPropagation={toggleEditor}>change theme</button>
+      <button class="themeButton" on:click|stopPropagation={toggleEditor}>
+        change theme
+      </button>
     </li>
     <li class="divider">{''}</li>
     <li class="mobileExternal block">
@@ -329,6 +335,6 @@
   </ul>
 </nav>
 {#if showThemeEditor}
-<div class="modalBackground"></div>
-<ThemeEditor />
+  <div class="modalBackground" />
+  <ThemeEditor />
 {/if}

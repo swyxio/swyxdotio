@@ -4,8 +4,6 @@ Modern JS frameworks have run into a quandary - what we write is what we ship. D
 
 But it doesn't have to be this way: as Tom Dale predicted, Compilers are the new Frameworks. Svelte is an exciting, newer JavaScript framework that was designed from the ground up with compilation and speed. In this talk, we'll look under its hood to understand how it works, so you know when and why you'd want to use it in future. Don't worry, it isn't Rocket Science!
 
-
-
 ## JSConfHI Brainstorm
 
 - How Svelte Works
@@ -116,7 +114,6 @@ Oredev:
 - You will learn about epsilon exhaustion and Probably Approximately Correct learning (this is a real ML term!)
 - You will learn about Simulated Annealing and the best way to search a possible solution space while converging on schedule
 - You will learn to apply the difference between Supervised and Unsupervised Learning and why generalization is more important than memorization
-
 
 ## Hooked on Change
 

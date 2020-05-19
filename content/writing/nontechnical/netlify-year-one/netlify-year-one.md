@@ -5,6 +5,8 @@ categories: ['Reflections']
 date: 2019-08-09
 ---
 
+> Update: I have since [left Netlify](https://dev.to/swyx/farewell-netlify-1alo).
+
 The official date is a bit fuzzy because visas but I joined the Netlify Slack a year ago today as like the 40ishth (🤷🏼‍) employee. I thought it'd be nice to do some public reflections for myself and perhaps also for others thinking of joining. (Just please note that I only speak for myself, wrote this on a friday in a couple hours so I cannot possibly be comprehensive, and also have things I cannot say publicly).
 
 This isn't just about my work in the past year, its also about the perspectives i've gained from my seat at netlify. I'm just one person, so undoubtedly I don't see things other Netlifiers see and lack context on other stuff. I am pretty much dumping this stream of consciousness style. If something is grossly mistaken, please reach out and I will rectify post haste.
