@@ -59,7 +59,7 @@
           <h3>Writing</h3>
           <div>
             I do a bunch of
-            <a href="/writing">personal and work-related writing</a>
+            <a href="/writing/">personal and work-related writing</a>
             :
             <ul>
               <li>
