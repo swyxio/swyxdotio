@@ -1,4 +1,5 @@
-swyx is an Infinite Builder, previously working on Developer Experience at Netlify. In his free time he teaches React, TypeScript, Storybook and Node.js CLI's at Egghead.io, and helps run the Svelte Society community of meetups.
+swyx is an Infinite Builder, working on Developer Experience at AWS Amplify. In his free time he teaches React, TypeScript, Storybook and Node.js CLI's at [Egghead.io](https://egghead.io/s/26zf5), and helps run the Svelte Society community of meetups.
+
 
 https://twitter.com/swyx
 https://github.com/sw-yx

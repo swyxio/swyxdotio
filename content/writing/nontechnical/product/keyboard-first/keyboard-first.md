@@ -14,20 +14,20 @@ I enjoyed listening to [Des and Paul's discussion of keyboard-first apps on thei
 - Slack
 - https://getcommande.com/ (open any document)
 
-Slack calls it a quick switcher, Linear calls it a Feature Spotlight (after mac osx), Height calls it Height command
+Slack calls it a quick switcher, Linear calls it a Feature Spotlight (after mac osx), Height calls it Height command.
 
 I recently prototyped an Omnibox for Netlify:
 
 ![omnibox](/assets/netlify-omnibox.gif)
 
-I like this UI paradigm a lot. I think speed is only one factor of what it offers. It also offers "constant time execution". In that whatever I want to do, I don't have to remember or look up what the precise command is, I can just punch in Cmd+K, type in what I want, and hope that the omnibox
+I like this UI paradigm a lot. I think speed is only one factor of what it offers. It also offers "constant time execution". In that whatever I want to do, I don't have to remember or look up what the precise command is, I can just punch in Cmd+K, type in what I want, and hope that the omnibox has what you want.
 
 They discussed:
 
 - the difference between **tool time** and **task time**. This is why the "Superhuman of blogging" probably won't work.
 - focus on where speed improvement will be noticeable
 - We moved away from CLI (as well as chatbots) because of discoverability
-- is it just power users? what happens to IA?
+- is it just power users? what happens to IA (Information Architecture - organizing your app's features in a menu and making them easy to find)?
 - Slack has a mix of tool and task time, bc chats are quick and multiple ongoing.
   - Slack's IA is dead simple
   - Intercom has messages and inbox and submenus, its much more complex
@@ -38,3 +38,5 @@ They discussed:
 ## Notes from future
 
 - CLUI https://blog.repl.it/clui
+- VSCode and Chrome Devtools use Cmd + Shift + P
+- [Vimium](https://chrome.google.com/webstore/detail/vimium/dbepggeogbaibhgnhhndojpepiihcmeb?hl=en) turns Chrome Keyboard navigable

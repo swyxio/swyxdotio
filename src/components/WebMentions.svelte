@@ -157,22 +157,22 @@
               <a
                 target="_blank"
                 rel="noopener"
-                href={link.data.author.url}
+                href={link.data.author && link.data.author.url}
                 color="blue">
                 <img
                   width="40"
                   height="40"
-                  alt="avatar of {link.data.author.name}"
-                  src={link.data.author.photo} />
+                  alt="avatar of {link.data.author && link.data.author.name}"
+                  src={link.data.author && link.data.author.photo} />
               </a>
             </div>
             <div>
               {#if link.activity.type === 'repost'}
-                {link.data.author.name}
+                {link.data.author && link.data.author.name}
                 <a href={link.data.url}>retweeted</a>
               {:else}
                 <div font-family="system" color="text" font-weight="bold">
-                  {link.data.author.name}
+                  {link.data.author && link.data.author.name}
                   <a
                     target="_blank"
                     rel="noopener"

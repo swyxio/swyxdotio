@@ -124,6 +124,6 @@ Isaac Schleuter, npm founder, [chimed in](https://twitter.com/izs/status/1219083
 - https://philna.sh/blog/2019/01/10/how-to-start-a-node-js-project/
 - https://medium.com/@jdxcode/for-the-love-of-god-dont-use-npmignore-f93c08909d8d
 - https://twitter.com/DerekNonGeneric/status/1219063020250456064
-- https://egghead.io/courses/how-to-contribute-to-an-open-source-project-on-github
+- https://egghead.io/courses/how-to-contribute-to-an-open-source-project-on-github?af=95qfq1
 - For large projects: enforcing CODEOWNERS: https://twitter.com/cramforce/status/1182349710121734145
 - (other tools? [Let me know](https://twitter.com/swyx))

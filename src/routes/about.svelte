@@ -59,7 +59,7 @@
           <h3>Writing</h3>
           <div>
             I do a bunch of
-            <a href="/writing/">personal and work-related writing</a>
+            <a href="/writing">personal and work-related writing</a>
             :
             <ul>
               <li>
@@ -147,13 +147,13 @@
           <h3>Teaching</h3>
           <div>
             I teach on
-            <a href="https://egghead.io/">egghead.io</a>
+            <a href="https://egghead.io/s/26zf5">egghead.io</a>
             and in other workshops:
             <ul>
               <li>
                 My course on
                 <a
-                  href="https://egghead.io/courses/design-systems-with-react-and-typescript-in-storybook">
+                  href="https://egghead.io/courses/design-systems-with-react-and-typescript-in-storybook?af=95qfq1">
                   Design Systems with React + TypeScript
                 </a>
               </li>

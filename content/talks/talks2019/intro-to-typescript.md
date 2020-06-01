@@ -400,7 +400,7 @@ Other People
 - Anders Hejlsberg reintroducing TypeScript: https://www.youtube.com/watch?v=ET4kT88JRXs (much of this intro cribs directly from there)
 - Simple Courses
   - https://www.executeprogram.com
-  - My Egghead course https://egghead.io/courses/design-systems-with-react-and-typescript-in-storybook
+  - My Egghead course https://egghead.io/courses/design-systems-with-react-and-typescript-in-storybook?af=95qfq1
   - Mike North [TypeScript workshop on FrontEndMasters](https://github.com/mike-works/typescript-fundamentals)
 - Books:
   - https://github.com/basarat/typescript-book

@@ -267,6 +267,7 @@ A more ambitious framing of this might put them into a pyramid "hierarchy of nee
 
 ## Further Reading
 
+- https://www.hillelwayne.com/post/learning-a-language/
 - https://www.divio.com/blog/documentation/
 - https://github.com/reduxjs/redux/issues/3609 has a bunch of great links
 - https://vimeo.com/32957711 John Resig on JQuery's OSS community

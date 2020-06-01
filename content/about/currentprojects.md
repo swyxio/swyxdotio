@@ -5,7 +5,7 @@ notes_to_self: so as not to have this show up on rss feed
 
 ## 📚 Current Projects
 
-- [Egghead.io](https://egghead.io/) instructor - short technical courses on [⚛️ React and 📜 Typescript](https://egghead.io/courses/design-systems-with-react-and-typescript-in-storybook)!
+- [Egghead.io](https://egghead.io/s/26zf5) instructor - short technical courses on [⚛️ React and 📜 Typescript](https://egghead.io/courses/design-systems-with-react-and-typescript-in-storybook?af=95qfq1)!
 - Georgia Tech OMSCS - Machine Learning
 - Technical Reviewer - TypeScript: Complete
 - 🌟 Project to be launched
@@ -65,3 +65,4 @@ notes_to_self: so as not to have this show up on rss feed
 - May 28 12pm PST - Eggheadio talk - concurrent react talk
 - Jun 16 - Reactdelphia online meetup
 - June 23 - https://www.jsconf.be/ Operating System of You
+- Jun 24 - https://ionicframework.com/ioniconf some react thing

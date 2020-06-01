@@ -2,15 +2,18 @@
 title: Concurrent React From Scratch v2
 slug: react-from-scratch
 topic: React
-venues: ByteConfReact
+venues: Egghead
 url: https://www.bytesized.xyz/react-2020
-video: https://youtu.be/yeyiA9U8Ep8
+video: https://egghead.io/lessons/react-eggheadtalks-concurrent-react-from-scratch?af=95qfq1
+video2: https://youtu.be/yeyiA9U8Ep8
 date: 2020-05-02
 desc: Cloning Concurrent React with React Fiber and discussing Time Slicing and Suspense
 description: In this talk, we’ll create an effective mental model of Concurrent React by building a tiny clone of React! We will start with a blank js file and learn about how React renders components, schedules Time-Slicing updates with a Work Loop, add Hooks, and end off with a mini-clone of Suspense!
 ---
 
-This is version 2 of my Concurrent React From Scratch talk - I gave [version 1](https://swyx.io/speaking/react-from-scratch-v1) in ReactAdvanced London previously. I updated it, went a bit more in depth (because not live coding anymore!), and presented it as a keynote for ByteConf React 2020.
+## [Watch this talk on Egghead.io here](https://egghead.io/lessons/react-eggheadtalks-concurrent-react-from-scratch)
+
+This is version 2 of my Concurrent React From Scratch talk - I gave [version 1](https://swyx.io/speaking/react-from-scratch-v1) in ReactAdvanced London previously. I updated it, went a bit more in depth (because not live coding anymore!), and presented it as [a keynote for ByteConf React 2020](https://youtu.be/yeyiA9U8Ep8) and [as an Egghead.io Talk](https://egghead.io/lessons/react-eggheadtalks-concurrent-react-from-scratch).
 
 [You can find the codesandbox here](https://codesandbox.io/s/react-byteconf-1f7mq).
 

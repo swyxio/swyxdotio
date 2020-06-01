@@ -66,6 +66,8 @@ I know this is lazy, but I like to get real life magic numbers to try on my own 
   - XLarge Devices (≥1200px): width: `1140px`
 - what else?
 
+[Preet](https://twitter.com/preetster/status/1263361587584196609?s=20) also pointed me to this study on [The Effects of Line Length on Reading Online News](https://www.researchgate.net/publication/253615156_The_Effects_of_Line_Length_on_Reading_Online_News).
+
 ## Try it yourself!
 
 You can now edit line lengths of this blog. 
