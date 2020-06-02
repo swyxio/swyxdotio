@@ -63,6 +63,10 @@ notes_to_self: so as not to have this show up on rss feed
   - With Svelte 3, Svelte has reached a stable and great foundation for writing fast and interactive web experiences. The next stage in Svelte's growth is Community, not Code. Let's have a chat about how to scale a framework for adoption, by filling in the metalanguage around the language
 - May 1-2 - ByteConf React - concurrent react talk
 - May 28 12pm PST - Eggheadio talk - concurrent react talk
+- Jun 11 - Reactiflux Q&A
+- Jun 11 - Svelte Meetup Amsterdam
 - Jun 16 - Reactdelphia online meetup
 - June 23 - https://www.jsconf.be/ Operating System of You
 - Jun 24 - https://ionicframework.com/ioniconf some react thing
+- Jul 22 - thisdot JavaScript Marathon - React
+  > I was wondering if you wanted to do a 1 hour training on 6/24 on react! :) We are looking for more topics like suspense or something fun like that.  The format is basically like a live coding demoing of the thing and some slides like this: https://youtube.com/watch?v=n21XU0Fzr1o
