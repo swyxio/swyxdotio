@@ -75,6 +75,8 @@ _originally drafted [in a gist](https://gist.github.com/sw-yx/9720bd4a30606ca3ff
 - Kent C Dodds: [Intentional Career Building](https://kentcdodds.com/blog/intentional-career-building)
 - Joshua Branchaud: Learning In Public by [posting daily TIL's for 5 years](https://github.com/jbranchaud/til)
 - Patrick O’Shaughnessy: [Learn, Build, Share, Repeat](https://twitter.com/david_perell/status/1214559294273683456?s=20)
+
+    > Learn in public, fanatically. Find something you can't stop thinking about and know it better than anyone, and share everything you learn along the way. Once deep enough, start building something too. Make something you have to sell as early as possible. - [Patrick in David Perell's Twitter course](https://twitter.com/drkraft/status/1268194548343279616)
 - LadyBug Podcast: [Blogging 101](https://ladybug.dev/episode/blogging-101/) (esp [Ali Spittel's Blog Post Workflow](https://dev.to/aspittel/my-blog-post-workflow-from-topic-to-publication-4n78))
 - Quincy Larson: [Build your Skills, Build your Reputation, Build your Network](https://twitter.com/ossia/status/1079942716480344065?s=12)
 - [Ali Spittel on syndicating content](https://podcasts.google.com/?feed=aHR0cHM6Ly9mZWVkcy5wb2R0cmFjLmNvbS9WR0F1bHBON01ZMVU&episode=aHR0cHM6Ly9tZWRpYS5ibHVicnJ5LmNvbS9hcnJlc3RlZGRldm9wcy9jb250ZW50LmJsdWJycnkuY29tL2FycmVzdGVkZGV2b3BzL2FycmVzdGVkLWRldm9wcy1wb2RjYXN0LWVwaXNvZGUxNDMubXAz&hl=en&ved=2ahUKEwiFwevO-KvnAhUwFzQIHdd-Dn4QjrkEegQICBAI&ep=6) on the Arrested DevOps podcast
