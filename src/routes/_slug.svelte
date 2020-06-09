@@ -47,9 +47,24 @@
   }
 
   .content :global(blockquote) {
-    padding: 0 1em;
-    font-style: italic;
+    position: relative;
+    margin-left: 0;
+    padding-left: 1em;
+    padding-right: 0.5em;
+    font-size: 0.9em;
+    line-height: 1.4em;
+    margin-right: 0;
+    /* font-style: italic; */
     border-left: 0.25em solid var(--brand-color-primary);
+  }
+  .content :global(blockquote:before) {
+    content: "";
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    background-color: var(--link-color);
+    opacity: 0.1;
   }
   .content :global(a) {
     border-bottom: 2px solid #F26111;
