@@ -7,7 +7,7 @@ date: 2018-06-19
 description: The fastest way to learn, grow your career, and build your network.
 ---
 
-_Translations: [한국어](https://velog.io/@kwanwooi/%EA%B3%B5%EA%B0%9C%EC%A0%81%EC%9C%BC%EB%A1%9C-%ED%95%99%EC%8A%B5%ED%95%98%EB%9D%BC)_
+> Author's Note: I am writing an expanded version of this essay in [my upcoming book](https://www.swyx.io/writing/i-m-writing-a-book-45a8/). Translations welcome! ([한국어](https://velog.io/@kwanwooi/%EA%B3%B5%EA%B0%9C%EC%A0%81%EC%9C%BC%EB%A1%9C-%ED%95%99%EC%8A%B5%ED%95%98%EB%9D%BC))
 
 If there's a golden rule, it's this one, so I put it first. All the other rules are more or less elaborations of this rule #1.
 
@@ -33,7 +33,7 @@ Oh you think you're done? Don't stop there:
 - Teach workshops.
 - Go to conferences and summarize what you learned.
 
-There's always one level deeper. But at every step of the way: _Document what you did and the problems you solved._
+If you're tired of creating one-off things, start building a persistent knowledge base that grows over time. [Open Source your Knowledge](https://www.swyx.io/speaking/open-source-knowledge/)! At every step of the way: _Document what you did and the problems you solved._
 
 The subheading under this rule would be: **Try your best to be right, but don't worry when you're wrong.** Repeatedly. If you feel uncomfortable, or like an impostor, good. You're pushing yourself. Don't assume you know everything, but try your best anyway, and let the internet correct you when you are inevitably wrong. Wear your noobyness on your sleeve.
 
@@ -45,7 +45,7 @@ At some point you'll get some support behind you. People notice genuine learners
 
 "With so many junior devs out there, why will they help _me_?", you ask.
 
-Because you learn in public. By teaching you they teach many. You amplify them. You have one thing they don't: a beginner's mind. You see how this works?
+**Because you learn in public.** By teaching you, they teach many. You amplify them. You have one thing they don't: a beginner's mind. You see how this works?
 
 At some point people will start asking you for help because of all the stuff you put out. 80% of developers are "dark", they dont write or speak or participate in public tech discourse. But you do. You must be an expert, right? Don't tell them you aren't. Answer best as you can, and when you're stuck or wrong pass it up to your mentors.
 
@@ -54,6 +54,8 @@ Eventually you run out of mentors, and just solve things on your own. You're sti
 Learn in public.
 
 p.s. Eventually, they'll want to pay you for your help too. A lot more than you think.
+
+---
 
 > Next: [Learning Gears](https://www.swyx.io/writing/learning-gears/) (How to Start Learning In Public)
 
@@ -64,6 +66,8 @@ p.s. Eventually, they'll want to pay you for your help too. A lot more than you 
 > Also: [Big L Notation](https://www.swyx.io/writing/big-l-notation) (expanding on why "Learn In Public" is the fastest way to learn)
 
 _originally drafted [in a gist](https://gist.github.com/sw-yx/9720bd4a30606ca3ffb8d407113c0fe5)_
+
+---
 
 **Related links**
 
