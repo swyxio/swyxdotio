@@ -1,8 +1,11 @@
-## Svelte: the Space Elevator Framework
+## Get Paid to Learn in Public
 
-Modern JS frameworks have run into a quandary - what we write is what we ship. Despite our best efforts at minifying and treeshaking, we cannot fight the fact that adding features means adding JS bundle size. This means we are often trading off user experience against developer experience for every fatiguing decision we make.
+A lot of people are interested in ways to learn in public...
 
-But it doesn't have to be this way: as Tom Dale predicted, Compilers are the new Frameworks. Svelte is an exciting, newer JavaScript framework that was designed from the ground up with compilation and speed. In this talk, we'll look under its hood to understand how it works, so you know when and why you'd want to use it in future. Don't worry, it isn't Rocket Science!
+## Svelte Actions and PE
+
+My article is on the potential of using Svelte Actions for Progressive Enhancement. I think there's a lot of interest in PE from the performance conscious crowd and I think this is one of the standout features in Svelte that makes the framework different from others. For example you can enhance a link to add previews (https://svelte.dev/repl/ffaacf4479e043dd9b21ba29fe96d2df?version=3.23.2) or do analytics tracking with very little setup.
+
 
 ## JSConfHI Brainstorm
 

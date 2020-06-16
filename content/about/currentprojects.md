@@ -65,7 +65,6 @@ notes_to_self: so as not to have this show up on rss feed
 - May 28 12pm PST - Eggheadio talk - concurrent react talk
 - Jun 11 - Reactiflux Q&A
 - Jun 11 - Svelte Meetup Amsterdam
-- Jun 16 - Reactdelphia online meetup
 - June 23 - https://www.jsconf.be/ Operating System of You
 - Jun 24 - https://ionicframework.com/ioniconf some react thing
 - Jun 25, 2020 9pm - 10pm (EDT) - vincit dev talks - career-hunting in tech
