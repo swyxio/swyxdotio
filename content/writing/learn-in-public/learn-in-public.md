@@ -85,6 +85,7 @@ _originally drafted [in a gist](https://gist.github.com/sw-yx/9720bd4a30606ca3ff
 - Quincy Larson: [Build your Skills, Build your Reputation, Build your Network](https://twitter.com/ossia/status/1079942716480344065?s=12)
 - [Ali Spittel on syndicating content](https://podcasts.google.com/?feed=aHR0cHM6Ly9mZWVkcy5wb2R0cmFjLmNvbS9WR0F1bHBON01ZMVU&episode=aHR0cHM6Ly9tZWRpYS5ibHVicnJ5LmNvbS9hcnJlc3RlZGRldm9wcy9jb250ZW50LmJsdWJycnkuY29tL2FycmVzdGVkZGV2b3BzL2FycmVzdGVkLWRldm9wcy1wb2RjYXN0LWVwaXNvZGUxNDMubXAz&hl=en&ved=2ahUKEwiFwevO-KvnAhUwFzQIHdd-Dn4QjrkEegQICBAI&ep=6) on the Arrested DevOps podcast
 - Reid Hoffman: [Those Who Teach, Can Do](https://medium.com/@reidhoffman/those-who-teach-can-do-98a30e9a74ea)
+- Shu Omi [did LIP on YouTube](https://www.youtube.com/watch?v=JpzTYxzcF8I) and gained 5k subscribers in 8 months!
 - Gift Egwuenu on [Learning in Public](https://www.youtube.com/watch?v=8VGoj8mrMnY)
 - [How do Rocket Scientists Learn? (Knowledge Management Lessons learned at Goddard, NASA)](https://www.govloop.com/community/blog/how-do-rocket-scientists-learn-aka-knowledge-management-lessons-learned-at-goddard-nasa/)
 
