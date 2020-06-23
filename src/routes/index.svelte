@@ -234,7 +234,7 @@
                       </div>
                       <div>
                         <p font-family="system" color="tertiary" font-size="2">
-                          {@html cleanString(mention.content.html)}
+                          {@html cleanString(mention)}
                         </p>
                       </div>
                     {/if}
