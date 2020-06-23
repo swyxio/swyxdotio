@@ -29,6 +29,8 @@ Sometimes they are just plain funny, sometimes they are so true it hurts.
 - [Polanyi's Paradox](https://en.wikipedia.org/wiki/Polanyi%E2%80%99s_paradox) - "We can know more than we can tell"
   - applicable in AI - we find it hard to describe common sense
   - design - clients that don't know what they want but definitely don't want what you show them
+  - related to [Moravec's Paradox](https://en.wikipedia.org/wiki/Moravec%27s_paradox): "It's easy to give computers adult level intelligence, but hard to give them child level perception and motor skills."
+    - "To Err is Human; To Really Foul Things Up Requires a Computer" - Bill Vaughan
 - [Postel's Law](https://en.wikipedia.org/wiki/Robustness_principle) aka Robustness principle: "be conservative in what you do, liberal in what you accept"
 - [Parkinson's Law](https://en.wikipedia.org/wiki/Parkinson%27s_law) is well known, but has several interesting corollaries: the Stock-Sanford Corollary states that "If you wait until the last minute, it only takes a minute to do."
 - [Hyrum's Law](https://www.hyrumslaw.com/): "With a sufficient number of users of an API, it does not matter what you promise in the contract - all observable behaviors of your system will be depended on by somebody." - [Even bugs will be relied on!](https://twitter.com/acemarke/status/1261761355712954368?s=20).

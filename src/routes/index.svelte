@@ -46,12 +46,17 @@
       }
     })
   }
-  function cleanString(str) {
-    const withSlash = target + '/'
-    const linky = `<a href="${withSlash}">${withSlash}</a>`
-    return str
-      .replace(linky, '') // drop self referential <a> tags
-      .replace('<script>', '<$cript>') // sneaky sneaky!
+  function cleanString(mention) {
+    if (mention.content && mention.content.html) {
+      const withSlash = target + '/'
+      const linky = `<a href="${withSlash}">${withSlash}</a>`
+      return mention.content.html
+        .replace(linky, '') // drop self referential <a> tags
+        .replace('<script>', '<$cript>') // sneaky sneaky!
+    } else {
+      console.log('no content in mention', mention)
+      return `<div>no content found</div`
+    }
   }
 </script>
 

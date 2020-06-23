@@ -7,7 +7,7 @@ date: 2018-06-19
 description: The fastest way to learn, grow your career, and build your network.
 ---
 
-> Author's Note: I am writing an expanded version of this essay in [my upcoming book](https://www.swyx.io/writing/i-m-writing-a-book-45a8/). Translations welcome! ([한국어](https://velog.io/@kwanwooi/%EA%B3%B5%EA%B0%9C%EC%A0%81%EC%9C%BC%EB%A1%9C-%ED%95%99%EC%8A%B5%ED%95%98%EB%9D%BC))
+> Author's Note: I am writing an expanded version of this essay in [my upcoming book](https://www.swyx.io/writing/i-m-writing-a-book-45a8/). Translations welcome! ([한국어](https://velog.io/@kwanwooi/%EA%B3%B5%EA%B0%9C%EC%A0%81%EC%9C%BC%EB%A1%9C-%ED%95%99%EC%8A%B5%ED%95%98%EB%9D%BC), [Español](https://ricardoerl.com/blog/aprender-en-publico))
 
 If there's a golden rule, it's this one, so I put it first. All the other rules are more or less elaborations of this rule #1.
 
