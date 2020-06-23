@@ -53,9 +53,15 @@
       return mention.content.html
         .replace(linky, '') // drop self referential <a> tags
         .replace('<script>', '<$cript>') // sneaky sneaky!
+    } else if (mention.photo && mention.photo.length) {
+      const photos = mention.photo.map(
+        url =>
+          `<a href="${mention.url}"><img src="${url}" height=200 alt="Twitter photo" /></a>`
+      )
+      return `<div>${photos.join('')}</div>`
     } else {
       console.log('no content in mention', mention)
-      return `<div>no content found</div`
+      return `<div>no content found</div>`
     }
   }
 </script>
