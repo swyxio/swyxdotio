@@ -34,7 +34,7 @@
     <a href="/writing/i-m-writing-a-book-45a8">
       <b>I'm Writing a Book!</b>
     </a>
-    Launching my first product on Jun 1, while I wait for my next job to begin.
+    Launching my first product on July 1, while I wait for my next job to begin.
   </p>
 
 </article>

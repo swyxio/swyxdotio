@@ -60,13 +60,13 @@ notes_to_self: so as not to have this show up on rss feed
 - Apr 15-17 - MagnoliaJS https://twitter.com/MagnoliaJSconf
 - Apr 26 - Svelte Society Day
 - Apr 29 - Svelte Bay Area https://www.meetup.com/Svelte-Js-Bay-Area/events/270076782/
-  - With Svelte 3, Svelte has reached a stable and great foundation for writing fast and interactive web experiences. The next stage in Svelte's growth is Community, not Code. Let's have a chat about how to scale a framework for adoption, by filling in the metalanguage around the language
 - May 1-2 - ByteConf React - concurrent react talk
 - May 28 12pm PST - Eggheadio talk - concurrent react talk
-- Jun 11 - Reactiflux Q&A
+- Jun 11 - Reactiflux Q&A https://www.reactiflux.com/transcripts/shawn-wang
 - Jun 11 - Svelte Meetup Amsterdam
 - June 23 - https://www.jsconf.be/ Operating System of You
 - Jun 24 - https://ionicframework.com/ioniconf State of React
 - Jun 25, 2020 9pm - 10pm (EDT) - vincit dev talks - career-hunting in tech
 - Jul 22 - thisdot JavaScript Marathon - React
   > I was wondering if you wanted to do a 1 hour training on 6/24 on react! :) We are looking for more topics like suspense or something fun like that.  The format is basically like a live coding demoing of the thing and some slides like this: https://youtube.com/watch?v=n21XU0Fzr1o
+- Sep 1-2 - CascadiaJS https://2020.cascadiajs.com/
