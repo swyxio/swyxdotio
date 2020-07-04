@@ -65,6 +65,7 @@
     left: 0;
     background-color: var(--link-color);
     opacity: 0.1;
+    pointer-events: none;
   }
   .content :global(a) {
     border-bottom: 2px solid #F26111;
