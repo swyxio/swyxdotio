@@ -153,8 +153,8 @@
 <article>
   <h1>swyx's site!</h1>
   <div id="CTA">
-    <a href="/writing/i-m-writing-a-book-45a8">
-      <b>I'm Writing a Book!</b>
+    <a href="http://learninpublic.org/?from=swyxdotio">
+      <b>I Launched my book!</b>
     </a>
     Featured Post:
     <div>
