@@ -12,7 +12,7 @@ I presented at [This Dot's online React meetup today](https://twitter.com/ThisDo
 
 ## Here are [the slides that I made](https://docs.google.com/presentation/d/1M-JUtp9I5_gSk8OpV9Adk9sYzhoU-VNcwz9RUJ1-8Sw/edit#slide=id.p) 
 
-## Here is [the video recording](https://www.swyx.io/speaking/react-survey-2019/)
+## Here is [the video recording](https://www.swyx.io/speaking/react-survey-2019-talk/)
 
 Note that I do not at all take credit for the survey - I only made the slides and gave initial ideas - The survey and data munging only happened with the heavy lifting made of [/u/timmonsjg](http://reddit.com/u/timmonsjg) and reviews from the mod team on Reddit.
 

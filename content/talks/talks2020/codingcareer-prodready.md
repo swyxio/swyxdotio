@@ -1,5 +1,5 @@
 ---
-title: Marketing Yourself - ProdReadyPodcast
+title: Marketing Yourself - ProdReady Podcast
 slug: codingcareer-prodready
 topic: Careers
 venues: Podcast

@@ -9,6 +9,8 @@ url2: https://media.transistor.fm/b2abc441.mp3
 description: I chatted with Jeremy Jung, host on Software Engineering Radio and now Software Sessions, about Learn in Public and the Coding Career Handbook!
 ---
 
+> Swyx note: this one got [good feedback!](https://twitter.com/swyx/status/1283248970286809093?s=20)
+
 Swyx talks about the self centered benefits of learning in public and navigating a software development career.
 
 <p>We discuss:</p>
