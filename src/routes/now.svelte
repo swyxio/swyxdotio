@@ -31,10 +31,10 @@
   <h1>What I am Doing Now</h1>
 
   <p>
-    <a href="/writing/i-m-writing-a-book-45a8">
-      <b>I'm Writing a Book!</b>
-    </a>
-    Launching my first product on July 1, while I wait for my next job to begin.
+    I'm running workshops and a community for <a href="/writing/i-m-writing-a-book-45a8">
+      <b>my new book</b>
+    </a>!
+    Otherwise, I've just started my job at AWS and am looking forward to ramp up on all the great services it has.
   </p>
 
 </article>
