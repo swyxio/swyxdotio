@@ -8,7 +8,7 @@ description: The fastest way to learn, grow your career, and build your network.
 ---
 
 > Author's Note: I have written an expanded version of this essay in [The Coding Career Handbook](http://learninpublic.org/?from=swyxdotio-LIP).
-> Translations welcome! ([한국어](https://velog.io/@kwanwooi/%EA%B3%B5%EA%B0%9C%EC%A0%81%EC%9C%BC%EB%A1%9C-%ED%95%99%EC%8A%B5%ED%95%98%EB%9D%BC), [Español](https://ricardoerl.com/blog/aprender-en-publico))
+> Translations welcome! ([한국어](https://velog.io/@kwanwooi/%EA%B3%B5%EA%B0%9C%EC%A0%81%EC%9C%BC%EB%A1%9C-%ED%95%99%EC%8A%B5%ED%95%98%EB%9D%BC), [Español](https://ricardoerl.com/blog/aprender-en-publico), [中文](https://juejin.im/post/6855456536056037389))
 
 If there's a golden rule, it's this one, so I put it first. All the other rules are more or less elaborations of this rule #1.
 
