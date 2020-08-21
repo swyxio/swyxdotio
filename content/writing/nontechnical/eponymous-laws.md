@@ -33,6 +33,7 @@ Sometimes they are just plain funny, sometimes they are so true it hurts.
     - "To Err is Human; To Really Foul Things Up Requires a Computer" - Bill Vaughan
 - [Postel's Law](https://en.wikipedia.org/wiki/Robustness_principle) aka Robustness principle: "be conservative in what you do, liberal in what you accept"
 - [Parkinson's Law](https://en.wikipedia.org/wiki/Parkinson%27s_law) is well known, but has several interesting corollaries: the Stock-Sanford Corollary states that "If you wait until the last minute, it only takes a minute to do."
+- [Cargill's Law](https://thenewstack.io/code-n00b-ol-ninety-ninety/): “The first 90 percent of the code accounts for the first 90 percent of the development time. The remaining 10 percent of the code accounts for the other 90 percent of the development time.”
 - [Hyrum's Law](https://www.hyrumslaw.com/): "With a sufficient number of users of an API, it does not matter what you promise in the contract - all observable behaviors of your system will be depended on by somebody." - [Even bugs will be relied on!](https://twitter.com/acemarke/status/1261761355712954368?s=20).
   - [Relevant XKCD](https://xkcd.com/1172/)
   - example - Python Ordered Dicts!
