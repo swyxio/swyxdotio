@@ -1,9 +1,11 @@
-# example netlify.toml
 [build]
-  command = "yarn run build"
-  publish = "__sapper__/export"
-  functions = "functions"
-[dev]
-  command = "yarn start" # Command to start your dev server
-  targetPort = 3000 # Port that the dev server will be listening on
-  publish = "static" # If you use a _redirect file, provide the path to your static content folder
+  command = "yarn build"
+  publish = "public/"
+
+[[headers]]
+  for = "/dist/svelte/*"
+  [headers.values]
+    cache-control = '''
+      public,
+      max-age=31536000,
+      immutable'''
