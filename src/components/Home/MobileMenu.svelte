@@ -6,7 +6,7 @@
 <nav class="relative max-w-screen-xl mx-auto flex items-center justify-between px-4 sm:px-6">
   <div class="flex items-center flex-1">
     <div class="flex items-center justify-between w-full md:w-auto">
-      <a href="#d" aria-label="Home" class="text-white"> swyx.io </a>
+      <a href="/" aria-label="Home" class="text-white"> swyx.io </a>
       <div class="-mr-2 flex items-center md:hidden">
         <button
           on:click={() => (isMenuOpen = true)}
@@ -23,7 +23,7 @@
       </div>
     </div>
     <div class="hidden space-x-10 md:flex md:ml-10">
-      <a href="#x" class="font-medium text-white hover:text-gray-300 transition duration-150 ease-in-out">Product</a>
+      <a href="/ideas" class="font-medium text-white hover:text-gray-300 transition duration-150 ease-in-out">Ideas</a>
       <a href="#d" class="font-medium text-white hover:text-gray-300 transition duration-150 ease-in-out">Features</a>
     </div>
   </div>

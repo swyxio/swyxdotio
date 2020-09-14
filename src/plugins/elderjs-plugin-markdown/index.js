@@ -6,7 +6,6 @@ const remark = require('remark');
 const remarkHtml = require('remark-html');
 require('dotenv-safe').config(); // have DEV_TO_API_KEY in process.env
 const fetch = require('node-fetch');
-const { title } = require('process');
 
 async function parseMarkdown(markdown) {
   const result = await remark().use(remarkHtml).process(markdown);
@@ -46,36 +45,11 @@ const plugin = {
     plugin.markdown = [];
     plugin.requests = [];
 
-    // (async function () {
-    //   let articles = await getFromDevTo();
-    //   console.log('devtolength', articles.length)
-    //   articles.forEach((article) => {
-    //     let {
-    //       // data,
-    //       content,
-    //     } = grayMatter(article.body_markdown);
-    //     // if (!data.title) data.title = article.title
-    //     // if (!data.slug) data.slug = article.slug
-    //     plugin.markdown.push({
-    //       slug: article.slug,
-    //       data: {
-    //         title: article.title,
-    //         slug: article.slug,
-    //         description: article.desc || article.description,
-    //         tag_list: article.tag_list,
-    //       },
-    //       content,
-    //     });
-    //   });
-    //   fs.writeFileSync('test.json', JSON.stringify(plugin.markdown, null, 2))
-    // })();
-
     if (config && Array.isArray(config.routes) && config.routes.length > 0) {
       for (const route of config.routes) {
-        const mdsInRoute = path.resolve(process.cwd(), settings.locations.srcFolder, './routes/', route);
-        // console.log(`${mdsInRoute}/*.md`);
+        const mdsInRoute = path.resolve(process.cwd(), route);
         const mdFiles = glob.sync(`${mdsInRoute}/*.md`);
-
+        const segment = route.split('/').slice(-1)[0]
         for (const file of mdFiles) {
           const md = fs.readFileSync(file, 'utf-8');
           const { data, content } = grayMatter(md);
@@ -85,21 +59,29 @@ const plugin = {
           if (fileSlug.includes(' ')) {
             fileSlug = fileSlug.replace(/ /gim, '-');
           }
-
+          const categories = data.tag_list || (Array.isArray(data.categories) ? data.categories : [data.categories || 'uncategorized'])
           if (data.slug) {
             plugin.markdown.push({
               slug: data.slug,
-              data,
+              data: {
+                technical: segment === 'technical', 
+                ...data,
+                categories
+              },
               content,
             });
-            plugin.requests.push({ slug: data.slug, route });
+            plugin.requests.push({ slug: data.slug, route: 'article' });
           } else {
             plugin.markdown.push({
               slug: fileSlug,
-              data,
+              data: {
+                technical: segment === 'technical', 
+                ...data,
+                categories
+              },
               content,
             });
-            plugin.requests.push({ slug: fileSlug, route });
+            plugin.requests.push({ slug: fileSlug, route: 'article' });
           }
         }
       }
@@ -114,6 +96,29 @@ const plugin = {
       description: 'Add parsed .md content and data to the data object',
       priority: 50, // default
       run: async ({ data, plugin }) => {
+        let articles = await getFromDevTo();
+        articles.forEach((article) => {
+          let {
+            data,
+            content,
+          } = grayMatter(article.body_markdown);
+          const slug = data.slug || article.slug
+          plugin.markdown.push({
+            slug,
+            data: {
+              title: article.title,
+              description: data.desc || article.description,
+              categories: article.tag_list,
+            },
+            content,
+          });
+          plugin.requests.push({ slug, route: 'article' });
+        });
+
+        // todo: make simple recommender algo to do related posts feature
+        // fs.writeFileSync('test.json', JSON.stringify(plugin.markdown, null, 2))
+
+        // console.log('markdown', plugin.markdown.map(x => Object.keys(x.data)))
         return {
           data: { ...data, markdown: plugin.markdown },
         };

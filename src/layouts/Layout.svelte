@@ -1,5 +1,5 @@
 <script>
-  import MobileMenu from '../../components/Home/MobileMenu.svelte';
+  import MobileMenu from '../components/Home/MobileMenu.svelte';
   export let routeHTML, settings;
 </script>
 

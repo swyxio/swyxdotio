@@ -1,7 +1,7 @@
 ---
 title: Learning Gears
 slug: learning-gears
-categories: ['Advice', 'Learn In Public']
+tag_list: ['Advice', 'LearnInPublic']
 date: 2019-04-19
 ---
 

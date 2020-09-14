@@ -1,0 +1,173 @@
+# 2019 Talks
+
+
+
+
+# # template pls ignore
+# - title: Template
+#   slug: template
+#   tags: [Template]
+#   desc: description
+#   url: optional
+#   github: optional
+#   misc: optional
+#   instances:
+#     - venue: Fullstack Academy
+#       video: https://youtu.be/7OHXz7vXC0g
+#       date: 2017-09-29
+#       slides: https://slides.com/swyx/heaps#/
+
+
+# checklist
+# fix topic -> tags
+# fix venues -> venue
+
+# todo
+# link up React's New Defaults to blogpost
+# blogpost Why Contribute to Open Source?
+# blogpost Why React is -NOT- Reactive
+
+
+# 2017-2018 Talks
+
+- title: Heaps
+  slug: fullstack-heaps
+  tags: [Data Structures]
+  desc: Bootcamp talk - guide to the Heap data structure and where they are used
+  instances:
+    - venue: Fullstack Academy
+      date: 2017-09-29
+      slides: https://slides.com/swyx/heaps#/
+- title: Crossbones
+  slug: fullstack-crossbones
+  tags: [React Native]
+  github: https://github.com/sw-yx/crossbones
+  url: https://www.fullstackacademy.com/hackathon-presentations/crossbones-fullstacks-react-native-boilerplate
+  desc: a React Native boilerplate for a hackathon
+  instances:
+    - venue: Fullstack Academy
+      date: 2017-09-29
+      video: https://www.youtube.com/watch?v=QFIj6iiqjWw
+- title: React Trip Planner
+  slug: fullstack-react-trip-planner
+  tags: [React]
+  github: https://github.com/sw-yx/FSA-React-Trip-Planner
+  desc: a guided workshop on converting a vanilla JS app into React for the first time.
+  instances:
+    - venue: Fullstack Academy
+      date: 2017-08-17
+      video: https://www.youtube.com/watch?v=M6rL0PXxPHs
+- title: Babel ❤️ GraphQL
+  slug: babel-heart-graphql
+  tags: [Babel, GraphQL]
+  desc: Babel plugins can help solve DX and UX tradeoffs by metaprogramming to while delivering code that is why stop there? In this talk we explore how babel-blade solves the double declaration problem in all get started writing your first babel plugin!
+  url: https://babel-blade.netlify.com/
+  github: https://github.com/sw-yx/babel-blade
+  misc: 
+    feedback: https://shawnwang3.typeform.com/to/OYtqZ7
+    description2: Babel-Macros were shipped with Create-React-App v2 - but what are they? What can you do with them? In this lightning talk we discuss how babel macros differ from plugins, and my recent work with babel-blade creating an inline GraphQL compiler that works with all React GraphQL clients.
+    description3: Babel-Macros were shipped with Babel v7 - but what are they? What can you do with them? In this lightning talk we discuss how babel macros differ from plugins, and my recent work with babel-blade creating an inline GraphQL compiler that works with all clientside GraphQL clients.
+    graphqlasianotes: No technical requirements apart from internet connection. I am the best person to speak on the subject because I made this macro https://babel-blade.netlify.com. Initially it was just a cool toy but then people at Coursera, Netflix, FB, and Adobe have picked up it telling me to keep going so I am applying for a lightning talk so I can spread the idea and get feedback/collaboration with the major clientside GraphQL clients!
+  instances:
+    - venue: React Boston
+      date: 2018-09-28
+      video: https://youtu.be/7OHXz7vXC0g
+    - venue: GraphQLNYC
+      date: 2018-09-28
+      video: https://youtu.be/30wOsJOluA4?t=497
+- title: Contributing to React
+  slug: contributing-to-react
+  tags: [React, Open Source]
+  desc: My very first public talk at a meetup, on Contributing to React. This went really well and Dan Abramov even added it to the React docs to guide people!
+  github: https://github.com/sw-yx/react-contributing
+  url: https://reactjs.org/docs/how-to-contribute.html
+  instances:
+    - venue: ReactNYC
+      date: 2017-12-15
+      video: https://www.youtube.com/watch?v=GWCcZ6fnpn4
+      slides: https://github.com/sw-yx/react-contributing
+- title: Creating Create-React-App
+  slug: creating-cra
+  tags: [React]
+  github: https://github.com/sw-yx/create-react-app-parcel
+  desc: diving into the history of CRA, how CRA works, and my experience making create-react-app-parcel
+  misc:
+    description: We all use create-react-app but how much do we know about how it works internally? In this talk we discuss how I recently dived into the source code for create-react-app to make a fun clone! It looks intimidating but is really not, once you get a hang of how lerna monorepos work and try making one of your own. Watch this and then go make your own create-awesome-app!
+    note: [max stoiber](https://github.com/mxstbr/mxstbr.com/blob/b7b1471541cb9fee679115bb29ded8ef14d65bfa/data/old-blog-posts/2016/12/a-dream-come-true.md#create-react-app) notes that `eject` used to be named `graduate`
+  instances:
+    - venue: ReactNYC
+      video: https://www.youtube.com/watch?v=Et571vTAtT8
+      slides: https://www.beautiful.ai/player/-LD4eaMxlqSlCy6biPmZ/Creating-Create-React-App
+      date: 2018-06-21
+- title: Never Bundle React Again
+  slug: never-bundle-react-again
+  tags: [Bundling]
+  url: https://slides.com/swyx/never-bundle-react-again#/
+  desc: a rehash of MJackson's React Rally 2017 talk but I am not very proud of it
+  instances:
+    - venue: ReactNYC
+      date: 2018-02-13
+      video: https://www.youtube.com/watch?v=rPuwZJEA-9U
+- title: React Suspense
+  slug: react-suspense
+  topic: React
+  url: https://slides.com/swyx/react-suspense
+  desc: a compendium of everything discussed about the React Suspense API
+  instances:
+    - venues: ReactNYC
+      video: https://www.youtube.com/watch?v=eRvbh5C6Lj0
+      date: 2018-04-22
+- title: React's New Defaults
+  slug: reacts-new-defaults
+  topic: React
+  url: https://github.com/sw-yx/talk-reacts-new-defaults
+  desc: a talk about the Why of Suspense, Time Slicing, and Hooks in React
+  misc: 
+    description: Concurrent React and React Hooks aren't simply new ways to do old things. They represent a new, stronger opinion of what apps should do by default. Let's explore the -Why- of React's new APIs!
+    discussion: "This is a talk version of a popular blogpost I wrote: https://gist.github.com/sw-yx/17965a31413acb461c4d64028527011e
+
+    The structure:
+
+    - Introduce the future roadmap of React
+    - Talk about the importance of good defaults in Technology
+    - Introduce the new defaults in Concurrent React and React Hooks
+    - Introduce a demo Movie app with today's React
+    - Demonstrate the drawbacks inherent in our current defaults
+    - Introduce React suspense, live code into the Movie app
+    - Talk about time slicing and the scheduler API
+    - Introduce React Hooks, live code into the Movie app
+    - Talk about Immediate mode vs Retained mode, and the DX Mullet
+    - Conclude by contrasting the current defaults vs the better defaults introduced by the new React APIs
+  "
+  instances: 
+    - venues: Bay Area React
+      video: https://youtu.be/vhWaMPQhMLQ
+      date: 2018-11-15
+- title: Why Contribute to Open Source?
+  slug: contributing-to-open-source
+  topic: Open Source
+  url: https://gist.github.com/sw-yx/505d15ed3e7febdab3aa3d25ee81f652
+  desc: 8 reasons to Contribute to Open Source, and how to Get Started (p.s. It doesn't have to be code)
+  instances:
+    - venues: JAMstackConf
+      date: 2018-11-03
+      video: https://youtu.be/GgqQI3zdzFY
+- title: Why React is -NOT- Reactive
+  slug: react-not-reactive
+  topic: React, Reactivity
+  url: https://slides.com/swyx/why-react-is-not-reactive
+  github: https://github.com/sw-yx/reactive-react
+  desc: diving into React's push-pull data flow and the importance of scheduling in React
+  misc:
+    banner: './DkvCgB6XcAAeYcP.jpeg'
+    reddit: https://www.reddit.com/r/reactjs/comments/98lbpi/why_react_is_not_reactive_react_rally_2018/
+    feedback: https://shawnwang3.typeform.com/to/cC7sYD
+    cfp: https://gist.github.com/sw-yx/9bf1fad03185613a4c19ef5352d90a09
+  instances:
+    - venues: ReactNYC
+      date: 2018-08-12
+      video: https://www.youtube.com/watch?v=nyFHR0dDZo0
+    - venues: React Rally
+      date: 2018-08-22
+      video: https://www.youtube.com/watch?v=ZZoB5frlcnE
+

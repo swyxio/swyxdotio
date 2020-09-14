@@ -1,7 +1,7 @@
 ---
 title: Clone Open Source Apps
 slug: clone-open-source-apps
-categories: ['Advice']
+tag_list: ['Advice', 'LearnInPublic']
 date: 2018-06-21
 ---
 
