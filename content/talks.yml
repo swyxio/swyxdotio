@@ -371,7 +371,12 @@ Together we will be discussing career change, Free Code Camp, #LearningInPublic,
   tags: [TypeScript]
   url: https://www.meetup.com/Real-World-React/events/256448268/
   desc: a live coding demo of starting with typescript for react devs
-  description: TypeScript is increasingly being adopted in React apps at scale, from AirBnb to Shopify to Atlassian. In this live coding talk, we walk through best practices and introduce everything you need to know to get started, WITHOUT getting lost in arcane generic type logic! The theme of this talk is showing how TypeScript (TS) tooling helps write and document apps at scale. We'll do: - a live coding demo of starting with typescript for react devs - end with some resources and discussions of pitfalls
+  description: "TypeScript is increasingly being adopted in React apps at scale, from AirBnb to Shopify to Atlassian. In this live coding talk, we walk through best practices and introduce everything you need to know to get started, WITHOUT getting lost in arcane generic type logic! 
+  
+  The theme of this talk is showing how TypeScript (TS) tooling helps write and document apps at scale. We'll do: 
+  
+  - a live coding demo of starting with typescript for react devs 
+  - end with some resources and discussions of pitfalls"
   instances:
     - venue: Real World React
       date: 2019-01-17
@@ -567,7 +572,7 @@ Together we will be discussing career change, Free Code Camp, #LearningInPublic,
   desc: diving into the history of CRA, how CRA works, and my experience making create-react-app-parcel
   misc:
     description: We all use create-react-app but how much do we know about how it works internally? In this talk we discuss how I recently dived into the source code for create-react-app to make a fun clone! It looks intimidating but is really not, once you get a hang of how lerna monorepos work and try making one of your own. Watch this and then go make your own create-awesome-app!
-    note: [max stoiber](https://github.com/mxstbr/mxstbr.com/blob/b7b1471541cb9fee679115bb29ded8ef14d65bfa/data/old-blog-posts/2016/12/a-dream-come-true.md#create-react-app) notes that `eject` used to be named `graduate`
+    note: "[max stoiber](https://github.com/mxstbr/mxstbr.com/blob/b7b1471541cb9fee679115bb29ded8ef14d65bfa/data/old-blog-posts/2016/12/a-dream-come-true.md#create-react-app) notes that `eject` used to be named `graduate`"
   instances:
     - venue: ReactNYC
       video: https://www.youtube.com/watch?v=Et571vTAtT8

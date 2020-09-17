@@ -1,5 +1,6 @@
 <script>
   import BlogTeaser from '../../components/BlogTeaser/BlogTeaser.svelte'
+  import Showcase from '../../components/Showcase/Showcase.svelte'
   export let data
 </script>
 
@@ -9,7 +10,7 @@
       <h2
         class="text-3xl leading-9 tracking-tight font-extrabold text-gray-900
           sm:text-4xl sm:leading-10">
-        Recent publications
+        Recent publications2
       </h2>
       <p class="mt-3 text-xl leading-7 text-gray-500 sm:mt-4">
         Nullam risus blandit ac aliquam justo ipsum. Quam mauris volutpat massa
@@ -17,11 +18,12 @@
       </p>
     </div>
   </div>
-  <div
+  <Showcase hydrate-client={{data}} />
+  <!-- <div
     class="mt-12 grid gap-16 border-t-2 border-gray-100 pt-12 lg:grid-cols-3
       lg:col-gap-5 lg:row-gap-12">
     {#each data.markdown as blog}
       <BlogTeaser { blog } />
     {/each}
-  </div>
+  </div> -->
 </div>

@@ -29,6 +29,7 @@
     "glob": "^7.1.6",
     "gray-matter": "^4.0.2",
     "intersection-observer": "^0.11.0",
+    "js-yaml": "^3.14.0",
     "markdown-js": "^0.0.4",
     "node-fetch": "^2.6.1",
     "polka": "^0.5.2",
