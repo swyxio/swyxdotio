@@ -1,9 +1,75 @@
+# 2020 podcasts
+
+- title: Svelte Radio Episodes
+  slug: svelte-radio
+  topic: Svelte
+  venues: SvelteRadio
+  date: 2020-05-12
+  url: https://anchor.fm/svelteradio/
+  description: I joined the Svelte Radio podcast together with Antony and Kev from Svelte Society.
+  instances:
+    - https://anchor.fm/svelteradio/episodes/Post-Svelte-Society-Day-eduktc
+    - https://anchor.fm/svelteradio/episodes/In-Defense-of-The-Modern-Web-eehprp
+    - https://anchor.fm/svelteradio/episodes/TypeScript-Language-Tools-ef1hrv
+- title: Software Sessions Podcast - Learning in Public
+  slug: software-sessions-podcast
+  topic: Careers
+  venues: SoftwareSessions
+  date: 2020-06-17
+  github: https://gist.github.com/sw-yx/02c28094f7d898554deee1ba7f96a502
+  url: https://www.softwaresessions.com/episodes/learning-in-public/
+  url2: https://media.transistor.fm/b2abc441.mp3
+  description: I chatted with Jeremy Jung, host on Software Engineering Radio and now Software Sessions, about Learn in Public and the Coding Career Handbook!
+- title: Dev Career Advice for the Coronavirus Recession
+  slug: recession-prep-tanay
+  topic: Careers
+  venues: TanayPratap
+  date: 2020-05-09
+  url: https://open.spotify.com/episode/1oj0Kpnt8xzk2vCBm6t3LE
+  description: I chatted with Tanay Pratap about what new entrants to software engineering in India can do given the Coronavirus Recession
+- title: Svelte and Community on JAMStack Radio
+  slug: jamstack-radio-svelte
+  topic: Svelte
+  venues: JamsackRadio
+  date: 2020-02-26
+  url: https://www.heavybit.com/library/podcasts/jamstack-radio/ep-51-community-over-code-with-shawn-wang-of-netlify/
+  desc: A 30 min chat about Svelte, Netlify, and Coding Communities, with Brian Douglas on his podcast. Brian was previously the only Devrel at Netlify so there is some ancestry going on here!
+  description: In episode 51 of JAMstack Radio, Brian joins Shawn Wang to discuss his role as a developer experience engineer at Netlify, the open-source JavaScript framework Svelte, and scaling community above code.
+- title: Marketing Yourself - ProdReady Podcast
+  slug: codingcareer-prodready
+  topic: Careers
+  venues: ProdReadyPodcast
+  date: 2020-07-07
+  url: https://www.productionreadypod.com/episodes/marketing-yourself-your-products-by-learning-in-public-w-shawn-wang
+  description: Hot off the launch of his new book, Shawn sits down to talk with me about personal marketing via working in public. We go into detail about how he wrote a book with the most insane bibliography you've ever seen and made $25,000 on launch day.
+  notes: "I chatted with Glenn Stovall twice - the audio was lost the first time 😂
+
+  This is maybe the 3rd podcast I got purely from the Marketing Yourself essay so this is really great."
+- title: Coding Careers - AQOC Podcast
+  slug: codingcareer-aqoc
+  topic: Careers
+  venues: AQOCPodcast
+  date: 2020-07-13
+  url: https://aquestionofcode.com/71-how-should-developers-market-themselves-shawn-wang/
+  desc: Charming chat with 2 british brothers! 1 experienced engineer and 1 just changing careers and learning to code
+  description: This week we're joined by Shawn Wang, Senior Developer Advocate at AWS and author of the excellent Coding Career Handbook. Shawn is a career-switcher; he transitioned into tech in his early thirties after a career in finance. He has written a lot about how aspiring devs can better accelerate their careers, and his views are nuanced and full of wisdom that's very relevant to all aQoC listeners (no matter what stage you're at in your career).
+- title: Coding Career Handbook - Newline Podcast
+  slug: codingcareer-newline
+  topic: Careers
+  venues: NewLinePodcast
+  date: 2020-07-18
+  url: https://podcast.newline.co/episodes/cracking-the-coding-career-with-shawn-wang
+  desc: In this wide-ranging conversation we talk about the differences between a Jr and Sr engineers, how to find strength in your weaknesses, and how to capture your daily ideas and use them to supercharge your career. 
+  notes: "It was a dream to chat with Amelia Wattenberger on her new podcast. I've admired her work for a long time. I wish I had asked them more questions as they are experienced book authors, but then again, I was the guest.
+
+  I love their backlog of questions as well."
+
 # 2019 podcasts
 
 - title: How, when, and why to use the JAMstack
   slug: devmode-fm-jamstack-panel
   topic: JAMstack
-  venues: Podcast
+  venues: Devmode.FM
   date: 2019-11-04
   url: https://devmode.fm/episodes/how-when-and-why-to-use-the-jamstack
   desc: In this episode, we have a round­table dis­cus­sion with a vari­ety of expe­ri­enced web devel­op­ers who are at dif­fer­ent stages of using the JAM­stack, from not at all, to exploring/​experimenting, to using to deliv­er client projects to production.
@@ -34,6 +100,7 @@
   topic: Learn In Public
   venues: FreeCodeCamp Podcast
   date: 2019-04-15
+  github: https://gist.github.com/sw-yx/f7b8ef5843475db994f05ae55f8cd464
   url: https://www.freecodecamp.org/news/shawn-wang-podcast-interview/
   desc: We talk about "learning in public" and his transition into tech from finance, where he left behind a job that paid him US $350,000 per year.
   description: the title overly focuses on the finance career, but this is much more about learn in public and the freecodecamp journey. plenty of links supplied!
