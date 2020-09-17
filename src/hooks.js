@@ -1,6 +1,6 @@
-const path = require('path');
-const glob = require('glob');
-const fs = require('fs-extra');
+const path = require('path')
+const glob = require('glob')
+const fs = require('fs-extra')
 
 const hooks = [
   // {
@@ -22,27 +22,37 @@ const hooks = [
   {
     hook: 'bootstrap',
     name: 'copyAssetsToPublic',
-    description: 'Copies /src/assets/ to the assets folder defined in the elder.config.js',
+    description:
+      'Copies /src/assets/ to the assets folder defined in the elder.config.js. This function helps support the live reload process.',
     run: ({ settings }) => {
-      // copy assets folder to public destination
-      glob.sync(path.resolve(process.cwd(), settings.locations.srcFolder, './assets/**/*')).forEach((file) => {
-        const parsed = path.parse(file);
-        // Only write the file/folder structure if it has an extension
-        if (parsed.ext && parsed.ext.length > 0) {
-          const relativeToAssetsArray = parsed.dir.split('assets');
-          relativeToAssetsArray.shift();
+      // note that this function doesn't manipulate any props or return anything.
+      // It is just executed on the 'bootstrap' hook which runs once when Elder.js is starting.
 
-          const relativeToAssetsFolder = `.${relativeToAssetsArray.join()}/`;
-          const relativeToAssets = `${relativeToAssetsFolder}${parsed.base}`;
-          const p = path.parse(path.resolve(process.cwd(), settings.locations.assets, relativeToAssetsFolder));
-          fs.ensureDirSync(p.dir);
-          fs.outputFileSync(
-            path.resolve(process.cwd(), settings.locations.assets, relativeToAssets),
-            fs.readFileSync(file),
-          );
-        }
-      });
-    },
-  },
-];
-module.exports = hooks;
+      // copy assets folder to public destination
+      glob
+        .sync(path.join(settings.rootDir, './src/assets/**/*'))
+        .forEach((file) => {
+          const parsed = path.parse(file)
+          // Only write the file/folder structure if it has an extension
+          if (parsed.ext && parsed.ext.length > 0) {
+            const relativeToAssetsArray = parsed.dir.split('assets')
+            relativeToAssetsArray.shift()
+
+            const relativeToAssetsFolder = `.${relativeToAssetsArray.join()}/`
+            const p = path.parse(
+              path.resolve(settings.distDir, relativeToAssetsFolder)
+            )
+            fs.ensureDirSync(p.dir)
+            fs.outputFileSync(
+              path.resolve(
+                settings.distDir,
+                `${relativeToAssetsFolder}${parsed.base}`
+              ),
+              fs.readFileSync(file)
+            )
+          }
+        })
+    }
+  }
+]
+module.exports = hooks
