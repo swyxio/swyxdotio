@@ -3,11 +3,19 @@
   export let data
 </script>
 
-
-<div class="pb-5 border-b border-gray-200 space-y-3 sm:flex sm:items-center sm:justify-between sm:space-x-4 sm:space-y-0">
-  <h3 class="text-lg leading-6 font-medium text-gray-900">
-    For Free: Great Ideas. Lightly Used.
-  </h3>
+<div class="relative max-w-lg mx-auto lg:max-w-7xl mb-8">
+  <div>
+    <h2
+      class="text-3xl leading-9 tracking-tight font-extrabold text-gray-900
+        sm:text-4xl sm:leading-10">
+      Idea Showcase
+    </h2>
+    <p class="mt-3 text-xl leading-7 text-gray-500 sm:mt-4">
+      For Free: Great Ideas. Lightly Used. Talks, Podcasts, Essays, Tutorials.
+    </p>
+  </div>
+</div>
+<!-- <div class="pb-5 border-b border-gray-200 space-y-3 sm:flex sm:flex-col sm:items-center sm:justify-between sm:space-x-4 sm:space-y-0"> -->
   <div>
     <label for="search_candidate" class="sr-only">Search</label>
     <div class="flex rounded-md shadow-sm">
@@ -36,13 +44,13 @@
 
     <div class="bg-white shadow overflow-hidden sm:rounded-md">
       <ul>
-        {#each data.podcasts as podcast}
+        {#each data as item}
         <li>
           <a href="#" class="block hover:bg-gray-50 focus:outline-none focus:bg-gray-50 transition duration-150 ease-in-out">
             <div class="px-4 py-4 sm:px-6">
               <div class="flex items-center justify-between">
                 <div class="text-sm leading-5 font-medium text-indigo-600 truncate">
-                  {podcast.title}
+                  {item.title}
                 </div>
                 <div class="ml-2 flex-shrink-0 flex">
                   <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
@@ -85,4 +93,4 @@
       </ul>
     </div>
   </div>
-</div>
+<!-- </div> -->
