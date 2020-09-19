@@ -7,26 +7,20 @@
   // })
 
   export let data
-  let showType = {
-    essays: true,
-    talks: true,
-    podcasts: true,
-    tutorials: true,
-    notes: true,
-  }
-  const handleClick = (type) => () => {
-    showType[type] = !showType[type]
-    showType = showType
-  }
-  $: console.log({showType})
-</script>
 
+  let essays = true
+  let talks = true
+  let podcasts = true
+  let tutorials = true
+  let notes = true
+</script>
+<!-- 
 <style>
   .btnSelected {
     background-color: #f9fafb
   }
 
-</style>
+</style> -->
 
 <div class="relative max-w-lg mx-auto lg:max-w-7xl mb-8">
   <div>
@@ -41,23 +35,25 @@
   </div>
 </div>
 <!-- <div class="pb-5 border-b border-gray-200 space-y-3 sm:flex sm:flex-col sm:items-center sm:justify-between sm:space-x-4 sm:space-y-0"> -->
-  <pre>{JSON.stringify(showType, null, 2)}</pre>
   <div>
     <div class="flex rounded-md shadow-sm">
       <!-- categories -->
       <span class="relative z-0 inline-flex shadow-sm rounded-md">
         <div class="inline-flex items-center mr-2">Show:</div>
-        <button type="button" on:click={handleClick('essays')} class:btnSelected={showType.essays} class="relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-white text-sm leading-5 font-medium text-gray-700 hover:text-gray-500 focus:z-10 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150">
+        <button type="button" on:click={() => essays = !essays} class:bg-gray-200={essays} class="relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-white text-sm leading-5 font-medium text-gray-700 hover:text-gray-500 focus:z-10 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150">
           Essays
         </button>
-        <button type="button" on:click={handleClick('talks')} class:btnSelected={showType.talks} class="-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm leading-5 font-medium text-gray-700 hover:text-gray-500 focus:z-10 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150">
+        <button type="button" on:click={() => talks = !talks} class:bg-gray-200={talks} class="-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm leading-5 font-medium text-gray-700 hover:text-gray-500 focus:z-10 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150">
           Talks
         </button>
-        <button type="button" on:click={handleClick('podcasts')} class:btnSelected={showType.podcasts} class="-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm leading-5 font-medium text-gray-700 hover:text-gray-500 focus:z-10 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150">
+        <button type="button" on:click={() => podcasts = !podcasts} class:bg-gray-200={podcasts} class="-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm leading-5 font-medium text-gray-700 hover:text-gray-500 focus:z-10 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150">
           Podcasts
         </button>
-        <button type="button" on:click={handleClick('tutorials')} class:btnSelected={showType.tutorials} class="-ml-px relative inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-white text-sm leading-5 font-medium text-gray-700 hover:text-gray-500 focus:z-10 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150">
+        <button type="button" on:click={() => tutorials = !tutorials} class:bg-gray-200={tutorials} class="-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm leading-5 font-medium text-gray-700 hover:text-gray-500 focus:z-10 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150">
           Tutorials
+        </button>
+        <button type="button" on:click={() => notes = !notes} class:bg-gray-200={notes} class="-ml-px relative inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-white text-sm leading-5 font-medium text-gray-700 hover:text-gray-500 focus:z-10 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150">
+          Notes
         </button>
       </span>
       <!-- search -->
