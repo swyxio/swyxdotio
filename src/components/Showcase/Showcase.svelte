@@ -1,14 +1,32 @@
 
 
 <script>
-  import {onMount} from 'svelte'
+  // import {onMount} from 'svelte'
+  // onMount(()=>{
+  //   console.log('showcase', data)
+  // })
 
   export let data
-  onMount(()=>{
-    console.log('showcase', data)
-  })
-
+  let showType = {
+    essays: true,
+    talks: true,
+    podcasts: true,
+    tutorials: true,
+    notes: true,
+  }
+  const handleClick = (type) => () => {
+    showType[type] = !showType[type]
+    showType = showType
+  }
+  $: console.log({showType})
 </script>
+
+<style>
+  .btnSelected {
+    background-color: #f9fafb
+  }
+
+</style>
 
 <div class="relative max-w-lg mx-auto lg:max-w-7xl mb-8">
   <div>
@@ -23,19 +41,41 @@
   </div>
 </div>
 <!-- <div class="pb-5 border-b border-gray-200 space-y-3 sm:flex sm:flex-col sm:items-center sm:justify-between sm:space-x-4 sm:space-y-0"> -->
+  <pre>{JSON.stringify(showType, null, 2)}</pre>
   <div>
-    <label for="search_candidate" class="sr-only">Search</label>
     <div class="flex rounded-md shadow-sm">
+      <!-- categories -->
+      <span class="relative z-0 inline-flex shadow-sm rounded-md">
+        <div class="inline-flex items-center mr-2">Show:</div>
+        <button type="button" on:click={handleClick('essays')} class:btnSelected={showType.essays} class="relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-white text-sm leading-5 font-medium text-gray-700 hover:text-gray-500 focus:z-10 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150">
+          Essays
+        </button>
+        <button type="button" on:click={handleClick('talks')} class:btnSelected={showType.talks} class="-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm leading-5 font-medium text-gray-700 hover:text-gray-500 focus:z-10 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150">
+          Talks
+        </button>
+        <button type="button" on:click={handleClick('podcasts')} class:btnSelected={showType.podcasts} class="-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm leading-5 font-medium text-gray-700 hover:text-gray-500 focus:z-10 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150">
+          Podcasts
+        </button>
+        <button type="button" on:click={handleClick('tutorials')} class:btnSelected={showType.tutorials} class="-ml-px relative inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-white text-sm leading-5 font-medium text-gray-700 hover:text-gray-500 focus:z-10 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150">
+          Tutorials
+        </button>
+      </span>
+      <!-- search -->
+      <label for="search_candidate" class="sr-only">Search</label>
       <div class="relative flex-grow focus-within:z-10">
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center">
           <!-- Heroicon name: search -->
-          <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-          </svg>
+          <label for="search_candidate">
+            <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+            </svg>
+          </label>
+          <input id="search_candidate" class="form-input block w-full rounded-none rounded-l-md pl-2 transition ease-in-out duration-150 sm:hidden" placeholder="Search">
+          <input id="search_candidate" class="hidden form-input w-full rounded-none rounded-l-md pl-2 transition ease-in-out duration-150 sm:block sm:text-sm sm:leading-5" placeholder="Search candidates">
         </div>
-        <input id="search_candidate" class="form-input block w-full rounded-none rounded-l-md pl-10 transition ease-in-out duration-150 sm:hidden" placeholder="Search">
-        <input id="search_candidate" class="hidden form-input w-full rounded-none rounded-l-md pl-10 transition ease-in-out duration-150 sm:block sm:text-sm sm:leading-5" placeholder="Search candidates">
       </div>
+      
+      <!-- sort -->
       <button class="-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm leading-5 font-medium rounded-r-md text-gray-700 bg-gray-50 hover:text-gray-500 hover:bg-white focus:outline-none focus:shadow-outline-blue focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150">
         <!-- Heroicon name: sort-ascending -->
         <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
