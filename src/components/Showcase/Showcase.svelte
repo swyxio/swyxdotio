@@ -1,6 +1,13 @@
+
+
 <script>
+  import {onMount} from 'svelte'
 
   export let data
+  onMount(()=>{
+    console.log('showcase', data)
+  })
+
 </script>
 
 <div class="relative max-w-lg mx-auto lg:max-w-7xl mb-8">
