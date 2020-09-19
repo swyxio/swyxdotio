@@ -1,6 +1,6 @@
 <script>
   import MobileMenu from '../components/Home/MobileMenu.svelte';
-  export let routeHTML, settings;
+  export let routeHtml, settings;
 </script>
 
 <style global lang="postcss">
@@ -29,7 +29,7 @@
     <div class="relative pt-6 pb-12 sm:pb-32">
       <MobileMenu hydrate-client={{}} />
       <main class="mt-8 sm:mt-16 md:mt-20 lg:mt-24">
-        {@html routeHTML}
+        {@html routeHtml}
       </main>
     </div>
   </div>
