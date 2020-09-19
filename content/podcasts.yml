@@ -2,7 +2,7 @@
 
 - title: Svelte Radio Episodes
   slug: svelte-radio
-  topic: Svelte
+  categories: [Svelte]
   venues: SvelteRadio
   date: 2020-05-12
   url: https://anchor.fm/svelteradio/
@@ -13,7 +13,7 @@
     - https://anchor.fm/svelteradio/episodes/TypeScript-Language-Tools-ef1hrv
 - title: Software Sessions Podcast - Learning in Public
   slug: software-sessions-podcast
-  topic: Careers
+  categories: [Careers]
   venues: SoftwareSessions
   date: 2020-06-17
   github: https://gist.github.com/sw-yx/02c28094f7d898554deee1ba7f96a502
@@ -22,14 +22,14 @@
   description: I chatted with Jeremy Jung, host on Software Engineering Radio and now Software Sessions, about Learn in Public and the Coding Career Handbook!
 - title: Dev Career Advice for the Coronavirus Recession
   slug: recession-prep-tanay
-  topic: Careers
+  categories: [Careers]
   venues: TanayPratap
   date: 2020-05-09
   url: https://open.spotify.com/episode/1oj0Kpnt8xzk2vCBm6t3LE
   description: I chatted with Tanay Pratap about what new entrants to software engineering in India can do given the Coronavirus Recession
 - title: Svelte and Community on JAMStack Radio
   slug: jamstack-radio-svelte
-  topic: Svelte
+  categories: [Svelte]
   venues: JamsackRadio
   date: 2020-02-26
   url: https://www.heavybit.com/library/podcasts/jamstack-radio/ep-51-community-over-code-with-shawn-wang-of-netlify/
@@ -37,7 +37,7 @@
   description: In episode 51 of JAMstack Radio, Brian joins Shawn Wang to discuss his role as a developer experience engineer at Netlify, the open-source JavaScript framework Svelte, and scaling community above code.
 - title: Marketing Yourself - ProdReady Podcast
   slug: codingcareer-prodready
-  topic: Careers
+  categories: [Careers]
   venues: ProdReadyPodcast
   date: 2020-07-07
   url: https://www.productionreadypod.com/episodes/marketing-yourself-your-products-by-learning-in-public-w-shawn-wang
@@ -47,7 +47,7 @@
   This is maybe the 3rd podcast I got purely from the Marketing Yourself essay so this is really great."
 - title: Coding Careers - AQOC Podcast
   slug: codingcareer-aqoc
-  topic: Careers
+  categories: [Careers]
   venues: AQOCPodcast
   date: 2020-07-13
   url: https://aquestionofcode.com/71-how-should-developers-market-themselves-shawn-wang/
@@ -55,7 +55,7 @@
   description: This week we're joined by Shawn Wang, Senior Developer Advocate at AWS and author of the excellent Coding Career Handbook. Shawn is a career-switcher; he transitioned into tech in his early thirties after a career in finance. He has written a lot about how aspiring devs can better accelerate their careers, and his views are nuanced and full of wisdom that's very relevant to all aQoC listeners (no matter what stage you're at in your career).
 - title: Coding Career Handbook - Newline Podcast
   slug: codingcareer-newline
-  topic: Careers
+  categories: [Careers]
   venues: NewLinePodcast
   date: 2020-07-18
   url: https://podcast.newline.co/episodes/cracking-the-coding-career-with-shawn-wang
@@ -68,14 +68,14 @@
 
 - title: How, when, and why to use the JAMstack
   slug: devmode-fm-jamstack-panel
-  topic: JAMstack
+  categories: [JAMstack]
   venues: Devmode.FM
   date: 2019-11-04
   url: https://devmode.fm/episodes/how-when-and-why-to-use-the-jamstack
   desc: In this episode, we have a round­table dis­cus­sion with a vari­ety of expe­ri­enced web devel­op­ers who are at dif­fer­ent stages of using the JAM­stack, from not at all, to exploring/​experimenting, to using to deliv­er client projects to production.
 - title: JAMstack & Serverless with Netlify (DevMode.fm Podcast)
   slug: devmode-fm-jamstack
-  topic: JAMstack
+  categories: [JAMstack]
   venues: Devmode.FM
   date: 2019-10-28
   url: https://devmode.fm/episodes/jamstack-serverless-with-netlify
@@ -89,7 +89,7 @@
   We also talk about how JavaScript edge work­ers will gain sen­tience as Skynet, and the AI lan­guage mod­el that was so dan­ger­ous they could­n’t release it."
 - title: Swyx Mix - Learn In Public
   slug: ducktapes-podcast
-  topic: Learn In Public
+  categories: [Learn In Public]
   venues: Ducktapes
   date: 2019-08-26
   url: https://anchor.fm/ducktapes/episodes/Swyx-Mix-e517kc
@@ -97,7 +97,7 @@
   description: This week, Shawn "Swyx" Wang joins us in the Duck Pond to take a deep dive into his coding philosophy "Learning in Public." We take some time to discuss his role at Netlify, how he got started in coding (after a full career in a different industry!), and of course Jack White comes up.
 - title: Leaving a $350K/year job to learn coding
   slug: freecodecamp-podcast
-  topic: Learn In Public
+  categories: [Learn In Public]
   venues: FreeCodeCamp Podcast
   date: 2019-04-15
   github: https://gist.github.com/sw-yx/f7b8ef5843475db994f05ae55f8cd464
@@ -106,7 +106,7 @@
   description: the title overly focuses on the finance career, but this is much more about learn in public and the freecodecamp journey. plenty of links supplied!
 - title: You Can Learn A Lot For The Low Price Of Your Ego
   slug: kentcdodds-podcast
-  topic: Learn In Public
+  categories: [Learn In Public]
   venues: Kent C Dodds Podcast
   date: 2019-08-05
   url: https://kentcdodds.com/chats-with-kent-podcast/seasons/01/episodes/you-can-learn-a-lot-for-the-low-price-of-your-ego-with-shawn-wang
@@ -115,7 +115,7 @@
   comments: This was actually recorded in March, I think, when I was in Tampa ahead of VueConf. I recall frantically driving back to do the recording and getting stuck in traffic and texting Kent that I would be late! I don't like driving so this was a high stress period.
 - title: Be Wrong with Shawn Swyx Wang
   slug: react-podcast
-  topic: React
+  categories: [React]
   venues: React Podcast
   date: 2019-02-20
   url: https://reactpodcast.simplecast.fm/36
@@ -123,7 +123,7 @@
   description: A disussion about strategies for being a lifelong learner, how to get started in React, the growth of React's API surface area, Hooks, Suspense, Concurrent Mode, designing APIs, and the future of React.
 - title: The Suspense is Almost Over - React Podcast
   slug: react-podcast-suspense
-  topic: React
+  categories: [React]
   venues: React Podcast
   date: 2019-10-22
   url: https://reactpodcast.com/69
@@ -155,7 +155,7 @@
   *   [All you need to know about Ivy, The new Angular engine!](https://blog.angularindepth.com/all-you-need-to-know-about-ivy-the-new-angular-engine-9cde471f42cf) — An article that seems to suggest it has everything you need to know about a thing I know nothing about"
 - title: Learning React and TypeScript in Public
   slug: reactroundup-podcast
-  topic: Learn In Public
+  categories: [Learn In Public]
   venues: React Roundup
   date: 2019-08-13
   url: https://devchat.tv/react-round-up/rru-074-learning-react-and-typescript-in-public-with-shawn-swyx-wang/
@@ -163,7 +163,7 @@
   description: Today’s guest Shawn Wang is a career changer starts off the show about how he got from finance to programming. The panel talks about how they each got started in programming. Shawn explains his Learn In Public manifesto. They discuss the benefits of learning in public and how concepts like Cunninham’s Law and lampshading can be a good thing. Shawn talks about the differences between inbound and outbound marketing. The two biggest benefits of learning in public is that people will come to help you, it helps you to build capital, and it os the fastest way to learn. They discuss the balance between sharing too little and oversharing.
 - title: No Code JAMstack with Shawn Wang
   slug: sedaily-nocode
-  topic: No Code
+  categories: [No Code]
   venues: SEDaily
   date: 2019-12-19
   url: https://softwareengineeringdaily.com/2019/12/19/no-code-with-shawn-wang/
@@ -264,7 +264,7 @@
     "
 - title: Work in Progress Podcast
   slug: wip-podcast
-  topic: Learn In Public
+  categories: [Learn In Public]
   venues: Podcast
   date: 2019-09-15
   url: http://wipp.buzzsprout.com/397696/1708216-wipp-002-shawn-wang-from-finance-to-tech
@@ -279,7 +279,7 @@
 # 2017-2018 podcasts
 - title: Infinite Building
   slug: egghead-podcast
-  topic: Advice
+  categories: [Advice]
   venues: Egghead
   date: 2018-08-15
   url: https://egghead.io/podcasts/swyx-shawn-wang-on-infinite-building?af=95qfq1
@@ -287,7 +287,7 @@
   description: Tune in to hear Shawn talk about what it means to be an infinite learner and builder and how he uses this approach to further his career.
 - title: Productivity in Tech
   slug: productivity-in-tech-podcast
-  topic: React
+  categories: [React]
   venues: Productivity in Tech
   date: 2017-11-13
   url: https://www.stitcher.com/podcast/kevin-miller/productivity-in-tech-podcast/e/52208723?autoplay=true
@@ -295,7 +295,7 @@
   description: In this conversation, we talk about Shawn's experience as a code school student and learn more about this growing source of alternative education.
 - title: State of JS with Sacha Greif (SEDaily)
   slug: software-daily-sacha-greif
-  topic: JS
+  categories: [JS]
   venues: SEDaily
   date: 2017-08-09
   url: https://softwareengineeringdaily.com/2017/08/09/state-of-javascript-with-sacha-greif/

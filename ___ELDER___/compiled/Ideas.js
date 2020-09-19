@@ -72,9 +72,9 @@ const Ideas = create_ssr_component(($$result, $$props, $$bindings, slots) => {
 	let { data } = $$props;
 
 	let _data = [
-		...data.podcasts.map(x => void (x.type = "podcasts") || x),
-		...data.talks.map(x => void (x.type = "talks") || x),
-		...data.markdown.map(x => void (x.data.type = "markdown") || x.data)
+		...data.podcasts.map(x => void (x.type = "Podcasts") || x),
+		...data.talks.map(x => void (x.type = "Talks") || x),
+		...data.markdown.map(x => void (x.data.type = "Essays") || x.data)
 	];
 
 	if ($$props.data === void 0 && $$bindings.data && data !== void 0) $$bindings.data(data);
