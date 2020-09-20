@@ -79,7 +79,7 @@ const Ideas = create_ssr_component(($$result, $$props, $$bindings, slots) => {
 
 	if ($$props.data === void 0 && $$bindings.data && data !== void 0) $$bindings.data(data);
 
-	return `<div class="${"bg-white pt-16 pb-20 px-4 sm:px-6 lg:pt-24 lg:pb-28 lg:px-8"}"><div class="${"ejs-component"}" data-ejs-component="${"Showcase"}"${add_attribute("data-ejs-props", JSON.stringify({ data: _data }), 0)}${add_attribute("data-ejs-options", JSON.stringify({ "loading": "lazy" }), 0)}></div>
+	return `<div class="${"pt-16 pb-20 px-4 sm:px-6 lg:pt-24 lg:pb-28 lg:px-8"}"><div class="${"ejs-component"}" data-ejs-component="${"Showcase"}"${add_attribute("data-ejs-props", JSON.stringify({ data: _data }), 0)}${add_attribute("data-ejs-options", JSON.stringify({ "loading": "lazy" }), 0)}></div>
   </div>`;
 });
 

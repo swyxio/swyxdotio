@@ -39,8 +39,14 @@
           </div>
           <div class="ml-2 flex-shrink-0 flex">
             <span
+              class:bg-green-100={item.type === 'Essays'}
+              class:text-green-800={item.type === 'Essays'}
+              class:bg-blue-100={item.type === 'Talks'}
+              class:text-blue-800={item.type === 'Talks'}
+              class:bg-teal-100={item.type === 'Podcasts'}
+              class:text-teal-800={item.type === 'Podcasts'}
               class="px-2 inline-flex text-xs leading-5 font-semibold
-                rounded-full bg-green-100 text-green-800">
+                rounded-full">
               {item.type}
             </span>
           </div>
@@ -215,7 +221,7 @@
         </div>
       {/if}
       {#if item.url}
-        <div class="px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <div class="px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 break-all">
           <dt class="text-sm leading-5 font-medium text-gray-500">URL</dt>
           <dd
             class="mt-1 text-sm leading-5 text-gray-900 sm:mt-0 sm:col-span-2">
@@ -265,7 +271,7 @@
                 On {new Date(instance.date).toDateString().slice(4)} at {instance.venue}
               </div>
               <div class="ml-4 flex-shrink-0">
-                <a class="underline hover:text-blue-900" href={instance.video}>Link to Video</a>
+                📺 <a class="underline hover:text-blue-900" href={instance.video}>Link to Video</a>
                 <!-- <div class="VideoDiv">
                   <iframe
                     src={`https://www.youtube.com/embed/${parseVideoURL(instance.video)}`}

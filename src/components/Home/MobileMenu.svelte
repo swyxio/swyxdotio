@@ -3,7 +3,7 @@
   let isMenuOpen = false;
 </script>
 
-<nav class="relative max-w-screen-xl mx-auto flex items-center justify-between px-4 sm:px-6">
+<nav class="relative max-w-screen-xl mx-auto flex items-center justify-between px-4 sm:px-6 pt-6 pb-6 sm:pb-12">
   <div class="flex items-center flex-1">
     <div class="flex items-center justify-between w-full md:w-auto">
       <a href="/" aria-label="Home" class="text-white"> swyx.io </a>

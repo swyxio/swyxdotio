@@ -43,18 +43,18 @@
 <div class="relative max-w-lg mx-auto lg:max-w-7xl mb-8">
   <div class="text-center">
     <h2
-      class="text-3xl leading-9 tracking-tight font-extrabold text-gray-900
+      class="text-3xl leading-9 tracking-tight font-extrabold text-gray-200
         sm:text-4xl sm:leading-10">
       Idea Showcase
     </h2>
-    <p class="mt-3 text-xl leading-7 text-gray-500 sm:mt-4">
+    <p class="mt-3 text-xl leading-7 text-gray-400 sm:mt-4">
       For Free: {filteredData.length} Great Ideas. Lightly Used.
     </p>
   </div>
 </div>
 <!-- <div class="pb-5 border-b border-gray-200 space-y-3 sm:flex sm:flex-col sm:items-center sm:justify-between sm:space-x-4 sm:space-y-0"> -->
 <div>
-  <div class="flex rounded-md shadow-sm mb-4">
+  <div class="flex rounded-md mb-4">
     <!-- search -->
     <label for="search_candidate" class="sr-only">Search</label>
     <div class="relative flex-grow focus-within:z-10">
@@ -71,11 +71,11 @@
               clip-rule="evenodd" />
           </svg>
         </label>
-        <!-- <input
+        <input
           id="search_candidate"
-          class="form-input block w-full rounded-none rounded-l-md pl-2
+          class="form-input block w-full rounded-md pl-2
             transition ease-in-out duration-150 sm:hidden"
-          placeholder="Filter" bind:value={filterStr} /> -->
+          placeholder="Filter" bind:value={filterStr} />
         <input
           id="search_candidate"
           autofocus
@@ -85,13 +85,13 @@
       </div>
     </div>
     <!-- categories -->
-    <span class="relative z-0 inline-flex shadow-sm rounded-md">
-      <div class="inline-flex items-center mr-2">Show:</div>
+    <span class="relative z-0 inline-flex flex-col sm:flex-row shadow-sm rounded-md">
+      <div class="inline-flex items-center mr-2 text-gray-400">Show:</div>
       <button
         type="button"
         on:click={() => (essays = !essays)}
-        class:bg-gray-200={essays}
-        class="relative inline-flex items-center px-4 py-2 rounded-l-md border
+        class:bg-gray-300={essays}
+        class="-ml-px sm:ml-0 relative inline-flex items-center px-4 py-2 sm:rounded-l-md border
           border-gray-300 bg-white text-sm leading-5 font-medium text-gray-700
           hover:text-gray-500 focus:z-10 focus:outline-none
           focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-100
@@ -101,7 +101,7 @@
       <button
         type="button"
         on:click={() => (talks = !talks)}
-        class:bg-gray-200={talks}
+        class:bg-gray-300={talks}
         class="-ml-px relative inline-flex items-center px-4 py-2 border
           border-gray-300 bg-white text-sm leading-5 font-medium text-gray-700
           hover:text-gray-500 focus:z-10 focus:outline-none
@@ -112,7 +112,7 @@
       <button
         type="button"
         on:click={() => (podcasts = !podcasts)}
-        class:bg-gray-200={podcasts}
+        class:bg-gray-300={podcasts}
         class="-ml-px relative inline-flex items-center px-4 py-2 border
           border-gray-300 bg-white text-sm leading-5 font-medium text-gray-700
           hover:text-gray-500 focus:z-10 focus:outline-none
@@ -123,7 +123,7 @@
       <button
         type="button"
         on:click={() => (tutorials = !tutorials)}
-        class:bg-gray-200={tutorials}
+        class:bg-gray-300={tutorials}
         class="-ml-px relative inline-flex items-center px-4 py-2 border
           border-gray-300 bg-white text-sm leading-5 font-medium text-gray-700
           hover:text-gray-500 focus:z-10 focus:outline-none
@@ -134,8 +134,8 @@
       <button
         type="button"
         on:click={() => (notes = !notes)}
-        class:bg-gray-200={notes}
-        class="-ml-px relative inline-flex items-center px-4 py-2 rounded-r-md
+        class:bg-gray-300={notes}
+        class="-ml-px relative inline-flex items-center px-4 py-2 sm:rounded-r-md
           border border-gray-300 bg-white text-sm leading-5 font-medium
           text-gray-700 hover:text-gray-500 focus:z-10 focus:outline-none
           focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-100

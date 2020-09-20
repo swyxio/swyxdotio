@@ -1,4 +1,5 @@
 <script>
+  import WebMentions from '../../components/WebMentions/WebMentions.svelte'
   export let data
   const { html, frontmatter } = data
 </script>
@@ -129,6 +130,7 @@
 
     {#if html}
       {@html html}
+      <WebMentions hydrate-client={{target: `https://www.swyx.io/writing/${frontmatter.slug}`}} />
     {:else}
       <h1>There was a problem rendering this page - please let @swyx know!</h1>
     {/if}
