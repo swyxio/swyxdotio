@@ -1,25 +1,43 @@
 <script>
-  // import {onMount} from 'svelte'
-  // onMount(()=>{
-  //   console.log('showcase', data)
-  // })
-
+  import ShowcaseItem from "./ShowcaseItem.svelte"
   export let data
 
   let essays = true
   let talks = true
   let podcasts = true
-  let tutorials = true
+  let tutorials = false
   let notes = false
 
+  let filterStr = ''
+
   $: filteredData = data.filter((x) => {
-    if (essays && x.type === 'Essays') return true
-    if (talks && x.type === 'Talks') return true
-    if (podcasts && x.type === 'Podcasts') return true
-    if (tutorials && x.type === 'Tutorials') return true
-    if (notes && x.type === 'Notes') return true
-  })
-  console.log({ data })
+    if (filterStr && notIncludes(filterStr, x)) {
+      return false
+    } else {
+      if (essays && x.type === 'Essays') return true
+      if (talks && x.type === 'Talks') return true
+      if (podcasts && x.type === 'Podcasts') return true
+      if (tutorials && x.type === 'Tutorials') return true
+      if (notes && x.type === 'Notes') return true
+    }
+  }).map(x => {
+    if (x.date) x.effectiveDate = new Date(x.date)
+    if (x.instances) x.effectiveDate = new Date(x.instances[0].date)
+    return x
+  }).sort((a,z) => z.effectiveDate - a.effectiveDate)
+  // $: console.log({ filteredData })
+
+  function notIncludes(_filterStr, item) {
+
+    let res = true
+    _filterStr = _filterStr.toLowerCase();
+    // if (JSON.stringify(item).toLowerCase().includes(_filterStr)) return true
+    if (item.title && item.title.toLowerCase().includes(_filterStr)) res = false
+    if (item.categories && item.categories.join().toLowerCase().includes(_filterStr)) res = false
+    if (item.description && item.description.toLowerCase().includes(_filterStr)) res = false
+    return res
+  }
+
 </script>
 
 <div class="relative max-w-lg mx-auto lg:max-w-7xl mb-8">
@@ -37,6 +55,35 @@
 <!-- <div class="pb-5 border-b border-gray-200 space-y-3 sm:flex sm:flex-col sm:items-center sm:justify-between sm:space-x-4 sm:space-y-0"> -->
 <div>
   <div class="flex rounded-md shadow-sm mb-4">
+    <!-- search -->
+    <label for="search_candidate" class="sr-only">Search</label>
+    <div class="relative flex-grow focus-within:z-10">
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center">
+        <!-- Heroicon name: search -->
+        <label for="search_candidate">
+          <svg
+            class="h-5 w-5 text-gray-400"
+            viewBox="0 0 20 20"
+            fill="currentColor">
+            <path
+              fill-rule="evenodd"
+              d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+              clip-rule="evenodd" />
+          </svg>
+        </label>
+        <!-- <input
+          id="search_candidate"
+          class="form-input block w-full rounded-none rounded-l-md pl-2
+            transition ease-in-out duration-150 sm:hidden"
+          placeholder="Filter" bind:value={filterStr} /> -->
+        <input
+          id="search_candidate"
+          autofocus
+          class="hidden form-input w-full rounded-none rounded-l-md pl-2
+            transition ease-in-out duration-150 sm:block sm:text-sm sm:leading-5"
+          placeholder="Filter ideas" bind:value={filterStr} />
+      </div>
+    </div>
     <!-- categories -->
     <span class="relative z-0 inline-flex shadow-sm rounded-md">
       <div class="inline-flex items-center mr-2">Show:</div>
@@ -82,7 +129,7 @@
           hover:text-gray-500 focus:z-10 focus:outline-none
           focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-100
           active:text-gray-700 transition ease-in-out duration-150">
-        Tutorials
+        <strike>Tutorials</strike>
       </button>
       <button
         type="button"
@@ -93,39 +140,12 @@
           text-gray-700 hover:text-gray-500 focus:z-10 focus:outline-none
           focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-100
           active:text-gray-700 transition ease-in-out duration-150">
-        Notes
+        <strike>Notes</strike>
       </button>
     </span>
-    <!-- search -->
-    <label for="search_candidate" class="sr-only">Search</label>
-    <div class="relative flex-grow focus-within:z-10">
-      <div class="absolute inset-y-0 left-0 pl-3 flex items-center">
-        <!-- Heroicon name: search -->
-        <label for="search_candidate">
-          <svg
-            class="h-5 w-5 text-gray-400"
-            viewBox="0 0 20 20"
-            fill="currentColor">
-            <path
-              fill-rule="evenodd"
-              d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-              clip-rule="evenodd" />
-          </svg>
-        </label>
-        <input
-          id="search_candidate"
-          class="form-input block w-full rounded-none rounded-l-md pl-2
-            transition ease-in-out duration-150 sm:hidden"
-          placeholder="Search" />
-        <input
-          id="search_candidate"
-          class="hidden form-input w-full rounded-none rounded-l-md pl-2
-            transition ease-in-out duration-150 sm:block sm:text-sm sm:leading-5"
-          placeholder="Search candidates" />
-      </div>
-    </div>
 
-    <!-- sort -->
+    <!-- sort - todo: see whether i actually need to sort -->
+    {#if false}
     <button
       class="-ml-px relative inline-flex items-center px-4 py-2 border
         border-gray-300 text-sm leading-5 font-medium rounded-r-md text-gray-700
@@ -152,101 +172,13 @@
           clip-rule="evenodd" />
       </svg>
     </button>
+    {/if}
   </div>
 
   <div class="bg-white shadow overflow-hidden sm:rounded-md">
     <ul>
       {#each filteredData as item}
-        <li>
-          <a
-            href="#"
-            class="block hover:bg-gray-50 focus:outline-none focus:bg-gray-50
-              transition duration-150 ease-in-out">
-            <div class="px-4 py-4 sm:px-6">
-              <div class="flex items-center justify-between">
-                <div
-                  class="text-sm leading-5 font-medium text-indigo-600 truncate">
-                  {item.title}
-                </div>
-                <div class="ml-2 flex-shrink-0 flex">
-                  <span
-                    class="px-2 inline-flex text-xs leading-5 font-semibold
-                      rounded-full bg-green-100 text-green-800">
-                    {item.type}
-                  </span>
-                </div>
-              </div>
-              <div class="mt-2 sm:flex sm:justify-between">
-                <div class="sm:flex">
-                  <div
-                    class="mr-6 flex items-center text-sm leading-5
-                      text-gray-500">
-                    <!-- Heroicon name: users -->
-                    <svg
-                      class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
-                      viewBox="0 0 20 20"
-                      fill="currentColor">
-                      <path
-                        d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                    </svg>
-                    {item.categories && item.categories.length ? item.categories.join(', ') : 'Uncategorized'}
-                    <!-- {item.tags} -->
-                  </div>
-                </div>
-                <div
-                  class="mt-2 flex text-sm leading-5 text-gray-500
-                    sm:mt-0">
-                  {#if item.type === 'Talks'}
-                    <!-- Heroicon name: location-marker -->
-                    {#each item.instances as instance}
-                      <div class="flex">
-                        <svg
-                          class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
-                          viewBox="0 0 20 20"
-                          fill="currentColor">
-                          <path
-                            fill-rule="evenodd"
-                            d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                            clip-rule="evenodd" />
-                        </svg>
-                        <span>
-                          <time
-                            datetime={new Date(instance.date)
-                              .toISOString()
-                              .slice(
-                                0,
-                                10
-                              )}>{new Date(instance.date)
-                              .toDateString()
-                              .slice(4)}</time> @ {instance.venue}
-                        </span>
-                      </div>
-                    {/each}
-                  {:else}
-                    <!-- Heroicon name: calendar -->
-                      <svg
-                        class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
-                        viewBox="0 0 20 20"
-                        fill="currentColor">
-                        <path
-                          fill-rule="evenodd"
-                          d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
-                          clip-rule="evenodd" />
-                      </svg>
-                      <span>
-                        <time
-                          datetime={new Date(item.date)
-                            .toISOString()
-                            .slice(
-                              0,
-                              10
-                            )}>{new Date(item.date).toDateString().slice(4)}</time>
-                      </span>
-                  {/if}
-                </div>
-              </div>
-            </div>
-          </a>
+        <li><ShowcaseItem {item} />
         </li>
       {/each}
     </ul>
