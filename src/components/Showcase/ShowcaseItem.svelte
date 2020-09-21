@@ -28,7 +28,7 @@
 </style>
 
 <div
-  class="block hover:bg-gray-200 focus:outline-none focus:bg-gray-50 transition
+  class="block hover:bg-teal-100 focus:outline-none focus:bg-gray-50 transition
     duration-150 ease-in-out">
   {#if item.type === 'Essays' && item.slug}
     <a href={`/${item.slug}`}>

@@ -42,11 +42,11 @@
 
 <div class="relative max-w-lg mx-auto lg:max-w-7xl mb-8">
   <div class="text-center">
-    <h2
-      class="text-3xl leading-9 tracking-tight font-extrabold text-gray-200
+    <h1
+      class="text-5xl leading-9 tracking-tight font-extrabold text-gray-200
         sm:text-4xl sm:leading-10">
       Idea Showcase
-    </h2>
+    </h1>
     <p class="mt-3 text-xl leading-7 text-gray-400 sm:mt-4">
       For Free: {filteredData.length} Great Ideas. Lightly Used.
     </p>
@@ -176,7 +176,7 @@
     {/if}
   </div>
 
-  <div class="bg-white shadow overflow-hidden sm:rounded-md">
+  <div class=" bg-gray-200 shadow overflow-hidden sm:rounded-md">
     <ul>
       {#each filteredData as item}
         <li><ShowcaseItem {item} />
