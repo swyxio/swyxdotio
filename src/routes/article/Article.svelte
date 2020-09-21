@@ -2,6 +2,15 @@
   import WebMentions from '../../components/WebMentions/WebMentions.svelte'
   export let data
   const { html, frontmatter } = data
+
+  let seoSubtitle = frontmatter.subtitle
+  export let seoTitle = seoSubtitle
+    ? `${frontmatter && frontmatter.title}: ${seoSubtitle}`
+    : `${seoCategory} | ${frontmatter && frontmatter.title}`
+  export let seoDescription = frontmatter
+    ? frontmatter.desc || frontmatter.description || seoTitle
+    : seoTitle
+  let slug = frontmatter.slug
 </script>
 
 <style>
@@ -106,6 +115,32 @@
 
 <svelte:head>
   <title>{frontmatter.title} | swyx.io</title>
+  <meta property="og:url" content={`https://www.swyx.io/${slug}`} />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content={seoTitle} />
+  <meta name="Description" content={seoDescription} />
+  <meta property="og:description" content={seoDescription} />
+  <meta
+    property="og:image"
+    content="https://www.swyx.io/og_image/writing.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:domain" value="swyx.io" />
+  <meta name="twitter:creator" value="https://twitter.com/swyx/" />
+  <meta name="twitter:title" value={seoTitle} />
+  <meta name="twitter:description" value={seoDescription} />
+  <meta
+    name="twitter:image"
+    content="https://www.swyx.io/og_image/writing.png" />
+  <meta name="twitter:label1" value="Published on" />
+  <meta
+    name="twitter:data1"
+    value={new Date(frontmatter.date).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    })} />
+  <meta name="twitter:label2" value="Reading Time" />
+  <meta name="twitter:data2" value="10 minutes" />
 </svelte:head>
 <a href="/">&LeftArrow; Home</a>
 

@@ -1,6 +1,5 @@
-
 <svelte:head>
-  <title>Elder.js Template: Home</title>
+  <title>swyx's site</title>
 </svelte:head>
 
 <div class="mx-auto max-w-screen-xl">
@@ -21,7 +20,7 @@
             class="underline text-indigo-300">speak</a>, and <a
             href="https://egghead.io/s/26zf5"
             class="underline text-indigo-300">teach</a>. But above all, I <a
-            href="https://www.swyx.io/writing/"
+            href="/ideas"
             class="underline text-indigo-300">write</a>. If we share interests, I'd love to connect with you!
           <!-- I am passionate about Developer Tools and Developer Communities and currently work as a Senior Developer
                 Advocate at AWS. In my free time I teach React, TypeScript, Storybook and Node.js CLI's at <a

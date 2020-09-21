@@ -1,6 +1,7 @@
 <script>
   import { scale } from 'svelte/transition';
   let isMenuOpen = false;
+  import IconList from '../IconList/IconList.svelte'
 </script>
 
 <nav class="relative max-w-screen-xl mx-auto flex items-center justify-between px-4 sm:px-6 pt-6 pb-6 sm:pb-12">
@@ -23,8 +24,8 @@
       </div>
     </div>
     <div class="hidden space-x-10 md:flex md:ml-10">
-      <a href="/ideas" class="font-medium text-white hover:text-gray-300 transition duration-150 ease-in-out">Ideas</a>
-      <a href="#d" class="font-medium text-white hover:text-gray-300 transition duration-150 ease-in-out">Features</a>
+      <a href="/ideas" class="font-medium text-teal-400 hover:text-red-500 transition duration-150 ease-in-out">Ideas</a>
+      <!-- <a href="#d" class="font-medium text-teal-400 hover:text-red-500 transition duration-150 ease-in-out">Features</a> -->
     </div>
   </div>
   <!-- <div class="hidden md:flex">
@@ -32,6 +33,7 @@
       Log in
     </a>
   </div> -->
+  <IconList />
 </nav>
 
 {#if isMenuOpen}

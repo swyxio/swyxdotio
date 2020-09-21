@@ -73,13 +73,14 @@
         </label>
         <input
           id="search_candidate"
+          type="text"
           class="form-input block w-full rounded-md pl-2
             transition ease-in-out duration-150 sm:hidden"
           placeholder="Filter" bind:value={filterStr} />
         <input
           id="search_candidate"
-          autofocus
-          class="hidden form-input w-full rounded-none rounded-l-md pl-2
+          type="text"
+          class="hidden form-input w-full rounded-md pl-2
             transition ease-in-out duration-150 sm:block sm:text-sm sm:leading-5"
           placeholder="Filter ideas" bind:value={filterStr} />
       </div>
@@ -180,6 +181,8 @@
       {#each filteredData as item}
         <li><ShowcaseItem {item} />
         </li>
+      {:else}
+      <div class="p-8">No Content Types Selected! Please see menu above and pick from either Essays, Talks, or Podcasts</div>
       {/each}
     </ul>
   </div>

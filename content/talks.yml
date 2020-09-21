@@ -32,6 +32,7 @@
       slides: https://docs.google.com/presentation/d/1XKbq4HcHW4_D4BrZeEE4ggB4p6XO4OBqXLeAt1Grsio/edit#slide=id.g8316066824_0_186
       video: https://youtu.be/XoATf7xGoUY
 - title: The Operating System of You
+  slug: operating-system-of-you
   categories: [Careers]
   description: Developers are mostly humans that run the same "hardware". Therefore most performance differences, especially the ones we can control, are down to our "OS" - our conscious prioritization and processing - and "firmware" - our unconscious personality and reactions. What can we do to better take care of our "hardware", and what does running better "software" look like?
   instances:
@@ -54,6 +55,7 @@
       date: 2020-07-23
       video: https://www.youtube.com/watch?v=AXiodji_8Ec
 - title: Coding Careers
+  slug: coding-careers
   categories: [Careers]
   published: true
   description: A general talk about the Coding Career Handbook
@@ -435,6 +437,7 @@ Together we will be discussing career change, Free Code Camp, #LearningInPublic,
       date: 2019-01-24
       video: https://www.youtube.com/watch?v=bFuRvcAEiHg
 - title: STAR Apps
+  slug: star-apps
   categories: [React, TypeScript]
   github: https://gist.github.com/sw-yx/531f6e848496c8744d8ee010d40a2e5a
   url: https://css-tricks.com/star-apps-a-new-generation-of-front-end-tooling-for-development-workflows/
@@ -481,6 +484,7 @@ Together we will be discussing career change, Free Code Camp, #LearningInPublic,
 #       Introduction to TypeScript
 #       JAMStack Jumpstart - Gatsby + Netlify
 #       Learn in public nyc talk
+#       star apps
 #       the hooks talk
 
 

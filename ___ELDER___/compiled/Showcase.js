@@ -171,8 +171,8 @@ const Showcase = create_ssr_component(($$result, $$props, $$bindings, slots) => 
     <label for="${"search_candidate"}" class="${"sr-only"}">Search</label>
     <div class="${"relative flex-grow focus-within:z-10"}"><div class="${"absolute inset-y-0 left-0 pl-3 flex items-center"}">
         <label for="${"search_candidate"}"><svg class="${"h-5 w-5 text-gray-400"}" viewBox="${"0 0 20 20"}" fill="${"currentColor"}"><path fill-rule="${"evenodd"}" d="${"M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"}" clip-rule="${"evenodd"}"></path></svg></label>
-        <input id="${"search_candidate"}" class="${"form-input block w-full rounded-md pl-2\n            transition ease-in-out duration-150 sm:hidden"}" placeholder="${"Filter"}"${add_attribute("value", filterStr, 1)}>
-        <input id="${"search_candidate"}" autofocus class="${"hidden form-input w-full rounded-none rounded-l-md pl-2\n            transition ease-in-out duration-150 sm:block sm:text-sm sm:leading-5"}" placeholder="${"Filter ideas"}"${add_attribute("value", filterStr, 1)}></div></div>
+        <input id="${"search_candidate"}" type="${"text"}" class="${"form-input block w-full rounded-md pl-2\n            transition ease-in-out duration-150 sm:hidden"}" placeholder="${"Filter"}"${add_attribute("value", filterStr, 1)}>
+        <input id="${"search_candidate"}" type="${"text"}" class="${"hidden form-input w-full rounded-md pl-2\n            transition ease-in-out duration-150 sm:block sm:text-sm sm:leading-5"}" placeholder="${"Filter ideas"}"${add_attribute("value", filterStr, 1)}></div></div>
     
     <span class="${"relative z-0 inline-flex flex-col sm:flex-row shadow-sm rounded-md"}"><div class="${"inline-flex items-center mr-2 text-gray-400"}">Show:</div>
       <button type="${"button"}" class="${[
@@ -202,8 +202,10 @@ const Showcase = create_ssr_component(($$result, $$props, $$bindings, slots) => 
     
     ${ ``}</div>
 
-  <div class="${"bg-white shadow overflow-hidden sm:rounded-md"}"><ul>${each(filteredData, item => `<li>${validate_component(ShowcaseItem, "ShowcaseItem").$$render($$result, { item }, {}, {})}
-        </li>`)}</ul></div></div>
+  <div class="${"bg-white shadow overflow-hidden sm:rounded-md"}"><ul>${filteredData.length
+	? each(filteredData, item => `<li>${validate_component(ShowcaseItem, "ShowcaseItem").$$render($$result, { item }, {}, {})}
+        </li>`)
+	: `<div class="${"p-8"}">No Content Types Selected! Please see menu above and pick from either Essays, Talks, or Podcasts</div>`}</ul></div></div>
 `;
 });
 

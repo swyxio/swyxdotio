@@ -98,6 +98,9 @@
     border: 0;
     text-align: left;
   }
+  svg {
+    display: inline
+  }
 </style>
 
 <hr />

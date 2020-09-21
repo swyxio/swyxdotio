@@ -6,6 +6,8 @@ const remark = require('remark');
 const remarkHtml = require('remark-html');
 require('dotenv-safe').config(); // have DEV_TO_API_KEY in process.env
 const fetch = require('node-fetch');
+const yaml = require('js-yaml')
+
 
 async function parseMarkdown(markdown) {
   const result = await remark().use(remarkHtml).process(markdown);
@@ -44,6 +46,9 @@ const plugin = {
     // used to store the data in the plugin's closure so it is persisted between loads
     plugin.markdown = [];
     plugin.requests = [];
+    plugin.podcasts = yaml.safeLoad(fs.readFileSync(path.resolve('content/podcasts.yml'), 'utf8'));
+    plugin.talks = yaml.safeLoad(fs.readFileSync(path.resolve('content/talks.yml'), 'utf8'));
+
 
     if (config && Array.isArray(config.routes) && config.routes.length > 0) {
       for (const route of config.routes) {
@@ -120,7 +125,11 @@ const plugin = {
 
         // console.log('markdown', plugin.markdown.map(x => Object.keys(x.data)))
         return {
-          data: { ...data, markdown: plugin.markdown },
+          data: { ...data, 
+            markdown: plugin.markdown,
+            podcasts: plugin.podcasts,
+            talks: plugin.talks
+           },
         };
       },
     },

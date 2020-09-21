@@ -1,5 +1,6 @@
 <script>
   import MobileMenu from '../components/Home/MobileMenu.svelte'
+  import IconList from '../components/IconList/IconList.svelte'
   export let templateHtml, settings
 </script>
 
@@ -129,6 +130,9 @@
     rel="stylesheet"
     href="{settings.locations.assets.replace('./public', '')}style.css" />
   <link rel="stylesheet" href="https://unpkg.com/balloon-css/balloon.min.css" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="webmention" href="https://webmention.io/www.swyx.io/webmention" />
+  <link rel="pingback" href="https://webmention.io/www.swyx.io/xmlrpc" />
   <script>
     if (
       'themePreference' in localStorage &&
@@ -150,6 +154,26 @@
     <main>
       {@html templateHtml}
     </main>
-    <footer class="pt-6 pb-12 sm:pb-32 text-white"> TODO: FOOTER</footer>
+    <!-- <footer class="pt-6 pb-12 sm:pb-32 text-white"> TODO: FOOTER</footer> -->
+    <footer
+      class="max-w-screen-xl mx-auto py-12 px-4 overflow-hidden sm:px-6 lg:px-8">
+      <nav class="-mx-5 -my-2 flex flex-wrap justify-center">
+        <div class="px-5 py-2">
+          <a
+            href="/ideas"
+            class="text-base leading-6 text-teal-400 hover:text-red-500">
+            Ideas
+          </a>
+        </div>
+      </nav>
+      <div class="mt-8 flex justify-center">
+        <IconList />
+      </div>
+      <div class="mt-8">
+        <p class="text-center text-base leading-6 text-gray-400">
+          &copy; 2020 swyx. All rights reserved.
+        </p>
+      </div>
+    </footer>
   </div>
 </div>

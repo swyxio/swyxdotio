@@ -7,10 +7,6 @@
   date: 2020-05-12
   url: https://anchor.fm/svelteradio/
   description: I joined the Svelte Radio podcast together with Antony and Kev from Svelte Society.
-  instances:
-    - https://anchor.fm/svelteradio/episodes/Post-Svelte-Society-Day-eduktc
-    - https://anchor.fm/svelteradio/episodes/In-Defense-of-The-Modern-Web-eehprp
-    - https://anchor.fm/svelteradio/episodes/TypeScript-Language-Tools-ef1hrv
 - title: Software Sessions Podcast - Learning in Public
   slug: software-sessions-podcast
   categories: [Careers]
