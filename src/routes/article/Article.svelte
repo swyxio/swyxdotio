@@ -6,7 +6,7 @@
   let seoSubtitle = frontmatter.subtitle
   export let seoTitle = seoSubtitle
     ? `${frontmatter && frontmatter.title}: ${seoSubtitle}`
-    : `${seoCategory} | ${frontmatter && frontmatter.title}`
+    : `${frontmatter && frontmatter.title}`
   export let seoDescription = frontmatter
     ? frontmatter.desc || frontmatter.description || seoTitle
     : seoTitle
@@ -75,9 +75,9 @@
     opacity: 0.1;
     pointer-events: none;
   }
-  .prose :global(a) {
+  /* .prose :global(a) {
     border-bottom: 2px solid #F26111;
-  }
+  } */
   .prose :global(ul) {
     line-height: 1.5;
   }
@@ -94,7 +94,11 @@
     margin: 0 auto;
     display: block;
   }
-  @media (min-width: 480px) {
+
+
+  /* this is for the hover link thing */
+  /* dont use transition: all 0.5s; this is buggy */
+  /* @media (min-width: 480px) {
     .prose :global(a)::before {
       content: attr(href);
       position: absolute;
@@ -102,7 +106,6 @@
       background: linear-gradient(45deg, var(--hover-color-primary),var(--hover-color-secondary));
       visibility: visible;
       opacity: 0;
-      /*transition: all 0.5s; this is buggy*/
       transition-duration: 0.5s;
       transition-property: opacity, transform;
     }
@@ -110,7 +113,7 @@
       opacity: 1;
       transform: translateY(1.5rem) scale(1);
     }
-  }
+  } */
 </style>
 
 <svelte:head>
@@ -142,7 +145,6 @@
   <meta name="twitter:label2" value="Reading Time" />
   <meta name="twitter:data2" value="10 minutes" />
 </svelte:head>
-<a href="/">&LeftArrow; Home</a>
 
 <article
   class="px-4 py-10 max-w-3xl mx-auto sm:px-6 sm:py-12 lg:max-w-4xl lg:py-16
@@ -165,9 +167,12 @@
 
     {#if html}
       {@html html}
+      <a class="text-white " href="/ideas">&LeftArrow; More Essays</a>
       <WebMentions hydrate-client={{target: `https://www.swyx.io/writing/${frontmatter.slug}`}} />
     {:else}
       <h1>There was a problem rendering this page - please let @swyx know!</h1>
     {/if}
   </div>
 </article>
+
+

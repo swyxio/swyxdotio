@@ -4,7 +4,8 @@ module.exports = {
   },
   build: {},
   locations: {
-    assets: './public/dist/static/',
+    // assets: './public/dist/static/',
+    assets: './public/',
     public: './public/',
     svelte: {
       ssrComponents: './___ELDER___/compiled/',
