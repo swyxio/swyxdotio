@@ -34,7 +34,7 @@
   </svg>
 </a>
 <a
-  href="https://twitter.com/swyx"
+  href="https://twitter.com/intent/follow?screen_name=swyx"
   title="twitter"
   target="_blank"
   rel="me"
