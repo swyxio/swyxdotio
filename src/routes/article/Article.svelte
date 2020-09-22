@@ -3,7 +3,7 @@
   export let data
   const { html, frontmatter } = data
 
-  let seoSubtitle = frontmatter.subtitle
+  let seoSubtitle = frontmatter && frontmatter.subtitle
   export let seoTitle = seoSubtitle
     ? `${frontmatter && frontmatter.title}: ${seoSubtitle}`
     : `${frontmatter && frontmatter.title}`
@@ -29,6 +29,29 @@
       a[aria-hidden='true'], h6 a[aria-hidden='true']) {
     margin-left: 1rem;
   }
+  .prose .articleMain :global(h2::before) {
+    content: "## "
+  }
+  .prose .articleMain :global(h3::before) {
+    content: "### "
+  }
+  .prose .articleMain :global(h4::before) {
+    content: "#### "
+  }
+
+  /* undo ol bug in tailwind typography */
+  /* https://github.com/tailwindlabs/tailwindcss-typography/issues/71 */
+
+  :global(.prose .articleMain ol) {
+    list-style: decimal
+  } 
+  :global(.prose .articleMain ol>li) {
+    padding-left: 0
+  } 
+  :global(.prose .articleMain ol>li::before) {
+    content: none;
+  } 
+  /* undo ol bug in tailwind typography */
 
   .prose :global(code) {
     font-size: 90%;
@@ -91,6 +114,12 @@
   }
   .Subtitle {
     margin-top: 0;
+  }
+  :global(.prose .highlightOnHover) {
+    text-decoration: none;
+  }
+  :global(.prose .highlightOnHover:hover) {
+    text-decoration: underline;
   }
 
   /* this is for the hover link thing */
@@ -177,7 +206,9 @@
     </div>
 
     {#if html}
+    <div class="articleMain">
       {@html html}
+    </div>
       <a class="text-white" href="/ideas">&LeftArrow; More Essays</a>
       <WebMentions
         hydrate-client={{ target: `https://www.swyx.io/writing/${frontmatter.slug}` }} />

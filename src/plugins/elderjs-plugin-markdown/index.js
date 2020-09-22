@@ -2,16 +2,56 @@ const glob = require('glob');
 const path = require('path');
 const fs = require('fs');
 const grayMatter = require('gray-matter');
-const remark = require('remark');
-const remarkHtml = require('remark-html');
+// const remark = require('remark');
+// const remarkHtml = require('remark-html');
 require('dotenv-safe').config(); // have DEV_TO_API_KEY in process.env
 const fetch = require('node-fetch');
 const yaml = require('js-yaml')
+const unified = require('unified')
+const vfile = require('vfile')
+const report = require('vfile-reporter')
+
+let _preset = {
+  settings: {},
+  plugins: [
+    require('remark-parse'),
+    require('remark-slug'),
+    [
+      require('remark-autolink-headings'),
+      {
+        behavior: 'wrap',
+        linkProperties: { class: 'highlightOnHover' }
+        // content: {
+        //   type: 'element',
+        //   tagName: 'span',
+        //   properties: { className: ['icon', 'icon-link'] },
+        //   children: [{ type: 'text', value: ' 🔗' }],
+        // },
+      },
+    ],
+    require('remark-toc'),
+    require('remark-sectionize'),
+    require('remark-rehype'),
+    require('rehype-format'),
+    [require('remark-frontmatter'), ['yaml']],
+    [require('rehype-shiki'), { theme: 'Material-Theme-Palenight' }],
+    require('rehype-stringify'),
+  ],
+}
 
 
-async function parseMarkdown(markdown) {
-  const result = await remark().use(remarkHtml).process(markdown);
-  return result.toString();
+async function parseMarkdown({filePath, markdown}) {
+  // const result = await remark().use(remarkHtml).process(markdown);
+  var post_vfile = vfile({ path: filePath, contents: markdown });
+  const file = await unified()
+    .use(_preset)
+    .process(post_vfile)
+    .catch((err) => {
+      console.error(report(post_vfile));
+      throw err;
+    });
+  file.extname = '.html';
+  return file.toString();
 }
 
 async function getFromDevTo() {
@@ -154,7 +194,10 @@ const plugin = {
           const markdown = data.markdown.find((m) => m.slug === request.slug);
           if (markdown) {
             const { content, data: frontmatter } = markdown;
-            const html = await parseMarkdown(content);
+            const html = await parseMarkdown({
+              filePath: frontmatter.slug,
+              markdown: content
+            });
             return {
               data: {
                 ...data,
