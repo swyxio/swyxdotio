@@ -70,7 +70,7 @@
       clip-rule="evenodd" />
   </svg>
 </a>
-<a title="search" href="/ideas">
+<!-- <a title="search" href="/ideas">
   <span class="sr-only">Search This Site</span>
   <svg
     class="icon h-6 w-6 ml-6 text-teal-400 hover:text-red-500"
@@ -87,4 +87,4 @@
       8.5 3.809 8.5 8.5s-3.809 8.5-8.5 8.5-8.5-3.809-8.5-8.5 3.809-8.5
       8.5-8.5z" />
   </svg>
-</a>
+</a> -->

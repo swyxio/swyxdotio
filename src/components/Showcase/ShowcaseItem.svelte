@@ -15,7 +15,7 @@
     }
     return null
   }
-  // $: if (item.type === 'Talks') console.log({item})
+  // $: if (item.type === 'Talks') console.log({ item })
 </script>
 
 <li
@@ -108,16 +108,14 @@
 
             <dl>
               {#if item.date}
-                <div
-                  class="py-2 sm:grid sm:grid-cols-3 sm:gap-4
-                    break-all">
+                <div class="py-2 sm:grid sm:grid-cols-3 sm:gap-4 break-all">
                   <dt class="text-sm leading-5 font-medium text-gray-500">
                     Date
                   </dt>
                   <dd
                     class="mt-1 text-sm leading-5 text-gray-900 sm:mt-0
                       sm:col-span-2">
-                      {item.date.slice(0,10)}
+                    {item.date.slice(0, 10)}
                   </dd>
                 </div>
               {/if}
@@ -136,10 +134,10 @@
                 </div>
               {/if}
               {#if item.url}
-                <div
-                  class="py-2 sm:grid sm:grid-cols-3 sm:gap-4
-                    break-all">
-                  <dt class="text-sm leading-5 font-medium text-gray-500 break-normal">
+                <div class="py-2 sm:grid sm:grid-cols-3 sm:gap-4 break-all">
+                  <dt
+                    class="text-sm leading-5 font-medium text-gray-500
+                      break-normal">
                     External URL
                   </dt>
                   <dd
@@ -182,14 +180,8 @@
             {#if item.instances}
               <ul class="border border-gray-200 rounded-md list-disc">
                 {#each item.instances as instance}
-                  <li
-                    class="pr-4 flex items-center justify-between text-sm
-                      leading-5">
-                    <a
-                      class="underline hover:text-blue-800"
-                      href={instance.video}>
-                      On {new Date(instance.date).toDateString().slice(4)} at {instance.venue}
-                    </a>
+                  <li class="pr-4 text-sm leading-5">
+                    {new Date(instance.date).toDateString().slice(4)} at {instance.venue}
                     <!-- <div class="ml-4 flex-shrink-0"> -->
                     <!-- <div class="VideoDiv">
           <iframe
@@ -207,6 +199,36 @@
             aria-hidden="true" />
         </div> -->
                     <!-- </div> -->
+
+                    <div class="ml-4">
+                      {#if instance.video}
+                        <a
+                          class="underline hover:text-blue-700"
+                          href={instance.video}>Video</a>
+                      {/if}
+                      {#if instance.slides}
+                        <a
+                          class="underline hover:text-blue-700"
+                          href={instance.slides}>Slides</a>
+                      {/if}
+                      {#if instance.github}
+                        <a
+                          class="underline hover:text-blue-700 text-sm leading-5
+                            font-medium text-gray-500"
+                          href={instance.github}>GitHub</a>
+                      {/if}
+                      {#if instance.tweet}
+                        <a
+                          class="underline hover:text-blue-700 text-sm leading-5
+                            font-medium text-gray-500"
+                          href={instance.tweet}>Tweet</a>
+                      {/if}
+                      {#if instance.description}
+                        <span
+                          class="text-sm leading-5 text-gray-700"
+                          >{instance.description}</span>
+                      {/if}
+                    </div>
                   </li>
                 {/each}
               </ul>
@@ -274,12 +296,23 @@
           <!-- Heroicon name: mail -->
           <svg
             class="w-5 h-5 text-gray-400"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <!-- <svg
             viewBox="0 0 20 20"
             fill="currentColor">
             <path
               d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
             <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-          </svg>
+          </svg> -->
           <span class="ml-3">More Info</span>
         </button>
       </div>
@@ -314,7 +347,14 @@
               focus:outline-none focus:shadow-outline-blue focus:border-blue-300
               focus:z-10 transition ease-in-out duration-150">
             <!-- http://simpleicons.org/?q=youtube -->
-            <svg class="w-5 h-5 text-gray-400" fill="currentColor" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>YouTube icon</title><path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>
+            <svg
+              class="w-5 h-5 text-gray-400"
+              fill="currentColor"
+              role="img"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"><title>YouTube icon</title>
+              <path
+                d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z" /></svg>
             <span class="ml-3">Watch</span>
           </a>
         {:else if item.type === 'Podcasts' && item.url}

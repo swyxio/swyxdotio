@@ -119,7 +119,7 @@ const ShowcaseItem = create_ssr_component(($$result, $$props, $$bindings, slots)
 	: `<div>${escape(longDesc)}</div>
 
             <dl>${item.date
-		? `<div class="${"py-2 sm:grid sm:grid-cols-3 sm:gap-4\n                    break-all"}"><dt class="${"text-sm leading-5 font-medium text-gray-500"}">Date
+		? `<div class="${"py-2 sm:grid sm:grid-cols-3 sm:gap-4 break-all"}"><dt class="${"text-sm leading-5 font-medium text-gray-500"}">Date
                   </dt>
                   <dd class="${"mt-1 text-sm leading-5 text-gray-900 sm:mt-0\n                      sm:col-span-2"}">${escape(item.date.slice(0, 10))}</dd></div>`
 		: ``}${item.canonical
@@ -127,7 +127,7 @@ const ShowcaseItem = create_ssr_component(($$result, $$props, $$bindings, slots)
                   </dt>
                   <dd class="${"mt-1 text-sm leading-5 text-gray-900 sm:mt-0\n                      sm:col-span-2"}"><a class="${"underline hover:text-blue-700"}"${add_attribute("href", item.canonical, 0)}>${escape(item.canonical)}</a></dd></div>`
 		: ``}${item.url
-		? `<div class="${"py-2 sm:grid sm:grid-cols-3 sm:gap-4\n                    break-all"}"><dt class="${"text-sm leading-5 font-medium text-gray-500 break-normal"}">External URL
+		? `<div class="${"py-2 sm:grid sm:grid-cols-3 sm:gap-4 break-all"}"><dt class="${"text-sm leading-5 font-medium text-gray-500\n                      break-normal"}">External URL
                   </dt>
                   <dd class="${"mt-1 text-sm leading-5 text-gray-900 sm:mt-0\n                      sm:col-span-2"}"><a class="${"underline hover:text-blue-700"}"${add_attribute("href", item.url, 0)}>${escape(item.url)}</a></dd></div>`
 		: ``}${item.slides
@@ -143,10 +143,26 @@ const ShowcaseItem = create_ssr_component(($$result, $$props, $$bindings, slots)
 		: ``}</dl>
 
             ${item.instances
-		? `<ul class="${"border border-gray-200 rounded-md list-disc"}">${each(item.instances, instance => `<li class="${"pr-4 flex items-center justify-between text-sm\n                      leading-5"}"><a class="${"underline hover:text-blue-800"}"${add_attribute("href", instance.video, 0)}>On ${escape(new Date(instance.date).toDateString().slice(4))} at ${escape(instance.venue)}</a>
+		? `<ul class="${"border border-gray-200 rounded-md list-disc"}">${each(item.instances, instance => `<li class="${"pr-4 text-sm leading-5"}">${escape(new Date(instance.date).toDateString().slice(4))} at ${escape(instance.venue)}
                     
                     
                     
+
+                    <div class="${"ml-4"}">${instance.video
+			? `<a class="${"underline hover:text-blue-700"}"${add_attribute("href", instance.video, 0)}>Video</a>`
+			: ``}
+                      ${instance.slides
+			? `<a class="${"underline hover:text-blue-700"}"${add_attribute("href", instance.slides, 0)}>Slides</a>`
+			: ``}
+                      ${instance.github
+			? `<a class="${"underline hover:text-blue-700 text-sm leading-5\n                            font-medium text-gray-500"}"${add_attribute("href", instance.github, 0)}>GitHub</a>`
+			: ``}
+                      ${instance.tweet
+			? `<a class="${"underline hover:text-blue-700 text-sm leading-5\n                            font-medium text-gray-500"}"${add_attribute("href", instance.tweet, 0)}>Tweet</a>`
+			: ``}
+                      ${instance.description
+			? `<span class="${"text-sm leading-5 text-gray-700"}">${escape(instance.description)}</span>`
+			: ``}</div>
                   </li>`)}</ul>`
 		: ``}
 
@@ -157,7 +173,8 @@ const ShowcaseItem = create_ssr_component(($$result, $$props, $$bindings, slots)
 		"relative -mr-px w-0 flex-1 inline-flex items-center\n            justify-center py-4 text-sm leading-5 text-gray-700 font-medium\n            border border-transparent rounded-bl-lg hover:bg-gray-300\n            focus:outline-none focus:shadow-outline-blue focus:border-blue-300\n            focus:z-10 transition ease-in-out duration-150",
 		( "") + " " + ( "")
 	].join(" ").trim()}">
-          <svg class="${"w-5 h-5 text-gray-400"}" viewBox="${"0 0 20 20"}" fill="${"currentColor"}"><path d="${"M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"}"></path><path d="${"M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"}"></path></svg>
+          <svg class="${"w-5 h-5 text-gray-400"}" xmlns="${"http://www.w3.org/2000/svg"}" fill="${"none"}" viewBox="${"0 0 24 24"}" stroke="${"currentColor"}"><path stroke-linecap="${"round"}" stroke-linejoin="${"round"}" stroke-width="${"2"}" d="${"M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"}"></path></svg>
+          
           <span class="${"ml-3"}">More Info</span></button></div>
       <div class="${"-ml-px w-0 flex-1 flex"}">${item.type === "Essays" && item.slug
 	? `<a${add_attribute("href", `/${item.slug}`, 0)} class="${"relative w-0 flex-1 inline-flex items-center justify-center\n              py-4 text-sm leading-5 text-gray-700 font-medium border\n              border-transparent rounded-br-lg hover:text-gray-500\n              focus:outline-none focus:shadow-outline-blue focus:border-blue-300\n              focus:z-10 transition ease-in-out duration-150"}">
@@ -705,6 +722,7 @@ const Showcase = create_ssr_component(($$result, $$props, $$bindings, slots) => 
 
 	const setURLState = newState => {
 		const finalState = { ...urlState, ...newState }; // merge with existing urlstate
+		urlState = finalState;
 
 		Object.keys(finalState).forEach(function (k) {
 			if (// don't save some state values if it meets the conditions below
@@ -717,14 +735,10 @@ const Showcase = create_ssr_component(($$result, $$props, $$bindings, slots) => 
 			}
 		});
 
-		urlState = finalState;
 		if (typeof window !== "undefined") history.pushState({}, "", document.location.origin + document.location.pathname + "?" + queryString.stringify(finalState));
 	};
 
 	let { data } = $$props;
-	let essays = true;
-	let talks = true;
-	let podcasts = true;
 	let tutorials = false;
 	let notes = false;
 	let filterStr = "";
@@ -742,10 +756,6 @@ const Showcase = create_ssr_component(($$result, $$props, $$bindings, slots) => 
 				notes 
 			].filter(Boolean)
 		});
-	}
-
-	 {
-		console.log({ urlState, essays, talks, podcasts });
 	}
 
 	filteredData = data.filter(x => {
@@ -770,7 +780,7 @@ const Showcase = create_ssr_component(($$result, $$props, $$bindings, slots) => 
     <div class="${"relative flex-grow focus-within:z-10"}"><div class="${"absolute inset-y-0 left-0 pl-3 flex items-center"}">
         <label for="${"search_candidate"}"><svg class="${"h-5 w-5 text-gray-400"}" viewBox="${"0 0 20 20"}" fill="${"currentColor"}"><path fill-rule="${"evenodd"}" d="${"M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"}" clip-rule="${"evenodd"}"></path></svg></label>
         <input id="${"search_candidate"}" type="${"text"}" class="${"form-input block w-full rounded-md pl-2\n            transition ease-in-out duration-150 sm:hidden"}" placeholder="${"Filter"}"${add_attribute("value", filterStr, 1)}>
-        <input id="${"search_candidate"}" type="${"text"}" class="${"hidden form-input w-full rounded-md pl-2\n            transition ease-in-out duration-150 sm:block sm:text-sm sm:leading-5"}" placeholder="${"Filter ideas"}"${add_attribute("value", filterStr, 1)}></div></div>
+        <input id="${"search_candidate"}" type="${"text"}" class="${"hidden form-input w-full rounded-md pl-2\n            transition ease-in-out duration-150 sm:block sm:text-sm sm:leading-5 py-2 ml-4"}" placeholder="${"Filter ideas"}"${add_attribute("value", filterStr, 1)}></div></div>
     
     <span class="${"relative z-0 inline-flex flex-col sm:flex-row shadow-sm rounded-md"}"><div class="${"inline-flex items-center mr-2 text-gray-400"}">Show:</div>
       <button type="${"button"}" class="${[

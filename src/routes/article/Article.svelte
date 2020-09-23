@@ -53,6 +53,11 @@
   } 
   /* undo ol bug in tailwind typography */
 
+  /* opt out of blockquote quotes */
+  .prose :global(blockquote p:first-of-type::before) {
+    content: none
+  }
+
   .prose :global(code) {
     font-size: 90%;
     background-color: rgba(29, 80, 80, 0.3);

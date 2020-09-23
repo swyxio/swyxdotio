@@ -11,6 +11,7 @@
   
   const setURLState = newState => {
     const finalState = { ...urlState, ...newState } // merge with existing urlstate
+    urlState = finalState
     Object.keys(finalState).forEach(function (k) {
       if ( // don't save some state values if it meets the conditions below
         !finalState[k] || // falsy
@@ -21,9 +22,9 @@
         delete finalState[k]; // drop query params with new values = falsy
       }
     });
-    urlState = finalState
     if (typeof window !== 'undefined') history.pushState({},'', document.location.origin + document.location.pathname + '?' + queryString.stringify(finalState))
   }
+
 
   export let data
 
@@ -35,7 +36,7 @@
 
   let filterStr = ''
   $: setURLState({filter: filterStr, show: [essays && "Essays", talks && "Talks", podcasts && "Podcasts", tutorials && "Tutorials", notes && "Notes"].filter(Boolean) })
-  $: console.log({urlState, essays, talks, podcasts})
+  // $: console.log({urlState, essays, talks, podcasts})
   
   $: filteredData = data.filter((x) => {
     if (filterStr && notIncludes(filterStr, x)) {
@@ -108,7 +109,7 @@
           id="search_candidate"
           type="text"
           class="hidden form-input w-full rounded-md pl-2
-            transition ease-in-out duration-150 sm:block sm:text-sm sm:leading-5"
+            transition ease-in-out duration-150 sm:block sm:text-sm sm:leading-5 py-2 ml-4"
           placeholder="Filter ideas" bind:value={filterStr} />
       </div>
     </div>

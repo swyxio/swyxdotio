@@ -157,14 +157,17 @@
     <!-- <footer class="pt-6 pb-12 sm:pb-32 text-white"> TODO: FOOTER</footer> -->
     <footer
       class="max-w-screen-xl mx-auto py-12 px-4 overflow-hidden sm:px-6 lg:px-8">
-      <nav class="-mx-5 -my-2 flex flex-wrap justify-center">
-        <div class="px-5 py-2">
+      <nav class="-mx-5 -my-2 flex flex-wrap justify-center items-center px-5 py-2 flex-col md:flex-row gap-2">
           <a
             href="/ideas"
             class="text-base leading-6 text-teal-400 hover:text-red-500">
             Ideas
           </a>
-        </div>
+          <a
+            href="/about"
+            class="text-base leading-6 text-teal-400 hover:text-red-500">
+            About
+          </a>
       </nav>
       <div class="mt-8 flex justify-center">
         <IconList />

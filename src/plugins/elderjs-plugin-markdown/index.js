@@ -141,24 +141,25 @@ const plugin = {
       description: 'Add parsed .md content and data to the data object',
       priority: 50, // default
       run: async ({ data, plugin }) => {
-        // let articles = await getFromDevTo();
-        // articles.forEach((article) => {
-        //   let {
-        //     data,
-        //     content,
-        //   } = grayMatter(article.body_markdown);
-        //   const slug = data.slug || article.slug
-        //   plugin.markdown.push({
-        //     slug,
-        //     data: {
-        //       title: article.title,
-        //       description: data.desc || article.description,
-        //       categories: article.tag_list,
-        //     },
-        //     content,
-        //   });
-        //   plugin.requests.push({ slug, route: 'article' });
-        // });
+        let articles = await getFromDevTo();
+        articles.forEach((article) => {
+          let {
+            data,
+            content,
+          } = grayMatter(article.body_markdown);
+          const slug = data.slug || article.slug
+          plugin.markdown.push({
+            slug,
+            data: {
+              slug,
+              title: article.title,
+              description: data.desc || article.description,
+              categories: article.tag_list,
+            },
+            content,
+          });
+          plugin.requests.push({ slug, route: 'article' });
+        });
 
         // todo: make simple recommender algo to do related posts feature
         // fs.writeFileSync('test.json', JSON.stringify(plugin.markdown, null, 2))
