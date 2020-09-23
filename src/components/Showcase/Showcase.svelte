@@ -176,15 +176,14 @@
     {/if}
   </div>
 
-  <div class=" bg-gray-200 shadow overflow-hidden sm:rounded-md">
-    <ul>
+  <!-- <div class=" bg-gray-200 shadow overflow-hidden sm:rounded-md"> -->
+    <ul class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {#each filteredData as item}
-        <li><ShowcaseItem {item} />
-        </li>
+          <ShowcaseItem {item} />
       {:else}
       <div class="p-8">No Content Types Selected! Please see menu above and pick from either Essays, Talks, or Podcasts</div>
       {/each}
     </ul>
-  </div>
+  <!-- </div> -->
 </div>
 <!-- </div> -->
