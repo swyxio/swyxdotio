@@ -48,7 +48,8 @@
         aria-orientation="vertical"
         aria-labelledby="main-menu">
         <div class="px-5 pt-4 flex items-center justify-between">
-          <div><img class="h-8 w-auto" src="https://tailwindui.com/img/logos/workflow-mark-on-white.svg" alt="" /></div>
+          <!-- <div><img class="h-8 w-auto" src="https://tailwindui.com/img/logos/workflow-mark-on-white.svg" alt="" /></div> -->
+          <a href="/" aria-label="Home" class="text-teal-700"> swyx.io </a>
           <div class="-mr-2">
             <button
               on:click={() => (isMenuOpen = false)}

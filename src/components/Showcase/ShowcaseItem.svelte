@@ -15,7 +15,7 @@
     }
     return null
   }
-  // $: if (item.type === 'Talks') console.log({ item })
+  $: if (item.type === 'Essays') console.log({ item })
 </script>
 
 <li

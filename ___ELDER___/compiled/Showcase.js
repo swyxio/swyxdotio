@@ -102,6 +102,10 @@ const ShowcaseItem = create_ssr_component(($$result, $$props, $$bindings, slots)
 	let longDesc = item.description || item.desc || "No description provided. Suggest one!";
 	if ($$props.item === void 0 && $$bindings.item && item !== void 0) $$bindings.item(item);
 
+	 {
+		if (item.type === "Essays") console.log({ item });
+	}
+
 	return `<li class="${[
 		"col-span-1 bg-gray-100 rounded-lg shadow flex flex-col justify-between\n    border-4 transition duration-100 transform hover:-translate-y-1",
 		(item.type === "Essays" ? "border-green-500" : "") + " " + (item.type === "Talks" ? "border-blue-500" : "") + " " + (item.type === "Podcasts" ? "border-teal-500" : "")

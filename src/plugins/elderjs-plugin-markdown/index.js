@@ -152,6 +152,7 @@ const plugin = {
             slug,
             data: {
               slug,
+              date: new Date(data.displayed_publish_date || article.published_at),
               title: article.title,
               description: data.desc || article.description,
               categories: article.tag_list,
@@ -162,7 +163,7 @@ const plugin = {
         });
 
         // todo: make simple recommender algo to do related posts feature
-        // fs.writeFileSync('test.json', JSON.stringify(plugin.markdown, null, 2))
+        fs.writeFileSync('test.json', JSON.stringify(articles, null, 2))
 
         // console.log('markdown', plugin.markdown.map(x => Object.keys(x.data)))
         return {
