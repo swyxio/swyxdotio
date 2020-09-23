@@ -33,6 +33,7 @@
     "markdown-js": "^0.0.4",
     "node-fetch": "^2.6.1",
     "polka": "^0.5.2",
+    "query-string": "^6.13.2",
     "remark": "^12.0.1",
     "remark-html": "^12.0.0",
     "rss": "^1.2.2",

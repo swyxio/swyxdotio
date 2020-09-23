@@ -107,6 +107,20 @@
             <div>{longDesc}</div>
 
             <dl>
+              {#if item.date}
+                <div
+                  class="py-2 sm:grid sm:grid-cols-3 sm:gap-4
+                    break-all">
+                  <dt class="text-sm leading-5 font-medium text-gray-500">
+                    Date
+                  </dt>
+                  <dd
+                    class="mt-1 text-sm leading-5 text-gray-900 sm:mt-0
+                      sm:col-span-2">
+                      {item.date.slice(0,10)}
+                  </dd>
+                </div>
+              {/if}
               {#if item.canonical}
                 <div class="py-2 sm:grid sm:grid-cols-3 sm:gap-4">
                   <dt class="text-sm leading-5 font-medium text-gray-500">
@@ -125,7 +139,7 @@
                 <div
                   class="py-2 sm:grid sm:grid-cols-3 sm:gap-4
                     break-all">
-                  <dt class="text-sm leading-5 font-medium text-gray-500">
+                  <dt class="text-sm leading-5 font-medium text-gray-500 break-normal">
                     External URL
                   </dt>
                   <dd
@@ -299,19 +313,8 @@
               border-transparent rounded-br-lg hover:text-gray-500
               focus:outline-none focus:shadow-outline-blue focus:border-blue-300
               focus:z-10 transition ease-in-out duration-150">
-            <!-- Heroicon name: video camera -->
-            <svg
-              class="w-5 h-5 text-gray-400"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-            </svg>
+            <!-- http://simpleicons.org/?q=youtube -->
+            <svg class="w-5 h-5 text-gray-400" fill="currentColor" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>YouTube icon</title><path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>
             <span class="ml-3">Watch</span>
           </a>
         {:else if item.type === 'Podcasts' && item.url}

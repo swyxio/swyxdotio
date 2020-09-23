@@ -14,6 +14,14 @@ let current_component;
 function set_current_component(component) {
     current_component = component;
 }
+function get_current_component() {
+    if (!current_component)
+        throw new Error(`Function called outside component initialization`);
+    return current_component;
+}
+function onMount(fn) {
+    get_current_component().$$.on_mount.push(fn);
+}
 const escaped = {
     '"': '&quot;',
     "'": '&#39;',
@@ -110,12 +118,16 @@ const ShowcaseItem = create_ssr_component(($$result, $$props, $$bindings, slots)
 	? `<div class="${""}">${escape(shortDesc)}</div>`
 	: `<div>${escape(longDesc)}</div>
 
-            <dl>${item.canonical
+            <dl>${item.date
+		? `<div class="${"py-2 sm:grid sm:grid-cols-3 sm:gap-4\n                    break-all"}"><dt class="${"text-sm leading-5 font-medium text-gray-500"}">Date
+                  </dt>
+                  <dd class="${"mt-1 text-sm leading-5 text-gray-900 sm:mt-0\n                      sm:col-span-2"}">${escape(item.date.slice(0, 10))}</dd></div>`
+		: ``}${item.canonical
 		? `<div class="${"py-2 sm:grid sm:grid-cols-3 sm:gap-4"}"><dt class="${"text-sm leading-5 font-medium text-gray-500"}">Originally posted at:
                   </dt>
                   <dd class="${"mt-1 text-sm leading-5 text-gray-900 sm:mt-0\n                      sm:col-span-2"}"><a class="${"underline hover:text-blue-700"}"${add_attribute("href", item.canonical, 0)}>${escape(item.canonical)}</a></dd></div>`
 		: ``}${item.url
-		? `<div class="${"py-2 sm:grid sm:grid-cols-3 sm:gap-4\n                    break-all"}"><dt class="${"text-sm leading-5 font-medium text-gray-500"}">External URL
+		? `<div class="${"py-2 sm:grid sm:grid-cols-3 sm:gap-4\n                    break-all"}"><dt class="${"text-sm leading-5 font-medium text-gray-500 break-normal"}">External URL
                   </dt>
                   <dd class="${"mt-1 text-sm leading-5 text-gray-900 sm:mt-0\n                      sm:col-span-2"}"><a class="${"underline hover:text-blue-700"}"${add_attribute("href", item.url, 0)}>${escape(item.url)}</a></dd></div>`
 		: ``}${item.slides
@@ -154,7 +166,7 @@ const ShowcaseItem = create_ssr_component(($$result, $$props, $$bindings, slots)
           `
 	: `${item.type === "Talks" && item.instances && item.instances[0].video
 		? `<a${add_attribute("href", item.instances[0].video, 0)} target="${"_blank"}" rel="${"noopener"}" class="${"relative w-0 flex-1 inline-flex items-center justify-center\n              py-4 text-sm leading-5 text-gray-700 font-medium border\n              border-transparent rounded-br-lg hover:text-gray-500\n              focus:outline-none focus:shadow-outline-blue focus:border-blue-300\n              focus:z-10 transition ease-in-out duration-150"}">
-            <svg class="${"w-5 h-5 text-gray-400"}" xmlns="${"http://www.w3.org/2000/svg"}" fill="${"none"}" viewBox="${"0 0 24 24"}" stroke="${"currentColor"}"><path stroke-linecap="${"round"}" stroke-linejoin="${"round"}" stroke-width="${"2"}" d="${"M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"}"></path></svg>
+            <svg class="${"w-5 h-5 text-gray-400"}" fill="${"currentColor"}" role="${"img"}" xmlns="${"http://www.w3.org/2000/svg"}" viewBox="${"0 0 24 24"}"><title>YouTube icon</title><path d="${"M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"}"></path></svg>
             <span class="${"ml-3"}">Watch</span></a>`
 		: `${item.type === "Podcasts" && item.url
 			? `<a${add_attribute("href", item.url, 0)} target="${"_blank"}" rel="${"noopener"}" class="${"relative w-0 flex-1 inline-flex items-center justify-center\n              py-4 text-sm leading-5 text-gray-700 font-medium border\n              border-transparent rounded-br-lg hover:text-gray-500\n              focus:outline-none focus:shadow-outline-blue focus:border-blue-300\n              focus:z-10 transition ease-in-out duration-150"}">
@@ -163,13 +175,578 @@ const ShowcaseItem = create_ssr_component(($$result, $$props, $$bindings, slots)
 			: `<div></div>`}`}`}</div></div></div></li>`;
 });
 
+function createCommonjsModule(fn, basedir, module) {
+	return module = {
+	  path: basedir,
+	  exports: {},
+	  require: function (path, base) {
+      return commonjsRequire(path, (base === undefined || base === null) ? module.path : base);
+    }
+	}, fn(module, module.exports), module.exports;
+}
+
+function commonjsRequire () {
+	throw new Error('Dynamic requires are not currently supported by @rollup/plugin-commonjs');
+}
+
+var strictUriEncode = str => encodeURIComponent(str).replace(/[!'()*]/g, x => `%${x.charCodeAt(0).toString(16).toUpperCase()}`);
+
+var token = '%[a-f0-9]{2}';
+var singleMatcher = new RegExp(token, 'gi');
+var multiMatcher = new RegExp('(' + token + ')+', 'gi');
+
+function decodeComponents(components, split) {
+	try {
+		// Try to decode the entire string first
+		return decodeURIComponent(components.join(''));
+	} catch (err) {
+		// Do nothing
+	}
+
+	if (components.length === 1) {
+		return components;
+	}
+
+	split = split || 1;
+
+	// Split the array in 2 parts
+	var left = components.slice(0, split);
+	var right = components.slice(split);
+
+	return Array.prototype.concat.call([], decodeComponents(left), decodeComponents(right));
+}
+
+function decode(input) {
+	try {
+		return decodeURIComponent(input);
+	} catch (err) {
+		var tokens = input.match(singleMatcher);
+
+		for (var i = 1; i < tokens.length; i++) {
+			input = decodeComponents(tokens, i).join('');
+
+			tokens = input.match(singleMatcher);
+		}
+
+		return input;
+	}
+}
+
+function customDecodeURIComponent(input) {
+	// Keep track of all the replacements and prefill the map with the `BOM`
+	var replaceMap = {
+		'%FE%FF': '\uFFFD\uFFFD',
+		'%FF%FE': '\uFFFD\uFFFD'
+	};
+
+	var match = multiMatcher.exec(input);
+	while (match) {
+		try {
+			// Decode as big chunks as possible
+			replaceMap[match[0]] = decodeURIComponent(match[0]);
+		} catch (err) {
+			var result = decode(match[0]);
+
+			if (result !== match[0]) {
+				replaceMap[match[0]] = result;
+			}
+		}
+
+		match = multiMatcher.exec(input);
+	}
+
+	// Add `%C2` at the end of the map to make sure it does not replace the combinator before everything else
+	replaceMap['%C2'] = '\uFFFD';
+
+	var entries = Object.keys(replaceMap);
+
+	for (var i = 0; i < entries.length; i++) {
+		// Replace all decoded components
+		var key = entries[i];
+		input = input.replace(new RegExp(key, 'g'), replaceMap[key]);
+	}
+
+	return input;
+}
+
+var decodeUriComponent = function (encodedURI) {
+	if (typeof encodedURI !== 'string') {
+		throw new TypeError('Expected `encodedURI` to be of type `string`, got `' + typeof encodedURI + '`');
+	}
+
+	try {
+		encodedURI = encodedURI.replace(/\+/g, ' ');
+
+		// Try the built in decoder first
+		return decodeURIComponent(encodedURI);
+	} catch (err) {
+		// Fallback to a more advanced decoder
+		return customDecodeURIComponent(encodedURI);
+	}
+};
+
+var splitOnFirst = (string, separator) => {
+	if (!(typeof string === 'string' && typeof separator === 'string')) {
+		throw new TypeError('Expected the arguments to be of type `string`');
+	}
+
+	if (separator === '') {
+		return [string];
+	}
+
+	const separatorIndex = string.indexOf(separator);
+
+	if (separatorIndex === -1) {
+		return [string];
+	}
+
+	return [
+		string.slice(0, separatorIndex),
+		string.slice(separatorIndex + separator.length)
+	];
+};
+
+var queryString = createCommonjsModule(function (module, exports) {
+
+
+
+
+const isNullOrUndefined = value => value === null || value === undefined;
+
+function encoderForArrayFormat(options) {
+	switch (options.arrayFormat) {
+		case 'index':
+			return key => (result, value) => {
+				const index = result.length;
+
+				if (
+					value === undefined ||
+					(options.skipNull && value === null) ||
+					(options.skipEmptyString && value === '')
+				) {
+					return result;
+				}
+
+				if (value === null) {
+					return [...result, [encode(key, options), '[', index, ']'].join('')];
+				}
+
+				return [
+					...result,
+					[encode(key, options), '[', encode(index, options), ']=', encode(value, options)].join('')
+				];
+			};
+
+		case 'bracket':
+			return key => (result, value) => {
+				if (
+					value === undefined ||
+					(options.skipNull && value === null) ||
+					(options.skipEmptyString && value === '')
+				) {
+					return result;
+				}
+
+				if (value === null) {
+					return [...result, [encode(key, options), '[]'].join('')];
+				}
+
+				return [...result, [encode(key, options), '[]=', encode(value, options)].join('')];
+			};
+
+		case 'comma':
+		case 'separator':
+			return key => (result, value) => {
+				if (value === null || value === undefined || value.length === 0) {
+					return result;
+				}
+
+				if (result.length === 0) {
+					return [[encode(key, options), '=', encode(value, options)].join('')];
+				}
+
+				return [[result, encode(value, options)].join(options.arrayFormatSeparator)];
+			};
+
+		default:
+			return key => (result, value) => {
+				if (
+					value === undefined ||
+					(options.skipNull && value === null) ||
+					(options.skipEmptyString && value === '')
+				) {
+					return result;
+				}
+
+				if (value === null) {
+					return [...result, encode(key, options)];
+				}
+
+				return [...result, [encode(key, options), '=', encode(value, options)].join('')];
+			};
+	}
+}
+
+function parserForArrayFormat(options) {
+	let result;
+
+	switch (options.arrayFormat) {
+		case 'index':
+			return (key, value, accumulator) => {
+				result = /\[(\d*)\]$/.exec(key);
+
+				key = key.replace(/\[\d*\]$/, '');
+
+				if (!result) {
+					accumulator[key] = value;
+					return;
+				}
+
+				if (accumulator[key] === undefined) {
+					accumulator[key] = {};
+				}
+
+				accumulator[key][result[1]] = value;
+			};
+
+		case 'bracket':
+			return (key, value, accumulator) => {
+				result = /(\[\])$/.exec(key);
+				key = key.replace(/\[\]$/, '');
+
+				if (!result) {
+					accumulator[key] = value;
+					return;
+				}
+
+				if (accumulator[key] === undefined) {
+					accumulator[key] = [value];
+					return;
+				}
+
+				accumulator[key] = [].concat(accumulator[key], value);
+			};
+
+		case 'comma':
+		case 'separator':
+			return (key, value, accumulator) => {
+				const isArray = typeof value === 'string' && value.split('').indexOf(options.arrayFormatSeparator) > -1;
+				const newValue = isArray ? value.split(options.arrayFormatSeparator).map(item => decode(item, options)) : value === null ? value : decode(value, options);
+				accumulator[key] = newValue;
+			};
+
+		default:
+			return (key, value, accumulator) => {
+				if (accumulator[key] === undefined) {
+					accumulator[key] = value;
+					return;
+				}
+
+				accumulator[key] = [].concat(accumulator[key], value);
+			};
+	}
+}
+
+function validateArrayFormatSeparator(value) {
+	if (typeof value !== 'string' || value.length !== 1) {
+		throw new TypeError('arrayFormatSeparator must be single character string');
+	}
+}
+
+function encode(value, options) {
+	if (options.encode) {
+		return options.strict ? strictUriEncode(value) : encodeURIComponent(value);
+	}
+
+	return value;
+}
+
+function decode(value, options) {
+	if (options.decode) {
+		return decodeUriComponent(value);
+	}
+
+	return value;
+}
+
+function keysSorter(input) {
+	if (Array.isArray(input)) {
+		return input.sort();
+	}
+
+	if (typeof input === 'object') {
+		return keysSorter(Object.keys(input))
+			.sort((a, b) => Number(a) - Number(b))
+			.map(key => input[key]);
+	}
+
+	return input;
+}
+
+function removeHash(input) {
+	const hashStart = input.indexOf('#');
+	if (hashStart !== -1) {
+		input = input.slice(0, hashStart);
+	}
+
+	return input;
+}
+
+function getHash(url) {
+	let hash = '';
+	const hashStart = url.indexOf('#');
+	if (hashStart !== -1) {
+		hash = url.slice(hashStart);
+	}
+
+	return hash;
+}
+
+function extract(input) {
+	input = removeHash(input);
+	const queryStart = input.indexOf('?');
+	if (queryStart === -1) {
+		return '';
+	}
+
+	return input.slice(queryStart + 1);
+}
+
+function parseValue(value, options) {
+	if (options.parseNumbers && !Number.isNaN(Number(value)) && (typeof value === 'string' && value.trim() !== '')) {
+		value = Number(value);
+	} else if (options.parseBooleans && value !== null && (value.toLowerCase() === 'true' || value.toLowerCase() === 'false')) {
+		value = value.toLowerCase() === 'true';
+	}
+
+	return value;
+}
+
+function parse(input, options) {
+	options = Object.assign({
+		decode: true,
+		sort: true,
+		arrayFormat: 'none',
+		arrayFormatSeparator: ',',
+		parseNumbers: false,
+		parseBooleans: false
+	}, options);
+
+	validateArrayFormatSeparator(options.arrayFormatSeparator);
+
+	const formatter = parserForArrayFormat(options);
+
+	// Create an object with no prototype
+	const ret = Object.create(null);
+
+	if (typeof input !== 'string') {
+		return ret;
+	}
+
+	input = input.trim().replace(/^[?#&]/, '');
+
+	if (!input) {
+		return ret;
+	}
+
+	for (const param of input.split('&')) {
+		let [key, value] = splitOnFirst(options.decode ? param.replace(/\+/g, ' ') : param, '=');
+
+		// Missing `=` should be `null`:
+		// http://w3.org/TR/2012/WD-url-20120524/#collect-url-parameters
+		value = value === undefined ? null : ['comma', 'separator'].includes(options.arrayFormat) ? value : decode(value, options);
+		formatter(decode(key, options), value, ret);
+	}
+
+	for (const key of Object.keys(ret)) {
+		const value = ret[key];
+		if (typeof value === 'object' && value !== null) {
+			for (const k of Object.keys(value)) {
+				value[k] = parseValue(value[k], options);
+			}
+		} else {
+			ret[key] = parseValue(value, options);
+		}
+	}
+
+	if (options.sort === false) {
+		return ret;
+	}
+
+	return (options.sort === true ? Object.keys(ret).sort() : Object.keys(ret).sort(options.sort)).reduce((result, key) => {
+		const value = ret[key];
+		if (Boolean(value) && typeof value === 'object' && !Array.isArray(value)) {
+			// Sort object keys, not values
+			result[key] = keysSorter(value);
+		} else {
+			result[key] = value;
+		}
+
+		return result;
+	}, Object.create(null));
+}
+
+exports.extract = extract;
+exports.parse = parse;
+
+exports.stringify = (object, options) => {
+	if (!object) {
+		return '';
+	}
+
+	options = Object.assign({
+		encode: true,
+		strict: true,
+		arrayFormat: 'none',
+		arrayFormatSeparator: ','
+	}, options);
+
+	validateArrayFormatSeparator(options.arrayFormatSeparator);
+
+	const shouldFilter = key => (
+		(options.skipNull && isNullOrUndefined(object[key])) ||
+		(options.skipEmptyString && object[key] === '')
+	);
+
+	const formatter = encoderForArrayFormat(options);
+
+	const objectCopy = {};
+
+	for (const key of Object.keys(object)) {
+		if (!shouldFilter(key)) {
+			objectCopy[key] = object[key];
+		}
+	}
+
+	const keys = Object.keys(objectCopy);
+
+	if (options.sort !== false) {
+		keys.sort(options.sort);
+	}
+
+	return keys.map(key => {
+		const value = object[key];
+
+		if (value === undefined) {
+			return '';
+		}
+
+		if (value === null) {
+			return encode(key, options);
+		}
+
+		if (Array.isArray(value)) {
+			return value
+				.reduce(formatter(key), [])
+				.join('&');
+		}
+
+		return encode(key, options) + '=' + encode(value, options);
+	}).filter(x => x.length > 0).join('&');
+};
+
+exports.parseUrl = (input, options) => {
+	options = Object.assign({
+		decode: true
+	}, options);
+
+	const [url, hash] = splitOnFirst(input, '#');
+
+	return Object.assign(
+		{
+			url: url.split('?')[0] || '',
+			query: parse(extract(input), options)
+		},
+		options && options.parseFragmentIdentifier && hash ? {fragmentIdentifier: decode(hash, options)} : {}
+	);
+};
+
+exports.stringifyUrl = (input, options) => {
+	options = Object.assign({
+		encode: true,
+		strict: true
+	}, options);
+
+	const url = removeHash(input.url).split('?')[0] || '';
+	const queryFromUrl = exports.extract(input.url);
+	const parsedQueryFromUrl = exports.parse(queryFromUrl, {sort: false});
+
+	const query = Object.assign(parsedQueryFromUrl, input.query);
+	let queryString = exports.stringify(query, options);
+	if (queryString) {
+		queryString = `?${queryString}`;
+	}
+
+	let hash = getHash(input.url);
+	if (input.fragmentIdentifier) {
+		hash = `#${encode(input.fragmentIdentifier, options)}`;
+	}
+
+	return `${url}${queryString}${hash}`;
+};
+});
+
 /* src/components/Showcase/Showcase.svelte generated by Svelte v3.25.1 */
 
 const Showcase = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+	let urlState = { filter: "", show: [] };
+
+	let defaultURLState = {
+		filter: "",
+		show: ["Essays", "Talks", "Podcasts"]
+	};
+
+	onMount(() => {
+		urlState = {
+			...defaultURLState,
+			...queryString.parse(location.search)
+		};
+	});
+
+	const setURLState = newState => {
+		const finalState = { ...urlState, ...newState }; // merge with existing urlstate
+
+		Object.keys(finalState).forEach(function (k) {
+			if (// don't save some state values if it meets the conditions below
+			!finalState[k] || // falsy
+			finalState[k] === "" || // string
+			Array.isArray(finalState[k]) && !finalState[k].length || // array
+			finalState[k] === defaultURLState[k]) {
+				delete finalState[k]; // same as default state, unnecessary
+				// drop query params with new values = falsy
+			}
+		});
+
+		urlState = finalState;
+		if (typeof window !== "undefined") history.pushState({}, "", document.location.origin + document.location.pathname + "?" + queryString.stringify(finalState));
+	};
+
 	let { data } = $$props;
+	let essays = true;
+	let talks = true;
+	let podcasts = true;
+	let tutorials = false;
+	let notes = false;
 	let filterStr = "";
 	if ($$props.data === void 0 && $$bindings.data && data !== void 0) $$bindings.data(data);
 	let filteredData;
+
+	 {
+		setURLState({
+			filter: filterStr,
+			show: [
+				 "Essays",
+				 "Talks",
+				 "Podcasts",
+				tutorials ,
+				notes 
+			].filter(Boolean)
+		});
+	}
+
+	 {
+		console.log({ urlState, essays, talks, podcasts });
+	}
 
 	filteredData = data.filter(x => {
 		{
@@ -224,9 +801,15 @@ const Showcase = create_ssr_component(($$result, $$props, $$bindings, slots) => 
     ${ ``}</div>
 
   
-    <ul class="${"grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"}">${filteredData.length
-	? each(filteredData, item => `${validate_component(ShowcaseItem, "ShowcaseItem").$$render($$result, { item }, {}, {})}`)
-	: `<div class="${"p-8"}">No Content Types Selected! Please see menu above and pick from either Essays, Talks, or Podcasts</div>`}</ul>
+    ${filteredData.length
+	? `<ul class="${"grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"}">${each(filteredData, item => `${validate_component(ShowcaseItem, "ShowcaseItem").$$render($$result, { item }, {}, {})}`)}</ul>`
+	: `<div class="${"p-8 text-red-500"}">Nothing found! The filter was too restrictive.
+      ${!urlState.show
+		? `Please pick either Essays, Talks, or Podcasts to show.`
+		: ``}
+      ${urlState.filter
+		? `Please clear the filter bar and you&#39;ll see more stuff.`
+		: ``}</div>`}
   </div>
 `;
 });

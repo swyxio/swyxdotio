@@ -1,5 +1,30 @@
 <script>
   import ShowcaseItem from "./ShowcaseItem.svelte"
+  import queryString from "query-string"
+  import {onMount} from 'svelte'
+
+  let urlState = {filter: '', show: []}
+  let defaultURLState = { filter: '', show: ['Essays', 'Talks', 'Podcasts'] }
+  onMount(() => {
+    urlState = { ...defaultURLState, ...queryString.parse(location.search) }
+  })
+  
+  const setURLState = newState => {
+    const finalState = { ...urlState, ...newState } // merge with existing urlstate
+    Object.keys(finalState).forEach(function (k) {
+      if ( // don't save some state values if it meets the conditions below
+        !finalState[k] || // falsy
+        finalState[k] === "" || // string
+        (Array.isArray(finalState[k]) && !finalState[k].length) || // array
+        finalState[k] === defaultURLState[k] // same as default state, unnecessary
+      ) {
+        delete finalState[k]; // drop query params with new values = falsy
+      }
+    });
+    urlState = finalState
+    if (typeof window !== 'undefined') history.pushState({},'', document.location.origin + document.location.pathname + '?' + queryString.stringify(finalState))
+  }
+
   export let data
 
   let essays = true
@@ -9,7 +34,9 @@
   let notes = false
 
   let filterStr = ''
-
+  $: setURLState({filter: filterStr, show: [essays && "Essays", talks && "Talks", podcasts && "Podcasts", tutorials && "Tutorials", notes && "Notes"].filter(Boolean) })
+  $: console.log({urlState, essays, talks, podcasts})
+  
   $: filteredData = data.filter((x) => {
     if (filterStr && notIncludes(filterStr, x)) {
       return false
@@ -123,7 +150,7 @@
       </button>
       <button
         type="button"
-        on:click={() => (tutorials = !tutorials)}
+        on:click={() => alert('coming soon')}
         class:bg-gray-300={tutorials}
         class="-ml-px relative inline-flex items-center px-4 py-2 border
           border-gray-300 bg-white text-sm leading-5 font-medium text-gray-700
@@ -134,7 +161,7 @@
       </button>
       <button
         type="button"
-        on:click={() => (notes = !notes)}
+        on:click={() => alert('coming soon')}
         class:bg-gray-300={notes}
         class="-ml-px relative inline-flex items-center px-4 py-2 sm:rounded-r-md
           border border-gray-300 bg-white text-sm leading-5 font-medium
@@ -177,13 +204,22 @@
   </div>
 
   <!-- <div class=" bg-gray-200 shadow overflow-hidden sm:rounded-md"> -->
+    {#if filteredData.length}
     <ul class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {#each filteredData as item}
           <ShowcaseItem {item} />
-      {:else}
-      <div class="p-8">No Content Types Selected! Please see menu above and pick from either Essays, Talks, or Podcasts</div>
-      {/each}
+          {/each}
     </ul>
+    {:else}
+    <div class="p-8 text-red-500">Nothing found! The filter was too restrictive.
+      {#if !urlState.show}
+       Please pick either Essays, Talks, or Podcasts to show.
+      {/if}
+      {#if urlState.filter}
+       Please clear the filter bar and you'll see more stuff.
+      {/if}
+    </div>
+    {/if}
   <!-- </div> -->
 </div>
 <!-- </div> -->
