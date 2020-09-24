@@ -32,13 +32,22 @@
           <p class="text-base font-medium text-gray-300">
             Join 2,000+ developers and get blog updates every other week!
           </p>
-          <form action="#" method="POST" class="mt-3 sm:flex">
+          <form 
+          action="https://tinyletter.com/swyx"
+          method="post"
+          target="popupwindow"
+          onsubmit="window.open('https://tinyletter.com/swyx', 'popupwindow', 'scrollbars=yes,width=800,height=600');return true"
+           class="mt-3 sm:flex">
             <input
               aria-label="Email"
+              id="tlemail"
+              name="email"
+              type="email"
               class="appearance-none block w-full px-3 py-3 border border-gray-300 text-base leading-6 rounded-md
                 placeholder-gray-500 shadow-sm focus:outline-none focus:placeholder-gray-400 focus:shadow-outline-blue
                 focus:border-blue-300 transition duration-150 ease-in-out sm:flex-1"
               placeholder="Enter your email" />
+            <input type="hidden" value="1" name="embed" />
             <button
               type="submit"
               class="mt-3 w-full px-6 py-3 border border-transparent text-base leading-6 font-medium rounded-md
@@ -71,12 +80,9 @@
     </div>
     <div
       class="mt-12 relative sm:max-w-lg sm:mx-auto lg:mt-0 lg:max-w-none lg:mx-0 lg:col-span-6 lg:flex lg:items-center">
-      <div class="relative mx-auto w-full rounded-lg shadow-lg lg:max-w-md">
-        <button
-          type="button"
-          class="relative block w-full rounded-lg overflow-hidden focus:outline-none focus:shadow-outline">
+      <div class="relative mx-auto w-32 md:w-full rounded-lg shadow-lg lg:max-w-md">
           <img
-            class="w-full"
+            class="w-full relative block rounded-full md:rounded-lg overflow-hidden focus:outline-none focus:shadow-outline"
             src="https://avatars2.githubusercontent.com/u/6764957?u=97ad815028595b73b06ee4b0510e66bbe391228d&v=4&s=500"
             alt="swyx at niseko" />
           <!-- <div class="absolute inset-0 w-full h-full flex items-center justify-center">
@@ -85,7 +91,6 @@
                     <path d="M55.5039 40.3359L37.1094 28.0729C35.7803 27.1869 34 28.1396 34 29.737V54.263C34 55.8604 35.7803 56.8131 37.1094 55.9271L55.5038 43.6641C56.6913 42.8725 56.6913 41.1275 55.5039 40.3359Z" />
                   </svg>
                 </div> -->
-        </button>
       </div>
     </div>
   </div>
