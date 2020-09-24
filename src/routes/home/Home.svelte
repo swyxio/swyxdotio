@@ -30,7 +30,7 @@
 
         <div class="mt-5 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
           <p class="text-base font-medium text-indigo-100 text-opacity-75">
-            Join 2,000+ developers and get blog updates every other week!
+            Join 2,000+ developers getting updates when I ship something big!
           </p>
           <form 
           action="https://tinyletter.com/swyx"
