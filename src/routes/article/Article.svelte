@@ -1,9 +1,8 @@
 <script>
   import WebMentions from '../../components/WebMentions/WebMentions.svelte'
   export let data
-  // export let slug
   const { html, frontmatter, markdown, podcasts, talks, ...rest } = data
-  console.log({frontmatter, rest})
+  // console.log({frontmatter, rest})
 
   let seoSubtitle = frontmatter && frontmatter.subtitle
   export let seoTitle = seoSubtitle

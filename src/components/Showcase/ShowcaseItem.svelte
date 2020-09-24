@@ -18,6 +18,21 @@
   // $: if (item.type === 'Essays') console.log({ item })
 </script>
 
+<!-- because svelte class is broken -->
+<!-- border-green-500
+border-blue-500
+border-teal-500
+bg-green-100
+text-green-800
+bg-blue-100
+text-blue-800
+bg-teal-100
+text-teal-800
+bg-indigo-600
+translate-x-5
+bg-gray-500
+text-teal-500 -->
+
 <li
   class="col-span-1 bg-gray-100 rounded-lg shadow flex flex-col justify-between
     border-4 transition duration-100 transform hover:-translate-y-1"
@@ -38,7 +53,7 @@
             class:text-blue-800={item.type === 'Talks'}
             class:bg-teal-100={item.type === 'Podcasts'}
             class:text-teal-800={item.type === 'Podcasts'}>
-            <!-- bg-teal-100 text-teal-800  -->
+
             {item.type}
           </span>
           <h3
