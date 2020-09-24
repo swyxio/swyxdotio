@@ -55,7 +55,15 @@
   })
   // $: console.log({urlState, essays, talks, podcasts})
 
+  $: showAll = filterStr.length > 2
   $: filteredData = data
+    .map((x) => {
+      if (x.date) x.effectiveDate = new Date(x.date)
+      if (x.instances) x.effectiveDate = new Date(x.instances[0].date)
+      return x
+    })
+    .sort((a, z) => z.effectiveDate - a.effectiveDate)
+    .filter((_, i) => (showAll ? true : i < 30))
     .filter((x) => {
       if (filterStr && notIncludes(filterStr, x)) {
         return false
@@ -67,12 +75,6 @@
         if (notes && x.type === 'Notes') return true
       }
     })
-    .map((x) => {
-      if (x.date) x.effectiveDate = new Date(x.date)
-      if (x.instances) x.effectiveDate = new Date(x.instances[0].date)
-      return x
-    })
-    .sort((a, z) => z.effectiveDate - a.effectiveDate)
   // $: console.log({ filteredData })
 
   function notIncludes(_filterStr, item) {
@@ -99,7 +101,7 @@
       Idea Showcase
     </h1>
     <p class="mt-3 text-xl leading-7 text-gray-400 sm:mt-4">
-      For Free: {filteredData.length} Great Ideas. Lightly Used.
+      For Free: Great Ideas. Lightly Used.
     </p>
   </div>
 </div>
@@ -240,6 +242,20 @@
         <ShowcaseItem {item} />
       {/each}
     </ul>
+    {#if !showAll}
+      <span class="flex justify-center my-8 rounded-md shadow-sm animate-bounce">
+        <button
+          on:click={() => (showAll = true)}
+          type="button"
+          class="inline-flex items-center border border-transparent
+            leading-6 font-medium rounded-md text-white bg-indigo-600
+            hover:bg-indigo-500 focus:outline-none focus:border-indigo-700
+            focus:shadow-outline-indigo active:bg-indigo-700 transition
+            ease-in-out duration-150 text-4xl p-8">
+          Show All
+        </button>
+      </span>
+    {/if}
   {:else}
     <div class="p-8 text-red-500">
       Nothing found! The filter was too restrictive. {#if !urlState.show}Please

@@ -218,6 +218,7 @@
     <div class="flex justify-between">
 
       <a class="text-white" href="/ideas">&LeftArrow; More Essays</a>
+      <a class="text-white" href="https://tinyletter.com/swyx">Subscribe via Email</a>
       <a class="text-white" href="/about">Featured Essays and Talks &RightArrow;</a>
     </div>
       <WebMentions
