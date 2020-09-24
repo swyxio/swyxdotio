@@ -58,7 +58,10 @@
         href="https://www.freecodecamp.org/news/shawn-wang-podcast-interview/">hedgie
         turned developer</a>, primarily active in the JavaScript community. I am
       originally from Singapore 🇸🇬, but have lived and worked mostly in the
-      US/UK, most recently in New York City 🗽. I am best known for the <a href="/learn-in-public">Learn in Public</a> idea and <a href="/ideas?filter=React&show=Essays&show=Talks&show=Podcasts">my speaking on React</a>.
+      US/UK, most recently in New York City 🗽. I am best known for the <a
+        href="/learn-in-public">Learn in Public</a> idea and <a
+        href="/ideas?filter=React&show=Essays&show=Talks&show=Podcasts">my
+        speaking on React</a>.
     </p>
     <h3 id="bio">Bio for Event Organizers</h3>
     <p>
@@ -76,11 +79,15 @@
       <a
         href="https://avatars3.githubusercontent.com/u/6764957?s=460&v=4">Large</a>.
     </p>
-    <a href="https://nownownow.com/about"><h3 id="now">What I'm Doing Now</h3></a>
+    <a href="https://nownownow.com/about"><h3 id="now">
+        What I'm Doing Now
+      </h3></a>
     <p>
       I am currently working on Developer Experience at AWS Amplify. I also am
       on the <a href="https://www.svelteradio.com/">Svelte Radio</a> and <a
-        href="http://careerchats.transistor.fm/">Career Chats</a> podcasts. You can get more high frequency updates on <a href="https://twitter.com/swyx">my Twitter</a>.
+        href="http://careerchats.transistor.fm/">Career Chats</a> podcasts. You can
+      get more high frequency updates on <a href="https://twitter.com/swyx">my
+        Twitter</a>.
     </p>
   </div>
   <hr />
