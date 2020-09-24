@@ -30,7 +30,7 @@
       id="main-menu"
       aria-label="Main menu"
       aria-haspopup="true">
-      <svg class="h-6 w-6 ml-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+      <svg class="h-6 w-6 ml-2" stroke="currentColor" fill="none" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
       </svg>
     </button>

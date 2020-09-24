@@ -42,6 +42,25 @@ module.exports = {
         },
       },
     }),
+    rotate: {
+      '360': '360deg'
+    },
+    extend: {
+      keyframes: {
+        wiggle: {
+          '0%, 100%': { transform: 'rotate(-3deg)' },
+          '50%': { transform: 'rotate(3deg)' },
+        }
+      },
+      animation: {
+        wiggle: 'wiggle 1s ease-in-out infinite',
+      }
+    }
+  },
+  variants: {
+    animation: ['responsive', 'hover'],
+    borderRadius: ['responsive', 'hover'],
+    borderWidth: ['responsive', 'hover'],
   },
   purge: {
     // mode: 'all', // TODO: purge typography styles
@@ -59,8 +78,8 @@ module.exports = {
       // // Capture classes within other delimiters like .block(class="w-1/2") in Pug
       // const innerMatches = content.match(/[^<>"'`\s.(){}[\]#=%]*[^<>"'`\s.(){}[\]#=%:]/g) || []
       const matches = broadMatches
-          .concat(broadMatchesWithoutTrailingSlash)
-          // .concat([...content.matchAll(/(?:class:)*([\w\d-\/:%.]+)/gm)].map(([_match, group, ..._rest]) => group))
+        .concat(broadMatchesWithoutTrailingSlash)
+      // .concat([...content.matchAll(/(?:class:)*([\w\d-\/:%.]+)/gm)].map(([_match, group, ..._rest]) => group))
       return matches
     },
     enabled: production // disable purge in dev

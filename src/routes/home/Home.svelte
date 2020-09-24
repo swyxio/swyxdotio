@@ -15,13 +15,13 @@
           Welcome to <span class="text-indigo-400">swyx.io</span>!
         </h2>
         <p class="mt-3 text-base text-gray-300 sm:mt-5 sm:text-xl lg:text-lg xl:text-xl">
-          I <a href="http://github.com/sw-yx" class="underline text-indigo-300">code</a>, <a
+          <span class="block">I <a href="http://github.com/sw-yx" class="underline text-indigo-300">code</a>, <a
             href="https://www.swyx.io/speaking/react-hooks"
             class="underline text-indigo-300">speak</a>, and <a
             href="https://egghead.io/s/26zf5"
             class="underline text-indigo-300">teach</a>. But above all, I <a
             href="/ideas"
-            class="underline text-indigo-300">write</a>. If we share interests, I'd love to connect with you!
+            class="underline text-indigo-300">write</a>. </span><span>If we share interests, I'd love to connect!</span>
           <!-- I am passionate about Developer Tools and Developer Communities and currently work as a Senior Developer
                 Advocate at AWS. In my free time I teach React, TypeScript, Storybook and Node.js CLI's at <a
                   href="https://egghead.io/s/26zf5">Egghead.io</a>, and help run the <a
@@ -29,7 +29,7 @@
         </p>
 
         <div class="mt-5 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
-          <p class="text-base font-medium text-gray-300">
+          <p class="text-base font-medium text-indigo-100 text-opacity-75">
             Join 2,000+ developers and get blog updates every other week!
           </p>
           <form 
@@ -53,12 +53,12 @@
               class="mt-3 w-full px-6 py-3 border border-transparent text-base leading-6 font-medium rounded-md
                 text-white bg-indigo-600 shadow-sm hover:bg-indigo-400 focus:outline-none focus:border-gray-300
                 focus:shadow-outline-gray active:bg-indigo-400 transition duration-150 ease-in-out sm:mt-0 sm:ml-3
-                sm:flex-shrink-0 sm:inline-flex sm:items-center sm:w-auto">
+                sm:flex-shrink-0 sm:inline-flex sm:items-center sm:w-auto hover:animate-wiggle">
               Notify me
             </button>
           </form>
-          <p class="mt-3 text-sm leading-5 text-gray-300">
-            Too soon! <a class="font-medium text-gray-300 underline" href="https://tinyletter.com/swyx/archive">Show me
+          <p class="mt-3 text-sm leading-5 text-gray-300 text-opacity-50">
+            Too soon! <a class="font-medium text-gray-300 text-opacity-50 underline" href="https://tinyletter.com/swyx/archive">Show me
               what I'm signing up for!</a>
           </p>
         </div>
@@ -80,9 +80,12 @@
     </div>
     <div
       class="mt-12 relative sm:max-w-lg sm:mx-auto lg:mt-0 lg:max-w-none lg:mx-0 lg:col-span-6 lg:flex lg:items-center">
-      <div class="relative mx-auto w-32 md:w-full rounded-lg shadow-lg lg:max-w-md">
+      <div class="relative mx-auto w-32 md:w-full rounded-lg lg:max-w-md">
           <img
-            class="w-full relative block rounded-full md:rounded-lg overflow-hidden focus:outline-none focus:shadow-outline"
+            class="hover:border-4 hover:border-indigo-700
+            transform transition duration-300 delay-200
+            hover:rotate-360 hover:scale-125 hover:rounded-full
+            w-full relative block rounded-full md:rounded-lg overflow-hidden focus:outline-none focus:shadow-outline"
             src="https://avatars2.githubusercontent.com/u/6764957?u=97ad815028595b73b06ee4b0510e66bbe391228d&v=4&s=500"
             alt="swyx at niseko" />
           <!-- <div class="absolute inset-0 w-full h-full flex items-center justify-center">
