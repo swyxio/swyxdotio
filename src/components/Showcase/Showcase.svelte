@@ -1,30 +1,38 @@
 <script>
-  import ShowcaseItem from "./ShowcaseItem.svelte"
-  import queryString from "query-string"
-  import {onMount} from 'svelte'
+  import ShowcaseItem from './ShowcaseItem.svelte'
+  import queryString from 'query-string'
+  import { onMount } from 'svelte'
 
-  let urlState = {filter: '', show: []}
+  let urlState = { filter: '', show: [] }
   let defaultURLState = { filter: '', show: ['Essays', 'Talks', 'Podcasts'] }
   onMount(() => {
     urlState = { ...defaultURLState, ...queryString.parse(location.search) }
   })
-  
-  const setURLState = newState => {
+
+  const setURLState = (newState) => {
     const finalState = { ...urlState, ...newState } // merge with existing urlstate
     urlState = finalState
     Object.keys(finalState).forEach(function (k) {
-      if ( // don't save some state values if it meets the conditions below
+      if (
+        // don't save some state values if it meets the conditions below
         !finalState[k] || // falsy
-        finalState[k] === "" || // string
+        finalState[k] === '' || // string
         (Array.isArray(finalState[k]) && !finalState[k].length) || // array
         finalState[k] === defaultURLState[k] // same as default state, unnecessary
       ) {
-        delete finalState[k]; // drop query params with new values = falsy
+        delete finalState[k] // drop query params with new values = falsy
       }
-    });
-    if (typeof window !== 'undefined') history.pushState({},'', document.location.origin + document.location.pathname + '?' + queryString.stringify(finalState))
+    })
+    if (typeof window !== 'undefined')
+      history.pushState(
+        {},
+        '',
+        document.location.origin +
+          document.location.pathname +
+          '?' +
+          queryString.stringify(finalState)
+      )
   }
-
 
   export let data
 
@@ -35,37 +43,52 @@
   let notes = false
 
   let filterStr = ''
-  $: setURLState({filter: filterStr, show: [essays && "Essays", talks && "Talks", podcasts && "Podcasts", tutorials && "Tutorials", notes && "Notes"].filter(Boolean) })
+  $: setURLState({
+    filter: filterStr,
+    show: [
+      essays && 'Essays',
+      talks && 'Talks',
+      podcasts && 'Podcasts',
+      tutorials && 'Tutorials',
+      notes && 'Notes'
+    ].filter(Boolean)
+  })
   // $: console.log({urlState, essays, talks, podcasts})
-  
-  $: filteredData = data.filter((x) => {
-    if (filterStr && notIncludes(filterStr, x)) {
-      return false
-    } else {
-      if (essays && x.type === 'Essays') return true
-      if (talks && x.type === 'Talks') return true
-      if (podcasts && x.type === 'Podcasts') return true
-      if (tutorials && x.type === 'Tutorials') return true
-      if (notes && x.type === 'Notes') return true
-    }
-  }).map(x => {
-    if (x.date) x.effectiveDate = new Date(x.date)
-    if (x.instances) x.effectiveDate = new Date(x.instances[0].date)
-    return x
-  }).sort((a,z) => z.effectiveDate - a.effectiveDate)
+
+  $: filteredData = data
+    .filter((x) => {
+      if (filterStr && notIncludes(filterStr, x)) {
+        return false
+      } else {
+        if (essays && x.type === 'Essays') return true
+        if (talks && x.type === 'Talks') return true
+        if (podcasts && x.type === 'Podcasts') return true
+        if (tutorials && x.type === 'Tutorials') return true
+        if (notes && x.type === 'Notes') return true
+      }
+    })
+    .map((x) => {
+      if (x.date) x.effectiveDate = new Date(x.date)
+      if (x.instances) x.effectiveDate = new Date(x.instances[0].date)
+      return x
+    })
+    .sort((a, z) => z.effectiveDate - a.effectiveDate)
   // $: console.log({ filteredData })
 
   function notIncludes(_filterStr, item) {
-
     let res = true
-    _filterStr = _filterStr.toLowerCase();
+    _filterStr = _filterStr.toLowerCase()
     // if (JSON.stringify(item).toLowerCase().includes(_filterStr)) return true
     if (item.title && item.title.toLowerCase().includes(_filterStr)) res = false
-    if (item.categories && item.categories.join().toLowerCase().includes(_filterStr)) res = false
-    if (item.description && item.description.toLowerCase().includes(_filterStr)) res = false
+    if (
+      item.categories &&
+      item.categories.join().toLowerCase().includes(_filterStr)
+    )
+      res = false
+    if (item.description && item.description.toLowerCase().includes(_filterStr))
+      res = false
     return res
   }
-
 </script>
 
 <div class="relative max-w-lg mx-auto lg:max-w-7xl mb-8">
@@ -102,29 +125,33 @@
         <input
           id="search_candidate"
           type="text"
-          class="form-input block w-full rounded-md pl-2
-            transition ease-in-out duration-150 sm:hidden"
-          placeholder="Filter" bind:value={filterStr} />
+          class="form-input block w-full rounded-md pl-2 transition ease-in-out
+            duration-150 sm:hidden"
+          placeholder="Filter"
+          bind:value={filterStr} />
         <input
           id="search_candidate"
           type="text"
-          class="hidden form-input w-full rounded-md pl-2
-            transition ease-in-out duration-150 sm:block sm:text-sm sm:leading-5 py-2 ml-4"
-          placeholder="Filter ideas" bind:value={filterStr} />
+          class="hidden form-input w-full rounded-md pl-2 transition ease-in-out
+            duration-150 sm:block sm:text-sm sm:leading-5 py-2 ml-4"
+          placeholder="Filter ideas"
+          bind:value={filterStr} />
       </div>
     </div>
     <!-- categories -->
-    <span class="relative z-0 inline-flex flex-col sm:flex-row shadow-sm rounded-md">
+    <span
+      class="relative z-0 inline-flex flex-col sm:flex-row shadow-sm rounded-md">
       <div class="inline-flex items-center mr-2 text-gray-400">Show:</div>
       <button
         type="button"
         on:click={() => (essays = !essays)}
         class:bg-gray-300={essays}
-        class="-ml-px sm:ml-0 relative inline-flex items-center px-4 py-2 sm:rounded-l-md border
-          border-gray-300 bg-white text-sm leading-5 font-medium text-gray-700
-          hover:text-gray-500 focus:z-10 focus:outline-none
-          focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-100
-          active:text-gray-700 transition ease-in-out duration-150">
+        class="-ml-px sm:ml-0 relative inline-flex items-center px-4 py-2
+          sm:rounded-l-md border border-gray-300 bg-white text-sm leading-5
+          font-medium text-gray-700 hover:text-gray-500 focus:z-10
+          focus:outline-none focus:border-blue-300 focus:shadow-outline-blue
+          active:bg-gray-100 active:text-gray-700 transition ease-in-out
+          duration-150">
         Essays
       </button>
       <button
@@ -164,63 +191,64 @@
         type="button"
         on:click={() => alert('coming soon')}
         class:bg-gray-300={notes}
-        class="-ml-px relative inline-flex items-center px-4 py-2 sm:rounded-r-md
-          border border-gray-300 bg-white text-sm leading-5 font-medium
-          text-gray-700 hover:text-gray-500 focus:z-10 focus:outline-none
-          focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-100
-          active:text-gray-700 transition ease-in-out duration-150">
+        class="-ml-px relative inline-flex items-center px-4 py-2
+          sm:rounded-r-md border border-gray-300 bg-white text-sm leading-5
+          font-medium text-gray-700 hover:text-gray-500 focus:z-10
+          focus:outline-none focus:border-blue-300 focus:shadow-outline-blue
+          active:bg-gray-100 active:text-gray-700 transition ease-in-out
+          duration-150">
         <strike>Notes</strike>
       </button>
     </span>
 
     <!-- sort - todo: see whether i actually need to sort -->
     {#if false}
-    <button
-      class="-ml-px relative inline-flex items-center px-4 py-2 border
-        border-gray-300 text-sm leading-5 font-medium rounded-r-md text-gray-700
-        bg-gray-50 hover:text-gray-500 hover:bg-white focus:outline-none
-        focus:shadow-outline-blue focus:border-blue-300 active:bg-gray-100
-        active:text-gray-700 transition ease-in-out duration-150">
-      <!-- Heroicon name: sort-ascending -->
-      <svg
-        class="h-5 w-5 text-gray-400"
-        viewBox="0 0 20 20"
-        fill="currentColor">
-        <path
-          d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h5a1 1 0 000-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM13 16a1 1 0 102 0v-5.586l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 101.414 1.414L13 10.414V16z" />
-      </svg>
-      <span class="ml-2">Sort</span>
-      <!-- Heroicon name: chevron-down -->
-      <svg
-        class="ml-2.5 -mr-1.5 h-5 w-5 text-gray-400"
-        viewBox="0 0 20 20"
-        fill="currentColor">
-        <path
-          fill-rule="evenodd"
-          d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-          clip-rule="evenodd" />
-      </svg>
-    </button>
+      <button
+        class="-ml-px relative inline-flex items-center px-4 py-2 border
+          border-gray-300 text-sm leading-5 font-medium rounded-r-md
+          text-gray-700 bg-gray-50 hover:text-gray-500 hover:bg-white
+          focus:outline-none focus:shadow-outline-blue focus:border-blue-300
+          active:bg-gray-100 active:text-gray-700 transition ease-in-out
+          duration-150">
+        <!-- Heroicon name: sort-ascending -->
+        <svg
+          class="h-5 w-5 text-gray-400"
+          viewBox="0 0 20 20"
+          fill="currentColor">
+          <path
+            d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h5a1 1 0 000-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM13 16a1 1 0 102 0v-5.586l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 101.414 1.414L13 10.414V16z" />
+        </svg>
+        <span class="ml-2">Sort</span>
+        <!-- Heroicon name: chevron-down -->
+        <svg
+          class="ml-2.5 -mr-1.5 h-5 w-5 text-gray-400"
+          viewBox="0 0 20 20"
+          fill="currentColor">
+          <path
+            fill-rule="evenodd"
+            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+            clip-rule="evenodd" />
+        </svg>
+      </button>
     {/if}
   </div>
 
   <!-- <div class=" bg-gray-200 shadow overflow-hidden sm:rounded-md"> -->
-    {#if filteredData.length}
+  {#if filteredData.length}
     <ul class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {#each filteredData as item}
-          <ShowcaseItem {item} />
-          {/each}
+        <ShowcaseItem {item} />
+      {/each}
     </ul>
-    {:else}
-    <div class="p-8 text-red-500">Nothing found! The filter was too restrictive.
-      {#if !urlState.show}
-       Please pick either Essays, Talks, or Podcasts to show.
-      {/if}
+  {:else}
+    <div class="p-8 text-red-500">
+      Nothing found! The filter was too restrictive. {#if !urlState.show}Please
+        pick either Essays, Talks, or Podcasts to show.{/if}
       {#if urlState.filter}
-       Please clear the filter bar and you'll see more stuff.
+        Please clear the filter bar and you'll see more stuff.
       {/if}
     </div>
-    {/if}
+  {/if}
   <!-- </div> -->
 </div>
 <!-- </div> -->

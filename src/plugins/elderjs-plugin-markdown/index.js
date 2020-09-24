@@ -162,8 +162,8 @@ const plugin = {
           plugin.requests.push({ slug, route: 'article' });
         });
 
-        // todo: make simple recommender algo to do related posts feature
-        fs.writeFileSync('test.json', JSON.stringify(articles, null, 2))
+        // // todo: make simple recommender algo to do related posts feature
+        // fs.writeFileSync('test.json', JSON.stringify(articles, null, 2))
 
         // console.log('markdown', plugin.markdown.map(x => Object.keys(x.data)))
         return {

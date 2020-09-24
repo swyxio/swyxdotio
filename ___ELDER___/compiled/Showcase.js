@@ -98,13 +98,11 @@ const ShowcaseItem = create_ssr_component(($$result, $$props, $$bindings, slots)
 	? str.length > 200 ? str.slice(0, 100) + "..." : str
 	: undefined;
 
-	let shortDesc = shorten(item.desc) || shorten(item.description);
-	let longDesc = item.description || item.desc || "No description provided. Suggest one!";
 	if ($$props.item === void 0 && $$bindings.item && item !== void 0) $$bindings.item(item);
-
-	 {
-		if (item.type === "Essays") console.log({ item });
-	}
+	let shortDesc;
+	let longDesc;
+	shortDesc = shorten(item.desc) || shorten(item.description);
+	longDesc = item.description || item.desc || "No description provided. Suggest one!";
 
 	return `<li class="${[
 		"col-span-1 bg-gray-100 rounded-lg shadow flex flex-col justify-between\n    border-4 transition duration-100 transform hover:-translate-y-1",
@@ -116,8 +114,6 @@ const ShowcaseItem = create_ssr_component(($$result, $$props, $$bindings, slots)
 	].join(" ").trim()}">
             ${escape(item.type)}</span>
           <h3 class="${"text-gray-900 text-sm leading-5 font-medium whitespace-normal\n              inline"}">${escape(item.title)}</h3></div>
-        
-        ${ ``}
         <p class="${"mt-1 text-gray-700 text-sm leading-5 whitespace-normal"}">${ shortDesc
 	? `<div class="${""}">${escape(shortDesc)}</div>`
 	: `<div>${escape(longDesc)}</div>
@@ -783,12 +779,12 @@ const Showcase = create_ssr_component(($$result, $$props, $$bindings, slots) => 
     <label for="${"search_candidate"}" class="${"sr-only"}">Search</label>
     <div class="${"relative flex-grow focus-within:z-10"}"><div class="${"absolute inset-y-0 left-0 pl-3 flex items-center"}">
         <label for="${"search_candidate"}"><svg class="${"h-5 w-5 text-gray-400"}" viewBox="${"0 0 20 20"}" fill="${"currentColor"}"><path fill-rule="${"evenodd"}" d="${"M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"}" clip-rule="${"evenodd"}"></path></svg></label>
-        <input id="${"search_candidate"}" type="${"text"}" class="${"form-input block w-full rounded-md pl-2\n            transition ease-in-out duration-150 sm:hidden"}" placeholder="${"Filter"}"${add_attribute("value", filterStr, 1)}>
-        <input id="${"search_candidate"}" type="${"text"}" class="${"hidden form-input w-full rounded-md pl-2\n            transition ease-in-out duration-150 sm:block sm:text-sm sm:leading-5 py-2 ml-4"}" placeholder="${"Filter ideas"}"${add_attribute("value", filterStr, 1)}></div></div>
+        <input id="${"search_candidate"}" type="${"text"}" class="${"form-input block w-full rounded-md pl-2 transition ease-in-out\n            duration-150 sm:hidden"}" placeholder="${"Filter"}"${add_attribute("value", filterStr, 1)}>
+        <input id="${"search_candidate"}" type="${"text"}" class="${"hidden form-input w-full rounded-md pl-2 transition ease-in-out\n            duration-150 sm:block sm:text-sm sm:leading-5 py-2 ml-4"}" placeholder="${"Filter ideas"}"${add_attribute("value", filterStr, 1)}></div></div>
     
     <span class="${"relative z-0 inline-flex flex-col sm:flex-row shadow-sm rounded-md"}"><div class="${"inline-flex items-center mr-2 text-gray-400"}">Show:</div>
       <button type="${"button"}" class="${[
-		"-ml-px sm:ml-0 relative inline-flex items-center px-4 py-2 sm:rounded-l-md border\n          border-gray-300 bg-white text-sm leading-5 font-medium text-gray-700\n          hover:text-gray-500 focus:z-10 focus:outline-none\n          focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-100\n          active:text-gray-700 transition ease-in-out duration-150",
+		"-ml-px sm:ml-0 relative inline-flex items-center px-4 py-2\n          sm:rounded-l-md border border-gray-300 bg-white text-sm leading-5\n          font-medium text-gray-700 hover:text-gray-500 focus:z-10\n          focus:outline-none focus:border-blue-300 focus:shadow-outline-blue\n          active:bg-gray-100 active:text-gray-700 transition ease-in-out\n          duration-150",
 		 "bg-gray-300" 
 	].join(" ").trim()}">Essays
       </button>
@@ -807,7 +803,7 @@ const Showcase = create_ssr_component(($$result, $$props, $$bindings, slots) => 
 		 ""
 	].join(" ").trim()}"><strike>Tutorials</strike></button>
       <button type="${"button"}" class="${[
-		"-ml-px relative inline-flex items-center px-4 py-2 sm:rounded-r-md\n          border border-gray-300 bg-white text-sm leading-5 font-medium\n          text-gray-700 hover:text-gray-500 focus:z-10 focus:outline-none\n          focus:border-blue-300 focus:shadow-outline-blue active:bg-gray-100\n          active:text-gray-700 transition ease-in-out duration-150",
+		"-ml-px relative inline-flex items-center px-4 py-2\n          sm:rounded-r-md border border-gray-300 bg-white text-sm leading-5\n          font-medium text-gray-700 hover:text-gray-500 focus:z-10\n          focus:outline-none focus:border-blue-300 focus:shadow-outline-blue\n          active:bg-gray-100 active:text-gray-700 transition ease-in-out\n          duration-150",
 		 ""
 	].join(" ").trim()}"><strike>Notes</strike></button></span>
 
@@ -815,11 +811,11 @@ const Showcase = create_ssr_component(($$result, $$props, $$bindings, slots) => 
     ${ ``}</div>
 
   
-    ${filteredData.length
+  ${filteredData.length
 	? `<ul class="${"grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"}">${each(filteredData, item => `${validate_component(ShowcaseItem, "ShowcaseItem").$$render($$result, { item }, {}, {})}`)}</ul>`
-	: `<div class="${"p-8 text-red-500"}">Nothing found! The filter was too restrictive.
-      ${!urlState.show
-		? `Please pick either Essays, Talks, or Podcasts to show.`
+	: `<div class="${"p-8 text-red-500"}">Nothing found! The filter was too restrictive. ${!urlState.show
+		? `Please
+        pick either Essays, Talks, or Podcasts to show.`
 		: ``}
       ${urlState.filter
 		? `Please clear the filter bar and you&#39;ll see more stuff.`
