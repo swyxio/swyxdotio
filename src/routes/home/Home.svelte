@@ -45,8 +45,10 @@
               class="underline text-indigo-300">teach</a>. But above all, I <a
               rel="noopener"
               href="/ideas"
-              class="underline text-indigo-300">write</a>.
-          </span><span>If we share interests, I'd love to connect!</span>
+              class="underline text-indigo-300">write</a> about great ideas for developers
+            and infinite builders.
+          </span><span>If we share <a href="/about">interests</a>, I'd love to
+            connect!</span>
           <!-- I am passionate about Developer Tools and Developer Communities and currently work as a Senior Developer
                 Advocate at AWS. In my free time I teach React, TypeScript, Storybook and Node.js CLI's at <a
                   rel="noopener" href="https://egghead.io/s/26zf5">Egghead.io</a>, and help run the <a

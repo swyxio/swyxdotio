@@ -137,7 +137,7 @@ function focusSearch(e) {
           type="text"
           class="form-input block w-full rounded-md pl-2 transition ease-in-out
             duration-150 sm:hidden focus:bg-yellow-200"
-          placeholder="Filter"
+          placeholder="Filter (/ to focus)"
           bind:value={filterStr} />
         <input
           id="search_candidate"

@@ -55,13 +55,20 @@
     <h3 id="about">About</h3>
     <p>
       I am a <a
-        href="https://www.freecodecamp.org/news/shawn-wang-podcast-interview/">hedgie
-        turned developer</a>, primarily active in the JavaScript community. I
-      grew up in Singapore 🇸🇬, but have lived and worked mostly in the US/UK,
-      most recently in New York City 🗽. I am best known for the <a
-        href="/learn-in-public">Learn in Public</a> idea and <a
+        href="https://www.freecodecamp.org/news/shawn-wang-podcast-interview/">
+        currency options trader turned TMT hedge fund analyst turned product
+        manager turned developer</a>, primarily active in the JavaScript
+      community. I grew up in Singapore 🇸🇬, but have worked mostly in the US
+      🇺🇸/UK 🇬🇧, most recently remotely out of New York City 🗽 working on
+      Developer Experience for <a
+        href="https://www.swyx.io/writing/farewell-netlify/">Netlify</a> and <a
+        href="https://www.swyx.io/writing/hello-aws/">Amazon Web Services</a>.
+    </p>
+    <p>
+      I am best known for being a <a href="/learn-in-public">Learn in Public</a>
+      evangelist and <a
         href="/ideas?filter=React&show=Essays&show=Talks&show=Podcasts">my
-        speaking on React</a>.
+        speaking/writing on React, JavaScript and the future of the Web</a>.
     </p>
     <h3 id="bio">Bio for Event Organizers</h3>
     <p>
@@ -74,13 +81,15 @@
     </p>
     <p>
       🔗 <a href="https://twitter.com/swyx">Twitter</a>, <a
-        href="https://github.com/sw-yx">GitHub</a>.
+        href="https://github.com/sw-yx">GitHub</a>, <a
+        href="https://learninpublic.org">The Coding Career Handbook</a>.
     </p>
     <p>
       🖼️ <a
         href="https://pbs.twimg.com/profile_images/990728399873232896/CMPn3IxT_400x400.jpg">Medium</a>,
-      <a
-        href="https://avatars3.githubusercontent.com/u/6764957?s=460&v=4">Large</a>.
+      or <a
+        href="https://avatars3.githubusercontent.com/u/6764957?s=460&v=4">Large</a>
+      pictures of me you can use without asking.
     </p>
     <h3 id="now">
       What I'm Doing Now <a href="https://nownownow.com/about">
@@ -256,11 +265,11 @@
         <li>
           <a
             href="https://github.com/typescript-cheatsheets/react-typescript-cheatsheet/">
-            ⚛️📜 React-TypeScript Cheatsheet
+            ⚛️ 📜 React-TypeScript Cheatsheet
           </a>
         </li>
         <li>
-          <a href="https://github.com/sw-yx/spark-joy/">✨😂 Spark-Joy</a>
+          <a href="https://github.com/sw-yx/spark-joy/">✨ 😂 Spark-Joy</a>
         </li>
         <li>
           <a
