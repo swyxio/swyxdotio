@@ -69,10 +69,10 @@
 
 </a>
 <a
-  rel="noopener" href="https://twitter.com/intent/follow?screen_name=swyx"
+  href="https://twitter.com/intent/follow?screen_name=swyx"
   title="twitter"
   target="_blank"
-  rel="me"
+  rel="me noopener"
   class="ml-4 text-teal-400 hover:text-red-500">
   <span class="sr-only">Twitter</span>
   <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
