@@ -113,7 +113,7 @@
   <hr />
   <div class="prose pt-4">
     <h2>Featured Work (on this site)</h2>
-    <h3>Writing</h3>
+    <h3 id="featured-writing">Writing</h3>
     <div>
       I do a bunch of <a href="/writing">personal and work-related writing</a>,
       and recently published <a href="https://learninpublic.org/">The Coding
@@ -142,13 +142,13 @@
         </li>
         <li>
           <b> <a href="/writing/svelte-static">Static Svelte</a> </b>
-          <div>How this very site was written</div>
+          <div>How this very site was written.</div>
         </li>
         <li>
           <b> <a href="/slack-fumble">Slack is Fumbling Developers</a> </b>
           <div>
             Trendspotting how Developer communities are leaving Slack (for
-            Discord)
+            Discord).
           </div>
         </li>
         <li>
@@ -174,22 +174,54 @@
       </ul>
     </div>
 
-    <h3>Speaking</h3>
+    <h3 id="featured-speaking">Speaking</h3>
     <div>
       I have done a bunch of talks and podcast appearances. The best of which
       are:
       <ul>
-        <li><a href="/speaking/react-hooks">Getting Closure on Hooks</a></li>
+        <li>
+          <a href="/speaking/react-hooks">Getting Closure on Hooks</a>
+          <div>
+            My most well received technical talk, where I explain a mental model
+            for React hooks by livecoding a React clone at JSConf Asia. Started
+            as <a href="https://twitter.com/swyx/status/1100809424963219456">a
+              tweet</a>, then <a href="https://www.swyx.io/writing/getting-closure-on-hooks/">a
+              blogpost.</a>
+          </div>
+        </li>
         <li>
           <a href="/speaking/react-not-reactive"> Why React is not Reactive </a>
+          <div>
+            My first conference talk ever was at the biggest React venue in the
+            world, React Rally. I spent a month writing <a
+              href="https://twitter.com/swyx/status/1112513571315830784?s=20">my
+              CFP on the most interesting React question I could think of</a>.
+          </div>
         </li>
 
         <li>
           <a href="/speaking/contributing-to-react"> Contributing to React </a>
+          <div>
+            My first meetup talk ever was at React NYC - this was accepted on to
+            the React docs as a guide for other contributors!
+          </div>
         </li>
-        <li><a href="/speaking/learn-in-public-nyc">Learn In Public</a></li>
         <li>
-          <a href="/speaking/babel-macros"> Babel Macros (the Moana talk) </a>
+          <a href="/speaking/learn-in-public-nyc">Learn In Public</a>
+          <div>
+            My first verbal exposition on the Learn In Public philosophy. Video
+            is frozen at the end, sorry.
+          </div>
+        </li>
+        <li>
+          <a href="/speaking/babel-macros">I Can Babel Macros and So Can You!
+            (the Moana talk)
+          </a>
+          <div>
+            My first JSConf appearance ever, at one of the most competitive
+            JSConfs ever. This talk is where I first started experimenting with
+            theming talks, and it came out really well with the Moana theme.
+          </div>
         </li>
       </ul>
     </div>
