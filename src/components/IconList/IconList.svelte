@@ -58,10 +58,10 @@
   </svg>
 </a>
 <a
-  rel="noopener" href="https://youtube.com/swyxTV"
+  href="https://youtube.com/swyxTV"
   title="youtube"
   target="_blank"
-  rel="me"
+  rel="me noopener"
   class="ml-4 text-teal-400 hover:text-red-500">
   <span class="sr-only">YouTube</span>
 
