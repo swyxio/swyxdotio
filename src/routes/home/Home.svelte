@@ -91,8 +91,8 @@
               Notify me
             </button>
           </form>
-          <p class="mt-3 text-sm leading-5 text-gray-300 text-opacity-50">
-            Too soon! <a class="font-medium text-gray-300 text-opacity-50
+          <p class="mt-3 text-sm leading-5 text-gray-300 text-opacity-75">
+            Too soon! <a class="font-medium text-gray-300 text-opacity-75
                 underline" rel="noopener" href="https://tinyletter.com/swyx/archive">Show
               me what I'm signing up for!</a>
           </p>
@@ -122,7 +122,7 @@
             duration-300 delay-200 hover:rotate-360 hover:scale-125
             hover:rounded-full w-full relative block rounded-full md:rounded-lg
             overflow-hidden focus:outline-none focus:shadow-outline"
-          src="https://avatars2.githubusercontent.com/u/6764957?u=97ad815028595b73b06ee4b0510e66bbe391228d&v=4&s=500"
+          src="https://avatars2.githubusercontent.com/u/6764957?u=97ad815028595b73b06ee4b0510e66bbe391228d&v=4&s=400"
           alt="swyx at niseko" />
         <!-- <div class="absolute inset-0 w-full h-full flex items-center justify-center">
                   <svg class="h-20 w-20 text-indigo-500" fill="currentColor" viewBox="0 0 84 84">

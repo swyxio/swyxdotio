@@ -14,7 +14,7 @@
   }
 </style> -->
 
-<a href="https://swyx.io/rss.xml" title="RSS" target="_blank">
+<a rel="noopener" href="https://swyx.io/rss.xml" title="RSS" target="_blank">
   <svg
     class="icon h-6 w-6 text-teal-400 hover:text-red-500"
     fill="currentColor"
@@ -33,7 +33,7 @@
     19.188h4.817c-.03-13.231-10.755-23.954-24-24v4.812z" />
   </svg>
 </a>
-<a class="ml-4" href="https://tinyletter.com/swyx/" title="Email" target="_blank">
+<a class="ml-4" rel="noopener" href="https://tinyletter.com/swyx/" title="Email" target="_blank">
   <!-- class="-ml-0.5 mr-2 h-4 w-4" -->
   <!-- Heroicon name: mail -->
   <svg 
@@ -58,7 +58,7 @@
   </svg>
 </a>
 <a
-  href="https://youtube.com/swyxTV"
+  rel="noopener" href="https://youtube.com/swyxTV"
   title="youtube"
   target="_blank"
   rel="me"
@@ -69,7 +69,7 @@
 
 </a>
 <a
-  href="https://twitter.com/intent/follow?screen_name=swyx"
+  rel="noopener" href="https://twitter.com/intent/follow?screen_name=swyx"
   title="twitter"
   target="_blank"
   rel="me"
@@ -80,7 +80,7 @@
       d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
   </svg>
 </a>
-<!-- <a title="search" href="/ideas">
+<!-- <a title="search" rel="noopener" href="/ideas">
   <span class="sr-only">Search This Site</span>
   <svg
     class="icon h-6 w-6 ml-6 text-teal-400 hover:text-red-500"
