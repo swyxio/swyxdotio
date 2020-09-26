@@ -34,8 +34,8 @@ const hooks = [
         .sync(path.join(settings.rootDir, './src/assets/**/*'))
         .forEach((file) => {
           const parsed = path.parse(file)
-          // // Only write the file/folder structure if it has an extension
-          // if (parsed.ext && parsed.ext.length > 0) {
+          // Only write the file/folder structure if it has an extension
+          if (parsed.name === '_redirects' || parsed.ext && parsed.ext.length > 0) {
             const relativeToAssetsArray = parsed.dir.split('assets')
             relativeToAssetsArray.shift()
 
@@ -51,7 +51,7 @@ const hooks = [
               ),
               fs.readFileSync(file)
             )
-          // }
+          }
         })
     }
   },
