@@ -12,6 +12,7 @@
     ? frontmatter.desc || frontmatter.description || seoTitle
     : seoTitle
   let slug = frontmatter.slug
+  // $: console.log({html, frontmatter})
 </script>
 
 <style>
@@ -31,32 +32,32 @@
     margin-left: 1rem;
   }
   .prose .articleMain :global(h2::before) {
-    content: "## "
+    content: '## ';
   }
   .prose .articleMain :global(h3::before) {
-    content: "### "
+    content: '### ';
   }
   .prose .articleMain :global(h4::before) {
-    content: "#### "
+    content: '#### ';
   }
 
   /* undo ol bug in tailwind typography */
   /* https://github.com/tailwindlabs/tailwindcss-typography/issues/71 */
 
   :global(.prose .articleMain ol) {
-    list-style: decimal
-  } 
-  :global(.prose .articleMain ol>li) {
-    padding-left: 0
-  } 
-  :global(.prose .articleMain ol>li::before) {
+    list-style: decimal;
+  }
+  :global(.prose .articleMain ol > li) {
+    padding-left: 0;
+  }
+  :global(.prose .articleMain ol > li::before) {
     content: none;
-  } 
+  }
   /* undo ol bug in tailwind typography */
 
   /* opt out of blockquote quotes */
   .prose :global(blockquote p:first-of-type::before) {
-    content: none
+    content: none;
   }
 
   .prose :global(code) {
@@ -199,32 +200,30 @@
         </span>
       {/each}
       {#if frontmatter.date}
-      <span class=" text-sm font-mono ">Posted: 
-        <time
-          datetime={new Date(frontmatter.date)
-            .toDateString()
-            .slice(
-              0,
-              10
-            )}>{new Date(frontmatter.date).toDateString().slice(4)}</time>
-          </span>
+        <span class="text-sm font-mono">Posted: <time datetime={new Date(frontmatter.date).toDateString().slice(0, 10)}>{new Date(
+              frontmatter.date
+            )
+              .toDateString()
+              .slice(4)}</time>
+        </span>
       {/if}
     </div>
 
     {#if html}
-    <div class="articleMain">
-      {@html html}
-    </div>
-    <div class="flex justify-between">
-
-      <a class="text-white" href="/ideas">&LeftArrow; More Essays</a>
-      <a class="text-white" href="https://tinyletter.com/swyx">Subscribe via Email</a>
-      <a class="text-white" href="/about">Featured Essays and Talks &RightArrow;</a>
-    </div>
-      <WebMentions
-        hydrate-client={{ target: `https://www.swyx.io/writing/${frontmatter.slug}` }} />
+      <div class="articleMain">
+        {@html html}
+      </div>
     {:else}
       <h1>There was a problem rendering this page - please let @swyx know!</h1>
     {/if}
   </div>
+
+  <div class="flex justify-between">
+    <a class="text-teal-400 underline hover:text-teal-200" href="/ideas?show=Essays">&LeftArrow; More Essays</a>
+    <a class="text-pink-400 underline hover:text-pink-200 font-bold" href="https://tinyletter.com/swyx">❤️ Subscribe
+      via Email ❤️</a>
+    <a class="text-teal-400 underline hover:text-teal-200" href="/about">Featured Essays and Talks &RightArrow;</a>
+  </div>
+  <WebMentions
+    hydrate-client={{ target: `https://www.swyx.io/writing/${frontmatter.slug}` }} />
 </article>

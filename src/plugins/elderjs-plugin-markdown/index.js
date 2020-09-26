@@ -36,6 +36,7 @@ let _preset = {
     [require('remark-frontmatter'), ['yaml']],
     [require('./rehype-shiki'), { theme: 'material-theme-palenight' }],
     require('rehype-stringify'),
+    require('./remark-replace'),
   ],
 }
 

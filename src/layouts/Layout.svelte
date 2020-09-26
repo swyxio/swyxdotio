@@ -123,6 +123,12 @@
     min-height: calc(100vh - 10px);
     margin: 5px;
   }
+  .basekid {
+    min-height: calc(100vh - 10px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
 </style>
 
 <svelte:head>
@@ -148,7 +154,7 @@
   </script>
 </svelte:head>
 <div id="base">
-  <div class="relative bg-gray-800 overflow-hidden">
+  <div class="relative bg-gray-800 overflow-hidden basekid">
     <MobileMenu hydrate-client={{}} />
     <!-- <main class="mt-8 sm:mt-16 md:mt-20 lg:mt-24"> -->
     <main>
@@ -157,17 +163,19 @@
     <!-- <footer class="pt-6 pb-12 sm:pb-32 text-white"> TODO: FOOTER</footer> -->
     <footer
       class="max-w-screen-xl mx-auto py-12 px-4 overflow-hidden sm:px-6 lg:px-8">
-      <nav class="-mx-5 -my-2 flex flex-wrap justify-center items-center px-5 py-2 flex-col md:flex-row gap-2">
-          <a
-            href="/ideas"
-            class="text-base leading-6 text-teal-400 hover:text-red-500">
-            Ideas
-          </a>
-          <a
-            href="/about"
-            class="text-base leading-6 text-teal-400 hover:text-red-500">
-            About
-          </a>
+      <nav
+        class="-mx-5 -my-2 flex flex-wrap justify-center items-center px-5 py-2
+          flex-col md:flex-row gap-2">
+        <a
+          href="/ideas"
+          class="text-base leading-6 text-teal-400 hover:text-red-500">
+          Ideas
+        </a>
+        <a
+          href="/about"
+          class="text-base leading-6 text-teal-400 hover:text-red-500">
+          About
+        </a>
       </nav>
       <div class="mt-8 flex justify-center">
         <IconList />

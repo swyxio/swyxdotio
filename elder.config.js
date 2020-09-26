@@ -21,6 +21,11 @@ module.exports = {
     build: false,
     automagic: false,
   },
+  shortcodes: {
+    // https://elderguide.com/tech/elderjs/#specifications-and-config
+    openPattern: "{%", // Opening pattern for identifying shortcodes in html output.
+    closePattern: "%}", // closing pattern for identifying shortcodes in html output.
+  },
   hooks: {
     // disable: ['elderWriteHtmlFileToPublic'], // this is used to disable internal hooks. Uncommenting this would disabled writing your files on build.
   },

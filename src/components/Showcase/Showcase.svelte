@@ -91,7 +91,15 @@
       res = false
     return res
   }
+
+let inputEl
+function focusSearch(e) {
+  if (e.key === '/' && inputEl) inputEl.select()
+}
 </script>
+
+
+<svelte:window on:keyup={focusSearch}/>
 
 <div class="relative max-w-lg mx-auto lg:max-w-7xl mb-8">
   <div class="text-center">
@@ -111,7 +119,7 @@
     <!-- search -->
     <label for="search_candidate" class="sr-only">Search</label>
     <div class="relative flex-grow focus-within:z-10">
-      <div class="absolute inset-y-0 left-0 pl-3 flex items-center">
+      <div class="absolute w-full inset-y-0 left-0 px-3 flex items-center">
         <!-- Heroicon name: search -->
         <label for="search_candidate">
           <svg
@@ -128,15 +136,16 @@
           id="search_candidate"
           type="text"
           class="form-input block w-full rounded-md pl-2 transition ease-in-out
-            duration-150 sm:hidden"
+            duration-150 sm:hidden focus:bg-yellow-200"
           placeholder="Filter"
           bind:value={filterStr} />
         <input
           id="search_candidate"
           type="text"
           class="hidden form-input w-full rounded-md pl-2 transition ease-in-out
-            duration-150 sm:block sm:text-sm sm:leading-5 py-2 ml-4"
-          placeholder="Filter ideas"
+            duration-150 sm:block sm:text-sm sm:leading-5 py-2 ml-4 focus:bg-yellow-200"
+          placeholder="Filter ideas (press / to focus)"
+          bind:this={inputEl}
           bind:value={filterStr} />
       </div>
     </div>

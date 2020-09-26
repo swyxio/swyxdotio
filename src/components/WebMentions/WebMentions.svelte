@@ -104,11 +104,12 @@
 </style>
 
 <hr />
-<div id="WebMentions">
-  <h3 font-family="system" font-size="4" font-weight="bold">Webmentions</h3>
+<div id="WebMentions" class="prose">
+  <h3 font-family="system" font-size="4" font-weight="bold" class="text-teal-400 text-xl">Webmentions</h3>
   <a
     aria-label="Clientside Webmentions"
     target="_blank"
+    title="What is this?"
     rel="noopener"
     href="http://swyx.io/writing/clientside-webmentions"
     color="blue">
