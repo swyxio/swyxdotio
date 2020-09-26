@@ -72,10 +72,12 @@
     </p>
     <h3 id="bio">Bio for Event Organizers</h3>
     <p>
-      swyx is an Infinite Builder, working on Developer Experience at AWS
-      Amplify and recently published <a href="https://learninpublic.org/">the
-        Coding Career Handbook</a>. In his free time he teaches React,
-      TypeScript, Storybook and Node.js CLI's at <a
+      swyx is an Infinite Builder passionate about Developer Tooling and
+      Developer Communities. He currently works at Senior Developer Advocate for
+      AWS Amplify and recently published <a
+        href="https://learninpublic.org/">the Coding Career Handbook</a> for Junior
+      to Senior developer careers. In his free time he teaches React, TypeScript,
+      Storybook and Node.js CLI's at <a
         href="https://egghead.io/s/26zf5">Egghead.io</a>, and helps run the <a
         href="https://sveltesociety.dev/">Svelte Society</a> community of meetups.
     </p>
