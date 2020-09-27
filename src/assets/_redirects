@@ -11,6 +11,10 @@
 /writing/no-controlled-dom /no-controlled-forms
 /now /about#now
 
-/talks/*  /ideas?show=Talks
-/writing/*  /ideas?show=Essays
-/speaking/*  /ideas?show=Talks&show=Podcasts
+
+/talks /ideas?show=Talks
+/writing  /ideas?show=Essays
+/speaking  /ideas?show=Talks&show=Podcasts
+/talks/*  /:splat
+/writing/*  /:splat
+/speaking/*  /:splat
