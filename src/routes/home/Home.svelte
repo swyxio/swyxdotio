@@ -22,7 +22,7 @@
         <div
           class="text-sm font-semibold uppercase tracking-wide text-gray-500
             sm:text-base lg:text-sm xl:text-base">
-          Shawn @Swyx Wang
+          Shawn <span class="text-teal-500 opacity-75">@Swyx</span> Wang
         </div>
         <!-- <h2
           class="mt-4 text-4xl tracking-tight leading-10 font-extrabold
@@ -33,7 +33,7 @@
         <h2
           class="mt-4 text-4xl tracking-tight leading-10 font-extrabold sm:mt-5
             sm:leading-none sm:text-6xl lg:mt-6 lg:text-5xl xl:text-6xl
-            text-transparent bg-clip-text bg-gradient-to-br from-red-500 via-indigo-400
+            text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-indigo-400
             to-indigo-400">
           Welcome to swyx.io!
         </h2>
@@ -61,7 +61,7 @@
             great ideas for developers and infinite builders.
           </span><span>If we share <a
               class="underline text-indigo-300 hover:text-indigo-200"
-              href="/about">interests</a>, I'd love to connect!</span>
+              href="/about">interests</a>, I'd love to <a href="mailto:swyx@hey.com">connect</a>!</span>
           <!-- I am passionate about Developer Tools and Developer Communities and currently work as a Senior Developer
                 Advocate at AWS. In my free time I teach React, TypeScript, Storybook and Node.js CLI's at <a
                   rel="noopener" href="https://egghead.io/s/26zf5">Egghead.io</a>, and help run the <a
