@@ -21,13 +21,13 @@
 <!-- because svelte class is broken -->
 <!-- border-green-500
 border-blue-500
-border-teal-500
+border-red-500
 bg-green-100
 text-green-800
 bg-blue-100
 text-blue-800
-bg-teal-100
-text-teal-800
+bg-red-100
+text-red-800
 bg-indigo-600
 translate-x-5
 bg-gray-500
@@ -38,7 +38,7 @@ text-teal-500 -->
     border-4 transition duration-100 transform hover:-translate-y-1"
   class:border-green-500={item.type === 'Essays'}
   class:border-blue-500={item.type === 'Talks'}
-  class:border-teal-500={item.type === 'Podcasts'}>
+  class:border-red-500={item.type === 'Podcasts'}>
   <div>
     <div class="w-full flex items-center justify-between p-6 space-x-6">
       <div class="flex-1 truncate">
@@ -51,8 +51,8 @@ text-teal-500 -->
             class:text-green-800={item.type === 'Essays'}
             class:bg-blue-100={item.type === 'Talks'}
             class:text-blue-800={item.type === 'Talks'}
-            class:bg-teal-100={item.type === 'Podcasts'}
-            class:text-teal-800={item.type === 'Podcasts'}>
+            class:bg-red-100={item.type === 'Podcasts'}
+            class:text-red-800={item.type === 'Podcasts'}>
             {item.type}
           </span>
           <h3
