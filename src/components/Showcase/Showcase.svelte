@@ -112,10 +112,11 @@ function focusSearch(e) {
       For Free: Great Ideas. Lightly Used.
     </p>
   </div>
+  <img class="mx-auto" src="http://textfiles.com/underconstruction/HeHeartlandValley1469underconstruction2.gif" alt="under construction..." />
 </div>
 <!-- <div class="pb-5 border-b border-gray-200 space-y-3 sm:flex sm:flex-col sm:items-center sm:justify-between sm:space-x-4 sm:space-y-0"> -->
 <div>
-  <div class="flex rounded-md mb-4">
+  <div class="flex flex-col md:flex-row gap-4 md:gap-0 rounded-md mb-4">
     <!-- search -->
     <label for="search_candidate" class="sr-only">Search</label>
     <div class="relative flex-grow focus-within:z-10">
