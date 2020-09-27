@@ -1,22 +1,7 @@
 ---
 title: Learn In Public (NYC)
-slug: learn-in-public-nyc
-topic: LearnInPublic
-venues: VueNYC
-date: 2019-07-31
-video: https://www.youtube.com/watch?v=znNxtSbuBjI
 ---
 
-## Description
-
-Developers are used to the idea of constant learning, especially in the fast moving Javascript ecosystem. But how often do we take a step back from learning to consider -how- we learn? In this talk we explore how Learning in Public can accelerate your career, bring value to your professional network, and ultimately make you a better developer, with examples all drawn from personal and other experience.
-
-## prior art
-
-- https://www.youtube.com/watch?time_continue=6&v=-f-rZepNKW0
-- https://gist.github.com/sw-yx/505d15ed3e7febdab3aa3d25ee81f652
-
-me
 
 - Learning In Public: https://www.swyx.io/writing/learn-in-public/
   - The Secret.

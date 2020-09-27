@@ -175,7 +175,18 @@ The volumninous _Code Complete_ offers an entire chapter on the Power of Variabl
 
 - Naming Components: https://open-ui.org/analysis/component-matrix
 - Naming Git Branches: https://deepsource.io/blog/git-branch-naming-conventions/
+- Naming Startups/Domains: https://www.saashub.com/domainsfortherestofus-alternatives
+- The Naming Book ([site](http://thenamingbook.com/), [podcast](https://uibreakfast.com/name-your-book/))
 
+steps
+
+1. criteria for success - eg feelings
+2. Generation
+    - Compound Words (Facebook)
+    - Portmanteaus (Pinterest)
+    - Foreign Translations
+    - Obscure words (Nike - greek goddess)
+    
 ## Your Opinion Here!
 
 I [asked for more opinions on Twitter](https://twitter.com/swyx/status/1127648507676983296), and here are some I got:

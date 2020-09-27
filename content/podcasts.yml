@@ -1,0 +1,299 @@
+# 2020 podcasts
+
+- title: Svelte Radio Episodes
+  slug: svelte-radio
+  categories: [Svelte]
+  venues: SvelteRadio
+  date: 2020-05-12
+  url: https://anchor.fm/svelteradio/
+  description: I joined the Svelte Radio podcast together with Antony and Kev from Svelte Society.
+- title: Software Sessions Podcast - Learning in Public
+  slug: software-sessions-podcast
+  categories: [Careers]
+  venues: SoftwareSessions
+  date: 2020-06-17
+  github: https://gist.github.com/sw-yx/02c28094f7d898554deee1ba7f96a502
+  url: https://www.softwaresessions.com/episodes/learning-in-public/
+  url2: https://media.transistor.fm/b2abc441.mp3
+  description: I chatted with Jeremy Jung, host on Software Engineering Radio and now Software Sessions, about Learn in Public and the Coding Career Handbook!
+- title: Dev Career Advice for the Coronavirus Recession
+  slug: recession-prep-tanay
+  categories: [Careers]
+  venues: TanayPratap
+  date: 2020-05-09
+  url: https://open.spotify.com/episode/1oj0Kpnt8xzk2vCBm6t3LE
+  description: I chatted with Tanay Pratap about what new entrants to software engineering in India can do given the Coronavirus Recession
+- title: Svelte and Community on JAMStack Radio
+  slug: jamstack-radio-svelte
+  categories: [Svelte]
+  venues: JamsackRadio
+  date: 2020-02-26
+  url: https://www.heavybit.com/library/podcasts/jamstack-radio/ep-51-community-over-code-with-shawn-wang-of-netlify/
+  desc: A 30 min chat about Svelte, Netlify, and Coding Communities, with Brian Douglas on his podcast. Brian was previously the only Devrel at Netlify so there is some ancestry going on here!
+  description: In episode 51 of JAMstack Radio, Brian joins Shawn Wang to discuss his role as a developer experience engineer at Netlify, the open-source JavaScript framework Svelte, and scaling community above code.
+- title: Marketing Yourself - ProdReady Podcast
+  slug: codingcareer-prodready
+  categories: [Careers]
+  venues: ProdReadyPodcast
+  date: 2020-07-07
+  url: https://www.productionreadypod.com/episodes/marketing-yourself-your-products-by-learning-in-public-w-shawn-wang
+  description: Hot off the launch of his new book, Shawn sits down to talk with me about personal marketing via working in public. We go into detail about how he wrote a book with the most insane bibliography you've ever seen and made $25,000 on launch day.
+  notes: "I chatted with Glenn Stovall twice - the audio was lost the first time 😂
+
+  This is maybe the 3rd podcast I got purely from the Marketing Yourself essay so this is really great."
+- title: Coding Careers - AQOC Podcast
+  slug: codingcareer-aqoc
+  categories: [Careers]
+  venues: AQOCPodcast
+  date: 2020-07-13
+  url: https://aquestionofcode.com/71-how-should-developers-market-themselves-shawn-wang/
+  desc: Charming chat with 2 british brothers! 1 experienced engineer and 1 just changing careers and learning to code
+  description: This week we're joined by Shawn Wang, Senior Developer Advocate at AWS and author of the excellent Coding Career Handbook. Shawn is a career-switcher; he transitioned into tech in his early thirties after a career in finance. He has written a lot about how aspiring devs can better accelerate their careers, and his views are nuanced and full of wisdom that's very relevant to all aQoC listeners (no matter what stage you're at in your career).
+- title: Coding Career Handbook - Newline Podcast
+  slug: codingcareer-newline
+  categories: [Careers]
+  venues: NewLinePodcast
+  date: 2020-07-18
+  url: https://podcast.newline.co/episodes/cracking-the-coding-career-with-shawn-wang
+  desc: In this wide-ranging conversation we talk about the differences between a Jr and Sr engineers, how to find strength in your weaknesses, and how to capture your daily ideas and use them to supercharge your career. 
+  notes: "It was a dream to chat with Amelia Wattenberger on her new podcast. I've admired her work for a long time. I wish I had asked them more questions as they are experienced book authors, but then again, I was the guest.
+
+  I love their backlog of questions as well."
+
+# 2019 podcasts
+
+- title: How, when, and why to use the JAMstack
+  slug: devmode-fm-jamstack-panel
+  categories: [JAMstack]
+  venues: Devmode.FM
+  date: 2019-11-04
+  url: https://devmode.fm/episodes/how-when-and-why-to-use-the-jamstack
+  desc: In this episode, we have a round­table dis­cus­sion with a vari­ety of expe­ri­enced web devel­op­ers who are at dif­fer­ent stages of using the JAM­stack, from not at all, to exploring/​experimenting, to using to deliv­er client projects to production.
+- title: JAMstack & Serverless with Netlify (DevMode.fm Podcast)
+  slug: devmode-fm-jamstack
+  categories: [JAMstack]
+  venues: Devmode.FM
+  date: 2019-10-28
+  url: https://devmode.fm/episodes/jamstack-serverless-with-netlify
+  desc: My first appearance on Devmode.fm talking about jamstack
+  description: "On this episode, we talk to Shawn ​“swyx” Wang from Netli­fy about the JAM­stack & Server­less rev­o­lu­tion in fron­tend development.
+
+  We dis­cuss what exact­ly Netli­fy is, and how you can lever­age the Edge, Build, and Dev aspect of it to make your devel­op­ment process more enjoyable.
+
+  We talk about the chal­lenges of main­tain­ing Author Expe­ri­ence (AX) in the age of sta­t­ic site gen­er­a­tors, using Live Pre­view func­tions in a CMS or ser­vice to help out.
+
+  We also talk about how JavaScript edge work­ers will gain sen­tience as Skynet, and the AI lan­guage mod­el that was so dan­ger­ous they could­n’t release it."
+- title: Swyx Mix - Learn In Public
+  slug: ducktapes-podcast
+  categories: [Learn In Public]
+  venues: Ducktapes
+  date: 2019-08-26
+  url: https://anchor.fm/ducktapes/episodes/Swyx-Mix-e517kc
+  desc: I had a lot of fun talking with John and Tiffany. they're a good crew! and passionate about music obviously.
+  description: This week, Shawn "Swyx" Wang joins us in the Duck Pond to take a deep dive into his coding philosophy "Learning in Public." We take some time to discuss his role at Netlify, how he got started in coding (after a full career in a different industry!), and of course Jack White comes up.
+- title: Leaving a $350K/year job to learn coding
+  slug: freecodecamp-podcast
+  categories: [Learn In Public]
+  venues: FreeCodeCamp Podcast
+  date: 2019-04-15
+  github: https://gist.github.com/sw-yx/f7b8ef5843475db994f05ae55f8cd464
+  url: https://www.freecodecamp.org/news/shawn-wang-podcast-interview/
+  desc: We talk about "learning in public" and his transition into tech from finance, where he left behind a job that paid him US $350,000 per year.
+  description: the title overly focuses on the finance career, but this is much more about learn in public and the freecodecamp journey. plenty of links supplied!
+- title: You Can Learn A Lot For The Low Price Of Your Ego
+  slug: kentcdodds-podcast
+  categories: [Learn In Public]
+  venues: Kent C Dodds Podcast
+  date: 2019-08-05
+  url: https://kentcdodds.com/chats-with-kent-podcast/seasons/01/episodes/you-can-learn-a-lot-for-the-low-price-of-your-ego-with-shawn-wang
+  desc: Shawn Wang talks about how learning in public was the single best thing he did for his career.
+  description: You can learn in private, or you can learn in public. 99% of developers work and learn privately in the shadows, so why shouldn't you? Something magical happened when Shawn started creating resources and sharing what he learned in public. More advanced people began to help him by correcting him when he was wrong. By learning publically, he was able to both teach and learn at the same time!
+  comments: This was actually recorded in March, I think, when I was in Tampa ahead of VueConf. I recall frantically driving back to do the recording and getting stuck in traffic and texting Kent that I would be late! I don't like driving so this was a high stress period.
+- title: Be Wrong with Shawn Swyx Wang
+  slug: react-podcast
+  categories: [React]
+  venues: React Podcast
+  date: 2019-02-20
+  url: https://reactpodcast.simplecast.fm/36
+  desc: A disussion about strategies for being a lifelong learner in React.
+  description: A disussion about strategies for being a lifelong learner, how to get started in React, the growth of React's API surface area, Hooks, Suspense, Concurrent Mode, designing APIs, and the future of React.
+- title: The Suspense is Almost Over - React Podcast
+  slug: react-podcast-suspense
+  categories: [React]
+  venues: React Podcast
+  date: 2019-10-22
+  url: https://reactpodcast.com/69
+  desc: A Pre-ReactConf Concurrent React Rundown with Swyx
+  description: "
+  ## Links
+
+  *   [STAR Apps: A New Generation of Front-End Tooling for Development Workflows](https://css-tricks.com/star-apps-a-new-generation-of-front-end-tooling-for-development-workflows/) on CSS-TRICKS
+  *   [STAR Apps](https://www.swyx.io/speaking/star-apps-svcodecamp/) at SV Code Camp by Swyx
+  *   [JAMStack](https://jamstack.org) — A modern architecture — Create fast and secure sites and dynamic apps with JavaScript, APIs, and prerendered Markup, served without web servers
+  *   [Beyond React 16 | JSConf Iceland 2018](https://www.youtube.com/watch?v=nLF0n9SACd4) Dan Abramov's introduction to Async React (eventually Concurrent React) at JSConf Iceland 2018
+  *   [Fiber Reconciler](https://reactjs.org/docs/codebase-overview.html#fiber-reconciler) doc on reactjs.org
+  *   [React Fiber Architecture](https://github.com/acdlite/react-fiber-architecture) — a gist by [Andrew Clark](https://twitter.com/dan_abramov)
+  *   [A Cartoon Intro to Fiber](https://www.youtube.com/watch?time_continue=3&v=ZCuYPiUIONs) — a talk by [Lin Clark](https://twitter.com/linclark?lang=en) at React Conf 2017
+  *   [Dan's Tweet](https://twitter.com/dan_abramov/status/1184987041676845056) on ConcurrentMode and how it informs other React APIs
+  *   [Building The New Facebook With React and Relay](https://conf.reactjs.org/event.html?frank) — an upcoming talk by [Frank Yan](https://twitter.com/frankyan) and [Ashley Watkins](https://twitter.com/catchingash) on Building The New Facebook With React and Relay
+  *   [Building the New Facebook.com with React, GraphQL and Relay](https://www.youtube.com/watch?v=WxPtYJRjLL0) — talk at F8 2019 about facebook.com v2
+  *   [Relay](https://relay.dev) — A JavaScript framework for building data-driven React applications
+  *   [Apollo Client](https://www.apollographql.com/docs/react/) — A complete state management library for JavaScript apps
+  *   [URQL](https://formidable.com/open-source/urql/) — Universal React Query Library is a blazing-fast GraphQL client, exposed as a set of ReactJS components
+  *   [Getting Closure on Hooks](https://www.swyx.io/speaking/react-hooks/) — Swyx demonstrating a simple mental model for hooks at JSConf.Asia 2019
+  *   [[Umbrello]React Flare](https://github.com/facebook/react/issues/15257) — Github issue for tracking the React DOM implementation of the experimental React Events API
+  *   [React Fire: Modernizing React DOM](https://github.com/facebook/react/issues/13525) — Github issue for tracking React DOM modernization
+  *   [React Native for Web](https://github.com/necolas/react-native-web) — Run React Native components and APIs on the web using React DOM. A library by [Nicholas Gallagher](https://twitter.com/necolas)
+  *   [Dominic Gannaway](https://twitter.com/trueadm) — React Core team member working on React Flare and React Fire
+  *   [The Case for React Native Web Singularity](https://www.swyx.io/writing/react-native-web-singularity/) A post by Swyx on React Native for Web as a template for a future React developer experience
+  *   [SVELTE](https://svelte.dev) — Cybernetically enhanced web apps
+  *   [glimmer](https://glimmerjs.com) — Fast and light-weight UI components for the web With the attention to detail you've come to expect from Ember
+  *   [All you need to know about Ivy, The new Angular engine!](https://blog.angularindepth.com/all-you-need-to-know-about-ivy-the-new-angular-engine-9cde471f42cf) — An article that seems to suggest it has everything you need to know about a thing I know nothing about"
+- title: Learning React and TypeScript in Public
+  slug: reactroundup-podcast
+  categories: [Learn In Public]
+  venues: React Roundup
+  date: 2019-08-13
+  url: https://devchat.tv/react-round-up/rru-074-learning-react-and-typescript-in-public-with-shawn-swyx-wang/
+  desc: One of my better podcast discussions of Learn In Public. The sequence of how this one happened was pretty fun. I noticed an a11y fight on Twitter, and posted about it on the Netlify slack. then Leslie picked up the torch and [wrote a blogpost about it](https://www.netlify.com/blog/2019/02/25/accessibility-is-not-a-react-problem/). That got her invited onto the podcast and she became a panelist. And then she invited me. and now we're here.
+  description: Today’s guest Shawn Wang is a career changer starts off the show about how he got from finance to programming. The panel talks about how they each got started in programming. Shawn explains his Learn In Public manifesto. They discuss the benefits of learning in public and how concepts like Cunninham’s Law and lampshading can be a good thing. Shawn talks about the differences between inbound and outbound marketing. The two biggest benefits of learning in public is that people will come to help you, it helps you to build capital, and it os the fastest way to learn. They discuss the balance between sharing too little and oversharing.
+- title: No Code JAMstack with Shawn Wang
+  slug: sedaily-nocode
+  categories: [No Code]
+  venues: SEDaily
+  date: 2019-12-19
+  url: https://softwareengineeringdaily.com/2019/12/19/no-code-with-shawn-wang/
+  desc: We know that no-code tools can create value. But how do they fit into the overall workflow of a software company? How should teams be arranged now that knowledge workers can build certain kinds of software without writing code? And how should no-code systems interface with the monoliths, microservices, and APIs that we have building for years?
+  description: "- [Podcast Link](https://softwareengineeringdaily.com/2019/12/19/no-code-with-shawn-wang/)
+    - [Download Podcast](http://traffic.libsyn.com/sedaily/2019_12_19_SwyxLowCodeJAMStack.mp3)
+
+    ## No Code
+
+    - Why is no code interesting to Software Engineers?
+      - Business opportunity
+      - Developer productivity
+    - Should no code users be worried about platform lockin?
+      - Yes
+      - We have to understand what the good abstractions are and where complexity overtakes convenience
+      - Software Engineers have a unique advantage here
+    - What duties should no code platforms fulfil? just UI layer? Shopify store? What are the borders?
+      - Nothing definite yet
+      - [Webflow Blogpost: No Code is a Lie](https://webflow.com/blog/no-code-is-a-lie)
+      - But everything can have a GUI layer - leading the API economy to transform into the GUI economy
+      - Even the Vue ecosystem has added a [UI on top of their CLI](https://cli.vuejs.org/dev-guide/ui-api.html)
+      - State machines in UI Development - [David Khourshid at React Rally](https://www.youtube.com/watch?v=VU1NKX6Qkxc)
+      - visual IDEs are winning over text editors
+      - [Bret Victor - the Future of Programming](https://vimeo.com/71278954)
+      - **EDIT: THINGS I FORGOT TO MENTION**
+      - Shopify and Wordpress are basically No Code platforms on top of Rails and PHP
+      - there is also a trend of big platforms implementing internal no-code solutions:
+        - [Slack Workflow Builder](https://slack.com/intl/en-sg/help/articles/360035692513-Guide-to-Workflow-Builder)
+        - [Asana No Code solution](https://webflow.com/nocodeconf/session/making-automation-feel-more-human)
+        - [Salesforce No Code](https://webflow.com/nocodeconf/session/progressive-enhancement-a-mindset-for-designing-no-code-platforms)
+        - [iOS Shortcuts was an acquisition](https://thesweetsetup.com/ios-shortcuts-guide/)
+    - What is available in the GUI economy?
+      - CSS
+      - CMS
+      - Ecommerce
+      - PaaS
+      - As developers, we use no code tools in our daily work
+      - Nobody wants to use Passport.js anymore, we rather farm it out to Okta and Auth0
+
+    ## JAMstack
+
+    - What is the JAMstack?
+      - [Jamstack Conf](https://jamstackconf.com/)
+      - [Jamstack.org](http://jamstack.org/)
+      - [GitHub Pages](https://pages.github.com/)
+    - How do you compare JAMstack to No Code?
+      - Very comparable - JAMstack is 'No Code backend' - serves frontend developers
+      - But there are more people who just aren't developers at all
+      - Non developers need a bit more handholding - frontend devs can at least help debug
+      - JAMstack vs No Code is similar to Figma vs Canva
+    - What code are you writing in the JAMstack?
+      - Frontend + Glue code
+      - In a No Code stack, you have to find your own frontend
+      - heavily overlapping paradigms
+      - Can go from No Code to JAMstack often, but not other way round
+    - Are enterprises building JAMstack applications?
+      - Sites:
+        - [Citrix's migration story](https://www.netlify.com/blog/2019/06/12/jamstack_conf-nyc-session-recap-citrix-delivers-better-ux-with-less-overhead-using-jamstack-and-netlify/)
+        - [Trinet on Netlify](https://is-this.netlify.com/trinet.com)
+      - Ecommerce:
+        - [Loblaw's migration story](https://www.youtube.com/watch?v=6VGu4PvEBag)
+        - [Popeye's migration story](https://www.youtube.com/watch?v=dKBDUhGi76o)
+        - [Nike agency story](https://www.youtube.com/watch?v=2rA_ucpQ_Fk)
+      - Apps:
+        - Paypal - [Bringing JAMstack to the Enterprise](https://www.infoq.com/presentations/jamstack-enterprise/)
+        - [FreeCodeCamp is built on Gatsby and Netlify](https://dev.to/ossia/how-freecodecamporg-uses-the-jamstack--a-single-api-server-to-help-millions-of-people-learn-to-code-every-month-4d5g)
+    - JAMstack as the counterpart to serverless
+    - Precompilation in the JAMstack - help me understand Gatsby
+      - Gatsby < React < JS
+      - Gatsby helps give a good default Webpack config for performance
+      - Webpack allows modules, preprocessing of code and images etc
+      - Having build steps has problems, but is a net benefit for users by shipping more optimal
+      - Gatsby allows you to pull in data pipeline aka content mesh
+
+    ## Code
+
+    - React vs Vue
+      - Vue easier to start with
+      - React has more jobs
+      - FB dogfoods React
+      - React as a universal UI language
+      - Tom Dale - [Compilers are the new Frameworks](https://tomdale.net/2017/09/compilers-are-the-new-frameworks/)
+    - Difference between SSR and Compiling
+      - SSR generates HTML
+      - Compiling framework runtime/footprint
+      - React is trying to help optimize overall app footprint
+
+    ## Career
+
+    - Learning in Public
+      - Essay https://www.swyx.io/writing/learn-in-public/
+      - Talk https://www.swyx.io/speaking/learn-in-public-nyc
+    - The Internet rewards spiky people
+    - [DHH Apple Card story](https://www.bloomberg.com/news/articles/2019-11-09/viral-tweet-about-apple-card-leads-to-probe-into-goldman-sachs)
+    - [Sophie Alpert $600 story](https://twitter.com/sophiebits/status/1193686558206877696?lang=en)
+    - [David Perell: Naked Brands](https://www.perell.com/blog/the-future-of-finance)
+    - [React TypeScript Cheatsheet](https://github.com/typescript-cheatsheets/react-typescript-cheatsheet)
+    "
+- title: Work in Progress Podcast
+  slug: wip-podcast
+  categories: [Learn In Public]
+  venues: Podcast
+  date: 2019-09-15
+  url: http://wipp.buzzsprout.com/397696/1708216-wipp-002-shawn-wang-from-finance-to-tech
+  desc: A 90 minute chat about my career change with Dana and Angela! It was an honor to be one of the first batch of interviews for a new podcast.
+  description: In this episode of our podcast we interview Shawn (@swyx) who made the leap from finance to tech. What started as a career reflection combined with burnout prompted him to seek a different path. 
+
+
+# todo
+# link up freecodecamp-podcast
+# back up https://reactpodcast.com/69
+
+# 2017-2018 podcasts
+- title: Infinite Building
+  slug: egghead-podcast
+  categories: [Advice]
+  venues: Egghead
+  date: 2018-08-15
+  url: https://egghead.io/podcasts/swyx-shawn-wang-on-infinite-building?af=95qfq1
+  desc: Chatting about Infinite Learning vs Building, JS fatigue, and Impostor Syndrome
+  description: Tune in to hear Shawn talk about what it means to be an infinite learner and builder and how he uses this approach to further his career.
+- title: Productivity in Tech
+  slug: productivity-in-tech-podcast
+  categories: [React]
+  venues: Productivity in Tech
+  date: 2017-11-13
+  url: https://www.stitcher.com/podcast/kevin-miller/productivity-in-tech-podcast/e/52208723?autoplay=true
+  desc: Perhaps my first ever guest appearance on a podcast - talking about career change and my bootcamp experience.
+  description: In this conversation, we talk about Shawn's experience as a code school student and learn more about this growing source of alternative education.
+- title: State of JS with Sacha Greif (SEDaily)
+  slug: software-daily-sacha-greif
+  categories: [JS]
+  venues: SEDaily
+  date: 2017-08-09
+  url: https://softwareengineeringdaily.com/2017/08/09/state-of-javascript-with-sacha-greif/
+  desc: My first time GUEST HOSTING a podcast - SE Daily - and reaching out to Sacha was nervewracking!
+  description: Sacha Greif is an independent designer and developer most prominent in his roles as co-author of Discover Meteor and community builder at Sidebar.io, a design newsletter with over 35,000 subscribers, and Hacker News Kansai. He is currently best known in the Javascript community as the maintainer of VulcanJS, and for his annual State of Javascript survey which is now open for 2017. In this episode, Shawn Wang guests hosts a discussion about both projects and Sacha’s thoughts on independent web design and development.

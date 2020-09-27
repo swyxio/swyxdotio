@@ -1,7 +1,7 @@
 ---
 title: Know Your Tools
 slug: know-your-tools
-categories: ['Advice']
+tag_list: ['Advice', 'LearnInPublic']
 date: 2018-06-20
 ---
 

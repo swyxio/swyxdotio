@@ -1,0 +1,30 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "commonjs",
+    "lib": ["es2020", "DOM"],
+    "allowJs": true,
+    "outDir": "build",
+    "rootDir": "src",
+    "strict": false,
+    "esModuleInterop": true,
+    "resolveJsonModule": true
+  },
+  "include": ["src/**/*"],
+
+  "exclude": [
+    "build",
+    "node_modules",
+    "dist",
+    "package.json",
+    "tsconfig.json",
+    "nodemon.json",
+    "public",
+    "___ELDER___",
+    "rollup.config.js",
+    "elderjs",
+    "elder.config.js",
+    "node_modules/sirv/"
+  ]
+}

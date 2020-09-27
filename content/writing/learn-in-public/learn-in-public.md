@@ -2,7 +2,7 @@
 title: Learn In Public
 slug: learn-in-public
 subtitle: The fastest way to learn
-categories: ['Advice', 'Learn In Public']
+tag_list: ['Advice', 'LearnInPublic']
 date: 2018-06-19
 description: The fastest way to learn, grow your career, and build your network.
 ---

@@ -1,0 +1,16 @@
+/LIP /learn-in-public
+/growing https://www.youtube.com/watch?v=_ahvzDzKdB0
+/jsconfhi /speaking/babel-macros/
+/reactrally /speaking/react-not-reactive/
+/hooks /speaking/react-hooks/
+/react-from-scratch /speaking/react-from-scratch
+/talks  /speaking
+/career  https://gumroad.com/products/bAZJq/
+/youtube  https://www.youtube.com/swyxTV
+/writing/js-observability /js-tools-metrics-logs-traces
+/writing/no-controlled-dom /no-controlled-forms
+/now /about#now
+
+/talks/*  /ideas?show=Talks
+/writing/*  /ideas?show=Essays
+/speaking/*  /ideas?show=Talks&show=Podcasts

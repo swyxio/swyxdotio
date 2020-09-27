@@ -1,7 +1,7 @@
 ---
 title: Specialize In The New
 slug: specialize-in-the-new
-categories: ['Advice']
+tag_list: ['Advice', 'LearnInPublic']
 date: 2018-06-22
 ---
 
