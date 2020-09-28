@@ -135,7 +135,6 @@
   <link
     rel="stylesheet"
     href="{settings.locations.assets.replace('./public', '')}style.css" />
-  <link rel="stylesheet" href="https://unpkg.com/balloon-css/balloon.min.css" />
   <link rel="icon" type="image/png" href="/favicon.png" />
   <link rel="webmention" href="https://webmention.io/www.swyx.io/webmention" />
   <link rel="pingback" href="https://webmention.io/www.swyx.io/xmlrpc" />
