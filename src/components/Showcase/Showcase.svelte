@@ -248,7 +248,7 @@ function focusSearch(e) {
   <!-- <div class=" bg-gray-200 shadow overflow-hidden sm:rounded-md"> -->
   {#if filteredData.length}
     <!-- <ul class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"> -->
-    <ul class="flex flex-col">
+    <ul class="flex flex-col max-w-4xl mx-auto">
       {#each filteredData as item}
         <ShowcaseLine {item} />
       {/each}

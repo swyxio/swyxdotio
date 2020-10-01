@@ -19,14 +19,14 @@ translate-x-5
 bg-gray-500
 text-teal-500 -->
 
-<li class="mb-4">
-  <div class="flex items-center">
+<li class="mb-8">
+  <div class="flex md:items-center flex-col md:flex-row">
     <span
-      class="mr-4 text-gray-300 text-xs font-mono">{item.effectiveDate ? item.effectiveDate
+      class="mr-4 text-gray-300 text-xs font-mono w-20">{item.effectiveDate ? item.effectiveDate
             .toISOString()
             .slice(0, 10) : '???'}</span>
     <span
-      class="flex-shrink-0 inline-block px-2 py-0.5 text-xs leading-4
+      class="flex-shrink-0 inline md:inline-block px-2 py-0.5 text-xs leading-4
         font-medium rounded-full"
       class:bg-green-100={item.type === 'Essays'}
       class:text-green-800={item.type === 'Essays'}
@@ -38,23 +38,23 @@ text-teal-500 -->
     </span>
     <button
       on:click={() => (displayDetails = !displayDetails)}
-      class="relative -mr-px inline-flex items-center justify-center text-sm
-        leading-5 text-gray-700 font-medium border border-transparent
-        rounded-bl-lg focus:outline-none focus:shadow-outline-blue
-        focus:border-blue-300 focus:z-10 transition ease-in-out duration-150">
+      class="relative -mr-px inline-flex text-sm text-left leading-5
+        text-gray-700 font-medium border border-transparent focus:outline-none
+        focus:shadow-outline-blue focus:border-blue-300 focus:z-10 transition
+        ease-in-out duration-150">
       <!-- class:bg-gray-500={displayDetails}
         class:text-teal-500={displayDetails} -->
       <h3
-        class="text-gray-300 hover:text-teal-600 text-sm leading-5 font-medium
-          whitespace-normal ml-4 inline">
+        class="text-gray-300 hover:text-teal-600 text-base md:text-2xl leading-5
+          font-medium whitespace-normal ml-4 inline">
         {item.title}
       </h3>
     </button>
   </div>
 
   {#if displayDetails}
-    <div class="ml-4 bg-teal-900 border-l-4 border-teal-500 p-4">
-      <p class="prose mt-1 text-gray-300 text-sm leading-5 whitespace-normal">
+    <div class="ml-4 mt-4 bg-teal-900 border-l-4 border-teal-500 p-4">
+      <p class="prose mt-1 text-gray-300 text-base md:text-xl leading-5 whitespace-normal">
         <span>{longDesc}</span>
       </p>
 
