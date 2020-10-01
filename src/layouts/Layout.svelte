@@ -153,7 +153,7 @@
   </script>
 </svelte:head>
 <div id="base">
-  <div class="relative bg-gray-800 overflow-hidden basekid">
+  <div class="relative bg-gray-900 overflow-hidden basekid">
     <MobileMenu hydrate-client={{}} />
     <!-- <main class="mt-8 sm:mt-16 md:mt-20 lg:mt-24"> -->
     <main>

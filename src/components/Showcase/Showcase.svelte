@@ -1,5 +1,5 @@
 <script>
-  import ShowcaseItem from './ShowcaseItem.svelte'
+  import ShowcaseLine from './ShowcaseLine.svelte'
   import queryString from 'query-string'
   import { onMount } from 'svelte'
 
@@ -247,9 +247,10 @@ function focusSearch(e) {
 
   <!-- <div class=" bg-gray-200 shadow overflow-hidden sm:rounded-md"> -->
   {#if filteredData.length}
-    <ul class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <!-- <ul class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"> -->
+    <ul class="flex flex-col">
       {#each filteredData as item}
-        <ShowcaseItem {item} />
+        <ShowcaseLine {item} />
       {/each}
     </ul>
     {#if !showAll}

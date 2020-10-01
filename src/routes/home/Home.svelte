@@ -67,19 +67,19 @@
                   rel="noopener" href="https://egghead.io/s/26zf5">Egghead.io</a>, and help run the <a
                   rel="noopener" href="https://sveltesociety.dev/">Svelte Society</a> community of meetups. -->
         </p>
-        <div class="prose mt-4 text-teal-300">
-          Recently Featured:
-          <ul>
+        <div class="mt-4">
+          <span class="text-teal-300">Recently Featured</span>:
+          <ul class="list-disc text-gray-300 ml-4">
             <li>
-              Essay: <a class="hover:text-indigo-200" href="/create_luck">How to
+              Essay: <a class="text-indigo-300 underline hover:text-indigo-200" href="/create_luck">How to
                 Create Luck</a>
             </li>
             <li>
-              Talk: <a class="hover:text-indigo-200" href="https://www.youtube.com/watch?v=D-Sj6jo4o1I">The
+              Talk: <a class="text-indigo-300 underline hover:text-indigo-200" href="https://www.youtube.com/watch?v=D-Sj6jo4o1I">The
                 Operating System of You</a>
             </li>
             <li>
-              Podcast: <a class="hover:text-indigo-200" href="https://podcast.newline.co/episodes/cracking-the-coding-career-with-shawn-wang">Newline
+              Podcast: <a class="text-indigo-300 underline hover:text-indigo-200" href="https://podcast.newline.co/episodes/cracking-the-coding-career-with-shawn-wang">Newline
                 Podcast</a>
             </li>
           </ul>
