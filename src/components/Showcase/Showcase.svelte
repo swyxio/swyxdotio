@@ -1,5 +1,6 @@
 <script>
   import ShowcaseLine from './ShowcaseLine.svelte'
+  import ShowcaseLineEssay from './ShowcaseLineEssay.svelte'
   import queryString from 'query-string'
   import { onMount } from 'svelte'
 
@@ -92,14 +93,13 @@
     return res
   }
 
-let inputEl
-function focusSearch(e) {
-  if (e.key === '/' && inputEl) inputEl.select()
-}
+  let inputEl
+  function focusSearch(e) {
+    if (e.key === '/' && inputEl) inputEl.select()
+  }
 </script>
 
-
-<svelte:window on:keyup={focusSearch}/>
+<svelte:window on:keyup={focusSearch} />
 
 <div class="relative max-w-lg mx-auto lg:max-w-7xl mb-8">
   <div class="text-center">
@@ -112,11 +112,14 @@ function focusSearch(e) {
       For Free: Great Ideas. Lightly Used.
     </p>
   </div>
-  <img class="mx-auto" src="http://textfiles.com/underconstruction/HeHeartlandValley1469underconstruction2.gif" alt="under construction..." />
+  <img
+    class="mx-auto"
+    src="http://textfiles.com/underconstruction/HeHeartlandValley1469underconstruction2.gif"
+    alt="under construction..." />
 </div>
 <!-- <div class="pb-5 border-b border-gray-200 space-y-3 sm:flex sm:flex-col sm:items-center sm:justify-between sm:space-x-4 sm:space-y-0"> -->
 <div>
-  <div class="flex flex-col md:flex-row gap-4 md:gap-0 rounded-md mb-4">
+  <div class="flex flex-col md:flex-row gap-4 md:gap-0 rounded-md mb-8">
     <!-- search -->
     <label for="search_candidate" class="sr-only">Search</label>
     <div class="relative flex-grow focus-within:z-10">
@@ -144,7 +147,8 @@ function focusSearch(e) {
           id="search_candidate"
           type="text"
           class="hidden form-input w-full rounded-md pl-2 transition ease-in-out
-            duration-150 sm:block sm:text-sm sm:leading-5 py-2 ml-4 focus:bg-yellow-200"
+            duration-150 sm:block sm:text-sm sm:leading-5 py-2 ml-4
+            focus:bg-yellow-200"
           placeholder="Filter ideas (press / to focus)"
           bind:this={inputEl}
           bind:value={filterStr} />
@@ -212,37 +216,6 @@ function focusSearch(e) {
         <strike>Notes</strike>
       </button>
     </span>
-
-    <!-- sort - todo: see whether i actually need to sort -->
-    {#if false}
-      <button
-        class="-ml-px relative inline-flex items-center px-4 py-2 border
-          border-gray-300 text-sm leading-5 font-medium rounded-r-md
-          text-gray-700 bg-gray-50 hover:text-gray-500 hover:bg-white
-          focus:outline-none focus:shadow-outline-blue focus:border-blue-300
-          active:bg-gray-100 active:text-gray-700 transition ease-in-out
-          duration-150">
-        <!-- Heroicon name: sort-ascending -->
-        <svg
-          class="h-5 w-5 text-gray-400"
-          viewBox="0 0 20 20"
-          fill="currentColor">
-          <path
-            d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h5a1 1 0 000-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM13 16a1 1 0 102 0v-5.586l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 101.414 1.414L13 10.414V16z" />
-        </svg>
-        <span class="ml-2">Sort</span>
-        <!-- Heroicon name: chevron-down -->
-        <svg
-          class="ml-2.5 -mr-1.5 h-5 w-5 text-gray-400"
-          viewBox="0 0 20 20"
-          fill="currentColor">
-          <path
-            fill-rule="evenodd"
-            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-            clip-rule="evenodd" />
-        </svg>
-      </button>
-    {/if}
   </div>
 
   <!-- <div class=" bg-gray-200 shadow overflow-hidden sm:rounded-md"> -->
@@ -250,17 +223,22 @@ function focusSearch(e) {
     <!-- <ul class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"> -->
     <ul class="flex flex-col max-w-4xl mx-auto">
       {#each filteredData as item}
-        <ShowcaseLine {item} />
+        {#if item.type === 'Essays'}
+          <ShowcaseLineEssay {item} />
+        {:else}
+          <ShowcaseLine {item} />
+        {/if}
       {/each}
     </ul>
     {#if !showAll}
-      <span class="flex justify-center my-8 rounded-md shadow-sm animate-bounce">
+      <span
+        class="flex justify-center my-8 rounded-md shadow-sm animate-bounce">
         <button
           on:click={() => (showAll = true)}
           type="button"
-          class="inline-flex items-center border border-transparent
-            leading-6 font-medium rounded-md text-white bg-indigo-600
-            hover:bg-indigo-500 focus:outline-none focus:border-indigo-700
+          class="inline-flex items-center border border-transparent leading-6
+            font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-500
+            focus:outline-none focus:border-indigo-700
             focus:shadow-outline-indigo active:bg-indigo-700 transition
             ease-in-out duration-150 text-4xl p-8">
           Show All

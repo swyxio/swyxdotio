@@ -3,6 +3,8 @@
   export let data
   const { html, frontmatter, markdown, podcasts, talks, ...rest } = data
   // console.log({frontmatter, rest})
+  $: longDesc =
+    frontmatter.description || frontmatter.desc || 'No description provided. Suggest one!'
 
   let seoSubtitle = frontmatter && frontmatter.subtitle
   export let seoTitle = seoSubtitle
@@ -187,6 +189,9 @@
       <h1 class="text-white">{frontmatter.title}</h1>
       {#if frontmatter.subtitle}
         <h2 class="text-gray-300 italic Subtitle">{frontmatter.subtitle}</h2>
+      {/if}
+      {#if longDesc}
+        <p class="text-gray-300 italic Subtitle">{longDesc}</p>
       {/if}
       {#if frontmatter.author}<small>By {frontmatter.author}</small>{/if}
     </div>

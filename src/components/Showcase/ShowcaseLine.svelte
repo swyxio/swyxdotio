@@ -7,20 +7,25 @@
 
 <!-- border-green-500
 border-blue-500
-border-red-500
+border-orange-500
 bg-green-100
 text-green-800
 bg-blue-100
 text-blue-800
-bg-red-100
-text-red-800
+bg-orange-100
+text-orange-800
 bg-indigo-600
 translate-x-5
 bg-gray-500
 text-teal-500 -->
 
 <li class="mb-8">
-  <div class="flex md:items-center flex-col md:flex-row">
+  <div class="flex md:items-center flex-col md:flex-row py-4 -my-2"
+  
+  class:bg-blue-800={item.type === 'Talks'}
+  class:text-blue-800={item.type === 'Talks'}
+  class:bg-orange-800={item.type === 'Podcasts'}
+  class:text-orange-800={item.type === 'Podcasts'}>
     <span
       class="mr-4 text-gray-300 text-xs font-mono w-20">{item.effectiveDate ? item.effectiveDate
             .toISOString()
@@ -32,8 +37,8 @@ text-teal-500 -->
       class:text-green-800={item.type === 'Essays'}
       class:bg-blue-100={item.type === 'Talks'}
       class:text-blue-800={item.type === 'Talks'}
-      class:bg-red-100={item.type === 'Podcasts'}
-      class:text-red-800={item.type === 'Podcasts'}>
+      class:bg-orange-100={item.type === 'Podcasts'}
+      class:text-orange-800={item.type === 'Podcasts'}>
       {item.type}
     </span>
     <button
@@ -45,10 +50,15 @@ text-teal-500 -->
       <!-- class:bg-gray-500={displayDetails}
         class:text-teal-500={displayDetails} -->
       <h3
-        class="text-gray-300 hover:text-teal-600 text-base md:text-2xl leading-5
+        class="text-gray-300 hover:text-teal-200 text-base md:text-2xl leading-5
           font-medium whitespace-normal ml-4 inline">
         {item.title}
       </h3>
+      {#if !displayDetails}
+        <span class="text-sm text-gray-300 ml-8">Click for details</span>
+        {:else}
+        <span class="text-sm text-gray-300 ml-8">❌ Close</span>
+      {/if}
     </button>
   </div>
 
@@ -143,7 +153,7 @@ text-teal-500 -->
             <dd
               class="mt-1 text-sm leading-5 text-gray-400 sm:mt-0 sm:col-span-2">
               <a
-                class="underline hover:text-blue-700"
+                class="underline hover:text-blue-100"
                 href={item.canonical}>{item.canonical}</a>
             </dd>
           </div>
@@ -157,7 +167,7 @@ text-teal-500 -->
             <dd
               class="mt-1 text-sm leading-5 text-gray-400 sm:mt-0 sm:col-span-2">
               <a
-                class="underline hover:text-blue-700"
+                class="underline hover:text-blue-100"
                 href={item.url}>{item.url}</a>
             </dd>
           </div>
@@ -168,7 +178,7 @@ text-teal-500 -->
             <dd
               class="mt-1 text-sm leading-5 text-gray-400 sm:mt-0 sm:col-span-2">
               <a
-                class="underline hover:text-blue-700"
+                class="underline hover:text-blue-100"
                 href={item.slides}>{item.slides}</a>
             </dd>
           </div>
@@ -194,29 +204,29 @@ text-teal-500 -->
               <div class="ml-4">
                 {#if instance.video}
                   <a
-                    class="underline hover:text-blue-700"
+                    class="underline hover:text-blue-100"
                     href={instance.video}>Video</a>
                 {/if}
                 {#if instance.slides}
                   <a
-                    class="underline hover:text-blue-700"
+                    class="underline hover:text-blue-100"
                     href={instance.slides}>Slides</a>
                 {/if}
                 {#if instance.github}
                   <a
-                    class="underline hover:text-blue-700 text-sm leading-5
+                    class="underline hover:text-blue-100 text-sm leading-5
                       font-medium text-gray-500"
                     href={instance.github}>GitHub</a>
                 {/if}
                 {#if instance.tweet}
                   <a
-                    class="underline hover:text-blue-700 text-sm leading-5
+                    class="underline hover:text-blue-100 text-sm leading-5
                       font-medium text-gray-500"
                     href={instance.tweet}>Tweet</a>
                 {/if}
                 {#if instance.description}
                   <span
-                    class="text-sm leading-5 text-gray-700">{instance.description}</span>
+                    class="text-sm leading-5 text-gray-400">{instance.description}</span>
                 {/if}
               </div>
             </li>
