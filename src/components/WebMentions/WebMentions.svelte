@@ -151,7 +151,7 @@
       <div>
         No replies yet.
         <a
-          href="https://twitter.com/intent/tweet/?text=My%20thoughts%20on%20{target}">
+          href="https://twitter.com/intent/tweet/?text=My%20thoughts%20on%20{targets[0]}">
           Tweet about this post
         </a>
         and it will show up here!
@@ -211,7 +211,7 @@
           <li>
             No further replies found.
             <a
-              href="https://twitter.com/intent/tweet/?text=My%20thoughts%20on%20{target}">
+              href="https://twitter.com/intent/tweet/?text=My%20thoughts%20on%20{targets[0]}">
               Tweet about this post
             </a>
             and it will show up here!

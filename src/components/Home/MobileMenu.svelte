@@ -118,7 +118,6 @@
             role="menuitem">About</a>
           <a
             href="https://twitter.com/swyx"
-            rel="me"
             class="block px-3 py-2 rounded-md text-base font-medium
               text-gray-700 hover:text-gray-900 hover:bg-gray-50
               focus:outline-none focus:text-gray-900 focus:bg-gray-50 transition
@@ -126,7 +125,6 @@
             role="menuitem">My Twitter</a>
           <a
             href="https://github.com/sw-yx"
-            rel="me"
             class="block px-3 py-2 rounded-md text-base font-medium
               text-gray-700 hover:text-gray-900 hover:bg-gray-50
               focus:outline-none focus:text-gray-900 focus:bg-gray-50 transition
