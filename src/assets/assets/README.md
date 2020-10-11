@@ -1,0 +1,2 @@
+- all assets here are holdover from the svelte/sapper version of the site
+- pls dont add.
