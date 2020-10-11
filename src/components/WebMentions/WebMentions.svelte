@@ -2,7 +2,7 @@
   let page = 0
   export let targets
   export let devto_reactions
-  $: _targets = [...new Set(targets)]
+  $: _targets = [...new Set(targets.filter(Boolean))]
   if (!targets) throw new Error('error: no target')
   let counts
   let mentions = []
@@ -159,9 +159,9 @@
         </svg>
       </a>
     </div>
-    {#if targets.find((x) => x.startsWith('https://dev.to'))}
+    {#if _targets.find((x) => x.startsWith('https://dev.to'))}
       <span>See
-        <a href={targets.find((x) => x.startsWith('https://dev.to'))}>comments on
+        <a href={_targets.find((x) => x.startsWith('https://dev.to'))}>comments on
           Dev.to</a>
       </span>
     {/if}
