@@ -1,6 +1,7 @@
 <script>
   let page = 0
   export let targets
+  export let devto_reactions
   $: _targets = [...new Set(targets)]
   if (!targets) throw new Error('error: no target')
   let counts
@@ -8,20 +9,20 @@
   let fetchState = 'fetching'
   import { onMount } from 'svelte'
   onMount(() => {
-    const fetches = _targets.map(
-      (target) =>
-        fetch(
-          `https://webmention.io/api/count.json?target=${target}/`
-        ).then((res) => res.json())
+    const fetches = _targets.map((target) =>
+      fetch(
+        `https://webmention.io/api/count.json?target=${target}/`
+      ).then((res) => res.json())
     )
     counts = Promise.all(fetches).then(
       (arr) =>
         arr
           .map((x) => x.type)
           .reduce((acc, cur) => ({
-            mention: acc.mention + (cur.mention || 0),
-            reply: acc.reply + (cur.reply || 0),
-            repost: acc.repost + (cur.repost || 0)
+            like: (acc.like || 0) + (cur.like || 0),
+            mention: (acc.mention || 0) + (cur.mention || 0),
+            reply: (acc.reply || 0) + (cur.reply || 0),
+            repost: (acc.repost || 0) + (cur.repost || 0)
           })),
       {}
     )
@@ -43,9 +44,7 @@
     // `https://webmention.io/api/mentions?page=${page}&per-page=20&sort-by=published&target=${target}`,
     return Promise.all(fetches)
       .then((arr) => arr.map((x) => x.links).flat())
-      .then(
-        (x) => x.filter((x) => x.activity.type !== 'like')
-      )
+      .then((x) => x.filter((x) => x.activity.type !== 'like'))
   }
   const fetchMore = () => {
     page += 1
@@ -128,35 +127,45 @@
 
 <hr />
 <div id="WebMentions" class="prose">
-  <h3
-    font-family="system"
-    font-size="4"
-    font-weight="bold"
-    class="text-teal-400 text-xl">
-    Webmentions
-  </h3>
-  <a
-    aria-label="Clientside Webmentions"
-    target="_blank"
-    title="What is this?"
-    rel="noopener"
-    href="http://swyx.io/writing/clientside-webmentions"
-    color="blue">
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="0.75em"
-      height="0.75em"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="#999"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round">
-      <circle cx="12" cy="12" r="10" />
-      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-      <line x1="12" y1="17" x2="12" y2="17" />
-    </svg>
-  </a>
+  <div class="flex justify-between">
+    <div>
+      <h3
+        font-family="system"
+        font-size="4"
+        font-weight="bold"
+        class="text-teal-400 text-xl">
+        Webmentions
+      </h3>
+      <a
+        aria-label="Clientside Webmentions"
+        target="_blank"
+        title="What is this?"
+        rel="noopener"
+        href="http://swyx.io/writing/clientside-webmentions"
+        color="blue">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="0.75em"
+          height="0.75em"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#999"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+          <line x1="12" y1="17" x2="12" y2="17" />
+        </svg>
+      </a>
+    </div>
+    {#if targets.find((x) => x.startsWith('https://dev.to'))}
+      <span>See
+        <a href={targets.find((x) => x.startsWith('https://dev.to'))}>comments on
+          Dev.to</a>
+      </span>
+    {/if}
+  </div>
   <div class="WebMentionsContainer">
     <div class="WebMentionsHeader">
       {#await counts}
@@ -167,7 +176,7 @@
             Loading...
           {:else}
             ❤️
-            {data.like + data.repost || 0}
+            {data.like + data.repost + devto_reactions || 0}
             💬
             {data.mention + data.reply || 0}
           {/if}
