@@ -230,5 +230,9 @@
     <a class="text-teal-400 underline hover:text-teal-200" href="/about">Featured Essays and Talks &RightArrow;</a>
   </div>
   <WebMentions
-    hydrate-client={{ target: `https://www.swyx.io/writing/${frontmatter.slug}` }} />
+    hydrate-client={{ targets: [
+      `https://www.swyx.io/${frontmatter.slug}`,
+      frontmatter.devto_url,
+      frontmatter.canonical_url,
+    ]}} />
 </article>

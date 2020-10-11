@@ -1,14 +1,15 @@
 <script>
   let page = 0
-  export let target
-  if (!target) console.error('error: no target')
+  export let targets
+  if (!targets) throw new Error('error: no target')
   let counts
   let mentions = []
   let fetchState = 'fetching'
   import { onMount } from 'svelte'
   onMount(() => {
-    counts = fetch(`https://webmention.io/api/count.json?target=${target}/`) // trailing slash impt
-      .then(res => res.json())
+    const fetches = targets.map(target => fetch(`https://webmention.io/api/count.json?target=${target}/`).then(res => res.json()))
+    counts = Promise.all(fetches)
+      .then(arr => arr.flat())
       .then(x => x.type)
     getMentions().then(x => {
       mentions = x
@@ -17,12 +18,14 @@
     })
   })
   function getMentions() {
-    return fetch(
-      // `https://webmention.io/api/mentions?page=${page}&per-page=20&sort-by=published&target=${target}`,
-      `https://webmention.io/api/mentions?page=${page}&per-page=20&target=${target}/` // trailing slash impt
-    )
-      .then(x => x.json())
-      .then(x => x.links.filter(x => x.activity.type !== 'like'))
+    console.log({targets})
+    const fetches = targets.map(target => console.log(`https://webmention.io/api/mentions?page=${page}&per-page=20&target=${target}/`) || fetch(`https://webmention.io/api/mentions?page=${page}&per-page=20&target=${target}/`).then(x => x.json()))
+    // remember trailing slash impt
+    // maybe want to sort someday
+    // `https://webmention.io/api/mentions?page=${page}&per-page=20&sort-by=published&target=${target}`,
+    return Promise.all(fetches)
+      .then(arr => arr.flat()) 
+      .then(x => console.log({x}) || x.links && x.links.filter(x => x.activity.type !== 'like'))
   }
   const fetchMore = () => {
     page += 1
@@ -35,7 +38,7 @@
     })
   }
   function cleanString(str) {
-    const withSlash = target + '/'
+    const withSlash = targets[0] + '/' // todo: figure out proper fix
     const linky = `<a href="${withSlash}">${withSlash}</a>`
     return str
       .replace(linky, '') // drop self referential <a> tags
