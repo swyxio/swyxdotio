@@ -44,7 +44,7 @@ const hooks = [
             fs.outputFileSync(
               path.resolve(
                 settings.distDir,
-                `${relativeToAssetsFolder}${parsed.base}`
+                `${relativeToAssetsFolder}${parsed.name === '_redirects' ? '' : parsed.base}`
               ),
               fs.readFileSync(file)
             )
