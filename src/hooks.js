@@ -37,17 +37,10 @@ const hooks = [
           // Only write the file/folder structure if it has an extension
           if (parsed.name === '_redirects' || parsed.ext && parsed.ext.length > 0) {
             const relativeToAssetsFolder = path.relative(path.join(settings.rootDir, './src/assets'), file)
-            const p = path.parse(
-              path.resolve(settings.distDir, relativeToAssetsFolder)
-            )
+            const outputPath = path.resolve(settings.distDir, relativeToAssetsFolder)
+            const p = path.parse(outputPath)
             fs.ensureDirSync(p.dir)
-            fs.outputFileSync(
-              path.resolve(
-                settings.distDir,
-                `${relativeToAssetsFolder}${parsed.name === '_redirects' ? '' : parsed.base}`
-              ),
-              fs.readFileSync(file)
-            )
+            fs.outputFileSync(outputPath, fs.readFileSync(file))
           }
         })
     }
