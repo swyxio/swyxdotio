@@ -9,7 +9,7 @@ date: 2019-12-26
 
 Let's say you needed a multipurpose tool. Which of these would you pick?
 
-![./assets/hammers.png](./assets/hammers.png)
+![/assets/hammers.png](/assets/hammers.png)
 
 There are probably a few responses possible:
 
