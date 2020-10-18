@@ -1,10 +1,9 @@
 /LIP /learn-in-public
 /growing https://www.youtube.com/watch?v=_ahvzDzKdB0
-/jsconfhi /speaking/babel-macros/
-/reactrally /speaking/react-not-reactive/
-/hooks /speaking/react-hooks/
-/react-from-scratch /speaking/react-from-scratch
-/talks  /speaking
+/jsconfhi /ideas/?filter=babel%20macros&show=Talks
+/reactrally /ideas/?filter=react%20rally&show=Talks
+/hooks /ideas/?filter=react%20hooks&show=Talks
+/react-from-scratch /ideas/?filter=react%20scratch&show=Talks
 /career  https://gumroad.com/products/bAZJq/
 /youtube  https://www.youtube.com/swyxTV
 /writing/js-observability /js-tools-metrics-logs-traces
