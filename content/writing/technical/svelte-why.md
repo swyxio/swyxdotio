@@ -6,6 +6,8 @@ description: Reasons I enjoy Svelte, despite not using it for work.
 date: 2020-01-26
 ---
 
+> March 2020 update: I wrote a [Short Version for a meetup talk](https://dev.to/swyx/why-svelte-the-short-version-3g0n).
+
 As someone who is primarily associated with React both at work and in my personal capacity, I get frequent questions on why I am messing around with Svelte so much. So I'm writing them down to organize my thoughts.
 
 ## Table of Contents
@@ -188,3 +190,5 @@ Community will be a major lever in this. [I'm involved](https://github.com/svelt
 React has plenty going for it, and is [good enough](https://twitter.com/swyx/status/1221125270989692928) for a vast majority of people. Network effect alone may be insurmountable. They also have [top notch release quality](https://reactjs.org/blog/2019/10/22/react-release-channels.html) and are working on awesome things no other framework is working on. If I were to start a new work app today, I'd still use React. I also think a compiler layer can be built for React to copy over some ideas from Svelte.
 
 For now, my approach is "**Svelte for sites, React for apps**".
+
+> Update from Oct 2020 - I wrote a longer elaboration of [Svelte for Sites, React for Apps](https://www.swyx.io/svelte-sites-react-apps/) here.
