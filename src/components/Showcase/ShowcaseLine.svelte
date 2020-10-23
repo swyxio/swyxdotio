@@ -15,8 +15,10 @@ border-purple-500
 bg-green-100
 text-green-900
 bg-blue-100
+bg-blue-900
 text-blue-900
 bg-purple-100
+bg-purple-900
 text-purple-900
 bg-indigo-600
 translate-x-5
