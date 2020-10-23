@@ -1,5 +1,30 @@
 # 2020 Talks
 
+- title: Lessons and Regrets from Shipping My $50000 Coronavirus Side Project
+  slug: lessons-and-regrets-50k
+  categories: [CodingCareer]
+  description: This talk is about my personal journey shipping my side project, LearnInPublic.org, from April to July this year. It involves both technical and nontechnical takeaways, from coding and designing the landing page and ecommerce fulfilment, to writing and marketing the book, all as a solo dev. Shipping side projects for money is a dream for many dev and I wanted to share what I learned doing mine.
+  instances:
+    - venue: JS.LA
+      date: 2020-09-29
+      video: https://www.youtube.com/watch?v=LJCyS8bFY80
+- title: Typesafe, Fullstack React
+  slug: aws-typesafe-fullstack-react
+  categories: [AWS]
+  description: A live coding talk given at React Global Summit 2020, with React, TypeScript GraphQL with an AWS Amplify backend.
+  instances:
+    - venue: React Summit
+      date: 2020-09-17
+      tweet: https://twitter.com/swyx/status/1305994389362106370?s=20
+      video: https://www.youtube.com/watch?v=ja6meOLHjIg
+- title: Intro to AWS Amplify and AppSync
+  slug: intro-to-aws-amplify-and-appsync
+  categories: [AWS]
+  description: A General intro to AWS Amplify and AppSync
+  instances:
+    - venue: Singapore Serverless
+      date: 2020-10-14
+      video: https://www.youtube.com/watch?v=YwpInifIO8o
 - title: Concurrent React From Scratch
   slug: react-from-scratch
   categories: [React]
@@ -37,6 +62,12 @@
   description: Developers are mostly humans that run the same "hardware". Therefore most performance differences, especially the ones we can control, are down to our "OS" - our conscious prioritization and processing - and "firmware" - our unconscious personality and reactions. What can we do to better take care of our "hardware", and what does running better "software" look like?
   instances:
     - venue: CascadiaJS
+      description: the truncated 20 min one that actually ran for the conference
+      url: https://2020.cascadiajs.com/speakers/shawn-wang
+      video: https://www.youtube.com/watch?v=KBi_LZTCrgU
+      date: 2020-09-24
+    - venue: CascadiaJS
+      description: my full length, 25 min recording.
       slides: https://docs.google.com/presentation/d/1z43axgETtWGqPFlRDmqU11gb3aJnEH0y3MgSV5fchpM/edit?usp=sharing
       url: https://2020.cascadiajs.com/speakers/shawn-wang
       video: https://www.youtube.com/watch?v=D-Sj6jo4o1I

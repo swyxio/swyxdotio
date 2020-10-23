@@ -1,5 +1,40 @@
 # 2020 podcasts
 
+- title: The Coding Career Handbook on React Podcast
+  slug: coding-career-react-podcast
+  categories: [Careers]
+  venues: React Podcast
+  date: 2020-10-15
+  url: https://reactpodcast.com/episodes/114/
+  description: Shawn Swyx Wang opens up about his new book The Coding Career Handbook - His book shines a spotlight on career patterns and practices that many had to learn the hard way — you know, up hill in the snow both ways!
+- title: SWYX on Shoptalk Show
+  slug: coding-career-shoptalk-show
+  categories: [Careers]
+  venues: Shoptalk Show Podcast
+  date: 2020-09-28
+  url: https://shoptalkshow.com/432/
+  description: Shawn Wang, known as Swyx, talks with Dave and Chris about his career path from finance to coding, and now in developer experience. They chat about serverless functions, React, getting a broad sense of technology, Wang's Coding Career Handbook, what's next for SSR, checking out Vite, and what exactly is DevX / developer experience?
+- title: Coding Career Strategy on ML Engineered Podcast
+  slug: coding-career-mle-podcast
+  categories: [Careers]
+  venues: ML Engineered Podcast
+  date: 2020-09-09
+  url: https://www.mlengineered.com/episode/swyx
+  description: Shawn Wang formerly worked in finance as a derivatives trader and equity analyst before burning out and pivoting towards tech. He's a prolific blogger who goes under the pseudonym "swyx" and recently published the excellent Coding Career Handbook. He's a graduate of Free Code Camp and Full Stack Academy now working at AWS as a Senior Developer Advocate. 
+- title: Open Knowledge on Maintainers Anonymous Podcast
+  slug: open-knowledge-maintainers-anonymous
+  categories: [Careers]
+  venues: Maintainers Anonymous Podcast
+  date: 2020-06-15
+  url: https://maintainersanonymous.com/open-knowledge/
+  description: What does it mean to be code adjacent? Shawn Wang joins Henry to chat about not just open code but open thinking with his experience in community managing, the idea of tumbling, moderating /r/reactjs, starting the Svelete Society meetup, documenting and learning in public, being historians of our field, fresh notes vs. awesome lists, the meta language, and adoption curves. (recorded in June) (54 min)
+- title: The Coding Career Handbook on Zhia Chong YouTube
+  slug: coding-career-zhia-chong
+  categories: [Careers]
+  venues: Zhia Chong
+  date: 2020-08-20
+  url: https://www.youtube.com/watch?v=flaAZQ3meQI
+  description: A quick interview on Zhia Chong's YouTube channel!
 - title: Svelte Radio Episodes
   slug: svelte-radio
   categories: [Svelte]
