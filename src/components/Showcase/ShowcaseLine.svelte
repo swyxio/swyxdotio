@@ -3,47 +3,38 @@
   let displayDetails = false
   $: longDesc =
     item.description || item.desc || 'No description provided. Suggest one!'
+  function formatDate(date) {
+    if (date.getFullYear() > 2019) return date.toDateString().slice(4, 10)
+    return date ? date.toISOString().slice(0, 10) : '???'
+  }
 </script>
 
 <!-- border-green-500
 border-blue-500
-border-orange-500
+border-purple-500
 bg-green-100
-text-green-800
+text-green-900
 bg-blue-100
-text-blue-800
-bg-orange-100
-text-orange-800
+text-blue-900
+bg-purple-100
+text-purple-900
 bg-indigo-600
 translate-x-5
 bg-gray-500
 text-teal-500 -->
 
-<li class="mb-8">
-  <div class="flex md:items-center flex-col md:flex-row py-4 -my-2"
-  
-  class:bg-blue-800={item.type === 'Talks'}
-  class:text-blue-800={item.type === 'Talks'}
-  class:bg-orange-800={item.type === 'Podcasts'}
-  class:text-orange-800={item.type === 'Podcasts'}>
+<li class="mb-4 md:mb-8">
+  <div class="flex py-4"
+    class:bg-blue-900={item.type === 'Talks'}
+    class:text-blue-900={item.type === 'Talks'}
+    class:bg-purple-900={item.type === 'Podcasts'}
+    class:text-purple-900={item.type === 'Podcasts'}>
     <span
-      class="mr-4 text-gray-300 text-xs font-mono w-20">{item.effectiveDate ? item.effectiveDate
-            .toISOString()
-            .slice(0, 10) : '???'}</span>
-    <span
-      class="flex-shrink-0 inline md:inline-block px-2 py-0.5 text-xs leading-4
-        font-medium rounded-full"
-      class:bg-green-100={item.type === 'Essays'}
-      class:text-green-800={item.type === 'Essays'}
-      class:bg-blue-100={item.type === 'Talks'}
-      class:text-blue-800={item.type === 'Talks'}
-      class:bg-orange-100={item.type === 'Podcasts'}
-      class:text-orange-800={item.type === 'Podcasts'}>
-      {item.type}
-    </span>
+      class="inline-flex justify-end items-center text-gray-500 text-xs font-mono whitespace-no-wrap">
+      {formatDate(item.effectiveDate)}</span>
     <button
       on:click={() => (displayDetails = !displayDetails)}
-      class="relative -mr-px inline-flex text-sm text-left leading-5
+      class="relative flex -mr-px text-sm text-left leading-5
         text-gray-700 font-medium border border-transparent focus:outline-none
         focus:shadow-outline-blue focus:border-blue-300 focus:z-10 transition
         ease-in-out duration-150">
@@ -54,10 +45,21 @@ text-teal-500 -->
           font-medium whitespace-normal ml-4 inline">
         {item.title}
       </h3>
+      <span
+        class="hidden items-center ml-4 flex-shrink-0 md:inline-block px-2 py-0.5 text-xs leading-4
+          font-medium rounded-full"
+        class:bg-green-100={item.type === 'Essays'}
+        class:text-green-900={item.type === 'Essays'}
+        class:bg-blue-100={item.type === 'Talks'}
+        class:text-blue-900={item.type === 'Talks'}
+        class:bg-purple-100={item.type === 'Podcasts'}
+        class:text-purple-900={item.type === 'Podcasts'}>
+        {item.type}
+      </span>
       {#if !displayDetails}
-        <span class="text-sm text-gray-300 ml-8">Click for details</span>
+        <span class="hidden md:inline text-sm text-gray-300 hover:text-teal-200 ml-8">Click for details</span>
         {:else}
-        <span class="text-sm text-gray-300 ml-8">❌ Close</span>
+        <span class="hidden md:inline text-sm text-gray-300 ml-8">❌ Close</span>
       {/if}
     </button>
   </div>

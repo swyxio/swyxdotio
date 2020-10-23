@@ -34,7 +34,7 @@
 </svelte:head>
 
 <div
-  class="pt-16 pb-20 px-4 sm:px-6 lg:pt-24 lg:pb-28 lg:px-8 container mx-auto">
+  class="pt-4 pb-20 px-4 sm:px-6 lg:pt-8 lg:pb-28 lg:px-8 container mx-auto">
   <Showcase hydrate-client={{ data: _data }} />
   <!-- <div
     class="mt-12 grid gap-16 border-t-2 border-gray-100 pt-12 lg:grid-cols-3
