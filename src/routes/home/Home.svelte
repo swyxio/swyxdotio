@@ -148,9 +148,8 @@
       <div class="relative mx-auto w-32 md:w-full rounded-lg lg:max-w-md">
         <a href="/ideas">
           <img
-            class="hover:border-4 hover:border-indigo-700 transform transition
-              duration-300 delay-200 hover:rotate-360 hover:scale-125
-              hover:rounded-full w-full relative block rounded-full
+            class="hover:border-4 hover:border-blue-500 
+              w-full relative block rounded-full
               md:rounded-lg overflow-hidden focus:outline-none
               focus:shadow-outline"
             src="https://avatars2.githubusercontent.com/u/6764957?u=97ad815028595b73b06ee4b0510e66bbe391228d&v=4&s=400"
