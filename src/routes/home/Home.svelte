@@ -69,20 +69,20 @@
         </p>
         <div class="mt-4">
           <span class="text-teal-300">Recently Featured</span>:
-          <ul class="list-disc text-gray-300 ml-4">
+          <ul class="list-disc text-gray-300 ml-4 mb-4">
             <li>
-              Essay: <a class="text-indigo-300 underline hover:text-indigo-200" href="/create_luck">How to
-                Create Luck</a>
+              Essay: <a class="text-indigo-300 underline hover:text-indigo-200" href="/svelte-sites-react-apps">Svelte for Sites, React for Apps</a>
             </li>
             <li>
               Talk: <a class="text-indigo-300 underline hover:text-indigo-200" href="https://www.youtube.com/watch?v=D-Sj6jo4o1I">The
                 Operating System of You</a>
             </li>
             <li>
-              Podcast: <a class="text-indigo-300 underline hover:text-indigo-200" href="https://podcast.newline.co/episodes/cracking-the-coding-career-with-shawn-wang">Newline
+              Podcast: <a class="text-indigo-300 underline hover:text-indigo-200" href="https://reactpodcast.com/episodes/114/">Coding Career Handbook on React
                 Podcast</a>
             </li>
           </ul>
+          <div>👉 <a class="text-indigo-300 underline hover:text-indigo-200" href="/ideas">See All My Essays, Talks, and Podcasts!</a> 👈</div>
         </div>
         <div
           class="mt-5 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
