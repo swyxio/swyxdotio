@@ -14,6 +14,7 @@
 /talks /ideas?show=Talks
 /writing  /ideas?show=Essays
 /speaking  /ideas?show=Talks&show=Podcasts
+/talks/react-hooks  /ideas?filter=getting%20closure%20on%20hooks&show=Talks
 /talks/*  /ideas?show=Talks&filter=:splat
 /writing/*  /:splat
 /speaking/*  /ideas?show=Talks&show=Podcasts&filter=:splat

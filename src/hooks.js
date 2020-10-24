@@ -2,6 +2,7 @@ const path = require('path')
 const glob = require('glob')
 const fs = require('fs-extra')
 const RSS = require('rss')
+const marked = require('marked');
 
 const hooks = [
   // {
@@ -92,7 +93,6 @@ const hooks = [
         ttl
       })
 
-      // fs.writeFileSync('testrss.json', JSON.stringify(data, null, 2))
       let _data = [
         ...data.podcasts.map((x) => void (x.type = 'Podcasts') || x),
         ...data.talks.map((x) => void (x.type = 'Talks') || x),
@@ -104,6 +104,7 @@ const hooks = [
       }).sort((a, z) => z.effectiveDate - a.effectiveDate)
         .slice(0, 100)
 
+      fs.writeFileSync('testrss.json', JSON.stringify(_data, null, 2))
       _data.forEach(item => {
         const slug = item.slug || (item.data ? item.data.slug : null)
         if (!slug) {
@@ -143,13 +144,6 @@ const hooks = [
 module.exports = hooks
 
 function customElements(item) {
-  if (item.html) return [
-    {
-      'content:encoded': {
-        _cdata: item.html
-      }
-    }
-  ]
   const part1 = type => `<h1>${type}: ${item.title}</h1>`
   const rawPart = `<p><pre>${JSON.stringify(item, null, 2)}</pre></p>`
   let instancesPart = ``
@@ -172,7 +166,7 @@ function customElements(item) {
           `<a href="${item.url}">${part1("Talk")}</a>
           ${instancesPart}
           ${rawPart}`
-          : `${part1}
+          : `${part1("Talk")}
           ${instancesPart}
           ${rawPart}`
       }
@@ -185,9 +179,16 @@ function customElements(item) {
           `<a href="${item.url}">${part1("Podcast")}</a>
           ${instancesPart}
           ${rawPart}`
-          : `${part1}
+          : `${part1("Podcast")}
           ${instancesPart}
           ${rawPart}`
+      }
+    }
+  ]
+  if (item.content) return [
+    {
+      'content:encoded': {
+        _cdata: marked(item.content) // todo - reuse parsed html
       }
     }
   ]

@@ -6,9 +6,6 @@
 
   let urlState = { filter: '', show: [] }
   let defaultURLState = { filter: '', show: ['Essays', 'Talks', 'Podcasts'] }
-  onMount(() => {
-    urlState = { ...defaultURLState, ...queryString.parse(location.search) }
-  })
 
   const setURLState = (newState) => {
     const finalState = { ...urlState, ...newState } // merge with existing urlstate
@@ -44,16 +41,30 @@
   let notes = false
 
   let filterStr = ''
-  $: setURLState({
-    filter: filterStr,
-    show: [
-      essays && 'Essays',
-      talks && 'Talks',
-      podcasts && 'Podcasts',
-      tutorials && 'Tutorials',
-      notes && 'Notes'
-    ].filter(Boolean)
+
+  onMount(() => {
+    let givenstate = queryString.parse(location.search)
+    if (!Array.isArray(givenstate.show)) givenstate.show = [givenstate.show]
+    if (!givenstate.show.includes('Essays')) essays = false
+    if (!givenstate.show.includes('Talks')) talks = false
+    if (!givenstate.show.includes('Podcasts')) podcasts = false
+    if (!givenstate.show.includes('Tutorials')) tutorials = false
+    if (!givenstate.show.includes('Notes')) notes = false
+    if (givenstate.filter) filterStr = givenstate.filter
+    urlState = { ...defaultURLState, ...givenstate }
   })
+  function saveURLState() {
+    setURLState({
+      filter: filterStr,
+      show: [
+        essays && 'Essays',
+        talks && 'Talks',
+        podcasts && 'Podcasts',
+        tutorials && 'Tutorials',
+        notes && 'Notes'
+      ].filter(Boolean)
+    })
+  }
   // $: console.log({urlState, essays, talks, podcasts})
 
   $: showAll = filterStr.length > 2
@@ -143,11 +154,12 @@
         <input
           id="search_candidate"
           type="text"
-          class="form-input w-full rounded-md pl-2 transition ease-in-out
+          class="form-input w-full rounded-md pl-2 transition ease-in-out text-white
           duration-150 sm:block sm:text-sm sm:leading-5 py-2 ml-4 bg-gray-800
-          focus:bg-yellow-200"
+          focus:bg-yellow-200 focus:text-gray-800"
           placeholder="Filter ideas (press / to focus)"
           bind:this={inputEl}
+          on:input={saveURLState}
           bind:value={filterStr} />
       </div>
     </div>
@@ -157,7 +169,7 @@
     <div class="inline-flex items-center mr-2 text-gray-400">Show:</div>
     <button
       type="button"
-      on:click={() => (essays = !essays)}
+      on:click={() => saveURLState(essays = !essays)}
       class:bg-gray-300={essays}
       class:text-gray-700={essays}
       class="-ml-px sm:ml-0 relative inline-flex items-center px-4 py-2
@@ -170,7 +182,7 @@
     </button>
     <button
       type="button"
-      on:click={() => (talks = !talks)}
+      on:click={() => saveURLState(talks = !talks)}
       class:bg-gray-300={talks}
       class:text-gray-700={talks}
       class="-ml-px relative inline-flex items-center px-4 py-2 border
@@ -182,7 +194,7 @@
     </button>
     <button
       type="button"
-      on:click={() => (podcasts = !podcasts)}
+      on:click={() => saveURLState(podcasts = !podcasts)}
       class:bg-gray-300={podcasts}
       class:text-gray-700={podcasts}
       class="-ml-px relative inline-flex items-center px-4 py-2 border
@@ -232,7 +244,7 @@
         {#if item.type === 'Essays'}
           <ShowcaseLineEssay {item} />
         {:else}
-          <ShowcaseLine {item} />
+          <ShowcaseLine {item} uno={filteredData.length === 1} />
         {/if}
       {/each}
     </ul>

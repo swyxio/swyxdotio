@@ -1,6 +1,7 @@
 <script>
   export let item
-  let displayDetails = false
+  export let uno = false
+  let displayDetails = uno
   $: longDesc =
     item.description || item.desc || 'No description provided. Suggest one!'
   function formatDate(date) {

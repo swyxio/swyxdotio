@@ -1,5 +1,5 @@
 <script>
-  import BlogTeaser from '../../components/BlogTeaser/BlogTeaser.svelte'
+  // import BlogTeaser from '../../components/BlogTeaser/BlogTeaser.svelte'
   import Showcase from '../../components/Showcase/Showcase.svelte'
   export let data
 
