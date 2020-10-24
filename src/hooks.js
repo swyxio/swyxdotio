@@ -104,7 +104,7 @@ const hooks = [
       }).sort((a, z) => z.effectiveDate - a.effectiveDate)
         .slice(0, 100)
 
-      fs.writeFileSync('testrss.json', JSON.stringify(_data, null, 2))
+      // fs.writeFileSync('testrss.json', JSON.stringify(_data, null, 2))
       _data.forEach(item => {
         const slug = item.slug || (item.data ? item.data.slug : null)
         if (!slug) {
