@@ -43,6 +43,7 @@
   let filterStr = ''
 
   onMount(() => {
+    if (location.search.length < 1) return // early terminate if no search
     let givenstate = queryString.parse(location.search)
     if (!Array.isArray(givenstate.show)) givenstate.show = [givenstate.show]
     if (!givenstate.show.includes('Essays')) essays = false

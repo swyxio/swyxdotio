@@ -14,7 +14,8 @@
 /talks /ideas?show=Talks
 /writing  /ideas?show=Essays
 /speaking  /ideas?show=Talks&show=Podcasts
-/talks/react-hooks  /ideas?filter=getting%20closure%20on%20hooks&show=Talks
+/talks/react-hooks  https://www.youtube.com/watch?v=KJP1E-Y-xyo
+/talks/concurrent-react  https://egghead.io/talks/react-egghead-talks-concurrent-react-from-scratch
 /talks/*  /ideas?show=Talks&filter=:splat
 /writing/*  /:splat
 /speaking/*  /ideas?show=Talks&show=Podcasts&filter=:splat
