@@ -102,7 +102,7 @@
     <p>
       🖼️
       <a
-        href="https://pbs.twimg.com/profile_images/990728399873232896/CMPn3IxT_400x400.jpg">Medium</a>,
+        href="https://avatars3.githubusercontent.com/u/6764957?s=200&v=4">Medium</a>,
       or
       <a
         href="https://avatars3.githubusercontent.com/u/6764957?s=460&v=4">Large</a>
