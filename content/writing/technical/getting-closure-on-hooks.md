@@ -8,6 +8,10 @@ canonical: https://www.netlify.com/blog/2019/03/11/deep-dive-how-do-react-hooks-
 
 _Published on the Netlify Blog as [Deep dive: How do React hooks really work?](https://www.netlify.com/blog/2019/03/11/deep-dive-how-do-react-hooks-really-work/)_
 
+_Given as a talk at JSConf Asia 2019_
+
+{% youtube KJP1E-Y-xyo %}
+
 [Hooks](https://reactjs.org/hooks) are a fundamentally simpler way to encapsulate stateful behavior and side effects in user interfaces. They were [first introduced in React](https://www.youtube.com/watch?v=dpw9EHDh2bM) and have been broadly embraced by other frameworks like [Vue](https://css-tricks.com/what-hooks-mean-for-vue/), [Svelte](https://twitter.com/Rich_Harris/status/1093260097558581250), and even adapted for [general functional JS](https://github.com/getify/TNG-Hooks). However, their functional design requires a good understanding of closures in JavaScript.
 
 In this article, we reintroduce closures by building a tiny clone of React Hooks. This will serve two purposes – to demonstrate the effective use of closures, and to show how you can build a Hooks clone in just 29 lines of readable JS. Finally, we arrive at how Custom Hooks naturally arise.
