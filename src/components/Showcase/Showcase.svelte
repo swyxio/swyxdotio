@@ -95,6 +95,7 @@
     _filterStr = _filterStr.toLowerCase()
     // if (JSON.stringify(item).toLowerCase().includes(_filterStr)) return true
     if (item.title && item.title.toLowerCase().includes(_filterStr)) res = false
+    if (item.slug && item.slug.toLowerCase().includes(_filterStr)) res = false
     if (
       item.categories &&
       item.categories.join().toLowerCase().includes(_filterStr)
