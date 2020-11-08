@@ -50,7 +50,7 @@
   slug: open-source-knowledge
   categories: [LearnInPublic]
   github: https://gist.github.com/sw-yx/f5a509d5f4a54fff0ad50aa57d620848
-  description: We all believe in the power of open source for code. But when we open source our knowledge, we can get the same benefits and it will last longer than any line of code that we will ever write.
+  description: We all believe in the power of open source for code. But when we open source our knowledge, we can get the same benefits and it will last longer than any line of code that we will ever write. NOTE - a written version of this is available in the Coding Career Handbook.
   instances:
     - venue: BelgiumJS
       date: 2020-04-08

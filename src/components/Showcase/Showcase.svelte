@@ -92,7 +92,7 @@
 
   function notIncludes(_filterStr, item) {
     let res = true
-    _filterStr = _filterStr.toLowerCase()
+    _filterStr = _filterStr.toLowerCase().replace('/', '')
     // if (JSON.stringify(item).toLowerCase().includes(_filterStr)) return true
     if (item.title && item.title.toLowerCase().includes(_filterStr)) res = false
     if (item.slug && item.slug.toLowerCase().includes(_filterStr)) res = false
