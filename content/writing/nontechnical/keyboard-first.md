@@ -10,6 +10,7 @@ I enjoyed listening to [Des and Paul's discussion of keyboard-first apps on thei
 - https://superhuman.com/ (Email Productivity) which i signed up for a couple months ago
 - https://linear.app/ (Issue Tracking)
 - https://height.app/ (Collaborative work)
+- https://pitch.com (Collborative Google Slides)
 - https://quill.chat/ (messaging for teams)
 - Slack
 - https://getcommande.com/ (open any document)
