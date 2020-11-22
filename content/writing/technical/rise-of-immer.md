@@ -6,7 +6,12 @@ date: 2018-09-12
 canonical: https://www.netlify.com/blog/2018/09/12/the-rise-of-immer-in-react/
 ---
 
-_Published on the Netlify Blog as [The Rise of Immer in React](https://www.netlify.com/blog/2018/09/12/the-rise-of-immer-in-react/)_
+> 2018: _Published on the Netlify Blog as [The Rise of Immer in React](https://www.netlify.com/blog/2018/09/12/the-rise-of-immer-in-react/)_
+
+> 2019: This was given as a talk at ForwardJS - [Immutability is Changing](https://www.youtube.com/watch?v=CbDD3c1KbKI)
+
+> 2020: Daishi Kato notes that [Valtio is the new option](https://twitter.com/dai_shi/status/1330490462642192384)
+
 
 Immutability is changing. At least, the way we do immutability in React is changing. (The irony isn't lost on us.)
 
