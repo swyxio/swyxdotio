@@ -7,6 +7,8 @@ date: 2020-01-21
 description: A neat trick I discovered from Mikeal Rogers
 ---
 
+> Dec 2020 Edit: You can see a live example of this in [my own GitHub profile readme](https://github.com/sw-yx/sw-yx)
+
 A common need I have in open source community work, especially with static site generators and the JAMstack, is scraping and updating data. For example, in the [Svelte Community](https://svelte-community.netlify.com/code) site we scrape the GitHub star count and last update, and ditto [Gatsby Starters](https://www.gatsbyjs.org/starters/). Of course, you could grab data clientside, and whatever you can't do clientside, you can throw up a serverless function to do this. 
 
 But sometimes it just makes sense to scrape data *once* instead of every time your users access your site, especially if that data requires tokens your users may not have. Typically you'd set up a cronjob and send the data into a database somewhere. With [GitHub Actions](https://github.com/features/actions), you can do this all inside GitHub, AND save a version controlled history of all data.

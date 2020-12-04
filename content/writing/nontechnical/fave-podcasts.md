@@ -6,7 +6,7 @@ description: 250 Podcasts I enjoy listening to
 date: 2020-02-02
 ---
 
-I recently switched from iPhone to Android (post to come about THAT one...) and had to port my podcast subscriptions from Overcast. I figured I would categorize and post commentary here for those who may be interested.
+I recently switched from iPhone to Android (Edit from the future: [post here!](https://www.swyx.io/android-vs-ios/)) and had to port my podcast subscriptions from Overcast. I figured I would categorize and post commentary here for those who may be interested.
 
 You are welcome to ping me for detailed thoughts on each of these, I didnt have time to write them down.
 
