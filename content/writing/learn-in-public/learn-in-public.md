@@ -77,6 +77,7 @@ _originally drafted [in a gist](https://gist.github.com/sw-yx/9720bd4a30606ca3ff
 - Chris Coyier: [Showing up and Persistence](https://chriscoyier.net/2013/10/18/mediocre-ideas-showing-up-and-persistence/) and [Working in Public](https://chriscoyier.net/2012/09/23/working-in-public/)
 - Cory House: [Becoming an Outlier](https://vimeo.com/97415346) and [The Art of Learning](https://www.bitnative.com/2013/12/14/programming-your-brain-the-art-of-learning-in-three-steps/) and [Lifestyle Systems](https://www.infoq.com/presentations/lifestyle-software-developer/) and [The 7 Pillar Developer](https://www.youtube.com/watch?v=Nks_Fb5TUjs&feature=emb_title)
 - Jeff Atwood: [How to stop sucking and be awesome instead](https://blog.codinghorror.com/how-to-stop-sucking-and-be-awesome-instead/)
+- Rachel Thomas: [Why You (yes, you!) Should Blog](https://medium.com/@racheltho/why-you-yes-you-should-blog-7d2544ac1045)
 - Kent C Dodds: [Intentional Career Building](https://kentcdodds.com/blog/intentional-career-building)
 - Joshua Branchaud: Learning In Public by [posting daily TIL's for 5 years](https://github.com/jbranchaud/til)
 - Patrick O’Shaughnessy: [Learn, Build, Share, Repeat](https://twitter.com/david_perell/status/1214559294273683456?s=20)
