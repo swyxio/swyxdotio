@@ -102,4 +102,4 @@ More lists:
 - Logical Fallacies:
   - http://utminers.utep.edu/omwilliamson/ENGL1311/fallacies.htm
   - Simpson's paradox https://twitter.com/G_S_Bhogal/status/1225561131122597896
-- https://github.com/dwmkerr/hacker-laws
+- https://github.com/dwmkerr/hacker-laws (discussed on [the Changelog](https://changelog.com/podcast/403))
