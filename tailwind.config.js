@@ -1,14 +1,6 @@
 const production = !process.env.ROLLUP_WATCH;
 module.exports = {
-  future: {
-    removeDeprecatedGapUtilities: true,
-    purgeLayersByDefault: true
-  },
-  // experimental: {
-  //   darkModeVariant: true
-  // },
-  // dark: 'class',
-
+  darkMode: 'media',
   theme: {
     typography: (theme) => ({
       default: {

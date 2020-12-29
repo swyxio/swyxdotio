@@ -38,7 +38,7 @@
   <Showcase hydrate-client={{ data: _data }} />
   <!-- <div
     class="mt-12 grid gap-16 border-t-2 border-gray-100 pt-12 lg:grid-cols-3
-      lg:col-gap-5 lg:row-gap-12">
+      lg:gap-x-5 lg:gap-y-12">
     {#each data.markdown as blog}
       <BlogTeaser { blog } />
     {/each}

@@ -133,7 +133,7 @@
         font-family="system"
         font-size="4"
         font-weight="bold"
-        class="text-teal-400 text-xl">
+        class="text-indigo-600 dark:text-indigo-400 text-xl">
         Webmentions
       </h3>
       <a

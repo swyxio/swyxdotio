@@ -1,4 +1,12 @@
-This is the new new new new new swyx.io site. it is based on https://github.com/sw-yx/ssg.
+This is the new new new new new new swyx.io site. it is based on https://elderguide.com/tech/elderjs/.
+
+## running this locally
+
+its not the best process but this is what you do for now:
+
+- in Terminal 1: `npm run dev:server`
+- in Terminal 2: `npm run dev:rollup`
+
 
 ## Design inspirations
 
@@ -7,6 +15,7 @@ This is the new new new new new swyx.io site. it is based on https://github.com/
 
 Old versions of this site can be viewed:
 
+- [Sep 2019 - Sep 2020](https://www.swyx.io/svelte-static/) https://5f3f3d1c3848e7cee67fee22--scout-videos-51664.netlify.app/ (ssg based on Svelte Sapper)
 - https://5d7699e172ae430007210374--scout-videos-51664.netlify.com (gatsby theme)
 - https://5a091ae7df99531f840bc06c--scout-videos-51664.netlify.com (react-static)
 - https://5b7db9761f12b7785b369b7b--scout-videos-51664.netlify.com/

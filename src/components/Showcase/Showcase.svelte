@@ -177,7 +177,7 @@
       class="-ml-px sm:ml-0 relative inline-flex items-center px-4 py-2
         sm:rounded-l-md border border-gray-300 text-sm leading-5
         font-medium text-gray-100 focus:z-10
-        focus:outline-none focus:border-blue-300 focus:shadow-outline-blue
+        focus:outline-none focus:border-blue-300 focus:ring-blue
          transition ease-in-out
         duration-150">
       Essays
@@ -190,7 +190,7 @@
       class="-ml-px relative inline-flex items-center px-4 py-2 border
         border-gray-300 text-sm leading-5 font-medium text-gray-100
        focus:z-10 focus:outline-none
-        focus:border-blue-300 focus:shadow-outline-blue 
+        focus:border-blue-300 focus:ring-blue 
        transition ease-in-out duration-150">
       Talks
     </button>
@@ -202,7 +202,7 @@
       class="-ml-px relative inline-flex items-center px-4 py-2 border
         border-gray-300 text-sm leading-5 font-medium text-gray-100
        focus:z-10 focus:outline-none
-        focus:border-blue-300 focus:shadow-outline-blue 
+        focus:border-blue-300 focus:ring-blue 
        transition ease-in-out duration-150">
       Podcasts
     </button>
@@ -215,7 +215,7 @@
         hidden md:inline-flex
         border-gray-300 text-sm leading-5 font-medium text-gray-100
        focus:z-10 focus:outline-none
-        focus:border-blue-300 focus:shadow-outline-blue 
+        focus:border-blue-300 focus:ring-blue 
        transition ease-in-out duration-150">
       <strike>Tutorials</strike>
     </button>
@@ -228,7 +228,7 @@
         hidden md:inline-flex
         sm:rounded-r-md border border-gray-300 text-sm leading-5
         font-medium text-gray-100 focus:z-10
-        focus:outline-none focus:border-blue-300 focus:shadow-outline-blue
+        focus:outline-none focus:border-blue-300 focus:ring-blue
          transition ease-in-out
         duration-150">
       <strike>Notes</strike>
@@ -259,7 +259,7 @@
           class="inline-flex items-center border border-transparent leading-6
             font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-500
             focus:outline-none focus:border-indigo-700
-            focus:shadow-outline-indigo active:bg-indigo-700 transition
+            focus:ring-indigo active:bg-indigo-700 transition
             ease-in-out duration-150 text-4xl p-8">
           Show All
         </button>

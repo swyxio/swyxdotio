@@ -13,7 +13,29 @@
 
   @tailwind utilities;
 
-  /* https://css-tricks.com/the-current-state-of-styling-scrollbars/ */
+  /*
+
+    @apply's
+
+  */
+  .link {
+    @apply text-indigo-300 underline hover:text-indigo-200
+  }
+
+
+
+  /* 
+  
+  
+  
+  
+  CUSTOM SCROLLBARS! https://css-tricks.com/the-current-state-of-styling-scrollbars/ 
+  
+  
+  
+  
+  
+  */
   body::-webkit-scrollbar-track {
     background-color: var(--bg-color);
   }
@@ -102,8 +124,17 @@
     }
   }
 
-  /* page border */
-  body:before {
+  /* 
+  
+  
+  
+  CUSTOM PAGE BORDER - unused for now
+  
+  
+  
+  
+  */
+  /* body:before {
     content: '';
     position: fixed;
     max-width: 100vw;
@@ -113,11 +144,11 @@
     left: 0;
     z-index: -1;
     border-radius: inherit;
-    /* background: linear-gradient(var(--brand-color-primary), #9198e5); */
     background: linear-gradient(#ff335f, #9198e5);
-  }
+  } */
+  /* background: linear-gradient(var(--brand-color-primary), #9198e5); */
 
-  #base {
+  /* #base {
     transition: background-color 1s ease;
     background: var(--bg-color);
     min-height: calc(100vh - 10px);
@@ -128,7 +159,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-  }
+  } */
 </style>
 
 <svelte:head>
@@ -153,7 +184,7 @@
   </script>
 </svelte:head>
 <div id="base">
-  <div class="relative bg-gray-900 overflow-hidden basekid">
+  <div class="relative bg-gray-100 dark:bg-gray-900 overflow-hidden basekid">
     <MobileMenu hydrate-client={{}} />
     <!-- <main class="mt-8 sm:mt-16 md:mt-20 lg:mt-24"> -->
     <main>
@@ -167,12 +198,12 @@
           flex-col md:flex-row gap-2">
         <a
           href="/ideas"
-          class="text-base leading-6 text-teal-400 hover:text-red-500">
+          class="text-base leading-6 text-indigo-600 dark:text-indigo-400 hover:text-red-500">
           Ideas
         </a>
         <a
           href="/about"
-          class="text-base leading-6 text-teal-400 hover:text-red-500">
+          class="text-base leading-6 text-indigo-600 dark:text-indigo-400 hover:text-red-500">
           About
         </a>
       </nav>
@@ -181,7 +212,7 @@
       </div>
       <div class="mt-8">
         <p class="text-center text-base leading-6 text-gray-400">
-          &copy; 2020 swyx. All rights reserved.
+          &copy; 2017-2021 swyx. All rights reserved.
         </p>
       </div>
     </footer>

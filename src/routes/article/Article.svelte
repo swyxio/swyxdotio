@@ -224,10 +224,10 @@
   </div>
 
   <div class="flex justify-between">
-    <a class="text-teal-400 underline hover:text-teal-200" href="/ideas?show=Essays">&LeftArrow; More Essays</a>
+    <a class="dark:text-indigo-400 text-indigo-600 underline hover:dark:text-indigo-200 hover:text-indigo-600" href="/ideas?show=Essays">&LeftArrow; More Essays</a>
     <a class="text-pink-400 underline hover:text-pink-200 font-bold" href="https://tinyletter.com/swyx">❤️ Subscribe
       via Email ❤️</a>
-    <a class="text-teal-400 underline hover:text-teal-200" href="/about">Featured Essays and Talks &RightArrow;</a>
+    <a class="dark:text-indigo-400 text-indigo-600 underline hover:dark:text-indigo-200 hover:text-indigo-800" href="/about">Featured Essays and Talks &RightArrow;</a>
   </div>
   <WebMentions
     hydrate-client={{ devto_reactions: frontmatter.devto_reactions,
