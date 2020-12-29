@@ -18,8 +18,11 @@
     @apply's
 
   */
-  .link {
-    @apply text-indigo-300 underline hover:text-indigo-200
+  .mylink {
+    @apply dark:text-indigo-300 underline dark:hover:text-indigo-200 text-indigo-800 hover:text-indigo-600
+  }
+  .mytext {
+    @apply text-gray-700 dark:text-gray-300
   }
 
 

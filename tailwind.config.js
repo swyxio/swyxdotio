@@ -2,38 +2,6 @@ const production = !process.env.ROLLUP_WATCH;
 module.exports = {
   darkMode: 'media',
   theme: {
-    typography: (theme) => ({
-      default: {
-        css: {
-          color: theme('colors.white'),
-          h1: {
-            color: theme('colors.white'),
-          },
-          h2: {
-            color: theme('colors.white'),
-          },
-          h3: {
-            color: theme('colors.white'),
-          },
-          strong: {
-            color: theme('colors.teal.300'),
-          },
-          a: {
-            color: theme('colors.blue.300'),
-          },
-          pre: {
-            color: theme('colors.green.300'),
-          },
-          code: {
-            color: theme('colors.green.300'),
-          },
-          blockquote: {
-            color: theme('colors.green.300'),
-          }
-          // ...
-        },
-      },
-    }),
     rotate: {
       '360': '360deg'
     },
@@ -52,7 +20,7 @@ module.exports = {
   variants: {
     animation: ['responsive', 'hover'],
     borderRadius: ['responsive', 'hover'],
-    borderWidth: ['responsive', 'hover'],
+    borderWidth: ['responsive', 'hover']
   },
   purge: {
     // mode: 'all', // TODO: purge typography styles
@@ -75,8 +43,5 @@ module.exports = {
       return matches
     },
     enabled: production // disable purge in dev
-  },
-  plugins: [
-    require('@tailwindcss/typography'),
-  ]
+  }
 };

@@ -17,7 +17,7 @@
       <div class="text-sm font-semibold uppercase tracking-wide text-gray-500
       sm:text-base lg:text-sm xl:text-base">
         <a href="/" aria-label="Home" class="text-indigo-700 dark:text-indigo-400">
-          Shawn <span class="font-bold text-indigo-800 dark:text-indigo-500 opacity-75">@Swyx</span> Wang
+          Shawn <span class="font-bold text-indigo-800 dark:text-indigo-200 opacity-75">@Swyx</span> Wang
         </a>
       </div>
     </div>

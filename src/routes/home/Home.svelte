@@ -13,7 +13,7 @@
   <meta name="twitter:image" content="https://www.swyx.io/swyx.jpg" />
 </svelte:head>
 
-<div class="mx-auto max-w-screen-xl">
+<div class="mx-auto max-w-screen-xl mytext">
   <div class="lg:grid lg:grid-cols-12 lg:gap-8">
     <div
       class="px-4 sm:px-6 sm:text-center md:max-w-2xl md:mx-auto lg:col-span-6
@@ -28,24 +28,24 @@
         </h2> -->
         <div class="mt-4">
           <span class="text-indigo-600 dark:text-indigo-300">Recently Featured</span>:
-          <ul class="list-disc text-gray-700 dark:text-gray-300 ml-4 mb-4">
+          <ul class="list-disc ml-4 mb-4">
             <li>
-              Essay: <a class="link" href="/svelte-sites-react-apps">Svelte for Sites, React for Apps</a>
+              Essay: <a class="mylink" href="/svelte-sites-react-apps">Svelte for Sites, React for Apps</a>
             </li>
             <li>
-              Talk: <a class="link" href="https://www.youtube.com/watch?v=D-Sj6jo4o1I">The
+              Talk: <a class="mylink" href="https://www.youtube.com/watch?v=D-Sj6jo4o1I">The
                 Operating System of You</a>
             </li>
             <li>
-              Podcast: <a class="link" href="https://reactpodcast.com/episodes/114/">Coding Career Handbook on React
+              Podcast: <a class="mylink" href="https://reactpodcast.com/episodes/114/">Coding Career Handbook on React
                 Podcast</a>
             </li>
           </ul>
-          <div>👉 <a class="link" href="/ideas">See All My Essays, Talks, and Podcasts!</a> 👈</div>
+          <div>👉 <a class="mylink" href="/ideas">See All My Essays, Talks, and Podcasts!</a> 👈</div>
         </div>
         <div
           class="mt-5 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
-          <p class="text-base font-medium text-indigo-100 text-opacity-75">
+          <p class="text-base font-medium text-opacity-75">
             Join 2,000+ developers getting updates when I ship something big!
           </p>
           <form
@@ -79,8 +79,8 @@
               Subscribe via Email
             </button>
           </form>
-          <p class="mt-3 text-sm leading-5 text-gray-700 dark:text-gray-300 text-opacity-75">
-            Too soon! <a class="font-medium text-gray-700 dark:text-gray-300 text-opacity-75
+          <p class="mt-3 text-sm leading-5 text-opacity-75">
+            Too soon! <a class="font-medium text-opacity-75
                 underline" rel="noopener" href="https://tinyletter.com/swyx/archive">Show
               me what I'm signing up for!</a>
           </p>
