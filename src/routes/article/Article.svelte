@@ -18,7 +18,7 @@
   let slug = frontmatter.slug
   // $: console.log({html, frontmatter})
   let readTime = Math.floor(html.split(' ').length / 250) // https://blog.medium.com/read-time-and-you-bc2048ab620c
-  readTime = readTime < 2 ? readTime + " minutes" : readTime + " minute"
+  readTime = readTime < 2 ? readTime + " minute" : readTime + " minutes"
 </script>
 
 <style>
@@ -165,10 +165,10 @@
       {#if frontmatter.author}<small>By {frontmatter.author}</small>{/if}
     </div>
 
-    <blockquote class="text-sm font-mono">
-      <div>Read time: {readTime}</div>
+    <blockquote class="text-sm font-mono bg-blue-100 dark:bg-blue-900">
+      <div>Read time:  {readTime}</div>
       {#if frontmatter.date}
-        Last updated:
+        Last update:
         <time
           datetime={new Date(frontmatter.date)
             .toDateString()
@@ -189,15 +189,57 @@
   </div>
 
   <div class="flex justify-between">
+    <a class="mylink"
+      href="http://swyx.io/ideas?show=Essays">&LeftArrow; All Essays</a>
+    <!-- <a
+      class="text-pink-700 dark:text-pink-400 underline hover:text-pink-200 font-bold"
+      href="https://tinyletter.com/swyx">❤️ Subscribe via Email ❤️</a> -->
     <a
-      class="dark:text-indigo-400 text-indigo-600 underline hover:dark:text-indigo-200 hover:text-indigo-600"
-      href="/ideas?show=Essays">&LeftArrow; More Essays</a>
-    <a
-      class="text-pink-400 underline hover:text-pink-200 font-bold"
-      href="https://tinyletter.com/swyx">❤️ Subscribe via Email ❤️</a>
-    <a
-      class="dark:text-indigo-400 text-indigo-600 underline hover:dark:text-indigo-200 hover:text-indigo-800"
-      href="/about">Featured Essays and Talks &RightArrow;</a>
+      class="mylink"
+      href="http://swyx.io/#featured-writing">Featured Essays &RightArrow;</a>
+  </div>
+  <hr class="mt-5" />
+  <div
+    class="mt-5 mytext sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
+    <p class="text-base font-light text-opacity-75">
+      Join 2,000+ developers getting updates ✉️
+    </p>
+    <form
+      action="https://tinyletter.com/swyx"
+      method="post"
+      target="popupwindow"
+      onsubmit="window.open('https://tinyletter.com/swyx', 'popupwindow', 'scrollbars=yes,width=800,height=600');return true"
+      class="mt-3 sm:flex">
+      <input
+        aria-label="Email"
+        id="tlemail"
+        name="email"
+        type="email"
+        class="appearance-none block w-full px-3 py-3 border
+          border-gray-300 text-base leading-6 rounded-md
+          placeholder-gray-500 shadow-sm focus:outline-none
+          focus:placeholder-gray-400 focus:ring-blue focus:bg-yellow-200
+          focus:border-blue-300 transition duration-150 ease-in-out
+          sm:flex-1"
+        placeholder="I solemnly swear to never spam you." />
+      <input type="hidden" value="1" name="embed" />
+      <button
+        type="submit"
+        class="mt-3 w-full px-6 py-3 border border-transparent text-base
+          leading-6 font-medium rounded-md text-white bg-indigo-600
+          shadow-sm hover:bg-indigo-400 focus:outline-none
+          focus:border-gray-300 focus:ring-gray focus:bg-yellow-200
+          active:bg-indigo-400 transition duration-150 ease-in-out sm:mt-0
+          sm:ml-3 sm:flex-shrink-0 sm:inline-flex sm:items-center
+          sm:w-auto hover:animate-wiggle">
+        Subscribe via Email
+      </button>
+    </form>
+    <p class="mt-3 text-sm leading-5 text-opacity-75">
+      Too soon! <a class="font-medium text-opacity-75
+          underline" rel="noopener" href="https://tinyletter.com/swyx/archive">Show
+        me what I'm signing up for!</a>
+    </p>
   </div>
   <WebMentions
     hydrate-client={{ devto_reactions: frontmatter.devto_reactions, targets: [`https://www.swyx.io/${frontmatter.slug}`, frontmatter.devto_url, frontmatter.canonical_url] }} />

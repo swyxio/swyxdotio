@@ -69,7 +69,7 @@
       line-height: 1.3333333;
     }
     & strong {
-      @apply text-indigo-900 dark:text-indigo-100 shadow-sm rounded
+      @apply text-gray-900 dark:text-gray-100 shadow-sm rounded
     }
     & a {
       @apply mylink
