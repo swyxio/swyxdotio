@@ -51,4 +51,5 @@ html {
   --hover-color-primary: #6d1f21;
   --hover-color-secondary: #1d1f61;
   background: var(--bg-color);
+  font-size: 125%;
 }

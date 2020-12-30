@@ -143,8 +143,8 @@
 </svelte:head>
 
 <article
-  class="px-4 py-10 max-w-3xl mx-auto sm:px-6 sm:py-12 lg:max-w-4xl lg:py-16
-    lg:px-8 xl:max-w-6xl">
+  class="px-4 py-10 max-w-2xl mx-auto sm:px-6 sm:py-12 lg:max-w-3xl lg:py-16
+    lg:px-8 xl:max-w-5xl">
   <div class="prose lg:prose-xl">
     <div class="title">
       <h1>{frontmatter.title}</h1>
@@ -165,7 +165,7 @@
       {#if frontmatter.author}<small>By {frontmatter.author}</small>{/if}
     </div>
 
-    <blockquote class="text-sm font-mono bg-blue-100 dark:bg-blue-900">
+    <blockquote class="text-sm font-mono bg-indigo-100 dark:bg-indigo-900">
       <div>Read time:  {readTime}</div>
       {#if frontmatter.date}
         Last update:
@@ -200,7 +200,7 @@
   </div>
   <hr class="mt-5" />
   <div
-    class="mt-5 mytext sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
+    class="mt-5 mytext sm:mx-auto sm:text-center lg:text-left lg:mx-0">
     <p class="text-base font-light text-opacity-75">
       Join 2,000+ developers getting updates ✉️
     </p>
@@ -220,7 +220,7 @@
           placeholder-gray-500 shadow-sm focus:outline-none
           focus:placeholder-gray-400 focus:ring-blue focus:bg-yellow-200
           focus:border-blue-300 transition duration-150 ease-in-out
-          sm:flex-1"
+          sm:flex-1 text-sm md:text-base"
         placeholder="I solemnly swear to never spam you." />
       <input type="hidden" value="1" name="embed" />
       <button
