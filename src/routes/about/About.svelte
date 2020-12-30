@@ -66,19 +66,14 @@
   <div class="prose py-4">
     <h3 id="tldr">TL;DR</h3>
     <p>
-      I
-      <a rel="noopener" href="http://github.com/sw-yx">code</a>,
-      <a
-        rel="noopener"
-        href="https://www.swyx.io/speaking/react-hooks">speak</a>,
-      <a rel="noopener" href="http://careerchats.transistor.fm/">podcast</a>,
-      and
-      <a rel="noopener" href="https://egghead.io/s/26zf5">teach</a>. But above
-      all, I
-      <a rel="noopener" href="/ideas">write</a>
-      about great ideas for developers and infinite builders. If we share
-      <a href="/about">interests</a>, I'd love to
-      <a href="mailto:swyx@hey.com">connect</a>!
+      I am a frontend/serverless developer, normally based
+      out of NYC but currently in Singapore. I am a frequent writer and speaker
+      and recently published <a href="https://learninpublic.org">The Coding Career Handbook</a> 
+      for Junior to Senior Engineers.
+    </p>
+    <p>
+      "swyx" is the initials of my English and Chinese names and you can use it interchangeably 
+      with "Shawn". It is pronounced "swicks".
     </p>
     <h3 id="about">About</h3>
     <p>
@@ -101,33 +96,6 @@
       evangelist and
       <a href="/ideas?filter=React&show=Essays&show=Talks&show=Podcasts">my
         speaking/writing on React, JavaScript and the future of the Web</a>.
-    </p>
-    <h3 id="bio">Bio for Event Organizers</h3>
-    <p>
-      swyx is an Infinite Builder passionate about Developer Tooling and
-      Developer Communities. He currently works as a Senior Developer Advocate
-      for AWS Amplify and recently published
-      <a href="https://learninpublic.org/">the Coding Career Handbook</a>
-      for Junior to Senior developer careers. In his free time he teaches React,
-      TypeScript, Storybook and Node.js CLI's at
-      <a href="https://egghead.io/s/26zf5">Egghead.io</a>, and helps run the
-      <a href="https://sveltesociety.dev/">Svelte Society</a>
-      community of meetups.
-    </p>
-    <p>
-      🔗
-      <a href="https://twitter.com/swyx">Twitter</a>,
-      <a href="https://github.com/sw-yx">GitHub</a>,
-      <a href="https://learninpublic.org">The Coding Career Handbook</a>.
-    </p>
-    <p>
-      🖼️
-      <a
-        href="https://avatars3.githubusercontent.com/u/6764957?s=200&v=4">Medium</a>,
-      or
-      <a
-        href="https://avatars3.githubusercontent.com/u/6764957?s=460&v=4">Large</a>
-      pictures of me you can use without asking.
     </p>
     <h3 id="now">
       What I'm Doing Now
@@ -157,6 +125,33 @@
       <a href="http://careerchats.transistor.fm/">Career Chats</a>
       podcasts. You can get more high frequency updates on
       <a href="https://twitter.com/swyx">my Twitter</a>.
+    </p>
+    <h3 id="bio">Bio for Event Organizers</h3>
+    <p>
+      swyx is passionate about Developer Tooling and
+      Developer Communities. He currently works as a Senior Developer Advocate
+      for AWS Amplify and recently published
+      <a href="https://learninpublic.org/">the Coding Career Handbook</a>
+      for Junior to Senior developer careers. In his free time he teaches React,
+      TypeScript, Storybook and Node.js CLI's at
+      <a href="https://egghead.io/s/26zf5">Egghead.io</a>, and helps run the
+      <a href="https://sveltesociety.dev/">Svelte Society</a>
+      community of meetups.
+    </p>
+    <p>
+      🔗
+      <a href="https://twitter.com/swyx">Twitter</a>,
+      <a href="https://github.com/sw-yx">GitHub</a>,
+      <a href="https://learninpublic.org">The Coding Career Handbook</a>.
+    </p>
+    <p>
+      🖼️
+      <a
+        href="https://avatars3.githubusercontent.com/u/6764957?s=200&v=4">Medium</a>,
+      or
+      <a
+        href="https://avatars3.githubusercontent.com/u/6764957?s=460&v=4">Large</a>
+      pictures of me you can use without asking.
     </p>
   </div>
 </article>
