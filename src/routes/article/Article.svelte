@@ -17,7 +17,7 @@
     : seoTitle
   let slug = frontmatter.slug
   // $: console.log({html, frontmatter})
-  let readTime = Math.floor(html.split(' ').length / 250) // https://blog.medium.com/read-time-and-you-bc2048ab620c
+  let readTime = Math.max(1, Math.floor(html.split(' ').length / 250)) // https://blog.medium.com/read-time-and-you-bc2048ab620c
   readTime = readTime < 2 ? readTime + " minute" : readTime + " minutes"
 </script>
 
