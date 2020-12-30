@@ -13,7 +13,109 @@
 
   @tailwind utilities;
 
-  /* https://css-tricks.com/the-current-state-of-styling-scrollbars/ */
+  /*
+
+    @apply's
+
+  */
+
+  .myflexresponsive {
+    @apply flex flex-col md:flex-row
+  }
+  .mylinkcolors {
+    @apply dark:text-indigo-300 dark:hover:text-indigo-200 dark:focus:text-indigo-200 text-indigo-800
+  }
+  .mylink {
+    @apply hover:underline focus:underline mylinkcolors
+  }
+  .mytext {
+    @apply text-gray-800 dark:text-gray-200
+  }
+  .mytext-inverse {
+    @apply text-gray-200 dark:text-gray-700
+  }
+  .mytext-light {
+    @apply text-gray-600 dark:text-gray-300 italic mt-0
+  }
+  .bimodalblue {
+    @apply text-blue-900 dark:text-blue-100 bg-blue-100 dark:bg-blue-900
+  }
+  .bimodalpurple {
+    @apply text-purple-900 dark:text-purple-100 bg-purple-100 dark:bg-purple-900
+  }
+
+  /* replace typography plugin */
+  .prose {
+    @apply text-gray-700 dark:text-gray-300
+  }
+  .prose {
+    & p {
+      @apply my-5
+    }
+    & h1 {
+      @apply text-black dark:text-white;
+      font-weight: 800;
+      font-size: 2.25em;
+      margin-top: 0;
+      margin-bottom: 0.8888889em;
+      line-height: 1.1111111;
+    }
+    & h2, & h3, & h4, & h5, & h6 {
+      @apply text-black dark:text-white;
+      font-weight: 700;
+      font-size: 1.5em;
+      margin-top: 2em;
+      margin-bottom: 1em;
+      line-height: 1.3333333;
+    }
+    & strong {
+      @apply text-gray-900 dark:text-gray-100 shadow-sm rounded
+    }
+    & a {
+      @apply mylink
+    }
+    & pre {
+      @apply text-xs p-6 bg-indigo-300 dark:bg-indigo-900 overflow-x-auto
+    }
+    & code {
+      @apply text-sm bg-indigo-200 dark:bg-indigo-900 bg-opacity-50 px-1 py-2
+    }
+    & pre code {
+      @apply bg-transparent p-0
+    }
+    & blockquote {
+      @apply border-l-4 border-purple-800 dark:border-purple-200
+    }
+    & blockquote:before {
+      @apply bg-purple-100 dark:bg-purple-900 bg-opacity-10
+    }
+    & ul {
+      @apply leading-6 list-disc ml-4
+    }
+    & ul li {
+      @apply mb-2 
+    }
+    & ul ul {
+      @apply mt-2 
+    }
+    & img {
+      @apply max-h-full my-4 mx-auto block
+    }
+  }
+
+
+  /* 
+  
+  
+  
+  
+  CUSTOM SCROLLBARS! https://css-tricks.com/the-current-state-of-styling-scrollbars/ 
+  
+  
+  
+  
+  
+  */
   body::-webkit-scrollbar-track {
     background-color: var(--bg-color);
   }
@@ -102,8 +204,17 @@
     }
   }
 
-  /* page border */
-  body:before {
+  /* 
+  
+  
+  
+  CUSTOM PAGE BORDER - unused for now
+  
+  
+  
+  
+  */
+  /* body:before {
     content: '';
     position: fixed;
     max-width: 100vw;
@@ -113,11 +224,11 @@
     left: 0;
     z-index: -1;
     border-radius: inherit;
-    /* background: linear-gradient(var(--brand-color-primary), #9198e5); */
     background: linear-gradient(#ff335f, #9198e5);
-  }
+  } */
+  /* background: linear-gradient(var(--brand-color-primary), #9198e5); */
 
-  #base {
+  /* #base {
     transition: background-color 1s ease;
     background: var(--bg-color);
     min-height: calc(100vh - 10px);
@@ -128,7 +239,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-  }
+  } */
 </style>
 
 <svelte:head>
@@ -153,7 +264,7 @@
   </script>
 </svelte:head>
 <div id="base">
-  <div class="relative bg-gray-900 overflow-hidden basekid">
+  <div class="relative bg-gray-50 dark:bg-gray-900 overflow-hidden basekid">
     <MobileMenu hydrate-client={{}} />
     <!-- <main class="mt-8 sm:mt-16 md:mt-20 lg:mt-24"> -->
     <main>
@@ -163,16 +274,16 @@
     <footer
       class="max-w-screen-xl mx-auto py-12 px-4 overflow-hidden sm:px-6 lg:px-8">
       <nav
-        class="-mx-5 -my-2 flex flex-wrap justify-center items-center px-5 py-2
-          flex-col md:flex-row gap-2">
+        class="-mx-5 -my-2 myflexresponsive flex-wrap justify-center items-center px-5 py-2
+          gap-2">
         <a
           href="/ideas"
-          class="text-base leading-6 text-teal-400 hover:text-red-500">
+          class="text-base leading-6 text-indigo-600 dark:text-indigo-400 hover:text-red-500">
           Ideas
         </a>
         <a
           href="/about"
-          class="text-base leading-6 text-teal-400 hover:text-red-500">
+          class="text-base leading-6 text-indigo-600 dark:text-indigo-400 hover:text-red-500">
           About
         </a>
       </nav>
@@ -181,7 +292,7 @@
       </div>
       <div class="mt-8">
         <p class="text-center text-base leading-6 text-gray-400">
-          &copy; 2020 swyx. All rights reserved.
+          &copy; 2017-2021 swyx. All rights reserved.
         </p>
       </div>
     </footer>

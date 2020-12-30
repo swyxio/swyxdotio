@@ -17,22 +17,24 @@
       font-size: 4em;
     }
   }
+
   h2 {
     font-size: 2em;
     text-transform: uppercase;
     font-weight: 700;
     margin: 0 0 0.5em 0;
   }
+
   h3 {
     /* font-size: 2em;
     text-transform: uppercase; */
     font-weight: 700;
     /* margin: 0 0 0.5em 0; */
   }
+
   .prose {
     margin: 0 auto;
   }
-
 
   .prose
     :global(h1 a[aria-hidden='true'], h2 a[aria-hidden='true'], h3
@@ -40,12 +42,15 @@
       a[aria-hidden='true'], h6 a[aria-hidden='true']) {
     margin-left: 1rem;
   }
+
   .prose :global(h2::before) {
     content: '## ';
   }
+
   .prose :global(h3::before) {
     content: '### ';
   }
+
   .prose :global(h4::before) {
     content: '#### ';
   }
@@ -55,18 +60,29 @@
   <title>About Swyx</title>
 </svelte:head>
 
-<article class="text-teal-400 px-4">
+<article class="text-indigo-600 dark:text-indigo-400 px-4">
   <h1 class="mb-2">About Swyx</h1>
-  <h2 class="text-teal-600">aka Shawn Wang</h2>
+  <h2 class="text-indigo-400 dark:text-indigo-600">aka Shawn Wang</h2>
   <div class="prose py-4">
+    <h3 id="tldr">TL;DR</h3>
+    <p>
+      I am a frontend/serverless developer, normally based
+      out of NYC but currently in Singapore. I am a frequent writer and speaker
+      and recently published <a href="https://learninpublic.org">The Coding Career Handbook</a> 
+      for Junior to Senior Engineers.
+    </p>
+    <p>
+      "swyx" is the initials of my English and Chinese names and you can use it interchangeably 
+      with "Shawn". It is pronounced "swicks".
+    </p>
     <h3 id="about">About</h3>
     <p>
       I am a
       <a href="https://www.freecodecamp.org/news/shawn-wang-podcast-interview/">
-        currency options trader turned TMT hedge fund analyst</a> turned
-        developer/product manager/angel investor, primarily active in the JavaScript
-      community. I grew up in Singapore 🇸🇬, but have worked mostly in the US
-      🇺🇸/UK 🇬🇧, most recently remotely out of New York City 🗽 working on
+        currency options trader turned TMT hedge fund analyst</a>
+      turned developer/product manager/angel investor, primarily active in the
+      JavaScript community. I grew up in Singapore 🇸🇬, but have worked mostly in
+      the US 🇺🇸/UK 🇬🇧, most recently remotely out of New York City 🗽 working on
       Developer Experience for
       <a href="https://www.swyx.io/writing/farewell-netlify/">Netlify</a>,
       <a href="https://www.swyx.io/writing/hello-aws/">Amazon Web Services</a>,
@@ -80,33 +96,6 @@
       evangelist and
       <a href="/ideas?filter=React&show=Essays&show=Talks&show=Podcasts">my
         speaking/writing on React, JavaScript and the future of the Web</a>.
-    </p>
-    <h3 id="bio">Bio for Event Organizers</h3>
-    <p>
-      swyx is an Infinite Builder passionate about Developer Tooling and
-      Developer Communities. He currently works as a Senior Developer Advocate for
-      AWS Amplify and recently published
-      <a href="https://learninpublic.org/">the Coding Career Handbook</a>
-      for Junior to Senior developer careers. In his free time he teaches React,
-      TypeScript, Storybook and Node.js CLI's at
-      <a href="https://egghead.io/s/26zf5">Egghead.io</a>, and helps run the
-      <a href="https://sveltesociety.dev/">Svelte Society</a>
-      community of meetups.
-    </p>
-    <p>
-      🔗
-      <a href="https://twitter.com/swyx">Twitter</a>,
-      <a href="https://github.com/sw-yx">GitHub</a>,
-      <a href="https://learninpublic.org">The Coding Career Handbook</a>.
-    </p>
-    <p>
-      🖼️
-      <a
-        href="https://avatars3.githubusercontent.com/u/6764957?s=200&v=4">Medium</a>,
-      or
-      <a
-        href="https://avatars3.githubusercontent.com/u/6764957?s=460&v=4">Large</a>
-      pictures of me you can use without asking.
     </p>
     <h3 id="now">
       What I'm Doing Now
@@ -137,211 +126,32 @@
       podcasts. You can get more high frequency updates on
       <a href="https://twitter.com/swyx">my Twitter</a>.
     </p>
-  </div>
-  <hr />
-  <div class="prose pt-4">
-    <h2>Featured Work (on this site)</h2>
-    <h3 id="featured-writing">Writing</h3>
-    <div>
-      I do a bunch of
-      <a href="/writing">personal and work-related writing</a>, and recently
-      published
-      <a href="https://learninpublic.org/">The Coding Career Handbook</a>
-      with the best of my nontechnical writing.
-      <ul>
-        <li>
-          <b> <a href="/writing/learn-in-public">Learn in Public</a> </b>
-          <div>
-            My most impactful essay, and the personal growth philosophy I and
-            many others follow.
-          </div>
-        </li>
-        <li>
-          <b> <a href="/create_luck">How to Create Luck</a> </b>
-          <div>
-            Luck is random, but creating luck is a skill that can be developed.
-          </div>
-        </li>
-        <li>
-          <b> <a href="/js-third-age">Third Age of JavaScript</a> </b>
-          <div>
-            Every 10 years there is a changing of the guard in JavaScript. A
-            well received piece that has caught the imagination of some
-            community leaders like Fred Schott and Rich Harris.
-          </div>
-        </li>
-        <li>
-          <b> <a href="/writing/svelte-static">Static Svelte</a> </b>
-          <div>How this very site was written.</div>
-        </li>
-        <li>
-          <b> <a href="/slack-fumble">Slack is Fumbling Developers</a> </b>
-          <div>
-            Trendspotting how Developer communities are leaving Slack (for
-            Discord).
-          </div>
-        </li>
-        <li>
-          <b>
-            <a href="/react-sfcs-here">React Single File Components Are Here</a>
-          </b>
-          <div>
-            Talking about why and when Single File Components are slowly coming
-            to React.js
-          </div>
-        </li>
-        <li>
-          <b>About</b>
-          <div>
-            My personal story,
-            <a href="https://github.com/sw-yx/README/blob/master/README.md">
-              README
-            </a>
-            , and
-            <a href="/speaking/freecodecamp-podcast">
-              podcast with Quincy Larson
-            </a>
-            about learning to code.
-          </div>
-        </li>
-        <li><a href="https://www.swyx.io/ideas/?show=Essays">More of my writing here!</a></li>
-      </ul>
-    </div>
-
-    <h3 id="featured-speaking">Speaking</h3>
-    <div>
-      I have done a bunch of talks and podcast appearances. The best of which
-      are:
-      <ul>
-        <li>
-          <a href="/speaking/react-hooks">Getting Closure on Hooks</a>
-          <div>
-            My most well received technical talk, where I explain a mental model
-            for React hooks by livecoding a React clone at JSConf Asia. Started
-            as
-            <a href="https://twitter.com/swyx/status/1100809424963219456">a
-              tweet</a>, then
-            <a href="https://www.swyx.io/writing/getting-closure-on-hooks/">a
-              blogpost.</a>
-          </div>
-        </li>
-        <li>
-          <a href="/speaking/react-not-reactive"> Why React is not Reactive </a>
-          <div>
-            My first conference talk ever was at the biggest React venue in the
-            world, React Rally. I spent a month writing
-            <a
-              href="https://twitter.com/swyx/status/1112513571315830784?s=20">my
-              CFP on the most interesting React question I could think of</a>.
-          </div>
-        </li>
-
-        <li>
-          <a href="/speaking/contributing-to-react"> Contributing to React </a>
-          <div>
-            My first meetup talk ever was at React NYC - this was accepted on to
-            the React docs as a guide for other contributors!
-          </div>
-        </li>
-        <li>
-          <a href="/speaking/learn-in-public-nyc">Learn In Public</a>
-          <div>
-            My first verbal exposition on the Learn In Public philosophy. Video
-            is frozen at the end, sorry.
-          </div>
-        </li>
-        <li>
-          <a href="/speaking/babel-macros">I Can Babel Macros and So Can You!
-            (the Moana talk)
-          </a>
-          <div>
-            My first JSConf appearance ever, at one of the most competitive
-            JSConfs ever. This talk is where I first started experimenting with
-            theming talks, and it came out really well with the Moana theme.
-          </div>
-        </li>
-        <li><a href="https://www.swyx.io/ideas/?show=Talks&show=Podcasts">More of my speaking here</a></li>
-      </ul>
-    </div>
-  </div>
-  <hr />
-  <div class="prose pt-4">
-    <h2>Other Work (off-site)</h2>
-    <h3>Teaching</h3>
-    <div>
-      I teach on
-      <a href="https://egghead.io/s/26zf5">egghead.io</a>
-      and in other workshops:
-      <ul>
-        <li>
-          My course on
-          <a
-            href="https://egghead.io/courses/design-systems-with-react-and-typescript-in-storybook?af=95qfq1">
-            Design Systems with React + TypeScript
-          </a>
-        </li>
-        <li>
-          My (upcoming) workshop on
-          <b>Building Custom CLI Tooling with OClif and React-Ink</b>
-        </li>
-        <li>
-          <a href="/speaking/netlify-freecodecamp-intro">
-            Complete Intro to Netlify in 3.5 hours
-          </a>
-        </li>
-      </ul>
-    </div>
-    <h3>Cheatsheets</h3>
-    <div>
-      I curate helpful repos around topics, like
-      <ul>
-        <li>
-          <a
-            href="https://github.com/typescript-cheatsheets/react-typescript-cheatsheet/">
-            ⚛️ 📜 React-TypeScript Cheatsheet
-          </a>
-        </li>
-        <li>
-          <a href="https://github.com/sw-yx/spark-joy/">✨ 😂 Spark-Joy</a>
-        </li>
-        <li>
-          <a
-            href="https://github.com/sw-yx/cli-cheatsheet/blob/master/README.md">
-            CLI Cheatsheet
-          </a>
-        </li>
-        <li>
-          <a href="https://github.com/sw-yx/concurrent-react-notes">
-            Concurrent-React Notes
-          </a>
-        </li>
-      </ul>
-    </div>
-
-    <h3>Dev Tooling & Dev Community</h3>
+    <h3 id="bio">Bio for Event Organizers</h3>
     <p>
-      I helped moderate
-      <a href="https://www.swyx.io/writing/react-survey-2019/">/r/reactjs</a>
-      to <a href="https://www.swyx.io/moderating-rreactjs/">200k+ developers</a>, and
-      <a href="https://twitter.com/sveltesociety">cofounded Svelte Society</a>.
+      swyx is passionate about Developer Tooling and
+      Developer Communities. He currently works as a Senior Developer Advocate
+      for AWS Amplify and recently published
+      <a href="https://learninpublic.org/">the Coding Career Handbook</a>
+      for Junior to Senior developer careers. In his free time he teaches React,
+      TypeScript, Storybook and Node.js CLI's at
+      <a href="https://egghead.io/s/26zf5">Egghead.io</a>, and helps run the
+      <a href="https://sveltesociety.dev/">Svelte Society</a>
+      community of meetups.
     </p>
-    <div>
-      I led CLI development for
-      <a href="https://news.ycombinator.com/item?id=19615546">Netlify Dev</a>,
+    <p>
+      🔗
+      <a href="https://twitter.com/swyx">Twitter</a>,
+      <a href="https://github.com/sw-yx">GitHub</a>,
+      <a href="https://learninpublic.org">The Coding Career Handbook</a>.
+    </p>
+    <p>
+      🖼️
       <a
-        href="https://github.com/netlify/plugins/blob/master/plugins.json">Build
-        Plugins</a>
-      and other open source tooling at Netlify. I've also helped maintain other
-      OSS projects like
-      <a href="https://github.com/jaredpalmer/tsdx">TSDX</a>
-      ,
-      <a href="https://www.gatsbyjs.org/showcase/">Gatsby's Showcase</a>
-      ,
-      <a href="https://github.com/sveltejs/community">Svelte Society</a>
-      <a href="https://github.com/sw-yx/ssg">SSG</a>
-      ,
-      <a href="https://github.com/pedronauck/docz/">Docz</a>
-      (inactive), etc.
-    </div>
+        href="https://avatars3.githubusercontent.com/u/6764957?s=200&v=4">Medium</a>,
+      or
+      <a
+        href="https://avatars3.githubusercontent.com/u/6764957?s=460&v=4">Large</a>
+      pictures of me you can use without asking.
+    </p>
   </div>
 </article>

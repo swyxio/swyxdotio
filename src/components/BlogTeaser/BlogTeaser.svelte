@@ -22,7 +22,7 @@
     </h3>
     <!-- <pre>{JSON.stringify(blog.data, null, 2)}</pre> -->
     {#if blog.data.description}
-    <p class="mt-3 text-base leading-6 text-gray-500 hover:text-teal-700">
+    <p class="mt-3 text-base leading-6 text-gray-500 hover:text-indigo-700">
       {blog.data.description}
     </p>
     {/if}

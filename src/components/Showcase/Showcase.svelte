@@ -114,14 +114,14 @@
 
 <svelte:window on:keyup={focusSearch} />
 
-<div class="relative mb-8 flex flex-col md:flex-row">
+<div class="relative mb-8 myflexresponsive">
   <div class="flex-1 mb-4 md:mb-0">
     <h1
-      class="text-5xl leading-9 tracking-tight font-extrabold text-gray-200
+      class="text-5xl leading-9 tracking-tight font-extrabold mytext
       sm:text-4xl sm:leading-10">
       Idea Showcase
     </h1>
-    <p class="mt-3 text-xl leading-7 text-gray-400 sm:mt-4">
+    <p class="mt-3 text-xl leading-7 mytext-light sm:mt-4">
       For Free: Great Ideas. Lightly Used.
       <span class="mt-4 italic block">This site is still under construction,
         pardon our appearance...</span>
@@ -137,7 +137,7 @@
         <!-- Heroicon name: search -->
         <label for="search_candidate">
           <svg
-            class="h-5 w-5 text-gray-400"
+            class="h-5 w-5 mytext-light"
             viewBox="0 0 20 20"
             fill="currentColor">
             <path
@@ -168,16 +168,17 @@
     <!-- categories -->
     <span
     class="relative z-0 inline-flex flex-col sm:flex-row shadow-sm rounded-md">
-    <div class="inline-flex items-center mr-2 text-gray-400">Show:</div>
+    <div class="inline-flex items-center mr-2 mytext-light">Show:</div>
     <button
       type="button"
       on:click={() => saveURLState(essays = !essays)}
-      class:bg-gray-300={essays}
-      class:text-gray-700={essays}
+      class:bimodalpurple={essays}
+      class:mytext={essays}
+      class:font-medium={essays}
       class="-ml-px sm:ml-0 relative inline-flex items-center px-4 py-2
         sm:rounded-l-md border border-gray-300 text-sm leading-5
-        font-medium text-gray-100 focus:z-10
-        focus:outline-none focus:border-blue-300 focus:shadow-outline-blue
+       text-gray-200 focus:z-10
+        focus:outline-none focus:border-blue-300 focus:ring-yellow focus:text-yellow-200
          transition ease-in-out
         duration-150">
       Essays
@@ -185,50 +186,54 @@
     <button
       type="button"
       on:click={() => saveURLState(talks = !talks)}
-      class:bg-gray-300={talks}
-      class:text-gray-700={talks}
+      class:bimodalpurple={talks}
+      class:mytext={talks}
+      class:font-medium={talks}
       class="-ml-px relative inline-flex items-center px-4 py-2 border
-        border-gray-300 text-sm leading-5 font-medium text-gray-100
+        border-gray-300 text-sm leading-5 text-gray-200
        focus:z-10 focus:outline-none
-        focus:border-blue-300 focus:shadow-outline-blue 
+        focus:border-blue-300 focus:ring-yellow focus:text-yellow-200 
        transition ease-in-out duration-150">
       Talks
     </button>
     <button
       type="button"
       on:click={() => saveURLState(podcasts = !podcasts)}
-      class:bg-gray-300={podcasts}
-      class:text-gray-700={podcasts}
+      class:bimodalpurple={podcasts}
+      class:mytext={podcasts}
+      class:font-medium={podcasts}
       class="-ml-px relative inline-flex items-center px-4 py-2 border
-        border-gray-300 text-sm leading-5 font-medium text-gray-100
+        border-gray-300 text-sm leading-5 text-gray-200
        focus:z-10 focus:outline-none
-        focus:border-blue-300 focus:shadow-outline-blue 
+        focus:border-blue-300 focus:ring-yellow focus:text-yellow-200 
        transition ease-in-out duration-150">
       Podcasts
     </button>
     <button
       type="button"
       on:click={() => alert('coming soon')}
-      class:bg-gray-300={tutorials}
-      class:text-gray-700={tutorials}
+      class:bimodalpurple={tutorials}
+      class:mytext={tutorials}
+      class:font-medium={tutorials}
       class="-ml-px relative items-center px-4 py-2 border
         hidden md:inline-flex
-        border-gray-300 text-sm leading-5 font-medium text-gray-100
+        border-gray-300 text-sm leading-5 text-gray-200
        focus:z-10 focus:outline-none
-        focus:border-blue-300 focus:shadow-outline-blue 
+        focus:border-blue-300 focus:ring-yellow focus:text-yellow-200 
        transition ease-in-out duration-150">
       <strike>Tutorials</strike>
     </button>
     <button
       type="button"
       on:click={() => alert('coming soon')}
-      class:bg-gray-300={notes}
-      class:text-gray-700={notes}
+      class:bimodalpurple={notes}
+      class:mytext={notes}
+      class:font-medium={notes}
       class="-ml-px relative items-center px-4 py-2
         hidden md:inline-flex
         sm:rounded-r-md border border-gray-300 text-sm leading-5
-        font-medium text-gray-100 focus:z-10
-        focus:outline-none focus:border-blue-300 focus:shadow-outline-blue
+       text-gray-200 focus:z-10
+        focus:outline-none focus:border-blue-300 focus:ring-yellow focus:text-yellow-200
          transition ease-in-out
         duration-150">
       <strike>Notes</strike>
@@ -259,7 +264,7 @@
           class="inline-flex items-center border border-transparent leading-6
             font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-500
             focus:outline-none focus:border-indigo-700
-            focus:shadow-outline-indigo active:bg-indigo-700 transition
+            focus:ring-indigo active:bg-indigo-700 transition
             ease-in-out duration-150 text-4xl p-8">
           Show All
         </button>

@@ -15,20 +15,20 @@
 <li class="mb-4 md:mb-8">
   <div class="flex">
     <span
-      class="inline-flex justify-end items-center text-gray-600 text-xs font-mono whitespace-no-wrap">{formatDate(item.effectiveDate) }</span>
+      class="inline-flex justify-end items-center text-gray-600 text-xs font-mono whitespace-nowrap">{formatDate(item.effectiveDate) }</span>
     <a
       href={`/${item.slug}`}
       class="relative -mr-px inline-flex text-sm text-left leading-5
-        text-gray-700 font-medium">
+        mytext font-medium">
       <h3
-        class="text-gray-300 hover:text-teal-600 focus:text-teal-600 text-base md:text-2xl leading-5
+        class="mylinkcolors text-base md:text-2xl leading-5
           font-medium whitespace-normal ml-4 inline"
         class:longTitle={item.title.length > 58}
       >
         {item.title}
       </h3>
       {#if item.categories}
-        <span class="font-mono text-xs ml-4 hidden md:inline">
+        <span class="font-mono text-xs ml-4 hidden md:inline-flex items-center">
           {item.categories && item.categories.length ? item.categories.map(x => `#${x}`).join(', ') : 'Uncategorized'}
         </span>
       {/if}

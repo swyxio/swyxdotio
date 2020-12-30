@@ -2,34 +2,34 @@
   import { scale } from 'svelte/transition'
   let isMenuOpen = false
   import IconList from '../IconList/IconList.svelte'
-  import {clickOutside} from './clickOutside.js';
-  
-	function handleClickOutside() {
-		if (isMenuOpen) isMenuOpen = false
-	}
-	
+  import { clickOutside } from './clickOutside.js';
+
+  function handleClickOutside() {
+    if (isMenuOpen) isMenuOpen = false
+  }
+
 </script>
 
-<nav
-  class="relative max-w-screen-xl mx-auto flex items-center justify-between px-4
+<nav class="relative max-w-screen-xl mx-auto flex items-center justify-between px-4
     sm:px-6 pt-6 pb-6 sm:pb-12">
   <div class="flex items-center flex-1">
     <div class="flex items-center justify-between w-full md:w-auto">
-      <a href="/" aria-label="Home" class="text-teal-400"> swyx.io </a>
+      <div class="text-sm font-semibold uppercase tracking-wide text-gray-500
+      sm:text-base lg:text-sm xl:text-base">
+        <a href="/" aria-label="Home" class="text-indigo-700 dark:text-indigo-400">
+          Shawn <span class="font-bold text-indigo-800 dark:text-indigo-200 opacity-75">@Swyx</span> Wang
+        </a>
+      </div>
     </div>
     <div class="hidden space-x-10 md:flex md:ml-10">
-      <a
-        href="/ideas"
-        class="font-medium text-teal-400 hover:text-red-500 transition
+      <a href="/ideas" class="font-medium text-indigo-800 dark:text-indigo-400 dark:hover:text-red-800 hover:text-red-500 transition
           duration-150 ease-in-out">Ideas</a>
-      <a
-        href="/about"
-        class="font-medium text-teal-400 hover:text-red-500 transition
+      <a href="/about" class="font-medium text-indigo-800 dark:text-indigo-400 dark:hover:text-red-800 hover:text-red-500 transition
           duration-150 ease-in-out">About</a>
     </div>
   </div>
   <!-- <div class="hidden md:flex">
-    <a href="#" class="inline-flex items-center px-4 py-2 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-gray-600 hover:bg-gray-500 focus:outline-none focus:shadow-outline-gray focus:border-gray-700 active:bg-gray-700 transition duration-150 ease-in-out">
+    <a href="#" class="inline-flex items-center px-4 py-2 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-gray-600 hover:bg-gray-500 focus:outline-none focus:ring-gray focus:border-gray-700 active:bg-gray-700 transition duration-150 ease-in-out">
       Log in
     </a>
   </div> -->
@@ -38,25 +38,16 @@
     <IconList />
   </div>
   <div class="-mr-2 flex items-center md:hidden">
-    <button
-      on:click={() => (isMenuOpen = true)}
+    <button on:click={()=> (isMenuOpen = true)}
       type="button"
       class="inline-flex items-center justify-center p-2 rounded-md
-        text-gray-400 hover:bg-gray-700 focus:outline-none focus:bg-gray-700
-        transition duration-150 ease-in-out"
+      text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:bg-gray-200 dark:focus:bg-gray-700
+      transition duration-150 ease-in-out"
       id="main-menu"
       aria-label="Main menu"
       aria-haspopup="true">
-      <svg
-        class="h-6 w-6 ml-2"
-        stroke="currentColor"
-        fill="none"
-        viewBox="0 0 24 24">
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M4 6h16M4 12h16M4 18h16" />
+      <svg class="h-6 w-6 ml-2" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
       </svg>
     </button>
   </div>
@@ -77,7 +68,7 @@
         aria-labelledby="main-menu">
         <div class="px-5 pt-4 flex items-center justify-between">
           <!-- <div><img class="h-8 w-auto" src="https://tailwindui.com/img/logos/workflow-mark-on-white.svg" alt="" /></div> -->
-          <a href="/" aria-label="Home" class="text-teal-700"> swyx.io </a>
+          <a href="/" aria-label="Home" class="text-indigo-700"> swyx.io </a>
           <div class="-mr-2">
             <button
               on:click={() => (isMenuOpen = false)}

@@ -15,36 +15,26 @@ border-blue-500
 border-purple-500
 bg-green-100
 text-green-900
-bg-blue-100
-bg-blue-900
-text-blue-900
-bg-purple-100
-bg-purple-900
-text-purple-900
 bg-indigo-600
 translate-x-5
 bg-gray-500
-text-teal-500 -->
+text-indigo-500 -->
 
 <li class="mb-4 md:mb-8">
   <div class="flex py-4"
-    class:bg-blue-900={item.type === 'Talks'}
-    class:text-blue-900={item.type === 'Talks'}
-    class:bg-purple-900={item.type === 'Podcasts'}
-    class:text-purple-900={item.type === 'Podcasts'}>
+    class:bimodalblue={item.type === 'Talks'}
+    class:bimodalpurple={item.type === 'Podcasts'}>
     <span
-      class="inline-flex justify-end items-center text-gray-500 text-xs font-mono whitespace-no-wrap">
+      class="inline-flex justify-end items-center text-gray-500 text-xs font-mono whitespace-nowrap">
       {formatDate(item.effectiveDate)}</span>
     <button
       on:click={() => (displayDetails = !displayDetails)}
       class="relative flex -mr-px text-sm text-left leading-5
         text-gray-700 font-medium border border-transparent focus:outline-none
-        focus:shadow-outline-blue focus:border-blue-300 focus:z-10 transition
+        focus:ring-blue focus:border-blue-300 focus:z-10 transition
         ease-in-out duration-150">
-      <!-- class:bg-gray-500={displayDetails}
-        class:text-teal-500={displayDetails} -->
       <h3
-        class="text-gray-300 hover:text-teal-200 text-base md:text-2xl leading-5
+        class="mylinkcolors text-base md:text-2xl leading-5
           font-medium whitespace-normal ml-4 inline">
         {item.title}
       </h3>
@@ -53,23 +43,21 @@ text-teal-500 -->
           font-medium rounded-full"
         class:bg-green-100={item.type === 'Essays'}
         class:text-green-900={item.type === 'Essays'}
-        class:bg-blue-100={item.type === 'Talks'}
-        class:text-blue-900={item.type === 'Talks'}
-        class:bg-purple-100={item.type === 'Podcasts'}
-        class:text-purple-900={item.type === 'Podcasts'}>
+        class:bimodalblue={item.type === 'Talks'}
+        class:bimodalpurple={item.type === 'Podcasts'}>
         {item.type}
       </span>
       {#if !displayDetails}
-        <span class="hidden md:inline text-sm text-gray-300 hover:text-teal-200 ml-8">Click for details</span>
+        <span class="hidden md:inline text-sm mylinkcolors ml-8">Click for details</span>
         {:else}
-        <span class="hidden md:inline text-sm text-gray-300 ml-8">❌ Close</span>
+        <span class="hidden md:inline text-sm mytext ml-8">❌ Close</span>
       {/if}
     </button>
   </div>
 
   {#if displayDetails}
-    <div class="ml-4 mt-4 bg-teal-900 border-l-4 border-teal-500 p-4">
-      <p class="prose mt-1 text-gray-300 text-base md:text-xl leading-5 whitespace-normal">
+    <div class="ml-4 mt-4 bg-indigo-900 border-l-4 border-indigo-400 dark:border-indigo-500 p-4">
+      <p class="prose mt-1 mytext text-base md:text-xl leading-5 whitespace-normal">
         <span>{longDesc}</span>
       </p>
 
@@ -80,7 +68,7 @@ text-teal-500 -->
             class="relative inline-flex items-center justify-center py-4 text-sm
               leading-5 text-gray-700 font-medium border border-transparent
               rounded-br-lg hover:text-gray-500 focus:outline-none
-              focus:shadow-outline-blue focus:border-blue-300 focus:z-10
+              focus:ring-blue focus:border-blue-300 focus:z-10
               transition ease-in-out duration-150">
             <!-- Heroicon name: book open -->
             <svg
@@ -106,7 +94,7 @@ text-teal-500 -->
             class="relative flex-1 inline-flex items-center justify-center py-4
               text-sm leading-5 text-gray-700 font-medium border
               border-transparent rounded-br-lg hover:text-gray-500
-              focus:outline-none focus:shadow-outline-blue focus:border-blue-300
+              focus:outline-none focus:ring-blue focus:border-blue-300
               focus:z-10 transition ease-in-out duration-150">
             <!-- http://simpleicons.org/?q=youtube -->
             <svg
@@ -127,7 +115,7 @@ text-teal-500 -->
             class="relative flex-1 inline-flex items-center justify-center py-4
               text-sm leading-5 text-gray-700 font-medium border
               border-transparent rounded-br-lg hover:text-gray-500
-              focus:outline-none focus:shadow-outline-blue focus:border-blue-300
+              focus:outline-none focus:ring-blue focus:border-blue-300
               focus:z-10 transition ease-in-out duration-150">
             <!-- Heroicon name: volume up -->
             <svg
