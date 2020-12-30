@@ -1,4 +1,38 @@
 <script>
+  let blocklist = [
+    'http://gadgetsearcher.com',
+    'https://pixallus.com',
+    'http://programming.yourworldin90seconds.com',
+    'https://programming.nichedomain.news',
+    'https://marketingsolution.com.au',
+    'https://programming.aplus-review.com',
+    'https://digitalapexgroup.com',
+    'https://technologynews.biz',
+    'https://worldtech.news',
+    'https://programming.webcloning.com',
+    'https://www.sacramentowebdesigngroup.com',
+    'https://htmltreehouse.com',
+    'https://1dmx.org',
+    'https://websitedesign-usa.com',
+    'https://techupd.com',
+    'https://fancyhints.com',
+    'https://techalertnews.com',
+    'https://buzzedly.com',
+    'https://dztechno.com',
+    'https://graphicdon.com',
+    'https://www.newsgosspis.com',
+    'http://www.digitasbuzz.in',
+    'https://gotutoral.com',
+    'https://wpguynews.com',
+    'https://www.klobal.net',
+    'http://www.webmastersgallery.com',
+    'https://pikopong.com',
+    'https://keren.link',
+    'https://ntdln.com',
+    'https://jczh.xyz',
+    'https://pazukong.wordpress.com',
+    'https://fullstackfeed.com'
+  ]
   let page = 0
   export let targets
   export let devto_reactions
@@ -33,6 +67,11 @@
       return fetchMore()
     })
   })
+  function filterOutLinks(link) {
+    if (link.activity.type === 'like') return false
+    if (blocklist.includes(new URL(link.source).origin)) return false
+    return true
+  }
   function getMentions() {
     const fetches = _targets.map((target) =>
       fetch(
@@ -44,7 +83,7 @@
     // `https://webmention.io/api/mentions?page=${page}&per-page=20&sort-by=published&target=${target}`,
     return Promise.all(fetches)
       .then((arr) => arr.map((x) => x.links).flat())
-      .then((x) => x.filter((x) => x.activity.type !== 'like'))
+      .then((link) => link.filter(filterOutLinks))
   }
   const fetchMore = () => {
     page += 1
@@ -57,6 +96,7 @@
     })
   }
   function cleanString(str) {
+    if (str.length > 1000) str = str.slice(0, 1000)
     const withSlash = _targets[0] + '/' // todo: figure out proper fix
     const linky = `<a href="${withSlash}">${withSlash}</a>`
     return str
@@ -69,8 +109,10 @@
   #WebMentions {
     margin: 0 auto;
     font-style: italic;
-    width: 80%;
     min-width: 300px;
+  }
+  #WebMentions ul {
+    margin-left: 0;
   }
   h3 {
     display: inline;
@@ -79,7 +121,6 @@
     border: 1px dashed var(--link-color);
     padding: 1rem;
     margin-top: 1rem;
-    color: var(--text-color);
   }
   .WebMentionsContainer ul {
     list-style-type: none;
@@ -91,9 +132,6 @@
   .WebMentionReply {
     margin-top: 16px;
     margin-bottom: 16px;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
   }
   .Avatar {
     margin-right: 16px;
@@ -127,7 +165,7 @@
 
 <hr />
 <div id="WebMentions" class="prose">
-  <div class="flex justify-between">
+  <div class="myflexresponsive justify-between">
     <div>
       <h3
         font-family="system"
@@ -160,13 +198,17 @@
       </a>
     </div>
     {#if _targets.find((x) => x.startsWith('https://dev.to'))}
-      <span>See
-        <a href={_targets.find((x) => x.startsWith('https://dev.to'))}>comments on
-          Dev.to</a>
+      <span><a
+          href="https://twitter.com/intent/tweet/?text=Great%20post%20by%20@swyx%20{_targets[0]}">
+          Tweet about this post
+        </a>
+        and it will show up here, or you could
+        <a href={_targets.find((x) => x.startsWith('https://dev.to'))}>leave a
+          comment on Dev.to</a>
       </span>
     {/if}
   </div>
-  <div class="WebMentionsContainer">
+  <div class="WebMentionsContainer mytext">
     <div class="WebMentionsHeader">
       {#await counts}
         <p>loading counts</p>
@@ -199,7 +241,8 @@
     {:else}
       <ul>
         {#each mentions as link}
-          <li class="WebMentionReply">
+          <li
+            class="myflexresponsive WebMentionReply border-b border-indigo-200 dark:border-indigo-700">
             {#if link.data.author && link.data.author.photo}
               <div class="Avatar">
                 <a
@@ -214,7 +257,9 @@
                     src={link.data.author && link.data.author.photo} />
                 </a>
               </div>
-            {:else}<span>{new URL(link.data.url).host}&nbsp;</span>{/if}
+            {:else}
+              <span class="font-bold">{new URL(link.data.url).host}&nbsp;</span>
+            {/if}
             <div>
               {#if link.activity.type === 'repost'}
                 {link.data.author && link.data.author.name}
@@ -227,7 +272,7 @@
                     rel="noopener"
                     href={link.data.url}
                     color="blue">
-                    replied
+                    mentioned this
                   </a>
                   on
                   <span color="tertiary">

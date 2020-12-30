@@ -18,13 +18,78 @@
     @apply's
 
   */
+
+  .myflexresponsive {
+    @apply flex flex-col md:flex-row
+  }
   .mylink {
     @apply dark:text-indigo-300 underline dark:hover:text-indigo-200 text-indigo-800 hover:text-indigo-600
   }
   .mytext {
-    @apply text-gray-700 dark:text-gray-300
+    @apply text-gray-800 dark:text-gray-200
+  }
+  .mytext-light {
+    @apply text-gray-600 dark:text-gray-300 italic mt-0
   }
 
+  /* replace typography plugin */
+  .prose {
+    @apply text-gray-700 dark:text-gray-300
+  }
+  .prose {
+    & p {
+      @apply my-5
+    }
+    & h1 {
+      @apply text-black dark:text-white;
+      font-weight: 800;
+      font-size: 2.25em;
+      margin-top: 0;
+      margin-bottom: 0.8888889em;
+      line-height: 1.1111111;
+    }
+    & h2, & h3, & h4, & h5, & h6 {
+      @apply text-black dark:text-white;
+      font-weight: 700;
+      font-size: 1.5em;
+      margin-top: 2em;
+      margin-bottom: 1em;
+      line-height: 1.3333333;
+    }
+    & strong {
+      @apply text-indigo-900 dark:text-indigo-100 shadow-sm rounded
+    }
+    & a {
+      @apply mylink
+    }
+    & pre {
+      @apply text-xs p-6 bg-indigo-300 dark:bg-indigo-900 overflow-x-auto
+    }
+    & code {
+      @apply text-sm bg-indigo-200 dark:bg-indigo-900 bg-opacity-50 px-1 py-2
+    }
+    & pre code {
+      @apply bg-transparent p-0
+    }
+    & blockquote {
+      @apply border-l-4 border-purple-800 dark:border-purple-200
+    }
+    & blockquote:before {
+      @apply bg-purple-100 dark:bg-purple-900 bg-opacity-10
+    }
+    & ul {
+      @apply leading-6 list-disc ml-4
+    }
+    & ul li {
+      @apply mb-2 
+    }
+    & ul ul {
+      @apply mt-2 
+    }
+    & img {
+      @apply max-h-full my-0 mx-auto block
+    }
+  }
 
 
   /* 
@@ -197,8 +262,8 @@
     <footer
       class="max-w-screen-xl mx-auto py-12 px-4 overflow-hidden sm:px-6 lg:px-8">
       <nav
-        class="-mx-5 -my-2 flex flex-wrap justify-center items-center px-5 py-2
-          flex-col md:flex-row gap-2">
+        class="-mx-5 -my-2 myflexresponsive flex-wrap justify-center items-center px-5 py-2
+          gap-2">
         <a
           href="/ideas"
           class="text-base leading-6 text-indigo-600 dark:text-indigo-400 hover:text-red-500">

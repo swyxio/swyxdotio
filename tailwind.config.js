@@ -23,10 +23,6 @@ module.exports = {
     borderWidth: ['responsive', 'hover']
   },
   purge: {
-    // mode: 'all', // TODO: purge typography styles
-    // options: {
-    //   whitelist: ['h1', 'h2', 'h3', 'p', 'blockquote', 'strong' /* etc. */],
-    // },
     content: [
       "./src/**/*.svelte",
       // may also want to include base index.html
