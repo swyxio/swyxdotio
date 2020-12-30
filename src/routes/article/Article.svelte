@@ -17,6 +17,8 @@
     : seoTitle
   let slug = frontmatter.slug
   // $: console.log({html, frontmatter})
+  let readTime = Math.floor(html.split(' ').length / 250) // https://blog.medium.com/read-time-and-you-bc2048ab620c
+  readTime = readTime < 2 ? readTime + " minutes" : readTime + " minute"
 </script>
 
 <style>
@@ -136,8 +138,8 @@
       month: 'short',
       day: 'numeric'
     })} />
-  <meta name="twitter:label2" value="Reading Time" />
-  <meta name="twitter:data2" value="10 minutes" />
+  <meta name="twitter:label2" value="Read Time" />
+  <meta name="twitter:data2" value={readTime} />
 </svelte:head>
 
 <article
@@ -154,8 +156,8 @@
           {longDesc}
           {#each frontmatter.categories as tag}
             <span
-              class="text-sm italic font-medium leading-5">
-              {tag}
+              class="text-sm italic font-light leading-5">
+              #{tag}
             </span>
           {/each}
         </p>
@@ -163,8 +165,9 @@
       {#if frontmatter.author}<small>By {frontmatter.author}</small>{/if}
     </div>
 
-    {#if frontmatter.date}
-      <blockquote class="text-sm font-mono">
+    <blockquote class="text-sm font-mono">
+      <div>Read time: {readTime}</div>
+      {#if frontmatter.date}
         Last updated:
         <time
           datetime={new Date(frontmatter.date)
@@ -173,8 +176,8 @@
               0,
               10
             )}>{new Date(frontmatter.date).toDateString().slice(4)}</time>
-      </blockquote>
-    {/if}
+      {/if}
+    </blockquote>
 
     {#if html}
       <div class="articleMain">

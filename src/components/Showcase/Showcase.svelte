@@ -172,12 +172,13 @@
     <button
       type="button"
       on:click={() => saveURLState(essays = !essays)}
-      class:bg-gray-300={essays}
-      class:text-gray-700={essays}
+      class:bimodalpurple={essays}
+      class:mytext={essays}
+      class:font-medium={essays}
       class="-ml-px sm:ml-0 relative inline-flex items-center px-4 py-2
         sm:rounded-l-md border border-gray-300 text-sm leading-5
-        font-medium text-gray-200 focus:z-10
-        focus:outline-none focus:border-blue-300 focus:ring-blue
+       text-gray-200 focus:z-10
+        focus:outline-none focus:border-blue-300 focus:ring-yellow focus:text-yellow-200
          transition ease-in-out
         duration-150">
       Essays
@@ -185,50 +186,54 @@
     <button
       type="button"
       on:click={() => saveURLState(talks = !talks)}
-      class:bg-gray-300={talks}
-      class:text-gray-700={talks}
+      class:bimodalpurple={talks}
+      class:mytext={talks}
+      class:font-medium={talks}
       class="-ml-px relative inline-flex items-center px-4 py-2 border
-        border-gray-300 text-sm leading-5 font-medium text-gray-200
+        border-gray-300 text-sm leading-5 text-gray-200
        focus:z-10 focus:outline-none
-        focus:border-blue-300 focus:ring-blue 
+        focus:border-blue-300 focus:ring-yellow focus:text-yellow-200 
        transition ease-in-out duration-150">
       Talks
     </button>
     <button
       type="button"
       on:click={() => saveURLState(podcasts = !podcasts)}
-      class:bg-gray-300={podcasts}
-      class:text-gray-700={podcasts}
+      class:bimodalpurple={podcasts}
+      class:mytext={podcasts}
+      class:font-medium={podcasts}
       class="-ml-px relative inline-flex items-center px-4 py-2 border
-        border-gray-300 text-sm leading-5 font-medium text-gray-200
+        border-gray-300 text-sm leading-5 text-gray-200
        focus:z-10 focus:outline-none
-        focus:border-blue-300 focus:ring-blue 
+        focus:border-blue-300 focus:ring-yellow focus:text-yellow-200 
        transition ease-in-out duration-150">
       Podcasts
     </button>
     <button
       type="button"
       on:click={() => alert('coming soon')}
-      class:bg-gray-300={tutorials}
-      class:text-gray-700={tutorials}
+      class:bimodalpurple={tutorials}
+      class:mytext={tutorials}
+      class:font-medium={tutorials}
       class="-ml-px relative items-center px-4 py-2 border
         hidden md:inline-flex
-        border-gray-300 text-sm leading-5 font-medium text-gray-200
+        border-gray-300 text-sm leading-5 text-gray-200
        focus:z-10 focus:outline-none
-        focus:border-blue-300 focus:ring-blue 
+        focus:border-blue-300 focus:ring-yellow focus:text-yellow-200 
        transition ease-in-out duration-150">
       <strike>Tutorials</strike>
     </button>
     <button
       type="button"
       on:click={() => alert('coming soon')}
-      class:bg-gray-300={notes}
-      class:text-gray-700={notes}
+      class:bimodalpurple={notes}
+      class:mytext={notes}
+      class:font-medium={notes}
       class="-ml-px relative items-center px-4 py-2
         hidden md:inline-flex
         sm:rounded-r-md border border-gray-300 text-sm leading-5
-        font-medium text-gray-200 focus:z-10
-        focus:outline-none focus:border-blue-300 focus:ring-blue
+       text-gray-200 focus:z-10
+        focus:outline-none focus:border-blue-300 focus:ring-yellow focus:text-yellow-200
          transition ease-in-out
         duration-150">
       <strike>Notes</strike>

@@ -26,7 +26,7 @@
     @apply dark:text-indigo-300 dark:hover:text-indigo-200 dark:focus:text-indigo-200 text-indigo-800
   }
   .mylink {
-    @apply underline mylinkcolors
+    @apply hover:underline focus:underline mylinkcolors
   }
   .mytext {
     @apply text-gray-800 dark:text-gray-200
@@ -99,7 +99,7 @@
       @apply mt-2 
     }
     & img {
-      @apply max-h-full my-0 mx-auto block
+      @apply max-h-full my-4 mx-auto block
     }
   }
 

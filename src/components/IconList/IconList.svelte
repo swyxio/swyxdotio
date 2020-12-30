@@ -16,7 +16,7 @@
 
 <a rel="noopener" href="https://swyx.io/rss.xml" title="RSS" target="_blank">
   <svg
-    class="icon h-6 w-6 text-indigo-700 dark:text-indigo-400 hover:text-red-500"
+    class="icon h-6 w-6 text-indigo-700 dark:text-indigo-400 focus:text-red-500 hover:text-red-500"
     fill="currentColor"
     viewBox="-6 -6 34 34"
     stroke-linecap="round"
@@ -37,7 +37,7 @@
   <!-- class="-ml-0.5 mr-2 h-4 w-4" -->
   <!-- Heroicon name: mail -->
   <svg 
-  class="icon h-6 w-6 text-indigo-700 dark:text-indigo-400 hover:text-red-500"
+  class="icon h-6 w-6 text-indigo-700 dark:text-indigo-400 focus:text-red-500 hover:text-red-500"
    viewBox="0 0 20 20" fill="currentColor">
     <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
     <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
@@ -48,7 +48,7 @@
   href="https://github.com/sw-yx/swyxdotio"
   target="_blank"
   rel="noopener"
-  class="ml-4 text-indigo-700 dark:text-indigo-400 hover:text-red-500">
+  class="ml-4 text-indigo-700 dark:text-indigo-400 focus:text-red-500 hover:text-red-500">
   <span class="sr-only">GitHub</span>
   <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
     <path
@@ -62,7 +62,7 @@
   title="youtube"
   target="_blank"
   rel="me noopener"
-  class="ml-4 text-indigo-700 dark:text-indigo-400 hover:text-red-500">
+  class="ml-4 text-indigo-700 dark:text-indigo-400 focus:text-red-500 hover:text-red-500">
   <span class="sr-only">YouTube</span>
 
     <svg class="h-6 w-6" fill="currentColor" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>YouTube icon</title><path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>
@@ -74,7 +74,7 @@
   title="twitter"
   target="_blank"
   rel="me noopener"
-  class="ml-4 text-indigo-700 dark:text-indigo-400 hover:text-red-500">
+  class="ml-4 text-indigo-700 dark:text-indigo-400 focus:text-red-500 hover:text-red-500">
   <span class="sr-only">Twitter</span>
   <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
     <path
@@ -84,7 +84,7 @@
 <!-- <a title="search" rel="noopener" href="/ideas">
   <span class="sr-only">Search This Site</span>
   <svg
-    class="icon h-6 w-6 ml-6 text-indigo-700 dark:text-indigo-400 hover:text-red-500"
+    class="icon h-6 w-6 ml-6 text-indigo-700 dark:text-indigo-400 focus:text-red-500 hover:text-red-500"
     fill="currentColor"
     viewBox="-4 -4 30 30"
     stroke-linecap="round"

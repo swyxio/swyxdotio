@@ -28,7 +28,7 @@
         {item.title}
       </h3>
       {#if item.categories}
-        <span class="font-mono text-xs ml-4 hidden md:inline">
+        <span class="font-mono text-xs ml-4 hidden md:inline-flex items-center">
           {item.categories && item.categories.length ? item.categories.map(x => `#${x}`).join(', ') : 'Uncategorized'}
         </span>
       {/if}

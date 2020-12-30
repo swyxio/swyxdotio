@@ -16,7 +16,7 @@
 <div class="mx-auto max-w-screen-xl mytext">
   <div class="lg:grid lg:grid-cols-12 lg:gap-8 mb-16">
     <div
-      class="px-4 sm:px-6 sm:text-center md:max-w-2xl md:mx-auto lg:col-span-6
+      class="px-4 sm:px-6 md:max-w-2xl md:mx-auto lg:col-span-6
         lg:text-left lg:flex lg:items-center">
       <div>
         <!-- <h2
@@ -26,7 +26,7 @@
             to-indigo-400">
           Welcome to swyx.io!
         </h2> -->
-        <div class="mt-4">
+        <div class="my-8">
           <h1
             class="text-2xl leading-9 tracking-tight font-extrabold mytext
             sm:text-xl sm:leading-10">
@@ -44,12 +44,12 @@
               Podcast: <a class="mylink" href="https://shoptalkshow.com/432/">SWYX on Shop Talk Show</a>
             </li>
           </ul>
-          <div>👉 <a class="mylink" href="/ideas">See All My Essays, Talks, and Podcasts!</a> 👈</div>
+          <div>👉 <a class="mylink font-bold" href="/ideas">See All Essays, Talks, Podcasts</a> 👈</div>
         </div>
         <div
           class="mt-5 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
-          <p class="text-base font-medium text-opacity-75">
-            Join 2,000+ developers getting updates!
+          <p class="text-base font-light text-opacity-75">
+            Join 2,000+ developers getting updates ✉️
           </p>
           <form
             action="https://tinyletter.com/swyx"
@@ -65,7 +65,7 @@
               class="appearance-none block w-full px-3 py-3 border
                 border-gray-300 text-base leading-6 rounded-md
                 placeholder-gray-500 shadow-sm focus:outline-none
-                focus:placeholder-gray-400 focus:ring-blue
+                focus:placeholder-gray-400 focus:ring-blue focus:bg-yellow-200
                 focus:border-blue-300 transition duration-150 ease-in-out
                 sm:flex-1"
               placeholder="I solemnly swear to never spam you." />
@@ -75,7 +75,7 @@
               class="mt-3 w-full px-6 py-3 border border-transparent text-base
                 leading-6 font-medium rounded-md text-white bg-indigo-600
                 shadow-sm hover:bg-indigo-400 focus:outline-none
-                focus:border-gray-300 focus:ring-gray
+                focus:border-gray-300 focus:ring-gray focus:bg-yellow-200
                 active:bg-indigo-400 transition duration-150 ease-in-out sm:mt-0
                 sm:ml-3 sm:flex-shrink-0 sm:inline-flex sm:items-center
                 sm:w-auto hover:animate-wiggle">
@@ -88,26 +88,12 @@
               me what I'm signing up for!</a>
           </p>
         </div>
-        <!-- <p class="mt-8 text-sm text-white uppercase tracking-wide font-semibold sm:mt-10">Used by</p>
-              <div class="mt-5 w-full sm:mx-auto sm:max-w-lg lg:ml-0">
-                <div class="flex flex-wrap items-start justify-between">
-                  <div class="flex justify-center px-1">
-                    <img class="h-9 sm:h-10" src="https://tailwindui.com/img/logos/tuple-logo.svg" alt="Tuple">
-                  </div>
-                  <div class="flex justify-center px-1">
-                    <img class="h-9 sm:h-10" src="https://tailwindui.com/img/logos/workcation-logo.svg" alt="Workcation">
-                  </div>
-                  <div class="flex justify-center px-1">
-                    <img class="h-9 sm:h-10" src="https://tailwindui.com/img/logos/statickit-logo.svg" alt="StaticKit">
-                  </div>
-                </div>
-              </div> -->
       </div>
     </div>
     <div
       class="mt-12 relative sm:max-w-lg sm:mx-auto lg:mt-0 lg:max-w-none lg:mx-0
         lg:col-span-6 lg:flex lg:items-center">
-      <div class="relative mx-auto w-32 md:w-full rounded-lg lg:max-w-md">
+      <div class="relative mx-auto w-32 lg:w-full rounded-lg lg:max-w-md">
         <a href="/ideas">
           <img
             class="hover:border-4 hover:border-blue-500 
@@ -130,35 +116,35 @@
       published
       <a href="https://learninpublic.org/">The Coding Career Handbook</a>
       with the best of my nontechnical writing.
-      <ul>
+      <ul class="mt-4">
         <li>
           <b> <a href="/writing/learn-in-public">Learn in Public</a> </b>
-          <div>
+          <div class="font-extralight">
             My most impactful essay, and the personal growth philosophy I and
             many others follow.
           </div>
         </li>
         <li>
           <b> <a href="/create_luck">How to Create Luck</a> </b>
-          <div>
+          <div class="font-extralight">
             Luck is random, but creating luck is a skill that can be developed.
           </div>
         </li>
         <li>
           <b> <a href="/js-third-age">Third Age of JavaScript</a> </b>
-          <div>
+          <div class="font-extralight">
             Every 10 years there is a changing of the guard in JavaScript. A
             well received piece that has caught the imagination of some
             community leaders like Fred Schott and Rich Harris.
           </div>
         </li>
         <li>
-          <b> <a href="/writing/svelte-static">Static Svelte</a> </b>
-          <div>How this very site was written.</div>
+          <b> <a href="/api-economy">The Light and Dark Side of the API Economy</a> </b>
+          <div class="font-extralight">The 'API Economy' is a popular term for VC's and tech media, however Developers seem ironically out of the loop despite their central importance to the whole story. Here's my explanation, together with a dash of economics and social implications.</div>
         </li>
         <li>
           <b> <a href="/slack-fumble">Slack is Fumbling Developers</a> </b>
-          <div>
+          <div class="font-extralight">
             Trendspotting how Developer communities are leaving Slack (for
             Discord).
           </div>
@@ -167,14 +153,14 @@
           <b>
             <a href="/react-sfcs-here">React Single File Components Are Here</a>
           </b>
-          <div>
+          <div class="font-extralight">
             Talking about why and when Single File Components are slowly coming
             to React.js
           </div>
         </li>
         <li>
-          <b>About</b>
-          <div>
+          <b><a href="/about">About</a></b>
+          <div class="font-extralight">
             My personal story,
             <a href="https://github.com/sw-yx/README/blob/master/README.md">
               README
@@ -186,10 +172,7 @@
             about learning to code.
           </div>
         </li>
-        <li>
-          <a href="https://www.swyx.io/ideas/?show=Essays">More of my writing
-            here!</a>
-        </li>
+        You can find all my writing on RSS or <a href="https://www.swyx.io/ideas/?show=Essays">on the /ideas page</a>.
       </ul>
     </div>
 
@@ -197,10 +180,10 @@
     <div>
       I have done a bunch of talks and podcast appearances. The best of which
       are:
-      <ul>
+      <ul class="mt-4">
         <li>
-          <a href="/speaking/react-hooks">Getting Closure on Hooks</a>
-          <div>
+          <b><a href="/speaking/react-hooks">Getting Closure on Hooks</a></b>
+          <div class="font-extralight">
             My most well received technical talk, where I explain a mental model
             for React hooks by livecoding a React clone at JSConf Asia. Started
             as
@@ -211,8 +194,8 @@
           </div>
         </li>
         <li>
-          <a href="/speaking/react-not-reactive"> Why React is not Reactive </a>
-          <div>
+          <b><a href="/speaking/react-not-reactive"> Why React is not Reactive </a></b>
+          <div class="font-extralight">
             My first conference talk ever was at the biggest React venue in the
             world, React Rally. I spent a month writing
             <a
@@ -222,33 +205,32 @@
         </li>
 
         <li>
-          <a href="/speaking/contributing-to-react"> Contributing to React </a>
-          <div>
+          <b><a href="/speaking/contributing-to-react"> Contributing to React </a></b>
+          <div class="font-extralight">
             My first meetup talk ever was at React NYC - this was accepted on to
             the React docs as a guide for other contributors!
           </div>
         </li>
         <li>
-          <a href="/speaking/learn-in-public-nyc">Learn In Public</a>
-          <div>
+          <b><a href="/speaking/learn-in-public-nyc">Learn In Public</a></b>
+          <div class="font-extralight">
             My first verbal exposition on the Learn In Public philosophy. Video
             is frozen at the end, sorry.
           </div>
         </li>
         <li>
-          <a href="/speaking/babel-macros">I Can Babel Macros and So Can You!
+          <b><a href="/speaking/babel-macros">I Can Babel Macros and So Can You!
             (the Moana talk)
           </a>
-          <div>
+        </b>
+          <div class="font-extralight">
             My first JSConf appearance ever, at one of the most competitive
             JSConfs ever. This talk is where I first started experimenting with
             theming talks, and it came out really well with the Moana theme.
           </div>
         </li>
-        <li>
-          <a href="https://www.swyx.io/ideas/?show=Talks&show=Podcasts">More of
+        <a href="https://www.swyx.io/ideas/?show=Talks&show=Podcasts">More of
             my speaking here</a>
-        </li>
       </ul>
     </div>
   </div>
