@@ -36,8 +36,10 @@
     margin: 0 auto;
   }
 
-
-  .prose :global(h1 a[aria-hidden='true'], h2 a[aria-hidden='true'], h3 a[aria-hidden='true'], h4 a[aria-hidden='true'], h5 a[aria-hidden='true'], h6 a[aria-hidden='true']) {
+  .prose
+    :global(h1 a[aria-hidden='true'], h2 a[aria-hidden='true'], h3
+      a[aria-hidden='true'], h4 a[aria-hidden='true'], h5
+      a[aria-hidden='true'], h6 a[aria-hidden='true']) {
     margin-left: 1rem;
   }
 
@@ -63,33 +65,29 @@
   <h2 class="text-indigo-400 dark:text-indigo-600">aka Shawn Wang</h2>
   <div class="prose py-4">
     <h3 id="tldr">TL;DR</h3>
-    <p class="mt-3 text-base text-gray-300 sm:mt-5 sm:text-xl lg:text-lg
-      xl:text-xl">
-      <span class="block">I <a rel="noopener" href="http://github.com/sw-yx"
-          class="underline text-indigo-300 hover:text-indigo-200">code</a>, <a rel="noopener"
-          href="https://www.swyx.io/speaking/react-hooks"
-          class="underline text-indigo-300 hover:text-indigo-200">speak</a>, <a rel="noopener"
-          href="http://careerchats.transistor.fm/" class="underline text-indigo-300 hover:text-indigo-200">podcast</a>,
-        and <a rel="noopener" href="https://egghead.io/s/26zf5"
-          class="underline text-indigo-300 hover:text-indigo-200">teach</a>.
-        But above all, I <a rel="noopener" href="/ideas"
-          class="underline text-indigo-300 hover:text-indigo-200">write</a> about
-        great ideas for developers and infinite builders.
-      </span><span>If we share <a class="underline text-indigo-300 hover:text-indigo-200" href="/about">interests</a>,
-        I'd love to <a href="mailto:swyx@hey.com">connect</a>!</span>
-      <!-- I am passionate about Developer Tools and Developer Communities and currently work as a Senior Developer
-          Advocate at AWS. In my free time I teach React, TypeScript, Storybook and Node.js CLI's at <a
-            rel="noopener" href="https://egghead.io/s/26zf5">Egghead.io</a>, and help run the <a
-            rel="noopener" href="https://sveltesociety.dev/">Svelte Society</a> community of meetups. -->
+    <p>
+      I
+      <a rel="noopener" href="http://github.com/sw-yx">code</a>,
+      <a
+        rel="noopener"
+        href="https://www.swyx.io/speaking/react-hooks">speak</a>,
+      <a rel="noopener" href="http://careerchats.transistor.fm/">podcast</a>,
+      and
+      <a rel="noopener" href="https://egghead.io/s/26zf5">teach</a>. But above
+      all, I
+      <a rel="noopener" href="/ideas">write</a>
+      about great ideas for developers and infinite builders. If we share
+      <a href="/about">interests</a>, I'd love to
+      <a href="mailto:swyx@hey.com">connect</a>!
     </p>
     <h3 id="about">About</h3>
     <p>
       I am a
       <a href="https://www.freecodecamp.org/news/shawn-wang-podcast-interview/">
-        currency options trader turned TMT hedge fund analyst</a> turned
-      developer/product manager/angel investor, primarily active in the JavaScript
-      community. I grew up in Singapore 🇸🇬, but have worked mostly in the US
-      🇺🇸/UK 🇬🇧, most recently remotely out of New York City 🗽 working on
+        currency options trader turned TMT hedge fund analyst</a>
+      turned developer/product manager/angel investor, primarily active in the
+      JavaScript community. I grew up in Singapore 🇸🇬, but have worked mostly in
+      the US 🇺🇸/UK 🇬🇧, most recently remotely out of New York City 🗽 working on
       Developer Experience for
       <a href="https://www.swyx.io/writing/farewell-netlify/">Netlify</a>,
       <a href="https://www.swyx.io/writing/hello-aws/">Amazon Web Services</a>,
@@ -107,8 +105,8 @@
     <h3 id="bio">Bio for Event Organizers</h3>
     <p>
       swyx is an Infinite Builder passionate about Developer Tooling and
-      Developer Communities. He currently works as a Senior Developer Advocate for
-      AWS Amplify and recently published
+      Developer Communities. He currently works as a Senior Developer Advocate
+      for AWS Amplify and recently published
       <a href="https://learninpublic.org/">the Coding Career Handbook</a>
       for Junior to Senior developer careers. In his free time he teaches React,
       TypeScript, Storybook and Node.js CLI's at
@@ -124,16 +122,27 @@
     </p>
     <p>
       🖼️
-      <a href="https://avatars3.githubusercontent.com/u/6764957?s=200&v=4">Medium</a>,
+      <a
+        href="https://avatars3.githubusercontent.com/u/6764957?s=200&v=4">Medium</a>,
       or
-      <a href="https://avatars3.githubusercontent.com/u/6764957?s=460&v=4">Large</a>
+      <a
+        href="https://avatars3.githubusercontent.com/u/6764957?s=460&v=4">Large</a>
       pictures of me you can use without asking.
     </p>
     <h3 id="now">
       What I'm Doing Now
       <a href="https://nownownow.com/about">
-        <svg class="inline" xmlns="http://www.w3.org/2000/svg" width="0.75em" height="0.75em" viewBox="0 0 24 24"
-          fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          class="inline"
+          xmlns="http://www.w3.org/2000/svg"
+          width="0.75em"
+          height="0.75em"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#999"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round">
           <circle cx="12" cy="12" r="10" />
           <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
           <line x1="12" y1="17" x2="12" y2="17" />
@@ -216,7 +225,10 @@
             about learning to code.
           </div>
         </li>
-        <li><a href="https://www.swyx.io/ideas/?show=Essays">More of my writing here!</a></li>
+        <li>
+          <a href="https://www.swyx.io/ideas/?show=Essays">More of my writing
+            here!</a>
+        </li>
       </ul>
     </div>
 
@@ -242,7 +254,8 @@
           <div>
             My first conference talk ever was at the biggest React venue in the
             world, React Rally. I spent a month writing
-            <a href="https://twitter.com/swyx/status/1112513571315830784?s=20">my
+            <a
+              href="https://twitter.com/swyx/status/1112513571315830784?s=20">my
               CFP on the most interesting React question I could think of</a>.
           </div>
         </li>
@@ -271,7 +284,10 @@
             theming talks, and it came out really well with the Moana theme.
           </div>
         </li>
-        <li><a href="https://www.swyx.io/ideas/?show=Talks&show=Podcasts">More of my speaking here</a></li>
+        <li>
+          <a href="https://www.swyx.io/ideas/?show=Talks&show=Podcasts">More of
+            my speaking here</a>
+        </li>
       </ul>
     </div>
   </div>
@@ -286,7 +302,8 @@
       <ul>
         <li>
           My course on
-          <a href="https://egghead.io/courses/design-systems-with-react-and-typescript-in-storybook?af=95qfq1">
+          <a
+            href="https://egghead.io/courses/design-systems-with-react-and-typescript-in-storybook?af=95qfq1">
             Design Systems with React + TypeScript
           </a>
         </li>
@@ -306,7 +323,8 @@
       I curate helpful repos around topics, like
       <ul>
         <li>
-          <a href="https://github.com/typescript-cheatsheets/react-typescript-cheatsheet/">
+          <a
+            href="https://github.com/typescript-cheatsheets/react-typescript-cheatsheet/">
             ⚛️ 📜 React-TypeScript Cheatsheet
           </a>
         </li>
@@ -314,7 +332,8 @@
           <a href="https://github.com/sw-yx/spark-joy/">✨ 😂 Spark-Joy</a>
         </li>
         <li>
-          <a href="https://github.com/sw-yx/cli-cheatsheet/blob/master/README.md">
+          <a
+            href="https://github.com/sw-yx/cli-cheatsheet/blob/master/README.md">
             CLI Cheatsheet
           </a>
         </li>
@@ -330,13 +349,16 @@
     <p>
       I helped moderate
       <a href="https://www.swyx.io/writing/react-survey-2019/">/r/reactjs</a>
-      to <a href="https://www.swyx.io/moderating-rreactjs/">200k+ developers</a>, and
+      to
+      <a href="https://www.swyx.io/moderating-rreactjs/">200k+ developers</a>,
+      and
       <a href="https://twitter.com/sveltesociety">cofounded Svelte Society</a>.
     </p>
     <div>
       I led CLI development for
       <a href="https://news.ycombinator.com/item?id=19615546">Netlify Dev</a>,
-      <a href="https://github.com/netlify/plugins/blob/master/plugins.json">Build
+      <a
+        href="https://github.com/netlify/plugins/blob/master/plugins.json">Build
         Plugins</a>
       and other open source tooling at Netlify. I've also helped maintain other
       OSS projects like
