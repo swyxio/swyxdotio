@@ -50,5 +50,5 @@ html {
   --brand-color-secondary: #43a9a3;
   --hover-color-primary: #6d1f21;
   --hover-color-secondary: #1d1f61;
-  /* background: var(--brand-color-primary); */
+  background: var(--bg-color);
 }
