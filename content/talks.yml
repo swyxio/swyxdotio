@@ -1,5 +1,21 @@
 # 2020 Talks
 
+- title: The Future of Dev Tools with Minko Gechev (Angular Core Team)
+  slug: devtools-minko-gechev
+  categories: [Angular]
+  description: Minko has been working tirelessly for years on the Angular developer experience. We'll talk about the Language Server, Angular Schematics, and whatever else team Angular has been cooking up for developers!
+  instances:
+    - venue: Swyx YouTube
+      date: 2020-12-16
+      video: https://www.youtube.com/watch?v=ECvAl3Ii5vM
+- title: Intro to Flutter and AWS Amplify
+  slug: intro-to-aws-amplify-and-flutter
+  categories: [AWS]
+  description: A General intro to AWS Amplify and Flutter on the Amplify with Friends show on the official AWS twitch stream
+  instances:
+    - venue: AWS Twitch
+      date: 2020-11-06
+      video: https://www.youtube.com/watch?v=AvTV1tWLv_s
 - title: Lessons and Regrets from Shipping My $50000 Coronavirus Side Project
   slug: lessons-and-regrets-50k
   categories: [CodingCareer]
@@ -108,7 +124,15 @@
       date: 2020-04-14
       video: https://www.youtube.com/watch?v=1ayI9j57VlQ
       desc: "I chatted with Eva on #LearnInPublic, teaching and career change!"
-      description: "Eva is a self-taught web developer, community organizer, cat & dog owner. 🐈 🐕
+      description: "Eva is a self-taught web developer, community organizer, cat & dog owner. 🐈 🐕"
+    - venue: Devto Youtube
+      date: 2020-11-11
+      video: https://www.youtube.com/watch?v=XZzChiXp8wM
+      description: I chatted with Nick Taylor and Christina Gorton from Dev.to on Svelte and the Coding Career Handbook!
+    - venue: Lambda School
+      date: 2020-12-06
+      video: https://www.youtube.com/watch?v=ilvwP4-7UXM
+      description: I chatted with Lambda School alums on the Coding Career Handbook!
 
 Swyx (https://twitter.com/swyx) is a career changer, creator, developer, teacher and avid learner. Check out his website here.
 

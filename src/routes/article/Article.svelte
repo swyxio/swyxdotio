@@ -152,11 +152,11 @@
         <h2 class="mytext-light">{frontmatter.subtitle}</h2>
       {/if}
       {#if longDesc}
-        <p class="mytext-light">
+        <p class="mytext-light text-sm">
           {longDesc}
           {#each frontmatter.categories as tag}
             <span
-              class="text-sm italic font-light leading-5">
+              class="text-xs italic font-light leading-5">
               #{tag}
             </span>
           {/each}

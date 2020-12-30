@@ -66,7 +66,7 @@ p.s. Eventually, they'll want to pay you for your help too. A lot more than you 
 
 > Also: [Big L Notation](https://www.swyx.io/writing/big-l-notation) (expanding on why "Learn In Public" is the fastest way to learn)
 
-_originally drafted [in a gist](https://gist.github.com/sw-yx/9720bd4a30606ca3ffb8d407113c0fe5)_
+_originally drafted [in a gist](https://gist.github.com/sw-yx/9720bd4a30606ca3ffb8d407113c0fe5) and republished in [Letters to a New Developer](https://letterstoanewdeveloper.com/2020/12/14/learn-in-public/)_
 
 ---
 

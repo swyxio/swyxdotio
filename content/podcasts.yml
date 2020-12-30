@@ -1,5 +1,26 @@
 # 2020 podcasts
 
+- title: The Coding Career Handbook on the Coder Foundry YouTube
+  slug: coder-foundry
+  categories: [Careers]
+  venues: Coder Foundry
+  date: 2020-11-19
+  url: https://www.youtube.com/watch?v=bTtb2NF8Gds
+  description: I was invited by the Coder Foundry guys to chat about learning in public, what it means to be a senior developer, why you should care where your code fits into the business, and why writing as a developer is so important.
+- title: Trading Derivatives with VBA, No Code, JavaScript, Negotiation, and DevRel on the KeyCuts podcast
+  slug: keycuts-podcast
+  categories: [Careers]
+  venues: KeyCuts
+  date: 2020-11-16
+  url: https://www.thekeycuts.com/dear-analyst-50-walking-through-a-vba-script-for-trading-billions-of-dollars-worth-of-derivatives-with-shawn-wang/
+  description: This is a different beat than my usual - it focuses on my Finance career where I traded interest rate derivatives with Excel and VBA! The show notes are really good too.
+- title: What's New in React on React Roundup
+  slug: reactroundup-podcast-2
+  categories: [React]
+  venues: React Roundup
+  date: 2020-11-11
+  url: https://devchat.tv/react-round-up/rru-124-whats-new-in-react-with-shawn-wang/
+  description: In this episode of React Round Up, we talked with Shawn Wang, a prolific React author, speaker and teacher, about the future of React. We discussed what’s new in React Core, the React routing world, React DevTools (webpack, rollup, parcel, etc), CSS, and a whole lot more.
 - title: The Coding Career Handbook on React Podcast
   slug: coding-career-react-podcast
   categories: [Careers]
@@ -7,13 +28,20 @@
   date: 2020-10-15
   url: https://reactpodcast.com/episodes/114/
   description: Shawn Swyx Wang opens up about his new book The Coding Career Handbook - His book shines a spotlight on career patterns and practices that many had to learn the hard way — you know, up hill in the snow both ways!
-- title: SWYX on Shoptalk Show
+- title: SWYX on Shoptalk Show Podcast
   slug: coding-career-shoptalk-show
   categories: [Careers]
   venues: Shoptalk Show Podcast
   date: 2020-09-28
   url: https://shoptalkshow.com/432/
   description: Shawn Wang, known as Swyx, talks with Dave and Chris about his career path from finance to coding, and now in developer experience. They chat about serverless functions, React, getting a broad sense of technology, Wang's Coding Career Handbook, what's next for SSR, checking out Vite, and what exactly is DevX / developer experience?
+- title: Coding Career Tactics on ML Engineered Podcast
+  slug: coding-career-mle-podcast-2
+  categories: [Careers]
+  venues: ML Engineered Podcast
+  date: 2020-09-09
+  url: https://www.mlengineered.com/episode/swyx2
+  description: I returned to the MLE podcast to continue our conversation. Charlie is one of the best interviewers I have ever worked with and it was a pleasure to join him again.
 - title: Coding Career Strategy on ML Engineered Podcast
   slug: coding-career-mle-podcast
   categories: [Careers]
@@ -21,6 +49,13 @@
   date: 2020-09-09
   url: https://www.mlengineered.com/episode/swyx
   description: Shawn Wang formerly worked in finance as a derivatives trader and equity analyst before burning out and pivoting towards tech. He's a prolific blogger who goes under the pseudonym "swyx" and recently published the excellent Coding Career Handbook. He's a graduate of Free Code Camp and Full Stack Academy now working at AWS as a Senior Developer Advocate. 
+- title: Coding Careers on the Junior to Senior Podcast
+  slug: jr-to-sr-podcast
+  categories: [Careers]
+  venues: JrToSr
+  date: 2020-08-03
+  url: https://juniortosenior.io/3
+  description: I spoke with David Guttman, who does a lot of mentoring and runs the AMAZING JS.LA community, on the Coding Career Handbook.
 - title: Open Knowledge on Maintainers Anonymous Podcast
   slug: open-knowledge-maintainers-anonymous
   categories: [Careers]
@@ -58,6 +93,14 @@
   date: 2020-05-09
   url: https://open.spotify.com/episode/1oj0Kpnt8xzk2vCBm6t3LE
   description: I chatted with Tanay Pratap about what new entrants to software engineering in India can do given the Coronavirus Recession
+- title: Marketing Yourself and Mentoring as a Developer on Egghead Podcast
+  slug: egghead-podcast-2
+  categories: [Careers]
+  venues: Egghead
+  date: 2020-03-03
+  url: https://egghead.io/podcasts/shawn-wang-talks-about-how-to-grow-your-reputation-as-a-developer?af=95qfq1
+  desc: Chatting about marketing yourself and mentoring as a developer
+  description: Joel invited me back to speak on the Egghead podcast about Marketing and Mentoring
 - title: Svelte and Community on JAMStack Radio
   slug: jamstack-radio-svelte
   categories: [Svelte]
