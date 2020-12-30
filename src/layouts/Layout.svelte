@@ -22,14 +22,26 @@
   .myflexresponsive {
     @apply flex flex-col md:flex-row
   }
+  .mylinkcolors {
+    @apply dark:text-indigo-300 dark:hover:text-indigo-200 dark:focus:text-indigo-200 text-indigo-800
+  }
   .mylink {
-    @apply dark:text-indigo-300 underline dark:hover:text-indigo-200 text-indigo-800 hover:text-indigo-600
+    @apply underline mylinkcolors
   }
   .mytext {
     @apply text-gray-800 dark:text-gray-200
   }
+  .mytext-inverse {
+    @apply text-gray-200 dark:text-gray-700
+  }
   .mytext-light {
     @apply text-gray-600 dark:text-gray-300 italic mt-0
+  }
+  .bimodalblue {
+    @apply text-blue-900 dark:text-blue-100 bg-blue-100 dark:bg-blue-900
+  }
+  .bimodalpurple {
+    @apply text-purple-900 dark:text-purple-100 bg-purple-100 dark:bg-purple-900
   }
 
   /* replace typography plugin */

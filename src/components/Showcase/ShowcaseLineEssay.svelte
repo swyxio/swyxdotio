@@ -19,9 +19,9 @@
     <a
       href={`/${item.slug}`}
       class="relative -mr-px inline-flex text-sm text-left leading-5
-        text-gray-700 font-medium">
+        mytext font-medium">
       <h3
-        class="text-gray-300 hover:text-indigo-200 dark:hover:text-indigo-600 focus:text-indigo-200 dark:focus:text-indigo-600 text-base md:text-2xl leading-5
+        class="mylinkcolors text-base md:text-2xl leading-5
           font-medium whitespace-normal ml-4 inline"
         class:longTitle={item.title.length > 58}
       >
