@@ -143,7 +143,7 @@
 </svelte:head>
 
 <article
-  class="px-4 py-10 max-w-2xl mx-auto sm:px-6 sm:py-12 lg:max-w-3xl lg:py-16
+  class="px-1 py-10 max-w-2xl mx-auto sm:px-4 sm:py-12 lg:max-w-3xl lg:py-16
     lg:px-8 xl:max-w-5xl">
   <div class="prose lg:prose-xl">
     <div class="title">

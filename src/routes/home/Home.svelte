@@ -44,12 +44,12 @@
               Podcast: <a class="mylink" href="https://shoptalkshow.com/432/">SWYX on Shop Talk Show</a>
             </li>
           </ul>
-          <div>👉 <a class="mylink font-bold" href="/ideas">See All Essays, Talks, Podcasts</a> 👈</div>
+          <div>👉 <a class="mylink font-bold" href="/ideas">All Essays, Talks, Podcasts</a> 👈</div>
         </div>
         <div
           class="mt-5 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
           <p class="text-base font-light text-opacity-75">
-            Join 2,000+ developers getting updates ✉️
+            Join 2,000+ developers ✉️
           </p>
           <form
             action="https://tinyletter.com/swyx"
@@ -85,7 +85,7 @@
           <p class="mt-3 text-sm leading-5 text-opacity-75">
             Too soon! <a class="font-medium text-opacity-75
                 underline" rel="noopener" href="https://tinyletter.com/swyx/archive">Show
-              me what I'm signing up for!</a>
+              me archives!</a>
           </p>
         </div>
       </div>

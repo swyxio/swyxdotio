@@ -12,7 +12,7 @@
     font-size: 1rem
   }
 </style>
-<li class="mb-4 md:mb-8">
+<li class="mb-4 md:mb-8 px-1">
   <div class="flex">
     <span
       class="inline-flex justify-end items-center text-gray-600 text-xs font-mono whitespace-nowrap">{formatDate(item.effectiveDate) }</span>

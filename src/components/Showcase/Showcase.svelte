@@ -114,7 +114,7 @@
 
 <svelte:window on:keyup={focusSearch} />
 
-<div class="relative mb-8 myflexresponsive">
+<div class="relative mb-8 px-2 myflexresponsive">
   <div class="flex-1 mb-4 md:mb-0">
     <h1
       class="text-5xl leading-9 tracking-tight font-extrabold mytext
