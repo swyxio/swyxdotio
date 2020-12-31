@@ -6,12 +6,12 @@
   <meta property="og:title" content="swyx.io home" />
   <meta name="Description" content="swyx's home on the Internet" />
   <meta property="og:description" content="swyx's home on the Internet" />
-  <meta property="og:image" content="https://www.swyx.io/swyx.jpg" />
+  <meta property="og:image" content="https://www.swyx.io/swyx-ski.jpeg" />
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:creator" content="https://twitter.com/swyx/" />
   <meta name="twitter:title" content="swyx.io home" />
   <meta name="twitter:description" content="swyx's home on the Internet" />
-  <meta name="twitter:image" content="https://www.swyx.io/swyx.jpg" />
+  <meta name="twitter:image" content="https://www.swyx.io/swyx-ski.jpeg" />
 </svelte:head>
 
 <div class="mx-auto max-w-screen-xl mytext">

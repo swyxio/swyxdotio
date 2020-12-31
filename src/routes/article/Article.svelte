@@ -9,9 +9,9 @@
     'No description provided. Suggest one!'
 
   let seoSubtitle = frontmatter && frontmatter.subtitle
-  export let seoTitle = seoSubtitle
+  export let seoTitle = (seoSubtitle
     ? `${frontmatter && frontmatter.title}: ${seoSubtitle}`
-    : `${frontmatter && frontmatter.title}`
+    : `${frontmatter && frontmatter.title}`) + ' ∊ swyx.io'
   export let seoDescription = frontmatter
     ? frontmatter.desc || frontmatter.description || seoTitle
     : seoTitle
@@ -19,8 +19,14 @@
   // $: console.log({html, frontmatter, rest})
   let swyxioURL = `https://www.swyx.io/${slug}`
   let canonical = frontmatter.canonical_url || swyxioURL
+  let coverImage = frontmatter.cover_image || "https://www.swyx.io/og_image/writing.png"
   let readTime = Math.max(1, Math.floor(html.split(' ').length / 250)) // https://blog.medium.com/read-time-and-you-bc2048ab620c
   readTime = readTime < 2 ? readTime + " minute" : readTime + " minutes"
+  let metaDate = new Date(frontmatter.date).toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  })
 </script>
 
 <style>
@@ -115,34 +121,33 @@
 </style>
 
 <svelte:head>
-  <title>{frontmatter.title} | swyx.io</title>
+  <title>{frontmatter.title} ∊ swyx.io</title>
   <link rel="canonical" href={canonical} />
   <meta property="og:url" content={swyxioURL} />
   <meta property="og:type" content="article" />
   <meta property="og:title" content={seoTitle} />
   <meta name="Description" content={seoDescription} />
   <meta property="og:description" content={seoDescription} />
+  {#if frontmatter.cover_image}
   <meta
     property="og:image"
-    content="https://www.swyx.io/og_image/writing.png" />
-  <meta name="twitter:card" content="summary" />
-  <meta name="twitter:domain" value="swyx.io" />
-  <meta name="twitter:creator" value="https://twitter.com/swyx/" />
-  <meta name="twitter:title" value={seoTitle} />
-  <meta name="twitter:description" value={seoDescription} />
+    content={coverImage} />
+  {/if}
+  <meta name="twitter:card" content={frontmatter.cover_image ? "summary_large_image" : "summary"} />
+  <meta name="twitter:domain" content="swyx.io" />
+  <meta name="twitter:creator" content="@swyx" />
+  <meta name="twitter:title" content={seoTitle} />
+  <meta name="twitter:description" content={seoDescription} />
   <meta
     name="twitter:image"
-    content="https://www.swyx.io/og_image/writing.png" />
-  <meta name="twitter:label1" value="Published on" />
+    content={frontmatter.cover_image ? frontmatter.cover_image : "https://www.swyx.io/swyx-ski.jpeg"} />
+  <meta name="twitter:label1" value="Last updated" content="Last updated" />
   <meta
     name="twitter:data1"
-    value={new Date(frontmatter.date).toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })} />
-  <meta name="twitter:label2" value="Read Time" />
-  <meta name="twitter:data2" value={readTime} />
+    value={metaDate}
+    content={metaDate} />
+  <meta name="twitter:label2" content="Read Time" />
+  <meta name="twitter:data2" content={readTime} />
 </svelte:head>
 
 <article

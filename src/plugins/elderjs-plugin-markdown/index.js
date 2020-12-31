@@ -154,6 +154,7 @@ const plugin = {
             data: {
               slug,
               canonical_url: article.canonical_url,
+              cover_image: article.cover_image,
               devto_url: article.url,
               date: new Date(data.displayed_publish_date || article.published_at),
               title: article.title,
@@ -175,7 +176,7 @@ const plugin = {
             markdown: plugin.markdown,
             podcasts: plugin.podcasts,
             talks: plugin.talks
-           },
+          },
         };
       },
     },
