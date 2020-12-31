@@ -218,11 +218,11 @@
         name="email"
         type="email"
         class="appearance-none block w-full px-3 py-3 border
-          border-gray-300 text-base leading-6 rounded-md
-          placeholder-gray-500 shadow-sm focus:outline-none
-          focus:placeholder-gray-400 focus:ring-blue focus:bg-yellow-200
-          focus:border-blue-300 transition duration-150 ease-in-out
-          sm:flex-1 text-sm md:text-base"
+        border-gray-300 text-sm leading-6 rounded-md
+        placeholder-gray-500 shadow-sm focus:outline-none
+        focus:placeholder-gray-400 focus:ring-4 focus:ring-blue-200 focus:bg-yellow-100
+        focus:border-blue-300 transition duration-150 ease-in-out
+        text-gray-900 sm:flex-1"
         placeholder="I solemnly swear to never spam you." />
       <input type="hidden" value="1" name="embed" />
       <button

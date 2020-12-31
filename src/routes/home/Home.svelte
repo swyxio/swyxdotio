@@ -35,17 +35,29 @@
           </h1>
           <ul class="list-disc ml-4 mb-4">
             <li>
-              Essay: <a class="mylink" href="/api-economy/">The Light and Dark Side of the API Economy</a>
+              Essay:
+              <a class="mylink" href="/api-economy/">The Light and Dark Side of
+                the API Economy</a>
             </li>
             <li>
-              Talk: <a class="mylink" href="https://www.youtube.com/watch?v=D-Sj6jo4o1I">The
-                Operating System of You</a>
+              Talk:
+              <a
+                class="mylink"
+                href="https://www.youtube.com/watch?v=D-Sj6jo4o1I">The Operating
+                System of You</a>
             </li>
             <li>
-              Podcast: <a class="mylink" href="https://shoptalkshow.com/432/">SWYX on Shop Talk Show</a>
+              Podcast:
+              <a class="mylink" href="https://shoptalkshow.com/432/">SWYX on
+                Shop Talk Show</a>
             </li>
           </ul>
-          <div>👉 <a class="mylink font-bold" href="/ideas/">All Essays, Talks, Podcasts</a> 👈</div>
+          <div>
+            👉
+            <a class="mylink font-bold" href="/ideas/">All Essays, Talks,
+              Podcasts</a>
+            👈
+          </div>
         </div>
         <div
           class="mt-5 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
@@ -64,11 +76,11 @@
               name="email"
               type="email"
               class="appearance-none block w-full px-3 py-3 border
-                border-gray-300 text-base leading-6 rounded-md
+                border-gray-300 text-sm leading-6 rounded-md
                 placeholder-gray-500 shadow-sm focus:outline-none
-                focus:placeholder-gray-400 focus:ring-blue focus:bg-yellow-200
+                focus:placeholder-gray-400 focus:ring-4 focus:ring-blue-200 focus:bg-yellow-100
                 focus:border-blue-300 transition duration-150 ease-in-out
-                sm:flex-1"
+                text-gray-900 sm:flex-1"
               placeholder="I solemnly swear to never spam you." />
             <input type="hidden" value="1" name="embed" />
             <button
@@ -83,10 +95,13 @@
               Subscribe via Email
             </button>
           </form>
-          <p class="mt-3 text-sm leading-5 text-opacity-75">
-            Too soon! <a class="font-medium text-opacity-75
-                underline" rel="noopener" href="https://tinyletter.com/swyx/archive">Show
-              me archives!</a>
+          <p class="mt-3 text-xs text-gray-900 dark:text-gray-100 leading-5 text-opacity-25">
+            Too soon!
+            <a
+              class="font-medium text-gray-900 dark:text-gray-100 text-opacity-25 hover:text-opacity-100
+                hover:underline"
+              rel="noopener"
+              href="https://tinyletter.com/swyx/archive">Show me archives!</a>
           </p>
         </div>
       </div>
@@ -140,8 +155,15 @@
           </div>
         </li>
         <li>
-          <b> <a href="/api-economy/">The Light and Dark Side of the API Economy</a> </b>
-          <div class="font-extralight">The 'API Economy' is a popular term for VC's and tech media, however Developers seem ironically out of the loop despite their central importance to the whole story. Here's my explanation, together with a dash of economics and social implications.</div>
+          <b>
+            <a href="/api-economy/">The Light and Dark Side of the API Economy</a>
+          </b>
+          <div class="font-extralight">
+            The 'API Economy' is a popular term for VC's and tech media, however
+            Developers seem ironically out of the loop despite their central
+            importance to the whole story. Here's my explanation, together with
+            a dash of economics and social implications.
+          </div>
         </li>
         <li>
           <b> <a href="/slack-fumble/">Slack is Fumbling Developers</a> </b>
@@ -173,7 +195,8 @@
             about learning to code.
           </div>
         </li>
-        You can find all my writing on RSS or <a href="https://www.swyx.io/ideas/?show=Essays">on the /ideas page</a>.
+        You can find all my writing on RSS or
+        <a href="https://www.swyx.io/ideas/?show=Essays">on the /ideas page</a>.
       </ul>
     </div>
 
@@ -195,7 +218,9 @@
           </div>
         </li>
         <li>
-          <b><a href="/speaking/react-not-reactive"> Why React is not Reactive </a></b>
+          <b><a href="/speaking/react-not-reactive">
+              Why React is not Reactive
+            </a></b>
           <div class="font-extralight">
             My first conference talk ever was at the biggest React venue in the
             world, React Rally. I spent a month writing
@@ -206,7 +231,9 @@
         </li>
 
         <li>
-          <b><a href="/speaking/contributing-to-react"> Contributing to React </a></b>
+          <b><a href="/speaking/contributing-to-react">
+              Contributing to React
+            </a></b>
           <div class="font-extralight">
             My first meetup talk ever was at React NYC - this was accepted on to
             the React docs as a guide for other contributors!
@@ -221,17 +248,17 @@
         </li>
         <li>
           <b><a href="/speaking/babel-macros">I Can Babel Macros and So Can You!
-            (the Moana talk)
-          </a>
-        </b>
+              (the Moana talk)
+            </a>
+          </b>
           <div class="font-extralight">
             My first JSConf appearance ever, at one of the most competitive
             JSConfs ever. This talk is where I first started experimenting with
             theming talks, and it came out really well with the Moana theme.
           </div>
         </li>
-        <a href="https://www.swyx.io/ideas/?show=Talks&show=Podcasts">More of
-            my speaking here</a>
+        <a href="https://www.swyx.io/ideas/?show=Talks&show=Podcasts">More of my
+          speaking here</a>
       </ul>
     </div>
   </div>
