@@ -1,5 +1,6 @@
 <svelte:head>
   <title>swyx's site</title>
+  <link rel="canonical" href="https://www.swyx.io/" />
   <meta property="og:url" content="https://www.swyx.io/" />
   <meta property="og:type" content="article" />
   <meta property="og:title" content="swyx.io home" />
@@ -34,7 +35,7 @@
           </h1>
           <ul class="list-disc ml-4 mb-4">
             <li>
-              Essay: <a class="mylink" href="/api-economy">The Light and Dark Side of the API Economy</a>
+              Essay: <a class="mylink" href="/api-economy/">The Light and Dark Side of the API Economy</a>
             </li>
             <li>
               Talk: <a class="mylink" href="https://www.youtube.com/watch?v=D-Sj6jo4o1I">The
@@ -44,7 +45,7 @@
               Podcast: <a class="mylink" href="https://shoptalkshow.com/432/">SWYX on Shop Talk Show</a>
             </li>
           </ul>
-          <div>👉 <a class="mylink font-bold" href="/ideas">All Essays, Talks, Podcasts</a> 👈</div>
+          <div>👉 <a class="mylink font-bold" href="/ideas/">All Essays, Talks, Podcasts</a> 👈</div>
         </div>
         <div
           class="mt-5 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
@@ -94,7 +95,7 @@
       class="mt-12 relative sm:max-w-lg sm:mx-auto lg:mt-0 lg:max-w-none lg:mx-0
         lg:col-span-6 lg:flex lg:items-center">
       <div class="relative mx-auto w-32 lg:w-full rounded-lg lg:max-w-md">
-        <a href="/ideas">
+        <a href="/ideas/">
           <img
             class="hover:border-4 hover:border-blue-500 
               w-full relative block rounded-full
@@ -112,26 +113,26 @@
     <h3 id="featured-writing">Writing</h3>
     <div>
       I do a bunch of
-      <a href="/writing">personal and work-related writing</a>, and recently
+      <a href="/writing/">personal and work-related writing</a>, and recently
       published
       <a href="https://learninpublic.org/">The Coding Career Handbook</a>
       with the best of my nontechnical writing.
       <ul class="mt-4">
         <li>
-          <b> <a href="/writing/learn-in-public">Learn in Public</a> </b>
+          <b> <a href="/learn-in-public/">Learn in Public</a> </b>
           <div class="font-extralight">
             My most impactful essay, and the personal growth philosophy I and
             many others follow.
           </div>
         </li>
         <li>
-          <b> <a href="/create_luck">How to Create Luck</a> </b>
+          <b> <a href="/create_luck/">How to Create Luck</a> </b>
           <div class="font-extralight">
             Luck is random, but creating luck is a skill that can be developed.
           </div>
         </li>
         <li>
-          <b> <a href="/js-third-age">Third Age of JavaScript</a> </b>
+          <b> <a href="/js-third-age/">Third Age of JavaScript</a> </b>
           <div class="font-extralight">
             Every 10 years there is a changing of the guard in JavaScript. A
             well received piece that has caught the imagination of some
@@ -139,11 +140,11 @@
           </div>
         </li>
         <li>
-          <b> <a href="/api-economy">The Light and Dark Side of the API Economy</a> </b>
+          <b> <a href="/api-economy/">The Light and Dark Side of the API Economy</a> </b>
           <div class="font-extralight">The 'API Economy' is a popular term for VC's and tech media, however Developers seem ironically out of the loop despite their central importance to the whole story. Here's my explanation, together with a dash of economics and social implications.</div>
         </li>
         <li>
-          <b> <a href="/slack-fumble">Slack is Fumbling Developers</a> </b>
+          <b> <a href="/slack-fumble/">Slack is Fumbling Developers</a> </b>
           <div class="font-extralight">
             Trendspotting how Developer communities are leaving Slack (for
             Discord).
@@ -151,7 +152,7 @@
         </li>
         <li>
           <b>
-            <a href="/react-sfcs-here">React Single File Components Are Here</a>
+            <a href="/react-sfcs-here/">React Single File Components Are Here</a>
           </b>
           <div class="font-extralight">
             Talking about why and when Single File Components are slowly coming
@@ -159,7 +160,7 @@
           </div>
         </li>
         <li>
-          <b><a href="/about">About</a></b>
+          <b><a href="/about/">About</a></b>
           <div class="font-extralight">
             My personal story,
             <a href="https://github.com/sw-yx/README/blob/master/README.md">

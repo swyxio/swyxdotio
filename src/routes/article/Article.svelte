@@ -16,7 +16,9 @@
     ? frontmatter.desc || frontmatter.description || seoTitle
     : seoTitle
   let slug = frontmatter.slug
-  // $: console.log({html, frontmatter})
+  // $: console.log({html, frontmatter, rest})
+  let swyxioURL = `https://www.swyx.io/${slug}`
+  let canonical = frontmatter.canonical_url || swyxioURL
   let readTime = Math.max(1, Math.floor(html.split(' ').length / 250)) // https://blog.medium.com/read-time-and-you-bc2048ab620c
   readTime = readTime < 2 ? readTime + " minute" : readTime + " minutes"
 </script>
@@ -114,7 +116,8 @@
 
 <svelte:head>
   <title>{frontmatter.title} | swyx.io</title>
-  <meta property="og:url" content={`https://www.swyx.io/${slug}`} />
+  <link rel="canonical" href={canonical} />
+  <meta property="og:url" content={swyxioURL} />
   <meta property="og:type" content="article" />
   <meta property="og:title" content={seoTitle} />
   <meta name="Description" content={seoDescription} />
