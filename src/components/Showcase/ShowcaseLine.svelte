@@ -21,14 +21,15 @@ bg-gray-500
 text-indigo-500 -->
 
 <li class="mb-4">
-  <div class="py-4 px-1"
+  <div
+    class="py-4 px-1"
     class:bimodalblue={item.type === 'Talks'}
     class:bimodalpurple={item.type === 'Podcasts'}>
     <div class="flex">
       <span
         class="inline-flex justify-end items-center text-gray-500 text-xs font-mono whitespace-nowrap">
         {formatDate(item.effectiveDate)}</span>
-        <!-- class:justify-between={!displayDetails}  -->
+      <!-- class:justify-between={!displayDetails}  -->
       <button
         on:click={() => (displayDetails = !displayDetails)}
         class="relative justify-between flex -mr-px text-sm text-left leading-5 w-full
@@ -41,9 +42,16 @@ text-indigo-500 -->
           {item.title}
         </h3>
         {#if !displayDetails}
-          <div class="hidden md:inline-flex items-center h-full text-sm mylinkcolors ml-8">Expand</div>
-          {:else}
-          <div role="switch" class="hidden md:inline-flex h-full items-center text-sm mytext mr-4">❌</div>
+          <div
+            class="hidden md:inline-flex items-center h-full text-sm mylinkcolors ml-8">
+            Expand
+          </div>
+        {:else}
+          <div
+            role="switch"
+            class="hidden md:inline-flex h-full items-center text-sm mytext mr-4">
+            ❌
+          </div>
         {/if}
       </button>
     </div>
@@ -58,10 +66,11 @@ text-indigo-500 -->
           class:bimodalpurple={item.type === 'Podcasts'}>
           {item.type}
         </h3> -->
-        <p class="prose mt-1 mytext text-base md:text-xl leading-5 whitespace-normal">
+        <p
+          class="prose mt-1 mytext text-base md:text-xl leading-5 whitespace-normal">
           <span>{longDesc}</span>
         </p>
-  
+
         <div class="prose w-16 ml-4">
           {#if item.type === 'Essays' && item.slug}
             <a
@@ -137,7 +146,7 @@ text-indigo-500 -->
             <div />
           {/if}
         </div>
-  
+
         <dl class="prose">
           {#if item.canonical}
             <div class="py-2 sm:grid sm:grid-cols-3 sm:gap-4">
@@ -168,7 +177,9 @@ text-indigo-500 -->
           {/if}
           {#if item.slides}
             <div class="py-2 sm:grid sm:grid-cols-3 sm:gap-4">
-              <dt class="text-sm leading-5 font-medium text-gray-500">Slides</dt>
+              <dt class="text-sm leading-5 font-medium text-gray-500">
+                Slides
+              </dt>
               <dd
                 class="mt-1 text-sm leading-5 text-gray-400 sm:mt-0 sm:col-span-2">
                 <a
@@ -182,19 +193,20 @@ text-indigo-500 -->
               <dt class="text-sm leading-5 font-medium text-gray-500">
                 Categories
               </dt>
-              <dd
-                class="mt-1 text-sm leading-5 mytext sm:mt-0 sm:col-span-2">
+              <dd class="mt-1 text-sm leading-5 mytext sm:mt-0 sm:col-span-2">
                 {item.categories && item.categories.length ? item.categories.join(', ') : 'Uncategorized'}
               </dd>
             </div>
           {/if}
         </dl>
-  
+
         {#if item.instances}
           <ul class="prose border border-gray-200 rounded-md">
             {#each item.instances as instance}
               <li class="pr-4 text-sm leading-5">
-                {new Date(instance.date).toDateString().slice(4)} at {instance.venue}
+                {new Date(instance.date).toDateString().slice(4)}
+                at
+                {instance.venue}
                 <div class="ml-4">
                   {#if instance.video}
                     <a
@@ -230,5 +242,4 @@ text-indigo-500 -->
       </div>
     {/if}
   </div>
-
 </li>

@@ -9,9 +9,10 @@
     'No description provided. Suggest one!'
 
   let seoSubtitle = frontmatter && frontmatter.subtitle
-  export let seoTitle = (seoSubtitle
-    ? `${frontmatter && frontmatter.title}: ${seoSubtitle}`
-    : `${frontmatter && frontmatter.title}`) + ' ∊ swyx.io'
+  export let seoTitle =
+    (seoSubtitle
+      ? `${frontmatter && frontmatter.title}: ${seoSubtitle}`
+      : `${frontmatter && frontmatter.title}`) + ' ∊ swyx.io'
   export let seoDescription = frontmatter
     ? frontmatter.desc || frontmatter.description || seoTitle
     : seoTitle
@@ -19,9 +20,10 @@
   // $: console.log({html, frontmatter, rest})
   let swyxioURL = `https://www.swyx.io/${slug}`
   let canonical = frontmatter.canonical_url || swyxioURL
-  let coverImage = frontmatter.cover_image || "https://www.swyx.io/og_image/writing.png"
+  let coverImage =
+    frontmatter.cover_image || 'https://www.swyx.io/og_image/writing.png'
   let readTime = Math.max(1, Math.floor(html.split(' ').length / 250)) // https://blog.medium.com/read-time-and-you-bc2048ab620c
-  readTime = readTime < 2 ? readTime + " minute" : readTime + " minutes"
+  readTime = readTime < 2 ? readTime + ' minute' : readTime + ' minutes'
   let metaDate = new Date(frontmatter.date).toLocaleDateString(undefined, {
     year: 'numeric',
     month: 'short',
@@ -129,23 +131,20 @@
   <meta name="Description" content={seoDescription} />
   <meta property="og:description" content={seoDescription} />
   {#if frontmatter.cover_image}
-  <meta
-    property="og:image"
-    content={coverImage} />
+    <meta property="og:image" content={coverImage} />
   {/if}
-  <meta name="twitter:card" content={frontmatter.cover_image ? "summary_large_image" : "summary"} />
+  <meta
+    name="twitter:card"
+    content={frontmatter.cover_image ? 'summary_large_image' : 'summary'} />
   <meta name="twitter:domain" content="swyx.io" />
   <meta name="twitter:creator" content="@swyx" />
   <meta name="twitter:title" content={seoTitle} />
   <meta name="twitter:description" content={seoDescription} />
   <meta
     name="twitter:image"
-    content={frontmatter.cover_image ? frontmatter.cover_image : "https://www.swyx.io/swyx-ski.jpeg"} />
+    content={frontmatter.cover_image ? frontmatter.cover_image : 'https://www.swyx.io/swyx-ski.jpeg'} />
   <meta name="twitter:label1" value="Last updated" content="Last updated" />
-  <meta
-    name="twitter:data1"
-    value={metaDate}
-    content={metaDate} />
+  <meta name="twitter:data1" value={metaDate} content={metaDate} />
   <meta name="twitter:label2" content="Read Time" />
   <meta name="twitter:data2" content={readTime} />
 </svelte:head>
@@ -163,10 +162,7 @@
         <p class="mytext-light text-sm">
           {longDesc}
           {#each frontmatter.categories as tag}
-            <span
-              class="text-xs italic font-light leading-5">
-              #{tag}
-            </span>
+            <span class="text-xs italic font-light leading-5"> #{tag} </span>
           {/each}
         </p>
       {/if}
@@ -174,7 +170,7 @@
     </div>
 
     <blockquote class="text-sm font-mono bg-indigo-100 dark:bg-indigo-900">
-      <div>Read time:  {readTime}</div>
+      <div>Read time: {readTime}</div>
       {#if frontmatter.date}
         Last update:
         <time
@@ -197,18 +193,16 @@
   </div>
 
   <div class="flex justify-between">
-    <a class="mylink"
-      href="http://swyx.io/ideas?show=Essays">&LeftArrow; All Essays</a>
+    <a class="mylink" href="http://swyx.io/ideas?show=Essays">&LeftArrow; All
+      Essays</a>
     <!-- <a
       class="text-pink-700 dark:text-pink-400 underline hover:text-pink-200 font-bold"
       href="https://tinyletter.com/swyx">❤️ Subscribe via Email ❤️</a> -->
-    <a
-      class="mylink"
-      href="http://swyx.io/#featured-writing">Featured Essays &RightArrow;</a>
+    <a class="mylink" href="http://swyx.io/#featured-writing">Featured Essays
+      &RightArrow;</a>
   </div>
   <hr class="mt-5" />
-  <div
-    class="mt-5 mytext sm:mx-auto sm:text-center lg:text-left lg:mx-0">
+  <div class="mt-5 mytext sm:mx-auto sm:text-center lg:text-left lg:mx-0">
     <p class="text-base font-light text-opacity-75">
       Join 2,000+ developers getting updates ✉️
     </p>
@@ -244,9 +238,13 @@
       </button>
     </form>
     <p class="mt-3 text-sm leading-5 text-opacity-75">
-      Too soon! <a class="font-medium text-opacity-75
-          underline" rel="noopener" href="https://tinyletter.com/swyx/archive">Show
-        me what I'm signing up for!</a>
+      Too soon!
+      <a
+        class="font-medium text-opacity-75
+          underline"
+        rel="noopener"
+        href="https://tinyletter.com/swyx/archive">Show me what I'm signing up
+        for!</a>
     </p>
   </div>
   <WebMentions

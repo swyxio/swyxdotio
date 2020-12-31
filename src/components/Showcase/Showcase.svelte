@@ -167,78 +167,78 @@
     </div>
     <!-- categories -->
     <span
-    class="relative z-0 inline-flex flex-col sm:flex-row shadow-sm rounded-md">
-    <div class="inline-flex items-center mr-2 mytext-light">Show:</div>
-    <button
-      type="button"
-      on:click={() => saveURLState(essays = !essays)}
-      class:bimodalpurple={essays}
-      class:mytext={essays}
-      class:font-medium={essays}
-      class="-ml-px sm:ml-0 relative inline-flex items-center px-4 py-2
+      class="relative z-0 inline-flex flex-col sm:flex-row shadow-sm rounded-md">
+      <div class="inline-flex items-center mr-2 mytext-light">Show:</div>
+      <button
+        type="button"
+        on:click={() => saveURLState((essays = !essays))}
+        class:bimodalpurple={essays}
+        class:mytext={essays}
+        class:font-medium={essays}
+        class="-ml-px sm:ml-0 relative inline-flex items-center px-4 py-2
         sm:rounded-l-md border border-gray-300 text-sm leading-5
        text-gray-200 focus:z-10
         focus:outline-none focus:border-blue-300 focus:ring-yellow focus:text-yellow-200
          transition ease-in-out
         duration-150">
-      Essays
-    </button>
-    <button
-      type="button"
-      on:click={() => saveURLState(talks = !talks)}
-      class:bimodalpurple={talks}
-      class:mytext={talks}
-      class:font-medium={talks}
-      class="-ml-px relative inline-flex items-center px-4 py-2 border
+        Essays
+      </button>
+      <button
+        type="button"
+        on:click={() => saveURLState((talks = !talks))}
+        class:bimodalpurple={talks}
+        class:mytext={talks}
+        class:font-medium={talks}
+        class="-ml-px relative inline-flex items-center px-4 py-2 border
         border-gray-300 text-sm leading-5 text-gray-200
        focus:z-10 focus:outline-none
         focus:border-blue-300 focus:ring-yellow focus:text-yellow-200 
        transition ease-in-out duration-150">
-      Talks
-    </button>
-    <button
-      type="button"
-      on:click={() => saveURLState(podcasts = !podcasts)}
-      class:bimodalpurple={podcasts}
-      class:mytext={podcasts}
-      class:font-medium={podcasts}
-      class="-ml-px relative inline-flex items-center px-4 py-2 border
+        Talks
+      </button>
+      <button
+        type="button"
+        on:click={() => saveURLState((podcasts = !podcasts))}
+        class:bimodalpurple={podcasts}
+        class:mytext={podcasts}
+        class:font-medium={podcasts}
+        class="-ml-px relative inline-flex items-center px-4 py-2 border
         border-gray-300 text-sm leading-5 text-gray-200
        focus:z-10 focus:outline-none
         focus:border-blue-300 focus:ring-yellow focus:text-yellow-200 
        transition ease-in-out duration-150">
-      Podcasts
-    </button>
-    <button
-      type="button"
-      on:click={() => alert('coming soon')}
-      class:bimodalpurple={tutorials}
-      class:mytext={tutorials}
-      class:font-medium={tutorials}
-      class="-ml-px relative items-center px-4 py-2 border
+        Podcasts
+      </button>
+      <button
+        type="button"
+        on:click={() => alert('coming soon')}
+        class:bimodalpurple={tutorials}
+        class:mytext={tutorials}
+        class:font-medium={tutorials}
+        class="-ml-px relative items-center px-4 py-2 border
         hidden md:inline-flex
         border-gray-300 text-sm leading-5 text-gray-200
        focus:z-10 focus:outline-none
         focus:border-blue-300 focus:ring-yellow focus:text-yellow-200 
        transition ease-in-out duration-150">
-      <strike>Tutorials</strike>
-    </button>
-    <button
-      type="button"
-      on:click={() => alert('coming soon')}
-      class:bimodalpurple={notes}
-      class:mytext={notes}
-      class:font-medium={notes}
-      class="-ml-px relative items-center px-4 py-2
+        <strike>Tutorials</strike>
+      </button>
+      <button
+        type="button"
+        on:click={() => alert('coming soon')}
+        class:bimodalpurple={notes}
+        class:mytext={notes}
+        class:font-medium={notes}
+        class="-ml-px relative items-center px-4 py-2
         hidden md:inline-flex
         sm:rounded-r-md border border-gray-300 text-sm leading-5
        text-gray-200 focus:z-10
         focus:outline-none focus:border-blue-300 focus:ring-yellow focus:text-yellow-200
          transition ease-in-out
         duration-150">
-      <strike>Notes</strike>
-    </button>
-  </span>
+        <strike>Notes</strike>
+      </button>
+    </span>
   </div>
 </div>
 <!-- <div class="pb-5 border-b border-gray-200 space-y-3 sm:flex sm:flex-col sm:items-center sm:justify-between sm:space-x-4 sm:space-y-0"> -->
@@ -272,8 +272,10 @@
     {/if}
   {:else}
     <div class="p-8 text-red-500">
-      Nothing found! The filter was too restrictive. {#if !urlState.show}Please
-        pick either Essays, Talks, or Podcasts to show.{/if}
+      Nothing found! The filter was too restrictive.
+      {#if !urlState.show}
+        Please pick either Essays, Talks, or Podcasts to show.
+      {/if}
       {#if urlState.filter}
         Please clear the filter bar and you'll see more stuff.
       {/if}

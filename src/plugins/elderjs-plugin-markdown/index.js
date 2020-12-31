@@ -41,7 +41,7 @@ let _preset = {
 }
 
 
-async function parseMarkdown({filePath, markdown}) {
+async function parseMarkdown({ filePath, markdown }) {
   // const result = await remark().use(remarkHtml).process(markdown);
   var post_vfile = vfile({ path: filePath, contents: markdown });
   const file = await unified()
@@ -110,7 +110,7 @@ const plugin = {
             plugin.markdown.push({
               slug: data.slug,
               data: {
-                technical: segment === 'technical', 
+                technical: segment === 'technical',
                 ...data,
                 categories
               },
@@ -121,7 +121,7 @@ const plugin = {
             plugin.markdown.push({
               slug: fileSlug,
               data: {
-                technical: segment === 'technical', 
+                technical: segment === 'technical',
                 ...data,
                 categories
               },
@@ -172,7 +172,8 @@ const plugin = {
 
         // console.log('markdown', plugin.markdown.map(x => Object.keys(x.data)))
         return {
-          data: { ...data, 
+          data: {
+            ...data,
             markdown: plugin.markdown,
             podcasts: plugin.podcasts,
             talks: plugin.talks
