@@ -28,6 +28,12 @@
           Welcome to swyx.io!
         </h2> -->
         <div class="my-8">
+          <div>
+            👉
+            <a class="mylink font-bold" href="/ideas/">All Essays, Talks,
+              Podcasts</a>
+            👈
+          </div>
           <h1
             class="text-2xl leading-9 tracking-tight font-extrabold mytext
             sm:text-xl sm:leading-10">
@@ -52,12 +58,6 @@
                 Shop Talk Show</a>
             </li>
           </ul>
-          <div>
-            👉
-            <a class="mylink font-bold" href="/ideas/">All Essays, Talks,
-              Podcasts</a>
-            👈
-          </div>
         </div>
         <div
           class="mt-5 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
