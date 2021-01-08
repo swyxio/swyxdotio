@@ -44,12 +44,21 @@
   }
   .prose .articleMain :global(h2::before) {
     content: '## ';
+    background: linear-gradient(to right, hsl(98 100% 62%), hsl(204 100% 59%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
   .prose .articleMain :global(h3::before) {
     content: '### ';
+    background: linear-gradient(to right, hsl(98 100% 62%), hsl(204 100% 59%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
   .prose .articleMain :global(h4::before) {
     content: '#### ';
+    background: linear-gradient(to right, hsl(98 100% 62%), hsl(204 100% 59%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
   /* undo ol bug in tailwind typography */
