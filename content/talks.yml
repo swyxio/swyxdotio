@@ -482,7 +482,11 @@
     - venue: Rehearsal
       date: 2019-01-24
       video: https://www.youtube.com/watch?v=CbDD3c1KbKI
-    - venue: ForwardJS
+    - venue: ForwardJS Official Recording
+      url: https://forwardjs.com/schedule
+      date: 2019-01-24
+      video: https://www.youtube.com/watch?v=JPIxZaVux_k
+    - venue: ForwardJS Self Recording
       url: https://forwardjs.com/schedule
       date: 2019-01-24
       video: https://www.youtube.com/watch?v=bFuRvcAEiHg
