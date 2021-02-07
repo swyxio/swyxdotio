@@ -343,5 +343,8 @@
       <a href="https://github.com/pedronauck/docz/">Docz</a>
       (inactive), etc.
     </div>
+    <p>
+      Here's <a href="https://www.swyx.io/my-new-mac-setup-4ibi/">how I setup my own Macs</a> together with my dotfiles and the developer/productivity software I use.
+    </p>
   </div>
 </div>
