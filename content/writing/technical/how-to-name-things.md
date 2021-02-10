@@ -8,7 +8,9 @@ date: 2019-05-16
 
 > There are 2 hard problems in computer science: cache invalidation, naming things, and off-by-1 errors. - [Leon Bambrick](https://twitter.com/secretgeek/status/7269997868?lang=en)
 
-I've vacillated on my opinion on naming things. I think most people start out with no or weak opinions, looking slightly askance at the weirdos who do have strong opinions. They absorb naming conventions by osmosis, and then run into real problems at scale/over time, and then develop extremely strong opinions informed by that experience. The Weirdo's Journey.
+I've vacillated on my opinion on naming things. I think most people start out with no or weak opinions, looking slightly askance at the weirdos who do have strong opinions. They absorb naming conventions by osmosis, and then run into real problems at scale/over time, and then develop extremely strong opinions informed by that experience. 
+
+The Weirdo's Journey.
 
 I've given this essay a slightly clickbaity title. Spoiler: I'm not going to solve the problem of naming things today. All I hope to do is describe some opinions I've formed from my experience in Python and JS, list some considerations, invite you to [share yours](https://twitter.com/swyx), and suggest you have this debate on your team.
 
@@ -173,19 +175,20 @@ The volumninous _Code Complete_ offers an entire chapter on the Power of Variabl
 
 ## More References
 
+- ztellman's Elements of Clojure book has a [free chapter on naming](https://leanpub.com/elementsofclojure/read_sample): naming data, functions, and macros.
 - Naming Components: https://open-ui.org/analysis/component-matrix
 - Naming Git Branches: https://deepsource.io/blog/git-branch-naming-conventions/
 - Naming Startups/Domains: https://www.saashub.com/domainsfortherestofus-alternatives
-- The Naming Book ([site](http://thenamingbook.com/), [podcast](https://uibreakfast.com/name-your-book/))
+- Naming Products/Books/Concepts: The Naming Book ([site](http://thenamingbook.com/), [podcast](https://uibreakfast.com/name-your-book/))
+  
+  steps to name things
 
-steps
-
-1. criteria for success - eg feelings
-2. Generation
-    - Compound Words (Facebook)
-    - Portmanteaus (Pinterest)
-    - Foreign Translations
-    - Obscure words (Nike - greek goddess)
+  1. criteria for success - eg feelings
+  2. Generation
+      - Compound Words (Facebook)
+      - Portmanteaus (Pinterest)
+      - Foreign Translations
+      - Obscure words (Nike - greek goddess)
     
 ## Your Opinion Here!
 
