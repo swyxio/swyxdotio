@@ -159,8 +159,8 @@
 </svelte:head>
 
 <article
-  class="px-1 py-10 max-w-2xl mx-auto sm:px-4 sm:py-12 lg:max-w-3xl lg:py-16
-    lg:px-8 xl:max-w-5xl">
+  class="px-2 py-10 max-w-xl mx-auto sm:px-4 sm:py-12 lg:max-w-2xl lg:py-16
+    lg:px-8 xl:max-w-3xl">
   <div class="prose lg:prose-xl">
     <div class="title">
       <h1>{frontmatter.title}</h1>
@@ -193,7 +193,7 @@
     </blockquote>
 
     {#if html}
-      <div class="articleMain">
+      <div class="articleMain mb-20">
         {@html html}
       </div>
     {:else}
@@ -201,7 +201,7 @@
     {/if}
   </div>
 
-  <div class="flex justify-between">
+  <div class="flex justify-between mb-16">
     <a class="mylink" href="http://swyx.io/ideas?show=Essays">&LeftArrow; All
       Essays</a>
     <!-- <a
@@ -211,7 +211,7 @@
       &RightArrow;</a>
   </div>
   <hr class="mt-5" />
-  <div class="mt-5 mytext sm:mx-auto sm:text-center lg:text-left lg:mx-0">
+  <div class="mt-8 mytext sm:mx-auto sm:text-center lg:text-left lg:mx-0">
     <p class="text-base font-light text-opacity-75">
       Join 2,000+ developers getting updates ✉️
     </p>

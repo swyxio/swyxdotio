@@ -34,6 +34,8 @@
     content="https://www.swyx.io/og_image/speaking.png" />
 </svelte:head>
 
-<div class="pt-4 pb-20 sm:px-6 lg:pt-8 lg:pb-28 lg:px-8 container mx-auto">
+<div class="pt-4 pb-20 sm:px-6 lg:pt-8 lg:pb-28 lg:px-8 container mx-auto
+max-w-xl lg:max-w-2xl xl:max-w-3xl
+">
   <Showcase hydrate-client={{ data: _data }} />
 </div>

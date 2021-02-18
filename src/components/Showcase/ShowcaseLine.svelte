@@ -25,26 +25,26 @@ text-indigo-500 -->
     class="py-4 px-1"
     class:bimodalblue={item.type === 'Talks'}
     class:bimodalpurple={item.type === 'Podcasts'}>
-    <div class="flex">
+    <div class="flex flex-col">
       <span
-        class="inline-flex justify-end items-center text-gray-500 text-xs font-mono whitespace-nowrap">
+        class="inline-flex uppercase items-center text-gray-500 text-xs font-mono whitespace-nowrap">
         {formatDate(item.effectiveDate)}</span>
       <!-- class:justify-between={!displayDetails}  -->
       <button
         on:click={() => (displayDetails = !displayDetails)}
-        class="relative justify-between flex -mr-px text-sm text-left leading-5 w-full
+        class="relative justify-between flex flex-col -mr-px text-sm text-left leading-5 w-full
           text-gray-700 font-medium border border-transparent focus:outline-none
           focus:ring-blue focus:border-blue-300 focus:z-10 transition
           ease-in-out duration-150">
         <h3
-          class="mylinkcolors text-base md:text-2xl leading-5
-            font-medium whitespace-normal ml-4 inline">
+          class="mylinkcolors text-base md:text-lg leading-5
+          font-medium whitespace-normal inline">
           {item.title}
         </h3>
         {#if !displayDetails}
           <div
-            class="hidden md:inline-flex items-center h-full text-sm mylinkcolors ml-8">
-            Expand
+            class="hidden md:inline-flex items-center h-full text-sm mylinkcolors">
+            Expand {item.type.slice(0,item.type.length - 1)}
           </div>
         {:else}
           <div
@@ -71,7 +71,7 @@ text-indigo-500 -->
           <span>{longDesc}</span>
         </p>
 
-        <div class="prose w-16 ml-4">
+        <div class="prose ml-4">
           {#if item.type === 'Essays' && item.slug}
             <a
               href={`/${item.slug}`}
@@ -115,7 +115,7 @@ text-indigo-500 -->
                 viewBox="0 0 24 24"><title>YouTube icon</title>
                 <path
                   d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z" /></svg>
-              <span class="ml-2">Watch</span>
+              <span class="ml-2">Watch Talk</span>
             </a>
           {:else if item.type === 'Podcasts' && item.url}
             <a
@@ -140,7 +140,7 @@ text-indigo-500 -->
                   stroke-width="2"
                   d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
               </svg>
-              <span class="ml-2">Listen</span>
+              <span class="ml-2">Listen to Podcast</span>
             </a>
           {:else}
             <div />

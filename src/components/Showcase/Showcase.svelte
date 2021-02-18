@@ -127,126 +127,119 @@
         pardon our appearance...</span>
     </p>
   </div>
+</div>
 
-  <div class="flex-1 flex flex-col gap-4 md:gap-0 rounded-md mb-8">
-    <!-- search -->
+
+<div class="flex-1 flex flex-col gap-4 md:gap-0 rounded-md mb-8">
+
+  
+  <div>
     <label for="search_candidate" class="sr-only">Search</label>
-    <div class="relative flex-grow focus-within:z-10">
-      <!-- <div class="absolute w-full inset-y-0 left-0 px-3 flex items-center"> -->
-      <div class="w-full inset-y-0 left-0 px-3 flex items-center">
+    <div class="mt-1 relative rounded-md shadow-sm mb-4">
+      <div class="absolute inset-y-0 left-0 flex items-center pointer-events-none pl-2">
         <!-- Heroicon name: search -->
-        <label for="search_candidate">
-          <svg
-            class="h-5 w-5 mytext-light"
-            viewBox="0 0 20 20"
-            fill="currentColor">
-            <path
-              fill-rule="evenodd"
-              d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-              clip-rule="evenodd" />
-          </svg>
-        </label>
-        <!-- <input
-          id="search_candidate"
-          type="text"
-          class="form-input block w-full rounded-md pl-2 transition ease-in-out
-          duration-150 sm:hidden focus:bg-yellow-200 bg-gray-800"
-          placeholder="Filter (/ to focus)"
-          bind:value={filterStr} /> -->
-        <input
-          id="search_candidate"
-          type="text"
-          class="form-input w-full rounded-md pl-2 transition ease-in-out text-white
-          duration-150 sm:block sm:text-sm sm:leading-5 py-2 ml-4 bg-gray-800
-          focus:bg-yellow-200 focus:text-gray-800"
-          placeholder="Filter ideas (press / to focus)"
-          bind:this={inputEl}
-          on:input={saveURLState}
-          bind:value={filterStr} />
+        <svg
+          class="h-5 w-5 mytext-light"
+          viewBox="0 0 20 20"
+          fill="currentColor">
+          <path
+            fill-rule="evenodd"
+            d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+            clip-rule="evenodd" />
+        </svg>
       </div>
+      <!-- class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"  -->
+      <input type="text" name="email" id="email" 
+        class="form-input w-full rounded-md pl-12 transition ease-in-out text-white
+        duration-150 sm:block sm:text-sm sm:leading-5 py-2 bg-gray-800
+        focus:bg-yellow-200 focus:text-gray-800"
+        placeholder="Filter ideas (press / to focus)"
+        bind:this={inputEl}
+        on:input={saveURLState}
+        bind:value={filterStr} />
     </div>
-    <!-- categories -->
-    <span
-      class="relative z-0 inline-flex flex-col sm:flex-row shadow-sm rounded-md">
-      <div class="inline-flex items-center mr-2 mytext-light">Show:</div>
-      <button
-        type="button"
-        on:click={() => saveURLState((essays = !essays))}
-        class:bimodalpurple={essays}
-        class:mytext={essays}
-        class:font-medium={essays}
-        class="-ml-px sm:ml-0 relative inline-flex items-center px-4 py-2
-        sm:rounded-l-md border border-gray-300 text-sm leading-5
-       text-gray-200 focus:z-10
-        focus:outline-none focus:border-blue-300 focus:ring-yellow focus:text-yellow-200
-         transition ease-in-out
-        duration-150">
-        Essays
-      </button>
-      <button
-        type="button"
-        on:click={() => saveURLState((talks = !talks))}
-        class:bimodalpurple={talks}
-        class:mytext={talks}
-        class:font-medium={talks}
-        class="-ml-px relative inline-flex items-center px-4 py-2 border
-        border-gray-300 text-sm leading-5 text-gray-200
-       focus:z-10 focus:outline-none
-        focus:border-blue-300 focus:ring-yellow focus:text-yellow-200 
-       transition ease-in-out duration-150">
-        Talks
-      </button>
-      <button
-        type="button"
-        on:click={() => saveURLState((podcasts = !podcasts))}
-        class:bimodalpurple={podcasts}
-        class:mytext={podcasts}
-        class:font-medium={podcasts}
-        class="-ml-px relative inline-flex items-center px-4 py-2 border
-        border-gray-300 text-sm leading-5 text-gray-200
-       focus:z-10 focus:outline-none
-        focus:border-blue-300 focus:ring-yellow focus:text-yellow-200 
-       transition ease-in-out duration-150">
-        Podcasts
-      </button>
-      <button
-        type="button"
-        on:click={() => alert('coming soon')}
-        class:bimodalpurple={tutorials}
-        class:mytext={tutorials}
-        class:font-medium={tutorials}
-        class="-ml-px relative items-center px-4 py-2 border
-        hidden md:inline-flex
-        border-gray-300 text-sm leading-5 text-gray-200
-       focus:z-10 focus:outline-none
-        focus:border-blue-300 focus:ring-yellow focus:text-yellow-200 
-       transition ease-in-out duration-150">
-        <strike>Tutorials</strike>
-      </button>
-      <button
-        type="button"
-        on:click={() => alert('coming soon')}
-        class:bimodalpurple={notes}
-        class:mytext={notes}
-        class:font-medium={notes}
-        class="-ml-px relative items-center px-4 py-2
-        hidden md:inline-flex
-        sm:rounded-r-md border border-gray-300 text-sm leading-5
-       text-gray-200 focus:z-10
-        focus:outline-none focus:border-blue-300 focus:ring-yellow focus:text-yellow-200
-         transition ease-in-out
-        duration-150">
-        <strike>Notes</strike>
-      </button>
-    </span>
   </div>
+  <!-- categories -->
+  <span
+    class="relative z-0 inline-flex flex-col sm:flex-row shadow-sm rounded-md">
+    <div class="inline-flex items-center mr-2 mytext-light">Show:</div>
+    <button
+      type="button"
+      on:click={() => saveURLState((essays = !essays))}
+      class:bimodalpurple={essays}
+      class:mytext={essays}
+      class:font-medium={essays}
+      class="-ml-px sm:ml-0 relative inline-flex items-center px-4 py-2
+      sm:rounded-l-md border border-gray-300 text-sm leading-5
+     text-gray-200 focus:z-10
+      focus:outline-none focus:border-blue-300 focus:ring-yellow focus:text-yellow-200
+       transition ease-in-out
+      duration-150">
+      Essays
+    </button>
+    <button
+      type="button"
+      on:click={() => saveURLState((talks = !talks))}
+      class:bimodalpurple={talks}
+      class:mytext={talks}
+      class:font-medium={talks}
+      class="-ml-px relative inline-flex items-center px-4 py-2 border
+      border-gray-300 text-sm leading-5 text-gray-200
+     focus:z-10 focus:outline-none
+      focus:border-blue-300 focus:ring-yellow focus:text-yellow-200 
+     transition ease-in-out duration-150">
+      Talks
+    </button>
+    <button
+      type="button"
+      on:click={() => saveURLState((podcasts = !podcasts))}
+      class:bimodalpurple={podcasts}
+      class:mytext={podcasts}
+      class:font-medium={podcasts}
+      class="-ml-px relative inline-flex items-center px-4 py-2 border
+      border-gray-300 text-sm leading-5 text-gray-200
+     focus:z-10 focus:outline-none
+      focus:border-blue-300 focus:ring-yellow focus:text-yellow-200 
+     transition ease-in-out duration-150">
+      Podcasts
+    </button>
+    <button
+      type="button"
+      on:click={() => alert('coming soon')}
+      class:bimodalpurple={tutorials}
+      class:mytext={tutorials}
+      class:font-medium={tutorials}
+      class="-ml-px relative items-center px-4 py-2 border
+      hidden md:inline-flex
+      border-gray-300 text-sm leading-5 text-gray-200
+     focus:z-10 focus:outline-none
+      focus:border-blue-300 focus:ring-yellow focus:text-yellow-200 
+     transition ease-in-out duration-150">
+      <strike>Tutorials</strike>
+    </button>
+    <button
+      type="button"
+      on:click={() => alert('coming soon')}
+      class:bimodalpurple={notes}
+      class:mytext={notes}
+      class:font-medium={notes}
+      class="-ml-px relative items-center px-4 py-2
+      hidden md:inline-flex
+      sm:rounded-r-md border border-gray-300 text-sm leading-5
+     text-gray-200 focus:z-10
+      focus:outline-none focus:border-blue-300 focus:ring-yellow focus:text-yellow-200
+       transition ease-in-out
+      duration-150">
+      <strike>Notes</strike>
+    </button>
+  </span>
 </div>
 <!-- <div class="pb-5 border-b border-gray-200 space-y-3 sm:flex sm:flex-col sm:items-center sm:justify-between sm:space-x-4 sm:space-y-0"> -->
 <div>
   <!-- <div class=" bg-gray-200 shadow overflow-hidden sm:rounded-md"> -->
   {#if filteredData.length || !showAll}
     <!-- <ul class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"> -->
-    <ul class="flex flex-col max-w-4xl mx-auto">
+    <ul class="flex flex-col max-w-2xl mx-4 bg-gray-200 dark:bg-gray-700 p-4 rounded">
       {#each filteredData as item}
         {#if item.type === 'Essays'}
           <ShowcaseLineEssay {item} />
