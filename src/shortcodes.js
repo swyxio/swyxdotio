@@ -15,4 +15,16 @@ module.exports = [{
     allowFullScreen
     aria-hidden="true"></iframe>`;
   },
-}]
+},
+{
+  shortcode: "twitter",
+  run: async ({ props, content }) => {
+    return `
+    <blockquote class="twitter-tweet" data-lang="en" data-dnt="true" data-theme="dark">
+    <a href="https://twitter.com/x/status/${props[0]}"></a></blockquote> 
+    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    `;
+  },
+}
+
+]

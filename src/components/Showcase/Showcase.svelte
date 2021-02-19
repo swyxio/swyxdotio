@@ -123,7 +123,7 @@
     </h1>
     <p class="mt-3 text-xl leading-7 mytext-light sm:mt-4">
       For Free: Great Ideas. Lightly Used.
-      <span class="mt-4 italic block">This site is still under construction,
+      <span class="mt-1 text-xs italic block">This site is still under construction,
         pardon our appearance...</span>
     </p>
   </div>
@@ -133,7 +133,7 @@
 <div class="flex-1 flex flex-col gap-4 md:gap-0 rounded-md mb-8">
 
   
-  <div>
+  <div class="px-2">
     <label for="search_candidate" class="sr-only">Search</label>
     <div class="mt-1 relative rounded-md shadow-sm mb-4">
       <div class="absolute inset-y-0 left-0 flex items-center pointer-events-none pl-2">
@@ -162,7 +162,7 @@
   <!-- categories -->
   <span
     class="relative z-0 inline-flex flex-col sm:flex-row shadow-sm rounded-md">
-    <div class="inline-flex items-center mr-2 mytext-light">Show:</div>
+    <div class="inline-flex items-center mr-2 mytext-light px-4">Show:</div>
     <button
       type="button"
       on:click={() => saveURLState((essays = !essays))}
@@ -171,8 +171,8 @@
       class:font-medium={essays}
       class="-ml-px sm:ml-0 relative inline-flex items-center px-4 py-2
       sm:rounded-l-md border border-gray-300 text-sm leading-5
-     text-gray-200 focus:z-10
-      focus:outline-none focus:border-blue-300 focus:ring-yellow focus:text-yellow-200
+     dark:text-gray-200 text-gray-700 focus:z-10
+      focus:outline-none focus:border-blue-300 focus:ring-yellow focus:text-yellow-400
        transition ease-in-out
       duration-150">
       Essays
@@ -184,9 +184,9 @@
       class:mytext={talks}
       class:font-medium={talks}
       class="-ml-px relative inline-flex items-center px-4 py-2 border
-      border-gray-300 text-sm leading-5 text-gray-200
+      border-gray-300 text-sm leading-5 dark:text-gray-200 text-gray-700
      focus:z-10 focus:outline-none
-      focus:border-blue-300 focus:ring-yellow focus:text-yellow-200 
+      focus:border-blue-300 focus:ring-yellow focus:text-yellow-400 
      transition ease-in-out duration-150">
       Talks
     </button>
@@ -197,9 +197,9 @@
       class:mytext={podcasts}
       class:font-medium={podcasts}
       class="-ml-px relative inline-flex items-center px-4 py-2 border
-      border-gray-300 text-sm leading-5 text-gray-200
+      border-gray-300 text-sm leading-5 dark:text-gray-200 text-gray-700
      focus:z-10 focus:outline-none
-      focus:border-blue-300 focus:ring-yellow focus:text-yellow-200 
+      focus:border-blue-300 focus:ring-yellow focus:text-yellow-400 
      transition ease-in-out duration-150">
       Podcasts
     </button>
@@ -211,9 +211,9 @@
       class:font-medium={tutorials}
       class="-ml-px relative items-center px-4 py-2 border
       hidden md:inline-flex
-      border-gray-300 text-sm leading-5 text-gray-200
+      border-gray-300 text-sm leading-5 dark:text-gray-200 text-gray-700
      focus:z-10 focus:outline-none
-      focus:border-blue-300 focus:ring-yellow focus:text-yellow-200 
+      focus:border-blue-300 focus:ring-yellow focus:text-yellow-400 
      transition ease-in-out duration-150">
       <strike>Tutorials</strike>
     </button>
@@ -226,8 +226,8 @@
       class="-ml-px relative items-center px-4 py-2
       hidden md:inline-flex
       sm:rounded-r-md border border-gray-300 text-sm leading-5
-     text-gray-200 focus:z-10
-      focus:outline-none focus:border-blue-300 focus:ring-yellow focus:text-yellow-200
+     dark:text-gray-200 text-gray-700 focus:z-10
+      focus:outline-none focus:border-blue-300 focus:ring-yellow focus:text-yellow-400
        transition ease-in-out
       duration-150">
       <strike>Notes</strike>
@@ -239,7 +239,7 @@
   <!-- <div class=" bg-gray-200 shadow overflow-hidden sm:rounded-md"> -->
   {#if filteredData.length || !showAll}
     <!-- <ul class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"> -->
-    <ul class="flex flex-col max-w-2xl mx-4 bg-gray-200 dark:bg-gray-700 p-4 rounded">
+    <ul class="flex flex-col max-w-2xl sm:mx-4 bg-gray-200 dark:bg-gray-800 p-4 sm:rounded">
       {#each filteredData as item}
         {#if item.type === 'Essays'}
           <ShowcaseLineEssay {item} />

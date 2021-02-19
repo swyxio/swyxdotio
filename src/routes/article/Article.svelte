@@ -159,7 +159,7 @@
 </svelte:head>
 
 <article
-  class="px-2 py-10 max-w-xl mx-auto sm:px-4 sm:py-12 lg:max-w-2xl lg:py-16
+  class="px-4 py-10 max-w-xl mx-auto sm:px-6 sm:py-12 lg:max-w-2xl lg:py-16
     lg:px-8 xl:max-w-3xl">
   <div class="prose lg:prose-xl">
     <div class="title">
@@ -193,7 +193,7 @@
     </blockquote>
 
     {#if html}
-      <div class="articleMain mb-20">
+      <div class="articleMain mb-20 font-serif">
         {@html html}
       </div>
     {:else}

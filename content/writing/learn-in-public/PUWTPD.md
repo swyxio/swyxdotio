@@ -1,8 +1,8 @@
 ---
-title: The Ultimate Hack for Learning In Public
-subtitle: Pick Up What They Put Down
+title: Pick Up What They Put Down
+subtitle: The Ultimate Hack for Learning In Public
 desc: By Picking Up What They Put Down, you are applying Nir Eyal's Hooked model to provide an inbuilt feedback mechanism to kickstart your #LearnInPublic journey.
-slug: learn-in-public-hack
+slug: PUWTPD
 tag_list: ['Advice', 'LearnInPublic']
 date: 2020-01-01
 ---
