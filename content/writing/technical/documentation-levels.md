@@ -273,7 +273,7 @@ A more ambitious framing of this might put them into a pyramid "hierarchy of nee
 - https://github.com/reduxjs/redux/issues/3609 has a bunch of great links
 - https://vimeo.com/32957711 John Resig on JQuery's OSS community
 - everything in this thread https://twitter.com/adamwathan/status/1257641015835611138
-- https://jacobian.org/2009/nov/10/what-to-write/ Django contributor's thoughts on Django docs
+- Jacob Kaplan-Moss (Django co-creator): [Writing Great Documentation series](https://jacobian.org/series/great-documentation/), [What to Write](https://jacobian.org/2009/nov/10/what-to-write/)
 - https://spec.fm/podcasts/toolsday/318867 Toolsday on Inspirational Doc Sites
   - Shopify Polaris
   - Svelte Docs
