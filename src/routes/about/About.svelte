@@ -31,10 +31,10 @@
       <a href="https://www.freecodecamp.org/news/shawn-wang-podcast-interview/">
         currency options trader turned TMT hedge fund analyst</a
       >
-      turned developer/product manager/angel investor, primarily active in the JavaScript
-      community (React, Svelte, Serverless). I grew up in Singapore 🇸🇬, but have
-      worked mostly in the US 🇺🇸/UK 🇬🇧, most recently remotely out of New York City
-      🗽 working on Developer Experience for
+      turned developer/product manager/angel investor, primarily active in the web
+      dev community. I grew up in Singapore 🇸🇬, but have worked mostly in the US
+      🇺🇸/UK 🇬🇧, most recently remotely out of New York City 🗽 working on Developer
+      Experience for
       <a href="https://www.swyx.io/writing/farewell-netlify/">Netlify</a>,
       <a href="https://www.swyx.io/writing/hello-aws/">Amazon Web Services</a>,
       and now
@@ -71,13 +71,15 @@
       </a>
     </h3>
     <p>
-      I am currently working on Developer Experience at AWS Amplify, working US
-      hours out of Singapore. I also am on the
+      I am currently working on Developer Experience at <a
+        href="https://temporal.io/">Temporal.io</a
+      >, working US hours out of Singapore. I also am on the
       <a href="https://www.svelteradio.com/">Svelte Radio</a>
       and
       <a href="http://careerchats.transistor.fm/">Career Chats</a>
       podcasts. You can get more high frequency updates on
-      <a href="https://twitter.com/swyx">my Twitter</a>.
+      <a href="https://twitter.com/swyx">my Twitter</a> and my daily mixtape at
+      the <a href="http://swyx.transistor.fm/">Swyx Mixtape</a>.
     </p>
     <h3 id="bio">Bio for Event Organizers</h3>
     <p>
