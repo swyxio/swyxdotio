@@ -1,3 +1,115 @@
+<svelte:head>
+  <title>About Swyx</title>
+</svelte:head>
+
+<article class="text-indigo-600 dark:text-indigo-400 px-4">
+  <h1 class="mb-2">About Swyx</h1>
+  <h2 class="text-indigo-400 dark:text-indigo-600">aka Shawn Wang</h2>
+  <div class="prose py-4">
+    <h3 id="tldr">TL;DR</h3>
+    <p>
+      Hey, I'm swyx! <span class="font-bold"
+        >I help build great developer experiences,</span
+      >
+      from documentation to dev tools to dev communities.
+    </p>
+    <p>
+      I am a frequent writer and speaker best known for the <a
+        href="https://swyx.io/LIP">Learn in Public</a
+      >
+      movement and recently published
+      <a href="https://learninpublic.org">The Coding Career Handbook</a>
+      with more advice for engineers going from Junior to Senior.
+    </p>
+    <p class="italic">
+      P.S. "swyx" is the initials of my English and Chinese names and you can
+      use it interchangeably with "Shawn". It is pronounced "swicks".
+    </p>
+    <h3 id="about">About</h3>
+    <p>
+      I am a
+      <a href="https://www.freecodecamp.org/news/shawn-wang-podcast-interview/">
+        currency options trader turned TMT hedge fund analyst</a
+      >
+      turned developer/product manager/angel investor, primarily active in the JavaScript
+      community (React, Svelte, Serverless). I grew up in Singapore 🇸🇬, but have
+      worked mostly in the US 🇺🇸/UK 🇬🇧, most recently remotely out of New York City
+      🗽 working on Developer Experience for
+      <a href="https://www.swyx.io/writing/farewell-netlify/">Netlify</a>,
+      <a href="https://www.swyx.io/writing/hello-aws/">Amazon Web Services</a>,
+      and now
+      <a href="https://temporal.io">Temporal</a>. I am currently physically in
+      Singapore due to COVID.
+    </p>
+    <p>
+      I am best known for being a
+      <a href="/learn-in-public">#LearnInPublic</a>
+      evangelist and
+      <a href="/ideas?filter=React&show=Essays&show=Talks&show=Podcasts"
+        >my speaking/writing on React, JavaScript and the future of the Web</a
+      >.
+    </p>
+    <h3 id="now">
+      What I'm Doing Now
+      <a href="https://nownownow.com/about">
+        <svg
+          class="inline"
+          xmlns="http://www.w3.org/2000/svg"
+          width="0.75em"
+          height="0.75em"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#999"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+          <line x1="12" y1="17" x2="12" y2="17" />
+        </svg>
+      </a>
+    </h3>
+    <p>
+      I am currently working on Developer Experience at AWS Amplify, working US
+      hours out of Singapore. I also am on the
+      <a href="https://www.svelteradio.com/">Svelte Radio</a>
+      and
+      <a href="http://careerchats.transistor.fm/">Career Chats</a>
+      podcasts. You can get more high frequency updates on
+      <a href="https://twitter.com/swyx">my Twitter</a>.
+    </p>
+    <h3 id="bio">Bio for Event Organizers</h3>
+    <p>
+      swyx is passionate about Developer Tooling and Developer Communities. He
+      currently works as a Senior Developer Advocate for AWS Amplify and
+      recently published
+      <a href="https://learninpublic.org/">the Coding Career Handbook</a>
+      for Junior to Senior developer careers. In his free time he teaches React,
+      TypeScript, Storybook and Node.js CLI's at
+      <a href="https://egghead.io/s/26zf5">Egghead.io</a>, and helps run the
+      <a href="https://sveltesociety.dev/">Svelte Society</a>
+      community of meetups.
+    </p>
+    <p>
+      🔗
+      <a href="https://twitter.com/swyx">Twitter</a>,
+      <a href="https://github.com/sw-yx">GitHub</a>,
+      <a href="https://learninpublic.org">The Coding Career Handbook</a>.
+    </p>
+    <p>
+      🖼️
+      <a href="https://avatars3.githubusercontent.com/u/6764957?s=200&v=4"
+        >Medium</a
+      >, or
+      <a href="https://avatars3.githubusercontent.com/u/6764957?s=460&v=4"
+        >Large</a
+      >
+      pictures of me you can use without asking.
+    </p>
+  </div>
+</article>
+
 <style>
   h1,
   h2 {
@@ -55,103 +167,3 @@
     content: '#### ';
   }
 </style>
-
-<svelte:head>
-  <title>About Swyx</title>
-</svelte:head>
-
-<article class="text-indigo-600 dark:text-indigo-400 px-4">
-  <h1 class="mb-2">About Swyx</h1>
-  <h2 class="text-indigo-400 dark:text-indigo-600">aka Shawn Wang</h2>
-  <div class="prose py-4">
-    <h3 id="tldr">TL;DR</h3>
-    <p>
-      I am a frontend/serverless developer, normally based
-      out of NYC but currently in Singapore. I am a frequent writer and speaker
-      and recently published <a href="https://learninpublic.org">The Coding Career Handbook</a> 
-      for Junior to Senior Engineers.
-    </p>
-    <p>
-      "swyx" is the initials of my English and Chinese names and you can use it interchangeably 
-      with "Shawn". It is pronounced "swicks".
-    </p>
-    <h3 id="about">About</h3>
-    <p>
-      I am a
-      <a href="https://www.freecodecamp.org/news/shawn-wang-podcast-interview/">
-        currency options trader turned TMT hedge fund analyst</a>
-      turned developer/product manager/angel investor, primarily active in the
-      JavaScript community. I grew up in Singapore 🇸🇬, but have worked mostly in
-      the US 🇺🇸/UK 🇬🇧, most recently remotely out of New York City 🗽 working on
-      Developer Experience for
-      <a href="https://www.swyx.io/writing/farewell-netlify/">Netlify</a>,
-      <a href="https://www.swyx.io/writing/hello-aws/">Amazon Web Services</a>,
-      and
-      <a href="https://temporal.io">Temporal</a>. I am currently physically in
-      Singapore due to COVID.
-    </p>
-    <p>
-      I am best known for being a
-      <a href="/learn-in-public">#LearnInPublic</a>
-      evangelist and
-      <a href="/ideas?filter=React&show=Essays&show=Talks&show=Podcasts">my
-        speaking/writing on React, JavaScript and the future of the Web</a>.
-    </p>
-    <h3 id="now">
-      What I'm Doing Now
-      <a href="https://nownownow.com/about">
-        <svg
-          class="inline"
-          xmlns="http://www.w3.org/2000/svg"
-          width="0.75em"
-          height="0.75em"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#999"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10" />
-          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-          <line x1="12" y1="17" x2="12" y2="17" />
-        </svg>
-      </a>
-    </h3>
-    <p>
-      I am currently working on Developer Experience at AWS Amplify, working US
-      hours out of Singapore. I also am on the
-      <a href="https://www.svelteradio.com/">Svelte Radio</a>
-      and
-      <a href="http://careerchats.transistor.fm/">Career Chats</a>
-      podcasts. You can get more high frequency updates on
-      <a href="https://twitter.com/swyx">my Twitter</a>.
-    </p>
-    <h3 id="bio">Bio for Event Organizers</h3>
-    <p>
-      swyx is passionate about Developer Tooling and
-      Developer Communities. He currently works as a Senior Developer Advocate
-      for AWS Amplify and recently published
-      <a href="https://learninpublic.org/">the Coding Career Handbook</a>
-      for Junior to Senior developer careers. In his free time he teaches React,
-      TypeScript, Storybook and Node.js CLI's at
-      <a href="https://egghead.io/s/26zf5">Egghead.io</a>, and helps run the
-      <a href="https://sveltesociety.dev/">Svelte Society</a>
-      community of meetups.
-    </p>
-    <p>
-      🔗
-      <a href="https://twitter.com/swyx">Twitter</a>,
-      <a href="https://github.com/sw-yx">GitHub</a>,
-      <a href="https://learninpublic.org">The Coding Career Handbook</a>.
-    </p>
-    <p>
-      🖼️
-      <a
-        href="https://avatars3.githubusercontent.com/u/6764957?s=200&v=4">Medium</a>,
-      or
-      <a
-        href="https://avatars3.githubusercontent.com/u/6764957?s=460&v=4">Large</a>
-      pictures of me you can use without asking.
-    </p>
-  </div>
-</article>
