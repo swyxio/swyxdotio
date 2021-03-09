@@ -6,7 +6,7 @@
   $: longDesc =
     frontmatter.description ||
     frontmatter.desc ||
-    'No description provided. Suggest one!'
+    null
 
   let seoSubtitle = frontmatter && frontmatter.subtitle
   export let seoTitle =
@@ -174,6 +174,12 @@
             <span class="text-xs italic font-light leading-5"> #{tag} </span>
           {/each}
         </p>
+      {:else}
+        {#each frontmatter.categories as tag}
+          <p>
+            <span class="text-xs italic font-light leading-5"> #{tag} </span>
+          </p>
+        {/each}
       {/if}
       {#if frontmatter.author}<small>By {frontmatter.author}</small>{/if}
     </div>

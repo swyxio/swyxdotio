@@ -8,7 +8,7 @@ date: 2019-05-16
 
 > There are 2 hard problems in computer science: cache invalidation, naming things, and off-by-1 errors. - [Leon Bambrick](https://twitter.com/secretgeek/status/7269997868?lang=en)
 
-I've vacillated on my opinion on naming things. I think most people start out with no or weak opinions, looking slightly askance at the weirdos who do have strong opinions. They absorb naming conventions by osmosis, and then run into real problems at scale/over time, and then develop extremely strong opinions informed by that experience. 
+I've vacillated on my opinion on naming things (this post specifically deals with naming things in code, though I end with other resources on naming everything). I think most people start out with no or weak opinions, looking slightly askance at the weirdos who do have strong opinions. They absorb naming conventions by osmosis, and then run into real problems at scale/over time, and then develop extremely strong opinions informed by that experience. 
 
 The Weirdo's Journey.
 
