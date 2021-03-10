@@ -84,7 +84,7 @@
     <h3 id="bio">Bio for Event Organizers</h3>
     <p>
       swyx is passionate about Developer Tooling and Developer Communities. He
-      currently works as a Senior Developer Advocate for AWS Amplify and
+      is Head of Developer Experience at Temporal.io and
       recently published
       <a href="https://learninpublic.org/">the Coding Career Handbook</a>
       for Junior to Senior developer careers. In his free time he teaches React,
