@@ -132,7 +132,7 @@
 </style>
 
 <svelte:head>
-  <title>{frontmatter.title} ∊ swyx.io</title>
+  <title>{frontmatter.title}</title>
   <link rel="canonical" href={canonical} />
   <meta property="og:url" content={swyxioURL} />
   <meta property="og:type" content="article" />
