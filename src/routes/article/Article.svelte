@@ -87,14 +87,16 @@
     </div>
 
     <blockquote class="text-sm font-mono bg-indigo-100 dark:bg-indigo-900">
-      <div><span class="font-bold">Read time: {readTime}</span>{#if frontmatter.date}, Last updated:
-            <time
-              datetime={new Date(frontmatter.date).toDateString().slice(0, 10)}
-            >
-              {new Date(frontmatter.date).toDateString().slice(4)}
-            </time>
-        {/if}
-      </div>
+      <span class="font-bold">Est Readtime: {readTime}</span>
+      {#if frontmatter.date}<span class=" hidden sm:inline">|</span>
+      <span class=" block sm:inline"> Last Updated:
+          <time
+            datetime={new Date(frontmatter.date).toDateString().slice(0, 10)}
+          >
+            {new Date(frontmatter.date).toDateString().slice(4)}
+          </time>
+      </span>
+      {/if}
     </blockquote>
 
     {#if html}
