@@ -87,9 +87,9 @@
     </div>
 
     <blockquote class="text-sm font-mono bg-indigo-100 dark:bg-indigo-900">
-      <span class="font-bold">Est Readtime: {readTime}</span>
+      <span class="font-bold">Read time: {readTime}</span>
       {#if frontmatter.date}<span class=" hidden sm:inline">|</span>
-      <span class=" block sm:inline"> Last Updated:
+      <span class=" block sm:inline">Published:
           <time
             datetime={new Date(frontmatter.date).toDateString().slice(0, 10)}
           >
