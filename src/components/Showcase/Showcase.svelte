@@ -121,7 +121,7 @@
       sm:text-4xl sm:leading-10">
       Idea Showcase
     </h1>
-    <p class="mt-3 text-xl leading-7 mytext-light sm:mt-4">
+    <p class="mt-3 text-xl leading-7 mytext-light italic sm:mt-4">
       For Free: Great Ideas. Lightly Used.
       <span class="mt-1 text-xs italic block">This site is still under construction,
         pardon our appearance...</span>
@@ -139,7 +139,7 @@
       <div class="absolute inset-y-0 left-0 flex items-center pointer-events-none pl-2">
         <!-- Heroicon name: search -->
         <svg
-          class="h-5 w-5 mytext-light"
+          class="h-5 w-5 mytext-light italic"
           viewBox="0 0 20 20"
           fill="currentColor">
           <path
@@ -162,7 +162,7 @@
   <!-- categories -->
   <span
     class="relative z-0 inline-flex flex-col sm:flex-row shadow-sm rounded-md">
-    <div class="inline-flex items-center mr-2 mytext-light px-4">Show:</div>
+    <div class="inline-flex items-center mr-2 mytext-light italic px-4">Show:</div>
     <button
       type="button"
       on:click={() => saveURLState((essays = !essays))}

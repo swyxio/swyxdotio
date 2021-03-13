@@ -35,7 +35,7 @@
     @apply text-gray-200 dark:text-gray-700
   }
   .mytext-light {
-    @apply text-gray-600 dark:text-gray-300 italic mt-0
+    @apply text-gray-600 dark:text-gray-300 mt-0
   }
   .bimodalblue {
     @apply text-blue-900 dark:text-blue-100 bg-blue-100 dark:bg-blue-900
@@ -51,6 +51,9 @@
   .prose {
     & p {
       @apply my-5
+    }
+    & li > p {
+      @apply my-0 mt-3
     }
     & h1 {
       @apply text-black dark:text-white;

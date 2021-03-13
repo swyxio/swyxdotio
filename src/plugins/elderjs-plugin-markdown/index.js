@@ -153,6 +153,7 @@ const plugin = {
             slug,
             data: {
               slug,
+              disclosure: data.disclosure,
               canonical_url: article.canonical_url,
               cover_image: article.cover_image,
               devto_url: article.url,
