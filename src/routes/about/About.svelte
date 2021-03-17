@@ -27,14 +27,11 @@
     </p>
     <h3 id="about">About</h3>
     <p>
-      I am a
-      <a href="https://www.freecodecamp.org/news/shawn-wang-podcast-interview/">
-        currency options trader turned TMT hedge fund analyst</a
-      >
-      turned developer/product manager/angel investor, primarily active in the web
-      dev community. I grew up in Singapore 🇸🇬, but have worked mostly in the US
-      🇺🇸/UK 🇬🇧, most recently remotely out of New York City 🗽 working on Developer
-      Experience for
+      I am a <a href="https://github.com/sw-yx">developer</a>/PM/<a
+        href="https://github.com/sw-yx/devtools-angels/">angel investor</a
+      >, primarily active in the web dev community. I grew up in Singapore 🇸🇬,
+      but have worked mostly in the US 🇺🇸/UK 🇬🇧, most recently remotely out of
+      New York City 🗽 working on Developer Experience for
       <a href="https://www.swyx.io/writing/farewell-netlify/">Netlify</a>,
       <a href="https://www.swyx.io/writing/hello-aws/">Amazon Web Services</a>,
       and now
@@ -48,6 +45,13 @@
       <a href="/ideas?filter=React&show=Essays&show=Talks&show=Podcasts"
         >my speaking/writing on React, JavaScript and the future of the Web</a
       >.
+    </p>
+    <p>
+      In a past life I was a
+      <a href="https://www.freecodecamp.org/news/shawn-wang-podcast-interview/">
+        currency options trader turned TMT hedge fund analyst</a
+      > as well, and I often do approach tech from an investing and risk management
+      angle.
     </p>
     <h3 id="now">
       What I'm Doing Now
@@ -84,8 +88,7 @@
     <h3 id="bio">Bio for Event Organizers</h3>
     <p>
       swyx is passionate about Developer Tooling and Developer Communities. He
-      is Head of Developer Experience at Temporal.io and
-      recently published
+      is Head of Developer Experience at Temporal.io and recently published
       <a href="https://learninpublic.org/">the Coding Career Handbook</a>
       for Junior to Senior developer careers. In his free time he teaches React,
       TypeScript, Storybook and Node.js CLI's at
