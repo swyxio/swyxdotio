@@ -77,24 +77,27 @@
     <p>
       I am currently working on Developer Experience at <a
         href="https://temporal.io/">Temporal.io</a
-      >, working US hours out of Singapore. I also am on the
-      <a href="https://www.svelteradio.com/">Svelte Radio</a>
-      and
-      <a href="http://careerchats.transistor.fm/">Career Chats</a>
-      podcasts. You can get more high frequency updates on
-      <a href="https://twitter.com/swyx">my Twitter</a> and my daily mixtape at
-      the <a href="http://swyx.transistor.fm/">Swyx Mixtape</a>.
+      >, working US hours out of Singapore. I am also a regular on the
+      <a href="https://www.svelteradio.com/">Svelte Radio</a> podcast and my own
+      <a href="http://swyx.transistor.fm/">Swyx Mixtape</a>. You can get more
+      high frequency updates on
+      <a href="https://twitter.com/swyx">my Twitter</a>.
     </p>
     <h3 id="bio">Bio for Event Organizers</h3>
     <p>
-      swyx is passionate about Developer Tooling and Developer Communities. He
-      is Head of Developer Experience at Temporal.io and recently published
+      swyx has worked on React and serverless JavaScript at Two Sigma, <a
+        href="https://www.swyx.io/farewell-netlify/">Netlify</a
+      >
+      and <a href="https://www.swyx.io/hello-aws/">AWS</a>, and now serves as
+      Head of Developer Experience at Temporal.io. He has started and run
+      communities for hundreds of thousands of developers, like
+      <a href="https://twitter.com/sveltesociety/">Svelte Society</a>,
+      <a href="https://www.swyx.io/moderating-rreactjs/">/r/reactjs</a>, and the
+      <a href="https://github.com/typescript-cheatsheets/react"
+        >React TypeScript Cheatsheet</a
+      >. His nontechnical writing was recently published in
       <a href="https://learninpublic.org/">the Coding Career Handbook</a>
-      for Junior to Senior developer careers. In his free time he teaches React,
-      TypeScript, Storybook and Node.js CLI's at
-      <a href="https://egghead.io/s/26zf5">Egghead.io</a>, and helps run the
-      <a href="https://sveltesociety.dev/">Svelte Society</a>
-      community of meetups.
+      for Junior to Senior developers.
     </p>
     <p>
       🔗
