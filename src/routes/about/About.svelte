@@ -45,6 +45,11 @@
       <a href="/ideas?filter=React&show=Essays&show=Talks&show=Podcasts"
         >my speaking/writing on React, JavaScript and the future of the Web</a
       >.
+      I am also known for my technical/book reviews, from
+      <a href="https://twitter.com/swyx/status/1361712610593316866">TypeScript in 50 Lessons</a>,
+      <a href="https://twitter.com/swyx/status/1135525665971695617">Programming TypeScript</a>,
+      <a href="https://twitter.com/swyx/status/1303062410157158401">Landing Page Hot Tips</a>, and
+      <a href="https://share.transistor.fm/s/aebece15">The GraphQL Guide</a>.
     </p>
     <p>
       In a past life I was a
