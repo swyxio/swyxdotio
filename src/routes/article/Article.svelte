@@ -1,5 +1,6 @@
 <script>
   import WebMentions from '../../components/WebMentions/WebMentions.svelte'
+  import SignUp from '../../components/SignUp/SignUp.svelte'
   export let data
   const { html, frontmatter, markdown, podcasts, talks, ...rest } = data
   // console.log({frontmatter, rest})
@@ -159,41 +160,8 @@
     <p class="text-base font-light text-opacity-75">
       Join 2,000+ developers getting updates ✉️
     </p>
-    <form
-      action="https://tinyletter.com/swyx"
-      method="post"
-      target="popupwindow"
-      onsubmit="window.open('https://tinyletter.com/swyx', 'popupwindow', 'scrollbars=yes,width=800,height=600');return true"
-      class="mt-3 sm:flex"
-    >
-      <input
-        aria-label="Email"
-        id="tlemail"
-        name="email"
-        type="email"
-        class="appearance-none block w-full px-3 py-3 border
-        border-gray-300 text-sm leading-6 rounded-md
-        placeholder-gray-500 shadow-sm focus:outline-none
-        focus:placeholder-gray-400 focus:ring-4 focus:ring-blue-200 focus:bg-yellow-100
-        focus:border-blue-300 transition duration-150 ease-in-out
-        text-gray-900 sm:flex-1"
-        placeholder="I solemnly swear to never spam you."
-      />
-      <input type="hidden" value="1" name="embed" />
-      <button
-        type="submit"
-        class="mt-3 w-full px-6 py-3 border border-transparent text-base
-          leading-6 font-medium rounded-md text-white bg-indigo-600
-          shadow-sm hover:bg-indigo-400 focus:outline-none
-          focus:border-gray-300 focus:ring-gray focus:bg-yellow-200
-          active:bg-indigo-400 transition duration-150 ease-in-out sm:mt-0
-          sm:ml-3 sm:flex-shrink-0 sm:inline-flex sm:items-center
-          sm:w-auto hover:animate-wiggle"
-      >
-        Subscribe via Email
-      </button>
-    </form>
-    <p class="mt-3 text-sm leading-5 text-opacity-75">
+    <SignUp />
+    <p class="mt-3 text-sm leading-5 text-opacity-75 italic">
       Too soon!
       <a
         class="font-medium text-opacity-75

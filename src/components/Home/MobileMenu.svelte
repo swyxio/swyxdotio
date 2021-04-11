@@ -16,8 +16,8 @@
     <div class="flex items-center justify-between w-full md:w-auto">
       <div class="text-sm font-semibold uppercase tracking-wide text-gray-500
       sm:text-base lg:text-sm xl:text-base">
-        <a href="/" aria-label="Home" class="text-indigo-700 dark:text-indigo-400">
-          Shawn <span class="font-bold text-indigo-800 dark:text-indigo-200 opacity-75">@Swyx</span> Wang
+        <a href="/" aria-label="Home" class="text-indigo-700 dark:text-indigo-400 hover:text-yellow-400 dark:hover:text-yellow-200">
+          Shawn <span class="font-bold text-indigo-800 dark:text-indigo-200 opacity-75 hover:text-yellow-400 dark:hover:text-yellow-200">@Swyx</span> Wang
         </a>
       </div>
     </div>

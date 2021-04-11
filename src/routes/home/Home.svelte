@@ -14,6 +14,10 @@
   <meta name="twitter:image" content="https://www.swyx.io/swyx-ski.jpeg" />
 </svelte:head>
 
+<script>
+  import SignUp from '../../components/SignUp/SignUp.svelte'
+</script>
+
 <div class="mx-auto max-w-screen-xl mytext">
   <div class="lg:grid lg:grid-cols-12 lg:gap-8 mb-16">
     <div
@@ -64,7 +68,8 @@
           <p class="text-base font-light text-opacity-75">
             Join 2,000+ developers ✉️
           </p>
-          <form
+          <SignUp />
+          <!-- <form
             action="https://tinyletter.com/swyx"
             method="post"
             target="popupwindow"
@@ -94,8 +99,8 @@
                 sm:w-auto hover:animate-wiggle">
               Subscribe via Email
             </button>
-          </form>
-          <p class="mt-3 text-xs text-gray-900 dark:text-gray-100 leading-5 text-opacity-25">
+          </form> -->
+          <p class="mt-3 text-xs text-gray-900 dark:text-gray-100 leading-5 text-opacity-25 italic">
             Too soon!
             <a
               class="font-medium text-gray-900 dark:text-gray-100 text-opacity-25 hover:text-opacity-100
