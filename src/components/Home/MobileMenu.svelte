@@ -22,9 +22,9 @@
       </div>
     </div>
     <div class="hidden space-x-10 md:flex md:ml-10">
-      <a href="/ideas" class="font-medium text-indigo-800 dark:text-indigo-400 dark:hover:text-red-800 hover:text-red-500 transition
+      <a href="/ideas" class="font-medium text-indigo-800 dark:text-indigo-400 hover:text-red-500 transition
           duration-150 ease-in-out">Ideas</a>
-      <a href="/about" class="font-medium text-indigo-800 dark:text-indigo-400 dark:hover:text-red-800 hover:text-red-500 transition
+      <a href="/about" class="font-medium text-indigo-800 dark:text-indigo-400 hover:text-red-500 transition
           duration-150 ease-in-out">About</a>
     </div>
   </div>
@@ -35,7 +35,19 @@
   </div> -->
 
   <div class="hidden md:flex">
-    <IconList />
+    <!-- <IconList /> -->
+
+    <!-- class="-ml-0.5 mr-2 h-4 w-4" -->
+<!-- Heroicon name: mail -->
+    <a class="ml-4 flex font-medium text-indigo-800 dark:text-indigo-400 focus:text-red-500 hover:text-red-500" rel="noopener" href="/subscribe" title="Subscribe to Email Newsletter">
+      <svg 
+      class="icon h-6 w-6 inline mr-2"
+      viewBox="0 0 20 20" fill="currentColor">
+        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+      </svg>
+      Subscribe
+    </a>
   </div>
   <div class="-mr-2 flex items-center md:hidden">
     <button on:click={()=> (isMenuOpen = true)}
@@ -96,38 +108,38 @@
           <a
             href="/ideas"
             class="block px-3 py-2 rounded-md text-base font-medium
-              text-gray-700 hover:text-gray-900 hover:bg-gray-50
-              focus:outline-none focus:text-gray-900 focus:bg-gray-50 transition
+              text-gray-700 hover:text-gray-900 hover:bg-purple-200
+              focus:outline-none focus:text-gray-900 focus:bg-purple-300 transition
               duration-150 ease-in-out"
             role="menuitem">Ideas</a>
           <a
             href="/about"
             class="block px-3 py-2 rounded-md text-base font-medium
-              text-gray-700 hover:text-gray-900 hover:bg-gray-50
-              focus:outline-none focus:text-gray-900 focus:bg-gray-50 transition
+              text-gray-700 hover:text-gray-900 hover:bg-purple-200
+              focus:outline-none focus:text-gray-900 focus:bg-purple-300 transition
               duration-150 ease-in-out"
             role="menuitem">About</a>
           <a
+            href="/subscribe"
+            class="block px-3 py-2 rounded-md text-base font-medium
+              hover:bg-purple-200 focus:bg-purple-300 text-gray-700 hover:text-gray-900
+             focus:outline-none focus:text-gray-900
+             transition duration-150 ease-in-out"
+            role="menuitem">Subscribe</a>
+          <a
             href="https://twitter.com/swyx"
             class="block px-3 py-2 rounded-md text-base font-medium
-              text-gray-700 hover:text-gray-900 hover:bg-gray-50
-              focus:outline-none focus:text-gray-900 focus:bg-gray-50 transition
+              text-gray-700 hover:text-gray-900 hover:bg-purple-200
+              focus:outline-none focus:text-gray-900 focus:bg-purple-300 transition
               duration-150 ease-in-out"
             role="menuitem">My Twitter</a>
           <a
             href="https://github.com/sw-yx"
             class="block px-3 py-2 rounded-md text-base font-medium
-              text-gray-700 hover:text-gray-900 hover:bg-gray-50
-              focus:outline-none focus:text-gray-900 focus:bg-gray-50 transition
+              text-gray-700 hover:text-gray-900 hover:bg-purple-200
+              focus:outline-none focus:text-gray-900 focus:bg-purple-300 transition
               duration-150 ease-in-out"
             role="menuitem">My GitHub</a>
-          <a
-            href="https://tinyletter.com/swyx"
-            class="block px-3 py-2 rounded-md text-base font-medium
-              bg-purple-200 hover:bg-green-200 text-gray-700 hover:text-gray-900
-              hover:bg-gray-50 focus:outline-none focus:text-gray-900
-              focus:bg-gray-50 transition duration-150 ease-in-out"
-            role="menuitem">My Mailing List</a>
         </div>
         <!-- <div>
           <a href="#" class="block w-full px-5 py-3 text-center font-medium text-indigo-600 bg-gray-50 hover:bg-gray-100 hover:text-indigo-700 focus:outline-none focus:bg-gray-100 focus:text-indigo-700 transition duration-150 ease-in-out" role="menuitem">

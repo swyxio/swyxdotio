@@ -290,6 +290,11 @@
           class="text-base leading-6 text-indigo-600 dark:text-indigo-400 hover:text-red-500">
           About
         </a>
+        <!-- <a
+          href="/subscribe"
+          class="text-base leading-6 text-indigo-600 dark:text-indigo-400 hover:text-red-500">
+          Subscribe
+        </a> -->
       </nav>
       <div class="mt-8 flex justify-center">
         <IconList />

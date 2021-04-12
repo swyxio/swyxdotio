@@ -14,28 +14,9 @@
   }
 </style> -->
 
-<a rel="noopener" href="https://swyx.io/rss.xml" title="RSS" target="_blank">
-  <svg
-    class="icon h-6 w-6 text-indigo-700 dark:text-indigo-400 focus:text-red-500 hover:text-red-500"
-    fill="currentColor"
-    viewBox="-6 -6 34 34"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-    stroke-width="2"
-    aria-hidden="true">
-    <path
-      d="M6.503 20.752c0 1.794-1.456 3.248-3.251 3.248-1.796
-    0-3.252-1.454-3.252-3.248 0-1.794 1.456-3.248 3.252-3.248 1.795.001
-    3.251 1.454 3.251 3.248zm-6.503-12.572v4.811c6.05.062 10.96 4.966
-    11.022
-    11.009h4.817c-.062-8.71-7.118-15.758-15.839-15.82zm0-3.368c10.58.046
-    19.152 8.594 19.183
-    19.188h4.817c-.03-13.231-10.755-23.954-24-24v4.812z" />
-  </svg>
-</a>
-<a class="ml-4" rel="noopener" href="https://tinyletter.com/swyx/" title="Email" target="_blank">
-  <!-- class="-ml-0.5 mr-2 h-4 w-4" -->
-  <!-- Heroicon name: mail -->
+<!-- class="-ml-0.5 mr-2 h-4 w-4" -->
+<!-- Heroicon name: mail -->
+<a class="ml-4" rel="noopener" href="/subscribe" title="Subscribe to Email Newsletter">
   <svg 
   class="icon h-6 w-6 text-indigo-700 dark:text-indigo-400 focus:text-red-500 hover:text-red-500"
    viewBox="0 0 20 20" fill="currentColor">
@@ -79,6 +60,25 @@
   <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
     <path
       d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
+  </svg>
+</a>
+<a rel="noopener" href="https://swyx.io/rss.xml" title="RSS" target="_blank">
+  <svg
+    class="ml-2 icon h-6 w-6 text-indigo-700 dark:text-indigo-400 focus:text-red-500 hover:text-red-500"
+    fill="currentColor"
+    viewBox="-6 -6 34 34"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="2"
+    aria-hidden="true">
+    <path
+      d="M6.503 20.752c0 1.794-1.456 3.248-3.251 3.248-1.796
+    0-3.252-1.454-3.252-3.248 0-1.794 1.456-3.248 3.252-3.248 1.795.001
+    3.251 1.454 3.251 3.248zm-6.503-12.572v4.811c6.05.062 10.96 4.966
+    11.022
+    11.009h4.817c-.062-8.71-7.118-15.758-15.839-15.82zm0-3.368c10.58.046
+    19.152 8.594 19.183
+    19.188h4.817c-.03-13.231-10.755-23.954-24-24v4.812z" />
   </svg>
 </a>
 <!-- <a title="search" rel="noopener" href="/ideas">

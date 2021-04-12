@@ -1,13 +1,33 @@
 <script>
   let options =
     "{&quot;settings&quot;:{&quot;after_subscribe&quot;:{&quot;action&quot;:&quot;message&quot;,&quot;success_message&quot;:&quot;Success! Now check your email to confirm your subscription.&quot;,&quot;redirect_url&quot;:&quot;&quot;},&quot;analytics&quot;:{&quot;google&quot;:null,&quot;facebook&quot;:null,&quot;segment&quot;:null,&quot;pinterest&quot;:null,&quot;sparkloop&quot;:null,&quot;googletagmanager&quot;:null},&quot;modal&quot;:{&quot;trigger&quot;:&quot;timer&quot;,&quot;scroll_percentage&quot;:null,&quot;timer&quot;:5,&quot;devices&quot;:&quot;all&quot;,&quot;show_once_every&quot;:15},&quot;powered_by&quot;:{&quot;show&quot;:true,&quot;url&quot;:&quot;https://convertkit.com?utm_source=dynamic&amp;utm_medium=referral&amp;utm_campaign=poweredby&amp;utm_content=form&quot;},&quot;recaptcha&quot;:{&quot;enabled&quot;:false},&quot;return_visitor&quot;:{&quot;action&quot;:&quot;custom_content&quot;,&quot;custom_content&quot;:&quot;You already signed up to the newsletter so I'm not showing a signup box. Nice, right?&quot;},&quot;slide_in&quot;:{&quot;display_in&quot;:&quot;bottom_right&quot;,&quot;trigger&quot;:&quot;timer&quot;,&quot;scroll_percentage&quot;:null,&quot;timer&quot;:5,&quot;devices&quot;:&quot;all&quot;,&quot;show_once_every&quot;:15},&quot;sticky_bar&quot;:{&quot;display_in&quot;:&quot;top&quot;,&quot;trigger&quot;:&quot;timer&quot;,&quot;scroll_percentage&quot;:null,&quot;timer&quot;:5,&quot;devices&quot;:&quot;all&quot;,&quot;show_once_every&quot;:15}},&quot;version&quot;:&quot;5&quot;}"
+  export let placeholder = 'I solemnly swear to never spam you.'
+  let isSignedUp = false
+  if (typeof window !== 'undefined') {
+      isSignedUp = localStorage.getItem('swyxSignedUp') === 'yes'
+  }
+  function show() {
+    localStorage.setItem('swyxSignedUp', 'no')
+    isSignedUp = false
+  }
+  function storeStorage() {
+    localStorage.setItem('swyxSignedUp', 'yes')
+  }
 </script>
 
 <svelte:head>
   <script src="https://f.convertkit.com/ckjs/ck.5.js"></script>
 </svelte:head>
 
-<form
+{#if isSignedUp}
+  <div>
+    <p>
+      You already signed up previously so we're not showing a form. Thank you!
+    </p>
+    <button on:click={show}>Show anyway</button>
+  </div>
+{:else}
+  <form
     action="https://app.convertkit.com/forms/2193112/subscriptions"
     method="post"
     data-sv-form="2193112"
@@ -16,7 +36,7 @@
     data-version="5"
     data-options={options}
     class="mt-3"
->
+  >
     <ul
       class="formkit-alert formkit-alert-error"
       data-element="errors"
@@ -38,17 +58,18 @@
           text-gray-900 sm:flex-1"
           name="email_address"
           aria-label="Email Address"
-          placeholder="I solemnly swear to never spam you."
+          {placeholder}
           required=""
           type="email"
         />
         <button
           type="submit"
+          on:click={storeStorage}
           data-element="submit"
           class="formkit-submit formkit-submit mt-3 w-full px-6 py-3 border border-transparent text-base
           leading-6 font-medium rounded-md text-white bg-indigo-600
           shadow-sm hover:bg-indigo-400 focus:outline-none
-          focus:border-gray-300 focus:ring-gray focus:bg-yellow-200
+          focus:border-gray-300 focus:ring-gray focus:bg-red-500
           active:bg-indigo-400 transition duration-150 ease-in-out sm:mt-0
           sm:ml-3 sm:flex-shrink-0 sm:inline-flex sm:items-center
           sm:w-auto hover:animate-wiggle"
@@ -82,6 +103,7 @@
                 type="checkbox"
                 name="tags[]"
                 value="2310032"
+                checked
               />
               <label for="tag-45274896-2310032"
                 >Send a TL;DR of the top 10 swyx.io posts!
@@ -135,8 +157,8 @@
     >
     Subscribe via Email
     </button> -->
-</form>
-
+  </form>
+{/if}
 <!-- <form
       action="https://tinyletter.com/swyx"
       method="post"

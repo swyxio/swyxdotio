@@ -68,7 +68,7 @@
           <p class="text-base font-light text-opacity-75">
             Join 2,000+ developers ✉️
           </p>
-          <SignUp />
+          <SignUp placeholder="Your email here!" />
           <!-- <form
             action="https://tinyletter.com/swyx"
             method="post"
@@ -275,7 +275,7 @@
       I teach on
       <a href="https://egghead.io/s/26zf5">egghead.io</a>
       and in other workshops:
-      <ul>
+      <ul class="mt-2">
         <li>
           My course on
           <a
@@ -284,8 +284,8 @@
           </a>
         </li>
         <li>
-          My (upcoming) workshop on
-          <b>Building Custom CLI Tooling with OClif and React-Ink</b>
+          My workshop on
+          <a href="https://egghead.io/courses/build-custom-command-line-interface-cli-tooling-with-oclif-and-typescript">Building Custom CLI Tooling with OClif and React-Ink</a>
         </li>
         <li>
           <a href="/speaking/netlify-freecodecamp-intro">
@@ -297,7 +297,7 @@
     <h3>Cheatsheets</h3>
     <div>
       I curate helpful repos around topics, like
-      <ul>
+      <ul class="mt-2">
         <li>
           <a
             href="https://github.com/typescript-cheatsheets/react-typescript-cheatsheet/">
@@ -306,6 +306,9 @@
         </li>
         <li>
           <a href="https://github.com/sw-yx/spark-joy/">✨ 😂 Spark-Joy</a>
+        </li>
+        <li>
+          <a href="https://github.com/sw-yx/launch-cheatsheet/">Launch Cheatsheet</a>
         </li>
         <li>
           <a
@@ -343,6 +346,7 @@
       <a href="https://www.gatsbyjs.org/showcase/">Gatsby's Showcase</a>
       ,
       <a href="https://github.com/sveltejs/community">Svelte Society</a>
+      ,
       <a href="https://github.com/sw-yx/ssg">SSG</a>
       ,
       <a href="https://github.com/pedronauck/docz/">Docz</a>
