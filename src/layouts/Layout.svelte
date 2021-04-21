@@ -119,6 +119,15 @@
   
   
   */
+  body {
+    --scrollbar-primary-color: #3730a3;
+  }
+  @media (prefers-color-scheme: dark) {
+    body {
+      --scrollbar-primary-color: #8db2e5;
+    }
+  }
+
   body::-webkit-scrollbar-track {
     background-color: var(--bg-color);
   }
@@ -126,82 +135,83 @@
     width: 2vw;
   }
   body::-webkit-scrollbar-thumb {
-    background: linear-gradient(var(--link-color), var(--text-color));
+    background: linear-gradient(var(--scrollbar-primary-color), var(--text-color));
+    border-radius: 2px;
   }
   @media (min-width: 1000px) {
     body::-webkit-scrollbar-track {
       -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.9);
       background: radial-gradient(
+        circle closest-side at 60% 43%,
+        var(--bg-color) 26%,
+        rgba(187, 0, 51, 0) 27%
+      ),
+      radial-gradient(
+        circle closest-side at 40% 43%,
+        var(--bg-color) 26%,
+        rgba(187, 0, 51, 0) 27%
+      ),
+      radial-gradient(
+        circle closest-side at 40% 22%,
+        #e1e7ff 45%,
+        rgba(221, 51, 85, 0) 46%
+      ),
+      radial-gradient(
+        circle closest-side at 60% 22%,
+        #e1e7ff 45%,
+        rgba(221, 51, 85, 0) 46%
+      ),
+      radial-gradient(
+        circle closest-side at 50% 35%,
+        #e1e7ff 30%,
+        rgba(221, 51, 85, 0) 31%
+      ),
+      radial-gradient(
           circle closest-side at 60% 43%,
           var(--bg-color) 26%,
           rgba(187, 0, 51, 0) 27%
-        ),
-        radial-gradient(
+        )
+        50px 50px,
+      radial-gradient(
           circle closest-side at 40% 43%,
           var(--bg-color) 26%,
           rgba(187, 0, 51, 0) 27%
-        ),
-        radial-gradient(
+        )
+        50px 50px,
+      radial-gradient(
           circle closest-side at 40% 22%,
-          #d35 45%,
+          #e1e7ff 45%,
           rgba(221, 51, 85, 0) 46%
-        ),
-        radial-gradient(
+        )
+        50px 50px,
+      radial-gradient(
           circle closest-side at 60% 22%,
-          #d35 45%,
+          #e1e7ff 45%,
           rgba(221, 51, 85, 0) 46%
-        ),
-        radial-gradient(
+        )
+        50px 50px,
+      radial-gradient(
           circle closest-side at 50% 35%,
-          #d35 30%,
+          #e1e7ff 30%,
           rgba(221, 51, 85, 0) 31%
-        ),
-        radial-gradient(
-            circle closest-side at 60% 43%,
-            var(--bg-color) 26%,
-            rgba(187, 0, 51, 0) 27%
-          )
-          50px 50px,
-        radial-gradient(
-            circle closest-side at 40% 43%,
-            var(--bg-color) 26%,
-            rgba(187, 0, 51, 0) 27%
-          )
-          50px 50px,
-        radial-gradient(
-            circle closest-side at 40% 22%,
-            #d35 45%,
-            rgba(221, 51, 85, 0) 46%
-          )
-          50px 50px,
-        radial-gradient(
-            circle closest-side at 60% 22%,
-            #d35 45%,
-            rgba(221, 51, 85, 0) 46%
-          )
-          50px 50px,
-        radial-gradient(
-            circle closest-side at 50% 35%,
-            #d35 30%,
-            rgba(221, 51, 85, 0) 31%
-          )
-          50px 50px;
+        )
+        50px 50px;
       background-color: var(--bg-color);
       background-size: 20px 20px;
     }
 
     body::-webkit-scrollbar-thumb {
-      -webkit-box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.9);
+      -webkit-box-shadow: inset 0 0 10px rgb(0 0 0 / 90%), inset 0 0 0px 5px rgb(29 31 33 / 90%);
       border-radius: 10px;
       background-image: -webkit-linear-gradient(
         45deg,
-        rgba(170, 170, 225, 0.7) 25%,
-        rgba(100, 50, 50, 0.9) 25%,
-        rgba(100, 50, 50, 0.9) 50%,
-        rgba(170, 170, 225, 0.7) 50%,
-        rgba(170, 170, 225, 0.7) 75%,
-        rgba(100, 50, 50, 0.9) 75%,
-        rgba(100, 50, 50, 0.9)
+        var(--scrollbar-primary-color) 25%,
+        #fff 25%,
+        #fff 50%,
+        var(--scrollbar-primary-color) 50%,
+        var(--scrollbar-primary-color) 75%,
+        #fff 75%,
+        #fff
       );
       background-size: 2rem 2rem;
     }
