@@ -173,12 +173,18 @@ The volumninous _Code Complete_ offers an entire chapter on the Power of Variabl
   - When the program will be long-lived enough that you might put it aside for a few weeks or months before working on it again
   - When you have a lot of unusual terms that are common on a project and want to have standard terms or abbreviations to use in coding
 
+## Naming Startups
+
+- Naming Startups/Domains: https://www.saashub.com/domainsfortherestofus-alternatives
+- "If you have a US startup called X and you don't have x.com, you should probably change your name." [Paul Graham](http://www.paulgraham.com/name.html)
+- Stripe's naming story: [buy the .com](https://www.quora.com/How-did-Stripe-come-up-with-its-name)
+
+
 ## More References
 
 - ztellman's Elements of Clojure book has a [free chapter on naming](https://leanpub.com/elementsofclojure/read_sample): naming data, functions, and macros.
 - Naming Components: https://open-ui.org/analysis/component-matrix
 - Naming Git Branches: https://deepsource.io/blog/git-branch-naming-conventions/
-- Naming Startups/Domains: https://www.saashub.com/domainsfortherestofus-alternatives
 - Naming Products/Books/Concepts: The Naming Book ([site](http://thenamingbook.com/), [podcast](https://uibreakfast.com/name-your-book/))
   
   steps to name things
