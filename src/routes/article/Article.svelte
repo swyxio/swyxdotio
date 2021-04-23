@@ -219,6 +219,12 @@
 
   :global(.prose .articleMain ol) {
     list-style: decimal;
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+  :global(.prose .articleMain ul) {
+    margin-left: 1rem;
+    margin-right: 1rem;
   }
   :global(.prose .articleMain ol > li) {
     padding-left: 0;
