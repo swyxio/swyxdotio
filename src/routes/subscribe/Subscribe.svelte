@@ -1,7 +1,7 @@
 <script>
     import SignUp from '../../components/SignUp/SignUp.svelte'
-    let title = "Signup for swyx's newsletter!"
-    let seoDescription = "Signup form for swy'x Newsletter"
+    let title = "subscribe to swyxletter"
+    let seoDescription = "Signup for swyx's Newsletter!"
 </script>
   
   <svelte:head>
