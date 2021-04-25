@@ -372,7 +372,7 @@
 - title: Complete Intro to Netlify in 3.5 hours
   slug: netlify-freecodecamp-intro
   categories: [Netlify]
-  url: https://www.netlify.com/blog/2019/10/07/complete-intro-to-netlify-in-3.5-hours/_
+  url: https://www.netlify.com/blog/2019/10/07/complete-intro-to-netlify-in-3.5-hours/
   github: https://gist.github.com/sw-yx/f1b8eb239559feb7e3d97b0e05564b6d
   instances:
     - venue: FreeCodeCamp
