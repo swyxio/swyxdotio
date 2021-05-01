@@ -7,7 +7,6 @@ date: 2018-06-19
 description: The fastest way to learn, grow your career, and build your network.
 ---
 
-> Author's Note: I have written an expanded version of this essay in [The Coding Career Handbook](http://learninpublic.org/?from=swyxdotio-LIP).
 > Translations welcome! ([한국어](https://velog.io/@kwanwooi/%EA%B3%B5%EA%B0%9C%EC%A0%81%EC%9C%BC%EB%A1%9C-%ED%95%99%EC%8A%B5%ED%95%98%EB%9D%BC), [Español 1](https://ricardoerl.com/blog/aprender-en-publico), [Español 2](https://gist.github.com/sw-yx/70d3ab5e9b18ff2ebdddcf45cd74ca47), [中文](https://juejin.im/post/6855456536056037389), [Português 1](https://segredo.dev/aprenda-em-publico/), [Português 2](https://mfgonzalez.github.io/aprendendo-em-publico) [Português 3](https://meleu.github.io/artigos-traduzidos/))
 
 If there's a golden rule, it's this one, so I put it first. All the other rules are more or less elaborations of this rule #1.
@@ -58,21 +57,23 @@ p.s. Eventually, they'll want to pay you for your help too. A lot more than you 
 
 ---
 
-> Next: [Learning Gears](https://www.swyx.io/writing/learning-gears/) (How to Start Learning In Public)
 
-> Also: [The Ultimate Hack for Learning In Public](https://www.swyx.io/writing/learn-in-public-hack/) (expanding on "Pick Up What They Put Down")
-
-> See Also: [How To Learn In Private](https://www.swyx.io/writing/learn-in-private) (not everything has to be public!)
-
-> Also: [Big L Notation](https://www.swyx.io/writing/big-l-notation) (expanding on why "Learn In Public" is the fastest way to learn)
-
-_originally drafted [in a gist](https://gist.github.com/sw-yx/9720bd4a30606ca3ffb8d407113c0fe5) and republished in [Letters to a New Developer](https://letterstoanewdeveloper.com/2020/12/14/learn-in-public/)_
+> Author's Note: I have written an expanded version of this essay and its related canon (below) in [The Coding Career Handbook](http://learninpublic.org/?from=swyxdotio-LIP).
+>
+> Read this next: [The Ultimate Hack for Learning In Public](https://www.swyx.io/PUWTPD/) (expanding on "Pick Up What They Put Down")
+>
+> - Then learn about [Learning Gears](https://www.swyx.io/learning-gears/)
+> - Not everything must be public: [How To Learn In Private](https://www.swyx.io/learn-in-private)
+> - A mathematical intuition for why LIP works: [Big L Notation](https://www.swyx.io/big-l-notation) 
+> - Learn how to turn ignorance to power: [The Power of Lampshading](https://swyx.io/lampshading)
+>
+> This essay was _originally drafted [in a gist](https://gist.github.com/sw-yx/9720bd4a30606ca3ffb8d407113c0fe5) and republished in [Letters to a New Developer](https://letterstoanewdeveloper.com/2020/12/14/learn-in-public/)_.
 
 ---
 
 **Related links**
 
-- Talk version of this essay: https://www.swyx.io/speaking/learn-in-public-nyc
+- 1 Hour Talk version of this essay: https://www.youtube.com/watch?v=znNxtSbuBjI
 - Patio11: [Do not end the week with nothing](https://training.kalzumeus.com/newsletters/archive/do-not-end-the-week-with-nothing)
 - Chris Coyier: [Showing up and Persistence](https://chriscoyier.net/2013/10/18/mediocre-ideas-showing-up-and-persistence/) and [Working in Public](https://chriscoyier.net/2012/09/23/working-in-public/)
 - Cory House: [Becoming an Outlier](https://vimeo.com/97415346) and [The Art of Learning](https://www.bitnative.com/2013/12/14/programming-your-brain-the-art-of-learning-in-three-steps/) and [Lifestyle Systems](https://www.infoq.com/presentations/lifestyle-software-developer/) and [The 7 Pillar Developer](https://www.youtube.com/watch?v=Nks_Fb5TUjs&feature=emb_title)

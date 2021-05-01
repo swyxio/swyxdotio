@@ -88,21 +88,18 @@
         if (notes && x.type === 'Notes') return true
       }
     })
-  // $: console.log({ filteredData })
 
   function notIncludes(_filterStr, item) {
     let res = true
     _filterStr = _filterStr.toLowerCase().replace('/', '')
-    // if (JSON.stringify(item).toLowerCase().includes(_filterStr)) return true
-    if (item.title && item.title.toLowerCase().includes(_filterStr)) res = false
-    if (item.slug && item.slug.toLowerCase().includes(_filterStr)) res = false
-    if (
-      item.categories &&
-      item.categories.join().toLowerCase().includes(_filterStr)
-    )
-      res = false
-    if (item.description && item.description.toLowerCase().includes(_filterStr))
-      res = false
+    function incluye(thing) {
+      // make sure to coerce to string bc sometimes yaml parses as string
+      if (thing && String(thing).toLowerCase().includes(_filterStr)) res = false  
+    }
+    incluye(item.title)
+    incluye(item.slug)
+    incluye(item.categories)
+    incluye(item.description)
     return res
   }
 
