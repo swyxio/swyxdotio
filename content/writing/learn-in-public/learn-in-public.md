@@ -4,7 +4,7 @@ slug: learn-in-public
 subtitle: The fastest way to learn
 tag_list: ['Advice', 'LearnInPublic']
 date: 2018-06-19
-description: The fastest way to learn, grow your career, and build your network.
+description: The fastest way to build your expertise, network, and second brain.
 ---
 
 > Translations welcome! ([한국어](https://velog.io/@kwanwooi/%EA%B3%B5%EA%B0%9C%EC%A0%81%EC%9C%BC%EB%A1%9C-%ED%95%99%EC%8A%B5%ED%95%98%EB%9D%BC), [Español 1](https://ricardoerl.com/blog/aprender-en-publico), [Español 2](https://gist.github.com/sw-yx/70d3ab5e9b18ff2ebdddcf45cd74ca47), [中文](https://juejin.im/post/6855456536056037389), [Português 1](https://segredo.dev/aprenda-em-publico/), [Português 2](https://mfgonzalez.github.io/aprendendo-em-publico) [Português 3](https://meleu.github.io/artigos-traduzidos/))
