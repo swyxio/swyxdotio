@@ -29,7 +29,13 @@
     <p>
       I am a <a href="https://github.com/sw-yx">developer</a>/PM/<a
         href="https://github.com/sw-yx/devtools-angels/">angel investor</a
-      >, primarily active in the web dev community. I grew up in Singapore 🇸🇬,
+      >, primarily active in the web dev community as a blogger and frequent
+      speaker. I am a <a href="https://stars.github.com/">GitHub Star 🌟</a>,
+      <a href="https://twitter.com/swyx/status/1392016498944741376">Stripe Community Expert</a>, 
+      and helped cofound <a href="http://twitter.com/sveltesociety">Svelte Society</a> 
+      and run <a href="https://www.swyx.io/moderating-rreactjs/">the React subreddit for over 200,000 developers</a>.
+    </p>
+    <p>I grew up in Singapore 🇸🇬,
       but have worked mostly in the US 🇺🇸/UK 🇬🇧, most recently remotely out of
       New York City 🗽 working on Developer Experience for
       <a href="https://www.swyx.io/writing/farewell-netlify/">Netlify</a>,
