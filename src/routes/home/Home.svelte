@@ -1,6 +1,7 @@
 <svelte:head>
   <title>swyx's site</title>
   <link rel="canonical" href="https://www.swyx.io/" />
+  <link rel="alternate" type="application/rss+xml" href="https://swyx.io/rss.xml" />
   <meta property="og:url" content="https://www.swyx.io/" />
   <meta property="og:type" content="article" />
   <meta property="og:title" content="swyx.io home" />
