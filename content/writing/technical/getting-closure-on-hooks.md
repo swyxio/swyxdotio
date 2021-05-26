@@ -1,6 +1,7 @@
 ---
-title: Getting Closure on Hooks
-slug: getting-closure-on-hooks
+title: Getting Closure on React Hooks
+slug: hooks
+description: Learn React Hooks by building a clone of React - in 30 minutes!
 categories: ['Tech', 'React']
 date: 2019-03-11
 canonical: https://www.netlify.com/blog/2019/03/11/deep-dive-how-do-react-hooks-really-work/

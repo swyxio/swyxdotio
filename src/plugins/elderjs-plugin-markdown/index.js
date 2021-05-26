@@ -67,7 +67,14 @@ async function getFromDevTo() {
         'api-key': process.env.DEV_TO_API_KEY,
       },
     })
-      .then((res) => res.json())
+      .then((res) => {
+        try {
+          return res.json()
+        } catch (err) {
+          console.error('res.json source: ', res);
+          throw err
+        }
+      })
       .then((x) => (allArticles = allArticles.concat(x)))
       .catch((err) => {
         console.error(err); // very basic error handling, customize as needed
