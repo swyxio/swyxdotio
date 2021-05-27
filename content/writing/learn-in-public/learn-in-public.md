@@ -80,6 +80,7 @@ p.s. Eventually, they'll want to pay you for your help too. A lot more than you 
 - Jeff Atwood: [How to stop sucking and be awesome instead](https://blog.codinghorror.com/how-to-stop-sucking-and-be-awesome-instead/)
 - Rachel Thomas: [Why You (yes, you!) Should Blog](https://medium.com/@racheltho/why-you-yes-you-should-blog-7d2544ac1045)
 - Kent C Dodds: [Intentional Career Building](https://kentcdodds.com/blog/intentional-career-building)
+- Julia Evans: [Blog about what you've struggled with](https://jvns.ca/blog/2021/05/24/blog-about-what-you-ve-struggled-with/)
 - Joshua Branchaud: Learning In Public by [posting daily TIL's for 5 years](https://github.com/jbranchaud/til)
 - Patrick O’Shaughnessy: [Learn, Build, Share, Repeat](https://twitter.com/david_perell/status/1214559294273683456?s=20)
 
