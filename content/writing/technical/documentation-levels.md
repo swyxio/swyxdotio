@@ -269,7 +269,7 @@ A more ambitious framing of this might put them into a pyramid "hierarchy of nee
 
 - https://github.com/noffle/art-of-readme "Things I've learned about writing good READMEs."
 - https://www.hillelwayne.com/post/learning-a-language/
-- https://www.divio.com/blog/documentation/
+- https://www.divio.com/blog/documentation/ (talk version here: https://www.youtube.com/watch?v=t4vKPhjcMZg)
 - https://github.com/reduxjs/redux/issues/3609 has a bunch of great links
 - https://vimeo.com/32957711 John Resig on JQuery's OSS community
 - everything in this thread https://twitter.com/adamwathan/status/1257641015835611138
