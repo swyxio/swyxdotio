@@ -5,6 +5,10 @@ tag_list: ['Advice', 'LearnInPublic']
 date: 2018-06-21
 ---
 
+> Author's note: This is part 3 of a series of essays I originally drafted about [Opinions for your Tech Career](https://gist.github.com/sw-yx/9720bd4a30606ca3ffb8d407113c0fe5). Part 1 is [Learn in Public](https://www.swyx.io/learn-in-public/).
+
+> A fully expanded and revised version is available in [The Coding Career Handbook](https://www.learninpublic.org/)!
+
 You already know you should be making projects to learn things and potentially add to your portfolio. You've read your Malcolm Gladwell, you know that you need 10,000 hours of deliberate practice. Given you're just starting out, I have a slightly contentious suggestion for you: DON'T make anything new.
 
 Your decision-making is a scarce resource. You start every day with a full tank, and as you make decisions through the day you gradually run low. We all know how good our late-late-night decisions are. Making a new app involves a thousand micro decisions - from what the app does, to how it should look, and everything in between. Decide now: Do you want to practice making technical decisions or product decisions?
@@ -19,8 +23,10 @@ Here's the subheading: **put a time limit on it**. Deadlines work wonders. Also 
 
 When you've done enough and start feeling bored, it's time to let your freak flag fly. You've earned the right to make your app because you've made others. You know what things cost and you have used your tools well enough to get there. You're still learning in public, though! Package up your experience into a talk. Livestream yourself coding. Blog about your game plan, then blog some more as you execute it. Developers who can communicate are in far more demand than developers who can't.
 
-p.s. All this will be a lot easier if you Know Your Tools well.
+P.S. All this will be a lot easier if you [Know Your Tools](https://www.swyx.io/know-your-tools/) well.
 
-_originally drafted [in a gist](https://gist.github.com/sw-yx/9720bd4a30606ca3ffb8d407113c0fe5)_
+Backup advice from Ryan Florence:
 
-more: https://mobile.twitter.com/ryanflorence/status/1119661699617787904
+{% tweet 1119661699617787904 %}
+
+> Next: [Specialize in the New!](https://www.swyx.io/specialize-in-the-new/)

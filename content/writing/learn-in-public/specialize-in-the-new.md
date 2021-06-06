@@ -5,6 +5,10 @@ tag_list: ['Advice', 'LearnInPublic']
 date: 2018-06-22
 ---
 
+> Author's note: This is part 4 of a series of essays I originally drafted about [Opinions for your Tech Career](https://gist.github.com/sw-yx/9720bd4a30606ca3ffb8d407113c0fe5). Part 1 is [Learn in Public](https://www.swyx.io/learn-in-public/).
+
+> A fully expanded and revised version is available in [The Coding Career Handbook](https://www.learninpublic.org/)!
+
 You already know the value of a niche - you go up in market value the more specialized you are in anything. So what do you specialize in?
 
 There are many schools of thought, including ones where you could be a generalist that doesn't specialize in anything. I find one rule to be simplest and most effective above all: Specialize in the New.
@@ -23,6 +27,4 @@ I have an economics background so if I lost you there, it's my fault. But I real
 
 Plant your flag on fertile ground, and say, "this is what I do". It will carry you far.
 
-p.s. Clone open source apps using your technology; demonstrate how it is better and make fixes where it is worse. "react-router" was built by early adopters of React who simply missed the old router from Ember.
-
-_originally drafted [in a gist](https://gist.github.com/sw-yx/9720bd4a30606ca3ffb8d407113c0fe5)_
+P.S. Clone open source apps using your technology; demonstrate how it is better and make fixes where it is worse. "react-router" was built by early adopters of React who simply missed the old router from Ember.

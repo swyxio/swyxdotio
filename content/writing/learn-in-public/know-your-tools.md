@@ -5,6 +5,10 @@ tag_list: ['Advice', 'LearnInPublic']
 date: 2018-06-20
 ---
 
+> Author's note: This is part 2 of a series of essays I originally drafted about [Opinions for your Tech Career](https://gist.github.com/sw-yx/9720bd4a30606ca3ffb8d407113c0fe5). Part 1 is [Learn in Public](https://www.swyx.io/learn-in-public/).
+
+> A fully expanded and revised version is available in [The Coding Career Handbook](https://www.learninpublic.org/)!
+
 You missed a lot in your bootcamp. I'm not talking about compiler theory from computer science courses. I don't mean algos. I mean a lot of basic knowledge of your tools is lacking. "A poor craftsperson blames his tools", they say. But you. You're no "craftsperson", you're still a novice. You don't even know your own tools that well. You haven't built that much with them, and you still freak out when things go wrong. It's not your fault, but it's in your power to fix your gaps. The bootcamp gave you a head start, now you have to go the distance.
 
 If you're a frontend dev: Learn Webpack. Learn Babel. Learn what the CSSWG and TC39 do. Heck, learn Javascript and CSS all over again. Did you know you can use the Chrome Devtools as a profiler and an IDE? Learn bash. Learn git. Learn CI/CD. Learn frontend testing. Learn Docker. Learn AWS, and Firebase. OPEN NODE_MODULES. Yeah, it's a lot, and I don't truly know some of these things either. I'm workin on it. Equally important is figuring out what is ok to miss. I have my list, I'm not sharing it. But there are some things you will use daily in whatever career you end up in, and some other things are sexier or seem important but are really just nice-to-have. Figure out the difference. Tech is a house of cards a mile high, abstractions atop abstractions. Lower levels of abstraction have a longer half-life than higher ones. Kyle Simpson says you should learn one abstraction level below where you work. I think that's directionally but maybe not literally correct.
@@ -19,6 +23,6 @@ There's more to knowing your tools than just knowing _what_ they are. There's al
 
 And when you've filled something in, when you've found something cool in your research, write it up.
 
-p.s. Learn in public.
+P.S. Learn in Public!
 
-_originally drafted [in a gist](https://gist.github.com/sw-yx/9720bd4a30606ca3ffb8d407113c0fe5)_
+> Next: [Clone Open Source Apps](https://www.swyx.io/clone-open-source-apps/)
