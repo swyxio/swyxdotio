@@ -2,7 +2,7 @@
   <title>About Swyx</title>
 </svelte:head>
 
-<article class="text-indigo-600 dark:text-indigo-400 px-4">
+<article class="mx-auto max-w-screen-xl text-indigo-600 dark:text-indigo-400 px-4">
   <h1 class="mb-2">About Swyx</h1>
   <h2 class="text-indigo-400 dark:text-indigo-600">aka Shawn Wang</h2>
   <div class="prose py-4">
