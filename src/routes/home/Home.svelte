@@ -66,7 +66,7 @@
         </div>
         <div
           class="mt-5 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
-          <p class="text-base font-light text-opacity-75">
+          <p class="text-base font-normal text-opacity-75">
             Join 2,000+ developers ✉️
           </p>
           <SignUp placeholder="Your email here!" />
@@ -130,7 +130,7 @@
   </div>
   <hr />
   <div class="prose p-4">
-    <h2>Featured Work (on this site)</h2>
+    <h2><span class="uppercase font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-pink-400 to-red-600">Featured Work</span></h2>
     <h3 id="featured-writing">Writing</h3>
     <div>
       I do a bunch of
@@ -141,20 +141,20 @@
       <ul class="mt-4">
         <li>
           <b> <a href="/learn-in-public/">Learn in Public</a> </b>
-          <div class="font-extralight">
+          <div class="font-normal">
             My most impactful essay, and the personal growth philosophy I and
             many others follow.
           </div>
         </li>
         <li>
           <b> <a href="/create_luck/">How to Create Luck</a> </b>
-          <div class="font-extralight">
+          <div class="font-normal">
             Luck is random, but creating luck is a skill that can be developed.
           </div>
         </li>
         <li>
           <b> <a href="/js-third-age/">Third Age of JavaScript</a> </b>
-          <div class="font-extralight">
+          <div class="font-normal">
             Every 10 years there is a changing of the guard in JavaScript. A
             well received piece that has caught the imagination of some
             community leaders like Fred Schott and Rich Harris.
@@ -164,7 +164,7 @@
           <b>
             <a href="/api-economy/">The Light and Dark Side of the API Economy</a>
           </b>
-          <div class="font-extralight">
+          <div class="font-normal">
             The 'API Economy' is a popular term for VC's and tech media, however
             Developers seem ironically out of the loop despite their central
             importance to the whole story. Here's my explanation, together with
@@ -173,7 +173,7 @@
         </li>
         <li>
           <b> <a href="/slack-fumble/">Slack is Fumbling Developers</a> </b>
-          <div class="font-extralight">
+          <div class="font-normal">
             Trendspotting how Developer communities are leaving Slack (for
             Discord).
           </div>
@@ -182,14 +182,14 @@
           <b>
             <a href="/react-sfcs-here/">React Single File Components Are Here</a>
           </b>
-          <div class="font-extralight">
+          <div class="font-normal">
             Talking about why and when Single File Components are slowly coming
             to React.js
           </div>
         </li>
         <li>
           <b><a href="/about/">About</a></b>
-          <div class="font-extralight">
+          <div class="font-normal">
             My personal story,
             <a href="https://github.com/sw-yx/README/blob/master/README.md">
               README
@@ -213,7 +213,7 @@
       <ul class="mt-4">
         <li>
           <b><a href="/speaking/react-hooks">Getting Closure on Hooks</a></b>
-          <div class="font-extralight">
+          <div class="font-normal">
             My most well received technical talk, where I explain a mental model
             for React hooks by livecoding a React clone at JSConf Asia. Started
             as
@@ -227,7 +227,7 @@
           <b><a href="/speaking/react-not-reactive">
               Why React is not Reactive
             </a></b>
-          <div class="font-extralight">
+          <div class="font-normal">
             My first conference talk ever was at the biggest React venue in the
             world, React Rally. I spent a month writing
             <a
@@ -240,14 +240,14 @@
           <b><a href="/speaking/contributing-to-react">
               Contributing to React
             </a></b>
-          <div class="font-extralight">
+          <div class="font-normal">
             My first meetup talk ever was at React NYC - this was accepted on to
             the React docs as a guide for other contributors!
           </div>
         </li>
         <li>
           <b><a href="/speaking/learn-in-public-nyc">Learn In Public</a></b>
-          <div class="font-extralight">
+          <div class="font-normal">
             My first verbal exposition on the Learn In Public philosophy. Video
             is frozen at the end, sorry.
           </div>
@@ -257,7 +257,7 @@
               (the Moana talk)
             </a>
           </b>
-          <div class="font-extralight">
+          <div class="font-normal">
             My first JSConf appearance ever, at one of the most competitive
             JSConfs ever. This talk is where I first started experimenting with
             theming talks, and it came out really well with the Moana theme.
@@ -270,7 +270,11 @@
   </div>
   <hr />
   <div class="prose p-4">
-    <h2>Other Work (off-site)</h2>
+    <h2><span class="uppercase font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-pink-400 to-red-600">Other Work</span> (off-site)</h2>
+    <h3><a href="https://swyx.transistor.fm/">The Swyx Mixtape</a></h3>
+    <div>
+      Personal podcast where I post 5-10 minute clips audio essays and clips from over 250 podcasts! 
+    </div>
     <h3>Teaching</h3>
     <div>
       I teach on
