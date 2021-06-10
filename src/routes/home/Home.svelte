@@ -130,6 +130,11 @@
   </div>
   <hr />
   <div class="prose p-4">
+    <h2><a href="https://swyx.transistor.fm/"><span class="uppercase font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-pink-400 to-red-600">The Swyx Mixtape</span></a></h2>
+    <div>
+      Personal podcast where I post 5-10 minute clips audio essays and clips from over 250 podcasts! 
+      <iframe title="swyx mixtape embed" width="100%" height="390" frameborder="no" scrolling="no" seamless src="https://share.transistor.fm/e/learn-in-podcast/playlist/dark"></iframe>
+    </div>
     <h2><span class="uppercase font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-pink-400 to-red-600">Featured Work</span></h2>
     <h3 id="featured-writing">Writing</h3>
     <div>
@@ -271,10 +276,6 @@
   <hr />
   <div class="prose p-4">
     <h2><span class="uppercase font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-pink-400 to-red-600">Other Work</span> (off-site)</h2>
-    <h3><a href="https://swyx.transistor.fm/">The Swyx Mixtape</a></h3>
-    <div>
-      Personal podcast where I post 5-10 minute clips audio essays and clips from over 250 podcasts! 
-    </div>
     <h3>Teaching</h3>
     <div>
       I teach on
