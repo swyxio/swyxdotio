@@ -166,6 +166,7 @@ const plugin = {
               devto_url: article.url,
               date: new Date(data.displayed_publish_date || article.published_at),
               title: article.title,
+              subtitle: data.subtitle,
               description: data.desc || article.description,
               categories: article.tag_list,
               devto_reactions: article.public_reactions_count

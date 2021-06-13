@@ -65,10 +65,11 @@
 >
   <div class="prose lg:prose-xl">
     <div class="title">
-      <h1>{frontmatter.title}</h1>
-      {#if frontmatter.subtitle}
-        <h2 class="mytext-light italic">{frontmatter.subtitle}</h2>
-      {/if}
+      <h1>{frontmatter.title}
+        {#if frontmatter.subtitle}
+          <p class="mytext-light italic font-bold text-xl">{frontmatter.subtitle}</p>
+        {/if}
+      </h1>
       {#if longDesc}
         <!-- p-summary is for https://brid.gy/about#microformats -->
         <p class="mytext-light italic text-sm p-summary">
