@@ -14,7 +14,10 @@
       from documentation to dev tools to dev communities.
     </p>
     <p>
-      I am a frequent writer and speaker best known for the <a
+      I am currently <a
+      href="https://www.swyx.io/why-temporal/">working on Developer Experience at Temporal.io</a
+      >, based out of Seattle. 
+      I am also a frequent writer and speaker best known for the <a
         href="https://swyx.io/LIP">Learn in Public</a
       >
       movement and recently published
