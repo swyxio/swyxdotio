@@ -7,7 +7,7 @@ date: 2018-06-19
 description: The fastest way to build your expertise, network, and second brain.
 ---
 
-> Translations welcome! ([한국어](https://velog.io/@kwanwooi/%EA%B3%B5%EA%B0%9C%EC%A0%81%EC%9C%BC%EB%A1%9C-%ED%95%99%EC%8A%B5%ED%95%98%EB%9D%BC), [Español 1](https://ricardoerl.com/blog/aprender-en-publico), [Español 2](https://gist.github.com/sw-yx/70d3ab5e9b18ff2ebdddcf45cd74ca47), [中文](https://juejin.im/post/6855456536056037389), [Português 1](https://segredo.dev/aprenda-em-publico/), [Português 2](https://mfgonzalez.github.io/aprendendo-em-publico) [Português 3](https://meleu.github.io/artigos-traduzidos/), [Deutsch](https://idkshite.com/posts/learn-in-public). [Add yours here!](https://github.com/sw-yx/swyxdotio/edit/master/content/writing/learn-in-public/learn-in-public.md)
+> Translations welcome! ([한국어](https://velog.io/@kwanwooi/%EA%B3%B5%EA%B0%9C%EC%A0%81%EC%9C%BC%EB%A1%9C-%ED%95%99%EC%8A%B5%ED%95%98%EB%9D%BC), [Español 1](https://ricardoerl.com/blog/aprender-en-publico), [Español 2](https://gist.github.com/sw-yx/70d3ab5e9b18ff2ebdddcf45cd74ca47), [中文](https://juejin.im/post/6855456536056037389), [Português 1](https://segredo.dev/aprenda-em-publico/), [Português 2](https://mfgonzalez.github.io/aprendendo-em-publico) [Português 3](https://meleu.github.io/artigos-traduzidos/), [Deutsch](https://idkshite.com/posts/learn-in-public), [Français](https://blog.damien.link/posts/learninpublic). [Add yours here!](https://github.com/sw-yx/swyxdotio/edit/master/content/writing/learn-in-public/learn-in-public.md)
 
 If there's a golden rule, it's this one, so I put it first. All the other rules are more or less elaborations of this rule #1.
 
@@ -57,14 +57,13 @@ p.s. Eventually, they'll want to pay you for your help too. A lot more than you 
 
 ---
 
-
 > Author's Note: I have written an expanded version of this essay and its related canon (below) in [The Coding Career Handbook](http://learninpublic.org/?from=swyxdotio-LIP).
 >
 > Read this next: [The Ultimate Hack for Learning In Public](https://www.swyx.io/PUWTPD/) (expanding on "Pick Up What They Put Down")
 >
 > - Then learn about [Learning Gears](https://www.swyx.io/learning-gears/)
 > - Not everything must be public: [How To Learn In Private](https://www.swyx.io/learn-in-private)
-> - A mathematical intuition for why LIP works: [Big L Notation](https://www.swyx.io/big-l-notation) 
+> - A mathematical intuition for why LIP works: [Big L Notation](https://www.swyx.io/big-l-notation)
 > - Learn how to turn ignorance to power: [The Power of Lampshading](https://swyx.io/lampshading)
 >
 > This essay was _originally drafted [in a gist](https://gist.github.com/sw-yx/9720bd4a30606ca3ffb8d407113c0fe5) and republished in [Letters to a New Developer](https://letterstoanewdeveloper.com/2020/12/14/learn-in-public/)_.
@@ -84,7 +83,8 @@ p.s. Eventually, they'll want to pay you for your help too. A lot more than you 
 - Joshua Branchaud: Learning In Public by [posting daily TIL's for 5 years](https://github.com/jbranchaud/til)
 - Patrick O’Shaughnessy: [Learn, Build, Share, Repeat](https://twitter.com/david_perell/status/1214559294273683456?s=20)
 
-    > Learn in public, fanatically. Find something you can't stop thinking about and know it better than anyone, and share everything you learn along the way. Once deep enough, start building something too. Make something you have to sell as early as possible. - [Patrick in David Perell's Twitter course](https://twitter.com/drkraft/status/1268194548343279616)
+  > Learn in public, fanatically. Find something you can't stop thinking about and know it better than anyone, and share everything you learn along the way. Once deep enough, start building something too. Make something you have to sell as early as possible. - [Patrick in David Perell's Twitter course](https://twitter.com/drkraft/status/1268194548343279616)
+
 - LadyBug Podcast: [Blogging 101](https://www.ladybug.dev/episodes/blogging-101) (esp [Ali Spittel's Blog Post Workflow](https://dev.to/aspittel/my-blog-post-workflow-from-topic-to-publication-4n78))
 - Quincy Larson: [Build your Skills, Build your Reputation, Build your Network](https://twitter.com/ossia/status/1079942716480344065?s=12)
 - [Ali Spittel on syndicating content](https://podcasts.google.com/?feed=aHR0cHM6Ly9mZWVkcy5wb2R0cmFjLmNvbS9WR0F1bHBON01ZMVU&episode=aHR0cHM6Ly9tZWRpYS5ibHVicnJ5LmNvbS9hcnJlc3RlZGRldm9wcy9jb250ZW50LmJsdWJycnkuY29tL2FycmVzdGVkZGV2b3BzL2FycmVzdGVkLWRldm9wcy1wb2RjYXN0LWVwaXNvZGUxNDMubXAz&hl=en&ved=2ahUKEwiFwevO-KvnAhUwFzQIHdd-Dn4QjrkEegQICBAI&ep=6) on the Arrested DevOps podcast
