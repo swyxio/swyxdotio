@@ -32,8 +32,8 @@
       >, primarily active in the web dev community as a blogger and frequent
       speaker. I am a <a href="https://stars.github.com/">GitHub Star 🌟</a>,
       <a href="https://twitter.com/swyx/status/1392016498944741376">Stripe Community Expert</a>, 
-      and helped cofound <a href="http://twitter.com/sveltesociety">Svelte Society</a> 
-      and run <a href="https://www.swyx.io/moderating-rreactjs/">the React subreddit for over 200,000 developers</a>.
+      helped run <a href="https://www.swyx.io/moderating-rreactjs/">the React subreddit for over 200,000 developers</a>
+      and grow <a href="https://twitter.com/swyx/status/1411071913548414976">Svelte Society from scratch to over 10,000 developers</a>.
     </p>
     <p>I grew up in Singapore 🇸🇬,
       but have worked mostly in the US 🇺🇸/UK 🇬🇧, most recently remotely out of
@@ -41,8 +41,7 @@
       <a href="https://www.swyx.io/writing/farewell-netlify/">Netlify</a>,
       <a href="https://www.swyx.io/writing/hello-aws/">Amazon Web Services</a>,
       and now
-      <a href="https://temporal.io">Temporal</a>. I am currently physically in
-      Singapore due to COVID.
+      <a href="https://www.swyx.io/why-temporal/">Temporal</a>. 
     </p>
     <p>
       I am best known for being a
@@ -86,9 +85,9 @@
       </a>
     </h3>
     <p>
-      I am currently working on Developer Experience at <a
-        href="https://temporal.io/">Temporal.io</a
-      >, working US hours out of Singapore. I am also a regular on the
+      I am currently <a
+      href="https://www.swyx.io/why-temporal/">working on Developer Experience at Temporal.io</a
+      >, based out of Seattle. I am also a regular on the
       <a href="https://www.svelteradio.com/">Svelte Radio</a> podcast and my own
       <a href="http://swyx.transistor.fm/">Swyx Mixtape</a>. You can get more
       high frequency updates on
@@ -100,8 +99,9 @@
         href="https://www.swyx.io/farewell-netlify/">Netlify</a
       >
       and <a href="https://www.swyx.io/hello-aws/">AWS</a>, and now serves as
-      Head of Developer Experience at Temporal.io. He has started and run
-      communities for hundreds of thousands of developers, like
+      <a
+      href="https://www.swyx.io/why-temporal/">Head of Developer Experience at Temporal.io</a>. 
+      He has started and run communities for hundreds of thousands of developers, like
       <a href="https://twitter.com/sveltesociety/">Svelte Society</a>,
       <a href="https://www.swyx.io/moderating-rreactjs/">/r/reactjs</a>, and the
       <a href="https://github.com/typescript-cheatsheets/react"
