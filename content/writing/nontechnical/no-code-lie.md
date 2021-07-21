@@ -7,7 +7,7 @@ date: 2019-10-11
 canonical: https://webflow.com/blog/no-code-is-a-lie
 ---
 
-\_Originally published on [the Webflow blog](https://webflow.com/blog/no-code-is-a-lie).
+_Originally published on [the Webflow blog](https://webflow.com/blog/no-code-is-a-lie)._
 
 Developers often mistake the "No Code" movement to mean "No Coders" or "Not for Coders". As a developer, I used to either regard "No Code" as a threat, or dismiss "No Code" tools as something beneath me, something you only resort to if you, well, can't code.
 
@@ -19,7 +19,7 @@ If you're thinking that that set of skills sounds like what developers do, you'd
 
 ## The API Economy + "No Code" = The GUI Economy
 
-You may have heard of [the API Economy](https://a16z.com/2018/03/09/api-world-summit/) - the idea that as software increasingly [eats the world](https://techcrunch.com/2016/06/07/software-is-eating-the-world-5-years-later/), a whole generation of software companies are arising to specialize in individual hard problems in software so you don't have to. The average person on the street will never hear of Stripe or Twilio, but they may be customers of some startups which in turn are customers of Stripe or Twilio for payments or communication.
+You may have heard of [the API Economy](https://www.swyx.io/api-economy/) - the idea that as software increasingly [eats the world](https://techcrunch.com/2016/06/07/software-is-eating-the-world-5-years-later/), a whole generation of software companies are arising to specialize in individual hard problems in software so you don't have to. The average person on the street will never hear of Stripe or Twilio, but they may be customers of some startups which in turn are customers of Stripe or Twilio for payments or communication.
 
 Where developers used to be responsible for the full stack of code and integration needed to make these capabilities possible, API companies make adding commoditized functionality as easy as dropping in a few lines of code. This makes sense on multiple dimensions: it transforms a high _fixed, upfront, uncertain_ cost, into a _variable, deferred, predictable_ expense, and a specialized service is likely to be more robust and cheaper (due to scale) than a self-written one. This is hugely beneficial for both sides, which has resulted in an entire economy of API's blossoming for every "hard problem" imaginable:
 
