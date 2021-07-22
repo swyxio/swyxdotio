@@ -1,18 +1,22 @@
 ---
 title: How To Name Things
 slug: how-to-name-things
-categories: ['Tech']
+categories: ['Tech', 'Naming']
 begun: 2019-05-09
 date: 2019-05-16
 ---
 
 > There are 2 hard problems in computer science: cache invalidation, naming things, and off-by-1 errors. - [Leon Bambrick](https://twitter.com/secretgeek/status/7269997868?lang=en)
 
-I've vacillated on my opinion on naming things (this post specifically deals with naming things in code, though I end with other resources on naming everything). I think most people start out with no or weak opinions, looking slightly askance at the weirdos who do have strong opinions. They absorb naming conventions by osmosis, and then run into real problems at scale/over time, and then develop extremely strong opinions informed by that experience. 
+I've vacillated on my opinion on naming things (this post specifically deals with naming things in code, though I end with other resources on naming everything). I think most people start out with no or weak opinions, looking slightly askance at the weirdos who do have strong opinions. They absorb naming conventions by osmosis, and then run into real problems at scale/over time, and then develop extremely strong opinions informed by that experience.
 
 The Weirdo's Journey.
 
 I've given this essay a slightly clickbaity title. Spoiler: I'm not going to solve the problem of naming things today. All I hope to do is describe some opinions I've formed from my experience in Python and JS, list some considerations, invite you to [share yours](https://twitter.com/swyx), and suggest you have this debate on your team.
+
+## Naming Companies [Jul 2021 Edit]
+
+See [The Genius of Apple's Name](https://dev.to/swyx/the-genius-of-apple-s-name-2643/).
 
 ## Not Naming Things [Aug 2019 Edit]
 
@@ -179,23 +183,22 @@ The volumninous _Code Complete_ offers an entire chapter on the Power of Variabl
 - "If you have a US startup called X and you don't have x.com, you should probably change your name." [Paul Graham](http://www.paulgraham.com/name.html)
 - Stripe's naming story: [buy the .com](https://www.quora.com/How-did-Stripe-come-up-with-its-name)
 
-
 ## More References
 
 - ztellman's Elements of Clojure book has a [free chapter on naming](https://leanpub.com/elementsofclojure/read_sample): naming data, functions, and macros.
 - Naming Components: https://open-ui.org/analysis/component-matrix
 - Naming Git Branches: https://deepsource.io/blog/git-branch-naming-conventions/
 - Naming Products/Books/Concepts: The Naming Book ([site](http://thenamingbook.com/), [podcast](https://uibreakfast.com/name-your-book/))
-  
+
   steps to name things
 
   1. criteria for success - eg feelings
   2. Generation
-      - Compound Words (Facebook)
-      - Portmanteaus (Pinterest)
-      - Foreign Translations
-      - Obscure words (Nike - greek goddess)
-    
+     - Compound Words (Facebook)
+     - Portmanteaus (Pinterest)
+     - Foreign Translations
+     - Obscure words (Nike - greek goddess)
+
 ## Your Opinion Here!
 
 I [asked for more opinions on Twitter](https://twitter.com/swyx/status/1127648507676983296), and here are some I got:
