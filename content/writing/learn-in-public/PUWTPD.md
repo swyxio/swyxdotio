@@ -7,6 +7,8 @@ tag_list: ['Advice', 'LearnInPublic']
 date: 2020-01-01
 ---
 
+> Translations welcome! ([Português](https://meleu.github.io/artigos-traduzidos/aprenda-em-publico-hack.html))
+
 Let's say you're sold on the idea of [Learning In Public](https://www.swyx.io/writing/learn-in-public/).
 
 You want to start right away but are feeling intimidated at all the advice out there:

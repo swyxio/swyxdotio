@@ -7,6 +7,8 @@ categories: ['Learn In Public']
 date: 2020-02-10
 ---
 
+> Translations welcome! ([Português](https://meleu.github.io/artigos-traduzidos/notacao-big-l.html))
+
 If you are a lifelong/[infinite learner](https://www.sachinrekhi.com/how-to-be-an-infinite-learner), you want to get the most out of the time you dedicate to learning. What are the determinants of how much you learn over time?
 
 ![Alt Text](https://dev-to-uploads.s3.amazonaws.com/i/63yl17w3d4eep4shubr3.png)
