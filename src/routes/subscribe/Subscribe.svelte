@@ -31,7 +31,7 @@
       lg:px-8 xl:max-w-3xl"
   >
     <h2><a href="https://swyx.transistor.fm/">✉️ <span class="uppercase text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-pink-400 to-red-600">The Swyx Newsletter</span></a></h2>
-    <div class="mb-8 mytext sm:mx-auto sm:text-center lg:text-left lg:mx-0">
+    <div class="mb-8 mytext text-center">
       <p class="text-base font-light text-opacity-75">
         Join <span class="font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-pink-400 to-red-600">3,000+</span> developers getting good reads, fun picks, and first looks at my work before I publish!
       </p>
