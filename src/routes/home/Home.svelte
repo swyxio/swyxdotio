@@ -67,7 +67,7 @@
         <div
           class="mt-5 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
           <p class="text-base font-normal text-opacity-75">
-            Join 2,000+ developers ✉️
+            Join 3,000+ developers ✉️
           </p>
           <SignUp placeholder="Your email here!" />
           <!-- <form

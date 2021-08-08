@@ -32,7 +32,7 @@
   >
     <div class="mt-8 mytext sm:mx-auto sm:text-center lg:text-left lg:mx-0">
       <p class="text-base font-light text-opacity-75">
-        Join 2,000+ developers getting updates ✉️
+        Join 3,000+ developers getting updates ✉️
       </p>
       <SignUp />
       <p class="mt-3 text-sm leading-5 text-opacity-75 italic">
@@ -45,6 +45,12 @@
           >Show me what I'm signing up for!</a
         >
       </p>
+    </div>
+
+    <h2><a href="https://swyx.transistor.fm/"><span class="uppercase font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-pink-400 to-red-600">The Swyx Mixtape</span></a></h2>
+    <div>
+      Personal podcast where I post 5-10 minute clips audio essays and clips from over 250 podcasts! 
+      <iframe title="swyx mixtape embed" width="100%" height="390" frameborder="no" scrolling="no" seamless src="https://share.transistor.fm/e/learn-in-podcast/playlist/dark"></iframe>
     </div>
   </article>
   
