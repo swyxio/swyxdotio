@@ -14,10 +14,6 @@ The Weirdo's Journey.
 
 I've given this essay a slightly clickbaity title. Spoiler: I'm not going to solve the problem of naming things today. All I hope to do is describe some opinions I've formed from my experience in Python and JS, list some considerations, invite you to [share yours](https://twitter.com/swyx), and suggest you have this debate on your team.
 
-## Naming Companies [Jul 2021 Edit]
-
-See [The Genius of Apple's Name](https://dev.to/swyx/the-genius-of-apple-s-name-2643/).
-
 ## Not Naming Things [Aug 2019 Edit]
 
 One option people sometimes forget they have at their disposal is to just _not_ name things where possible. I have a couple examples for you.
@@ -182,6 +178,8 @@ The volumninous _Code Complete_ offers an entire chapter on the Power of Variabl
 - Naming Startups/Domains: https://www.saashub.com/domainsfortherestofus-alternatives
 - "If you have a US startup called X and you don't have x.com, you should probably change your name." [Paul Graham](http://www.paulgraham.com/name.html)
 - Stripe's naming story: [buy the .com](https://www.quora.com/How-did-Stripe-come-up-with-its-name)
+- See [The Genius of Apple's Name](https://dev.to/swyx/the-genius-of-apple-s-name-2643/)
+- https://www.shopify.com/tools/business-name-generator
 
 ## More References
 
