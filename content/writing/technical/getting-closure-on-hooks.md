@@ -4,14 +4,17 @@ slug: hooks
 description: Learn React Hooks by building a clone of React - in 30 minutes!
 categories: ['Tech', 'React']
 date: 2019-03-11
-canonical: https://www.netlify.com/blog/2019/03/11/deep-dive-how-do-react-hooks-really-work/
 ---
 
-_Published on the Netlify Blog as [Deep dive: How do React hooks really work?](https://www.netlify.com/blog/2019/03/11/deep-dive-how-do-react-hooks-really-work/)_
-
-_Given as a talk at JSConf Asia 2019_
+_Given as a talk at JSConf Asia 2019, with a [Concurrent React followup](https://egghead.io/talks/react-egghead-talks-concurrent-react-from-scratch)_
 
 {% youtube KJP1E-Y-xyo %}
+
+The CodeSandbox used is here: https://codesandbox.io/s/jsconfasia-final-forked-ws4r6?file=/src/utils.js
+
+## Getting Closure on Hooks
+
+_Published on the Netlify Blog as [Deep dive: How do React hooks really work?](https://www.netlify.com/blog/2019/03/11/deep-dive-how-do-react-hooks-really-work/)_
 
 [Hooks](https://reactjs.org/hooks) are a fundamentally simpler way to encapsulate stateful behavior and side effects in user interfaces. They were [first introduced in React](https://www.youtube.com/watch?v=dpw9EHDh2bM) and have been broadly embraced by other frameworks like [Vue](https://css-tricks.com/what-hooks-mean-for-vue/), [Svelte](https://twitter.com/Rich_Harris/status/1093260097558581250), and even adapted for [general functional JS](https://github.com/getify/TNG-Hooks). However, their functional design requires a good understanding of closures in JavaScript.
 
@@ -67,7 +70,7 @@ function Counter() {
   const [count, setCount] = useState(0) // same useState as above
   return {
     click: () => setCount(count() + 1),
-    render: () => console.log('render:', { count: count() }),
+    render: () => console.log('render:', { count: count() })
   }
 }
 const C = Counter()
@@ -108,7 +111,7 @@ We can solve our `useState` conundrum by… moving our closure inside another cl
 
 ```js
 // Example 2
-const MyReact = (function() {
+const MyReact = (function () {
   let _val // hold our state in module scope
   return {
     render(Component) {
@@ -122,7 +125,7 @@ const MyReact = (function() {
         _val = newVal
       }
       return [_val, setState]
-    },
+    }
   }
 })()
 ```
@@ -135,7 +138,7 @@ function Counter() {
   const [count, setCount] = MyReact.useState(0)
   return {
     click: () => setCount(count + 1),
-    render: () => console.log('render:', { count }),
+    render: () => console.log('render:', { count })
   }
 }
 let App
@@ -156,7 +159,7 @@ We can extend the tiny model of React we have built up so far to include this:
 
 ```js
 // Example 3
-const MyReact = (function() {
+const MyReact = (function () {
   let _val, _deps // hold our state and dependencies in scope
   return {
     render(Component) {
@@ -166,7 +169,9 @@ const MyReact = (function() {
     },
     useEffect(callback, depArray) {
       const hasNoDeps = !depArray
-      const hasChangedDeps = _deps ? !depArray.every((el, i) => el === _deps[i]) : true
+      const hasChangedDeps = _deps
+        ? !depArray.every((el, i) => el === _deps[i])
+        : true
       if (hasNoDeps || hasChangedDeps) {
         callback()
         _deps = depArray
@@ -178,7 +183,7 @@ const MyReact = (function() {
         _val = newVal
       }
       return [_val, setState]
-    },
+    }
   }
 })()
 
@@ -191,7 +196,7 @@ function Counter() {
   return {
     click: () => setCount(count + 1),
     noop: () => setCount(count),
-    render: () => console.log('render', { count }),
+    render: () => console.log('render', { count })
   }
 }
 let App
@@ -220,7 +225,7 @@ We have a pretty good clone of the `useState` and `useEffect` functionality, but
 
 ```js
 // Example 4
-const MyReact = (function() {
+const MyReact = (function () {
   let hooks = [],
     currentHook = 0 // array of hooks, and an iterator!
   return {
@@ -233,7 +238,9 @@ const MyReact = (function() {
     useEffect(callback, depArray) {
       const hasNoDeps = !depArray
       const deps = hooks[currentHook] // type: array | undefined
-      const hasChangedDeps = deps ? !depArray.every((el, i) => el === deps[i]) : true
+      const hasChangedDeps = deps
+        ? !depArray.every((el, i) => el === deps[i])
+        : true
       if (hasNoDeps || hasChangedDeps) {
         callback()
         hooks[currentHook] = depArray
@@ -245,7 +252,7 @@ const MyReact = (function() {
       const setStateHookIndex = currentHook // for setState's closure!
       const setState = (newState) => (hooks[setStateHookIndex] = newState)
       return [hooks[currentHook++], setState]
-    },
+    }
   }
 })()
 ```
@@ -264,7 +271,7 @@ function Counter() {
     click: () => setCount(count + 1),
     type: (txt) => setText(txt),
     noop: () => setCount(count),
-    render: () => console.log('render', { count, text }),
+    render: () => console.log('render', { count, text })
   }
 }
 let App
@@ -299,7 +306,7 @@ function Component() {
   const [text, setText] = useSplitURL('www.netlify.com')
   return {
     type: (txt) => setText(txt),
-    render: () => console.log({ text }),
+    render: () => console.log({ text })
   }
 }
 function useSplitURL(str) {
