@@ -168,9 +168,10 @@
         class="font-medium text-opacity-75
           underline"
         rel="noopener"
-        href="https://tinyletter.com/swyx/archive"
+        href="https://twyx.ck.page/posts"
         >Show me what I'm signing up for!</a
-      >
+        >
+        <!-- href="https://tinyletter.com/swyx/archive" -->
     </p>
   </div>
   <WebMentions

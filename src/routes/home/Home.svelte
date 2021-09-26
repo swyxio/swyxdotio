@@ -107,7 +107,7 @@
               class="font-medium text-gray-900 dark:text-gray-100 text-opacity-25 hover:text-opacity-100
                 hover:underline"
               rel="noopener"
-              href="https://tinyletter.com/swyx/archive">Show me archives!</a>
+              href="https://twyx.ck.page/posts">Show me archives!</a>
           </p>
         </div>
       </div>
@@ -119,7 +119,7 @@
         <a href="/ideas/">
           <img
             class="hover:border-4 hover:border-blue-500 
-              w-full relative block rounded-full
+              w-64 relative block rounded-full
               md:rounded-lg overflow-hidden focus:outline-none
               focus:ring"
             src="https://avatars2.githubusercontent.com/u/6764957?u=97ad815028595b73b06ee4b0510e66bbe391228d&v=4&s=400"

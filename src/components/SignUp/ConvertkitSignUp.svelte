@@ -27,30 +27,7 @@
     <button on:click={show}>Show anyway</button>
   </div>
 {:else}
-  <div id="revue-embed">
-    <form action="https://www.getrevue.co/profile/swyx/add_subscriber" method="post" id="revue-form" name="revue-form"  target="_blank">
-    <div class="revue-form-group formkit-field sm:flex">
-      <input class="formkit-input appearance-none block w-full px-3 py-3 border
-      border-gray-300 text-sm leading-6 rounded-md
-      placeholder-gray-500 shadow-sm focus:outline-none
-      focus:placeholder-gray-400 focus:ring-4 focus:ring-blue-200 focus:bg-yellow-100
-      focus:border-blue-300 transition duration-150 ease-in-out
-      text-gray-900 sm:flex-1"
-      aria-label="Email Address" placeholder="Your email address..." type="email" name="member[email]" id="member_email">
-      <div class="revue-form-actions">
-        <input type="submit" class="formkit-submit formkit-submit mt-3 w-full px-6 py-3 border border-transparent text-base
-        leading-6 font-medium rounded-md text-white bg-indigo-600
-        shadow-sm hover:bg-indigo-400 focus:outline-none
-        focus:border-gray-300 focus:ring-gray focus:bg-red-500
-        active:bg-indigo-400 transition duration-150 ease-in-out sm:mt-0
-        sm:ml-3 sm:flex-shrink-0 sm:inline-flex sm:items-center
-        sm:w-auto hover:animate-wiggle" value="Subscribe" name="member[subscribe]" id="member_submit">
-      </div>
-    </div>
-    <div class="revue-form-footer hidden">By subscribing, you agree with Revue’s <a target="_blank" href="https://www.getrevue.co/terms">Terms of Service</a> and <a target="_blank" href="https://www.getrevue.co/privacy">Privacy Policy</a>.</div>
-    </form>
-  </div>
-<!-- <form
+  <form
     action="https://app.convertkit.com/forms/2193112/subscriptions"
     method="post"
     data-sv-form="2193112"
@@ -154,7 +131,6 @@
         >Built with ConvertKit
       </a>
     </div>
-  </form> -->
     <!-- <input
     aria-label="Email"
     id="tlemail"
@@ -181,6 +157,7 @@
     >
     Subscribe via Email
     </button> -->
+  </form>
 {/if}
 <!-- <form
       action="https://tinyletter.com/swyx"
