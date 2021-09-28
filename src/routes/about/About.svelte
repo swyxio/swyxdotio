@@ -124,7 +124,7 @@
       <a href="https://avatars3.githubusercontent.com/u/6764957?s=200&v=4"
         >Medium</a
       >, or
-      <a href="https://avatars3.githubusercontent.com/u/6764957?s=460&v=4"
+      <a href="https://user-images.githubusercontent.com/6764957/103350806-26d9ca80-4adc-11eb-9e53-a8ce9ca3f21f.jpeg"
         >Large</a
       >
       pictures of me you can use without asking.
