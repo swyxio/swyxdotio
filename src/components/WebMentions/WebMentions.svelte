@@ -1,4 +1,5 @@
 <script>
+  // https://github.com/sw-yx/domainblocklist/blob/main/README.md
   let blocklist = [
     'http://gadgetsearcher.com',
     'https://pixallus.com',
@@ -66,7 +67,18 @@
     'http://gotutoral.com/', 
     'http://techfans.co.uk/', 
     'http://pikopong.com/', 
-    'http://marketingsolution.com.au/'
+    'http://marketingsolution.com.au/',
+    'https://reportwire.org',
+    'https://www.codeificant.com',
+    'https://tipsxd.com',
+    'https://wpdesigns.live',
+    'https://gigatechnews.com',
+    'https://blogs.thebitx.com',
+    'https://updatetech.xyz',
+    'https://neoweb4u.com',
+    'https://www.websjohn.com',
+    'https://www.webhostpolice.com',
+    'https://lzomedia.com/'
   ]
   let page = 0
   export let targets
