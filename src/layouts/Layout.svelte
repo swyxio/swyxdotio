@@ -46,7 +46,7 @@
 
   /* replace typography plugin */
   .prose {
-    @apply text-gray-700 dark:text-gray-300
+    @apply text-gray-700 dark:text-gray-300  leading-7
   }
   .prose {
     & p {
