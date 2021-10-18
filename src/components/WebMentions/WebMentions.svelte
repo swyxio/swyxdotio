@@ -78,7 +78,9 @@
     'https://neoweb4u.com',
     'https://www.websjohn.com',
     'https://www.webhostpolice.com',
-    'https://lzomedia.com/'
+    'https://lzomedia.com/',
+    'https://jateng.co/',
+    'https://news.priviw.com/'
   ]
   let page = 0
   export let targets
