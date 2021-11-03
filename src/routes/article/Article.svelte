@@ -17,6 +17,8 @@
   // $: console.log({html, frontmatter, rest})
   let swyxioURL = `https://www.swyx.io/${slug}`
   let canonical = frontmatter.canonical_url || swyxioURL
+  // ensure slash at the end
+  if (canonical.substr(-1) !== '/') canonical += '/'
   let coverImage =
     frontmatter.cover_image || 'https://www.swyx.io/og_image/writing.png'
   let readTime = Math.max(1, Math.floor(html.split(' ').length / 250)) // https://blog.medium.com/read-time-and-you-bc2048ab620c
