@@ -69,6 +69,7 @@ async function getFromDevTo() {
       },
     })
       .then(async (res) => {
+        console.log({res})
         try {
           return res.json()
         } catch (err) {
