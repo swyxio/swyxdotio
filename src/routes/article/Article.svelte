@@ -14,7 +14,6 @@
     ? frontmatter.desc || frontmatter.description || seoTitle
     : seoTitle
   let slug = frontmatter.slug
-  // $: console.log({html, frontmatter, rest})
   let swyxioURL = `https://www.swyx.io/${slug}`
   let canonical = frontmatter.canonical_url || swyxioURL
   // ensure slash at the end

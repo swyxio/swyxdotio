@@ -70,10 +70,11 @@ async function getFromDevTo() {
     })
       .then(async (res) => {
         try {
-          const text = await res.text()
-          console.log('res.json text: ', text);
           return res.json()
         } catch (err) {
+          const text = await res.text()
+          console.error('err', err); // very basic error handling, customize as needed
+          console.log('res.json text: ', text.slice(0, 200));
           throw err
         }
       })
