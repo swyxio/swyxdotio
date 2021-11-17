@@ -69,7 +69,6 @@ async function getFromDevTo() {
       },
     })
       .then(async (res) => {
-        console.log({res})
         try {
           return res.json()
         } catch (err) {
@@ -81,6 +80,7 @@ async function getFromDevTo() {
       })
       .then((x) => (allArticles = allArticles.concat(x)))
       .catch((err) => {
+        console.log({res})
         console.error(err); // very basic error handling, customize as needed
         throw new Error(`error fetching page ${page}, {err}`);
       });
