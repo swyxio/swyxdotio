@@ -106,6 +106,7 @@ const hooks = [
 
       // fs.writeFileSync('testrss.json', JSON.stringify(_data, null, 2))
       _data.forEach(item => {
+        if (!item) return // undefined for whatever reason
         const slug = item.slug || (item.data ? item.data.slug : null)
         if (!slug) {
           console.log('missing slug: ', { baseUrl, item })

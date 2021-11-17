@@ -36,7 +36,7 @@
       focus:placeholder-gray-400 focus:ring-4 focus:ring-blue-200 focus:bg-yellow-100
       focus:border-blue-300 transition duration-150 ease-in-out
       text-gray-900 sm:flex-1"
-      aria-label="Email Address" placeholder="Your email address..." type="email" name="member[email]" id="member_email">
+      aria-label="Email Address" {placeholder} type="email" name="member[email]" id="member_email">
       <div class="revue-form-actions">
         <input type="submit" class="formkit-submit formkit-submit mt-3 w-full px-6 py-3 border border-transparent text-base
         leading-6 font-medium rounded-md text-white bg-indigo-600
