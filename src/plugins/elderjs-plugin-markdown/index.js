@@ -62,6 +62,7 @@ async function getFromDevTo() {
   let latestResult = [];
   do {
     page += 1; // bump page up by 1 every loop
+    // var abc = await fetch('https://dev.to/api/articles/me/published', { headers: { 'api-key': 'dxHE3aPVYRDfYs57nGWmDG6P' } })
     latestResult = await fetch(`https://dev.to/api/articles/me/published?page=${page}&per_page=${per_page}`, {
       headers: {
         'api-key': process.env.DEV_TO_API_KEY,
@@ -69,9 +70,9 @@ async function getFromDevTo() {
     })
       .then((res) => {
         try {
+          console.error('res.json source: ', res);
           return res.json()
         } catch (err) {
-          console.error('res.json source: ', res);
           throw err
         }
       })
