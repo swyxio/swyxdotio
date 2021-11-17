@@ -70,8 +70,7 @@ async function getFromDevTo() {
     })
       .then((res) => {
         try {
-          console.error('res.json text: ', res.text());
-          console.error('res.json string: ', res.toString());
+          console.error('res.json text: ', await res.text());
           return res.json()
         } catch (err) {
           throw err
