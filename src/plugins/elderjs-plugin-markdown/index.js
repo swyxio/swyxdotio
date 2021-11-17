@@ -68,9 +68,10 @@ async function getFromDevTo() {
         'api-key': process.env.DEV_TO_API_KEY,
       },
     })
-      .then((res) => {
+      .then(async (res) => {
         try {
-          console.error('res.json text: ', await res.text());
+          const text = await res.text()
+          console.log('res.json text: ', text);
           return res.json()
         } catch (err) {
           throw err
