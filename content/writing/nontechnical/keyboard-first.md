@@ -40,4 +40,6 @@ They discussed:
 
 - CLUI https://blog.repl.it/clui
 - VSCode and Chrome Devtools use Cmd + Shift + P
+- I prototyped a [Command Palette for Netlify in 2019](https://twitter.com/swyx/status/1173754563351973888)
 - [Vimium](https://chrome.google.com/webstore/detail/vimium/dbepggeogbaibhgnhhndojpepiihcmeb?hl=en) turns Chrome Keyboard navigable
+- https://capiche.com/e/consumer-dev-tools-command-palette
