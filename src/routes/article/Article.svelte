@@ -160,7 +160,7 @@
   <hr class="mt-5" />
   <div class="mt-8 mytext sm:mx-auto sm:text-center lg:text-left lg:mx-0">
     <p class="text-base font-light text-opacity-75">
-      Join 2,000+ developers getting updates ✉️
+      Join 3,000+ developers getting updates ✉️
     </p>
     <SignUp />
     <p class="mt-3 text-sm leading-5 text-opacity-75 italic">
