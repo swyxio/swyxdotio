@@ -12,10 +12,10 @@
 		><div class="w-full mb-4">
 			<div class="flex justify-between md:flex-row flex-col-reverse">
 				<h4 class="w-full mb-2 text-lg font-medium md:text-xl flex-auto">
-					{item.title}
-					{#if item.type !== 'essay'}
-					<span class="text-xs p-1 rounded-xl text-white bg-blue-700">{item.type[0].toUpperCase() + item.type.substring(1)}</span>
+					{#if item.type !== 'note'}
+					<span class="p-1 rounded text-white bg-blue-700">{item.type[0].toUpperCase() + item.type.substring(1)}</span>
           {/if}
+					{item.title}
 				</h4>
 				<div class="inline-flex flex-1 items-center flex-row-reverse justify-end md:flex-row md:justify-start">
 					{#if (item.ghMetadata && item.ghMetadata.reactions.total_count) || item.data.devToReactions}
@@ -24,7 +24,7 @@
 							>{item?.ghMetadata?.reactions?.total_count + item?.data?.devToReactions} ♥</span
 						>
 					{/if}
-					<p class="w-28 mb-2 text-left text-gray-500 md:text-right md:mb-0">{date}</p>
+					<p class="w-28 text-left text-gray-500 md:text-right">{date}</p>
 				</div>
 			</div>
 			<p class="text-gray-600 dark:text-gray-400 text-ellipsis overflow-hidden break-all">
@@ -40,9 +40,9 @@
 		><div class="w-full mb-4">
 			<div class="flex flex-col justify-between md:flex-row">
 				<h4 class="w-full mb-2 text-lg font-medium md:text-xl flex-auto">
+					<span class="p-1 rounded text-white bg-blue-700">Podcast</span>
 					{item.title}
 					<!-- pill -->
-					<span class="text-xs p-1 rounded-xl text-white bg-blue-700">Podcast</span>
 				</h4>
 				<div class="inline-flex flex-1 items-center">
 					<!-- {#if ghMetadata && ghMetadata.reactions.total_count}
@@ -72,9 +72,9 @@
 					</a>
 					<div class="justify-between md:flex-row">
 						<h4 class="w-full text-lg font-medium md:text-xl flex-auto">
+							<span class="p-1 rounded text-white bg-green-700">Talk</span>
 							{item.title}
 							<!-- pill -->
-							<span class="text-xs p-1 rounded-xl text-white bg-green-700">Talk</span>
 						</h4>
 						<div class="inline-flex flex-1 items-center">
 							<!-- {#if ghMetadata && ghMetadata.reactions.total_count}
@@ -92,9 +92,9 @@
 			{:else}
 				<div class="flex flex-col justify-between md:flex-row">
 					<h4 class="w-full mb-2 text-lg font-medium md:text-xl flex-auto">
+						<span class="p-1 rounded text-white bg-green-700">Talk</span>
 						{item.title}
 						<!-- pill -->
-						<span class="text-xs p-1 rounded-xl text-white bg-green-700">Talk</span>
 					</h4>
 					<div class="inline-flex flex-1 items-center">
 						<!-- {#if ghMetadata && ghMetadata.reactions.total_count}
