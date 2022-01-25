@@ -50,8 +50,6 @@
       )
   }
 
-  export let data
-
   let essays = true
   let talks = true
   let podcasts = true

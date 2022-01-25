@@ -26,7 +26,7 @@ I am best known for being a [#LearnInPublic](/learn-in-public) evangelist and [m
 
 In a past life I was a [currency options trader turned TMT hedge fund analyst](https://www.freecodecamp.org/news/shawn-wang-podcast-interview/) as well, and I often do approach tech from an investing and risk management angle.
 
-## What I'm Doing Now[](https://nownownow.com/about)
+<h2>What I'm Doing Now <a href="https://nownownow.com/about"><svg class="inline" xmlns="http://www.w3.org/2000/svg" width="0.75em" height="0.75em" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12" y2="17"></line></svg></a></h2>
 
 I am currently [working on Developer Experience at Temporal.io](https://www.swyx.io/why-temporal/), based out of Seattle. I am also a regular on the [Svelte Radio](https://www.svelteradio.com/) podcast and my own [Swyx Mixtape](http://swyx.transistor.fm/). You can get more high frequency updates on [my Twitter](https://twitter.com/swyx).
 
