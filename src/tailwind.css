@@ -72,7 +72,6 @@ a {
   font-size: 0.8rem;
 }
 .prose h2::before {
-  margin-left: -2.5rem;
   content: '## ';
 }
 .prose h3::before {
@@ -80,6 +79,14 @@ a {
 }
 .prose h4::before {
   content: '#### ';
+}
+
+@media (min-width: 640px){
+  .prose h1, .prose h2, .prose h3
+   , .prose h4, .prose h5
+   , .prose h6 {
+      margin-left: -2.5rem;
+    }
 }
 
 /* https://seek-oss.github.io/capsize/ */

@@ -107,7 +107,7 @@
 		</p>
 	</div>
 	<div
-		class="flex h-1 w-[100vw] sm:w-full -mx-4 sm:mx-0 my-2 bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500"
+		class="flex h-1 w-full -mx-4 sm:mx-0 my-2 bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500"
 	/>
 
 	{#if json.data.disclosure}
@@ -141,11 +141,12 @@
 			>: {json.data.disclosure}
 		</p>
 	{/if}
-	<div class="w-full mt-16 mb-32 prose dark:prose-invert max-w-none">
+	<div class="w-full mt-16 mb-16 prose dark:prose-invert max-w-none">
 		{@html content}
 	</div>
 </article>
 <div class="max-w-2xl mx-auto">
+	<Newsletter />
 	<div class="prose dark:prose-invert border-t border-b p-4 border-blue-800 mb-12">
 		{#if ghMetadata.reactions.total_count > 0}
 			Reactions: <Reactions {ghMetadata} />
@@ -157,6 +158,9 @@
 	<div class="mb-8">
 		<Comments {ghMetadata} />
 	</div>
+
+
+
 	<WebMentions
 		devto_reactions={json.data.devToReactions}
 		targets={[
@@ -165,6 +169,4 @@
 			canonicalUrl
 		]}
 	/>
-
-	<Newsletter />
 </div>

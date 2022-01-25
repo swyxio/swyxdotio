@@ -212,17 +212,16 @@
   }
 </style>
 
-<hr />
-<div id="WebMentions" class="prose">
+<div id="WebMentions" class="prose dark:prose-invert">
   <div class="myflexresponsive justify-between">
     <div>
-      <h3
+      <span
         font-family="system"
         font-size="4"
         font-weight="bold"
-        class="text-indigo-600 dark:text-indigo-400 text-xl">
+        class="text-2xl font-bold">
         Webmentions
-      </h3>
+      </span>
       <a
         aria-label="Clientside Webmentions"
         target="_blank"
@@ -320,7 +319,7 @@
                 </div>
                 {#if link.data.content}
                   <div>
-                    <p font-family="system" color="tertiary" font-size="2">
+                    <p class="prose dark:prose-invert" font-family="system" color="tertiary" font-size="2">
                       {@html cleanString(link.data.content)}
                     </p>
                   </div>
