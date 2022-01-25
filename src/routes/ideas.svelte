@@ -174,7 +174,7 @@
 	<h1 class="mb-4 text-3xl font-bold tracking-tight text-black md:text-5xl dark:text-white">
 		Idea Showcase
 	</h1>
-	<p class="mt-3 text-xl leading-7 mytext-light italic sm:mt-4">
+	<p class="mt-3 text-xl leading-7 text-black dark:text-white italic sm:mt-4">
 		For Free: Great Ideas. Lightly Used.
 	</p>
 	<p class="mb-4 text-gray-600 dark:text-gray-400">
