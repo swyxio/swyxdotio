@@ -73,7 +73,7 @@
 			class="border-b border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 font-semibold"
 			style="transition-delay: 250ms;"
 		>
-			<a class="flex w-auto pb-4" sveltekit:prefetch on:click={() => setTimeout(() => isOpen = false, 300)} href="/blog">Blog</a>
+			<a class="flex w-auto pb-4" sveltekit:prefetch on:click={() => setTimeout(() => isOpen = false, 300)} href="/ideas">Ideas</a>
 		</li>
 		<li
 			class="border-b border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 font-semibold"

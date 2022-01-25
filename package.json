@@ -4,7 +4,8 @@
 	"version": "0.0.1",
 	"scripts": {
 		"start": "svelte-kit dev",
-		"build": "svelte-kit build",
+		"build": "svelte-kit build && npm run copydatafiles",
+		"copydatafiles": "cp podcasts.yml .netlify/podcasts.yml && cp talks.yml .netlify/talks.yml",
 		"preview": "svelte-kit preview",
 		"check": "svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-check --tsconfig ./tsconfig.json --watch",

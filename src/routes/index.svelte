@@ -81,13 +81,13 @@
 		</h3>
 		<ul class="text-white">
 			{#each list as item}
-				<li class="list-disc">{new Date(item.date).toISOString().slice(0, 10)} <a sveltekit:prefetch href={item.slug}>{item.title}</a></li>
+				<li>{new Date(item.date).toISOString().slice(0, 10)} <a sveltekit:prefetch href={item.slug}>{item.title}</a></li>
 			{/each}
 		</ul>
 		<a
 		class="flex mt-8 text-gray-600 dark:text-gray-400 leading-7 rounded-lg 
 			 dark:hover:text-gray-200 transition-all h-6"
-		href="/blog"
+		href="/ideas"
 		>See all posts<svg
 			xmlns="http://www.w3.org/2000/svg"
 			fill="none"

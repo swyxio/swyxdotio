@@ -5,7 +5,7 @@ import fetch from 'node-fetch';
 import { GH_USER_REPO } from './siteConfig';
 import parse from 'parse-link-header'
 import slugify from 'slugify'
-import { parse as nodehtmlparse } from 'node-html-parser';
+// import { parse as nodehtmlparse } from 'node-html-parser';
 
 import remarkToc from 'remark-toc'
 // import remarkRehype from 'remark-rehype'
@@ -117,7 +117,8 @@ function parseIssue(issue) {
 		} else {
 			slug = slugify(title)
 		}
-		let description = data.description ?? nodehtmlparse(content.trim().split('\n')[0]).text;
+		// let description = data.description ?? nodehtmlparse(content.trim().split('\n')[0]).text;
+		let description = data.description ?? content.trim().split('\n')[0]
 		// let description = data.description ?? nodehtmlparse('<div id="abc">' +  + '</div>').textContent;
 		// (data.content.length > 300) ? data.content.slice(0, 300) + '...' : data.content
 
