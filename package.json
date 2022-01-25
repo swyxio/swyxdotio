@@ -13,7 +13,7 @@
 	},
 	"devDependencies": {
 		"@rollup/plugin-yaml": "^3.1.0",
-		"@sveltejs/adapter-netlify": "^1.0.0-next.37",
+		"@sveltejs/adapter-netlify": "1.0.0-next.37",
 		"@sveltejs/kit": "1.0.0-next.231",
 		"@tailwindcss/typography": "^0.5.0",
 		"@typescript-eslint/eslint-plugin": "^4.33.0",
