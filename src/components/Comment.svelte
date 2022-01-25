@@ -37,13 +37,6 @@
 		}
 		for (let i = node.childNodes.length; i--; ) _sanitize(node.childNodes[i]);
 	}
-	// let html = null
-	// async function getContents() {
-	//   const snarkdown = await import('snarkdown')
-	//   const res = await (await fetch(comment.url)).json()
-	//   html = snarkdown.default(res.body);
-	//   console.log(html);
-	// }
 </script>
 
 <div class="mb-4 pt-4 px-2 sm:px-4 border-y-2 sm:border-x sm:border-blue-200 dark:border-blue-700 sm:border-opacity-40">

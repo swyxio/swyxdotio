@@ -10,22 +10,24 @@
 		try {
 			const res = await fetch(`/api/blog/${slug}.json`);
 			if (res.status > 400) {
+				console.error('render error for ' + `/api/blog/${slug}.json`)
 				return {
 					status: res.status,
 					error: await res.text()
 				};
+			} else {
+				const x = (await res.json()).data;
+				const json = JSON.parse(x);
+	
+				return {
+					props: {
+						json,
+						slug,
+						REPO_URL
+					},
+					maxage: 60 // 1 minute
+				};
 			}
-			const x = (await res.json()).data;
-			const json = JSON.parse(x);
-
-			return {
-				props: {
-					json,
-					slug,
-					REPO_URL
-				},
-				maxage: 60 // 1 minute
-			};
 		} catch (err) {
 			console.error('error fetching blog post at [slug].svelte: ' + slug, err);
 			return {

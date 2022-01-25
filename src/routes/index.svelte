@@ -4,25 +4,20 @@
 	export async function load({ params, fetch }) {
 		const blogposts = await fetch(`/api/listBlogposts.json`);
 		if (blogposts.status > 400) {
+      console.error('render error for ' + `/api/listBlogposts.json`)
 			return {
 				status: blogposts.status,
 				error: await blogposts.text()
 			};
+		} else {
+			return {
+				props: { 
+					blogposts: await blogposts.json(),
+					// speaking: await speaking.json()
+				},
+				maxage: 3600 // 1 hour
+			};
 		}
-		// const speaking = await fetch(`/api/listSpeaking.json`);
-		// if (speaking.status > 400) {
-		// 	return {
-		// 		status: speaking.status,
-		// 		error: await speaking.text()
-		// 	};
-		// }
-		return {
-			props: { 
-				blogposts: await blogposts.json(),
-				// speaking: await speaking.json()
-			},
-			maxage: 3600 // 1 hour
-		};
 	}
 </script>
 

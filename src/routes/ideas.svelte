@@ -3,17 +3,19 @@
 	export async function load({ params, fetch }) {
 		const items = await fetch(`/api/listAll.json`);
 		if (items.status > 400) {
+      console.error('render error for ' + `/api/listAll.json`)
 			return {
 				status: items.status,
 				error: await items.text()
 			};
-		}
-		return {
-			props: {
-				items: await items.json()
-			},
-			maxage: 300 // 5 mins
-		};
+		} else {
+      return {
+        props: {
+          items: await items.json()
+        },
+        maxage: 300 // 5 mins
+      };
+    }
 	}
 </script>
 
