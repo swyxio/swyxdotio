@@ -107,7 +107,7 @@
 		</p>
 	</div>
 	<div
-		class="flex h-1 w-full -mx-4 sm:mx-0 my-2 bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500"
+		class="flex h-1 -mx-8 w-[calc(100%+4rem)] sm:w-full sm:mx-0 my-2 bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500"
 	/>
 
 	{#if json.data.disclosure}
