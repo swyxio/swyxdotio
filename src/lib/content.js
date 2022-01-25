@@ -82,6 +82,7 @@ export async function getBlogpost(slug) {
 			.replace(/<\/code>`}<\/pre>/g, '</code></pre>')
 			// regex for shortcode
 			.replace(/{% youtube (.*?) %}/g,(_,x) => `<iframe
+			class="w-full object-contain"
 			src="https://www.youtube.com/embed/${x}"
 			title="video123"
 			name="video123"

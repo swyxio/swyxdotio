@@ -68,6 +68,9 @@ a {
     text-decoration: none !important;
     @apply text-orange-700 dark:text-orange-400
   }
+.prose pre code {
+  font-size: 0.8rem;
+}
 .prose h2::before {
   margin-left: -2.5rem;
   content: '## ';
