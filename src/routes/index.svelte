@@ -81,7 +81,7 @@
 		</h3>
 		<ul class="text-white">
 			{#each list as item}
-				<li>{new Date(item.date).toISOString().slice(0, 10)} <a sveltekit:prefetch href={item.slug}>{item.title}</a></li>
+				<li class="text-black dark:text-white">{new Date(item.date).toISOString().slice(0, 10)} <a sveltekit:prefetch href={item.slug}>{item.title}</a></li>
 			{/each}
 		</ul>
 		<a

@@ -3,134 +3,136 @@
 	export async function load({ params, fetch }) {
 		const items = await fetch(`/api/listAll.json`);
 		if (items.status > 400) {
-      console.error('render error for ' + `/api/listAll.json`)
+			console.error('render error for ' + `/api/listAll.json`);
 			return {
 				status: items.status,
 				error: await items.text()
 			};
 		} else {
-      return {
-        props: {
-          items: await items.json()
-        },
-        maxage: 300 // 5 mins
-      };
-    }
+			return {
+				props: {
+					items: await items.json()
+				},
+				maxage: 300 // 5 mins
+			};
+		}
 	}
 </script>
 
 <script>
 	import ItemCard from '../components/ItemCard.svelte';
-  import queryString from 'query-string'
-  import { onMount } from 'svelte'
+	import queryString from 'query-string';
+	import { onMount } from 'svelte';
 
-  let urlState = { filter: '', show: [] }
-  let defaultURLState = { filter: '', show: ['Essays', 'Talks', 'Podcasts', 'Snippets'] }
+	let urlState = { filter: '', show: [] };
+	let defaultURLState = { filter: '', show: ['Essays', 'Talks', 'Podcasts', 'Snippets'] };
 
-  const setURLState = (newState) => {
-    const finalState = { ...urlState, ...newState } // merge with existing urlstate
-    urlState = finalState
-    Object.keys(finalState).forEach(function (k) {
-      if (
-        // don't save some state values if it meets the conditions below
-        !finalState[k] || // falsy
-        finalState[k] === '' || // string
-        (Array.isArray(finalState[k]) && !finalState[k].length) || // array
-        finalState[k] === defaultURLState[k] // same as default state, unnecessary
-      ) {
-        delete finalState[k] // drop query params with new values = falsy
-      }
-    })
-    if (typeof window !== 'undefined')
-      history.pushState(
-        {},
-        '',
-        document.location.origin +
-          document.location.pathname +
-          '?' +
-          queryString.stringify(finalState)
-      )
-  }
+	const setURLState = (newState) => {
+		const finalState = { ...urlState, ...newState }; // merge with existing urlstate
+		urlState = finalState;
+		Object.keys(finalState).forEach(function (k) {
+			if (
+				// don't save some state values if it meets the conditions below
+				!finalState[k] || // falsy
+				finalState[k] === '' || // string
+				(Array.isArray(finalState[k]) && !finalState[k].length) || // array
+				finalState[k] === defaultURLState[k] // same as default state, unnecessary
+			) {
+				delete finalState[k]; // drop query params with new values = falsy
+			}
+		});
+		if (typeof window !== 'undefined')
+			history.pushState(
+				{},
+				'',
+				document.location.origin +
+					document.location.pathname +
+					'?' +
+					queryString.stringify(finalState)
+			);
+	};
 
-  let essays = true
-  let talks = true
-  let podcasts = true
-  let tutorials = false
-  let snippets = false
-  let notes = false
+	let essays = true;
+	let talks = true;
+	let podcasts = true;
+	let tutorials = true;
+	let snippets = true;
+	let notes = true;
 
-  let filterStr = ''
+	let filterStr = '';
 
-  onMount(() => {
-    if (location.search.length < 1) return // early terminate if no search
-    let givenstate = queryString.parse(location.search)
-    if (!Array.isArray(givenstate.show)) givenstate.show = [givenstate.show]
-    if (!givenstate.show.includes('Essays')) essays = false
-    if (!givenstate.show.includes('Talks')) talks = false
-    if (!givenstate.show.includes('Podcasts')) podcasts = false
-    if (!givenstate.show.includes('Tutorials')) tutorials = false
-    if (!givenstate.show.includes('Snippets')) snippets = false
-    if (!givenstate.show.includes('Notes')) notes = false
-    if (givenstate.filter) filterStr = givenstate.filter
-    urlState = { ...defaultURLState, ...givenstate }
-  })
-  function saveURLState() {
-    setURLState({
-      filter: filterStr,
-      show: [
-        essays && 'Essays',
-        talks && 'Talks',
-        podcasts && 'Podcasts',
-        snippets && 'Snippets',
-        tutorials && 'Tutorials',
-        notes && 'Notes'
-      ].filter(Boolean)
-    })
-  }
-  // $: console.log({urlState, essays, talks, podcasts})
+	onMount(() => {
+		if (location.search.length < 1) return; // early terminate if no search
+		let givenstate = queryString.parse(location.search);
+		if (!Array.isArray(givenstate.show)) givenstate.show = [givenstate.show];
+		if (!givenstate.show.includes('Essays')) essays = false;
+		if (!givenstate.show.includes('Talks')) talks = false;
+		if (!givenstate.show.includes('Podcasts')) podcasts = false;
+		if (!givenstate.show.includes('Tutorials')) tutorials = false;
+		if (!givenstate.show.includes('Snippets')) snippets = false;
+		if (!givenstate.show.includes('Notes')) notes = false;
+		if (givenstate.filter) filterStr = givenstate.filter;
+		urlState = { ...defaultURLState, ...givenstate };
+	});
+	function saveURLState() {
+		setTimeout(() => {
+			setURLState({
+				filter: filterStr,
+				show: [
+					essays && 'Essays',
+					talks && 'Talks',
+					podcasts && 'Podcasts',
+					snippets && 'Snippets',
+					tutorials && 'Tutorials',
+					notes && 'Notes'
+				].filter(Boolean)
+			});
+		}, 100);
+	}
+	// $: console.log({urlState, essays, talks, podcasts})
 
-  $: showAll = filterStr.length > 2
-  // $: filteredData = data
-  //   .map((x) => {
-  //     if (x.date) x.effectiveDate = new Date(x.date)
-  //     if (x.instances) x.effectiveDate = new Date(x.instances[0].date)
-  //     return x
-  //   })
-  //   .sort((a, z) => z.effectiveDate - a.effectiveDate)
-  //   .filter((_, i) => (showAll ? true : i < 30))
-  //   .filter((x) => {
-  //     if (filterStr && notIncludes(filterStr, x)) {
-  //       return false
-  //     } else {
-  //       if (essays && x.type === 'Essays') return true
-  //       if (talks && x.type === 'Talks') return true
-  //       if (podcasts && x.type === 'Podcasts') return true
-  //       if (tutorials && x.type === 'Tutorials') return true
-  //       if (notes && x.type === 'Notes') return true
-  //     }
-  //   })
+	$: showAll = filterStr.length > 2;
+	// $: filteredData = data
+	//   .map((x) => {
+	//     if (x.date) x.effectiveDate = new Date(x.date)
+	//     if (x.instances) x.effectiveDate = new Date(x.instances[0].date)
+	//     return x
+	//   })
+	//   .sort((a, z) => z.effectiveDate - a.effectiveDate)
+	//   .filter((_, i) => (showAll ? true : i < 30))
+	//   .filter((x) => {
+	//     if (filterStr && notIncludes(filterStr, x)) {
+	//       return false
+	//     } else {
+	//       if (essays && x.type === 'Essays') return true
+	//       if (talks && x.type === 'Talks') return true
+	//       if (podcasts && x.type === 'Podcasts') return true
+	//       if (tutorials && x.type === 'Tutorials') return true
+	//       if (notes && x.type === 'Notes') return true
+	//     }
+	//   })
 
-  function notIncludes(_filterStr, item) {
-    let res = true
-    _filterStr = _filterStr.toLowerCase().replace('/', '')
-    function incluye(thing) {
-      // make sure to coerce to string bc sometimes yaml parses as string
-      if (thing && String(thing).toLowerCase().includes(_filterStr)) res = false  
-    }
-    incluye(item.title)
-    incluye(item.slug)
-    incluye(item.categories)
-    incluye(item.description)
-    return res
-  }
+	function notIncludes(_filterStr, item) {
+		let res = true;
+		_filterStr = _filterStr.toLowerCase().replace('/', '');
+		function incluye(thing) {
+			// make sure to coerce to string bc sometimes yaml parses as string
+			if (thing && String(thing).toLowerCase().includes(_filterStr)) res = false;
+		}
+		incluye(item.title);
+		incluye(item.slug);
+		incluye(item.categories);
+		incluye(item.description);
+		return res;
+	}
 
-  let inputEl
-  function focusSearch(e) {
-    if (e.key === '/' && inputEl) inputEl.select()
-  }
+	let inputEl;
+	function focusSearch(e) {
+		if (e.key === '/' && inputEl) inputEl.select();
+	}
 
 	export let items;
-	
+
 	// // export let page;
 	// // const PAGE_SIZE = 30;
 	// // $: start = 1 + (page - 1) * PAGE_SIZE;
@@ -147,18 +149,18 @@
 		// 	}
 		// 	return true;
 		// })
-		.slice(0, showAll ? 20 : items.length)
-    .filter((x) => {
-      if (filterStr && notIncludes(filterStr, x)) {
-        return false
-      } else {
-        if (essays && x.type === 'essay') return true
-        if (talks && x.type === 'talk') return true
-        if (podcasts && x.type === 'podcast') return true
-        if (tutorials && x.type === 'tutorial') return true
-        if (notes && x.type === 'note') return true
-      }
-    });
+		.slice(0, showAll ? items.length : 20)
+		.filter((x) => {
+			if (filterStr && notIncludes(filterStr, x)) {
+				return false;
+			} else {
+				if (essays && x.type === 'essay') return true;
+				if (talks && x.type === 'talk') return true;
+				if (podcasts && x.type === 'podcast') return true;
+				if (tutorials && x.type === 'tutorial') return true;
+				if (notes && x.type === 'note') return true;
+			}
+		});
 </script>
 
 <svelte:head>
@@ -178,7 +180,7 @@
 	<p class="mb-4 text-gray-600 dark:text-gray-400">
 		In total, I've written <span class="bg-orange-400 bg-opacity-70 font-mono text-white px-2"
 			>{items.length}</span
-		> essays, snippets, tutorials, and notes. Use the search below to filter by title.
+		> essays, snippets, tutorials, and notes!
 	</p>
 	<div class="relative w-full">
 		<input
@@ -186,8 +188,8 @@
 			type="text"
 			bind:this={inputEl}
 			on:input={saveURLState}
-			bind:value={filterStr} 
-			placeholder="Search articles (JavaScript, Career, Advice, Reflections, etc.)"
+			bind:value={filterStr}
+			placeholder="Hit / to search (JavaScript, Advice, Reflections, etc.)"
 			class="block w-full px-4 py-2 text-gray-900 bg-white border border-gray-200 rounded-md dark:border-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-gray-100"
 		/><svg
 			class="absolute w-5 h-5 text-gray-400 right-3 top-3 dark:text-gray-300"
@@ -203,98 +205,116 @@
 			/></svg
 		>
 	</div>
-  <div class="flex items-center mb-12 mt-2 ">
-  <span class="text-gray-900 dark:text-gray-400 mr-2">
-    Filter: 
-  </span>
-  <span
-    class="relative z-0 inline-flex flex-col sm:flex-row shadow-sm rounded-md">
-    <!-- <div class="inline-flex items-center text-gray-600 dark:text-gray-400 mr-2 italic px-4">Show:</div> -->
-    <button
-      type="button"
-      on:click={() => {saveURLState(); essays = !essays}}
-      class:bimodalpurple={essays}
-      class:mytext={essays}
-      class:font-medium={essays}
-      class="-ml-px sm:ml-0 relative inline-flex items-center px-4 py-2
+	<div class="flex items-center mb-12 mt-2 ">
+		<span class="text-gray-900 dark:text-gray-400 mr-2"> Filter: </span>
+		<span class="relative z-0 grid grid-cols-3 sm:grid-cols-6 shadow-sm rounded-md">
+			<!-- <div class="inline-flex items-center text-gray-600 dark:text-gray-400 mr-2 italic px-4">Show:</div> -->
+			<button
+				type="button"
+				on:click={() => {
+					saveURLState();
+					essays = !essays;
+				}}
+				class:bimodalpurple={essays}
+				class:mytext={essays}
+				class:font-medium={essays}
+				class="-ml-px sm:ml-0 relative inline-flex items-center px-4 py-2
       sm:rounded-l-md border border-gray-300 text-sm leading-5
      dark:text-gray-200 text-gray-700 focus:z-10
       focus:outline-none focus:border-blue-300 focus:ring-yellow focus:text-yellow-400
        transition ease-in-out
-      duration-150">
-      Essays
-    </button>
-    <button
-      type="button"
-      on:click={() => {saveURLState(); talks = !talks}}
-      class:bimodalpurple={talks}
-      class:mytext={talks}
-      class:font-medium={talks}
-      class="-ml-px relative inline-flex items-center px-4 py-2 border
+      duration-150"
+			>
+				Essays
+			</button>
+			<button
+				type="button"
+				on:click={() => {
+					saveURLState();
+					talks = !talks;
+				}}
+				class:bimodalpurple={talks}
+				class:mytext={talks}
+				class:font-medium={talks}
+				class="-ml-px relative inline-flex items-center px-4 py-2 border
       border-gray-300 text-sm leading-5 dark:text-gray-200 text-gray-700
      focus:z-10 focus:outline-none
       focus:border-blue-300 focus:ring-yellow focus:text-yellow-400 
-     transition ease-in-out duration-150">
-      Talks
-    </button>
-    <button
-      type="button"
-      on:click={() => {saveURLState(); podcasts = !podcasts}}
-      class:bimodalpurple={podcasts}
-      class:mytext={podcasts}
-      class:font-medium={podcasts}
-      class="-ml-px relative inline-flex items-center px-4 py-2 border
+     transition ease-in-out duration-150"
+			>
+				Talks
+			</button>
+			<button
+				type="button"
+				on:click={() => {
+					saveURLState();
+					podcasts = !podcasts;
+				}}
+				class:bimodalpurple={podcasts}
+				class:mytext={podcasts}
+				class:font-medium={podcasts}
+				class="-ml-px relative inline-flex items-center px-4 py-2 border
       border-gray-300 text-sm leading-5 dark:text-gray-200 text-gray-700
      focus:z-10 focus:outline-none
       focus:border-blue-300 focus:ring-yellow focus:text-yellow-400 
-     transition ease-in-out duration-150">
-      Podcasts
-    </button>
-    <button
-      type="button"
-      on:click={() => {saveURLState(); snippets = !snippets}}
-      class:bimodalpurple={snippets}
-      class:mytext={snippets}
-      class:font-medium={snippets}
-      class="-ml-px relative items-center px-4 py-2 border
-      hidden md:inline-flex
+     transition ease-in-out duration-150"
+			>
+				Podcasts
+			</button>
+			<button
+				type="button"
+				on:click={() => {
+					saveURLState();
+					snippets = !snippets;
+				}}
+				class:bimodalpurple={snippets}
+				class:mytext={snippets}
+				class:font-medium={snippets}
+				class="-ml-px relative inline-flex items-center px-4 py-2 border
+        border-gray-300 text-sm leading-5 dark:text-gray-200 text-gray-700
+       focus:z-10 focus:outline-none
+        focus:border-blue-300 focus:ring-yellow focus:text-yellow-400 
+       transition ease-in-out duration-150"
+			>
+				Snippets
+			</button>
+			<button
+				type="button"
+				on:click={() => {
+					saveURLState();
+					tutorials = !tutorials;
+				}}
+				class:bimodalpurple={tutorials}
+				class:mytext={tutorials}
+				class:font-medium={tutorials}
+				class="-ml-px relative inline-flex items-center px-4 py-2 border
+        border-gray-300 text-sm leading-5 dark:text-gray-200 text-gray-700
+       focus:z-10 focus:outline-none
+        focus:border-blue-300 focus:ring-yellow focus:text-yellow-400 
+       transition ease-in-out duration-150"
+			>
+				Tutorials
+			</button>
+			<button
+				type="button"
+				on:click={() => {
+					saveURLState();
+					notes = !notes;
+				}}
+				class:bimodalpurple={notes}
+				class:mytext={notes}
+				class:font-medium={notes}
+				class="
+      sm:rounded-r-md border -ml-px relative inline-flex items-center px-4 py-2 border
       border-gray-300 text-sm leading-5 dark:text-gray-200 text-gray-700
      focus:z-10 focus:outline-none
       focus:border-blue-300 focus:ring-yellow focus:text-yellow-400 
-     transition ease-in-out duration-150">
-      Snippets
-    </button>
-    <button
-      type="button"
-      on:click={() => {saveURLState(); tutorials = !tutorials}}
-      class:bimodalpurple={tutorials}
-      class:mytext={tutorials}
-      class:font-medium={tutorials}
-      class="-ml-px relative items-center px-4 py-2 border
-      hidden md:inline-flex
-      border-gray-300 text-sm leading-5 dark:text-gray-200 text-gray-700
-     focus:z-10 focus:outline-none
-      focus:border-blue-300 focus:ring-yellow focus:text-yellow-400 
-     transition ease-in-out duration-150">
-      Tutorials
-    </button>
-    <button
-      type="button"
-      on:click={() => {saveURLState(); notes = !notes}}
-      class:bimodalpurple={notes}
-      class:mytext={notes}
-      class:font-medium={notes}
-      class="-ml-px relative items-center px-4 py-2
-      hidden md:inline-flex
-      sm:rounded-r-md border border-gray-300 text-sm leading-5
-     dark:text-gray-200 text-gray-700 focus:z-10
-      focus:outline-none focus:border-blue-300 focus:ring-yellow focus:text-yellow-400
-       transition ease-in-out
-      duration-150">
-      Notes
-    </button>
-  </span>
-  </div>
+     transition ease-in-out duration-150"
+			>
+				Notes
+			</button>
+		</span>
+	</div>
 	<!-- {#if !search}
 		<h3 class="mt-8 mb-4 text-2xl font-bold tracking-tight text-black md:text-4xl dark:text-white">
 			Most Popular
@@ -316,15 +336,15 @@
 	{#if list.length}
 		<ul class="max-w-full">
 			{#each list as item}
-				<li class="mb-8 text-lg">
-          <ItemCard {item} />
+				<li class="mb-4">
+					<ItemCard {item} />
 				</li>
 			{/each}
 		</ul>
-		{#if showAll}
+		{#if !showAll}
 			<div class="flex justify-center">
 				<button
-					on:click={() => (showAll = false)}
+					on:click={() => (showAll = true)}
 					class="inline-block text-lg font-bold tracking-tight text-black md:text-2xl dark:text-white bg-blue-100 dark:bg-blue-900 rounded p-4 hover:text-yellow-900 hover:dark:text-yellow-200"
 				>
 					Load More Posts...
