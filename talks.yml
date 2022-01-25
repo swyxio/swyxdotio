@@ -1,0 +1,708 @@
+# 2020 Talks
+
+- title: The Future of Dev Tools with Minko Gechev (Angular Core Team)
+  slug: devtools-minko-gechev
+  categories: [Angular]
+  description: Minko has been working tirelessly for years on the Angular developer experience. We'll talk about the Language Server, Angular Schematics, and whatever else team Angular has been cooking up for developers!
+  instances:
+    - venue: Swyx YouTube
+      date: 2020-12-16
+      video: https://www.youtube.com/watch?v=ECvAl3Ii5vM
+- title: Intro to Flutter and AWS Amplify
+  slug: intro-to-aws-amplify-and-flutter
+  categories: [AWS]
+  description: A General intro to AWS Amplify and Flutter on the Amplify with Friends show on the official AWS twitch stream
+  instances:
+    - venue: AWS Twitch
+      date: 2020-11-06
+      video: https://www.youtube.com/watch?v=AvTV1tWLv_s
+- title: Lessons and Regrets from Shipping My $50000 Coronavirus Side Project
+  slug: lessons-and-regrets-50k
+  categories: [CodingCareer]
+  description: This talk is about my personal journey shipping my side project, LearnInPublic.org, from April to July this year. It involves both technical and nontechnical takeaways, from coding and designing the landing page and ecommerce fulfilment, to writing and marketing the book, all as a solo dev. Shipping side projects for money is a dream for many dev and I wanted to share what I learned doing mine.
+  instances:
+    - venue: JS.LA
+      date: 2020-09-29
+      video: https://www.youtube.com/watch?v=LJCyS8bFY80
+- title: Typesafe, Fullstack React
+  slug: aws-typesafe-fullstack-react
+  categories: [AWS]
+  description: A live coding talk given at React Global Summit 2020, with React, TypeScript GraphQL with an AWS Amplify backend.
+  instances:
+    - venue: React Summit
+      date: 2020-09-17
+      tweet: https://twitter.com/swyx/status/1305994389362106370?s=20
+      video: https://www.youtube.com/watch?v=ja6meOLHjIg
+- title: Intro to AWS Amplify and AppSync
+  slug: intro-to-aws-amplify-and-appsync
+  categories: [AWS]
+  description: A General intro to AWS Amplify and AppSync
+  instances:
+    - venue: Singapore Serverless
+      date: 2020-10-14
+      video: https://www.youtube.com/watch?v=YwpInifIO8o
+- title: Concurrent React From Scratch
+  slug: react-from-scratch
+  categories: [React]
+  desc: Cloning Concurrent React with React Fiber and discussing Time Slicing and Suspense
+  description: In this talk, we’ll create an effective mental model of Concurrent React by building a tiny clone of React! We will start with a blank js file and learn about how React renders components, schedules Time-Slicing updates with a Work Loop, add Hooks, and end off with a mini-clone of Suspense!
+  github: https://gist.github.com/sw-yx/f94dcb03adc7252ac0b735d7ba242890
+  instances:
+    - venue: Egghead
+      date: 2020-05-29
+      video: https://egghead.io/lessons/react-eggheadtalks-concurrent-react-from-scratch?af=95qfq1
+    - venue: ByteConf React
+      url: https://www.bytesized.xyz/react-2020
+      date: 2020-05-02
+      video: https://www.youtube.com/watch?v=yeyiA9U8Ep8&feature=youtu.be
+    - venue: ReactAdvanced London
+      url: https://reactadvanced.com/
+      date: 2019-10-25
+      video: https://www.youtube.com/watch?v=dFO4m7Y-yhs
+    - venue: EngineersSG
+      date: 2019-11-29
+      video: https://www.youtube.com/watch?v=8opFTK2shAc
+- title: Open Source Your Knowledge
+  slug: open-source-knowledge
+  categories: [LearnInPublic]
+  github: https://gist.github.com/sw-yx/f5a509d5f4a54fff0ad50aa57d620848
+  description: We all believe in the power of open source for code. But when we open source our knowledge, we can get the same benefits and it will last longer than any line of code that we will ever write. NOTE - a written version of this is available in the Coding Career Handbook.
+  instances:
+    - venue: BelgiumJS
+      date: 2020-04-08
+      slides: https://docs.google.com/presentation/d/1XKbq4HcHW4_D4BrZeEE4ggB4p6XO4OBqXLeAt1Grsio/edit#slide=id.g8316066824_0_186
+      video: https://youtu.be/XoATf7xGoUY
+- title: The Operating System of You
+  slug: operating-system-of-you
+  categories: [Careers]
+  description: Developers are mostly humans that run the same "hardware". Therefore most performance differences, especially the ones we can control, are down to our "OS" - our conscious prioritization and processing - and "firmware" - our unconscious personality and reactions. What can we do to better take care of our "hardware", and what does running better "software" look like?
+  instances:
+    - venue: CascadiaJS
+      description: the truncated 20 min one that actually ran for the conference
+      url: https://2020.cascadiajs.com/speakers/shawn-wang
+      video: https://www.youtube.com/watch?v=KBi_LZTCrgU
+      date: 2020-09-24
+    - venue: CascadiaJS
+      description: my full length, 25 min recording.
+      slides: https://docs.google.com/presentation/d/1z43axgETtWGqPFlRDmqU11gb3aJnEH0y3MgSV5fchpM/edit?usp=sharing
+      url: https://2020.cascadiajs.com/speakers/shawn-wang
+      video: https://www.youtube.com/watch?v=D-Sj6jo4o1I
+      date: 2020-09-01
+    - venue: BelgiumJS
+      video: https://www.youtube.com/watch?v=IzK4IxHv3W0
+      slides: https://docs.google.com/presentation/d/1iHi3tULjAWeMpfjzpKtix-vzRItRSC4P_Osl0hkm_aY/edit?usp=sharing
+      date: 2020-06-23
+- title: JAMstack Chat with Amazon Pay India Team
+  slug: jamstack-amazon-pay-india
+  categories: [Jamstack]
+  description: A recorded casual chat I had with the Amazon Pay India team on JAMstack topics. The audience is a mix of technical and nontechnical team members, so this is a more high level/introductory overview.
+  github: https://gist.github.com/sw-yx/7dfb9eee760ea948b15cdf2fcdcb9629
+  instances:
+    - venue: YouTube
+      date: 2020-07-23
+      video: https://www.youtube.com/watch?v=AXiodji_8Ec
+- title: Coding Careers
+  slug: coding-careers
+  categories: [Careers]
+  published: true
+  description: A general talk about the Coding Career Handbook
+  instances:
+    - venue: Vincit
+      video: https://www.youtube.com/watch?v=iBwjAZvJhvI
+      slides: https://docs.google.com/presentation/d/1VsWoNEMzLeHllMUBn7Ti9Ed0j0r9wDXSaiTZ7K-vspw/edit?usp=sharing
+      date: 2020-06-24
+    - venue: Summer of Shipping
+      date: 2020-07-09
+      video: https://www.youtube.com/watch?v=F7AP7tfsM1Y
+      desc: A chat with Summer of Shipping students about Coding Careers - a slightly updated version of the Vincit Devs talk I gave.
+      description: A chat with Summer of Shipping students about Coding Careers - a slightly updated version of the Vincit Devs talk I gave. Philip Liao is doing a great thing with this program and the students asked good questions.
+    - venue: Fullstack Academy
+      date: 2020-04-16
+      video: https://www.youtube.com/watch?v=QFHO2-8fGtM
+      description: I chatted with David and Nimit, founders of the bootcamp where I started, about React and all the soft skills stuff I've been working on.
+    - venue: IncludeJS
+      date: 2020-04-14
+      video: https://www.youtube.com/watch?v=1ayI9j57VlQ
+      desc: "I chatted with Eva on #LearnInPublic, teaching and career change!"
+      description: "Chat with Eva from BeJS about career change, Free Code Camp, #LearningInPublic, online communities (such as ReactJS community on Reddit), the importance of writing and note-taking (and creating your second brain), public speaking and cats!"
+    - venue: Devto Youtube
+      date: 2020-11-11
+      video: https://www.youtube.com/watch?v=XZzChiXp8wM
+      description: I chatted with Nick Taylor and Christina Gorton from Dev.to on Svelte and the Coding Career Handbook!
+    - venue: Lambda School
+      date: 2020-12-06
+      video: https://www.youtube.com/watch?v=ilvwP4-7UXM
+      description: I chatted with Lambda School alums on the Coding Career Handbook!
+- slug: react-rally-metalanguage
+  title: Growing a Meta-Language
+  categories: [React]
+  desc: My React Rally 2020 talk on Dialects, Distros, Devtools, and the React SFC idea
+  description: 7 years after release, React reaches millions of developers and billions of users. Its ideas have influenced other frameworks, even those in other languages like Swift UI and Jetpack Compose. What’s next? The community has been hard at work innovating in React formats, metaframeworks, and developer tooling. This fits an established pattern of how developer languages grow, and likely forms a roadmap for React in the Third Age of JavaScript.
+  instances:
+    - venue: ReactRally
+      github: https://gist.github.com/sw-yx/dedf23e25e6955d29968b5eecd7d749e
+      url: https://www.reactrally.com/speakers
+      date: 2020-08-15
+      video: https://www.youtube.com/watch?v=18F5v1diO_A
+      slides: https://docs.google.com/presentation/d/1sBb7KjhSOiONML61fnYwkVI-7yzJCoP-Zgs6E37T-nY/edit?usp=sharing
+- title: State of /r/ReactJS
+  slug: react-survey-2019-talk
+  categories: [React]
+  desc: Presenting Results from the 2019 /r/ReactJS survey
+  description: Presenting Results from the 2019 /r/ReactJS survey
+  instances:
+    - venue: ThisDotMedia
+      url: https://www.swyx.io/writing/react-survey-2019/
+      date: 2020-02-19
+      slides: https://docs.google.com/presentation/d/1M-JUtp9I5_gSk8OpV9Adk9sYzhoU-VNcwz9RUJ1-8Sw/edit#slide=id.p
+      video: https://youtu.be/RCtqCDiNLvU?t=190
+- title: What's New in React
+  slug: react-whats-new
+  categories: [React]
+  description: The React ecosystem is extremely fast moving and it can be hard to keep up. In 2019, the STAR thesis – Design Systems, Static Typing, Smart APIs, and Static/Server Rendering – mostly worked out. Is it over? What's next? Let's take stock of how React is evolving in 2020, and take some guesses at what you should be checking out and investing in.
+  instances:
+    - venue: IonicConf
+      date: 2020-06-24
+      slides: https://docs.google.com/presentation/d/1s2mcumHDA-sSCf9eDWNGnVfApgtGwRBhI4fV4i4nFkU/edit?usp=sharing
+      video: https://www.youtube.com/watch?v=Qox56z4xH6o
+    - venue: IonicConf livestream
+      date: 2020-06-24
+      video: https://youtu.be/xh-B-AtsLJc?t=3944
+- title: Marketing Yourself as a Dev
+  slug: reacteurope-podcast
+  categories: [Careers]
+  description: I chatted with Patrick, founder of React Europe, about the Marketing Yourself blogpost.
+  instances:
+    - venue: React Europe
+      date: 2020-04-20
+      video: https://www.youtube.com/watch?v=bcca0VCJe9Q&list=PLCC436JpVnK31LZG2cNINhlEQ1KTm39BR&index=15
+
+- title: Data Fetching For Developers Who Are New to Svelte And Wanna Learn To Do Other Stuff Good Too
+  slug: svelte-data-fetching
+  categories: [Svelte]
+  repo: https://github.com/sw-yx/svelte-data-fetching
+  desc: my first talk for svelte society online conf :)
+  description: Here at the Svelte Society For Developers Who Are New to Svelte And Wanna Learn To Do Other Stuff Good Too, we teach you that there's more to life than making really, really ridiculously good-looking apps. You can also make them with a lot less code.
+  instances:
+    - venue: SvelteSociety
+      date: 2020-04-26
+      video: https://www.youtube.com/watch?v=_K7LRy6IP_4
+    - venue: SvelteSociety
+      date: 2020-04-26
+      video: https://www.youtube.com/watch?v=nR8XRpin4OI&feature=youtu.be
+- title: Svelte for React Devs
+  slug: svelte-for-react-devs-js-morocco
+  categories: [Svelte]
+  description: A livecoded introduction to Svelte for React Devs
+  instances:
+    - venue: YouTube
+      date: 2020-05-30
+      video: https://www.youtube.com/watch?v=iUbBm5YhJfY&feature=youtu.be
+- title: Intro to Svelte and Svelte Ecosystem
+  slug: svelte-intro-ecosystem
+  categories: [Svelte]
+  github: https://gist.github.com/sw-yx/28fe6da657660fec0d15fa2fa8c35f1c
+  url: https://www.eventbrite.com/e/javascript-and-friends-online-meetup-svelte-tickets-90472245923
+  description: Svelte is an exciting, newer JavaScript framework that was designed from the ground up with compilation and developer experience in mind. Yet the compiler can be a black box - how can a tiny framework ship so many features? This talk is a deep dive into Svelte's compiler and runtime to demystify this brilliant approach to solving the tradeoff between DX and UX.
+  instances:
+    - venue: JSandFriends
+      date: 2020-02-19
+      video: https://www.youtube.com/watch?v=XQi4kd-6SSQ&feature=youtu.be
+- title: Svelte Preprocessors and How to Write Them
+  slug: svelte-preprocessors
+  categories: [Svelte]
+  description: Svelte is a superset of HTML - but what if we don't want to write HTML? In this livecode talk we explore how Svelte preprocessors work, letting you write Sass, Pug, and even TypeScript inside of your Svelte comopnents!
+  instances:
+    - venue: SvelteSociety
+      date: 2020-06-11
+      video: https://www.youtube.com/watch?v=QCrpZBsCSq8
+
+- title: Svelte and the Great Space Elevator
+  slug: svelte-space-elevator
+  categories: [Svelte]
+  slides: https://docs.google.com/presentation/d/1fTdTyCVdiHC7PvyYRzmessS09TfLFDXEk50aRhb-JRM/edit#slide=id.g82f12b5bf5_2_290
+  description: Modern JS frameworks have run into a quandary - what we write is what we ship. Despite our best efforts at minifying and treeshaking, we cannot fight the fact that adding features means adding JS bundle size. This means we are often trading off user experience against developer experience for every fatiguing decision we make. But it doesn't have to be this way. As Tom Dale predicted, Compilers are the new Frameworks. Svelte is an exciting, newer JavaScript framework that was designed from the ground up with compilation and speed. In this talk, we'll look under its hood to understand how it works, so you know when and why you'd want to use it in future. Don't worry, it isn't Rocket Science!
+  instances:
+    - venue: SvelteSociety
+      date: 2020-04-17
+      video: https://youtu.be/atOIxTHylF8
+- title: Intro to Svelte Stores
+  slug: svelte-stores
+  categories: [Svelte]
+  slides: https://docs.google.com/presentation/d/1WbHCfA8dxX09xrIhXQeHx3DWNxoy8Y0VN6U5iOMnkOw/edit
+  description: A proper introduction to Svelte Stores
+  instances:
+    - venue: SvelteSociety
+      video: https://youtu.be/zq6PpM5t3z0?t=360
+      date: 2020-01-08
+
+
+# todo: concurrent react from scratch 
+# todo: reactiflux q&a
+
+
+# 2019 Talks
+
+- title: Getting Closure on Hooks
+  github: https://codesandbox.io/s/izqhl
+  slug: react-hooks
+  categories: [React]
+  desc: Cloning the React Hooks API in raw JS
+  description: The design of React Hooks requires a good understanding of closures in JavaScript. In this talk, we’ll reintroduce closures by building a tiny clone of React! This will serve two purposes – to demonstrate the effective use of closures, and to show how you can build a Hooks clone in just 29 lines of readable JS. Finally, we arrive at how you get Custom Hooks and the Rules of Hooks out of this incredible mental model!
+  url: https://2019.jsconf.asia/#program
+  instances:
+    - date: 2019-03-30
+      venue: Reactathon (Lightning Talk)
+      video: https://youtu.be/Wt4kuspJIxY?t=3236
+      url: https://twitter.com/swyx/status/1100809424963219456
+    - venue: JSConf Asia
+      date: 2019-06-18
+      video: https://www.youtube.com/watch?v=KJP1E-Y-xyo
+    - venue: Livestream
+      date: 2019-06-18
+      video: https://youtu.be/9jWwO7McMbU?t=9451
+    - venue: Rehearsal
+      date: 2019-06-18
+      video: https://youtu.be/6zDQBnbGQx8
+    - venue: Meetup
+      date: 2019-06-18
+      video: https://www.youtube.com/watch?v=il43iId9JQA
+- title: I can Babel Macros (and So Can You!)
+  slug: babel-macros
+  categories: [Babel]
+  desc: An introduction to Babel Macros and how they can solve DX vs UX tradeoffs
+  description: Babel macros are a new way to solve DX and UX tradeoffs by metaprogramming to write code the way that is best for you while delivering code that is best for the user. Case in point, JSX - but why stop there? In this talk we explore how I wrote babel-blade to solve the double declaration problem in clientside GraphQL libraries, and how to get started writing your first babel macro!
+  github: https://gist.github.com/sw-yx/9e0d62b60ea8b5711ced2bb2f97b43ec
+  misc:
+    - cfp: Hi organizers! Babel is a core part of the JS ecosystem, and I think still very underexplored/underappreciated because of the perception that it is hard to get into and limited to transpiling JSX and TC39 proposals. With the increasing adoption of babel-plugin-macros (adopted by large ecosystems like React) the addressable space for babel has -exploded-. Essentially making it possible to move computation and metaprogramming from run time to build time making for faster apps -and- a better developer experience! I want to tell the world!!
+  instances:
+    - venue: JSConfHI
+      date: 2019-02-07
+      url: https://www.jsconfhi.com/schedule/
+      video: https://www.youtube.com/watch?v=1WNT5RCENfo
+- title: Adaptive Intent-based CLI State Machines
+  slug: intent-based-cli
+  categories: [CLI]
+  github: https://gist.github.com/sw-yx/3af1e264b8460af8897768045b2c229f
+  desc: Oclif does a lot of nice things, like offering flag and argument parsing, help documentation, and pluggability. That's good for the CLI developer. But what about the CLI user? Instead of viewing our CLI's as simple harnesses for procedure calls, how can we add an intelligent layer to interpret to user intent and guide them down a pit of success? How can we make our CLI's improve using information gained over time?
+  instances:
+    - venue: OclifConf
+      url: https://oclif.io/conf
+      date: 2019-05-31
+      video: https://www.youtube.com/watch?v=ZueoIYnHiaI&feature=emb_title
+    - venue: OclifConf
+      url: https://oclif.io/conf
+      date: 2019-05-31
+      video: https://www.youtube.com/watch?v=1_w1YWCHXFg
+- title: Introduction to TypeScript
+  slug: intro-to-typescript
+  categories: [TypeScript]
+  url: https://mobile.twitter.com/swyx/status/1166487148331184128
+  desc: a 1hr netlify workshop introducing people to TS
+  description: TypeScript is a megatrend in JavaScript, going from 46% of npm survey respondents in 2018 to 62% in 2019. This is an introduction to TypeScript for those familiar with JavaScript with a Q&A at the end. A 1hr internal Netlify lunch & learn.
+  instances:
+    - venue: Netlify
+      date: 2019-09-03
+      video: https://www.youtube.com/watch?v=YDK8sYCgbDw
+- title: JAMStack Jumpstart - Gatsby + Netlify
+  slug: jamstack-jumpstart
+  categories: [JAMstack]
+  url: https://2019.jsconf.asia
+  github: https://gist.github.com/sw-yx/6ea04fd9b594a56a840dd650863626bb
+  desc: A 3-4hr workshop to introduce JAMstack and get started with Gatsby and Netlify
+  description: There is a lot of developer and investment interest in JAMStack technologies, from the serverless movement to new authentication models to continuous atomic deployment to the static site generator renaissance. But with so many new terms and options, it is hard for people to figure out where to start. This workshop will teach developers to set up a simple but state of the art Gatsby and Netlify stack, which lets people create blazing fast sites and apps with React and GraphQL, backed up by a continuous deployment and serverless platform complete with authentication and CMS. It has never been easier to get a great Lighthouse score, or to deploy complex, secure webapps for free.
+  instances:
+    - venue: JSConfAsia
+      date: 2019-06-15
+      video: https://www.youtube.com/watch?v=s-l99ZzR77k
+    - venue: JSConfAsia
+      date: 2019-06-15
+      video: https://www.youtube.com/watch?v=PoqWF9BKtOE
+    - venue: MidDevCon
+      date: 2019-08-26
+      video: https://www.youtube.com/watch?v=PoqWF9BKtOE
+- title: The Rise of JAMStack
+  slug: jamstack-rise
+  categories: [JAMstack]
+  url: https://oredev.org/
+  desc: An introduction to the JAMstack from a historical perspective as the next evolution from LAMP and MEAN stacks
+  description: 20 years ago, Michael Kunze coined the LAMP stack to describe the success of open source architecture on the web, but it also betrayed the server-centric world of the time. 5 years ago, Val Karpov described the MEAN stack as a JavaScript centric alternative straddling frontend and backend worlds. A lot has happened since then. React rose to dominance, AWS Lambda started the Serverless movement, the "API economy" arose to serve developers, and Static Site Generators came back in a big way. What is driving this new stack of Javascript, APIs, and Markup?
+  misc:
+    - You will learn about the historical context of developer focus and product differentiation moving from backend to frontend
+    - You will be able to explain the problems with serverful architecture
+    - You will have a better understanding of the growing startup and open source ecosystem building around the JAMstack
+    - You will be able to explain what exactly the fuss is about the JAMstack
+  instances:
+    - venue: Oredev
+      date: 2019-11-07
+      video: https://www.youtube.com/watch?v=QgKvRylmPfk
+- title: JAMStack - The Total Victory of JavaScript
+  slug: jamstack-victory-jsla
+  categories: [JAMstack]
+  desc: An introduction to the JAMstack from a historical perspective and how it finally lets JS "win"
+  description: A lot has happened in the five years since Val Karpov coined the MEAN stack to describe "Full Stack" Javascript stacks. React rose to dominance, AWS Lambda started the Serverless movement, and Static Site Generators came back in a big way. What is driving this new stack of Javascript, APIs, and Markup? This is the story of how a JAMstack cynic finally turned into a believer.
+  instances:
+    - venue: JS.LA
+      url: https://js.la/events/2019/
+      slides: https://www.slideshare.net/ShawnWang36/jamstack-the-total-victory-of-javascript-jsla-feb-2019
+      date: 2019-02-28
+      video: https://www.youtube.com/watch?v=vOUcPI2mljU
+    - url: https://jscamp.tech/
+      venue: JSCamp
+      date: 2019-07-19
+      video: https://www.youtube.com/watch?v=WVayQ66AGa4
+      slides: https://noti.st/swyx/gl7P6h/jamstack-the-total-victory-of-javascript
+- title: Learn In Public
+  slug: learn-in-public-nyc
+  categories: [LearnInPublic]
+  description: Developers are used to the idea of constant learning, especially in the fast moving Javascript ecosystem. But how often do we take a step back from learning to consider -how- we learn? In this talk we explore how Learning in Public can accelerate your career, bring value to your professional network, and ultimately make you a better developer, with examples all drawn from personal and other experience.
+  github: https://gist.github.com/sw-yx/505d15ed3e7febdab3aa3d25ee81f652
+  instances:
+    - venue: VueNYC
+      date: 2019-07-31
+      video: https://www.youtube.com/watch?v=znNxtSbuBjI
+    - venue: JRDevSG
+      date: 2019-06-20
+      video: https://www.youtube.com/watch?time_continue=6&v=-f-rZepNKW0
+      desc: An unrehearsed, raw, off the cuff talk about the LearnInPublic philosophy for internal Shopee developers. First ever nontechnical talk.
+    - venue: JRDevSG
+      date: 2019-12-12
+      video: https://www.youtube.com/watch?v=GxdhfnzuamY&feature=emb_title
+      desc: An unrehearsed, raw, off the cuff talk about the LearnInPublic philosophy for the JrDevSG crowd.
+- title: Complete Intro to Netlify in 3.5 hours
+  slug: netlify-freecodecamp-intro
+  categories: [Netlify]
+  url: https://www.netlify.com/blog/2019/10/07/complete-intro-to-netlify-in-3.5-hours/
+  github: https://gist.github.com/sw-yx/f1b8eb239559feb7e3d97b0e05564b6d
+  instances:
+    - venue: FreeCodeCamp
+      date: 2019-10-07
+      video: https://www.youtube.com/watch?v=mT5siI19gtc
+      url: https://www.netlify.com/blog/2019/10/07/complete-intro-to-netlify-in-3.5-hours/
+- title: Lunch & Learn - Develop, Test, and Deploy Serverless Functions
+  slug: netlify-functions-lunchnlearn
+  categories: [Netlify]
+  url: https://smashingconf.com/toronto-2019/lunch-sessions
+  desc: This show-and-tell session will look at what you can do with serverless functions, how to get started creating and locally testing them with Netlify Dev, and finally deploying them as Netlify Functions with atomic deployments and instant rollbacks.
+  description: Making dynamic app functionality on the JAMstack often involves writing custom APIs as "glue code", "token hiders" and other business logic traditionally done on the server. Even _without_ a JAMstack architecture, serverless functions can be a great add-on, autoscaling solution for additional functionality for existing apps. It should be -easy- to spin up these serverless functions, but learning, testing and deploying them can often be more trouble than they are worth. This show-and-tell session will look at what you can do with serverless functions, how to get started creating and locally testing them with Netlify Dev, and finally deploying them as Netlify Functions with atomic deployments and instant rollbacks. Static has never looked this dynamic!
+  instances:
+    - venue: SmashingConf Toronto
+      date: 2019-06-26
+      video: https://www.youtube.com/watch?v=iLc8rXlLoMU
+    - venue: SmashingConf Toronto (Back)
+      date: 2019-06-26
+      video: https://www.youtube.com/watch?v=CdSwZZVnq6Q&feature=youtu.be
+    - venue: SmashingConf NYC
+      date: 2019-10-16
+      url: https://smashingconf.com/ny-2019/lunch-sessions
+      video: https://youtu.be/ewV-IGt0yls
+      description: A shorter, 20min version of the 1hr lunch 'n learn done at SmashingConf Toronto https://www.swyx.io/speaking/netlify-functions-lunchnlearn.
+- title: Intro to Netlify for React Devs
+  slug: netlify-intro-lightning
+  categories: [Netlify]
+  url: https://reactknowledgeable.org/meetups/5/
+  desc: An intro to Netlify for the inaugural React + JAMstack Singapore meetup.
+  github: https://gist.github.com/sw-yx/09678b6fd9b756362d4e033ee1c32649
+  instances:
+    - venue: ReactKnowledgeable
+      date: 2019-12-05
+      video: https://www.youtube.com/watch?v=o-Cp53QAQwM&feature=share
+- title: Programming TypeScript
+  subtitle: Cultural Learnings of Programming for Make Benefit Glorious Users of TypeScript
+  slug: programming-typescript
+  categories: [TypeScript]
+  url: https://www.meetup.com/TypeScriptNYC/events/263420132/?action=rsvp&response=yes
+  desc: some notes from Programming TypeScript, a book report
+  description: this is a book report version of some things i learned from reading Programming TypeScript https://twitter.com/swyx/status/1135525665971695617
+  instances:
+    - venue: TypeScriptNYC
+      date: 2019-08-07
+      video: https://www.youtube.com/watch?v=B-gANQc0giM&feature=youtu.be
+- title: A Gentle Introduction to React and TypeScript
+  slug: react-typescript
+  categories: [TypeScript]
+  url: https://www.meetup.com/Real-World-React/events/256448268/
+  desc: a live coding demo of starting with typescript for react devs
+  description: "TypeScript is increasingly being adopted in React apps at scale, from AirBnb to Shopify to Atlassian. In this live coding talk, we walk through best practices and introduce everything you need to know to get started, WITHOUT getting lost in arcane generic type logic! 
+    
+    The theme of this talk is showing how TypeScript (TS) tooling helps write and document apps at scale. We'll do: 
+    
+    - a live coding demo of starting with typescript for react devs 
+    - end with some resources and discussions of pitfalls"
+  instances:
+    - venue: Real World React
+      date: 2019-01-17
+      video: https://www.youtube.com/watch?v=TcDFd9W2Y2A
+- title: Serverless GraphQL
+  slug: serverless-graphql
+  categories: [GraphQL]
+  desc: A basic talk on how serverless functions work with GraphQL
+  description: GraphQL is often synonymous with the return of Monolithic architecture. Does this mean the benefits of Serverless are irrelevant? In this talk we explore how Serverless and GraphQL work together, explore ways to stitch individual function schemas, and get hard numbers to fight performance concerns.
+  github: https://gist.github.com/sw-yx/f099b6d197658e8818ceb5eefa490d1a
+  instances:
+    - venue: GraphQL Asia
+      url: https://www.graphql-asia.org/
+      date: 2019-04-12
+      video: https://www.youtube.com/watch?v=lq_He6Buv14
+    - venue: Apollo Day
+      date: 2019-05-21
+      alt-title: Serverless GraphQL with Netlify Dev
+      url: https://www.youtube.com/watch?v=rCYOpTQReD4
+- title: 'Compile Svelte in Your Head (Lightning Talk)'
+  slug: svelte-compile-lightning
+  categories: ['Tech', 'Svelte']
+  desc: A great way to break the black box of Svelte is to look at the compiled output. This helps you understand both the runtime and the compiler.
+  description: a fuller discussion of this was done by Tan Li Hau https://lihautan.com/compile-svelte-in-your-head-part-1/
+  github: https://gist.github.com/sw-yx/6a3f3c0bbab7c5b328bc60526b673441
+  instances:
+    - date: 2019-10-01
+      description: A lightning talk for Svelte Society Oct 1
+      venue: SvelteSociety
+    - date: 2019-12-06
+      venue: ReactKnowledgeable
+      video: https://www.youtube.com/watch?v=FNmvcswdjV8
+- title: Introducing Svelte Site Generator
+  slug: svelte-intro-ssg
+  categories: ['Tech', 'Svelte']
+  description: A lightning talk for Svelte Society November
+  slides: https://docs.google.com/presentation/d/1xvErwRiPjeVT2O9qIAoFpT0cSCpt37FHmK4QFuUE1ls/edit?usp=sharing_erl&userstoinvite=olegchursin@gmail.com&ts=5dc0be33
+  instances:
+    - venue: SvelteSociety
+      date: 2019-11-04
+      video: https://www.youtube.com/watch?v=JEH0V-zNGUk
+- title: Immutability is Changing
+  subtitle: From Immutable.js to Immer
+  slug: immutability-is-changing
+  categories: [Immutability]
+  github: https://gist.github.com/sw-yx/0f7419f29e4ece87446dcd51a43d3855
+  url: https://www.netlify.com/blog/2018/09/12/the-rise-of-immer-in-react/
+  desc: Why Immutability in JS and why you shouldn't use Immutable.js to do it
+  description: The need for immutability in JavaScript isn’t obvious, but Immutable.js swept the Javascript world in 2015 when it enforced a stricter, more functional approach to code without any need for deep comparisons. Then Immer was introduced in 2018, and took the Javascript world by storm. What's different? What's better? And what do ES6 Proxies have to do with it?
+  instances:
+    - venue: Rehearsal
+      date: 2019-01-24
+      video: https://www.youtube.com/watch?v=CbDD3c1KbKI
+    - venue: ForwardJS Official Recording
+      url: https://forwardjs.com/schedule
+      date: 2019-01-24
+      video: https://www.youtube.com/watch?v=JPIxZaVux_k
+    - venue: ForwardJS Self Recording
+      url: https://forwardjs.com/schedule
+      date: 2019-01-24
+      video: https://www.youtube.com/watch?v=bFuRvcAEiHg
+- title: STAR Apps
+  slug: star-apps
+  categories: [React, TypeScript]
+  github: https://gist.github.com/sw-yx/531f6e848496c8744d8ee010d40a2e5a
+  url: https://css-tricks.com/star-apps-a-new-generation-of-front-end-tooling-for-development-workflows/
+  desc: A 1hr talk about Storybook, TypeScript, Apollo GraphQL, and React
+  description: A new front-end stack is emerging, with one theme - constraints that scale. They involve building Design Systems for visual consistency, using TypeScript for internal consistency, Apollo GraphQL for data manipulation, and server- or statically-rendered React for data representation. In this talk we explore how these trends fit together, and _why_ leading product teams from AirBnb to the New York Times are embracing them.
+  instances:
+    - venue: All Things Open
+      date: 2019-10-14
+      url: https://allthingsopen.org/schedule/
+      video: https://www.youtube.com/watch?v=vLVnwlrMDD0
+      tweet: https://twitter.com/swyx/status/1183884912321060864
+    - venue: SV Code Camp
+      date: 2019-10-19
+      img: https://user-images.githubusercontent.com/6764957/93413645-4b65ba00-f8d2-11ea-92db-6ea67a4a5094.jpg
+      url: https://www.siliconvalley-codecamp.com/Session/2019/star-apps-design-systems-typescript-apollo-graphql-and-react
+      video: https://www.youtube.com/watch?v=avJkYrfvutk
+- title: A Skeptic's Intro to the JAMstack
+  slug: jamstack-skeptic
+  categories: [JAMstack]
+  github: https://gist.github.com/sw-yx/8b8c13f9608c6aea21ec424b4bd10f7c
+  desc: An introduction to the JAMstack from a skeptical perspective
+  description: A delightful exploration of how JavaScript web apps, serverless APIs, the static-site renaissance, and Git-centric workflows are enabling a whole new architecture, from a fellow skeptic wary of marketing acronyms.
+  instances:
+    - venue: Asbury Agile
+      date: 2019-10-04
+      url: https://www.asburyagile.com/schedule
+      video: https://www.youtube.com/watch?v=DD6KTAGrj3E
+      img: https://user-images.githubusercontent.com/6764957/93413819-aa2b3380-f8d2-11ea-8bbb-f51b384b9a6f.jpeg
+    - venue: All Things Open
+      date: 2019-10-14
+      video: https://www.youtube.com/watch?v=yzY1vIQmVUA&feature=youtu.be
+      tweet: https://twitter.com/swyx/status/1183886538251423744
+      url: https://allthingsopen.org/schedule/
+    - venue: JSCamp Barcelona
+      date: 2019-07-14
+      video: https://www.youtube.com/watch?v=WVayQ66AGa4
+      slides: https://noti.st/swyx/gl7P6h/jamstack-the-total-victory-of-javascript
+      url: https://jscamp.tech/speakers/2019/shawn-wang/
+      img: https://user-images.githubusercontent.com/6764957/93413812-a5667f80-f8d2-11ea-8a4f-d51c88c6c99e.jpeg
+
+
+# todo: make into a blogpost
+#       ai cli state machines
+#       Introduction to TypeScript
+#       JAMStack Jumpstart - Gatsby + Netlify
+#       Learn in public nyc talk
+#       star apps
+#       the hooks talk
+
+
+# # template pls ignore
+# - title: Template
+#   slug: template
+#   categories: [Template]
+#   desc: description
+#   url: optional
+#   github: optional
+#   misc: optional
+#   instances:
+#     - venue: Fullstack Academy
+#       video: https://youtu.be/7OHXz7vXC0g
+#       date: 2017-09-29
+#       slides: https://slides.com/swyx/heaps#/
+
+
+# todo
+# link up React's New Defaults to blogpost
+# blogpost Why Contribute to Open Source?
+# blogpost Why React is -NOT- Reactive
+
+
+# 2017-2018 Talks
+
+- title: Heaps
+  slug: fullstack-heaps
+  categories: [Data Structures]
+  desc: Bootcamp talk - guide to the Heap data structure and where they are used
+  instances:
+    - venue: Fullstack Academy
+      date: 2017-09-29
+      slides: https://slides.com/swyx/heaps#/
+- title: Crossbones
+  slug: fullstack-crossbones
+  categories: [React Native]
+  github: https://github.com/sw-yx/crossbones
+  url: https://www.fullstackacademy.com/hackathon-presentations/crossbones-fullstacks-react-native-boilerplate
+  desc: a React Native boilerplate for a hackathon
+  instances:
+    - venue: Fullstack Academy
+      date: 2017-09-29
+      video: https://www.youtube.com/watch?v=QFIj6iiqjWw
+- title: React Trip Planner
+  slug: fullstack-react-trip-planner
+  categories: [React]
+  github: https://github.com/sw-yx/FSA-React-Trip-Planner
+  desc: a guided workshop on converting a vanilla JS app into React for the first time.
+  instances:
+    - venue: Fullstack Academy
+      date: 2017-08-17
+      video: https://www.youtube.com/watch?v=M6rL0PXxPHs
+- title: Babel ❤️ GraphQL
+  slug: babel-heart-graphql
+  categories: [Babel, GraphQL]
+  desc: Babel plugins can help solve DX and UX tradeoffs by metaprogramming to while delivering code that is why stop there? In this talk we explore how babel-blade solves the double declaration problem in all get started writing your first babel plugin!
+  url: https://babel-blade.netlify.com/
+  github: https://github.com/sw-yx/babel-blade
+  misc: 
+    feedback: https://shawnwang3.typeform.com/to/OYtqZ7
+    description2: Babel-Macros were shipped with Create-React-App v2 - but what are they? What can you do with them? In this lightning talk we discuss how babel macros differ from plugins, and my recent work with babel-blade creating an inline GraphQL compiler that works with all React GraphQL clients.
+    description3: Babel-Macros were shipped with Babel v7 - but what are they? What can you do with them? In this lightning talk we discuss how babel macros differ from plugins, and my recent work with babel-blade creating an inline GraphQL compiler that works with all clientside GraphQL clients.
+    graphqlasianotes: No technical requirements apart from internet connection. I am the best person to speak on the subject because I made this macro https://babel-blade.netlify.com. Initially it was just a cool toy but then people at Coursera, Netflix, FB, and Adobe have picked up it telling me to keep going so I am applying for a lightning talk so I can spread the idea and get feedback/collaboration with the major clientside GraphQL clients!
+  instances:
+    - venue: React Boston
+      date: 2018-09-28
+      video: https://youtu.be/7OHXz7vXC0g
+    - venue: GraphQLNYC
+      date: 2018-09-28
+      video: https://youtu.be/30wOsJOluA4?t=497
+- title: Contributing to React
+  slug: contributing-to-react
+  categories: [React, Open Source]
+  desc: My very first public talk at a meetup, on Contributing to React. This went really well and Dan Abramov even added it to the React docs to guide people!
+  github: https://github.com/sw-yx/react-contributing
+  url: https://reactjs.org/docs/how-to-contribute.html
+  instances:
+    - venue: ReactNYC
+      date: 2017-12-15
+      video: https://www.youtube.com/watch?v=GWCcZ6fnpn4
+      slides: https://github.com/sw-yx/react-contributing
+- title: Creating Create-React-App
+  slug: creating-cra
+  categories: [React]
+  github: https://github.com/sw-yx/create-react-app-parcel
+  desc: diving into the history of CRA, how CRA works, and my experience making create-react-app-parcel
+  misc:
+    description: We all use create-react-app but how much do we know about how it works internally? In this talk we discuss how I recently dived into the source code for create-react-app to make a fun clone! It looks intimidating but is really not, once you get a hang of how lerna monorepos work and try making one of your own. Watch this and then go make your own create-awesome-app!
+    note: "[max stoiber](https://github.com/mxstbr/mxstbr.com/blob/b7b1471541cb9fee679115bb29ded8ef14d65bfa/data/old-blog-posts/2016/12/a-dream-come-true.md#create-react-app) notes that `eject` used to be named `graduate`"
+  instances:
+    - venue: ReactNYC
+      video: https://www.youtube.com/watch?v=Et571vTAtT8
+      slides: https://www.beautiful.ai/player/-LD4eaMxlqSlCy6biPmZ/Creating-Create-React-App
+      date: 2018-06-21
+- title: Never Bundle React Again
+  slug: never-bundle-react-again
+  categories: [Bundling]
+  url: https://slides.com/swyx/never-bundle-react-again#/
+  desc: a rehash of MJackson's React Rally 2017 talk but I am not very proud of it
+  instances:
+    - venue: ReactNYC
+      date: 2018-02-13
+      video: https://www.youtube.com/watch?v=rPuwZJEA-9U
+- title: React Suspense
+  slug: react-suspense
+  categories: [React]
+  url: https://slides.com/swyx/react-suspense
+  desc: a compendium of everything discussed about the React Suspense API
+  instances:
+    - venue: ReactNYC
+      video: https://www.youtube.com/watch?v=eRvbh5C6Lj0
+      date: 2018-04-22
+- title: React's New Defaults
+  slug: reacts-new-defaults
+  categories: [React]
+  url: https://github.com/sw-yx/talk-reacts-new-defaults
+  desc: a talk about the Why of Suspense, Time Slicing, and Hooks in React
+  misc: 
+    description: Concurrent React and React Hooks aren't simply new ways to do old things. They represent a new, stronger opinion of what apps should do by default. Let's explore the -Why- of React's new APIs!
+    discussion: "This is a talk version of a popular blogpost I wrote: https://gist.github.com/sw-yx/17965a31413acb461c4d64028527011e
+
+      The structure:
+
+      - Introduce the future roadmap of React
+      - Talk about the importance of good defaults in Technology
+      - Introduce the new defaults in Concurrent React and React Hooks
+      - Introduce a demo Movie app with today's React
+      - Demonstrate the drawbacks inherent in our current defaults
+      - Introduce React suspense, live code into the Movie app
+      - Talk about time slicing and the scheduler API
+      - Introduce React Hooks, live code into the Movie app
+      - Talk about Immediate mode vs Retained mode, and the DX Mullet
+      - Conclude by contrasting the current defaults vs the better defaults introduced by the new React APIs
+      "
+  instances: 
+    - venue: Bay Area React
+      video: https://youtu.be/vhWaMPQhMLQ
+      date: 2018-11-15
+- title: Why Contribute to Open Source?
+  slug: contributing-to-open-source
+  categories: [Open Source]
+  url: https://gist.github.com/sw-yx/505d15ed3e7febdab3aa3d25ee81f652
+  desc: 8 reasons to Contribute to Open Source, and how to Get Started (p.s. It doesn't have to be code)
+  instances:
+    - venue: JAMstackConf
+      date: 2018-11-03
+      video: https://youtu.be/GgqQI3zdzFY
+- title: Why React is -NOT- Reactive
+  slug: react-not-reactive
+  categories: [React, Reactivity]
+  url: https://slides.com/swyx/why-react-is-not-reactive
+  github: https://github.com/sw-yx/reactive-react
+  desc: diving into React's push-pull data flow and the importance of scheduling in React
+  misc:
+    banner: './DkvCgB6XcAAeYcP.jpeg'
+    reddit: https://www.reddit.com/r/reactjs/comments/98lbpi/why_react_is_not_reactive_react_rally_2018/
+    feedback: https://shawnwang3.typeform.com/to/cC7sYD
+    cfp: https://gist.github.com/sw-yx/9bf1fad03185613a4c19ef5352d90a09
+  instances:
+    - venue: ReactNYC
+      date: 2018-08-12
+      video: https://www.youtube.com/watch?v=nyFHR0dDZo0
+    - venue: React Rally
+      date: 2018-08-22
+      video: https://www.youtube.com/watch?v=ZZoB5frlcnE
+

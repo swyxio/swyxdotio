@@ -1,11 +1,24 @@
+# example netlify.toml
 [build]
-  command = "yarn build"
-  publish = "public/"
+  command = "npm run build"
+  publish = "build"
+
+[functions]
+  directory = "functions"
+  node_bundler = "esbuild"
+  external_node_modules = ["mdsvex"]
+
+[build.environment]
+  NODE_VERSION = "14"
+  ## https://github.com/sveltejs/kit/issues/2687
 
 [[headers]]
-  for = "/dist/svelte/*"
+  ## https://answers.netlify.com/t/content-type-header-not-working-in-netlify-toml/7718
+  for = "/*"
   [headers.values]
-    cache-control = '''
-      public,
-      max-age=31536000,
-      immutable'''
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    Cache-Control = "public, max-age=4000" 
+    # cache just over 1 hour for webpagetest to be happy
+    X-Content-Type-Options = "nosniff"
+    ## Content-Security-Policy = "default-src 'self'; script-src 'nonce-swyx'; img-src *"

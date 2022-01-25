@@ -1,0 +1,126 @@
+<script context="module">
+	import { SITE_URL, REPO_URL, SITE_TITLE, SITE_DESCRIPTION, DEFAULT_OG_IMAGE, MY_TWITTER } from '$lib/siteConfig';
+	export const prerender = true; // index page is most visited, lets prerender
+	export async function load({ params, fetch }) {
+		const blogposts = await fetch(`/api/listBlogposts.json`);
+		if (blogposts.status > 400) {
+			return {
+				status: blogposts.status,
+				error: await blogposts.text()
+			};
+		}
+		// const speaking = await fetch(`/api/listSpeaking.json`);
+		// if (speaking.status > 400) {
+		// 	return {
+		// 		status: speaking.status,
+		// 		error: await speaking.text()
+		// 	};
+		// }
+		return {
+			props: { 
+				blogposts: await blogposts.json(),
+				// speaking: await speaking.json()
+			},
+			maxage: 3600 // 1 hour
+		};
+	}
+</script>
+
+<script>
+	import Newsletter from '../components/Newsletter.svelte';
+	import FeatureCard from '../components/FeatureCard.svelte';
+	export let blogposts; // ,speaking;
+	$: list = blogposts.list.slice(0,10)
+</script>
+
+<svelte:head>
+	<title>{SITE_TITLE}</title>
+	<link rel="canonical" href={SITE_URL} />
+	<link rel="alternate" type="application/rss+xml" href={SITE_URL + '/api/rss.xml'} />
+	<meta property="og:url" content={SITE_URL} />
+	<meta property="og:type" content="article" />
+	<meta property="og:title" content={SITE_TITLE} />
+	<meta name="Description" content={SITE_DESCRIPTION} />
+	<meta property="og:description" content={SITE_DESCRIPTION} />
+	<meta property="og:image" content={DEFAULT_OG_IMAGE} />
+	<meta name="twitter:card" content="summary" />
+	<meta name="twitter:creator" content={MY_TWITTER} />
+	<meta name="twitter:title" content={SITE_TITLE} />
+	<meta name="twitter:description" content={SITE_DESCRIPTION} />
+	<meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
+</svelte:head>
+
+<div
+	class="flex flex-col px-4 sm:px-8 justify-center items-start max-w-2xl border-gray-200 dark:border-gray-700 mx-auto pb-16"
+>
+	<div class="flex flex-col-reverse sm:flex-row items-start">
+		<div class="flex flex-col pr-8">
+			<h1 class="font-bold text-3xl md:text-5xl tracking-tight mb-3 text-black dark:text-white">
+				Shawn
+				<span
+					class="ml-2 before:block before:absolute before:-inset-1 before:-skew-y-3 before:bg-red-500 relative inline-block"
+				>
+					<span class="relative text-yellow-400 skew-y-3">@swyx</span>
+				</span>
+				Wang
+			</h1>
+			<h2 class="text-gray-700 dark:text-gray-200 mb-4">
+				Writer, Speaker, Developer Advocate. I help devtools cross the chasm (React + TypeScript, Svelte, Netlify, now Temporal) 
+				and help developers <a sveltekit:prefetch href="/LIP">Learn in Public</a>!
+			</h2>
+			<p class="text-gray-600 dark:text-gray-400 mb-16">
+				<a sveltekit:prefetch href="/about">More on About page</a>
+			</p>
+		</div>
+		<!-- <div
+				class="w-[80px] h-[80px] rounded-full sm:w-[176px] sm:h-[136px] relative mb-8 sm:mb-0 mr-auto bg-cyan-300 bg-opacity-25"
+			/> -->
+	</div>
+
+	<!-- <section class="mb-16 w-full">
+		<pre>{JSON.stringify(speaking, null, 2)}</pre>
+	</section> -->
+	<section class="mb-16 w-full">
+		<h3 class="font-bold text-2xl md:text-4xl tracking-tight mb-6 text-black dark:text-white">
+			Latest Posts
+		</h3>
+		<ul class="text-white">
+			{#each list as item}
+				<li class="list-disc">{new Date(item.date).toISOString().slice(0, 10)} <a sveltekit:prefetch href={item.slug}>{item.title}</a></li>
+			{/each}
+		</ul>
+		<a
+		class="flex mt-8 text-gray-600 dark:text-gray-400 leading-7 rounded-lg 
+			 dark:hover:text-gray-200 transition-all h-6"
+		href="/blog"
+		>See all posts<svg
+			xmlns="http://www.w3.org/2000/svg"
+			fill="none"
+			viewBox="0 0 24 24"
+			class="h-6 w-6 ml-1"
+			><path
+				stroke="currentColor"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M17.5 12h-15m11.667-4l3.333 4-3.333-4zm3.333 4l-3.333 4 3.333-4z"
+			/></svg
+		></a
+	>
+	</section>
+	<section class="mb-16 w-full">
+		<h3 class="font-bold text-2xl md:text-4xl tracking-tight mb-6 text-black dark:text-white">
+			Most Popular Posts
+		</h3>
+		<div class="flex gap-6 flex-col md:flex-row">
+			<FeatureCard title="Welcome to swyxkit 2022!" href="/welcome" date={'Jan 2022'} />
+			<FeatureCard
+				title="Moving to a GitHub CMS"
+				href="/moving-to-a-github-cms"
+				date={'Jan 2022'}
+			/>
+			<FeatureCard title="HTML Ipsum demo" href="/moo" date={'Jan 2022'} />
+		</div>
+	</section>
+	<Newsletter />
+</div>

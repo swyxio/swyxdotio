@@ -1,0 +1,60 @@
+<script context="module">
+  // disabled hydrate = false because mobile nav becomes unresponsive :(
+  // TODO: other options for mobile nav
+  // export const hydrate = false // about pages dont need it!
+  // more info https://twitter.com/Rich_Harris/status/1376578504704331778?s=20
+</script>
+
+## TL;DR
+
+Hey, I'm swyx! I help build great developer experiences, from documentation to dev tools to dev communities.
+
+I am currently [Head of DX at Temporal.io](https://www.swyx.io/why-temporal/), based out of Seattle.
+I am also a frequent writer and speaker best known for the [Learn in Public](https://swyx.io/LIP) movement and recently published [The Coding Career Handbook](https://learninpublic.org) with more advice for engineers going from Junior to Senior.
+
+P.S. "swyx" is the initials of my English and Chinese names and you can use it interchangeably with "Shawn". It is pronounced "swicks".
+
+You can find me on [Twitter](https://twitter.com/swyx) and [Github](https://github.com/sw-yx)!
+
+## About
+
+I am a [developer](https://github.com/sw-yx)/PM/[angel investor](https://github.com/sw-yx/devtools-angels/), primarily active in the web dev community as a blogger and frequent speaker. I am a [GitHub Star 🌟](https://stars.github.com/), [Stripe Community Expert](https://twitter.com/swyx/status/1392016498944741376), helped run [the React subreddit for over 200,000 developers](https://www.swyx.io/moderating-rreactjs/) and grow [Svelte Society from scratch to over 10,000 developers](https://twitter.com/swyx/status/1411071913548414976).
+
+I grew up in Singapore 🇸🇬, but have worked mostly in the US 🇺🇸 and UK 🇬🇧 , most recently remotely out of New York City 🗽 working on Developer Experience for [Netlify](https://www.swyx.io/writing/farewell-netlify/), [Amazon Web Services](https://www.swyx.io/writing/hello-aws/), and now [Temporal](https://www.swyx.io/why-temporal/).
+
+I am best known for being a [#LearnInPublic](/learn-in-public) evangelist and [my speaking/writing on React, JavaScript and the future of the Web](/ideas?filter=React&show=Essays&show=Talks&show=Podcasts). I am also known for my technical/book reviews, from [TypeScript in 50 Lessons](https://twitter.com/swyx/status/1361712610593316866), [Programming TypeScript](https://twitter.com/swyx/status/1135525665971695617), [Landing Page Hot Tips](https://twitter.com/swyx/status/1303062410157158401), and [The GraphQL Guide](https://share.transistor.fm/s/aebece15).
+
+In a past life I was a [currency options trader turned TMT hedge fund analyst](https://www.freecodecamp.org/news/shawn-wang-podcast-interview/) as well, and I often do approach tech from an investing and risk management angle.
+
+## What I'm Doing Now[](https://nownownow.com/about)
+
+I am currently [working on Developer Experience at Temporal.io](https://www.swyx.io/why-temporal/), based out of Seattle. I am also a regular on the [Svelte Radio](https://www.svelteradio.com/) podcast and my own [Swyx Mixtape](http://swyx.transistor.fm/). You can get more high frequency updates on [my Twitter](https://twitter.com/swyx).
+
+## Bio for Event Organizers
+
+swyx has worked on React and serverless JavaScript at Two Sigma, [Netlify](https://www.swyx.io/farewell-netlify/) and [AWS](https://www.swyx.io/hello-aws/), and now serves as [Head of Developer Experience at Temporal.io](https://www.swyx.io/why-temporal/). He has started and run communities for hundreds of thousands of developers, like [Svelte Society](https://twitter.com/sveltesociety/), [/r/reactjs](https://www.swyx.io/moderating-rreactjs/), and the [React TypeScript Cheatsheet](https://github.com/typescript-cheatsheets/react). His nontechnical writing was recently published in [the Coding Career Handbook](https://learninpublic.org/) for Junior to Senior developers.
+
+🔗 [Twitter](https://twitter.com/swyx), [GitHub](https://github.com/sw-yx), [The Coding Career Handbook](https://learninpublic.org).
+
+🖼️ [Medium](https://avatars3.githubusercontent.com/u/6764957?s=200&v=4), or [Large](https://user-images.githubusercontent.com/6764957/103350806-26d9ca80-4adc-11eb-9e53-a8ce9ca3f21f.jpeg) pictures of me you can use without asking.
+
+
+Selected prior talks:
+
+- JS Conf: https://swyx.io/hooks
+- React Rally: https://www.youtube.com/watch?v=nyFHR0dDZo0
+- The Operating System of You: https://www.youtube.com/watch?v=D-Sj6jo4o1I
+
+
+## Tech behind this site
+
+See https://swyxkit.netlify.app/about
+
+## Further Reading
+
+You can read:
+
+- [Why I Enjoy Svelte](https://www.swyx.io/svelte-why/)
+- [Svelte for Sites, React for Apps](https://www.swyx.io/svelte-sites-react-apps/)
+- [Why Tailwind CSS](https://www.swyx.io/why-tailwind/)
+- [How to Setup Svelte with Tailwind](https://dev.to/swyx/how-to-set-up-svelte-with-tailwind-css-4fg5)
