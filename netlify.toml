@@ -6,6 +6,7 @@
 [functions]
   directory = "functions"
   node_bundler = "esbuild"
+  included_files = ["podcasts.yml", "talks.yml"]
   external_node_modules = ["mdsvex"]
 
 [build.environment]

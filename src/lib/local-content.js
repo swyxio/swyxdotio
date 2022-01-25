@@ -1,9 +1,8 @@
 
-import { resolve, basename } from 'path';
+import { resolve } from 'path';
 import { promises as fs } from 'fs';
 import YAML from 'yaml'
 
-listSpeaking().then(x => fs.writeFile('dump.json', JSON.stringify(x, null, 2)))
 export async function listSpeaking() {
 	const x = await fs.readFile(resolve('./podcasts.yml'), 'utf8')
 	const y = await fs.readFile(resolve('./talks.yml'), 'utf8')
