@@ -25,16 +25,16 @@
 
 <article
 	class="mx-auto max-w-xl px-4 py-10 sm:px-6 sm:py-12 lg:max-w-2xl lg:py-16
-    lg:px-8 xl:max-w-3xl"
+    lg:px-8 xl:max-w-3xl prose dark:prose-invert"
 >
-	<h2>
-		<a href="https://swyx.transistor.fm/"
+	<p>
+		<a class="no-underline" href="https://swyx.transistor.fm/"
 			>✉️ <span
 				class="ml-2 bg-gradient-to-br from-pink-400 to-red-600 bg-clip-text text-xl font-extrabold uppercase text-transparent"
 				>The Swyx Newsletter</span
 			></a
 		>
-	</h2>
+	</p>
 	<div class="mytext mb-8">
 		<p class="text-base font-light text-opacity-75">
 			Join <span
@@ -55,15 +55,15 @@
     </p> -->
 	</div>
 
-	<h2>
-		<a href="https://swyx.transistor.fm/"
+	<p>
+		<a class="no-underline" href="https://swyx.transistor.fm/"
 			>🎧 <span
 				class="ml-2 bg-gradient-to-br from-pink-400 to-red-600 bg-clip-text font-extrabold uppercase text-transparent"
 				>The Swyx Mixtape</span
 			></a
 		>
-	</h2>
-	<div class="mytext">
+	</p>
+	<div class="mb-4">
 		My personal pod where I share 5-10 minute clips from over 250 podcasts! <br /> Search "<span
 			class="bg-gradient-to-br from-pink-400 to-red-600 bg-clip-text font-extrabold text-transparent"
 			>swyx</span
@@ -79,6 +79,7 @@
 		<a class="mylinkcolors underline" href="https://overcast.fm/itunes1549059398">Overcast</a>,
 		<a class="mylinkcolors underline" href="https://feeds.transistor.fm/learn-in-podcast">RSS</a>).
 	</div>
+  <iframe id="swyxembed" title="swyx mixtape embed" width="100%" height="390" frameborder="no" scrolling="no" seamless src="https://share.transistor.fm/e/learn-in-podcast/playlist/dark"></iframe>
 </article>
 
 <style>

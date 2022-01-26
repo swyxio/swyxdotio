@@ -76,9 +76,11 @@
 				<a sveltekit:prefetch href="/about">More on About page</a>
 			</p>
 		</div>
-		<!-- <div
-				class="w-[80px] h-[80px] rounded-full sm:w-[176px] sm:h-[136px] relative mb-8 sm:mb-0 mr-auto bg-cyan-300 bg-opacity-25"
-			/> -->
+		<img
+				class="w-[80px] rounded-full sm:w-[176px] relative mb-8 sm:mb-0 mr-auto bg-cyan-300 bg-opacity-25"
+				src="/swyx-ski.jpeg" alt="swyx at Niseko" 
+		
+			/>
 	</div>
 
 	<!-- <section class="mb-16 w-full">
