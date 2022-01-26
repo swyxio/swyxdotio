@@ -5,12 +5,13 @@
 </script>
 
 {#if ['essay', 'note', 'snippet', 'tutorial'].includes(item?.type)}
-	<a
-		sveltekit:prefetch
-		class="w-full text-gray-900 hover:text-yellow-600 dark:text-gray-100 dark:hover:text-yellow-100"
-		href={item.slug}
-		><div class="mb-4 w-full">
-			<div class="flex flex-col-reverse justify-between md:flex-row">
+	<div class="mb-4 w-full">
+		<div class="flex flex-col-reverse justify-between md:flex-row">
+			<a
+				sveltekit:prefetch
+				class="w-full text-gray-900 hover:text-yellow-600 dark:text-gray-100 dark:hover:text-yellow-100"
+				href={item.slug}
+			>
 				<h4 class="mb-2 w-full flex-auto text-lg font-medium md:text-xl">
 					{#if item.type !== 'note'}
 						<span class="rounded bg-blue-700 p-1 text-white"
@@ -18,48 +19,49 @@
 						>
 					{/if}
 					{item.title}
-				</h4>
-				<div
-					class="inline-flex flex-1 flex-row-reverse items-center justify-end md:flex-row md:justify-start"
-				>
-					{#if (item.ghMetadata && item.ghMetadata.reactions.total_count) || item.data.devToReactions}
-						<span
-							class=" mr-2 min-w-[3rem] text-right font-mono text-xs text-gray-700 text-opacity-70 dark:text-gray-300"
-							>{item?.ghMetadata?.reactions?.total_count + item?.data?.devToReactions} ♥</span
-						>
-					{/if}
-					<p class="w-28 text-left text-gray-500 md:text-right">{date}</p>
-				</div>
+				</h4></a
+			>
+			<div
+				class="inline-flex flex-1 flex-row-reverse items-center justify-end md:flex-row md:justify-start"
+			>
+				{#if (item.ghMetadata && item.ghMetadata.reactions.total_count) || item.data.devToReactions}
+					<span
+						class=" mr-2 min-w-[3rem] text-right font-mono text-xs text-gray-700 text-opacity-70 dark:text-gray-300"
+						>{item?.ghMetadata?.reactions?.total_count + item?.data?.devToReactions} ♥</span
+					>
+				{/if}
+				<p class="w-28 text-left text-gray-500 md:text-right">{date}</p>
 			</div>
-			<p class="overflow-hidden text-ellipsis break-all text-gray-600 dark:text-gray-400">
-				{item.description}
-			</p>
-		</div></a
-	>
+		</div>
+		<p class="overflow-hidden text-ellipsis break-all text-gray-600 dark:text-gray-400">
+			{item.description}
+		</p>
+	</div>
 {:else if item?.type === 'podcast'}
-	<a
-		class="w-full hover:no-underline text-gray-900 dark:text-gray-100 hover:text-yellow-600 dark:hover:text-yellow-100"
-		href={item.url}
-		target="_blank"
-		><div class="w-full mb-4">
-			<div class="flex flex-col justify-between md:flex-row">
+	<div class="w-full mb-4">
+		<div class="flex flex-col justify-between md:flex-row">
+			<a
+				class="w-full hover:no-underline text-gray-900 dark:text-gray-100 hover:text-yellow-600 dark:hover:text-yellow-100"
+				href={item.url}
+				target="_blank"
+			>
 				<h4 class="w-full mb-2 text-lg font-medium md:text-xl flex-auto">
 					<span class="p-1 rounded text-white bg-blue-700">Podcast</span>
 					{item.title}
 					<!-- pill -->
-				</h4>
-				<div class="inline-flex flex-1 items-center">
-					<!-- {#if ghMetadata && ghMetadata.reactions.total_count}
+				</h4></a
+			>
+			<div class="inline-flex flex-1 items-center">
+				<!-- {#if ghMetadata && ghMetadata.reactions.total_count}
 					<span class=" min-w-[2rem] mr-2 text-xs font-mono text-opacity-70 text-gray-700 dark:text-gray-300">{ghMetadata.reactions.total_count} ♥</span>
 				{/if} -->
-					<p class="w-32 mb-4 text-left text-gray-500 md:text-right md:mb-0">{date}</p>
-				</div>
+				<p class="w-32 mb-4 text-left text-gray-500 md:text-right md:mb-0">{date}</p>
 			</div>
-			<p class="text-gray-600 dark:text-gray-400 text-ellipsis overflow-hidden">
-				{item.description}
-			</p>
-		</div></a
-	>
+		</div>
+		<p class="text-gray-600 dark:text-gray-400 text-ellipsis overflow-hidden">
+			{item.description}
+		</p>
+	</div>
 {:else if item?.type === 'talk'}
 	<div class="w-full text-gray-900 dark:text-gray-100">
 		<div class="w-full mb-4">
@@ -125,7 +127,9 @@
 							{@const url = instance.video && new URL(instance.video)}
 							{@const ytslug =
 								url &&
-								(url.host === 'www.youtube.com' ? url.searchParams.get('v') : url.pathname.slice(1))}
+								(url.host === 'www.youtube.com'
+									? url.searchParams.get('v')
+									: url.pathname.slice(1))}
 							{#if url}
 								<li>
 									<a href={instance.video} target="_blank">

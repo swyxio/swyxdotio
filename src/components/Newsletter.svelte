@@ -92,7 +92,18 @@
 							<input
 								type="submit"
 								on:click={toggleNewsletter}
-								class="absolute right-0 top-1 flex items-center justify-center rounded-r-lg bg-zinc-100 px-4 
+								class="absolute flex right-0 top-0 sm:hidden items-center justify-center rounded-r-lg bg-zinc-100 px-4 
+							py-2 font-medium text-gray-900 hover:text-gray-700 
+							dark:bg-zinc-700 dark:text-gray-100
+							hover:dark:text-yellow-200"
+								value={'Subscribe'}
+								name="member[subscribe]"
+								id="member_submit"
+							/>
+							<input
+								type="submit"
+								on:click={toggleNewsletter}
+								class="absolute hidden right-0 top-1 sm:flex items-center justify-center rounded-r-lg bg-zinc-100 px-4 
 							py-2 font-medium text-gray-900 hover:text-gray-700 
 							dark:bg-zinc-700 dark:text-gray-100
 							hover:dark:text-yellow-200"

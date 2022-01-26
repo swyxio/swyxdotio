@@ -31,6 +31,8 @@
 <script>
 	import Newsletter from '../components/Newsletter.svelte';
 	import FeatureCard from '../components/FeatureCard.svelte';
+	import FeaturedWriting from '../components/FeaturedWriting.svx';
+	import FeaturedSpeaking from '../components/FeaturedSpeaking.svx';
 	export let blogposts; // ,speaking;
 	$: list = blogposts.list.slice(0, 10);
 </script>
@@ -56,7 +58,7 @@
 	class="mx-auto flex max-w-2xl flex-col items-start justify-center border-gray-200 px-4 pb-16 dark:border-gray-700 sm:px-8"
 >
 	<div class="flex flex-col-reverse items-start sm:flex-row">
-		<div class="flex flex-col pr-8">
+		<div class="flex flex-col pr-8 mb-16 ">
 			<h1 class="mb-3 text-3xl font-bold tracking-tight text-black dark:text-white md:text-5xl">
 				Shawn
 				<span
@@ -68,13 +70,12 @@
 			</h1>
 			<h2 class="mb-4 text-gray-700 dark:text-gray-200">
 				Writer, Speaker, Developer Advocate. I help devtools cross the chasm (React + TypeScript,
-				Svelte, Netlify, now Temporal) and help developers <a sveltekit:prefetch href="/LIP"
+				Svelte, Netlify, now <a sveltekit:prefetch href="/why-temporal"
+				>Temporal</a>) and help developers <a sveltekit:prefetch href="/LIP"
 					>Learn in Public</a
 				>!
 			</h2>
-			<p class="mb-16 text-gray-600 dark:text-gray-400">
-				<a sveltekit:prefetch href="/about">More on About page</a>
-			</p>
+				<a  class="text-gray-600 dark:text-gray-400" sveltekit:prefetch href="/about">More on About page</a>
 		</div>
 		<img
 				class="w-[80px] rounded-full sm:w-[176px] relative mb-8 sm:mb-0 mr-auto bg-cyan-300 bg-opacity-25"
@@ -121,15 +122,80 @@
 		<h3 class="mb-6 text-2xl font-bold tracking-tight text-black dark:text-white md:text-4xl">
 			Most Popular Posts
 		</h3>
-		<div class="flex flex-col gap-6 md:flex-row">
-			<FeatureCard title="Welcome to swyxkit 2022!" href="/welcome" date={'Jan 2022'} />
+		<div class="flex flex-col gap-6 md:flex-row mb-8">
+			<FeatureCard title="Learn in Public" href="/learn-in-public" date={'Jun 2018'} />
 			<FeatureCard
-				title="Moving to a GitHub CMS"
-				href="/moving-to-a-github-cms"
-				date={'Jan 2022'}
+				title="The Third Age of JavaScript"
+				href="/js-third-age"
+				date={'May 2020'}
 			/>
-			<FeatureCard title="HTML Ipsum demo" href="/moo" date={'Jan 2022'} />
+			<FeatureCard title="Eating the Cloud from Outside In" href="/cloudflare-go" date={'Oct 2021'} />
 		</div>
+		<FeaturedWriting />
+	</section>
+	<section class="mb-16 w-full">
+		<h3 class="mb-6 text-2xl font-bold tracking-tight text-black dark:text-white md:text-4xl">
+			Most Popular Talks
+		</h3>
+		<div class="grid grid-cols-2 gap-6">
+			<iframe
+			class="object-contain"
+			src="https://www.youtube.com/embed/KJP1E-Y-xyo"
+			title="video123"
+			name="video123"
+			allow="accelerometer; autoplay; encrypted-media; gyroscope;
+			picture-in-picture"
+			frameBorder="0"
+			webkitallowfullscreen="true"
+			mozallowfullscreen="true"
+			width="300"
+			height="200"
+			allowFullScreen
+			aria-hidden="true"></iframe>
+			<iframe
+			class="object-contain"
+			src="https://www.youtube.com/embed/D-Sj6jo4o1I"
+			title="video123"
+			name="video123"
+			allow="accelerometer; autoplay; encrypted-media; gyroscope;
+			picture-in-picture"
+			frameBorder="0"
+			webkitallowfullscreen="true"
+			mozallowfullscreen="true"
+			width="300"
+			height="200"
+			allowFullScreen
+			aria-hidden="true"></iframe>
+			<iframe
+			class="object-contain"
+			src="https://www.youtube.com/embed/GWCcZ6fnpn4"
+			title="video123"
+			name="video123"
+			allow="accelerometer; autoplay; encrypted-media; gyroscope;
+			picture-in-picture"
+			frameBorder="0"
+			webkitallowfullscreen="true"
+			mozallowfullscreen="true"
+			width="300"
+			height="200"
+			allowFullScreen
+			aria-hidden="true"></iframe>
+			<iframe
+			class="object-contain"
+			src="https://www.youtube.com/embed/nyFHR0dDZo0"
+			title="video123"
+			name="video123"
+			allow="accelerometer; autoplay; encrypted-media; gyroscope;
+			picture-in-picture"
+			frameBorder="0"
+			webkitallowfullscreen="true"
+			mozallowfullscreen="true"
+			width="300"
+			height="200"
+			allowFullScreen
+			aria-hidden="true"></iframe>
+		</div>
+		<FeaturedSpeaking />
 	</section>
 	<Newsletter />
 </div>

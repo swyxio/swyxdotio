@@ -1,0 +1,11 @@
+I do a bunch of [personal and work-related writing](/writing/), and recently published [The Coding Career Handbook](https://learninpublic.org/) with the best of my nontechnical writing.
+
+- **[Learn in Public](/learn-in-public/)**: My most impactful essay, read by millions.
+- **[How to Create Luck](/create_luck/)**: Luck is random, but creating luck is a skill.
+- **[Third Age of JavaScript](/js-third-age/)**: Documenting the changing of the guard in JavaScript.
+- **[The Light and Dark Side of the API Economy](/api-economy/)**: Economics, tech & society.
+- **[Eating the Cloud from Outside In](/cloudflare-go/)**: AWS plays Chess, Cloudflare plays Go.
+- **[Temporal - the iPhone of System Design](/why-temporal/)**: Why Temporal is a big deal.
+- **[About](/about/)**: My personal story, [README](https://github.com/sw-yx/README/blob/master/README.md) , and [podcast with Quincy Larson](/speaking/freecodecamp-podcast).
+
+You can find all my writing on RSS or [on the /ideas page](https://www.swyx.io/ideas/?show=Essays).
