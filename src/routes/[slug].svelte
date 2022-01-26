@@ -1,5 +1,5 @@
 <script context="module">
-	// export const prerender = true; // you can uncomment to prerender as an optimization
+	export const prerender = true; // you can uncomment to prerender as an optimization
 	export const hydrate = true;
 	import { REPO_URL, SITE_URL } from '$lib/siteConfig';
 
