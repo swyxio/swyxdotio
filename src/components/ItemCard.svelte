@@ -10,7 +10,7 @@
 			<a
 				sveltekit:prefetch
 				class="w-full text-gray-900 hover:text-yellow-600 dark:text-gray-100 dark:hover:text-yellow-100"
-				href={item.slug}
+				href={`/` + item.slug}
 			>
 				<h4 class="mb-2 w-full flex-auto text-lg font-medium md:text-xl">
 					{#if item.type !== 'note'}
