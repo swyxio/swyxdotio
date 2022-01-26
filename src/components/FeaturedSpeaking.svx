@@ -1,9 +1,9 @@
 I have done a bunch of talks and podcast appearances. The best of which are:
 
-- **[Getting Closure on Hooks](/speaking/react-hooks)**: My most well received technical talk, where I explain a mental model for React hooks by livecoding a React clone at JSConf Asia. Started as [a tweet](https://twitter.com/swyx/status/1100809424963219456), then [a blogpost.](https://www.swyx.io/writing/getting-closure-on-hooks/)
-- **[Why React is not Reactive](/speaking/react-not-reactive)**: My first conference talk ever was at the biggest React venue in the world, React Rally. I spent a month writing [my CFP on the most interesting React question I could think of](https://twitter.com/swyx/status/1112513571315830784?s=20).
-- **[Contributing to React](/speaking/contributing-to-react)**: My first meetup talk ever was at React NYC - this was accepted on to the React docs as a guide for other contributors!
-- **[Learn In Public](/speaking/learn-in-public-nyc)**: My first verbal exposition on the Learn In Public philosophy. Video is frozen at the end, sorry.
-- **[I Can Babel Macros and So Can You! (the Moana talk)](/speaking/babel-macros)**: My first JSConf appearance ever, at one of the most competitive JSConfs ever. This talk is where I first started experimenting with theming talks, and it came out really well with the Moana theme.
+- **[Getting Closure on Hooks](/hooks)**: My most well received technical talk, where I explain a mental model for React hooks by livecoding a React clone at JSConf Asia. Started as [a tweet](https://twitter.com/swyx/status/1100809424963219456), then [a blogpost.](https://www.swyx.io/writing/getting-closure-on-hooks/)
+- **[Why React is not Reactive](/reactrally)**: My first conference talk ever was at the biggest React venue in the world, React Rally. I spent a month writing [my CFP on the most interesting React question I could think of](https://twitter.com/swyx/status/1112513571315830784?s=20).
+- **[Contributing to React](/ideas?filter=contributing%20to%20react)**: My first meetup talk ever was at React NYC - this was accepted on to the React docs as a guide for other contributors!
+- **[Learn In Public](/ideas?filter=learn%20in%20public&show=Talks&show=Tutorials&show=Notes)**: My first verbal exposition on the Learn In Public philosophy. Video is frozen at the end, sorry.
+- **[I Can Babel Macros and So Can You! (the Moana talk)](/ideas?filter=babel%20macros&show=Talks)**: My first JSConf appearance ever, at one of the most competitive JSConfs ever. This talk is where I first started experimenting with theming talks, and it came out really well with the Moana theme.
 
-[More of my speaking here](https://www.swyx.io/ideas/?show=Talks&show=Podcasts)
+[More of my speaking here](/ideas/?show=Talks&show=Podcasts)

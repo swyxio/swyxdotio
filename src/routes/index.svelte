@@ -55,7 +55,7 @@
 </svelte:head>
 
 <div
-	class="mx-auto flex max-w-2xl flex-col items-start justify-center border-gray-200 px-4 pb-16 dark:border-gray-700 sm:px-8"
+	class="mx-auto flex max-w-2xl flex-col items-start justify-center border-gray-200 px-4 dark:border-gray-700 sm:px-8"
 >
 	<div class="flex flex-col-reverse items-start sm:flex-row">
 		<div class="flex flex-col pr-8 mb-16 ">
@@ -87,7 +87,7 @@
 	<!-- <section class="mb-16 w-full">
 		<pre>{JSON.stringify(speaking, null, 2)}</pre>
 	</section> -->
-	<section class="mb-16 w-full">
+	<section class="mb-8 w-full">
 		<h3 class="mb-6 text-2xl font-bold tracking-tight text-black dark:text-white md:text-4xl">
 			Latest Posts
 		</h3>
@@ -118,7 +118,8 @@
 			></a
 		>
 	</section>
-	<section class="mb-16 w-full">
+	<Newsletter />
+	<section class="mb-8 w-full">
 		<h3 class="mb-6 text-2xl font-bold tracking-tight text-black dark:text-white md:text-4xl">
 			Most Popular Posts
 		</h3>
@@ -133,7 +134,7 @@
 		</div>
 		<FeaturedWriting />
 	</section>
-	<section class="mb-16 w-full">
+	<section class="mb-8 w-full">
 		<h3 class="mb-6 text-2xl font-bold tracking-tight text-black dark:text-white md:text-4xl">
 			Most Popular Talks
 		</h3>
@@ -197,5 +198,4 @@
 		</div>
 		<FeaturedSpeaking />
 	</section>
-	<Newsletter />
 </div>
