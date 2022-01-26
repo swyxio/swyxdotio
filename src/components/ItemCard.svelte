@@ -1,33 +1,37 @@
 <script>
 	export let item;
 	let date = new Date(item?.date).toISOString().slice(0, 10);
-  // console.log(item)
+	// console.log(item)
 </script>
 
 {#if ['essay', 'note', 'snippet', 'tutorial'].includes(item?.type)}
 	<a
 		sveltekit:prefetch
-		class="w-full text-gray-900 dark:text-gray-100 hover:text-yellow-600 dark:hover:text-yellow-100"
+		class="w-full text-gray-900 hover:text-yellow-600 dark:text-gray-100 dark:hover:text-yellow-100"
 		href={item.slug}
-		><div class="w-full mb-4">
-			<div class="flex justify-between md:flex-row flex-col-reverse">
-				<h4 class="w-full mb-2 text-lg font-medium md:text-xl flex-auto">
+		><div class="mb-4 w-full">
+			<div class="flex flex-col-reverse justify-between md:flex-row">
+				<h4 class="mb-2 w-full flex-auto text-lg font-medium md:text-xl">
 					{#if item.type !== 'note'}
-					<span class="p-1 rounded text-white bg-blue-700">{item.type[0].toUpperCase() + item.type.substring(1)}</span>
-          {/if}
+						<span class="rounded bg-blue-700 p-1 text-white"
+							>{item.type[0].toUpperCase() + item.type.substring(1)}</span
+						>
+					{/if}
 					{item.title}
 				</h4>
-				<div class="inline-flex flex-1 items-center flex-row-reverse justify-end md:flex-row md:justify-start">
+				<div
+					class="inline-flex flex-1 flex-row-reverse items-center justify-end md:flex-row md:justify-start"
+				>
 					{#if (item.ghMetadata && item.ghMetadata.reactions.total_count) || item.data.devToReactions}
 						<span
-							class=" min-w-[3rem] text-right mr-2 text-xs font-mono text-opacity-70 text-gray-700 dark:text-gray-300"
+							class=" mr-2 min-w-[3rem] text-right font-mono text-xs text-gray-700 text-opacity-70 dark:text-gray-300"
 							>{item?.ghMetadata?.reactions?.total_count + item?.data?.devToReactions} ♥</span
 						>
 					{/if}
 					<p class="w-28 text-left text-gray-500 md:text-right">{date}</p>
 				</div>
 			</div>
-			<p class="text-gray-600 dark:text-gray-400 text-ellipsis overflow-hidden break-all">
+			<p class="overflow-hidden text-ellipsis break-all text-gray-600 dark:text-gray-400">
 				{item.description}
 			</p>
 		</div></a
@@ -67,7 +71,12 @@
 						class="w-32 inline-flex flex-col items-center"
 					>
 						{#if item.instances[0].video}
-							<img alt="talk thumbnail" src={`http://i3.ytimg.com/vi/${new URL(item.instances[0].video).searchParams.get('v')}/hqdefault.jpg`} />
+							<img
+								alt="talk thumbnail"
+								src={`http://i3.ytimg.com/vi/${new URL(item.instances[0].video).searchParams.get(
+									'v'
+								)}/hqdefault.jpg`}
+							/>
 						{/if}
 					</a>
 					<div class="justify-between md:flex-row">
@@ -81,7 +90,9 @@
 							<span class=" min-w-[2rem] mr-2 text-xs font-mono text-opacity-70 text-gray-700 dark:text-gray-300">{ghMetadata.reactions.total_count} ♥</span>
 						{/if} -->
 							<p class="mb-4 text-left text-gray-500 md:text-right md:mb-0">
-								{item.instances[0].venue} @ {new Date(item.instances[0].date).toISOString().slice(0, 10)}
+								{item.instances[0].venue} @ {new Date(item.instances[0].date)
+									.toISOString()
+									.slice(0, 10)}
 							</p>
 						</div>
 						<p class="text-gray-600 dark:text-gray-400 text-ellipsis overflow-hidden">
@@ -110,24 +121,30 @@
 				</p>
 				<ul class="grid grid-cols-2 gap-4 items-center py-2 border-b-2 border-white my-4">
 					{#each item.instances as instance}
-					{@const url = instance.video && new URL(instance.video)}
-					{@const ytslug = url && (url.host === 'www.youtube.com' ? url.searchParams.get('v') : url.pathname.slice(1))}
+						{@const url = instance.video && new URL(instance.video)}
+						{@const ytslug =
+							url &&
+							(url.host === 'www.youtube.com' ? url.searchParams.get('v') : url.pathname.slice(1))}
 						{#if url}
 							<li>
 								<a href={instance.video} target="_blank">
-										{#if ['www.youtube.com', 'youtu.be'].includes(url.host)}
-										<img class="max-h-32 w-fit" alt="talk thumbnail" src={`http://i3.ytimg.com/vi/${ytslug}/hqdefault.jpg`} />
-										{/if}
-											{instance.venue} @ {new Date(instance.date).toISOString().slice(0, 10)}
-										</a>
+									{#if ['www.youtube.com', 'youtu.be'].includes(url.host)}
+										<img
+											class="max-h-32 w-fit"
+											alt="talk thumbnail"
+											src={`http://i3.ytimg.com/vi/${ytslug}/hqdefault.jpg`}
+										/>
+									{/if}
+									{instance.venue} @ {new Date(instance.date).toISOString().slice(0, 10)}
+								</a>
 							</li>
-							{:else}
+						{:else}
 							<li>
 								<a href={instance.video} target="_blank">
-											{instance.venue} @ {new Date(instance.date).toISOString().slice(0, 10)}
-										</a>
+									{instance.venue} @ {new Date(instance.date).toISOString().slice(0, 10)}
+								</a>
 							</li>
-							{/if}
+						{/if}
 					{/each}
 				</ul>
 			{/if}

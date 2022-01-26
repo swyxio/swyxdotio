@@ -16,10 +16,10 @@
 
 <section class="mb-16 w-full" id="newsletter">
 	<div
-		class="border-y sm:border-x border-blue-200 sm:rounded p-6 my-4 w-full dark:border-gray-600 bg-blue-50 dark:bg-gray-800"
+		class="my-4 w-full border-y border-blue-200 bg-blue-50 p-6 dark:border-gray-600 dark:bg-gray-800 sm:rounded sm:border-x"
 	>
-		<div class="flex justify-between items-center space-x-4 text-gray-900 dark:text-gray-100">
-			<p class="text-lg md:text-xl font-bold">
+		<div class="flex items-center justify-between space-x-4 text-gray-900 dark:text-gray-100">
+			<p class="text-lg font-bold md:text-xl">
 				{isSubscribed === 'subscribed'
 					? 'Thanks for subscribing!'
 					: 'Get updates on new posts and projects'}
@@ -27,7 +27,7 @@
 
 			<button
 				aria-label="Toggle Newsletter CTA"
-				class="w-9 h-9 rounded-lg  flex items-center justify-center hover:ring-2 ring-gray-300 transition-all"
+				class="flex h-9 w-9  items-center justify-center rounded-lg ring-gray-300 transition-all hover:ring-2"
 				on:click={toggleNewsletter}
 			>
 				{#if isNewsletterOpen}
@@ -77,11 +77,11 @@
 				>
 					<div class="revue-form-group formkit-field sm:flex">
 						<input
-							class="px-4 py-2 mt-1 
-						formkit-input appearance-none 
-						placeholder-gray-400
-						focus:ring-blue-500 focus:border-blue-500 block w-full border-gray-300 rounded-lg 
-						bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 pr-32"
+							class="formkit-input mt-1 block 
+						w-full appearance-none 
+						rounded-lg
+						border-gray-300 bg-white px-4 py-2 pr-32 text-gray-900 
+						placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100"
 							aria-label="Email Address"
 							placeholder="your@email.com"
 							type="email"
@@ -92,10 +92,10 @@
 							<input
 								type="submit"
 								on:click={toggleNewsletter}
-								class="flex items-center justify-center absolute right-0 top-1 px-4 py-2 font-medium 
-							bg-zinc-100 dark:bg-zinc-700 text-gray-900 dark:text-gray-100 
-							hover:text-gray-700 hover:dark:text-yellow-200
-							rounded-r-lg"
+								class="absolute right-0 top-1 flex items-center justify-center rounded-r-lg bg-zinc-100 px-4 
+							py-2 font-medium text-gray-900 hover:text-gray-700 
+							dark:bg-zinc-700 dark:text-gray-100
+							hover:dark:text-yellow-200"
 								value={isSubscribed ? 'Subscribe again why not' : 'Subscribe'}
 								name="member[subscribe]"
 								id="member_submit"
@@ -130,7 +130,7 @@
 		-->
 				</form>
 			</div>
-			<p class="text-sm text-gray-800 dark:text-gray-200 mt-2">
+			<p class="mt-2 text-sm text-gray-800 dark:text-gray-200">
 				3000+ subscribers including my Mom – <a href="https://www.getrevue.co/profile/swyx"
 					>see past issues</a
 				>

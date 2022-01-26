@@ -170,15 +170,15 @@
 
 <svelte:window on:keyup={focusSearch} />
 
-<section class="flex flex-col items-start justify-center max-w-2xl mx-auto mb-16 px-4 sm:px-8">
-	<h1 class="mb-4 text-3xl font-bold tracking-tight text-black md:text-5xl dark:text-white">
+<section class="mx-auto mb-16 flex max-w-2xl flex-col items-start justify-center px-4 sm:px-8">
+	<h1 class="mb-4 text-3xl font-bold tracking-tight text-black dark:text-white md:text-5xl">
 		Idea Showcase
 	</h1>
-	<p class="mt-3 text-xl leading-7 text-black dark:text-white italic sm:mt-4">
+	<p class="mt-3 text-xl italic leading-7 text-black dark:text-white sm:mt-4">
 		For Free: Great Ideas. Lightly Used.
 	</p>
 	<p class="mb-4 text-gray-600 dark:text-gray-400">
-		In total, I've written <span class="bg-orange-400 bg-opacity-70 font-mono text-white px-2"
+		In total, I've written <span class="bg-orange-400 bg-opacity-70 px-2 font-mono text-white"
 			>{items.length}</span
 		> essays, snippets, tutorials, and notes!
 	</p>
@@ -190,9 +190,9 @@
 			on:input={saveURLState}
 			bind:value={filterStr}
 			placeholder="Hit / to search (JavaScript, Advice, Reflections, etc.)"
-			class="block w-full px-4 py-2 text-gray-900 bg-white border border-gray-200 rounded-md dark:border-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-gray-100"
+			class="block w-full rounded-md border border-gray-200 bg-white px-4 py-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-900 dark:bg-gray-800 dark:text-gray-100"
 		/><svg
-			class="absolute w-5 h-5 text-gray-400 right-3 top-3 dark:text-gray-300"
+			class="absolute right-3 top-3 h-5 w-5 text-gray-400 dark:text-gray-300"
 			xmlns="http://www.w3.org/2000/svg"
 			fill="none"
 			viewBox="0 0 24 24"
@@ -205,9 +205,9 @@
 			/></svg
 		>
 	</div>
-	<div class="flex items-center mb-12 mt-2 ">
-		<span class="text-gray-900 dark:text-gray-400 mr-2"> Filter: </span>
-		<span class="relative z-0 grid grid-cols-3 sm:grid-cols-6 shadow-sm rounded-md">
+	<div class="mb-12 mt-2 flex items-center ">
+		<span class="mr-2 text-gray-900 dark:text-gray-400"> Filter: </span>
+		<span class="relative z-0 grid grid-cols-3 rounded-md shadow-sm sm:grid-cols-6">
 			<!-- <div class="inline-flex items-center text-gray-600 dark:text-gray-400 mr-2 italic px-4">Show:</div> -->
 			<button
 				type="button"
@@ -218,12 +218,12 @@
 				class:bimodalpurple={essays}
 				class:mytext={essays}
 				class:font-medium={essays}
-				class="-ml-px sm:ml-0 relative inline-flex items-center px-4 py-2
-      sm:rounded-l-md border border-gray-300 text-sm leading-5
-     dark:text-gray-200 text-gray-700 focus:z-10
-      focus:outline-none focus:border-blue-300 focus:ring-yellow focus:text-yellow-400
-       transition ease-in-out
-      duration-150"
+				class="focus:ring-yellow relative -ml-px inline-flex items-center border border-gray-300
+      px-4 py-2 text-sm leading-5 text-gray-700
+     transition duration-150 ease-in-out
+      focus:z-10 focus:border-blue-300 focus:text-yellow-400 focus:outline-none
+       dark:text-gray-200 sm:ml-0
+      sm:rounded-l-md"
 			>
 				Essays
 			</button>
@@ -236,11 +236,11 @@
 				class:bimodalpurple={talks}
 				class:mytext={talks}
 				class:font-medium={talks}
-				class="-ml-px relative inline-flex items-center px-4 py-2 border
-      border-gray-300 text-sm leading-5 dark:text-gray-200 text-gray-700
-     focus:z-10 focus:outline-none
-      focus:border-blue-300 focus:ring-yellow focus:text-yellow-400 
-     transition ease-in-out duration-150"
+				class="focus:ring-yellow relative -ml-px inline-flex items-center border border-gray-300
+      px-4 py-2 text-sm leading-5 text-gray-700
+     transition duration-150
+      ease-in-out focus:z-10 focus:border-blue-300 
+     focus:text-yellow-400 focus:outline-none dark:text-gray-200"
 			>
 				Talks
 			</button>
@@ -253,11 +253,11 @@
 				class:bimodalpurple={podcasts}
 				class:mytext={podcasts}
 				class:font-medium={podcasts}
-				class="-ml-px relative inline-flex items-center px-4 py-2 border
-      border-gray-300 text-sm leading-5 dark:text-gray-200 text-gray-700
-     focus:z-10 focus:outline-none
-      focus:border-blue-300 focus:ring-yellow focus:text-yellow-400 
-     transition ease-in-out duration-150"
+				class="focus:ring-yellow relative -ml-px inline-flex items-center border border-gray-300
+      px-4 py-2 text-sm leading-5 text-gray-700
+     transition duration-150
+      ease-in-out focus:z-10 focus:border-blue-300 
+     focus:text-yellow-400 focus:outline-none dark:text-gray-200"
 			>
 				Podcasts
 			</button>
@@ -270,11 +270,11 @@
 				class:bimodalpurple={snippets}
 				class:mytext={snippets}
 				class:font-medium={snippets}
-				class="-ml-px relative inline-flex items-center px-4 py-2 border
-        border-gray-300 text-sm leading-5 dark:text-gray-200 text-gray-700
-       focus:z-10 focus:outline-none
-        focus:border-blue-300 focus:ring-yellow focus:text-yellow-400 
-       transition ease-in-out duration-150"
+				class="focus:ring-yellow relative -ml-px inline-flex items-center border border-gray-300
+        px-4 py-2 text-sm leading-5 text-gray-700
+       transition duration-150
+        ease-in-out focus:z-10 focus:border-blue-300 
+       focus:text-yellow-400 focus:outline-none dark:text-gray-200"
 			>
 				Snippets
 			</button>
@@ -287,11 +287,11 @@
 				class:bimodalpurple={tutorials}
 				class:mytext={tutorials}
 				class:font-medium={tutorials}
-				class="-ml-px relative inline-flex items-center px-4 py-2 border
-        border-gray-300 text-sm leading-5 dark:text-gray-200 text-gray-700
-       focus:z-10 focus:outline-none
-        focus:border-blue-300 focus:ring-yellow focus:text-yellow-400 
-       transition ease-in-out duration-150"
+				class="focus:ring-yellow relative -ml-px inline-flex items-center border border-gray-300
+        px-4 py-2 text-sm leading-5 text-gray-700
+       transition duration-150
+        ease-in-out focus:z-10 focus:border-blue-300 
+       focus:text-yellow-400 focus:outline-none dark:text-gray-200"
 			>
 				Tutorials
 			</button>
@@ -305,11 +305,11 @@
 				class:mytext={notes}
 				class:font-medium={notes}
 				class="
-      sm:rounded-r-md border -ml-px relative inline-flex items-center px-4 py-2 border
-      border-gray-300 text-sm leading-5 dark:text-gray-200 text-gray-700
-     focus:z-10 focus:outline-none
-      focus:border-blue-300 focus:ring-yellow focus:text-yellow-400 
-     transition ease-in-out duration-150"
+      focus:ring-yellow relative -ml-px inline-flex items-center border border border-gray-300 px-4
+      py-2 text-sm leading-5 text-gray-700 transition
+     duration-150 ease-in-out
+      focus:z-10 focus:border-blue-300 focus:text-yellow-400 
+     focus:outline-none dark:text-gray-200 sm:rounded-r-md"
 			>
 				Notes
 			</button>
@@ -345,7 +345,7 @@
 			<div class="flex justify-center">
 				<button
 					on:click={() => (showAll = true)}
-					class="inline-block text-lg font-bold tracking-tight text-black md:text-2xl dark:text-white bg-blue-100 dark:bg-blue-900 rounded p-4 hover:text-yellow-900 hover:dark:text-yellow-200"
+					class="inline-block rounded bg-blue-100 p-4 text-lg font-bold tracking-tight text-black hover:text-yellow-900 dark:bg-blue-900 dark:text-white hover:dark:text-yellow-200 md:text-2xl"
 				>
 					Load More Posts...
 				</button>

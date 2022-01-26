@@ -47,57 +47,59 @@ const fs = require('fs');
 
 // upload to github issues
 (async function main() {
-  let data = JSON.parse(fs.readFileSync('./devto-articles.json'))
-  console.log(data.length)
-  const start = 220
-  for (let i = start; i < start + 4; i++) {
-    const post = data[i]
-    await postToGitHub(post, i)
-    await sleep(1000)
-  }
-  function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-})()
+	let data = JSON.parse(fs.readFileSync('./devto-articles.json'));
+	console.log(data.length);
+	const start = 220;
+	for (let i = start; i < start + 4; i++) {
+		const post = data[i];
+		await postToGitHub(post, i);
+		await sleep(1000);
+	}
+	function sleep(ms) {
+		return new Promise((resolve) => setTimeout(resolve, ms));
+	}
+})();
 
 async function postToGitHub(post, i) {
-  let body = `---
+	let body = `---
 ${renderExtra({
-  source: 'devto',
-  devToUrl: `"${post.url}"`,
-  devToReactions: post.public_reactions_count,
-  devToReadingTime: post.reading_time_minutes,
-  devToPublishedAt: `"${post.published_at}"`,
-  devToViewsCount: post.page_views_count,
+	source: 'devto',
+	devToUrl: `"${post.url}"`,
+	devToReactions: post.public_reactions_count,
+	devToReadingTime: post.reading_time_minutes,
+	devToPublishedAt: `"${post.published_at}"`,
+	devToViewsCount: post.page_views_count
 })}
-${stripHeader(post.body_markdown)}`
-  
-  // console.log(body.slice(0, 500))
-  
-  await fetch('https://api.github.com/repos/sw-yx/swyxdotio/issues', {
-    method: 'POST',
-    headers: {
-      'Authorization': `token ${process.env.GH_TOKEN}`,
-      'Content-Type': "application/vnd.github.v3+json",
-    },
-    body: JSON.stringify({
-      title: post.title,
-      body,
-      labels: ['Published'],
-    }),
-  }).then((res) => {
-    console.log(i + ': success', post.title)
-  }).catch(err => {
-    console.log(i + ': error: ' + post.title, err)
-  })
+${stripHeader(post.body_markdown)}`;
+
+	// console.log(body.slice(0, 500))
+
+	await fetch('https://api.github.com/repos/sw-yx/swyxdotio/issues', {
+		method: 'POST',
+		headers: {
+			Authorization: `token ${process.env.GH_TOKEN}`,
+			'Content-Type': 'application/vnd.github.v3+json'
+		},
+		body: JSON.stringify({
+			title: post.title,
+			body,
+			labels: ['Published']
+		})
+	})
+		.then((res) => {
+			console.log(i + ': success', post.title);
+		})
+		.catch((err) => {
+			console.log(i + ': error: ' + post.title, err);
+		});
 }
 
 function renderExtra(extra) {
-  return Object.entries(extra)
-    .map(([key, value]) => `${key}: ${value}`)
-    .join('\n')
+	return Object.entries(extra)
+		.map(([key, value]) => `${key}: ${value}`)
+		.join('\n');
 }
 
 function stripHeader(x) {
-  return x.slice(0,4) === '---\n' ? x.slice(4) : ('\n---\n\n' + x)
+	return x.slice(0, 4) === '---\n' ? x.slice(4) : '\n---\n\n' + x;
 }

@@ -10,7 +10,7 @@
 		try {
 			const res = await fetch(`/api/blog/${slug}.json`);
 			if (res.status > 400) {
-				console.error('render error for ' + `/api/blog/${slug}.json`)
+				console.error('render error for ' + `/api/blog/${slug}.json`);
 				return {
 					status: res.status,
 					error: await res.text()
@@ -18,7 +18,7 @@
 			} else {
 				const x = (await res.json()).data;
 				const json = JSON.parse(x);
-	
+
 				return {
 					props: {
 						json,
@@ -49,7 +49,7 @@
 	let date = json.date;
 	let content = json.content;
 	let ghMetadata = json.ghMetadata;
-	let canonicalUrl = json.data.canonical ? json.data.canonical : SITE_URL + '/' + json.slug
+	let canonicalUrl = json.data.canonical ? json.data.canonical : SITE_URL + '/' + json.slug;
 	// export let slug;
 	// export let REPO_URL
 </script>
@@ -73,29 +73,29 @@
 </svelte:head>
 
 <article
-	class="flex flex-col px-4 sm:px-8 items-start justify-center w-full max-w-2xl mx-auto mb-16"
+	class="mx-auto mb-16 flex w-full max-w-2xl flex-col items-start justify-center px-4 sm:px-8"
 >
-	<h1 class="mb-8 text-3xl font-bold tracking-tight text-black md:text-5xl dark:text-white ">
+	<h1 class="mb-8 text-3xl font-bold tracking-tight text-black dark:text-white md:text-5xl ">
 		{title}
 	</h1>
 	{#if subtitle}
-		<p class="italic tracking-tight text-black md:text-xl dark:text-white mb-4">
+		<p class="mb-4 italic tracking-tight text-black dark:text-white md:text-xl">
 			{subtitle}
 		</p>
 	{/if}
 	<div
-		class="flex sm:flex-col sm:items-start justify-between w-full mt-2 md:flex-row md:items-center bg"
+		class="bg mt-2 flex w-full justify-between sm:flex-col sm:items-start md:flex-row md:items-center"
 	>
 		<p class="flex items-center text-sm text-gray-700 dark:text-gray-300">swyx</p>
-		<p class="flex items-center text-sm text-gray-600 dark:text-gray-400 min-w-32 md:mt-0">
+		<p class="min-w-32 flex items-center text-sm text-gray-600 dark:text-gray-400 md:mt-0">
 			<a href={ghMetadata.issueUrl} rel="external" class="no-underline" target="_blank">
-				<span class="text-xs font-mono text-opacity-70 text-gray-700 dark:text-gray-300"
+				<span class="font-mono text-xs text-gray-700 text-opacity-70 dark:text-gray-300"
 					>{ghMetadata.reactions.total_count} reactions
 				</span>
 			</a>
 			{#if json.data.devToReactions}
 				<a href={json.data.devToUrl} rel="external" class="no-underline" target="_blank">
-					<span class="ml-2 text-xs font-mono text-opacity-70 text-gray-700 dark:text-gray-300">
+					<span class="ml-2 font-mono text-xs text-gray-700 text-opacity-70 dark:text-gray-300">
 						(+{json.data.devToReactions} on dev.to)
 					</span>
 				</a>
@@ -103,15 +103,14 @@
 			<span class="ml-4">
 				{new Date(date).toISOString().slice(0, 10)}
 			</span>
-			
 		</p>
 	</div>
 	<div
-		class="flex h-1 -mx-8 w-[calc(100%+4rem)] sm:w-full sm:mx-0 my-2 bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500"
+		class="-mx-8 my-2 flex h-1 w-[calc(100%+4rem)] bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 sm:mx-0 sm:w-full"
 	/>
 
 	{#if json.data.disclosure}
-		<p class="text-sm text-gray-600 dark:text-gray-400 mt-4">
+		<p class="mt-4 text-sm text-gray-600 dark:text-gray-400">
 			<a
 				aria-label="What is my disclosure policy?"
 				target="_blank"
@@ -120,12 +119,12 @@
 				href="https://www.swyx.io/digital-garden-tos/#2-epistemic-disclosure"
 				color="blue"
 			>
-				<span class="font-bold relative"
+				<span class="relative font-bold"
 					>Disclosure<svg
 						xmlns="http://www.w3.org/2000/svg"
 						width="1em"
 						height="1em"
-						class="inline ml-1"
+						class="ml-1 inline"
 						viewBox="0 0 24 24"
 						fill="none"
 						stroke="#999"
@@ -141,13 +140,13 @@
 			>: {json.data.disclosure}
 		</p>
 	{/if}
-	<div class="w-full mt-16 mb-16 prose dark:prose-invert max-w-none">
+	<div class="prose mt-16 mb-16 w-full max-w-none dark:prose-invert">
 		{@html content}
 	</div>
 </article>
-<div class="max-w-2xl mx-auto">
+<div class="mx-auto max-w-2xl">
 	<Newsletter />
-	<div class="prose dark:prose-invert border-t border-b p-4 border-blue-800 mb-12">
+	<div class="prose mb-12 border-t border-b border-blue-800 p-4 dark:prose-invert">
 		{#if ghMetadata.reactions.total_count > 0}
 			Reactions: <Reactions {ghMetadata} />
 		{:else}
@@ -159,14 +158,8 @@
 		<Comments {ghMetadata} />
 	</div>
 
-
-
 	<WebMentions
 		devto_reactions={json.data.devToReactions}
-		targets={[
-			`https://www.swyx.io/${json.slug}`,
-			json.data.devToUrl,
-			canonicalUrl
-		]}
+		targets={[`https://www.swyx.io/${json.slug}`, json.data.devToUrl, canonicalUrl]}
 	/>
 </div>

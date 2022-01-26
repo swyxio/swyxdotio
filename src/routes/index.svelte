@@ -1,18 +1,25 @@
 <script context="module">
-	import { SITE_URL, REPO_URL, SITE_TITLE, SITE_DESCRIPTION, DEFAULT_OG_IMAGE, MY_TWITTER } from '$lib/siteConfig';
+	import {
+		SITE_URL,
+		REPO_URL,
+		SITE_TITLE,
+		SITE_DESCRIPTION,
+		DEFAULT_OG_IMAGE,
+		MY_TWITTER
+	} from '$lib/siteConfig';
 	export const prerender = true; // index page is most visited, lets prerender
 	export async function load({ params, fetch }) {
 		const blogposts = await fetch(`/api/listBlogposts.json`);
 		if (blogposts.status > 400) {
-      console.error('render error for ' + `/api/listBlogposts.json`)
+			console.error('render error for ' + `/api/listBlogposts.json`);
 			return {
 				status: blogposts.status,
 				error: await blogposts.text()
 			};
 		} else {
 			return {
-				props: { 
-					blogposts: await blogposts.json(),
+				props: {
+					blogposts: await blogposts.json()
 					// speaking: await speaking.json()
 				},
 				maxage: 3600 // 1 hour
@@ -25,7 +32,7 @@
 	import Newsletter from '../components/Newsletter.svelte';
 	import FeatureCard from '../components/FeatureCard.svelte';
 	export let blogposts; // ,speaking;
-	$: list = blogposts.list.slice(0,10)
+	$: list = blogposts.list.slice(0, 10);
 </script>
 
 <svelte:head>
@@ -46,24 +53,26 @@
 </svelte:head>
 
 <div
-	class="flex flex-col px-4 sm:px-8 justify-center items-start max-w-2xl border-gray-200 dark:border-gray-700 mx-auto pb-16"
+	class="mx-auto flex max-w-2xl flex-col items-start justify-center border-gray-200 px-4 pb-16 dark:border-gray-700 sm:px-8"
 >
-	<div class="flex flex-col-reverse sm:flex-row items-start">
+	<div class="flex flex-col-reverse items-start sm:flex-row">
 		<div class="flex flex-col pr-8">
-			<h1 class="font-bold text-3xl md:text-5xl tracking-tight mb-3 text-black dark:text-white">
+			<h1 class="mb-3 text-3xl font-bold tracking-tight text-black dark:text-white md:text-5xl">
 				Shawn
 				<span
-					class="ml-2 before:block before:absolute before:-inset-1 before:-skew-y-3 before:bg-red-500 relative inline-block"
+					class="relative ml-2 inline-block before:absolute before:-inset-1 before:block before:-skew-y-3 before:bg-red-500"
 				>
-					<span class="relative text-yellow-400 skew-y-3">@swyx</span>
+					<span class="relative skew-y-3 text-yellow-400">@swyx</span>
 				</span>
 				Wang
 			</h1>
-			<h2 class="text-gray-700 dark:text-gray-200 mb-4">
-				Writer, Speaker, Developer Advocate. I help devtools cross the chasm (React + TypeScript, Svelte, Netlify, now Temporal) 
-				and help developers <a sveltekit:prefetch href="/LIP">Learn in Public</a>!
+			<h2 class="mb-4 text-gray-700 dark:text-gray-200">
+				Writer, Speaker, Developer Advocate. I help devtools cross the chasm (React + TypeScript,
+				Svelte, Netlify, now Temporal) and help developers <a sveltekit:prefetch href="/LIP"
+					>Learn in Public</a
+				>!
 			</h2>
-			<p class="text-gray-600 dark:text-gray-400 mb-16">
+			<p class="mb-16 text-gray-600 dark:text-gray-400">
 				<a sveltekit:prefetch href="/about">More on About page</a>
 			</p>
 		</div>
@@ -76,38 +85,41 @@
 		<pre>{JSON.stringify(speaking, null, 2)}</pre>
 	</section> -->
 	<section class="mb-16 w-full">
-		<h3 class="font-bold text-2xl md:text-4xl tracking-tight mb-6 text-black dark:text-white">
+		<h3 class="mb-6 text-2xl font-bold tracking-tight text-black dark:text-white md:text-4xl">
 			Latest Posts
 		</h3>
 		<ul class="text-white">
 			{#each list as item}
-				<li class="text-black dark:text-white">{new Date(item.date).toISOString().slice(0, 10)} <a sveltekit:prefetch href={item.slug}>{item.title}</a></li>
+				<li class="text-black dark:text-white">
+					{new Date(item.date).toISOString().slice(0, 10)}
+					<a sveltekit:prefetch href={item.slug}>{item.title}</a>
+				</li>
 			{/each}
 		</ul>
 		<a
-		class="flex mt-8 text-gray-600 dark:text-gray-400 leading-7 rounded-lg 
-			 dark:hover:text-gray-200 transition-all h-6"
-		href="/ideas"
-		>See all posts<svg
-			xmlns="http://www.w3.org/2000/svg"
-			fill="none"
-			viewBox="0 0 24 24"
-			class="h-6 w-6 ml-1"
-			><path
-				stroke="currentColor"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="2"
-				d="M17.5 12h-15m11.667-4l3.333 4-3.333-4zm3.333 4l-3.333 4 3.333-4z"
-			/></svg
-		></a
-	>
+			class="mt-8 flex h-6 rounded-lg leading-7 text-gray-600 
+			 transition-all dark:text-gray-400 dark:hover:text-gray-200"
+			href="/ideas"
+			>See all posts<svg
+				xmlns="http://www.w3.org/2000/svg"
+				fill="none"
+				viewBox="0 0 24 24"
+				class="ml-1 h-6 w-6"
+				><path
+					stroke="currentColor"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M17.5 12h-15m11.667-4l3.333 4-3.333-4zm3.333 4l-3.333 4 3.333-4z"
+				/></svg
+			></a
+		>
 	</section>
 	<section class="mb-16 w-full">
-		<h3 class="font-bold text-2xl md:text-4xl tracking-tight mb-6 text-black dark:text-white">
+		<h3 class="mb-6 text-2xl font-bold tracking-tight text-black dark:text-white md:text-4xl">
 			Most Popular Posts
 		</h3>
-		<div class="flex gap-6 flex-col md:flex-row">
+		<div class="flex flex-col gap-6 md:flex-row">
 			<FeatureCard title="Welcome to swyxkit 2022!" href="/welcome" date={'Jan 2022'} />
 			<FeatureCard
 				title="Moving to a GitHub CMS"

@@ -123,8 +123,8 @@
     - venue: IncludeJS
       date: 2020-04-14
       video: https://www.youtube.com/watch?v=1ayI9j57VlQ
-      desc: "I chatted with Eva on #LearnInPublic, teaching and career change!"
-      description: "Chat with Eva from BeJS about career change, Free Code Camp, #LearningInPublic, online communities (such as ReactJS community on Reddit), the importance of writing and note-taking (and creating your second brain), public speaking and cats!"
+      desc: 'I chatted with Eva on #LearnInPublic, teaching and career change!'
+      description: 'Chat with Eva from BeJS about career change, Free Code Camp, #LearningInPublic, online communities (such as ReactJS community on Reddit), the importance of writing and note-taking (and creating your second brain), public speaking and cats!'
     - venue: Devto Youtube
       date: 2020-11-11
       video: https://www.youtube.com/watch?v=XZzChiXp8wM
@@ -236,10 +236,8 @@
       video: https://youtu.be/zq6PpM5t3z0?t=360
       date: 2020-01-08
 
-
-# todo: concurrent react from scratch 
+# todo: concurrent react from scratch
 # todo: reactiflux q&a
-
 
 # 2019 Talks
 
@@ -423,11 +421,12 @@
   categories: [TypeScript]
   url: https://www.meetup.com/Real-World-React/events/256448268/
   desc: a live coding demo of starting with typescript for react devs
-  description: "TypeScript is increasingly being adopted in React apps at scale, from AirBnb to Shopify to Atlassian. In this live coding talk, we walk through best practices and introduce everything you need to know to get started, WITHOUT getting lost in arcane generic type logic! 
-    
-    The theme of this talk is showing how TypeScript (TS) tooling helps write and document apps at scale. We'll do: 
-    
-    - a live coding demo of starting with typescript for react devs 
+  description:
+    "TypeScript is increasingly being adopted in React apps at scale, from AirBnb to Shopify to Atlassian. In this live coding talk, we walk through best practices and introduce everything you need to know to get started, WITHOUT getting lost in arcane generic type logic!
+
+    The theme of this talk is showing how TypeScript (TS) tooling helps write and document apps at scale. We'll do:
+
+    - a live coding demo of starting with typescript for react devs
     - end with some resources and discussions of pitfalls"
   instances:
     - venue: Real World React
@@ -532,7 +531,6 @@
       url: https://jscamp.tech/speakers/2019/shawn-wang/
       img: https://user-images.githubusercontent.com/6764957/93413812-a5667f80-f8d2-11ea-8a4f-d51c88c6c99e.jpeg
 
-
 # todo: make into a blogpost
 #       ai cli state machines
 #       Introduction to TypeScript
@@ -540,7 +538,6 @@
 #       Learn in public nyc talk
 #       star apps
 #       the hooks talk
-
 
 # # template pls ignore
 # - title: Template
@@ -556,12 +553,10 @@
 #       date: 2017-09-29
 #       slides: https://slides.com/swyx/heaps#/
 
-
 # todo
 # link up React's New Defaults to blogpost
 # blogpost Why Contribute to Open Source?
 # blogpost Why React is -NOT- Reactive
-
 
 # 2017-2018 Talks
 
@@ -598,7 +593,7 @@
   desc: Babel plugins can help solve DX and UX tradeoffs by metaprogramming to while delivering code that is why stop there? In this talk we explore how babel-blade solves the double declaration problem in all get started writing your first babel plugin!
   url: https://babel-blade.netlify.com/
   github: https://github.com/sw-yx/babel-blade
-  misc: 
+  misc:
     feedback: https://shawnwang3.typeform.com/to/OYtqZ7
     description2: Babel-Macros were shipped with Create-React-App v2 - but what are they? What can you do with them? In this lightning talk we discuss how babel macros differ from plugins, and my recent work with babel-blade creating an inline GraphQL compiler that works with all React GraphQL clients.
     description3: Babel-Macros were shipped with Babel v7 - but what are they? What can you do with them? In this lightning talk we discuss how babel macros differ from plugins, and my recent work with babel-blade creating an inline GraphQL compiler that works with all clientside GraphQL clients.
@@ -628,7 +623,7 @@
   desc: diving into the history of CRA, how CRA works, and my experience making create-react-app-parcel
   misc:
     description: We all use create-react-app but how much do we know about how it works internally? In this talk we discuss how I recently dived into the source code for create-react-app to make a fun clone! It looks intimidating but is really not, once you get a hang of how lerna monorepos work and try making one of your own. Watch this and then go make your own create-awesome-app!
-    note: "[max stoiber](https://github.com/mxstbr/mxstbr.com/blob/b7b1471541cb9fee679115bb29ded8ef14d65bfa/data/old-blog-posts/2016/12/a-dream-come-true.md#create-react-app) notes that `eject` used to be named `graduate`"
+    note: '[max stoiber](https://github.com/mxstbr/mxstbr.com/blob/b7b1471541cb9fee679115bb29ded8ef14d65bfa/data/old-blog-posts/2016/12/a-dream-come-true.md#create-react-app) notes that `eject` used to be named `graduate`'
   instances:
     - venue: ReactNYC
       video: https://www.youtube.com/watch?v=Et571vTAtT8
@@ -657,9 +652,10 @@
   categories: [React]
   url: https://github.com/sw-yx/talk-reacts-new-defaults
   desc: a talk about the Why of Suspense, Time Slicing, and Hooks in React
-  misc: 
+  misc:
     description: Concurrent React and React Hooks aren't simply new ways to do old things. They represent a new, stronger opinion of what apps should do by default. Let's explore the -Why- of React's new APIs!
-    discussion: "This is a talk version of a popular blogpost I wrote: https://gist.github.com/sw-yx/17965a31413acb461c4d64028527011e
+    discussion:
+      "This is a talk version of a popular blogpost I wrote: https://gist.github.com/sw-yx/17965a31413acb461c4d64028527011e
 
       The structure:
 
@@ -674,7 +670,7 @@
       - Talk about Immediate mode vs Retained mode, and the DX Mullet
       - Conclude by contrasting the current defaults vs the better defaults introduced by the new React APIs
       "
-  instances: 
+  instances:
     - venue: Bay Area React
       video: https://youtu.be/vhWaMPQhMLQ
       date: 2018-11-15
@@ -705,4 +701,3 @@
     - venue: React Rally
       date: 2018-08-22
       video: https://www.youtube.com/watch?v=ZZoB5frlcnE
-

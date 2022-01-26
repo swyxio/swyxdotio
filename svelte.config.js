@@ -11,7 +11,7 @@ import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 const mdsvexConfig = {
 	extensions: ['.svelte.md', '.md', '.svx'],
 	layout: {
-		_: './src/mdsvexlayout.svelte', // default mdsvex layout
+		_: './src/mdsvexlayout.svelte' // default mdsvex layout
 	},
 	smartypants: {
 		dashes: 'oldschool'
@@ -52,9 +52,9 @@ const config = {
 		target: '#svelte',
 		adapter: adapter({
 			split: false
-		}),
+		})
 		// vite: {
-  	// 	plugins: [yaml()]
+		// 	plugins: [yaml()]
 		// }
 	}
 };

@@ -8,12 +8,10 @@
 	import Comment from './Comment.svelte';
 </script>
 
-<div class="prose dark:prose-invert w-full mb-8">
+<div class="prose mb-8 w-full dark:prose-invert">
 	{#if data.message}
-		<p>
-			Error loading comments: 
-		</p>
-    <pre>
+		<p>Error loading comments:</p>
+		<pre>
       {data.message.split('. ')[0]}
     </pre>
 		<p>
@@ -30,7 +28,7 @@
 	href={`${ghMetadata.issueUrl}#issuecomment-new`}
 	rel="external"
 	target="_blank"
-	class="no-underline p-4 flex justify-center sm:inline border-y sm:border-x border-blue-700 sm:rounded-xl hover:text-yellow-700 dark:hover:text-yellow-200"
+	class="flex justify-center border-y border-blue-700 p-4 no-underline hover:text-yellow-700 dark:hover:text-yellow-200 sm:inline sm:rounded-xl sm:border-x"
 >
 	Leave a new comment!
 </a>
