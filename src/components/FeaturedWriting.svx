@@ -1,4 +1,4 @@
-I do a bunch of [personal and work-related writing](/writing/), and recently published [The Coding Career Handbook](https://learninpublic.org/) with the best of my nontechnical writing.
+I do a bunch of [personal and work-related writing](/ideas/?show=Essays), and recently published [The Coding Career Handbook](https://learninpublic.org/) with the best of my nontechnical writing.
 
 - **[Learn in Public](/learn-in-public/)**: My most impactful essay, read by millions.
 - **[How to Create Luck](/create_luck/)**: Luck is random, but creating luck is a skill.
@@ -8,4 +8,4 @@ I do a bunch of [personal and work-related writing](/writing/), and recently pub
 - **[Temporal - the iPhone of System Design](/why-temporal/)**: Why Temporal is a big deal.
 - **[About](/about/)**: My personal story, [README](https://github.com/sw-yx/README/blob/master/README.md) , and [podcast with Quincy Larson](/speaking/freecodecamp-podcast).
 
-You can find all my writing on RSS or [on the /ideas page](https://www.swyx.io/ideas/?show=Essays).
+You can find all my writing on RSS or [on the /ideas page](/ideas/?show=Essays).
