@@ -25,7 +25,7 @@
 	import { onMount } from 'svelte';
 
 	let urlState = { filter: '', show: [] };
-	let defaultURLState = { filter: '', show: ['Essays', 'Talks', 'Podcasts', 'Snippets'] };
+	let defaultURLState = { filter: '', show: [] };
 
 	const setURLState = (newState) => {
 		const finalState = { ...urlState, ...newState }; // merge with existing urlstate
@@ -52,12 +52,12 @@
 			);
 	};
 
-	let essays = true;
-	let talks = true;
-	let podcasts = true;
-	let tutorials = true;
-	let snippets = true;
-	let notes = true;
+	let essays = false;
+	let talks = false;
+	let podcasts = false;
+	let tutorials = false;
+	let snippets = false;
+	let notes = false;
 
 	let filterStr = '';
 
@@ -155,10 +155,12 @@
 			if (filterStr && notIncludes(filterStr, x)) {
 				return false;
 			} else {
+				if ([essays, talks, podcasts, tutorials, snippets, notes].every(v => v === false)) return true;
 				if (essays && x.type === 'essay') return true;
 				if (talks && x.type === 'talk') return true;
 				if (podcasts && x.type === 'podcast') return true;
 				if (tutorials && x.type === 'tutorial') return true;
+				if (snippets && x.type === 'snippet') return true;
 				if (notes && x.type === 'note') return true;
 			}
 		});
