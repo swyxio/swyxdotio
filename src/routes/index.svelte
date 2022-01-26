@@ -138,7 +138,7 @@
 		<h3 class="mb-6 text-2xl font-bold tracking-tight text-black dark:text-white md:text-4xl">
 			Most Popular Talks
 		</h3>
-		<div class="grid grid-cols-2 gap-6">
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 			<iframe
 			class="object-contain"
 			src="https://www.youtube.com/embed/KJP1E-Y-xyo"
