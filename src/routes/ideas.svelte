@@ -1,5 +1,5 @@
 <script context="module">
-	// export const prerender = true; // turned off so it refreshes quickly
+	export const prerender = true; // turned off so it refreshes quickly
 	export async function load({ params, fetch }) {
 		const items = await fetch(`/api/listAll.json`);
 		if (items.status > 400) {
@@ -75,6 +75,7 @@
 		urlState = { ...defaultURLState, ...givenstate };
 	});
 	function saveURLState() {
+		showAll = true
 		setTimeout(() => {
 			setURLState({
 				filter: filterStr,
@@ -358,6 +359,6 @@
 		</div>
 		<button class="p-2 bg-slate-500" on:click={() => (filterStr = '')}>Clear your search</button>
 	{:else}
-		<div class="prose dark:prose-invert">No blogposts found!</div>
+		<div class="prose dark:prose-invert">Search something else!</div>
 	{/if}
 </section>
