@@ -46,7 +46,7 @@
 				target="_blank"
 			>
 				<h4 class="w-full mb-2 text-lg font-medium md:text-xl flex-auto">
-					<span class="p-1 rounded text-white bg-blue-700">Podcast</span>
+					<span class="p-1 rounded text-white bg-purple-700">Podcast</span>
 					{item.title}
 					<!-- pill -->
 				</h4></a
