@@ -13,7 +13,7 @@
 <script>
 	import MobileMenu from './MobileMenu.svelte';
 	import NavLink from './NavLink.svelte';
-	export let origin = '';
+	export const origin = '';
 	let isDark = false;
 	if (typeof localStorage !== 'undefined') {
 		if (

@@ -1,5 +1,217 @@
+# 2021 Talks
+
+- title: Mapping Developer Experience (ft. Silas Sao, Head of Experience Design, DataStax)
+  slug: mapping-devex
+  categories: [Devrel]
+  description: I chatted with Silas about how I'm looking at DX these days. We met at Kubecon and realized we were doing pretty similar things at our companies (which are closely related) so this is a honest discussion/session!
+  instances:
+    - venue: Swyx Youtube
+      date: 2021-10-28
+      video: https://www.youtube.com/watch?v=ddKDPikKbNk&feature=youtu.be
+- title: Scaling and Measuring Developer Relations (with Sai Senthilkumar of Redpoint)
+  slug: measuring-devrel
+  categories: [Devrel]
+  description: I was interviewed by Sai of Redpoint for about 150 founders and devrel folks based on these blogposts
+  instances:
+    - venue: Swyx Youtube
+      date: 2021-09-25
+      video: https://www.youtube.com/watch?v=guK1XiLQbH8
+- title: React and the Meta of the Web with Sunil Pai
+  slug: sunil-pai-pod
+  categories: [React]
+  description: A wideranging podcast with Sunil covering the future of React, the Third Age of JavaScript, and the Meta of online discourse.
+  instances:
+    - venue: Swyx Youtube
+      date: 2021-09-20
+      video: https://www.youtube.com/watch?v=H3h1WICelqs
+- title: Temporal - React for the Backend
+  slug: temporal-react
+  categories: [Temporal]
+  description: swyx doing the podcast tour talking about everything Temporal!
+  instances:
+    - venue: DevtoolsFM
+      date: 2021-09-10
+      url: https://devtools.fm/episode/13
+      video: https://www.youtube.com/watch?v=yNOkWFGejUs
+    - venue: ReactDayNY
+      date: 2021-10-07
+      video: https://www.youtube.com/watch?v=Cxaf8E00GMM
+- title: How to Market Yourself (without Being a Celebrity)
+  slug: market-yourself
+  categories: [Marketing]
+  description: Discussing personal branding and developer marketing with LearnInPublic.
+  instances:
+    - venue: DataTalksClub
+      date: 2021-05-14
+      tweet: https://twitter.com/Al_Grigor/status/1393219745088946178?s=20
+      url: https://datatalks.club/podcast/s03e07-market-yourself.html
+      video: https://www.youtube.com/watch?v=tkBCPqWKCL8
+    - venue: ReactEurope
+      date: 2020-04-20
+      url: https://portal.gitnation.org/contents/shawn-swyx-wangs-career-tips-knowing-how-to-market-yourself-authentically-is-not-scammy
+      video: https://www.youtube.com/watch?v=bcca0VCJe9Q&list=PLCC436JpVnK31LZG2cNINhlEQ1KTm39BR&index=15
+- title: E2E Encryption Keyservers with Ashoat Tevosyan
+  slug: comm-with-ashoat
+  categories: [Tech]
+  description: A recording of one of the most interesting angel investing conversations I've had this year.
+  instances:
+    - venue: Swyx YouTube
+      date: 2021-05-09
+      video: https://www.youtube.com/watch?v=lWCOruAWpW4
+- title: The Coding Career Handbook with Educative
+  slug: coding-career-educative
+  categories: [Careers]
+  description: Shawn talks about his work with the LearnInPublic movement and his own contributions to the Educative platform.
+  instances:
+    - venue: Educative
+      date: 2021-06-14
+      tweet: https://twitter.com/leepngo/status/1404408306215628801?s=21
+      video: https://www.youtube.com/watch?v=9maORXuCBHk
+- title: Side Projects on the Modern Web Podcast
+  slug: side-projects-modern-web
+  categories: [Creator]
+  description: In this episode, Lindsay Wardell and Hunter Miller talk side projects with Shawn Wang. We discuss the projects they do on the side, and what kind of side projects they enjoy working on. Shawn also talks about his book, "The Coding Career Handbook", and how it started as a side project as well. We also talk about the importance of writing your own blog posts, and sharing your experience and learning in public to help both yourself and others, rather than blogging for numbers. We wrap up with a discussion on being a part-time creator, and finding a company that supports their employees and match what you're looking to do.
+  instances:
+    - venue: ModernWeb Podcast
+      date: 2021-04-22
+      video: https://www.youtube.com/watch?v=3DjrhpxuDOk
+- title: Grifters and Content Creation Traps
+  slug: content-grifter
+  categories: [Creator]
+  description: We'll discuss how to grow and build your reputation online. Ethical ways to build your audience on Twitter. Things to avoid as a content creator. How to write things that matter.
+  instances:
+    - venue: Maksim Ivanov
+      date: 2021-04-21
+      tweet: https://twitter.com/ivanov_dev/status/1384553300914180097?s=20
+      video: https://www.youtube.com/watch?v=sL_uefhT51g
+- title: 7 Lessons to Outlive React
+  slug: outlive-react
+  categories: [React]
+  description: There was a time before React, and there will be life after. If you tie yourself too closely to any technology, you might trap yourself and miss the next wave. Let's zoom out from the state management library du jour — what timeless lessons can we learn from React? In the talk I'll discuss lessons I've learned from studying React that I will take with me for the rest of my career.
+  instances:
+    - venue: React Summit
+      date: 2021-08-28
+      video: https://www.youtube.com/watch?v=yLgq-Foc1EE
+    - venue: ItalianCoders
+      date: 2021-12-10
+      video: https://www.youtube.com/watch?v=b1FXpOExLQw
+- title: swyx on GraphQL
+  slug: graphql-guide
+  categories: [GraphQL]
+  description: I chatted with Loren as part of the bonus features for the GraphQL Guide book.
+  instances:
+    - venue: GraphQL Guide
+      date: 2021-04-12
+      video: https://www.youtube.com/watch?v=K4jzDASCPFM
+- title: Technical Community Builders
+  slug: tech-community
+  categories: [Community]
+  description: Who builds developer communities, why are companies investing in them, and why now? I joined Idan Gazit and Brian Douglas to talk about my post on Technical Community Builders.
+  instances:
+    - venue: GitHub OCTO
+      date: 2021-04-13
+      tweet: https://twitter.com/githubOCTO/status/1372568532190306304
+      video: https://www.youtube.com/watch?v=lN9FphNMJbY
+    - venue: Jamstack Boston
+      date: 2021-04-21
+      video: https://www.youtube.com/watch?v=ecSq1Sl6h7M
+    - venue: Sourcegraph
+      date: 2021-12-14
+      video: https://www.youtube.com/watch?v=L1ATAYQFMn4
+- title: State of Svelte
+  slug: state-of-svelte
+  categories: [JavaScript]
+  description: I joined the CodingCat stream with Alex and Brittney to talk Svelte!
+  instances:
+    - venue: CodingCat
+      date: 2021-04-08
+      video: https://www.youtube.com/watch?v=JfZm0tPUxjE
+- title: Third Age of Javascript
+  slug: third-age-of-js
+  categories: [JavaScript]
+  description: In this stream, we chat to Shawn Swyx Wang, developer, author of the Coding Career Handbook, and learn-in-public advocate. Come along and ask him your questions! 
+  instances:
+    - venue: JSWorld
+      date: 2021-02-25
+      tweet: https://twitter.com/swyx/status/1364977488657412101
+      video: https://www.youtube.com/watch?v=8cQ7ukBbrbA
+    - venue: JSNation Preview
+      date: 2021-05-20
+      url: https://portal.gitnation.org/contents/the-third-age-of-javascript
+      video: https://www.youtube.com/watch?v=Nan1hqQ90_4
+    - venue: JSNation Live
+      date: 2021-06-09
+      description: My first time as opening keynote speaker
+      video: https://www.youtube.com/watch?v=7sowEZQa3Tc&t=5740s
+    - venue: Swyx YouTube
+      date: 2021-04-04
+      video: https://www.youtube.com/watch?v=UKDjW0uRZGo
+    - venue: CityJS Conf
+      date: 2021-07-31
+      video: https://www.youtube.com/watch?v=oRnli8zrEBM
+    - venue: Web Directions Global Scope
+      date: 2021-06-11
+      url: https://webdirections.org/blog/web-directions-hover-21-session-spotlight-temporal-modern-dates-and-times-in-javascriptthe-third-age-of-javascript/
+    - venue: Infobip Shift
+      date: 2021-10-13
+      tweets:
+        - https://twitter.com/tlakomy/status/1435256423315877889?s=20
+        - https://twitter.com/m4d_z/status/1435253892523171843?s=20
+        - https://twitter.com/giltayar/status/1435258266729205762?s=20
+        - https://twitter.com/CompuIves/status/1435258964242059268?s=20
+        - https://twitter.com/kenny_io/status/1435313957099745282?s=20
+        - https://twitter.com/jen_ayy_/status/1435568073700958210?s=21
+        - https://twitter.com/kenny_io/status/1435639380991954946?s=21
+        - https://twitter.com/giltayar/status/1435876021681758208?s=21
+        - https://twitter.com/dabit3/status/1436932234263597058?s=21
+      video: https://www.youtube.com/watch?v=lU-zEoGqjc8
+- title: Scrimba Livestream - Q&A
+  slug: scrimba-livestream
+  categories: [Careers]
+  description: In this stream, we chat to Shawn Swyx Wang, developer, author of the Coding Career Handbook, and learn-in-public advocate. Come along and ask him your questions! 
+  instances:
+    - venue: Scrimba
+      date: 2021-02-25
+      tweet: https://twitter.com/scrimba/status/1364579629634363396?s=21
+      video: https://www.youtube.com/watch?v=t6A0jVDRymw
+- title: Prerecording Conference Talks - 15 Tips to Make It Bigger and Better
+  slug: prerecording-conf-talks-gdcfp-day
+  categories: [Careers]
+  description: MI prepared this talk for Global Diversity CFP Day 2021 and here is the high quality backup for posterity!
+  instances:
+    - venue: GDCFP Day
+      date: 2021-02-20
+      video: https://www.youtube.com/watch?v=Tz1Fotm-hnk
+- title: Build and deploy dynamic Jamstack apps with AWS Amplify
+  slug: aws-amplify-2021
+  categories: [AWS]
+  description: Jamstack is a modern web development architecture built with JavaScript, APIs, and Markup. This new way of building websites and applications delivers performance, higher security, lower cost of scaling, and a better developer experience. In this session, you learn how to bring your Jamstack applications to life in record time when you develop and deploy with AWS Amplify. You also learn how to easily and quickly develop cloud-enabled applications with your choice of REST or GraphQL APIs, rapidly release new features, avoid downtime during application deployment, and handle the complexity of simultaneously updating the front end and backend of your applications.
+  instances:
+    - venue: AWS Reinvent
+      date: 2021-02-06
+      video: https://www.youtube.com/watch?v=nlifa0c-PFU
+
 # 2020 Talks
 
+- title: React Podcast
+  slug: reactpodcast2020
+  categories: [React]
+  description: swyx and Chantastic talk the state of React and the Coding Career Handbook.
+  instances:
+    - venue: React Podcast
+      date: 2020-09-17
+      video: https://www.youtube.com/watch?v=GSl2CbF77GM
+- title: Growing a Meta-Language
+  slug: reactrally2020
+  categories: [React]
+  description: 7 years after release, React reaches millions of developers and billions of users. Its ideas have influenced other frameworks, even those in other languages like Swift UI and Jetpack Compose. What’s next? The community has been hard at work innovating in React formats, metaframeworks, and developer tooling. This fits an established pattern of how developer languages grow, and likely forms a roadmap for React in the Third Age of JavaScript.
+  instances:
+    - venue: Swyx YouTube
+      date: 2020-08-15
+      video: https://www.youtube.com/watch?v=18F5v1diO_A
+    - venue: React Rally
+      date: 2021-04-01
+      video: https://www.youtube.com/watch?v=Dz4q_bNDqfo
 - title: The Future of Dev Tools with Minko Gechev (Angular Core Team)
   slug: devtools-minko-gechev
   categories: [Angular]
@@ -33,6 +245,9 @@
       date: 2020-09-17
       tweet: https://twitter.com/swyx/status/1305994389362106370?s=20
       video: https://www.youtube.com/watch?v=ja6meOLHjIg
+    - venue: Reactathon
+      date: 2020-12-08
+      video: https://www.youtube.com/watch?v=KgTW0xfyr9A&t=17107s
 - title: Intro to AWS Amplify and AppSync
   slug: intro-to-aws-amplify-and-appsync
   categories: [AWS]
@@ -51,10 +266,13 @@
     - venue: Egghead
       date: 2020-05-29
       video: https://egghead.io/lessons/react-eggheadtalks-concurrent-react-from-scratch?af=95qfq1
+    - venue: Code with Kristian
+      date: 2020-05-15
+      video: https://www.youtube.com/watch?v=fKlt5GFQnVc
     - venue: ByteConf React
       url: https://www.bytesized.xyz/react-2020
       date: 2020-05-02
-      video: https://www.youtube.com/watch?v=yeyiA9U8Ep8&feature=youtu.be
+      video: https://www.youtube.com/watch?v=yeyiA9U8Ep8
     - venue: ReactAdvanced London
       url: https://reactadvanced.com/
       date: 2019-10-25
@@ -133,6 +351,18 @@
       date: 2020-12-06
       video: https://www.youtube.com/watch?v=ilvwP4-7UXM
       description: I chatted with Lambda School alums on the Coding Career Handbook!
+    - venue: MLH Fellowship
+      date: 2020-12-06
+      video: https://www.youtube.com/watch?v=Z2X-RsCVRas
+      description: I chatted with the MLH Fellowship students on the Coding Career Handbook!
+    - venue: High Tech High School
+      date: 2021-06-20
+      video: https://www.youtube.com/watch?v=2iacVfTQA7k
+      description: I chatted with these great High School students on the Coding Career Handbook!
+    - venue: FITC Conf
+      date: 2021-10-19
+      video: https://www.youtube.com/watch?v=S8GQL4qBJB4
+      description: I presented the Coding Careers talk to FITC Web Unleashed.
 - slug: react-rally-metalanguage
   title: Growing a Meta-Language
   categories: [React]
@@ -168,14 +398,6 @@
     - venue: IonicConf livestream
       date: 2020-06-24
       video: https://youtu.be/xh-B-AtsLJc?t=3944
-- title: Marketing Yourself as a Dev
-  slug: reacteurope-podcast
-  categories: [Careers]
-  description: I chatted with Patrick, founder of React Europe, about the Marketing Yourself blogpost.
-  instances:
-    - venue: React Europe
-      date: 2020-04-20
-      video: https://www.youtube.com/watch?v=bcca0VCJe9Q&list=PLCC436JpVnK31LZG2cNINhlEQ1KTm39BR&index=15
 
 - title: Data Fetching For Developers Who Are New to Svelte And Wanna Learn To Do Other Stuff Good Too
   slug: svelte-data-fetching
@@ -367,6 +589,11 @@
       date: 2019-12-12
       video: https://www.youtube.com/watch?v=GxdhfnzuamY&feature=emb_title
       desc: An unrehearsed, raw, off the cuff talk about the LearnInPublic philosophy for the JrDevSG crowd.
+    - venue: Thunder Nerds
+      tweet: https://twitter.com/thundernerds/status/1444725115766415364?s=20
+      desc: In this episode, we talk with SWYX, author, speaker, podcaster, and learning in public evangelist. We dive into his career history in finance and how he transitioned into development. We also discuss the challenges of Developer Experience, the advantages of learning in public, and lessons learned from podcasting.
+      date: 2021-10-03
+      video: https://www.youtube.com/watch?v=lHG4rNmzQq4
 - title: Complete Intro to Netlify in 3.5 hours
   slug: netlify-freecodecamp-intro
   categories: [Netlify]

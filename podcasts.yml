@@ -1,5 +1,150 @@
+# 2022 podcasts
+- title: Developer Health Space -- Courage and Vulnerability with Swyx
+  slug: g2i-pod
+  categories: [LIP]
+  venues: G2i
+  date: 2022-01-26
+  url: https://www.youtube.com/watch?v=9Qdj8CK7GOk
+  description: This week, Shawn "Swyx" Wang, Head of Developer Experience at Temporal, joins us to discuss the value of courage and vulnerability for software developers.
+- title: Temporal is like React for the backend
+  slug: jsparty-pod
+  categories: [Temporal]
+  venues: JSParty
+  date: 2022-01-06
+  url: https://changelog.com/jsparty/208
+  description: Swyx is known for learning in public, and he joins the party to teach Ali and Nick about what he’s been working on with Temporal IO, what it is, and why he’s excited about it. 
+# 2021 podcasts
+- title: Dev Community on SourceGraph podcast
+  slug: sourcegraph-pod
+  categories: [Community]
+  venues: SourceGraph
+  date: 2021-12-14
+  url: https://about.sourcegraph.com/podcast/swyx/
+  description: Why is building a technical community the most effective moat out there for startups? In this episode, swyx, who runs DevRel at Temporal and co-founded the Svelte Society, joins Beyang Liu, co-founder and CTO of Sourcegraph, to discuss the stress-induced heart palpitations that led him to transition from finance to tech, show how you can harness a willingness to look stupid to become a standout member of your community, and explain why every book should come with a Discord. Along the way, swyx shares some of the ways learning in public has changed his life, including how one blog post earned two job offers.
+- title: LIP and Temporal on MongoDB podcast
+  slug: mongodb-pod
+  categories: [Temporal]
+  venues: MongoDB
+  date: 2021-12-06
+  url: https://mongodb.libsyn.com/ep-93-swyx-learn-in-public-and-temporal
+  description: I chatted about "The Coding Career Handbook" and Temporal.
+- title: Connecting the dots in public on the Changelog
+  slug: changelog-pod
+  categories: [LIP]
+  venues: Changelog
+  date: 2021-10-06
+  url: https://changelog.com/podcast/467
+  description: TToday we’re joined by Shawn “swyx” Wang, also known as just “swyx” — and we’re talking about his interesting path to becoming a software developer, what it means to “learn in public” and how he’s been able to leverage that process to not only level up his skills and knowlege, but to also rapidly advance his career.
+- title: How to Market Yourself with Shawn “Swyx” Wang
+  slug: uibreakfast-pod
+  categories: [Marketing]
+  venues: UIBreakfast
+  date: 2021-10-06
+  url: https://uibreakfast.com/223-how-to-market-yourself-with-shawn-swyx-wang/
+  description: Today we talk about marketing yourself, both as a personal brand and at work. Our guest is Shawn “Swyx” Wang, an engineering thought leader and author of “The Coding Career Handbook.” You’ll learn several components of defining your brand, tips on expressing that brand in public, collateral and strategies that will help you at work, and more.
+- title: Learning in Public with SWYX on Thunder Nerds
+  slug: thundernerds-pod
+  categories: [LIP]
+  venues: ThunderNerds
+  date: 2021-10-03
+  url: https://www.listennotes.com/podcasts/thunder-nerds/287-learning-in-public-with-Y4yNEbFi8Kh/
+  tweet: https://twitter.com/thundernerds/status/1444725115766415364?s=20
+  description: Today, we're thrilled to have Shawn as a guest on our podcast to discuss the past, present, and future state of JavaScript as well as the world of developer ergonomics and the magical possibilities of effortless platform management.
+- title: Third Age of JS on WorkingCode
+  slug: workingcode-pod
+  categories: [JavaScript]
+  venues: WorkingCode
+  date: 2021-09-22
+  url: https://www.bennadel.com/blog/4120-working-code-podcast-episode-041-the-third-age-of-javascript-with-shawn-swyx-wang.htm
+  tweet: https://twitter.com/bennadel/status/1440657316441776135?s=21
+  description: Today, we're thrilled to have Shawn as a guest on our podcast to discuss the past, present, and future state of JavaScript as well as the world of developer ergonomics and the magical possibilities of effortless platform management.
+- title: Temporal on DevtoolsFM
+  slug: devtoolsfm-pod
+  categories: [Temporal]
+  venues: DevTools
+  date: 2021-09-10
+  url: https://devtools.fm/episode/13
+  description: Join us as we chat with Shawn Wang who's Head of Developer Experience at Temporal and a staunch advocate of learning in public.
+- title: Swyx on DevJourney with Tim Bourgignon
+  slug: devjourney-pod
+  categories: [LIP]
+  venues: DevJourney
+  date: 2021-05-25
+  url: https://devjourney.info/Guests/152-ShawnWang.html
+  description: Shawn took us along on his transition from his very well-paid trading job to his career as a developer. We talked about re-using your skills, boot camps, the power of networks, LearnInPublic, motivation, and much more.
+- title: How to Market Yourself (without Being a Celebrity)
+  slug: market-yourself-pod
+  categories: [LIP]
+  venues: DataTalksClub
+  date: 2021-05-14
+  url: https://datatalks.club/podcast/s03e07-market-yourself.html
+  description: Discussing personal branding and developer marketing with LearnInPublic.
+- title: Side Projects on the Modern Web Podcast
+  slug: side-projects-modern-web-pod
+  categories: [LIP]
+  venues: ModernWeb
+  date: 2021-04-21
+  url: https://modernweb.podbean.com/e/s08e09-modern-web-podcast-sides-projects-with-shawn-wang/
+  description: In this episode, Lindsay Wardell and Hunter Miller talk side projects with Shawn Wang. We discuss the projects they do on the side, and what kind of side projects they enjoy working on. Shawn also talks about his book, "The Coding Career Handbook", and how it started as a side project as well. We also talk about the importance of writing your own blog posts, and sharing your experience and learning in public to help both yourself and others, rather than blogging for numbers. We wrap up with a discussion on being a part-time creator, and finding a company that supports their employees and match what you're looking to do.
+- title: Learning in Public on Developer Love
+  slug: dev-love-podcast
+  categories: [LIP]
+  venues: DeveloperLove
+  date: 2021-03-11
+  url: https://www.heavybit.com/library/podcasts/developer-love/ep-15-learning-in-public-with-shawn-swyx-wang/
+  description: In episode 15 of Developer Love, Patrick speaks with Shawn “Swyx” Wang of Temporal. They discuss divorcing your identity from your work, transparency in developer marketing, and the merits of learning in public.
+- title: Svelte on PodRocket
+  slug: podrocket-2
+  categories: [Svelte]
+  venues: Podrocket
+  date: 2021-07-16
+  url: https://podrocket.logrocket.com/svelte
+  description: Curious about all of the hype around Svelte? Swyx joins us on this episode of PodRocket to talk about Svelte and all of the work he has been doing at Svelte Society.
+- title: Devrel and Dev Community on PodRocket
+  slug: podrocket-1
+  categories: [Devrel]
+  venues: Podrocket
+  date: 2021-03-09
+  url: https://podrocket.logrocket.com/swyx
+  description: Ben and Brian talk to Shawn Wang, better known as Swyx, about infinite building, his experience as a Reddit moderator, blogging platforms, scaling developer relations, and more.
+- title: Clubhouse chat - Growing Digital Gardens w/ Maggie Appleton
+  slug: digital-gardens-maggie
+  categories: [DigitalGardens]
+  venues: Swyx YouTube
+  date: 2021-02-13
+  url: https://share.transistor.fm/s/41a6f89a
+  description: Maggie and I hosted a Clubhouse chat on Digital Gardens and here is the recording! Later joined by Nikita Voloboev and other listeners. 
+- title: How to Launch Your Product and Sustain Revenue
+  slug: ecoder-book
+  categories: [Creators]
+  venues: EntrepreneurialCoder
+  date: 2021-02-11
+  url: https://share.transistor.fm/s/1cfa55cb
+  description: Shawn Wang (aka swyx) chats about his experience writing and publishing his book, The Coding Career Handbook. He goes into detail about the challenges he encountered, how he learned from other people's launches, and how he was able to successfully launch the book and make it into something that provides meaningful revenue. He also talks about how to sustain revenue for your product after you launch.
+- title: Amplify and DataStore - FSJam Podcast
+  slug: amplify-fsjam
+  categories: [AWS]
+  venues: FSJam
+  date: 2021-01-18
+  url: https://fsjam.org/episodes/episode-12-amplify-and-datastore-with-shawn-swyx-wang
+  description: In this episode we discuss Amplify, DataStore, the difference between teaching and learning in public, migrating existing projects to AWS, containers vs. serverless, and the endgame of layer 2 clouds.
+
 # 2020 podcasts
 
+- title: Learning in Public and the Coding Career Handbook - Developer Tea
+  slug: developer-tea
+  categories: [Careers]
+  venues: Developer Tea
+  date: 2020-12-07
+  url: https://www.listennotes.com/podcasts/developer-tea/learning-in-public-w-shawn-Q2S4e9qJDpu/
+  description: I joined Jon Cuttrell's podcast to talk about the book and got to talk some strategy stuff I rarely talk about!
+- title: The Coding Career Handbook on the React Podcast
+  slug: react-podcast-2020
+  categories: [Careers]
+  venues: React Podcast
+  date: 2020-10-15
+  url: https://www.listennotes.com/podcasts/react-podcast/114-shawn-swyx-wang-on-the-8flz1q2hHM4/
+  description: swyx and Chantastic talk the state of React and the Coding Career Handbook.
 - title: The Coding Career Handbook on the Coder Foundry YouTube
   slug: coder-foundry
   categories: [Careers]

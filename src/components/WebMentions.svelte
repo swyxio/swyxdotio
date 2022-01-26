@@ -300,9 +300,6 @@
 	#WebMentions ul {
 		margin-left: 0;
 	}
-	h3 {
-		display: inline;
-	}
 	.WebMentionsContainer {
 		border: 1px dashed var(--link-color);
 		padding: 1rem;
@@ -311,9 +308,6 @@
 	.WebMentionsContainer ul {
 		list-style-type: none;
 		padding: 0;
-	}
-	hr {
-		margin: 3rem 1rem;
 	}
 	.WebMentionReply {
 		margin-top: 16px;
