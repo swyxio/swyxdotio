@@ -16,6 +16,8 @@
 	export let origin = '';
 </script>
 
+<link rel="webmention" href="https://webmention.io/www.swyx.io/webmention" />
+<link rel="pingback" href="https://webmention.io/www.swyx.io/xmlrpc" />
 <div class="flex flex-col justify-center bg-gray-50 px-4 dark:bg-gray-900 sm:px-8">
 	<Nav />
 </div>

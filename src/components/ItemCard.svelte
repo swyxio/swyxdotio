@@ -106,7 +106,7 @@
 				<div class="flex flex-col-reverse md:flex-col border-b-2 py-2  border-white">
 					<div class="flex flex-col justify-between">
 						<h4 class="w-full mb-2 text-lg font-medium md:text-xl flex-auto  flex items-center space-x-2">
-							<span class="p-1 rounded text-white bg-green-700">Talk</span>
+							<span class="p-1 rounded text-white bg-green-700 text-xs">Talk</span>
 							<span>{item.title}</span>
 						</h4>
 						<div class="inline-flex flex-1 items-center">
