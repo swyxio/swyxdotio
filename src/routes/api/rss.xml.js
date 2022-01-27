@@ -18,7 +18,7 @@ export async function get() {
 // // locals: Locals;
 // }
 	const feed = new RSS({
-		title: 'swyxkit blog',
+		title: 'swyx.io blog',
 		site_url: SITE_URL,
 		feed_url: SITE_URL + '/api/rss.xml'
 	});
@@ -34,21 +34,10 @@ export async function get() {
 	const allBlogs = await listBlogposts();
 	allBlogs.forEach((post) => {
 		feed.item({
-			title: post.data.title,
+			title: post.title,
 			url: SITE_URL + `/${post.slug}`,
-			date: post.data.date
+			date: post.date
 			// description: makeDescription(post)
-		});
-	});
-
-	// use this if you want your content in a local '/content' folder rather than github issues
-	// let allBlogs = import.meta.globEager('/content/**/*.md')
-	Object.entries(allBlogs).forEach(([path, obj]) => {
-		feed.item({
-			title: obj.title,
-			url: SITE_URL + `/${path.slice(9).slice(0, -3)}`,
-			date: obj.date,
-			description: obj.description
 		});
 	});
 
