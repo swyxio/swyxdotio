@@ -32,7 +32,7 @@ export async function get() {
 
 	// finally the solution was simplest - just run the same fn in node lol
 	const allBlogs = await listBlogposts();
-	allBlogs.forEach((post) => {
+	allBlogs.sort((a, b) => a.date - b.date).forEach((post) => {
 		feed.item({
 			title: post.data.title,
 			url: SITE_URL + `/${post.slug}`,
