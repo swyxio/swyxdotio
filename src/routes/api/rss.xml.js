@@ -34,10 +34,10 @@ export async function get() {
 	const allBlogs = await listBlogposts();
 	allBlogs.forEach((post) => {
 		feed.item({
-			title: post.title,
+			title: post.data.title,
 			url: SITE_URL + `/${post.slug}`,
-			date: post.date
-			// description: makeDescription(post)
+			date: post.date,
+			description: post.description
 		});
 	});
 
