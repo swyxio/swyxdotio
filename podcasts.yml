@@ -6,14 +6,22 @@
   date: 2022-01-26
   url: https://www.youtube.com/watch?v=9Qdj8CK7GOk
   description: This week, Shawn "Swyx" Wang, Head of Developer Experience at Temporal, joins us to discuss the value of courage and vulnerability for software developers.
-- title: Temporal is like React for the backend
+- title: Temporal - React for the backend
   slug: jsparty-pod
   categories: [Temporal]
   venues: JSParty
   date: 2022-01-06
   url: https://changelog.com/jsparty/208
   description: Swyx is known for learning in public, and he joins the party to teach Ali and Nick about what he’s been working on with Temporal IO, what it is, and why he’s excited about it. 
-# 2021 podcasts
+- title: Developer Careers on Cloudcast
+  slug: cloudcast-pod
+  categories: [Temporal, Careers]
+  venues: Cloudcast
+  date: 2022-01-12
+  url: https://www.thecloudcast.net/2022/01/2022-look-ahead-developer-careers.html
+  description: Shawn Wang (@swyx, Head of Developer Experience @Temporalio) talks about the breadth of developer skills needed, how developers learn new technologies, and insights into important future trends for a broad set of developers. 
+
+  # 2021 podcasts
 - title: Dev Community on SourceGraph podcast
   slug: sourcegraph-pod
   categories: [Community]

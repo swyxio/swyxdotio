@@ -104,7 +104,7 @@
 				</div>
 			{:else}
 				<div class="flex flex-col-reverse md:flex-col border-b-2 py-2  border-white">
-					<div class="flex flex-col justify-between md:flex-row">
+					<div class="flex flex-col justify-between">
 						<h4 class="w-full mb-2 text-lg font-medium md:text-xl flex-auto  flex items-center space-x-2">
 							<span class="p-1 rounded text-white bg-green-700">Talk</span>
 							<span>{item.title}</span>
@@ -113,9 +113,9 @@
 							<!-- {#if ghMetadata && ghMetadata.reactions.total_count}
 							<span class=" min-w-[2rem] mr-2 text-xs font-mono text-opacity-70 text-gray-700 dark:text-gray-300">{ghMetadata.reactions.total_count} ♥</span>
 						{/if} -->
-							<p class="w-32 mb-4 text-left text-gray-500 md:text-right md:mb-0">
+							<!-- <p class="w-32 mb-4 text-left text-gray-500 md:text-right md:mb-0">
 								{new Date(item.date).toISOString().slice(0, 10)}
-							</p>
+							</p> -->
 						</div>
 						<p class="text-gray-600 dark:text-gray-400 text-ellipsis overflow-hidden">
 							{item.description}
