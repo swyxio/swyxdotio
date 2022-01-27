@@ -137,7 +137,7 @@ function parseIssue(issue) {
 		if (data.slug) {
 			slug = data.slug;
 		} else if (data.devToUrl) {
-			slug = data.devToUrl.slice(12) // if from devto, but no slug, it used the devto slug
+			slug = data.devToUrl.slice(20) // if from devto, but no slug, it used the devto slug
 		} else {
 			slug = slugify(title);
 		}
