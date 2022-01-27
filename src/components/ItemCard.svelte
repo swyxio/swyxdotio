@@ -33,7 +33,7 @@
 				<p class="w-28 text-left text-gray-500 md:text-right">{date}</p>
 			</div>
 		</div>
-		<p class="overflow-hidden text-ellipsis break-all text-gray-600 dark:text-gray-400 text-xs">
+		<p class="overflow-hidden text-ellipsis break-all text-gray-600 dark:text-gray-400 text-sm">
 			{item.description}
 		</p>
 	</div>
@@ -60,7 +60,7 @@
 				<p class="w-32 mb-4 text-left text-gray-500 md:text-right md:mb-0">{date}</p>
 			</div>
 		</div>
-		<p class="text-gray-600 dark:text-gray-400 text-ellipsis overflow-hidden">
+		<p class="text-gray-600 dark:text-gray-400 text-ellipsis overflow-hidden text-sm">
 			{item.description}
 		</p>
 	</div>
@@ -101,7 +101,7 @@
 									.slice(0, 10)}
 							</p>
 						</div>
-						<p class="text-gray-600 dark:text-gray-400 text-ellipsis overflow-hidden">
+						<p class="text-gray-600 dark:text-gray-400 text-ellipsis overflow-hidden text-sm">
 							{item.description}
 						</p>
 					</div>
@@ -123,7 +123,7 @@
 								{new Date(item.date).toISOString().slice(0, 10)}
 							</p> -->
 						</div>
-						<p class="text-gray-600 dark:text-gray-400 text-ellipsis overflow-hidden">
+						<p class="text-gray-600 dark:text-gray-400 text-ellipsis overflow-hidden text-sm">
 							{item.description}
 						</p>
 					</div>
