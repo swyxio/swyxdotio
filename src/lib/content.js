@@ -115,7 +115,7 @@ export async function getBlogpost(slug) {
 			)
 			.replace(
 				/{% (tweet|twitter) (.*?) %}/g,
-				(_, x) => `
+				(_, _2, x) => `
 			<blockquote class="twitter-tweet" data-lang="en" data-dnt="true" data-theme="dark">
 			<a href="https://twitter.com/x/status/${x}"></a></blockquote> 
 			<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
