@@ -1,3 +1,6 @@
+/rss.xml /api/rss.xml
+/feed /api/rss.xml
+/rss /api/rss.xml
 /LIP /learn-in-public
 /learn-in-public-hack /puwtpd
 /growing /ideas/?filter=growing&show=Talks

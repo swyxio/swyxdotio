@@ -14,11 +14,11 @@
 			>
 				<h4 class="mb-2 w-full flex-auto text-lg font-medium md:text-xl">
 					{#if item.type !== 'note'}
-						<span class="rounded bg-blue-700 p-1 text-white"
+						<span class="rounded bg-blue-700 p-1 text-white text-xs"
 							>{item.type[0].toUpperCase() + item.type.substring(1)}</span
 						>
 					{/if}
-					{item.title}
+					<span>{item.title}</span>
 				</h4></a
 			>
 			<div
@@ -45,9 +45,9 @@
 				href={item.url}
 				target="_blank"
 			>
-				<h4 class="w-full mb-2 text-lg font-medium md:text-xl flex-auto">
-					<span class="p-1 rounded text-white bg-purple-700">Podcast</span>
-					{item.title}
+				<h4 class="w-full mb-2 text-lg font-medium md:text-xl flex-auto flex items-center space-x-2">
+					<span class="p-1 rounded text-white bg-purple-700 text-xs">Podcast</span>
+					<span>{item.title}</span>
 					<!-- pill -->
 				</h4></a
 			>
@@ -82,9 +82,9 @@
 						{/if}
 					</a>
 					<div class="justify-between md:flex-row">
-						<h4 class="w-full text-lg font-medium md:text-xl flex-auto">
-							<span class="p-1 rounded text-white bg-green-700">Talk</span>
-							{item.title}
+						<h4 class="w-full text-lg font-medium md:text-xl flex-auto  flex items-center space-x-2">
+							<span class="p-1 rounded text-white bg-green-700 text-xs">Talk</span>
+							<span>{item.title}</span>
 							<!-- pill -->
 						</h4>
 						<div class="inline-flex flex-1 items-center">
@@ -105,10 +105,9 @@
 			{:else}
 				<div class="flex flex-col-reverse md:flex-col border-b-2 py-2  border-white">
 					<div class="flex flex-col justify-between md:flex-row">
-						<h4 class="w-full mb-2 text-lg font-medium md:text-xl flex-auto">
+						<h4 class="w-full mb-2 text-lg font-medium md:text-xl flex-auto  flex items-center space-x-2">
 							<span class="p-1 rounded text-white bg-green-700">Talk</span>
-							{item.title}
-							<!-- pill -->
+							<span>{item.title}</span>
 						</h4>
 						<div class="inline-flex flex-1 items-center">
 							<!-- {#if ghMetadata && ghMetadata.reactions.total_count}
