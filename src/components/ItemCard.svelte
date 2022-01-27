@@ -14,7 +14,7 @@
 			>
 				<h4 class="mb-2 w-full flex-auto text-lg font-medium md:text-xl">
 					{#if item.type !== 'note'}
-						<span class="rounded bg-blue-700 p-1 text-white text-xs"
+						<span class="rounded bg-blue-700 p-1 text-xs text-white"
 							>{item.type[0].toUpperCase() + item.type.substring(1)}</span
 						>
 					{/if}
@@ -27,13 +27,13 @@
 				{#if (item.ghMetadata && item.ghMetadata.reactions.total_count) || item.data.devToReactions}
 					<span
 						class=" mr-2 min-w-[3rem] text-right font-mono text-xs text-gray-700 text-opacity-70 dark:text-gray-300"
-						>{item?.ghMetadata?.reactions?.total_count + item?.data?.devToReactions} ♥</span
+						>{(item?.ghMetadata?.reactions?.total_count || 0) + (item?.data?.devToReactions || 0)} ♥</span
 					>
 				{/if}
 				<p class="w-28 text-left text-gray-500 md:text-right">{date}</p>
 			</div>
 		</div>
-		<p class="overflow-hidden text-ellipsis break-all text-gray-600 dark:text-gray-400">
+		<p class="overflow-hidden text-ellipsis break-all text-gray-600 dark:text-gray-400 text-xs">
 			{item.description}
 		</p>
 	</div>
@@ -45,7 +45,9 @@
 				href={item.url}
 				target="_blank"
 			>
-				<h4 class="w-full mb-2 text-lg font-medium md:text-xl flex-auto flex items-center space-x-2">
+				<h4
+					class="w-full mb-2 text-lg font-medium md:text-xl flex-auto flex items-center space-x-2"
+				>
 					<span class="p-1 rounded text-white bg-purple-700 text-xs">Podcast</span>
 					<span>{item.title}</span>
 					<!-- pill -->
@@ -82,7 +84,9 @@
 						{/if}
 					</a>
 					<div class="justify-between md:flex-row">
-						<h4 class="w-full text-lg font-medium md:text-xl flex-auto  flex items-center space-x-2">
+						<h4
+							class="w-full text-lg font-medium md:text-xl flex-auto  flex items-center space-x-2"
+						>
 							<span class="p-1 rounded text-white bg-green-700 text-xs">Talk</span>
 							<span>{item.title}</span>
 							<!-- pill -->
@@ -105,7 +109,9 @@
 			{:else}
 				<div class="flex flex-col-reverse md:flex-col border-b-2 py-2  border-white">
 					<div class="flex flex-col justify-between">
-						<h4 class="w-full mb-2 text-lg font-medium md:text-xl flex-auto  flex items-center space-x-2">
+						<h4
+							class="w-full mb-2 text-lg font-medium md:text-xl flex-auto  flex items-center space-x-2"
+						>
 							<span class="p-1 rounded text-white bg-green-700 text-xs">Talk</span>
 							<span>{item.title}</span>
 						</h4>
