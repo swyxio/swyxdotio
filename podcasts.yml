@@ -1,12 +1,12 @@
 # 2022 podcasts
-- title: Developer Health Space -- Courage and Vulnerability with Swyx
+- title: Developer Health Space - Courage and Vulnerability with Swyx
   slug: g2i-pod
   categories: [LIP]
   venues: G2i
   date: 2022-01-26
   url: https://www.youtube.com/watch?v=9Qdj8CK7GOk
   description: This week, Shawn "Swyx" Wang, Head of Developer Experience at Temporal, joins us to discuss the value of courage and vulnerability for software developers.
-- title: Temporal - React for the backend
+- title: Temporal as React for the backend on JSParty
   slug: jsparty-pod
   categories: [Temporal]
   venues: JSParty
