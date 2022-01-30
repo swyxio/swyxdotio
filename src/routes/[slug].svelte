@@ -43,13 +43,13 @@
 	import Newsletter from '../components/Newsletter.svelte';
 	import Reactions from '../components/Reactions.svelte';
 	export let json;
-	let title = json.title;
-	let subtitle = json.subtitle;
-	let extendedTitle = title + (subtitle ? ': ' + subtitle : '');
-	let date = json.date;
-	let content = json.content;
-	let ghMetadata = json.ghMetadata;
-	let canonicalUrl = json.data.canonical ? json.data.canonical : SITE_URL + '/' + json.slug;
+	$: title = json.title;
+	$: subtitle = json.subtitle;
+	$: extendedTitle = title + (subtitle ? ': ' + subtitle : '');
+	$: date = json.date;
+	$: content = json.content;
+	$: ghMetadata = json.ghMetadata;
+	$: canonicalUrl = json.data.canonical ? json.data.canonical : SITE_URL + '/' + json.slug;
 	// export let slug;
 	// export let REPO_URL
 </script>
