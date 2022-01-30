@@ -1,19 +1,10 @@
 <script context="module">
 	import { MY_TWITTER, MY_YOUTUBE, REPO_URL } from '$lib/siteConfig';
-	/** @type {import('@sveltejs/kit').Load} */
-	export async function load({ url }) {
-		return {
-			props: {
-				origin: url.origin
-			}
-		};
-	}
 </script>
 
 <script>
 	import '../tailwind.css';
 	import Nav from '../components/Nav.svelte';
-	export let origin = '';
 </script>
 
 <link rel="webmention" href="https://webmention.io/www.swyx.io/webmention" />
@@ -37,7 +28,7 @@
 			<a class="text-gray-500 transition hover:text-gray-300" href="/subscribe">Newsletter</a>
 			<a
 				class="text-gray-500 transition hover:text-gray-300"
-				href={origin + '/api/rss.xml'}
+				href="/api/rss.xml"
 				rel="external">RSS</a
 			>
 		</div>
