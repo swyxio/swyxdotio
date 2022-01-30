@@ -36,6 +36,12 @@
     - venue: ReactDayNY
       date: 2021-10-07
       video: https://www.youtube.com/watch?v=Cxaf8E00GMM
+    - venue: Temporal
+      date: 2021-10-07
+      video: https://www.youtube.com/watch?v=umsYzbDtj18
+    - venue: CascadiaJS
+      date: 2021-10-16
+      video: https://www.youtube.com/watch?v=WRYozSljSpw
 - title: How to Market Yourself (without Being a Celebrity)
   slug: market-yourself
   categories: [Marketing]
