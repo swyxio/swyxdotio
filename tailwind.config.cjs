@@ -10,7 +10,21 @@ module.exports = {
 			typography: (theme) => ({
 				DEFAULT: {
 					css: {
-						'--tw-prose-bullets': theme('colors.black')
+						'--tw-prose-bullets': theme('colors.black'),
+            blockquote: {
+              // border: "none",
+              // color: "var(--ifm-color)",
+              // backgroundColor: "transparent",
+              fontSize: "inherit",
+              fontStyle: "inherit",
+              fontWeight: "medium",
+            },
+            "blockquote p:first-of-type::before": {
+              content: "",
+            },
+            "blockquote p:last-of-type::after": {
+              content: "",
+            },
 					}
 				}
 			})
