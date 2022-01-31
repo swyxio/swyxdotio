@@ -42,29 +42,22 @@
 	import 'prism-themes/themes/prism-shades-of-purple.min.css';
 	import Newsletter from '../components/Newsletter.svelte';
 	import Reactions from '../components/Reactions.svelte';
+	
 	export let json;
-	$: title = json.title;
-	$: subtitle = json.subtitle;
-	$: extendedTitle = title + (subtitle ? ': ' + subtitle : '');
-	$: date = json.date;
-	$: content = json.content;
-	$: ghMetadata = json.ghMetadata;
 	$: canonicalUrl = json.data.canonical ? json.data.canonical : SITE_URL + '/' + json.slug;
-	// export let slug;
-	// export let REPO_URL
 </script>
 
 <svelte:head>
-	<title>{title}</title>
+	<title>{json.title}</title>
 	<link rel="canonical" href={canonicalUrl} />
 	<meta property="og:url" content={canonicalUrl} />
 	<meta property="og:type" content="article" />
-	<meta property="og:title" content={extendedTitle} />
+	<meta property="og:title" content={json.title + (json.subtitle ? ': ' + json.subtitle : '')} />
 	<meta name="Description" content={json.description} />
 	<meta property="og:description" content={json.description} />
 	<meta name="twitter:card" content="summary" />
 	<meta name="twitter:creator" content="https://twitter.com/swyx/" />
-	<meta name="twitter:title" content={extendedTitle} />
+	<meta name="twitter:title" content={json.title + (json.subtitle ? ': ' + json.subtitle : '')} />
 	<meta name="twitter:description" content={json.description} />
 	{#if json.image}
 		<meta property="og:image" content={json.image} />
@@ -76,11 +69,11 @@
 	class="mx-auto mb-16 flex w-full max-w-2xl flex-col items-start justify-center px-4 sm:px-8"
 >
 	<h1 class="mb-8 text-3xl font-bold tracking-tight text-black dark:text-white md:text-5xl ">
-		{title}
+		{json.title}
 	</h1>
-	{#if subtitle}
+	{#if json.subtitle}
 		<p class="mb-4 italic tracking-tight text-black dark:text-white md:text-xl">
-			{subtitle}
+			{json.subtitle}
 		</p>
 	{/if}
 	<div
@@ -88,9 +81,9 @@
 	>
 		<p class="flex items-center text-sm text-gray-700 dark:text-gray-300">swyx</p>
 		<p class="min-w-32 flex items-center text-sm text-gray-600 dark:text-gray-400 md:mt-0">
-			<a href={ghMetadata.issueUrl} rel="external" class="no-underline" target="_blank">
+			<a href={json.ghMetadata.issueUrl} rel="external" class="no-underline" target="_blank">
 				<span class="font-mono text-xs text-gray-700 text-opacity-70 dark:text-gray-300"
-					>{ghMetadata.reactions.total_count} reactions
+					>{json.ghMetadata.reactions.total_count} reactions
 				</span>
 			</a>
 			{#if json.data.devToReactions}
@@ -101,7 +94,7 @@
 				</a>
 			{/if}
 			<span class="ml-4">
-				{new Date(date).toISOString().slice(0, 10)}
+				{new Date(json.date).toISOString().slice(0, 10)}
 			</span>
 		</p>
 	</div>
@@ -141,21 +134,21 @@
 		</p>
 	{/if}
 	<div class="prose mt-16 mb-16 w-full max-w-none dark:prose-invert">
-		{@html content}
+		{@html json.content}
 	</div>
 </article>
 <div class="mx-auto max-w-2xl">
 	<Newsletter />
 	<div class="prose mb-12 border-t border-b border-blue-800 p-4 dark:prose-invert">
-		{#if ghMetadata.reactions.total_count > 0}
-			Reactions: <Reactions {ghMetadata} />
+		{#if json.ghMetadata.reactions.total_count > 0}
+			Reactions: <Reactions ghMetadata={json.ghMetadata} />
 		{:else}
-			<a href={ghMetadata.issueUrl}>Leave a reaction </a>
+			<a href={json.ghMetadata.issueUrl}>Leave a reaction </a>
 			if you liked this post! 🧡
 		{/if}
 	</div>
 	<div class="mb-8">
-		<Comments {ghMetadata} />
+		<Comments ghMetadata={json.ghMetadata} />
 	</div>
 
 	<WebMentions
