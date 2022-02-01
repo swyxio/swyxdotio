@@ -163,7 +163,7 @@ function parseIssue(issue) {
 		// console.log(slug, tags)
 
 		return {
-			type: data.category.toLowerCase() || 'essay',
+			type: data.category?.toLowerCase() || 'essay',
 			content,
 			data,
 			title,
