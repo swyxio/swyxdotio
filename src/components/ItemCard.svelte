@@ -4,7 +4,7 @@
 	// console.log(item)
 </script>
 
-{#if ['essay', 'note', 'snippet', 'tutorial'].includes(item?.type)}
+{#if ['essay', 'note', 'notes', 'snippet', 'tutorial'].includes(item?.type)}
 	<div class="mb-4 w-full">
 		<div class="flex flex-col-reverse justify-between md:flex-row">
 			<a
@@ -162,5 +162,5 @@
 		</div>
 	</div>
 {:else}
-	<pre class="prose dark:prose-invert">{JSON.stringify(item, null, 2)}</pre>
+	<pre class="prose dark:prose-invert overflow-scroll w-full">{JSON.stringify(item, null, 2)}</pre>
 {/if}
