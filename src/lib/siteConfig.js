@@ -5,7 +5,7 @@ export const SITE_TITLE = "swyx's site";
 export const SITE_DESCRIPTION =
 	'The official site of Shawn @swyx Wang, a technologist and recovering finance geek.';
 export const DEFAULT_OG_IMAGE = 'swyx-ski.jpeg';
-export const MY_TWITTER = 'https://twitter.com/swyx/';
+export const MY_TWITTER_HANDLE = 'swyx';
 export const MY_YOUTUBE = 'https://youtube.com/swyxTV';
 
 // dont forget process.env.GH_TOKEN
