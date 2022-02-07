@@ -59,7 +59,7 @@
 >
 	<div class="flex flex-col-reverse items-start sm:flex-row">
 		<div class="flex flex-col pr-8 mb-16 ">
-			<h1 class="mb-3 text-3xl font-bold tracking-tight text-black dark:text-white md:text-5xl">
+			<h1 id="me" class="mb-3 text-3xl font-bold tracking-tight text-black dark:text-white md:text-5xl">
 				Shawn
 				<span
 					class="relative ml-2 inline-block before:absolute before:-inset-1 before:block before:-skew-y-3 before:bg-red-500"
@@ -68,7 +68,7 @@
 				</span>
 				Wang
 			</h1>
-			<h2 class="mb-4 text-gray-700 dark:text-gray-200">
+			<h2 id="bio" class="mb-4 text-gray-700 dark:text-gray-200">
 				Writer, Speaker, Developer Advocate. I help devtools cross the chasm (React + TypeScript,
 				Svelte, Netlify, now <a sveltekit:prefetch href="/why-temporal"
 				>Temporal</a>) and help developers <a sveltekit:prefetch href="/LIP"
@@ -88,7 +88,7 @@
 		<pre>{JSON.stringify(speaking, null, 2)}</pre>
 	</section> -->
 	<section class="mb-8 w-full">
-		<h3 class="mb-6 text-2xl font-bold tracking-tight text-black dark:text-white md:text-4xl">
+		<h3 id="latest" class="mb-6 text-2xl font-bold tracking-tight text-black dark:text-white md:text-4xl">
 			Latest Posts
 		</h3>
 		<ul class="text-white">
@@ -120,7 +120,7 @@
 	</section>
 	<Newsletter />
 	<section class="mb-8 w-full">
-		<h3 class="mb-6 text-2xl font-bold tracking-tight text-black dark:text-white md:text-4xl">
+		<h3 id="writing" class="mb-6 text-2xl font-bold tracking-tight text-black dark:text-white md:text-4xl">
 			Most Popular Posts
 		</h3>
 		<div class="flex flex-col gap-6 md:flex-row mb-8">
@@ -135,7 +135,7 @@
 		<FeaturedWriting />
 	</section>
 	<section class="mb-8 w-full">
-		<h3 class="mb-6 text-2xl font-bold tracking-tight text-black dark:text-white md:text-4xl">
+		<h3 id="speaking" class="mb-6 text-2xl font-bold tracking-tight text-black dark:text-white md:text-4xl">
 			Most Popular Talks
 		</h3>
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
