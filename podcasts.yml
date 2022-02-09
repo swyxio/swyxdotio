@@ -1,4 +1,11 @@
 # 2022 podcasts
+- title: Learning in Public on #DevDiscuss
+  slug: devdiscuss-lip
+  categories: [LIP]
+  venues: DevDiscuss
+  date: 2022-02-09
+  url: https://dev.to/devteam/devdiscuss-is-back-for-season-8-4knb
+  description: Chatting LIP with Gift Egwenu, Ben Halpern, and Ridhwana!
 - title: Developer Health Space - Courage and Vulnerability with Swyx
   slug: g2i-pod
   categories: [LIP]
