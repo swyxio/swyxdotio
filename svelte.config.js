@@ -13,9 +13,6 @@ const mdsvexConfig = {
 	layout: {
 		_: './src/mdsvexlayout.svelte' // default mdsvex layout
 	},
-	smartypants: {
-		dashes: 'oldschool'
-	},
 	remarkPlugins: [
 		[
 			remarkGithub,
