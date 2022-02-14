@@ -1,4 +1,13 @@
 # 2022 podcasts
+
+
+- title: Self Provisioning Runtimes and Temporal on Serverless Chats
+  slug: sls-chats-self-provisioning
+  categories: [Temporal, Serverless]
+  venues: ServerlessChats
+  date: 2022-02-14
+  url: https://www.serverlesschats.com/124/
+  description: Talking workflow engines and my Self Provisioning Runtimes essay with Jeremy Daly, who is the GM for Serverless Cloud which is one of the best examples of SPRs 
 - title: Learning in Public on #DevDiscuss
   slug: devdiscuss-lip
   categories: [LIP]
