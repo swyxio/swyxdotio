@@ -1,6 +1,12 @@
 # 2022 podcasts
 
-
+- title: The radiating circles in DevX with Swyx
+  slug: radiating-devx-pod
+  categories: [DX, DevRel]
+  venues: DevXPod
+  date: 2022-02-15
+  url: https://devxpod.buzzsprout.com/1895030/10012425-the-radiating-circles-in-devx-with-swyx-head-of-developer-experience-temporal
+  description: i joined Pauline and Mike to give my updated thoughts on what great developer experience is!
 - title: Self Provisioning Runtimes and Temporal on Serverless Chats
   slug: sls-chats-self-provisioning
   categories: [Temporal, Serverless]
