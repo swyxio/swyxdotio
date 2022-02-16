@@ -55,7 +55,7 @@
 </svelte:head>
 
 <div
-	class="mx-auto flex max-w-2xl flex-col items-start justify-center border-gray-200 px-4 dark:border-gray-700 sm:px-8"
+	class="mx-auto flex max-w-4xl flex-col items-start justify-center border-gray-200 px-4 dark:border-gray-700 sm:px-8"
 >
 	<div class="flex flex-col-reverse items-start sm:flex-row">
 		<div class="flex flex-col pr-8 mb-16 ">
@@ -130,7 +130,7 @@
 				href="/js-third-age"
 				date={'May 2020'}
 			/>
-			<FeatureCard title="Eating the Cloud from Outside In" href="/cloudflare-go" date={'Oct 2021'} />
+			<FeatureCard title="AWS plays Chess, but Cloudflare plays Go" href="/cloudflare-go" date={'Oct 2021'} />
 		</div>
 		<FeaturedWriting />
 	</section>
@@ -138,7 +138,7 @@
 		<h3 id="speaking" class="mb-6 text-2xl font-bold tracking-tight text-black dark:text-white md:text-4xl">
 			Most Popular Talks
 		</h3>
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-6 place-items-center my-16">
 			<iframe
 			class="object-contain"
 			src="https://www.youtube.com/embed/KJP1E-Y-xyo"
