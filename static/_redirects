@@ -2,6 +2,7 @@
 /feed /api/rss.xml
 /rss /api/rss.xml
 /LIP /learn-in-public
+/lip /learn-in-public
 /learn-in-public-hack /puwtpd
 /growing /ideas/?filter=growing&show=Talks
 /jsconfhi /ideas/?filter=babel%20macros&show=Talks
