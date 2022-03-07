@@ -1,5 +1,12 @@
 # 2022 podcasts
 
+- title: Talking Temporal on Purrfect.Dev
+  slug: temporal-purrfect
+  categories: [Temporal]
+  venues: Purrfect
+  date: 2022-03-04
+  url: https://www.youtube.com/watch?v=Q0P-Uod19NY
+  description: I joined Brittney and Alex for the second time, this time to talk about Temporal instead of Svelte!
 - title: The radiating circles in DevX with Swyx
   slug: radiating-devx-pod
   categories: [DX, DevRel]
@@ -14,7 +21,7 @@
   date: 2022-02-14
   url: https://www.serverlesschats.com/124/
   description: Talking workflow engines and my Self Provisioning Runtimes essay with Jeremy Daly, who is the GM for Serverless Cloud which is one of the best examples of SPRs 
-- title: Learning in Public on #DevDiscuss
+- title: Learning in Public on DevDiscuss
   slug: devdiscuss-lip
   categories: [LIP]
   venues: DevDiscuss
