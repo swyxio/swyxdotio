@@ -137,7 +137,7 @@
 		{@html json.content}
 	</div>
 </article>
-<div class="mx-auto max-w-4xl break-all">
+<div class="mx-0 sm:mx-auto max-w-4xl break-all">
 	<Newsletter />
 	<div class="prose mb-12 border-t border-b border-blue-800 p-4 dark:prose-invert">
 		{#if json.ghMetadata.reactions.total_count > 0}
