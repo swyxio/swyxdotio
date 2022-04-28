@@ -1,3 +1,13 @@
+
+- title: 7 minute intro to Temporal
+  slug: temporal-intro
+  categories: [Temporal]
+  description: I made the definitive intro to Temporal - picked up by the Register for our Series B funding announcement.
+  instances:
+    - venue: Temporal Youtube
+      date: 2022-01-15
+      video: https://www.youtube.com/watch?v=CQhUL5RogXI
+      
 # 2021 Talks
 
 - title: Mapping Developer Experience (ft. Silas Sao, Head of Experience Design, DataStax)
