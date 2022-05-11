@@ -1,4 +1,20 @@
 
+- title: Third Age of JavaScript - Three Years In
+  slug: third-age-3-talk
+  categories: [JS]
+  description: I updated the epic Third Age talk for Reactathon 2022
+  instances:
+    - venue: RWR Youtube
+      date: 2022-05-06
+      video: https://youtu.be/Ck-e3hd3pKw?t=19926
+- title: Radiating Circles of DevX - Opening Keynote DevXConf Stage B
+  slug: radiating-dx
+  categories: [DX]
+  description: DX expands outward from product to docs to content to community. Here's the full breakdown!
+  instances:
+    - venue: Gitpod Youtube
+      date: 2022-05-02
+      video: https://www.youtube.com/watch?time_continue=634&v=E40KwlxZJFI&feature=emb_title
 - title: Temporal Series B Livestream
   slug: temporal-series-b
   categories: [Temporal]
