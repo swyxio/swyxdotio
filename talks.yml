@@ -1,5 +1,61 @@
+
+- title: Third Age of JavaScript - Three Years In
+  slug: third-age-3-talk
+  categories: [JS]
+  description: I updated the epic Third Age talk for Reactathon 2022
+  instances:
+    - venue: RWR Youtube
+      date: 2022-05-06
+      video: https://youtu.be/Ck-e3hd3pKw?t=19926
+- title: Radiating Circles of DevX - Opening Keynote DevXConf Stage B
+  slug: radiating-dx
+  categories: [DX]
+  description: DX expands outward from product to docs to content to community. Here's the full breakdown!
+  instances:
+    - venue: Gitpod Youtube
+      date: 2022-05-02
+      video: https://www.youtube.com/watch?time_continue=634&v=E40KwlxZJFI&feature=emb_title
+- title: Temporal Series B Livestream
+  slug: temporal-series-b
+  categories: [Temporal]
+  description: Our community livestream for our Series B
+  instances:
+    - venue: Temporal Youtube
+      date: 2022-02-16
+      video: https://www.youtube.com/watch?time_continue=634&v=E40KwlxZJFI&feature=emb_title
+- title: Temporal SDK Intros
+  slug: temporal-sdk-intros
+  categories: [Temporal]
+  description: Full length SDK intro workshops for Temporal's main SDKs.
+  instances:
+    - venue: Temporal Youtube
+      date: 2022-02-16
+      video: https://www.youtube.com/watch?v=66zQ8nrW-mA
+    - venue: Temporal Youtube
+      date: 2022-02-16
+      video: https://www.youtube.com/watch?v=1RY2lWSuJaA
+    - venue: Temporal Youtube
+      date: 2022-02-16
+      video: https://www.youtube.com/watch?v=-KWutSkFda8
+- title: 7 minute intro to Temporal
+  slug: temporal-intro
+  categories: [Temporal]
+  description: I made the definitive intro to Temporal - picked up by the Register for our Series B funding announcement.
+  instances:
+    - venue: Temporal Youtube
+      date: 2022-02-14
+      video: https://www.youtube.com/watch?v=2HjnQlnA5eY
+
 # 2021 Talks
 
+- title: Temporal TypeScript SDK Full Workshop
+  slug: temporal-ts-sdk-workshop
+  categories: [Temporal]
+  description: Full length SDK intro workshops for TypeScript SDK
+  instances:
+    - venue: Temporal Youtube
+      date: 2021-12-14
+      video: https://www.youtube.com/watch?v=CeHSmv8oF_4
 - title: Mapping Developer Experience (ft. Silas Sao, Head of Experience Design, DataStax)
   slug: mapping-devex
   categories: [Devrel]

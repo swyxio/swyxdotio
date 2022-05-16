@@ -36,17 +36,24 @@ I am currently [working on Developer Experience at Temporal.io](https://www.swyx
 
 swyx has worked on React and serverless JavaScript at Two Sigma, [Netlify](https://www.swyx.io/farewell-netlify/) and [AWS](https://www.swyx.io/hello-aws/), and now serves as [Head of Developer Experience at Temporal.io](https://www.swyx.io/why-temporal/). He has started and run communities for hundreds of thousands of developers, like [Svelte Society](https://twitter.com/sveltesociety/), [/r/reactjs](https://www.swyx.io/moderating-rreactjs/), and the [React TypeScript Cheatsheet](https://github.com/typescript-cheatsheets/react). His nontechnical writing was recently published in [the Coding Career Handbook](https://learninpublic.org/) for Junior to Senior developers.
 
-🔗 [Twitter](https://twitter.com/swyx), [GitHub](https://github.com/sw-yx), [The Coding Career Handbook](https://learninpublic.org).
-
-🖼️ [Medium](https://avatars3.githubusercontent.com/u/6764957?s=200&v=4), or [Large](https://user-images.githubusercontent.com/6764957/103350806-26d9ca80-4adc-11eb-9e53-a8ce9ca3f21f.jpeg) pictures of me you can use without asking.
-
-
 Selected prior talks:
 
 - JS Conf: https://swyx.io/hooks
 - React Rally: https://www.youtube.com/watch?v=nyFHR0dDZo0
 - The Operating System of You: https://www.youtube.com/watch?v=D-Sj6jo4o1I
 
+### Socials
+
+🔗 [Twitter](https://twitter.com/swyx), [GitHub](https://github.com/sw-yx), [The Coding Career Handbook](https://learninpublic.org).
+
+### Images
+
+Pictures of me you can use without asking
+
+- [200x200](https://avatars3.githubusercontent.com/u/6764957?s=200&v=4)
+- [460x460](https://user-images.githubusercontent.com/6764957/103350806-26d9ca80-4adc-11eb-9e53-a8ce9ca3f21f.jpeg)
+  - [transparent background variant](https://user-images.githubusercontent.com/6764957/166125711-7dd63d46-3405-4c66-a6bd-92a34dbf58f6.png)
+- Speaking photo - [React Miami](https://user-images.githubusercontent.com/6764957/164554925-e6a2791e-4c75-4d5f-8003-2932193d5b25.png)
 
 ## Tech behind this site
 
