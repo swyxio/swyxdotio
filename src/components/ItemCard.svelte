@@ -1,7 +1,7 @@
 <script>
 	export let item;
 	let date = new Date(item?.date).toISOString().slice(0, 10);
-	let videoID = item?.instances[0]?.video
+	let videoID = item?.instances?.[0]?.video
 	if (videoID) {
 		if (videoID.includes('youtube')) {
 			videoID = videoID.split('v=')[1].split('&')[0]
