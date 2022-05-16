@@ -1,6 +1,14 @@
 <script>
 	export let item;
 	let date = new Date(item?.date).toISOString().slice(0, 10);
+	let videoID = item.instances[0].video
+	if (videoID) {
+		if (videoID.includes('youtube')) {
+			videoID = videoID.split('v=')[1].split('&')[0]
+		} else {
+			videoID = videoID.split('/')[videoID.split('/').length - 1]
+		}
+	} 
 	// console.log(item)
 </script>
 
@@ -77,9 +85,7 @@
 						{#if item.instances[0].video}
 							<img
 								alt="talk thumbnail"
-								src={`http://i3.ytimg.com/vi/${new URL(item.instances[0].video).searchParams.get(
-									'v'
-								)}/hqdefault.jpg`}
+								src={`http://i3.ytimg.com/vi/${videoID}/hqdefault.jpg`}
 							/>
 						{/if}
 					</a>
