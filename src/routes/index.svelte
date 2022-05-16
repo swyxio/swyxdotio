@@ -92,7 +92,7 @@
 			Latest Posts
 		</h3>
 		<ul class="text-white">
-			{#each list as item}
+			{#each list as item (item.slug)}
 				<li>
 					<a sveltekit:prefetch href={item.slug}>{item.title}</a>
 					<span class="text-xs text-black dark:text-gray-400">{new Date(item.date).toISOString().slice(0, 10)}</span>

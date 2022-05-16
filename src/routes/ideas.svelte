@@ -338,7 +338,7 @@
 	{/if} -->
 	{#if list.length}
 		<ul class="max-w-full">
-			{#each list as item}
+			{#each list as item (item.slug)}
 				<li class="mb-4">
 					<ItemCard {item} />
 				</li>
