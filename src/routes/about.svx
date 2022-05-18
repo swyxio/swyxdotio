@@ -9,9 +9,7 @@
 
 ## TL;DR
 
-Hey, I'm swyx! I help build great developer experiences, from documentation to dev tools to dev communities.
-
-I am currently [Head of DX at Temporal.io](https://www.swyx.io/why-temporal/), based out of Seattle.
+Hey, I'm swyx! I help build great developer experiences, from documentation to dev tools to dev communities, most recently as [Head of DX at Temporal.io](https://www.swyx.io/why-temporal/), based out of Seattle.
 I am also a frequent writer and speaker best known for the [Learn in Public](https://swyx.io/LIP) movement and recently published [The Coding Career Handbook](https://learninpublic.org) with more advice for engineers going from Junior to Senior.
 
 P.S. "swyx" is the initials of my English and Chinese names and you can use it interchangeably with "Shawn". It is pronounced "swicks".
@@ -30,11 +28,14 @@ In a past life I was a [currency options trader turned TMT hedge fund analyst](h
 
 <h2>What I'm Doing Now <a href="https://nownownow.com/about"><svg class="inline" xmlns="http://www.w3.org/2000/svg" width="0.75em" height="0.75em" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12" y2="17"></line></svg></a></h2>
 
-I am currently [working on Developer Experience at Temporal.io](https://www.swyx.io/why-temporal/), based out of Seattle. I am also a regular on the [Svelte Radio](https://www.svelteradio.com/) podcast and my own [Swyx Mixtape](http://swyx.transistor.fm/). You can get more high frequency updates on [my Twitter](https://twitter.com/swyx).
+I most recently am [working on Developer Experience at Temporal.io](https://www.swyx.io/why-temporal/).
+Apart from [my blog](https://swyx.io/ideas), I also regularly maintain community and updates for [my book](https://learninpublic.org).
+I am also a regular on the [Svelte Radio](https://www.svelteradio.com/) podcast and my own [Swyx Mixtape](http://swyx.transistor.fm/).
+You can get more high frequency updates on [my Twitter](https://twitter.com/swyx).
 
 ## Bio for Event Organizers
 
-swyx has worked on React and serverless JavaScript at Two Sigma, [Netlify](https://www.swyx.io/farewell-netlify/) and [AWS](https://www.swyx.io/hello-aws/), and now serves as [Head of Developer Experience at Temporal.io](https://www.swyx.io/why-temporal/). He has started and run communities for hundreds of thousands of developers, like [Svelte Society](https://twitter.com/sveltesociety/), [/r/reactjs](https://www.swyx.io/moderating-rreactjs/), and the [React TypeScript Cheatsheet](https://github.com/typescript-cheatsheets/react). His nontechnical writing was recently published in [the Coding Career Handbook](https://learninpublic.org/) for Junior to Senior developers.
+swyx has worked on React and serverless JavaScript at Two Sigma, [Netlify](https://www.swyx.io/farewell-netlify/) and [AWS](https://www.swyx.io/hello-aws/), and most recently as [Head of Developer Experience at Temporal.io](https://www.swyx.io/why-temporal/). He has started and run communities for hundreds of thousands of developers, like [Svelte Society](https://twitter.com/sveltesociety/), [/r/reactjs](https://www.swyx.io/moderating-rreactjs/), and the [React TypeScript Cheatsheet](https://github.com/typescript-cheatsheets/react). His nontechnical writing was recently published in [the Coding Career Handbook](https://learninpublic.org/) for Junior to Senior developers.
 
 Selected prior talks:
 
