@@ -743,9 +743,9 @@
   description: a fuller discussion of this was done by Tan Li Hau https://lihautan.com/compile-svelte-in-your-head-part-1/
   github: https://gist.github.com/sw-yx/6a3f3c0bbab7c5b328bc60526b673441
   instances:
-    - date: 2019-10-01
-      description: A lightning talk for Svelte Society Oct 1
-      venue: SvelteSociety
+    # - date: 2019-10-01
+    #   description: A lightning talk for Svelte Society Oct 1
+    #   venue: SvelteSociety
     - date: 2019-12-06
       venue: ReactKnowledgeable
       video: https://www.youtube.com/watch?v=FNmvcswdjV8

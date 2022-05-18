@@ -1,5 +1,20 @@
 # 2022 podcasts
 
+- title: Angel Investing your Time on Educative
+  slug: investing-educative
+  categories: [Careers]
+  venues: Educative.io
+  date: 2022-05-02
+  url: https://www.podbean.com/media/share/pb-n2ntb-1208ead
+  url2: https://www.youtube.com/watch?v=NqAGxYWgYZk
+  description: I joined Lee Ngo a second time to talk about tech strategy and angel investing!
+- title: Part Time Creators on Compressed.fm
+  slug: part-time-creators-compressed
+  categories: [Creators]
+  venues: Compressed.fm
+  date: 2022-04-14
+  url: https://www.compressed.fm/episode/64
+  description: I joined Amy and James to talk about the Part Time Creator Manifesto!
 - title: Talking Temporal on Purrfect.Dev
   slug: temporal-purrfect
   categories: [Temporal]
