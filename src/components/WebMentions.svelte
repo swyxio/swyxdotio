@@ -93,7 +93,10 @@
 		    'https://wpnewshub.com',
 		    'https://codinghindi.in',
 		    'https://programmer.chimpymail.com',
-		    'https://sayed.work'
+		    'https://sayed.work',
+		    'https://infos.by',
+		    'https://data-science-austria.at',
+		    'https://www.techyrack.com'
 	];
 	let page = 0;
 	export let targets;
