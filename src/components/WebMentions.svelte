@@ -78,14 +78,22 @@
 		'https://neoweb4u.com',
 		'https://www.websjohn.com',
 		'https://www.webhostpolice.com',
-    'https://lzomedia.com',
-    'https://jateng.co',
-    'https://news.priviw.com',
-    'https://movilgadget.com',
-    'https://kitdeveloper.ru',
-    '.thats.im',     // 'https://bdbloger.thats.im', 'https://mdsohel.thats.im', 'https://sazelab.thats.im/'
-    '.cu.ma', // 'https://bdbloger.cu.ma', 'https://mdsazel.cu.ma/'
-    'https://reactjsexample.com'
+		    'https://lzomedia.com',
+		    'https://jateng.co',
+		    'https://news.priviw.com',
+		    'https://movilgadget.com',
+		    'https://kitdeveloper.ru',
+		    '.thats.im',     // 'https://bdbloger.thats.im', 'https://mdsohel.thats.im', 'https://sazelab.thats.im/'
+		    '.cu.ma', // 'https://bdbloger.cu.ma', 'https://mdsazel.cu.ma/'
+		    'https://reactjsexample.com',
+		    'https://dentedreality.com.au',
+		    'https://platoblockchain.net',
+		    'http://aayugcreation.com',
+		    'https://www.67nj.org',
+		    'https://wpnewshub.com',
+		    'https://codinghindi.in',
+		    'https://programmer.chimpymail.com',
+		    'https://sayed.work'
 	];
 	let page = 0;
 	export let targets;
@@ -148,7 +156,7 @@
 		});
 	};
 	function cleanString(str) {
-		if (str.length > 1000) str = str.slice(0, 1000);
+		if (str.length > 300) str = str.slice(0, 300);
 		const withSlash = _targets[0] + '/'; // todo: figure out proper fix
 		const linky = `<a href="${withSlash}">${withSlash}</a>`;
 		return str
@@ -263,7 +271,7 @@
 								{#if link.data.content}
 									<div>
 										<p
-											class="prose dark:prose-invert"
+											class="prose dark:prose-invert italic border-l-2 pl-2 border-teal-500"
 											font-family="system"
 											color="tertiary"
 											font-size="2"
