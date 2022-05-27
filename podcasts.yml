@@ -1,5 +1,12 @@
 # 2022 podcasts
 
+- title: The Third Year of the Third Age of JS on the Changelog
+  slug: changelog-third-age
+  categories: [JS]
+  venues: Changelog
+  date: 2022-05-20
+  url: https://changelog.com/jsparty/226
+  description: I joined JSParty crew to talk more about the Third Age of JS after my Reactathon talk!
 - title: Angel Investing your Time on Educative
   slug: investing-educative
   categories: [Careers]
@@ -15,6 +22,13 @@
   date: 2022-04-14
   url: https://www.compressed.fm/episode/64
   description: I joined Amy and James to talk about the Part Time Creator Manifesto!
+- title: Career + Luck on Metamuse
+  slug: career-luck-metamuse
+  categories: [Career, LIP]
+  venues: Metamuse
+  date: 2022-03-30
+  url: https://museapp.com/podcast/53-career/
+  description: I joined Adam and Mark who are one of the most thoughtful podcasters to talk about Learning in Public!
 - title: Talking Temporal on Purrfect.Dev
   slug: temporal-purrfect
   categories: [Temporal]
