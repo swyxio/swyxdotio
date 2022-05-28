@@ -153,6 +153,6 @@
 
 	<WebMentions
 		devto_reactions={json.data.devToReactions}
-		targets={[`https://www.swyx.io/${json.slug}`, json.data.devToUrl, canonicalUrl]}
+		targets={[`https://www.swyx.io/${json.slug}`, `https://www.swyx.io/writing/${json.slug}`, json.data.devToUrl, canonicalUrl]}
 	/>
 </div>
