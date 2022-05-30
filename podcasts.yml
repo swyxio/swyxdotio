@@ -1,9 +1,9 @@
 # 2022 podcasts
 
-- title: The Third Year of the Third Age of JS on the Changelog
-  slug: changelog-third-age
+- title: The Third Year of the Third Age of JS on JSParty
+  slug: jsparty-third-age
   categories: [JS]
-  venues: Changelog
+  venues: JSParty
   date: 2022-05-20
   url: https://changelog.com/jsparty/226
   description: I joined JSParty crew to talk more about the Third Age of JS after my Reactathon talk!
