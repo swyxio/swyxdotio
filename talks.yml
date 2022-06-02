@@ -4,9 +4,12 @@
   categories: [JS]
   description: I updated the epic Third Age talk for Reactathon 2022
   instances:
-    - venue: RWR Youtube
+    - venue: RWR YouTube
       date: 2022-05-06
-      video: https://youtu.be/Ck-e3hd3pKw?t=19926
+      video: https://www.youtube.com/watch?v=CGnlBU3K_eM
+    - venue: RWR Livestream
+      date: 2022-05-06
+      video: https://www.youtube.com/watch?v=Ck-e3hd3pKw&t=19926
 - title: Radiating Circles of DevX - Opening Keynote DevXConf Stage B
   slug: radiating-dx
   categories: [DX]
