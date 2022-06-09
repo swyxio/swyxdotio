@@ -1,5 +1,12 @@
 # 2022 podcasts
 
+- title: Learning in Public on Screaming in The Cloud
+  slug: lip-screaming
+  categories: [LearninPublic]
+  venues: ScreamingInTheCloud
+  date: 2022-06-10
+  url: https://www.lastweekinaws.com/podcast/screaming-in-the-cloud/learning-in-public-with-swyx/
+  description: Corey Quinn is one of my favorite cloud/creators/podcasters/writers/comedians and I was honored to be invited on his pod!
 - title: The Third Year of the Third Age of JS on JSParty
   slug: jsparty-third-age
   categories: [JS]
