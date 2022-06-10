@@ -97,7 +97,7 @@ export async function getBlogpost(slug) {
 			.replace(/<\/code>`}<\/pre>/g, '</code></pre>')
 			// regex for shortcode
 			.replace(
-				/\n{% youtube (.*?) %}/g,
+				/{% youtube (.*?) %}/g,
 				(_, x) => {
 
 					// https://stackoverflow.com/a/27728417/1106414
