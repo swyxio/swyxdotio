@@ -97,8 +97,16 @@ export async function getBlogpost(slug) {
 			.replace(/<\/code>`}<\/pre>/g, '</code></pre>')
 			// regex for shortcode
 			.replace(
-				/{% youtube (.*?) %}/g,
-				(_, x) => `<iframe
+				/\n{% youtube (.*?) %}/g,
+				(_, x) => {
+
+					// https://stackoverflow.com/a/27728417/1106414
+					function youtube_parser(url) {
+						var rx = /^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]*).*/;
+						return url.match(rx)[1]
+					}
+					const videoId = x.startsWith('https://') ? youtube_parser(x) : x;
+					return `<iframe
 			class="w-full object-contain"
 			srcdoc="
 				<style>
@@ -141,15 +149,18 @@ export async function getBlogpost(slug) {
 			width="600"
 			height="400"
 			allowFullScreen
-			aria-hidden="true"></iframe>`
+			aria-hidden="true"></iframe>`}
 			)
 			.replace(
-				/{% (tweet|twitter) (.*?) %}/g,
-				(_, _2, x) => `
-			<blockquote class="twitter-tweet" data-lang="en" data-dnt="true" data-theme="dark">
-			<a href="https://twitter.com/x/status/${x}"></a></blockquote> 
-			<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-			`
+				/\n{% (tweet|twitter) (.*?) %}/g,
+				(_, _2, x) => {
+					const url = x.startsWith('https://twitter.com/') ? x : `https://twitter.com/x/status/${x}`;
+					return `
+					<blockquote class="twitter-tweet" data-lang="en" data-dnt="true" data-theme="dark">
+					<a href="${url}"></a></blockquote> 
+					<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+					`
+				}
 			);
 
 		return { ...blogpost, content };
