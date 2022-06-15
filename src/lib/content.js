@@ -87,7 +87,8 @@ export async function getBlogpost(slug) {
 
 		const blogbody = blogpost.content
 			.replace(
-				/\n{% youtube (.*?) %}/g,
+				// /\n{% youtube (.*?) %}/g,
+				/{% youtube (.*?) %}/g,
 				(_, x) => {
 
 					// https://stackoverflow.com/a/27728417/1106414
@@ -112,7 +113,8 @@ export async function getBlogpost(slug) {
 			aria-hidden="true"></iframe>`}
 			)
 			.replace(
-				/\n{% (tweet|twitter) (.*?) %}/g,
+				// /\n{% (tweet|twitter) (.*?) %}/g,
+				/{% (tweet|twitter) (.*?) %}/g,
 				(_, _2, x) => {
 					const url = x.startsWith('https://twitter.com/') ? x : `https://twitter.com/x/status/${x}`;
 					return `
