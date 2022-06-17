@@ -56,6 +56,10 @@ module.exports = {
             'ul > li::marker': {
               color: 'var(--tw-prose-body)',
             },
+            'ul > li > p': {
+              marginTop: 0,
+              marginBottom: 0,
+            },
 					}
 				}
 			})
