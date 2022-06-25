@@ -28,7 +28,7 @@
   venues: Purrfect.dev
   date: 2022-04-19
   url: https://codingcat.dev/podcast/2-21-linking-your-microservices-with-workflows
-  description: I joined Brittney and Alex again to talk about Temporal this time!
+  description: I joined Brittney and Alex again to talk about Temporal and Self Provisioning Runtimes!
 - title: Part Time Creators on Compressed.fm
   slug: part-time-creators-compressed
   categories: [Creators]
