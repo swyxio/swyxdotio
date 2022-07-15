@@ -18,9 +18,9 @@ You can find me on [Twitter](https://twitter.com/swyx), [Github](https://github.
 
 ## About
 
-I am a [developer](https://github.com/sw-yx)/PM/[angel investor](https://github.com/sw-yx/devtools-angels/), primarily active in the web dev community as a blogger and frequent speaker. I am a [GitHub Star 🌟](https://stars.github.com/), [Stripe Community Expert](https://twitter.com/swyx/status/1392016498944741376), helped run [the React subreddit for over 200,000 developers](https://www.swyx.io/moderating-rreactjs/) and grow [Svelte Society from scratch to over 10,000 developers](https://twitter.com/swyx/status/1411071913548414976).
+I am a [developer](https://github.com/sw-yx)/PM/[angel investor](https://github.com/sw-yx/devtools-angels/), primarily active in the devrel and devtools community as a blogger and speaker. I am a [GitHub Star 🌟](https://stars.github.com/), [Stripe Community Expert](https://twitter.com/swyx/status/1392016498944741376), helped run [the React subreddit for over 200,000 developers](https://www.swyx.io/moderating-rreactjs/) and grew [Svelte Society from 0 to over 15,000 developers](https://twitter.com/swyx/status/1411071913548414976) ([writeup](https://www.swyx.io/starting-dev-community-meetup)).
 
-I grew up in Singapore 🇸🇬, but have worked mostly in the US 🇺🇸 and UK 🇬🇧 , most recently remotely out of New York City 🗽 working on Developer Experience for [Netlify](https://www.swyx.io/writing/farewell-netlify/), [Amazon Web Services](https://www.swyx.io/writing/hello-aws/), and now [Temporal](https://www.swyx.io/why-temporal/).
+I grew up in Singapore 🇸🇬, but have worked mostly in the US 🇺🇸 and UK 🇬🇧 , most recently remotely out of Miami, Florida, working on Developer Experience for [Netlify](https://www.swyx.io/writing/farewell-netlify/), [Amazon Web Services](https://www.swyx.io/writing/hello-aws/), [Temporal](https://www.swyx.io/why-temporal/), and Airbyte (unannounced).
 
 I am best known for being a [#LearnInPublic](/learn-in-public) evangelist and [my speaking/writing on React, JavaScript and the future of the Web](/ideas?filter=React&show=Essays&show=Talks&show=Podcasts). I am also known for my technical/book reviews, from [TypeScript in 50 Lessons](https://twitter.com/swyx/status/1361712610593316866), [Programming TypeScript](https://twitter.com/swyx/status/1135525665971695617), [Landing Page Hot Tips](https://twitter.com/swyx/status/1303062410157158401), and [The GraphQL Guide](https://share.transistor.fm/s/aebece15).
 
@@ -28,10 +28,10 @@ In a past life I was a [currency options trader turned TMT hedge fund analyst](h
 
 <h2>What I'm Doing Now <a href="https://nownownow.com/about"><svg class="inline" xmlns="http://www.w3.org/2000/svg" width="0.75em" height="0.75em" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12" y2="17"></line></svg></a></h2>
 
-I most recently am [working on Developer Experience at Temporal.io](https://www.swyx.io/why-temporal/).
-Apart from [my blog](https://swyx.io/ideas), I also regularly maintain community and updates for [my book](https://learninpublic.org).
-I am also a regular on the [Svelte Radio](https://www.svelteradio.com/) podcast and my own [Swyx Mixtape](http://swyx.transistor.fm/).
-You can get more high frequency updates on [my Twitter](https://twitter.com/swyx).
+- I most recently am [working on Developer Experience at Airbyte.io](https://www.swyx.io/why-temporal/).
+- Apart from [my personal blog](https://swyx.io/ideas) and [magazine DX.tips](https://dx.tips/), I also regularly maintain community and updates for [my book](https://learninpublic.org).
+- I am also a regular on [Svelte Radio](https://www.svelteradio.com/) and my own [Swyx Mixtape](http://swyx.transistor.fm/).
+- You can get more high frequency updates on [my Twitter](https://twitter.com/swyx).
 
 ## Bio for Event Organizers
 
@@ -39,8 +39,8 @@ swyx has worked on React and serverless JavaScript at Two Sigma, [Netlify](https
 
 Selected prior talks:
 
-- JS Conf: https://swyx.io/hooks
-- React Rally: https://www.youtube.com/watch?v=nyFHR0dDZo0
+- The Hooks talk: https://swyx.io/hooks
+- The Concurrent React talk: https://www.youtube.com/watch?v=nyFHR0dDZo0
 - The Operating System of You: https://www.youtube.com/watch?v=D-Sj6jo4o1I
 
 ### Socials
@@ -55,6 +55,10 @@ Pictures of me you can use without asking
 - [460x460](https://user-images.githubusercontent.com/6764957/103350806-26d9ca80-4adc-11eb-9e53-a8ce9ca3f21f.jpeg)
   - [transparent background variant](https://user-images.githubusercontent.com/6764957/166125711-7dd63d46-3405-4c66-a6bd-92a34dbf58f6.png)
 - Speaking photo - [React Miami](https://user-images.githubusercontent.com/6764957/164554925-e6a2791e-4c75-4d5f-8003-2932193d5b25.png)
+- Social photos
+  - https://user-images.githubusercontent.com/6764957/179319070-7c223991-e965-4d69-b6d9-f894feb02cf8.png
+  - https://user-images.githubusercontent.com/6764957/179319086-7ec3a384-4d92-4db2-83d5-fad203256601.png
+  - https://pbs.twimg.com/media/FXunDs9VEAAZ7tL?format=jpg&name=large
 
 ## Tech behind this site
 
