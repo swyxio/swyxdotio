@@ -1,4 +1,15 @@
 
+- title: Bun vs Deno - New Runtimes for the Third Age of JS
+  slug: bun-vs-deno
+  categories: [JS]
+  description: People are tearing up the foundations of JavaScript with new assumptions and a need for speed. Let’s look at the new kids on the block - Bun and Deno and explore how they might someday replace Node in your tech stack.
+  instances:
+    - venue: RWR YouTube (live)
+      date: 2022-07-13
+      video: https://www.youtube.com/watch?v=ORI29ot_Zck
+    - venue: Swyx YouTube
+      date: 2022-07-21
+      video: https://www.youtube.com/watch?t=11&v=O7KVEwNau6w&feature=youtu.be
 - title: Third Age of JavaScript - Three Years In
   slug: third-age-3-talk
   categories: [JS]
