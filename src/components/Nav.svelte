@@ -73,7 +73,7 @@
 		</a> -->
 		<!-- YouTube -->
 		<a
-			href="https://youtube.com/swyxTV"
+			href="https://youtube.com/swyxTV?sub_confirmation=1"
 			title="youtube"
 			target="_blank"
 			rel="me noopener"
@@ -93,7 +93,7 @@
 		</a>
 		<!-- Twitter -->
 		<a
-			href="https://twitter.com/swyx"
+			href="https://twitter.com/intent/user?screen_name=swyx"
 			title="twitter"
 			target="_blank"
 			rel="me noopener"

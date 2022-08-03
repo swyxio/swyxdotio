@@ -6,7 +6,7 @@ export const SITE_DESCRIPTION =
 	'The official site of Shawn @swyx Wang, a technologist and recovering finance geek.';
 export const DEFAULT_OG_IMAGE = 'swyx-ski.jpeg';
 export const MY_TWITTER_HANDLE = 'swyx';
-export const MY_YOUTUBE = 'https://youtube.com/swyxTV';
+export const MY_YOUTUBE = 'https://youtube.com/swyxTV?sub_confirmation=1';
 
 // dont forget process.env.GH_TOKEN
 // if supplied, raises rate limit from 60 to 5000
