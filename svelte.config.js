@@ -2,6 +2,7 @@ import preprocess from 'svelte-preprocess';
 import adapter from '@sveltejs/adapter-netlify';
 import { mdsvex } from 'mdsvex';
 import remarkGithub from 'remark-github';
+import remarkGfm from 'remark-gfm';
 import remarkAbbr from 'remark-abbr';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
@@ -15,12 +16,13 @@ const mdsvexConfig = {
 	},
 	remarkPlugins: [
 		[
-			remarkGithub,
+			remarkGfm,
 			{
 				// Use your own repository
-				repository: 'https://github.com/mvasigh/sveltekit-mdsvex-blog.git'
+				repository: 'https://github.com/sw-yx/swyxdotio'
 			}
 		],
+		[remarkGithub, { repository: 'https://github.com/sw-yx/swyxdotio/' }],
 		remarkAbbr
 	],
 	rehypePlugins: [

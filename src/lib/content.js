@@ -11,11 +11,17 @@ import remarkToc from 'remark-toc';
 // import remarkRehype from 'remark-rehype'
 // import rehypeDocument from 'rehype-document'
 // import rehypeFormat from 'rehype-format'
+import remarkGithub from 'remark-github';
+import remarkGfm from 'remark-gfm';
 import rehypeStringify from 'rehype-stringify';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutoLink from 'rehype-autolink-headings';
 
-const remarkPlugins = [remarkToc];
+const remarkPlugins = [
+	remarkToc,
+	[remarkGithub, { repository: 'https://github.com/sw-yx/swyxdotio/' }],
+	[remarkGfm, { repository: 'https://github.com/sw-yx/swyxdotio/' }],
+];
 const rehypePlugins = [
 	rehypeStringify,
 	rehypeSlug,

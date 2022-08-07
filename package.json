@@ -66,6 +66,7 @@
 		"parse-link-header": "^2.0.0",
 		"prism-themes": "^1.9.0",
 		"query-string": "^7.1.0",
+		"remark-gfm": "^3.0.1",
 		"shiki": "^0.10.0",
 		"slugify": "^1.6.5",
 		"snarkdown": "^2.0.0"
