@@ -1,5 +1,13 @@
 # 2022 podcasts
 
+
+- title: How to Thought Lead, the Metacreator Ceiling, and Learning in Public on the Build in Public podcast
+  slug: bip-thoughtlead
+  categories: [LearninPublic]
+  venues: BuildInPublic
+  date: 2022-08-11
+  url: https://www.youtube.com/watch?v=-oTmQhagN4k&feature=youtu.be
+  description: KP is the Build in Public guy and invited me on his pod to talk about LIP, but we sidetracked to talk about devrel, the content metagame, and my upcoming post on How to Thought Lead.
 - title: Learning in Public on Screaming in The Cloud
   slug: lip-screaming
   categories: [LearninPublic]
