@@ -50,7 +50,7 @@
 	<div class="w-full mb-4">
 		<div class="flex flex-col justify-between md:flex-row">
 			<a
-				class="w-full hover:no-underline text-gray-900 dark:text-gray-100 hover:text-yellow-600 dark:hover:text-yellow-100"
+				class="w-full text-gray-900 dark:text-gray-100 hover:text-yellow-600 dark:hover:text-yellow-100"
 				href={item.url}
 				target="_blank"
 			>
