@@ -9,6 +9,27 @@
   url: https://share.transistor.fm/s/398dc0ca
   video: https://www.youtube.com/watch?v=-oTmQhagN4k&feature=youtu.be
   description: KP is the Build in Public guy and invited me on his pod to talk about LIP, but we sidetracked to talk about devrel, the content metagame, and my upcoming post on How to Thought Lead.
+- title: Talking DX on Syntax.fm
+  slug: syntax-dx
+  categories: [DevRel]
+  venues: Syntax.fm
+  date: 2022-07-01
+  url: https://syntax.fm/show/478/supper-club-developer-experience-with-shawn-wang
+  description: Syntax.fm is one of the shows I really leaned on when learning the ropes in tech, so it was a huge honor to be invited.
+- title: Talking Careers on Webjoy.fm
+  slug: webjoy-careers
+  categories: [Careers]
+  venues: Webjoy.fm
+  date: 2022-06-22
+  url: https://webjoy.fm/episode/season-1-episode-4-creating-something-from-nothing-shawn-swyx
+  description: We discuss what the career path for a developer advocate might look like, as well as podcast listening tools Listen Notes and Listenbox and how they help allow people to look up and listen to podcasts on their own terms rather than being stuck in a corporate garden.
+- title: AWS, Cloudflare, and Techbro Therapy on AWS.fm
+  slug: aws-techbros
+  categories: [Creators]
+  venues: AWS.fm
+  date: 2022-06-21
+  url: https://aws.fm/episodes/episode-25-shawn-swyx-wang
+  description: Shawn joins Adam to discuss Amplify and its place in the developer ecosystem, whether we should care about Cloudflare, yet, and how to cope with the anxiety that can come with being extremely online. Also, it sounds like Adam is a tech bro and he's NOT happy about it.
 - title: Learning in Public on Screaming in The Cloud
   slug: lip-screaming
   categories: [LearninPublic]
@@ -59,6 +80,13 @@
   date: 2022-03-04
   url: https://www.youtube.com/watch?v=Q0P-Uod19NY
   description: I joined Brittney and Alex for the second time, this time to talk about Temporal instead of Svelte!
+- title: Talking Svelte on Purrfect.Dev
+  slug: svelte-purrfect
+  categories: [Temporal]
+  venues: Purrfect
+  date: 2021-03-04
+  url: https://codingcat.dev/podcast/1-15-whats-up-with-svelte
+  description: I joined Brittney and Alex to talk Svelte and SvelteKit
 - title: The radiating circles in DevX with Swyx
   slug: radiating-devx-pod
   categories: [DX, DevRel]
