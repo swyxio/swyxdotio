@@ -398,13 +398,13 @@
 
 # 2019 podcasts
 
-- title: How, when, and why to use the JAMstack
+- title: JAMstack panel on Devmode.fm
   slug: devmode-fm-jamstack-panel
   categories: [JAMstack]
   venues: Devmode.FM
   date: 2019-11-04
   url: https://devmode.fm/episodes/how-when-and-why-to-use-the-jamstack
-  desc: In this episode, we have a roundtable discussion with a variety of experienced web developers who are at different stages of using the JAMstack, from not at all, to exploring/ experimenting, to using to deliver client projects to production.
+  description: A panel discussion about JAMstack - In this episode, we have a roundtable discussion with a variety of experienced web developers who are at different stages of using the JAMstack, from not at all, to exploring/ experimenting, to using to deliver client projects to production.
 - title: JAMstack & Serverless with Netlify (DevMode.fm Podcast)
   slug: devmode-fm-jamstack
   categories: [JAMstack]
