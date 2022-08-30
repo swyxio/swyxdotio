@@ -1,6 +1,19 @@
 # 2022 podcasts
 
-
+- title: Real talk on DevRel with Devmode.fm
+  slug: devmode-fm-devrel
+  categories: [DevRel]
+  venues: Devmode.FM
+  date: 2022-08-29
+  url: https://devmode.fm/episodes/advocating-for-devrels
+  description: Back again with Andrew Welch and crew to talk the evolving meta of DevRel.
+- title: The End of Localhost on InfoQ Podcast
+  slug: infoq-localhost
+  categories: [DevTools]
+  venues: InfoQ
+  date: 2022-08-29
+  url: https://www.infoq.com/podcasts/localhost-end/
+  description: Daniel Bryant interviewed me about my DXTips article on The End of Localhost! a really enjoyable tour through the post with commentary and reactions.
 - title: How to Thought Lead, the Metacreator Ceiling, and Learning in Public on the Build in Public podcast
   slug: bip-thoughtlead
   categories: [LearninPublic]
