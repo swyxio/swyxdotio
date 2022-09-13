@@ -9,6 +9,8 @@
 	});
 	function toggleNewsletter() {
 		isNewsletterOpen = !isNewsletterOpen;
+	}
+	function toggleSubscribe() {
 		isSubscribed = 'subscribed';
 		localStorage.setItem('isSubscribed', 'subscribed');
 	}
@@ -95,7 +97,7 @@
 						<div class="revue-form-actions">
 							<input
 								type="submit"
-								on:click={toggleNewsletter}
+								on:click={toggleSubscribe}
 								class="absolute flex right-0 top-0 sm:hidden items-center justify-center rounded-r-lg bg-zinc-100 px-4 
 							py-2 font-medium text-gray-900 hover:text-gray-700 
 							dark:bg-zinc-700 dark:text-gray-100
@@ -106,7 +108,7 @@
 							/>
 							<input
 								type="submit"
-								on:click={toggleNewsletter}
+								on:click={toggleSubscribe}
 								class="absolute hidden right-0 top-1 sm:flex items-center justify-center rounded-r-lg bg-zinc-100 px-4 
 							py-2 font-medium text-gray-900 hover:text-gray-700 
 							dark:bg-zinc-700 dark:text-gray-100
