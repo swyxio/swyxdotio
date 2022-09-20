@@ -1,4 +1,4 @@
-export const SITE_URL = 'https://swyx.io';
+export const SITE_URL = 'https://www.swyx.io';
 export const GH_USER_REPO = 'sw-yx/swyxdotio'; // used for pulling github issues and offering comments
 export const REPO_URL = 'https://github.com/' + GH_USER_REPO;
 export const SITE_TITLE = "swyx's site";
