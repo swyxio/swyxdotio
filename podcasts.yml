@@ -1,5 +1,12 @@
 # 2022 podcasts
 
+- title: Broad Swyx Interview with Infoshare Poland
+  slug: infoshare-poland
+  categories: [Tech]
+  venues: Infoshare
+  date: 2022-09-28
+  url: https://www.youtube.com/watch?v=aZnzzMbA7Vg&feature=emb_title
+  description: A broad overview of everything I've been working on, including Temporal and Airbyte, Smart Clients vs Smart Servers, The Coding_Career Book, The Operating System of You, React Ecosystem, the case for Techno-Optimism in the face of cynicism.
 - title: Real talk on DevRel with Devmode.fm
   slug: devmode-fm-devrel
   categories: [DevRel]
