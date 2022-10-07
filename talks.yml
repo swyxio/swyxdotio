@@ -79,6 +79,14 @@
     - venue: Temporal Youtube
       date: 2021-12-14
       video: https://www.youtube.com/watch?v=CeHSmv8oF_4
+- title: React Server Components in Next.js 12 with Shawn "swyx" Wang
+  slug: react-server-components-2021
+  categories: [React]
+  description: A short live stream about React Server Components support in Next.js 12. Together with swyx, we will try to build a simple notes app using the most recent Next.js version.
+  instances:
+    - venue: Zaiste Programming
+      date: 2021-11-13
+      video: https://www.youtube.com/watch?v=qIPWzRvPSxk
 - title: Mapping Developer Experience (ft. Silas Sao, Head of Experience Design, DataStax)
   slug: mapping-devex
   categories: [Devrel]
