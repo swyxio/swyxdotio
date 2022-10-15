@@ -4,7 +4,7 @@ export const REPO_URL = 'https://github.com/' + GH_USER_REPO;
 export const SITE_TITLE = "swyx's site";
 export const SITE_DESCRIPTION =
 	'The official site of Shawn @swyx Wang, a technologist and recovering finance geek.';
-export const DEFAULT_OG_IMAGE = 'swyx-ski.jpeg';
+export const DEFAULT_OG_IMAGE = SITE_URL + '/swyx-ski.jpeg';
 export const MY_TWITTER_HANDLE = 'swyx';
 export const MY_YOUTUBE = 'https://youtube.com/swyxTV?sub_confirmation=1';
 
