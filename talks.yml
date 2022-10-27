@@ -8,6 +8,14 @@
     - venue: Stripe Dev YouTube
       date: 2022-09-28
       video: https://www.youtube.com/watch?v=S-UxzCtpB74
+- title: Paradigm Lost
+  slug: paradigm-lost-cascadia
+  categories: [Devtools, AI, Orchestration]
+  description: A talk covering why frontend vs backend is now insufficient for "full stack", and how 4 trends are taking over: local first, async, data, and AI are taking my attention.
+  instances:
+    - venue: CascadiaJS
+      date: 2022-09-01
+      video: https://www.youtube.com/watch?v=KsTAcQJ619o&feature=emb_title
 - title: Bun vs Deno - New Runtimes for the Third Age of JS
   slug: bun-vs-deno
   categories: [JS]
