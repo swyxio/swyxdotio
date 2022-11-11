@@ -11,7 +11,7 @@
 - title: Paradigm Lost
   slug: paradigm-lost-cascadia
   categories: [Devtools, AI, Orchestration]
-  description: A talk covering why frontend vs backend is now insufficient for "full stack", and how 4 trends are taking over: local first, async, data, and AI are taking my attention.
+  description: A talk covering why frontend vs backend is now insufficient for "full stack", and how 4 trends are taking over - local first, async, data, and AI are taking my attention.
   instances:
     - venue: CascadiaJS
       date: 2022-09-01
