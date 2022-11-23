@@ -9,7 +9,7 @@
 
 ## TL;DR
 
-Hey, I'm swyx! I help build great developer experiences, from documentation to dev tools to dev communities, most recently as [Head of DX at Temporal.io](https://www.swyx.io/why-temporal/), based out of Seattle.
+Hey, I'm swyx! I help build great developer experiences, from documentation to dev tools to dev communities, most recently as Head of DX at [Airbyte](https://airbyte.io/), based out of Miami.
 I am also a frequent writer and speaker best known for the [Learn in Public](https://swyx.io/LIP) movement and recently published [The Coding Career Handbook](https://learninpublic.org) with more advice for engineers going from Junior to Senior.
 
 P.S. "swyx" is the initials of my English and Chinese names and you can use it interchangeably with "Shawn". It is pronounced "swicks".
@@ -35,7 +35,10 @@ In a past life I was a [currency options trader turned TMT hedge fund analyst](h
 
 ## Bio for Event Organizers
 
-swyx has worked on React and serverless JavaScript at Two Sigma, [Netlify](https://www.swyx.io/farewell-netlify/) and [AWS](https://www.swyx.io/hello-aws/), and most recently as [Head of Developer Experience at Temporal.io](https://www.swyx.io/why-temporal/). He has started and run communities for hundreds of thousands of developers, like [Svelte Society](https://twitter.com/sveltesociety/), [/r/reactjs](https://www.swyx.io/moderating-rreactjs/), and the [React TypeScript Cheatsheet](https://github.com/typescript-cheatsheets/react). His nontechnical writing was recently published in [the Coding Career Handbook](https://learninpublic.org/) for Junior to Senior developers.
+swyx has helped Developer Tools cross the chasm at [AWS](https://www.swyx.io/hello-aws/), Two Sigma, and three devtool unicorns - [Netlify](https://www.swyx.io/farewell-netlify/), [Temporal](https://www.swyx.io/why-temporal/), and most recently as [Airbyte](https://airbyte.io/). 
+
+He has started and run communities for hundreds of thousands of developers, like [Svelte Society](https://twitter.com/sveltesociety/), [/r/reactjs](https://www.swyx.io/moderating-rreactjs/), and the [React TypeScript Cheatsheet](https://github.com/typescript-cheatsheets/react).
+His blog (https://www.swyx.io/ideas) covers Tech, Careers, and Indie Hacking, and his nontechnical writing was published in [the Coding Career Handbook](https://learninpublic.org/) for Junior to Senior developers.
 
 Selected prior talks:
 
