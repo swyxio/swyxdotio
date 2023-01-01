@@ -1,5 +1,12 @@
 # 2022 podcasts
 
+- title: On ChatGPT with the Changelog
+  slug: changelog-chatgpt
+  categories: [Tech, AI]
+  venues: Changelog
+  date: 2022-12-09
+  url: https://changelog.com/podcast/519
+  description: To wrap up the year we’re talking about what’s breaking the internet, again. Yes, we’re talking about ChatGPT and we’re joined by our good friend Shawn “swyx” Wang. Between his writings on L-Space Diaries and his AI notes repo on GitHub, we had a lot to cover around the world of AI and what might be coming in 2023.
 - title: Broad Swyx Interview with Infoshare Poland
   slug: infoshare-poland
   categories: [Tech]
@@ -93,6 +100,13 @@
   date: 2022-03-30
   url: https://museapp.com/podcast/53-career/
   description: I joined Adam and Mark who are one of the most thoughtful podcasters to talk about Learning in Public!
+- title: Crossing the Chasm with Richard Feldman
+  slug: crossing-chasm-feldman
+  categories: [DevRel]
+  venues: Software Unscripted
+  date: 2022-03-25
+  url: https://www.listennotes.com/podcasts/software-unscripted/crossing-the-chasm-1-dDJwWER37/
+  description: Richard and Shawn Wang discuss how technologies "cross the chasm" from early adopters to mainstream
 - title: Talking Temporal on Purrfect.Dev
   slug: temporal-purrfect
   categories: [Temporal]
