@@ -1,3 +1,19 @@
+# 2023 podcasts
+- title: Crossing the Chasm with Jack Bridger's Scaling DevTools podcast
+  slug: crossing-chasm-scaling-devtools
+  categories: [Tech, Devrel]
+  venues: Scaling Devtools
+  date: 2023-01-12
+  url: https://www.youtube.com/watch?v=_xEyt7mVbX8
+  description: Everyone in tech should understand the technology adoption cycle and know which stage of the adoption cycle you’re at. Shawn Wang, known on the internet as swyx. Shawn is a writer, speaker and head of DX at Airbyte. He's also the editor of DX.tips. In this episode Shawn shares how DevTools can cross the chasm.
+- title: The State of the Cloud in 2023 with ChitChatMoney
+  slug: chitchatmoney-cloud
+  categories: [Tech, Fubabce]
+  venues: ChitChatMoney
+  date: 2023-01-05
+  url: https://www.listennotes.com/podcasts/chit-chat-money/the-state-of-the-cloud-in-8r7cCw5kEeL/
+  description: The "Cloud" in its simplest form refers to servers with data stored on them and those servers can be accessed over the internet. Many companies like Amazon, Microsoft, and Alphabet lead this fast-growing industry. Listen in as Brett and Ryan ask questions about the cloud and what growth will look like over the next few years. Enjoy the show!
+
 # 2022 podcasts
 
 - title: On ChatGPT with the Changelog
