@@ -4,7 +4,8 @@
   categories: [Tech, Devrel]
   venues: Scaling Devtools
   date: 2023-01-12
-  url: https://www.youtube.com/watch?v=_xEyt7mVbX8
+  url: https://podcast.bitreach.io/episodes/swyx
+  video: https://www.youtube.com/watch?v=_xEyt7mVbX8
   description: Everyone in tech should understand the technology adoption cycle and know which stage of the adoption cycle you’re at. Shawn Wang, known on the internet as swyx. Shawn is a writer, speaker and head of DX at Airbyte. He's also the editor of DX.tips. In this episode Shawn shares how DevTools can cross the chasm.
 - title: The State of the Cloud in 2023 with ChitChatMoney
   slug: chitchatmoney-cloud
