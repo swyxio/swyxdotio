@@ -1,4 +1,11 @@
 # 2023 podcasts
+- title: Talking AI on the Techmeme RideHome podcast with Brian McCollough + Chris Messina
+  slug: techmeme-ridehome-ai-chat
+  categories: [Tech, AI]
+  venues: Techmeme Ridehome
+  date: 2023-01-13
+  url: https://www.listennotes.com/podcasts/techmeme-ride-home/twtr-spc-the-big-ai-discussion-vb0hd4qmEHA/
+  description: I joined the Techmeme RideHome duo to chat AI with the gang!
 - title: Crossing the Chasm with Jack Bridger's Scaling DevTools podcast
   slug: crossing-chasm-scaling-devtools
   categories: [Tech, Devrel]
