@@ -44,7 +44,7 @@
 			>
 		{:else}
 			<svg
-				class="h-5 w-5 absolute text-gray-900 dark:text-gray-100"
+				class="absolute h-5 w-5 text-gray-900 dark:text-gray-100"
 				viewBox="0 0 24 24"
 				width="24"
 				height="24"
@@ -69,7 +69,6 @@
 			>
 				<a
 					class="flex w-auto pb-4"
-					sveltekit:prefetch
 					on:click={() => setTimeout(() => (isOpen = false), 300)}
 					href="/">Home</a
 				>
@@ -80,7 +79,6 @@
 			>
 				<a
 					class="flex w-auto pb-4"
-					sveltekit:prefetch
 					on:click={() => setTimeout(() => (isOpen = false), 300)}
 					href="/ideas">Ideas</a
 				>
@@ -91,7 +89,6 @@
 			>
 				<a
 					class="flex w-auto pb-4"
-					sveltekit:prefetch
 					on:click={() => setTimeout(() => (isOpen = false), 300)}
 					href="/about">About</a
 				>
@@ -102,9 +99,8 @@
 			>
 				<a
 					class="flex w-auto pb-4"
-					sveltekit:prefetch
 					on:click={() => setTimeout(() => (isOpen = false), 300)}
-					href="/subscribe">Subscribe</a
+					href="https://github.com/sw-yx/swyxkit">GitHub</a
 				>
 			</li>
 			<!-- <li

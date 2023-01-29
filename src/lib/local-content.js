@@ -7,12 +7,12 @@ export async function listSpeaking() {
 	const y = await fs.readFile(resolve('./talks.yml'), 'utf8');
 	// const x = import.meta.globEager('/podcasts.yml') // doesnt work even when i add rollup plugin yml to vite config
 	const podcasts = YAML.parse(x).map((x) => {
-		x.type = 'podcast';
+		x.category = 'podcast';
 		x.date = new Date(x.date);
 		return x;
 	});
 	const talks = YAML.parse(y).map((x) => {
-		x.type = 'talk';
+		x.category = 'talk';
 		x.date = new Date(x.instances[0].date);
 		return x;
 	});

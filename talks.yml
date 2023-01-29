@@ -104,7 +104,7 @@
       date: 2021-10-28
       video: https://www.youtube.com/watch?v=ddKDPikKbNk&feature=youtu.be
 - title: Scaling and Measuring Developer Relations (with Sai Senthilkumar of Redpoint)
-  slug: measuring-devrel
+  slug: measuring-devrel-talk
   categories: [Devrel]
   description: I was interviewed by Sai of Redpoint for about 150 founders and devrel folks based on these blogposts
   instances:
@@ -818,7 +818,7 @@
       date: 2019-01-24
       video: https://www.youtube.com/watch?v=bFuRvcAEiHg
 - title: STAR Apps
-  slug: star-apps
+  slug: star-apps-talk
   categories: [React, TypeScript]
   github: https://gist.github.com/sw-yx/531f6e848496c8744d8ee010d40a2e5a
   url: https://css-tricks.com/star-apps-a-new-generation-of-front-end-tooling-for-development-workflows/

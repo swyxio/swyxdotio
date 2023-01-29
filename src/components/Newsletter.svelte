@@ -1,18 +1,23 @@
 <script>
-	import { onMount } from 'svelte';
+	// https://rodneylab.com/using-local-storage-sveltekit/
+	import { browser } from '$app/environment';
+	import { writable } from 'svelte/store';
 
-	let isNewsletterOpen = true;
-	let isSubscribed = 'no';
-	onMount(() => {
-		isSubscribed = localStorage.getItem('isSubscribed');
-		if (isSubscribed === 'subscribed') isNewsletterOpen = false;
+	const defaultValue = true;
+	const initialValue = browser
+		? window.localStorage.getItem('isNewsletterOpen') ?? defaultValue
+		: defaultValue;
+
+	const isNewsletterOpen = writable(!!initialValue);
+
+	isNewsletterOpen.subscribe((value) => {
+		if (browser) {
+			window.localStorage.setItem('isNewsletterOpen', value ? 'true' : 'false');
+		}
 	});
+
 	function toggleNewsletter() {
-		isNewsletterOpen = !isNewsletterOpen;
-	}
-	function toggleSubscribe() {
-		isSubscribed = 'subscribed';
-		localStorage.setItem('isSubscribed', 'subscribed');
+		$isNewsletterOpen = !$isNewsletterOpen;
 	}
 </script>
 
@@ -21,15 +26,7 @@
 		class="my-4 w-full border-y border-blue-200 bg-blue-50 p-6 dark:border-gray-600 dark:bg-gray-800 sm:rounded sm:border-x"
 	>
 		<div class="flex items-center justify-between space-x-4 text-gray-900 dark:text-gray-100">
-			{#if isSubscribed === 'subscribed'}
-			<p class="md:text-xl">
-				Thanks for subscribing to the newsletter!
-			</p>
-			{:else}
-			<p class="text-lg font-bold md:text-xl">
-				Get updates on new posts and projects
-			</p>
-			{/if}
+			<p class="text-lg font-bold md:text-xl">Subscribe to the newsletter</p>
 
 			<button
 				aria-label="Toggle Newsletter CTA"
@@ -66,91 +63,35 @@
 			</button>
 		</div>
 		{#if isNewsletterOpen}
-			<!-- <p class="my-1 text-gray-800 dark:text-gray-200">
-				You know the deal <span class="font-bold"
+			<p class="my-1 text-gray-800 dark:text-gray-200">
+				Get emails from me about <span class="font-bold"
 					>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Libero, ducimus.</span
 				>.
-			</p> -->
+			</p>
 
-			<div id="revue-embed">
-				<form
-					class="relative my-4"
-					action="https://www.getrevue.co/profile/swyx/add_subscriber"
-					method="post"
-					id="revue-form"
-					name="revue-form"
-					target="_blank"
-				>
-					<div class="revue-form-group formkit-field sm:flex">
-						<input
-							class="formkit-input mt-1 block 
-						w-full appearance-none 
-						rounded-lg
-						border-gray-300 bg-white px-4 py-2 pr-32 text-gray-900 
-						placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100"
-							aria-label="Email Address"
-							placeholder="your@email.com"
-							type="email"
-							name="member[email]"
-							id="member_email"
-						/>
-						<div class="revue-form-actions">
-							<input
-								type="submit"
-								on:click={toggleSubscribe}
-								class="absolute flex right-0 top-0 sm:hidden items-center justify-center rounded-r-lg bg-zinc-100 px-4 
-							py-2 font-medium text-gray-900 hover:text-gray-700 
-							dark:bg-zinc-700 dark:text-gray-100
-							hover:dark:text-yellow-200"
-								value={'Subscribe'}
-								name="member[subscribe]"
-								id="member_submit"
-							/>
-							<input
-								type="submit"
-								on:click={toggleSubscribe}
-								class="absolute hidden right-0 top-1 sm:flex items-center justify-center rounded-r-lg bg-zinc-100 px-4 
-							py-2 font-medium text-gray-900 hover:text-gray-700 
-							dark:bg-zinc-700 dark:text-gray-100
-							hover:dark:text-yellow-200"
-								value={isSubscribed ? 'Subscribe again why not' : 'Subscribe'}
-								name="member[subscribe]"
-								id="member_submit"
-							/>
-						</div>
-					</div>
-					<div class="revue-form-footer hidden">
-						By subscribing, you agree with Revue’s <a
-							target="_blank"
-							href="https://www.getrevue.co/terms">Terms of Service</a
-						>
-						and <a target="_blank" href="https://www.getrevue.co/privacy">Privacy Policy</a>.
-					</div>
-
-					<!-- <form class="relative my-4" action="https://www.getrevue.co/profile/swyx/add_subscriber" method="post" id="revue-form" name="revue-form"  target="_blank">
-					<div class="revue-form-group formkit-field sm:flex">
-
-					</div>
+			<form
+				class="relative my-4"
+				action="https://buttondown.email/api/emails/embed-subscribe/swyx"
+				method="post"
+				target="popupwindow"
+				on:submit={() => toggleNewsletter() && window.open('https://buttondown.email/swyx', 'popupwindow')}
+			>
 				<input
 					type="email"
-					aria-label="Email Address"
-					name="member[email]" id="member_email"
-					placeholder="your@email.com"
+					id="bd-email"
+					name="email"
+					aria-label="Email for newsletter"
+					placeholder="tim@apple.com"
 					autocomplete="email"
 					required={true}
-					class="px-4 py-2 mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full border-gray-300 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 pr-32"
+					class="mt-1 block w-full rounded-md border-gray-300 bg-white px-4 py-2 pr-32 text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
 				/><button
-					class="flex items-center justify-center absolute right-1 top-1 px-4 pt-1 font-medium h-8 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded w-28"
+					class="absolute right-1 top-1 flex h-8 w-28 items-center justify-center rounded bg-gray-100 px-4 pt-1 font-medium text-gray-900 dark:bg-gray-700 dark:text-gray-100"
 					type="submit">Subscribe</button
 				>
 			</form>
-		-->
-				</form>
-			</div>
-			<p class="mt-2 text-sm text-gray-800 dark:text-gray-200">
-				3000+ subscribers including my Mom – <a href="https://www.getrevue.co/profile/swyx"
-					>see past issues</a
-				>
+			<p class="text-sm text-gray-800 dark:text-gray-200">
+				5,432 subscribers including my Mom – <a href="/#newsletter">123 issues</a>
 			</p>
 		{/if}
 	</div>
