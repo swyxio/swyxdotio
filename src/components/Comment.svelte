@@ -2,6 +2,7 @@
 	import formatDistance from 'date-fns/formatDistance/index.js';
 	import snarkdown from 'snarkdown';
 	import Reactions from './Reactions.svelte';
+	/** @type {import('$lib/types').GHComment} */
 	export let comment;
 	const doc = new DOMParser().parseFromString(
 		snarkdownEnhanced(comment.body.replace(/\r\n/g, '\n')), // https://github.com/developit/snarkdown/issues/69
@@ -37,31 +38,41 @@
 		}
 		for (let i = node.childNodes.length; i--; ) _sanitize(node.childNodes[i]);
 	}
+	// let html = null
+	// async function getContents() {
+	//   const snarkdown = await import('snarkdown')
+	//   const res = await (await fetch(comment.url)).json()
+	//   html = snarkdown.default(res.body);
+	// }
 </script>
 
 <div
 	class="mb-4 border-y-2 px-2 pt-4 dark:border-blue-700 sm:border-x sm:border-blue-200 sm:border-opacity-40 sm:px-4"
 >
-	<div>
-		{@html body}
-		<div class="flex min-w-[8rem] flex-row-reverse items-center text-xs">
-			<img
-				class="ml-4 h-8 w-8 rounded-full"
-				alt={`avatar of commenter ${comment.user.login}`}
-				src={comment.user.avatar_url}
-			/>
-			<div class="flex flex-col" class:text-green-600={comment.author_association === 'OWNER'}>
-				<a href={comment.html_url} class="no-underline" rel="external" target="_blank">
-					<time>{formatDistance(new Date(comment.created_at), new Date())} ago</time>
-				</a>
+	<div class="md-10 flex flex-row">
+		<img
+			class="h-12 w-12 rounded-full border-2 border-gray-300"
+			alt={`avatar of commenter ${comment.user.login}`}
+			src={comment.user.avatar_url}
+		/>
+		<div class="mt-1 flex-col">
+			<div
+				class="flex flex-1 items-center px-4 font-bold leading-tight"
+				class:text-green-600={comment.author_association === 'OWNER'}
+			>
 				{comment.user.login}
+				<span class="ml-2 text-xs font-normal text-gray-500">
+					<a href={comment.html_url} class="no-underline" rel="external noreferrer" target="_blank">
+						<time>{formatDistance(new Date(comment.created_at), new Date())} ago</time>
+					</a>
+				</span>
 			</div>
-			<Reactions
-				ghMetadata={{
-					issueUrl: comment.issue_url,
-					reactions: comment.reactions
-				}}
-			/>
+			<div class="ml-2 flex-1 px-2">
+				{@html body}
+			</div>
+			<div class="ml-2 mb-4 flex-1 px-2">
+				<Reactions issueUrl={comment.issue_url} reactions={comment.reactions} />
+			</div>
 		</div>
 	</div>
 </div>
