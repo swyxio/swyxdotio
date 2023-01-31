@@ -13,11 +13,10 @@
 	// console.log(item)
 </script>
 
-{#if ['essay', 'note', 'notes', 'snippet', 'tutorial'].includes(item?.type)}
+{#if ['essay', 'note', 'notes', 'snippet', 'tutorial'].includes(item?.category)}
 	<div class="mb-4 w-full">
 		<div class="flex flex-col-reverse justify-between md:flex-row">
-			<a
-				sveltekit:prefetch
+			<a data-sveltekit-preload-data
 				class="w-full text-gray-900 hover:text-yellow-600 dark:text-gray-100 dark:hover:text-yellow-100"
 				href={`/` + item.slug}
 			>
@@ -33,7 +32,7 @@
 			<div
 				class="inline-flex flex-1 flex-row-reverse items-center justify-end md:flex-row md:justify-start"
 			>
-				{#if (item.ghMetadata && item.ghMetadata.reactions.total_count) || item.data.devToReactions}
+				{#if (item.ghMetadata && item.ghMetadata.reactions.total_count) || item.devToReactions}
 					<span
 						class=" mr-2 min-w-[3rem] text-right font-mono text-xs text-gray-700 text-opacity-70 dark:text-gray-300"
 						>{(item?.ghMetadata?.reactions?.total_count || 0) + (item?.data?.devToReactions || 0)} ♥</span

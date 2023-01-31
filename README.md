@@ -13,4 +13,6 @@ If you want to make a site based on this, see https://github.com/sw-yx/swyxkit f
 
 See https://swyx.io
 
-You can see previous iterations of the site from 2017 here: https://www.swyx.io/rewrite-2022
+- You can see previous iterations of the site from 2017 here: https://www.swyx.io/rewrite-2022
+- The last version of the 2022 site was preserved at https://github.com/sw-yx/swyxdotio2022
+- The 2023 site is documented at https://www.swyx.io/rewrite-2023
