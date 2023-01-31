@@ -1,0 +1,8 @@
+# .prettierrc or .prettierrc.yaml
+trailingComma: 'none'
+tabWidth: 2
+semi: false
+singleQuote: true
+overrides:
+  - files:
+      - '*.svelte'

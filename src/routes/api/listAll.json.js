@@ -1,11 +1,11 @@
-import { listContent } from '$lib/content';
+import { listBlogposts } from '$lib/content';
 import { listSpeaking } from '$lib/local-content';
 
 /**
  * @type {import('@sveltejs/kit').RequestHandler}
  */
 export async function get() {
-	const blogposts = await listContent();
+	const blogposts = await listBlogposts();
 	const speaking = await listSpeaking();
 	const body = blogposts.concat(speaking).sort((a, b) => b.date - a.date);
 	return {

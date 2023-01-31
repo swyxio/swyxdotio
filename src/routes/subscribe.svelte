@@ -1,5 +1,5 @@
 <script>
-	import Newsletter from '../../components/Newsletter.svelte';
+	import Newsletter from '../components/Newsletter.svelte';
 	let title = 'subscribe to swyxletter';
 	let seoDescription = "Signup for swyx's Newsletter!";
 </script>
@@ -7,7 +7,7 @@
 <svelte:head>
 	<title>swyx's Newsletter</title>
 	<link rel="alternate" type="application/rss+xml" href="https://swyx.io/rss.xml" />
-	<meta property="og:url" content={'https://swyx.io/subscribe'} />
+	<meta property="og:url" content={'https://swyx.io/newsletter'} />
 	<meta property="og:type" content="article" />
 	<meta property="og:title" content={title} />
 	<meta name="Description" content={seoDescription} />
@@ -17,8 +17,8 @@
 	<meta name="twitter:creator" content="@swyx" />
 	<meta name="twitter:title" content={title} />
 	<meta name="twitter:description" content={seoDescription} />
-	<meta name="twitter:label1" content="Top picks" />
-	<meta name="twitter:data1" content={'Weekly'} />
+	<meta name="twitter:label1" value="Top picks" content="Top picks" />
+	<meta name="twitter:data1" value={'Weekly'} content={'Weekly'} />
 	<meta name="twitter:label2" content="Value" />
 	<meta name="twitter:data2" content={'Priceless'} />
 </svelte:head>
