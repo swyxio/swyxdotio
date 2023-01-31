@@ -35,22 +35,29 @@
 		<li>
 			<NavLink href="/">Home</NavLink>
 		</li>
-		<li>
+		<li class="group flex relative items-center">
 			<NavLink href="/ideas">Ideas</NavLink>
+			<span class="absolute hidden group-hover:flex text-center top-8 text-xs text-opacity-50">Writing & Speaking</span>
 		</li>
-		<li>
-			<NavLink href="/about">About</NavLink>
-		</li>
-		<li>
+		<li class="group flex relative items-center">
 			<a
 				class="hidden rounded-lg p-1 text-gray-800 transition-all hover:bg-yellow-200 dark:text-gray-200 dark:hover:bg-yellow-800 sm:px-3 sm:py-2 md:inline-block"
 				rel="external"
-				href={'/rss.xml'}
-				><span class="capsize">RSS</span>
+				href={'https://learninpublic.org'}
+				><span class="capsize">Book</span>
 			</a>
+			<span class="absolute hidden group-hover:flex text-center top-8 text-xs text-opacity-50">Tactics, Strategy, Principles</span>
+		</li>
+		<li class="group flex relative items-center">
+			<NavLink href="/about">About</NavLink>
+			<span class="absolute hidden group-hover:flex text-center top-8 -ml-2 text-xs text-opacity-50">Bio, Talks, Photos</span>
+		</li>
+		<li class="group flex relative items-center">
+			<NavLink href="/subscribe">Subscribe</NavLink>
+			<span class="absolute hidden group-hover:flex text-center top-8 -ml-2 text-xs text-opacity-50">RSS, Newsletter, Mixtape</span>
 		</li>
 	</ul>
-	<div class="flex items-center space-x-4">
+	<div class="flex items-center space-x-2">
 		<!-- RSS -->
 		<!-- <a
 			class="text-gray-700 hover:bg-yellow-200 dark:text-gray-200 dark:hover:bg-yellow-800"
@@ -98,6 +105,42 @@
 				/>
 			</svg>
 		</a>
+		<!-- YouTube -->
+		<a
+			href="https://youtube.com/swyxTV?sub_confirmation=1"
+			title="youtube"
+			target="_blank"
+			rel="me noopener noreferrer"
+			class="rounded-lg text-gray-700 hover:bg-yellow-200 dark:text-gray-200
+			dark:hover:bg-yellow-800"
+		>
+			<span class="sr-only">YouTube</span>
+			<svg
+				class="h-9 w-9 p-1"
+				fill="currentColor"
+				role="img"
+				xmlns="http://www.w3.org/2000/svg"
+				viewBox="0 0 24 24"
+				><title>YouTube icon</title><path
+					d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"
+				/></svg
+			>
+		</a>
+		<!-- Twitter -->
+		<a
+			href="https://twitter.com/intent/user?screen_name=swyx"
+			title="twitter"
+			target="_blank"
+			rel="me noopener noreferrer"
+			class="rounded-lg text-gray-700 hover:bg-yellow-200 dark:text-gray-200
+			dark:hover:bg-yellow-800"
+			><span class="sr-only">Twitter</span>
+			<svg class="h-9 w-9 p-1" fill="currentColor" viewBox="0 0 24 24"
+				><path
+					d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"
+				/></svg
+			></a
+		>
 		<button
 			aria-label="Toggle Dark Mode"
 			class="ml-1 flex h-9 w-9 items-center justify-center rounded-lg bg-yellow-400 ring-yellow-400

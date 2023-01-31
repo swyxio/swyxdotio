@@ -84,15 +84,15 @@
 	<div
 		class="flex justify-between w-full mt-2 bg border-red sm:items-start md:flex-row md:items-center"
 	>
-		<p class="flex items-center text-sm text-gray-700 dark:text-gray-300">swyx</p>
-		<p class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+		<span class="flex items-center text-sm text-gray-700 dark:text-gray-300">swyx</span>
+		<span class="flex items-center text-sm text-gray-600 dark:text-gray-400">
 			<a href={json.ghMetadata.issueUrl} rel="external noreferrer" class="no-underline" target="_blank">
 				<!-- <span class="mr-4 font-mono text-xs text-gray-700 text-opacity-70 dark:text-gray-300"
 					>{json.ghMetadata.reactions.total_count} reactions</span
 				> -->
 				{new Date(json.date).toISOString().slice(0, 10)}
 			</a>
-		</p>
+		</span>
 	</div>
 	<div
 		class="-mx-4 my-2 flex h-1 w-[100vw] bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 sm:mx-0 sm:w-full"
@@ -161,10 +161,6 @@
 			</a>
 		{/if}
 	</div>
-	<WebMentions
-		devto_reactions={json.devToReactions}
-		targets={[`https://www.swyx.io/${json.slug}`, `https://www.swyx.io/writing/${json.slug}`, json.devToUrl, canonical]}
-	/>
 	<div class="mb-8 text-black dark:text-white " bind:this={commentsEl} use:utterances={{number: issueNumber}}>
 		Loading comments...
 		<!-- svelte-ignore a11y-mouse-events-have-key-events -->
@@ -174,6 +170,10 @@
 		>Load now</button>
 		<!-- <Comments ghMetadata={json.ghMetadata} /> -->
 	</div>
+	<WebMentions
+		devto_reactions={json.devToReactions}
+		targets={[`https://www.swyx.io/${json.slug}`, `https://www.swyx.io/writing/${json.slug}`, json.devToUrl, canonical]}
+	/>
 
 	<Newsletter />
 	<LatestPosts items={data.list} />
@@ -185,7 +185,7 @@
 			--gap: clamp(1rem, 6vw, 3rem);
 			--full: minmax(var(--gap), 1fr);
 			/* --content: min(65ch, 100% - var(--gap) * 2); */
-			--content: 65ch;
+			--content: minmax(65ch, 56rem);
 			--popout: minmax(0, 2rem);
 			--feature: minmax(0, 5rem);
 
