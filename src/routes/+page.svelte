@@ -57,8 +57,7 @@
 				Writer, Speaker, Developer Advocate
 			</h2>
 			<p class="mb-4 text-gray-700 dark:text-gray-200">
-				I help devtools cross the chasm (React + TypeScript,
-				Svelte, Netlify, AWS, Temporal and Airbyte) and help developers <a href="/learn-in-public"
+				I help devtools cross the chasm (devrel, advising and investing) and help developers <a href="/learn-in-public"
 					>Learn in Public</a
 				>!
 			</p>

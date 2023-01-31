@@ -39,7 +39,7 @@
 		<p class="text-base font-light text-opacity-75">
 			Join <span
 				class="bg-gradient-to-br from-pink-400 to-red-600 bg-clip-text font-extrabold text-transparent"
-				>3,000+</span
+				>10k+</span
 			> developers getting good reads, fun picks, and first looks at my work before I publish!
 		</p>
 		<Newsletter />

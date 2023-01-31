@@ -48,7 +48,7 @@
 	// with a fallback to a simple filter function
 	let loaded = false;
 	const filterCategories = async (_items, _, s) => {
-		if (!$selectedCategories?.length) return _items;
+		if (!$selectedCategories?.length || !s?.length) return _items;
 		return _items
 			.filter((item) => {
 				return $selectedCategories

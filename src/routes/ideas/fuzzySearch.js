@@ -33,7 +33,7 @@ function debounce(func, wait) {
  */
 function _fuzzySearch(items, selectedCategories, search) {
   const filteredItems = items.filter((item) => {
-    if (selectedCategories?.length < 1) return true
+    if (selectedCategories?.length < 1 || !search?.length) return true
     return selectedCategories
       .map((element) => {
         return element.toLowerCase();
