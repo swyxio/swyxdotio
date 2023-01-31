@@ -104,7 +104,7 @@
 				aria-label="What is my disclosure policy?"
 				target="_blank"
 				title="What is my disclosure policy?"
-				rel="noopener"
+				rel="noopener noreferrer"
 				href="https://www.swyx.io/digital-garden-tos/#2-epistemic-disclosure"
 				color="blue"
 			>
@@ -154,7 +154,7 @@
 			if you liked this post! 🧡
 		{/if}
 		{#if json.devToReactions}
-			<a href={json.devToUrl} rel="external" class="no-underline" target="_blank">
+			<a href={json.devToUrl} rel="external noreferrer" class="no-underline" target="_blank">
 				<span class="ml-2 font-mono text-xs text-gray-700 text-opacity-70 dark:text-gray-300">
 					(+{json.devToReactions} on dev.to)
 				</span>

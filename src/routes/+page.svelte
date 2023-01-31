@@ -19,7 +19,6 @@
 	// technically this is a slighlty different type because doesnt have 'content' but we'll let it slide
 	/** @type {import('$lib/types').ContentItem[]} */
 	$: items = data.items;
-	$: console.log({ items })
 </script>
 
 <svelte:head>
@@ -56,12 +55,12 @@
 			</h1>
 			<h2 id="bio" class="mb-4 text-gray-700 dark:text-gray-200">
 				Writer, Speaker, Developer Advocate. I help devtools cross the chasm (React + TypeScript,
-				Svelte, Netlify, now <a sveltekit:prefetch href="/why-temporal"
-				>Temporal</a>) and help developers <a sveltekit:prefetch href="/learn-in-public"
+				Svelte, Netlify, now <a href="/why-temporal"
+				>Temporal</a>) and help developers <a href="/learn-in-public"
 					>Learn in Public</a
 				>!
 			</h2>
-				<a  class="text-gray-600 dark:text-gray-400" sveltekit:prefetch href="/about">More on About page</a>
+				<a  class="text-gray-600 dark:text-gray-400" href="/about">More on About page</a>
 		</div>
 		<img
 				class="w-[80px] rounded-full sm:w-[176px] relative mb-8 sm:mb-0 mr-auto bg-cyan-300 bg-opacity-25"
@@ -81,11 +80,15 @@
 			{#each items as item (item.slug)}
 			<li>
 					{#if item.category === 'podcast'}
-					🎧 <a sveltekit:prefetch href={item.url}>{item.title}</a>
+					🎧 <a href={item.url}>{item.title}</a>
 					{:else if item.category === 'talk'}
-					📺 <a sveltekit:prefetch href={item.instances[0].video}>{item.title}</a>
+					📺 <a href={item.instances[0].video}>{item.title}</a>
+					{:else if item.category === 'essay'}
+					📙 <a href={item.slug}>{item.title}</a>
+					{:else if item.category === 'tutorial'}
+					📘 <a href={item.slug}>{item.title}</a>
 					{:else}
-					✍️ <a sveltekit:prefetch href={item.slug}>{item.title}</a>
+					📓 <a href={item.slug}>{item.title}</a>
 					{/if}
 					<span class="text-xs text-black dark:text-gray-400">{new Date(item.date).toISOString().slice(0, 10)}</span>
 				</li>

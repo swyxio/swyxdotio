@@ -16,8 +16,7 @@
 {#if ['essay', 'note', 'notes', 'snippet', 'tutorial'].includes(item?.category)}
 	<div class="mb-4 w-full">
 		<div class="flex flex-col-reverse justify-between md:flex-row">
-			<a
-				sveltekit:prefetch
+			<a data-sveltekit-preload-data
 				class="w-full text-gray-900 hover:text-yellow-600 dark:text-gray-100 dark:hover:text-yellow-100"
 				href={`/` + item.slug}
 			>
