@@ -6,4 +6,4 @@ I have done a bunch of [talks](/ideas/?show=Talks) and [podcast](/ideas/?show=Po
 - **[Learn In Public](/ideas?filter=learn%20in%20public&show=Talks&show=Tutorials&show=Notes)**: My first verbal exposition on the Learn In Public philosophy. Video is frozen at the end, sorry.
 - **[I Can Babel Macros and So Can You! (the Moana talk)](/ideas?filter=babel%20macros&show=Talks)**: My first JSConf appearance ever, at one of the most competitive JSConfs ever. This talk is where I first started experimenting with theming talks, and it came out really well with the Moana theme.
 
-[More of my speaking here](/ideas/?show=Talks&show=Podcasts)
+[More of my speaking on the /ideas page](/ideas/?show=Talks&show=Podcasts).

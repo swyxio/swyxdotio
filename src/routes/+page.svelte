@@ -53,14 +53,16 @@
 				</span>
 				Wang
 			</h1>
-			<h2 id="bio" class="mb-4 text-gray-700 dark:text-gray-200">
-				Writer, Speaker, Developer Advocate. I help devtools cross the chasm (React + TypeScript,
-				Svelte, Netlify, now <a sveltekit:prefetch href="/why-temporal"
-				>Temporal</a>) and help developers <a sveltekit:prefetch href="/learn-in-public"
+			<h2 id="bio" class="mb-4 italic text-gray-700 dark:text-gray-200">
+				Writer, Speaker, Developer Advocate
+			</h2>
+			<p class="mb-4 text-gray-700 dark:text-gray-200">
+				I help devtools cross the chasm (React + TypeScript,
+				Svelte, Netlify, AWS, Temporal and Airbyte) and help developers <a href="/learn-in-public"
 					>Learn in Public</a
 				>!
-			</h2>
-				<a  class="text-gray-600 dark:text-gray-400" sveltekit:prefetch href="/about">More on About page</a>
+			</p>
+				<a  class="text-gray-600 dark:text-gray-400" href="/about">More on About page</a>
 		</div>
 		<img
 				class="w-[80px] rounded-full sm:w-[176px] relative mb-8 sm:mb-0 mr-auto bg-cyan-300 bg-opacity-25"
@@ -74,12 +76,22 @@
 	</section> -->
 	<section class="mb-8 w-full">
 		<h3 id="latest" class="mb-6 text-2xl font-bold tracking-tight text-black dark:text-white md:text-4xl">
-			Latest Posts
+			Latest Swyx Content
 		</h3>
 		<ul class="text-white">
 			{#each items as item (item.slug)}
-				<li>
-					<a sveltekit:prefetch href={item.slug}>{item.title}</a>
+			<li>
+					{#if item.category === 'podcast'}
+					🎧 <a href={item.url}>{item.title}</a>
+					{:else if item.category === 'talk'}
+					📺 <a href={item.instances[0].video}>{item.title}</a>
+					{:else if item.category === 'essay'}
+					📙 <a href={item.slug}>{item.title}</a>
+					{:else if item.category === 'tutorial'}
+					📘 <a href={item.slug}>{item.title}</a>
+					{:else}
+					📓 <a href={item.slug}>{item.title}</a>
+					{/if}
 					<span class="text-xs text-black dark:text-gray-400">{new Date(item.date).toISOString().slice(0, 10)}</span>
 				</li>
 			{/each}
@@ -106,22 +118,22 @@
 	<Newsletter />
 	<section class="mb-8 w-full">
 		<h3 id="writing" class="mb-6 text-2xl font-bold tracking-tight text-black dark:text-white md:text-4xl">
-			Most Popular Posts
+			Most Popular Writing
 		</h3>
-		<div class="flex flex-col gap-6 md:flex-row mb-8">
-			<FeatureCard title="Learn in Public" href="/learn-in-public" date={'Jun 2018'} />
+		<!-- <div class="flex flex-col gap-6 md:flex-row mb-8">
+			<FeatureCard title="Learn in Public" href="/learn-in-public" stringData={'Jun 2018'} />
 			<FeatureCard
 				title="The Third Age of JavaScript"
 				href="/js-third-age"
-				date={'May 2020'}
+				stringData={'May 2020'}
 			/>
-			<FeatureCard title="AWS plays Chess, but Cloudflare plays Go" href="/cloudflare-go" date={'Oct 2021'} />
-		</div>
+			<FeatureCard title="AWS plays Chess, but Cloudflare plays Go" href="/cloudflare-go" stringData={'Oct 2021'} />
+		</div> -->
 		<FeaturedWriting />
 	</section>
 	<section class="mb-8 w-full">
 		<h3 id="speaking" class="mb-6 text-2xl font-bold tracking-tight text-black dark:text-white md:text-4xl">
-			Most Popular Talks
+			Most Popular Speaking
 		</h3>
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-6 place-items-center my-16">
 			<iframe
