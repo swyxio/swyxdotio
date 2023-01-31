@@ -13,7 +13,7 @@
 	// console.log(item)
 </script>
 
-{#if ['essay', 'note', 'notes', 'snippet', 'tutorial'].includes(item?.category)}
+{#if ['essay', 'note', 'notes', 'snippet', 'tutorial'].includes(item?.type)}
 	<div class="mb-4 w-full">
 		<div class="flex flex-col-reverse justify-between md:flex-row">
 			<a
@@ -33,7 +33,7 @@
 			<div
 				class="inline-flex flex-1 flex-row-reverse items-center justify-end md:flex-row md:justify-start"
 			>
-				{#if (item.ghMetadata && item.ghMetadata.reactions.total_count) || item.devToReactions}
+				{#if (item.ghMetadata && item.ghMetadata.reactions.total_count) || item.data.devToReactions}
 					<span
 						class=" mr-2 min-w-[3rem] text-right font-mono text-xs text-gray-700 text-opacity-70 dark:text-gray-300"
 						>{(item?.ghMetadata?.reactions?.total_count || 0) + (item?.data?.devToReactions || 0)} ♥</span

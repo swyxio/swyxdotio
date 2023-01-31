@@ -43,9 +43,6 @@ module.exports = {
             "a code": {
               color: 'unset'
             },
-            table: {
-              overflow: 'hidden'
-            },
             "li, ul, ol": {
               margin: 0
             },

@@ -1,25 +1,22 @@
 import { compile } from 'mdsvex';
-import { dev } from '$app/environment';
+import { dev } from '$app/env';
 import grayMatter from 'gray-matter';
-
-import {
-	GH_USER_REPO,
-	APPROVED_POSTERS_GH_USERNAME,
-	GH_PUBLISHED_TAGS,
-	REPO_OWNER
-} from './siteConfig';
+import fetch from 'node-fetch';
+import { GH_USER_REPO } from './siteConfig';
 import parse from 'parse-link-header';
 import slugify from 'slugify';
-import { remark } from 'remark';
-import remarkParse from 'remark-parse';
-import remarkStringify from 'remark-stringify';
+// import { parse as nodehtmlparse } from 'node-html-parser';
+
+import remarkToc from 'remark-toc';
+// import remarkRehype from 'remark-rehype'
+// import rehypeDocument from 'rehype-document'
+// import rehypeFormat from 'rehype-format'
+import remarkGithub from 'remark-github';
+import remarkGfm from 'remark-gfm';
 import rehypeStringify from 'rehype-stringify';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutoLink from 'rehype-autolink-headings';
 
-import remarkToc from 'remark-toc';
-import remarkGithub from 'remark-github';
-import remarkGfm from 'remark-gfm';
 const remarkPlugins = [
 	remarkToc,
 	[remarkGithub, { repository: 'https://github.com/sw-yx/swyxdotio/' }],
@@ -37,80 +34,52 @@ const rehypePlugins = [
 	]
 ];
 
-/** @type {import('./types').ContentItem[]} */
+const allowedPosters = ['sw-yx'];
+const publishedTags = ['Published'];
 let allBlogposts = [];
 // let etag = null // todo - implmement etag header
 
-
-/**
- * @param {string} text
- * @returns {string}
- */
-function readingTime(text) {
-	let minutes = Math.ceil(text.trim().split(' ').length / 225);
-	return minutes > 1 ? `${minutes} minutes` : `${minutes} minute`;
-}
-
-export async function listContent(providedFetch) {
-	// use a diff var so as to not have race conditions while fetching
+export async function listBlogposts() {
 	// TODO: make sure to handle this better when doing etags or cache restore
-
-	/** @type {import('./types').ContentItem[]} */
 	let _allBlogposts = [];
 	let next = null;
 	let limit = 0; // just a failsafe against infinite loop - feel free to remove
 	const authheader = process.env.GH_TOKEN && {
 		Authorization: `token ${process.env.GH_TOKEN}`
 	};
-	let url =
-		`https://api.github.com/repos/${GH_USER_REPO}/issues?` +
-		new URLSearchParams({
-			state: 'all',
-			labels: GH_PUBLISHED_TAGS.toString(),
-			per_page: '100',
-		});
-	// pull issues created by owner only if allowed author = repo owner
-	if (APPROVED_POSTERS_GH_USERNAME.length === 1 && APPROVED_POSTERS_GH_USERNAME[0] === REPO_OWNER) {
-		url += '&' + new URLSearchParams({ creator: REPO_OWNER });
-	}
 	do {
-		const res = await providedFetch(next?.url ?? url, {
-			headers: authheader
-		});
-
-		const issues = await res.json();
-		if ('message' in issues && res.status > 400)
-			throw new Error(res.status + ' ' + res.statusText + '\n' + (issues && issues.message));
-		issues.forEach(
-			/** @param {import('./types').GithubIssue} issue */
-			(issue) => {
-				if (
-					// labels check not needed anymore as we have set the labels param in github api
-					// issue.labels.some((label) => GH_PUBLISHED_TAGS.includes(label.name)) &&
-					APPROVED_POSTERS_GH_USERNAME.includes(issue.user.login)
-				) {
-					_allBlogposts.push(parseIssue(issue));
-				}
+		const res = await fetch(
+			next?.url ?? `https://api.github.com/repos/${GH_USER_REPO}/issues?state=all&per_page=100`,
+			{
+				headers: authheader
 			}
 		);
+
+		const issues = await res.json();
+		if (res.status > 400)
+			throw new Error(res.status + ' ' + res.statusText + '\n' + (issues && issues.message));
+		issues.forEach((issue) => {
+			if (
+				issue.labels.some((label) => publishedTags.includes(label.name)) &&
+				allowedPosters.includes(issue.user.login)
+			) {
+				_allBlogposts.push(parseIssue(issue));
+			}
+		});
 		const headers = parse(res.headers.get('Link'));
 		next = headers && headers.next;
+		// } while (limit++ < 1) // just for development
 	} while (next && limit++ < 1000); // just a failsafe against infinite loop - feel free to remove
-	_allBlogposts.sort((a, b) => b.date.valueOf() - a.date.valueOf()); // use valueOf to make TS happy https://stackoverflow.com/a/60688789/1106414
+	// _allBlogposts.sort((a, b) => b.date - a.date)
 	allBlogposts = _allBlogposts;
 	return _allBlogposts;
 }
 
-/**
- * @param {Function} providedFetch from sveltekit
- * @param {string} slug of the file to retrieve
- * @returns {Promise<import('./types').ContentItem[]>}
- */
-export async function getContent(providedFetch, slug) {
+export async function getBlogpost(slug) {
 	// get all blogposts if not already done - or in development
 	if (dev || allBlogposts.length === 0) {
 		console.log('loading allBlogposts');
-		allBlogposts = await listContent(providedFetch);
+		allBlogposts = await listBlogposts();
 		console.log('loaded ' + allBlogposts.length + ' blogposts');
 		if (!allBlogposts.length)
 			throw new Error(
@@ -121,49 +90,22 @@ export async function getContent(providedFetch, slug) {
 	// find the blogpost that matches this slug
 	const blogpost = allBlogposts.find((post) => post.slug === slug);
 	if (blogpost) {
+
 		const blogbody = blogpost.content
-			.replace(/\n{% youtube (.*?) %}/g, (_, x) => {
-				// https://stackoverflow.com/a/27728417/1106414
-				function youtube_parser(url) {
-					var rx =
-						/^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/)|(?:(?:watch)?\?v(?:i)?=|&v(?:i)?=))([^#&?]*).*/;
-					if (url.match(rx)) return url.match(rx)[1];
-					return url.slice(-11);
-				}
-				const videoId = x.startsWith('https://') ? youtube_parser(x) : x;
-				return `<iframe
+			.replace(
+				// /\n{% youtube (.*?) %}/g,
+				/{% youtube (.*?) %}/g,
+				(_, x) => {
+
+					// https://stackoverflow.com/a/27728417/1106414
+					function youtube_parser(url) {
+						var rx = /^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]*).*/;
+						return url.match(rx)[1]
+					}
+					const videoId = x.startsWith('https://') ? youtube_parser(x) : x;
+					return `<iframe
 			class="w-full object-contain"
-			srcdoc="
-				<style>
-				    body, .youtubeembed {
-					width: 100%;
-					height: 100%;
-					margin: 0;
-					position: absolute;
-					display: flex;
-					justify-content: center;
-					object-fit: cover;
-				    }
-				</style>
-				<a
-				    href='https://www.youtube.com/embed/${videoId}?autoplay=1'
-				    class='youtubeembed'
-				>
-				    <img
-					src='https://img.youtube.com/vi/${videoId}/sddefault.jpg'
-					class='youtubeembed'
-				    />
-				    <svg
-					version='1.1'
-					viewBox='0 0 68 48'
-					width='68px'
-					style='position: relative;'
-				    >
-					<path d='M66.52,7.74c-0.78-2.93-2.49-5.41-5.42-6.19C55.79,.13,34,0,34,0S12.21,.13,6.9,1.55 C3.97,2.33,2.27,4.81,1.48,7.74C0.06,13.05,0,24,0,24s0.06,10.95,1.48,16.26c0.78,2.93,2.49,5.41,5.42,6.19 C12.21,47.87,34,48,34,48s21.79-0.13,27.1-1.55c2.93-0.78,4.64-3.26,5.42-6.19C67.94,34.95,68,24,68,24S67.94,13.05,66.52,7.74z' fill='#f00'></path>
-					<path d='M 45,24 27,14 27,34' fill='#fff'></path>
-				    </svg>
-				</a>
-			"
+			src="https://www.youtube.com/embed/${videoId}"
 			title="video123"
 			name="video123"
 			allow="accelerometer; autoplay; encrypted-media; gyroscope;
@@ -174,28 +116,31 @@ export async function getContent(providedFetch, slug) {
 			width="600"
 			height="400"
 			allowFullScreen
-			aria-hidden="true"></iframe>`;
-			})
-			.replace(/\n{% (tweet|twitter) (.*?) %}/g, (_, _2, x) => {
-				const url = x.startsWith('https://twitter.com/') ? x : `https://twitter.com/x/status/${x}`;
-				return `
+			aria-hidden="true"></iframe>`}
+			)
+			.replace(
+				// /\n{% (tweet|twitter) (.*?) %}/g,
+				/{% (tweet|twitter) (.*?) %}/g,
+				(_, _2, x) => {
+					const url = x.startsWith('https://twitter.com/') ? x : `https://twitter.com/x/status/${x}`;
+					return `
 					<blockquote class="twitter-tweet" data-lang="en" data-dnt="true" data-theme="dark">
 					<a href="${url}"></a></blockquote> 
 					<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-					`;
-			});
+					`
+				}
+			);
 
 		// compile it with mdsvex
 		const content = (
 			await compile(blogbody, {
 				remarkPlugins,
-				// @ts-ignore
 				rehypePlugins
 			})
 		).code
 			// https://github.com/pngwn/MDsveX/issues/392
 			.replace(/>{@html `<code class="language-/g, '><code class="language-')
-			.replace(/<\/code>`}<\/pre>/g, '</code></pre>');
+			.replace(/<\/code>`}<\/pre>/g, '</code></pre>')
 
 		return { ...blogpost, content };
 	} else {
@@ -203,10 +148,6 @@ export async function getContent(providedFetch, slug) {
 	}
 }
 
-/**
- * @param {import('./types').GithubIssue} issue
- * @returns {import('./types').ContentItem}
- */
 function parseIssue(issue) {
 	const src = issue.body;
 	try {
@@ -220,22 +161,10 @@ function parseIssue(issue) {
 		} else {
 			slug = slugify(title);
 		}
-
+		// let description = data.description ?? nodehtmlparse(content.trim().split('\n')[0]).text;
 		let description = data.description ?? content.trim().split('\n')[0];
-		// extract plain text from markdown
-		description = remark()
-			.use(remarkParse)
-			.use(remarkStringify)
-			.processSync(description)
-			.toString();
-		description = description.replace(/\n/g, ' ');
-		// strip html
-		description = description.replace(/<[^>]*>?/gm, '');
-		// strip markdown
-		// description = description.replace(/[[\]]/gm, '');
-	
-		// you may wish to use a truncation approach like this instead...
-		// let description = (data.content.length > 300) ? data.content.slice(0, 300) + '...' : data.content
+		// let description = data.description ?? nodehtmlparse('<div id="abc">' +  + '</div>').textContent;
+		// (data.content.length > 300) ? data.content.slice(0, 300) + '...' : data.content
 
 		let tags = [];
 		if (data.tags)
@@ -251,21 +180,20 @@ function parseIssue(issue) {
 			// console.log(`WARN: ${slug} has no tags`) // todo: go thru and check thru old content
 		}
 		tags = tags.map((tag) => tag.toLowerCase());
+		// console.log(slug, tags)
 
 		return {
-			type: 'blog', // futureproof in case you want to add other types of content
+			type: data.category?.toLowerCase() || 'essay',
 			content,
-			frontmatter: data,
+			data,
 			title,
 			subtitle: data.subtitle,
 			description,
-			category: data.category?.toLowerCase() || 'note', // all posts assumed to be "note"s unless otherwise specified
 			tags,
 			image: data.image ?? data.cover_image,
 			canonical: data.canonical || data.canonical_url, // for canonical URLs of something published elsewhere
 			slug: `${slug}`.toLowerCase(),
 			date: new Date(data.date ?? data.devToPublishedAt ?? issue.created_at),
-			readingTime: readingTime(content),
 			ghMetadata: {
 				issueUrl: issue.html_url,
 				commentsUrl: issue.comments_url,

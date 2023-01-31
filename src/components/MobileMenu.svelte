@@ -44,7 +44,7 @@
 			>
 		{:else}
 			<svg
-				class="absolute h-5 w-5 text-gray-900 dark:text-gray-100"
+				class="h-5 w-5 absolute text-gray-900 dark:text-gray-100"
 				viewBox="0 0 24 24"
 				width="24"
 				height="24"
@@ -69,6 +69,7 @@
 			>
 				<a
 					class="flex w-auto pb-4"
+					sveltekit:prefetch
 					on:click={() => setTimeout(() => (isOpen = false), 300)}
 					href="/">Home</a
 				>
@@ -79,6 +80,7 @@
 			>
 				<a
 					class="flex w-auto pb-4"
+					sveltekit:prefetch
 					on:click={() => setTimeout(() => (isOpen = false), 300)}
 					href="/ideas">Ideas</a
 				>
@@ -89,28 +91,20 @@
 			>
 				<a
 					class="flex w-auto pb-4"
+					sveltekit:prefetch
 					on:click={() => setTimeout(() => (isOpen = false), 300)}
 					href="/about">About</a
 				>
 			</li>
 			<li
 				class="border-b border-gray-300 font-semibold text-gray-900 dark:border-gray-700 dark:text-gray-100"
-				style="transition-delay: 450ms;"
+				style="transition-delay: 400ms;"
 			>
 				<a
 					class="flex w-auto pb-4"
+					sveltekit:prefetch
 					on:click={() => setTimeout(() => (isOpen = false), 300)}
 					href="/subscribe">Subscribe</a
-				>
-			</li>
-			<li
-				class="border-b border-gray-300 font-semibold text-gray-900 dark:border-gray-700 dark:text-gray-100"
-				style="transition-delay: 550ms;"
-			>
-				<a
-					class="flex w-auto pb-4"
-					on:click={() => setTimeout(() => (isOpen = false), 300)}
-					href="https://learninpublic.org">Book</a
 				>
 			</li>
 			<!-- <li

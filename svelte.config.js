@@ -47,17 +47,13 @@ const config = {
 	],
 
 	kit: {
+		// hydrate the <div id="svelte"> element in src/app.html
+		target: '#svelte',
 		adapter: adapter({
 			split: false
 		})
-		// https://kit.svelte.dev/docs/configuration#csp
-		// csp: {
-		// 	directives: {
-		// 		'script-src': ['self']
-		// 	},
-		// 	reportOnly: {
-		// 		'script-src': ['self']
-		// 	}
+		// vite: {
+		// 	plugins: [yaml()]
 		// }
 	}
 };

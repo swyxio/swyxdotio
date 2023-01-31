@@ -96,16 +96,7 @@
 		    'https://sayed.work',
 		    'https://infos.by',
 		    'https://data-science-austria.at',
-		    'https://www.techyrack.com',
-				'https://wazooy.com',
-				'https://simpleenews.qblnet.us',
-				'https://dandp.ltd',
-				'https://e-digitaltechnology.com',
-				'https://aruf.store',
-				'https://wons.store',
-				'http://trainingwingsworkshop.com',
-				'https://aruf.ru',
-				'https://new-bie.xyz'
+		    'https://www.techyrack.com'
 	];
 	let page = 0;
 	export let targets;
@@ -242,7 +233,7 @@
 			<ul>
 				{#each mentions as link}
 					<li
-						class="myflexresponsive WebMentionReply"
+						class="myflexresponsive WebMentionReply border-b border-indigo-200 dark:border-indigo-700"
 					>
 						{#if link.data.author && link.data.author.photo}
 							<div class="Avatar">
@@ -263,35 +254,37 @@
 						{:else}
 							<span class="font-bold">{new URL(link.data.url).host}&nbsp;</span>
 						{/if}
-						{#if link.activity.type === 'repost'}
-							{link.data.author && link.data.author.name}
-							<a href={link.data.url}>retweeted</a>
-						{:else}
-							<span font-family="system" color="text" font-weight="bold">
-								{link.data.author ? `${link.data.author.name} ` : ' '}
-								<a target="_blank" rel="noopener" href={link.data.url} color="blue">
-									mentioned this
-								</a>
-								on
-								<span color="tertiary">
-									{link.data.published
-										? link.data.published.slice(0, 10)
-										: link.verified_date.slice(0, 10)}
-								</span>
-							</span>
-							{#if link.data.content}
-								<div>
-									<p
-										class="prose dark:prose-invert italic border-l-2 pl-2 border-teal-500"
-										font-family="system"
-										color="tertiary"
-										font-size="2"
-									>
-										{@html cleanString(link.data.content)}
-									</p>
+						<div>
+							{#if link.activity.type === 'repost'}
+								{link.data.author && link.data.author.name}
+								<a href={link.data.url}>retweeted</a>
+							{:else}
+								<div font-family="system" color="text" font-weight="bold">
+									{link.data.author ? `${link.data.author.name} ` : ' '}
+									<a target="_blank" rel="noopener" href={link.data.url} color="blue">
+										mentioned this
+									</a>
+									on
+									<span color="tertiary">
+										{link.data.published
+											? link.data.published.slice(0, 10)
+											: link.verified_date.slice(0, 10)}
+									</span>
 								</div>
+								{#if link.data.content}
+									<div>
+										<p
+											class="prose dark:prose-invert italic border-l-2 pl-2 border-teal-500"
+											font-family="system"
+											color="tertiary"
+											font-size="2"
+										>
+											{@html cleanString(link.data.content)}
+										</p>
+									</div>
+								{/if}
 							{/if}
-						{/if}
+						</div>
 					</li>
 				{/each}
 				{#if fetchState !== 'nomore'}

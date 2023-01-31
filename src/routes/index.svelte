@@ -1,9 +1,4 @@
-<script>
-	import Newsletter from '../components/Newsletter.svelte';
-	import FeatureCard from '../components/FeatureCard.svelte';
-	import LatestPosts from '../components/LatestPosts.svelte';
-	import FeaturedWriting from '../components/FeaturedWriting.svx';
-	import FeaturedSpeaking from '../components/FeaturedSpeaking.svx';
+<script context="module">
 	import {
 		SITE_URL,
 		REPO_URL,
@@ -12,19 +7,40 @@
 		DEFAULT_OG_IMAGE,
 		MY_TWITTER_HANDLE
 	} from '$lib/siteConfig';
+	export const prerender = true; // index page is most visited, lets prerender
+	export async function load({ params, fetch }) {
+		const blogposts = await fetch(`/api/listBlogposts.json`);
+		if (blogposts.status > 400) {
+			console.error('render error for ' + `/api/listBlogposts.json`);
+			return {
+				status: blogposts.status,
+				error: await blogposts.text()
+			};
+		} else {
+			return {
+				props: {
+					blogposts: await blogposts.json()
+					// speaking: await speaking.json()
+				},
+				maxage: 3600 // 1 hour
+			};
+		}
+	}
+</script>
 
-
-	/** @type {import('./$types').PageData} */
-	export let data;
-	// technically this is a slighlty different type because doesnt have 'content' but we'll let it slide
-	/** @type {import('$lib/types').ContentItem[]} */
-	$: items = data.items;
+<script>
+	import Newsletter from '../components/Newsletter.svelte';
+	import FeatureCard from '../components/FeatureCard.svelte';
+	import FeaturedWriting from '../components/FeaturedWriting.svx';
+	import FeaturedSpeaking from '../components/FeaturedSpeaking.svx';
+	export let blogposts; // ,speaking;
+	$: list = blogposts.list.slice(0, 10);
 </script>
 
 <svelte:head>
 	<title>{SITE_TITLE}</title>
 	<link rel="canonical" href={SITE_URL} />
-	<link rel="alternate" type="application/rss+xml" href={SITE_URL + '/rss.xml'} />
+	<link rel="alternate" type="application/rss+xml" href={SITE_URL + '/api/rss.xml'} />
 	<meta property="og:url" content={SITE_URL} />
 	<meta property="og:type" content="article" />
 	<meta property="og:title" content={SITE_TITLE} />
@@ -37,7 +53,6 @@
 	<meta name="twitter:description" content={SITE_DESCRIPTION} />
 	<meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
 </svelte:head>
-
 
 <div
 	class="mx-auto flex max-w-4xl flex-col items-start justify-center border-gray-200 px-4 dark:border-gray-700 sm:px-8"
@@ -77,7 +92,7 @@
 			Latest Posts
 		</h3>
 		<ul class="text-white">
-			{#each items as item (item.slug)}
+			{#each list as item (item.slug)}
 				<li>
 					<a sveltekit:prefetch href={item.slug}>{item.title}</a>
 					<span class="text-xs text-black dark:text-gray-400">{new Date(item.date).toISOString().slice(0, 10)}</span>
