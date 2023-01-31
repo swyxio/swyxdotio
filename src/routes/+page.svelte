@@ -53,13 +53,15 @@
 				</span>
 				Wang
 			</h1>
-			<h2 id="bio" class="mb-4 text-gray-700 dark:text-gray-200">
-				Writer, Speaker, Developer Advocate. I help devtools cross the chasm (React + TypeScript,
-				Svelte, Netlify, now <a href="/why-temporal"
-				>Temporal</a>) and help developers <a href="/learn-in-public"
+			<h2 id="bio" class="mb-4 italic text-gray-700 dark:text-gray-200">
+				Writer, Speaker, Developer Advocate
+			</h2>
+			<p class="mb-4 text-gray-700 dark:text-gray-200">
+				I help devtools cross the chasm (React + TypeScript,
+				Svelte, Netlify, AWS, Temporal and Airbyte) and help developers <a href="/learn-in-public"
 					>Learn in Public</a
 				>!
-			</h2>
+			</p>
 				<a  class="text-gray-600 dark:text-gray-400" href="/about">More on About page</a>
 		</div>
 		<img
