@@ -64,9 +64,7 @@
 		</div>
 		{#if isNewsletterOpen}
 			<p class="my-1 text-gray-800 dark:text-gray-200">
-				Get emails from me about <span class="font-bold"
-					>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Libero, ducimus.</span
-				>.
+				Join >10,000 subscribers getting occasional updates on new posts and projects!
 			</p>
 
 			<form
@@ -90,9 +88,9 @@
 					type="submit">Subscribe</button
 				>
 			</form>
-			<p class="text-sm text-gray-800 dark:text-gray-200">
-				5,432 subscribers including my Mom – <a href="/#newsletter">123 issues</a>
-			</p>
+			<!-- <p class="text-sm text-gray-800 dark:text-gray-200">
+				6000+ subscribers and counting!
+			</p> -->
 		{/if}
 	</div>
 </section>

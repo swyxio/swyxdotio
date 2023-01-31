@@ -195,6 +195,6 @@
 		</div>
 		<button class="bg-slate-500 p-2" on:click={() => ($search = '')}>Clear your search</button>
 	{:else}
-		<div class="prose dark:prose-invert">No blogposts found!</div>
+		<div class="prose dark:prose-invert">No content found! Try widening your search again</div>
 	{/if}
 </section>

@@ -106,22 +106,22 @@
 	<Newsletter />
 	<section class="mb-8 w-full">
 		<h3 id="writing" class="mb-6 text-2xl font-bold tracking-tight text-black dark:text-white md:text-4xl">
-			Most Popular Posts
+			Most Popular Writing
 		</h3>
-		<div class="flex flex-col gap-6 md:flex-row mb-8">
-			<FeatureCard title="Learn in Public" href="/learn-in-public" date={'Jun 2018'} />
+		<!-- <div class="flex flex-col gap-6 md:flex-row mb-8">
+			<FeatureCard title="Learn in Public" href="/learn-in-public" stringData={'Jun 2018'} />
 			<FeatureCard
 				title="The Third Age of JavaScript"
 				href="/js-third-age"
-				date={'May 2020'}
+				stringData={'May 2020'}
 			/>
-			<FeatureCard title="AWS plays Chess, but Cloudflare plays Go" href="/cloudflare-go" date={'Oct 2021'} />
-		</div>
+			<FeatureCard title="AWS plays Chess, but Cloudflare plays Go" href="/cloudflare-go" stringData={'Oct 2021'} />
+		</div> -->
 		<FeaturedWriting />
 	</section>
 	<section class="mb-8 w-full">
 		<h3 id="speaking" class="mb-6 text-2xl font-bold tracking-tight text-black dark:text-white md:text-4xl">
-			Most Popular Talks
+			Most Popular Speaking
 		</h3>
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-6 place-items-center my-16">
 			<iframe
