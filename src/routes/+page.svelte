@@ -19,6 +19,7 @@
 	// technically this is a slighlty different type because doesnt have 'content' but we'll let it slide
 	/** @type {import('$lib/types').ContentItem[]} */
 	$: items = data.items;
+	$: console.log({ items })
 </script>
 
 <svelte:head>
@@ -74,12 +75,18 @@
 	</section> -->
 	<section class="mb-8 w-full">
 		<h3 id="latest" class="mb-6 text-2xl font-bold tracking-tight text-black dark:text-white md:text-4xl">
-			Latest Posts
+			Latest Swyx Content
 		</h3>
 		<ul class="text-white">
 			{#each items as item (item.slug)}
-				<li>
-					<a sveltekit:prefetch href={item.slug}>{item.title}</a>
+			<li>
+					{#if item.category === 'podcast'}
+					🎧 <a sveltekit:prefetch href={item.url}>{item.title}</a>
+					{:else if item.category === 'talk'}
+					📺 <a sveltekit:prefetch href={item.instances[0].video}>{item.title}</a>
+					{:else}
+					✍️ <a sveltekit:prefetch href={item.slug}>{item.title}</a>
+					{/if}
 					<span class="text-xs text-black dark:text-gray-400">{new Date(item.date).toISOString().slice(0, 10)}</span>
 				</li>
 			{/each}
