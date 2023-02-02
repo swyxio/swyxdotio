@@ -88,9 +88,9 @@
 					type="submit">Subscribe</button
 				>
 			</form>
-			<!-- <p class="text-sm text-gray-800 dark:text-gray-200">
-				6000+ subscribers and counting!
-			</p> -->
+			<p class="text-sm text-gray-800 dark:text-gray-200">
+				I also write an <a href="https://lspace.swyx.io/">AI newsletter</a> and a <a href="https://dx.tips/">DevRel/DevTools newsletter</a>.
+			</p>
 		{/if}
 	</div>
 </section>
