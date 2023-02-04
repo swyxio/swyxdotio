@@ -32,23 +32,27 @@ function debounce(func, wait) {
  * @return {Object[]}
  */
 function _fuzzySearch(items, selectedCategories, search) {
-  const filteredItems = items.filter((item) => {
-    if (selectedCategories?.length < 1 || !search?.length) return true
-    return selectedCategories
-      .map((element) => {
-        return element.toLowerCase();
-      })
-      .includes(item.category.toLowerCase());
-  })
+  let filteredItems = items
+  if (selectedCategories?.length) {
+    filteredItems = items.filter((item) => {
+      return selectedCategories
+        .map((element) => {
+          return element.toLowerCase();
+        })
+        .includes(item.category.toLowerCase());
+    })
+  }
   if (search) {
     const haystack = filteredItems.map((v) =>
       [
         v.title,
         v.subtitle,
+        v.slug,
+        v.venues,
         v.tags?.map((tag) => 'hashtag-' + tag), // add #tag so as to enable tag search
         v.content,
-        v.description
-      ].join(' ')
+        v.description || v.desc
+      ].filter(Boolean).join(' ')
     );
     const idxs = u.filter(haystack, search);
     const info = u.info(idxs, haystack, search);
