@@ -48,16 +48,19 @@
 	// with a fallback to a simple filter function
 	let loaded = false;
 	const filterCategories = async (_items, _, s) => {
-		if (!$selectedCategories?.length || !s?.length) return _items;
+		if ($selectedCategories?.length) {
+			_items = _items.filter((item) => {
+					return $selectedCategories
+						.map((element) => {
+							return element.toLowerCase();
+						})
+						.includes(item.category.toLowerCase());
+				})
+		}
+		if (s?.length) {
+			_items = _items.filter((item) => item.toString().toLowerCase().includes(s));
+		}
 		return _items
-			.filter((item) => {
-				return $selectedCategories
-					.map((element) => {
-						return element.toLowerCase();
-					})
-					.includes(item.category.toLowerCase());
-			})
-			.filter((item) => item.toString().toLowerCase().includes(s));
 	};
 	$: searchFn = filterCategories;
 	function loadsearchFn() {
