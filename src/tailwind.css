@@ -115,6 +115,9 @@ a {
 article.prose a {
 	word-break: break-word;
 }
+article.prose code {
+	word-break: break-all;
+}
 article.prose h1 a,
 h2 a,
 h3 a,
