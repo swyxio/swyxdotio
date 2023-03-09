@@ -4,14 +4,12 @@ import { listSpeaking } from '$lib/local-content';
 /**
  * @type {import('@sveltejs/kit').RequestHandler}
  */
-export async function get() {
+export async function GET({ setHeaders }) {
 	const blogposts = await listContent();
 	const speaking = await listSpeaking();
 	const body = blogposts.concat(speaking).sort((a, b) => b.date - a.date);
-	return {
-		body,
-		headers: {
-			'Cache-Control': `max-age=0, s-max-age=${60}` // 1 minute.. for now
-		}
-	};
+	setHeaders({
+		'Cache-Control': `max-age=0, s-max-age=${3600}` // 1 hour
+	})
+	return { body };
 }

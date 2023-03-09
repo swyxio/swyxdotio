@@ -5,13 +5,16 @@ import { REPO_URL } from '$lib/siteConfig';
 // instead we set cache control headers
 // export const prerender = true
 
+// March 2023 update - we are going back to prerender because we are seeing 6 seconds render times
+// https://www.webpagetest.org/result/230309_AiDcTC_7S0/1/details/#waterfall_view_step1
+export const prerender = 'auto';
 
 /** @type {import('./$types').PageLoad} */
 export async function load({ params, fetch, setHeaders }) {
 	const slug = params.slug;
 	let [pageData, listData] = await Promise.all([
 		fetch(`/api/ideas/${slug}.json`),
-		fetch(`/api/listContent.json`)
+		fetch(`/api/latestPosts.json`)
 	])
 	if (pageData.status > 400) {
 		throw error(pageData.status, await pageData.text());
@@ -20,7 +23,7 @@ export async function load({ params, fetch, setHeaders }) {
 		throw error(listData.status, await listData.text());
 	}
 	setHeaders({
-		'cache-control': 'public, max-age=60' // increase the max age as you get more confident in your caching
+		'cache-control': 'public, max-age=3600' // 1 hour
 	});
 	return {
 		json: await pageData.json(),
