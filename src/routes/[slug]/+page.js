@@ -5,6 +5,9 @@ import { REPO_URL } from '$lib/siteConfig';
 // instead we set cache control headers
 // export const prerender = true
 
+// March 2023 update - we are going back to prerender because we are seeing 6 seconds render times
+// https://www.webpagetest.org/result/230309_AiDcTC_7S0/1/details/#waterfall_view_step1
+export const prerender = 'auto';
 
 /** @type {import('./$types').PageLoad} */
 export async function load({ params, fetch, setHeaders }) {
