@@ -4,7 +4,7 @@ import { listSpeaking } from '$lib/local-content';
 /**
  * @type {import('@sveltejs/kit').RequestHandler}
  */
-export async function get({ setHeaders }) {
+export async function GET({ setHeaders }) {
 	const blogposts = await listContent();
 	const speaking = await listSpeaking();
 	const body = blogposts.concat(speaking).sort((a, b) => b.date - a.date);

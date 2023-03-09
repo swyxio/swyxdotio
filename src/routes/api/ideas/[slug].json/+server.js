@@ -3,13 +3,14 @@ import { error } from '@sveltejs/kit';
 /**
  * @type {import('@sveltejs/kit').RequestHandler}
  */
-export async function get({ fetch, params, setHeaders }) {
+export async function GET({ fetch, params, setHeaders }) {
 	const { slug } = params;
 	let data;
 	try {
+		if (!slug) throw error(404, ' - no slug provided');
 		data = await getContent(fetch, slug);
 		setHeaders({
-			'Cache-Control': `max-age=0, s-max-age=${3600}` // 1 minute.. for now
+			'Cache-Control': `max-age=0, s-max-age=${3600}` // 1 hour
 		})
 		return new Response(JSON.stringify(data), {
 			headers: {

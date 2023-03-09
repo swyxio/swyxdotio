@@ -3,7 +3,7 @@ import { listSpeaking } from '$lib/local-content';
 /**
  * @type {import('@sveltejs/kit').RequestHandler}
  */
-export async function get({ setHeaders }) {
+export async function GET({ setHeaders }) {
 	const body = await listSpeaking();
 	setHeaders({
 		'Cache-Control': `max-age=0, s-max-age=${3600}` // 1 hour
