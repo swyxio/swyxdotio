@@ -188,7 +188,7 @@
 				target="_blank"
 				title="What is this?"
 				rel="noopener"
-				href="http://swyx.io/writing/clientside-webmentions"
+				href="https://swyx.io/clientside-webmentions"
 				color="blue"
 			>
 				<svg
