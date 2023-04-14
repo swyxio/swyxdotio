@@ -1,4 +1,11 @@
 # 2023 podcasts
+- title: Talking AI DX on the Alphalist CTO podcast
+  slug: alphalist-cto-ai-chat
+  tags: [Tech, AI, DX]
+  venues: Alphalist CTO
+  date: 2023-04-13
+  url: https://alphalist.com/podcast/74-shawn-swyx-wang-developer-experience-expert
+  description: Tune in to discover how generative AI will change programming and how to start exploring the world of LLMs.
 - title: Talking AI on the Techmeme RideHome podcast
   slug: techmeme-ridehome-ai-chat
   tags: [Tech, AI]
