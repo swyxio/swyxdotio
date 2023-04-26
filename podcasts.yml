@@ -1,4 +1,11 @@
 # 2023 podcasts
+- title: Angel Investing in Devtools on the Wannabe Angels podcast
+  slug: wannabe-angels-pod
+  tags: [Tech, Investing]
+  venues: Wannabe Angels
+  date: 2023-04-26
+  url: https://wannabeangels.com/p/the-devtools-angel-and-scout-shawn#details
+  description: Chatting with The Rideshare Guy and Colin Gardiner on the why and how of Devtools Angel Investing.
 - title: Talking AI DX on the Alphalist CTO podcast
   slug: alphalist-cto-ai-chat
   tags: [Tech, AI, DX]
