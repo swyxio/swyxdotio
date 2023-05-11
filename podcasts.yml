@@ -1,4 +1,11 @@
 # 2023 podcasts
+- title: AI for Developers on Svelte Radio
+  slug: svelte-radio-ai-pod
+  tags: [Tech, AI]
+  venues: Svelte Radio
+  date: 2023-05-11
+  url: https://www.svelteradio.com/episodes/a-primer-on-ai-for-developers-with-swyx-from-latent-space
+  description: This episode is special in the sense that it's not so much about Svelte in particular but for developers in general. If you haven't gone down the AI rabbit hole yet this episode is for you. Swyx gives us a crash course in what it is and how you can use it as a web developer. Enjoy!
 - title: Angel Investing in Devtools on the Wannabe Angels podcast
   slug: wannabe-angels-pod
   tags: [Tech, Investing]
