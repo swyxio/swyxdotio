@@ -1,5 +1,5 @@
 export const SITE_URL = 'https://www.swyx.io';
-export const GH_USER_REPO = 'sw-yx/swyxdotio'; // used for pulling github issues and offering comments
+export const GH_USER_REPO = 'swyxio/swyxdotio'; // used for pulling github issues and offering comments
 export const SITE_TITLE = "swyx's site";
 export const SITE_DESCRIPTION =
 	'The official site of Shawn @swyx Wang, a technologist and recovering finance geek.';
