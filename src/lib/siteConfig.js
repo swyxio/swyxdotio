@@ -8,7 +8,7 @@ export const MY_TWITTER_HANDLE = 'swyx';
 export const MY_YOUTUBE = 'https://youtube.com/swyxTV?sub_confirmation=1';
 
 
-export const APPROVED_POSTERS_GH_USERNAME = ['sw-yx'];
+export const APPROVED_POSTERS_GH_USERNAME = ['sw-yx', 'swyxdotio'];
 export const POST_CATEGORIES = ['Essay', 'Note', 'Talk', 'Podcast', 'Tutorial', 'Snippet']; // Other categories you can consider adding: Talks, Tutorials, Snippets, Podcasts, Notes...
 export const GH_PUBLISHED_TAGS = ['Published'];
 

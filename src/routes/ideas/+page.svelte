@@ -38,7 +38,7 @@
 
 	// https://github.com/leeoniya/uFuzzy#options
 	// we know this has js weight, but we tried lazyloading and it wasnt significant enough for the added complexity
-	// https://github.com/sw-yx/swyxkit/pull/171
+	// https://github.com/swyxdotio/swyxkit/pull/171
 	// this will be slow if you have thousands of items, but most people don't
 	let isTruncated = items?.length > 20;
 	

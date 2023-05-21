@@ -31,7 +31,7 @@
 	$: canonical =  json.canonical ? json.canonical : SITE_URL + $page.url.pathname;
 
 	// customize this with https://tailgraph.com/
-	// discuss this decision at https://github.com/sw-yx/swyxkit/pull/161
+	// discuss this decision at https://github.com/swyxdotio/swyxkit/pull/161
 	$: image = json?.image || `https://og.tailgraph.com/og
 															?fontFamily=Roboto
 															&title=${encodeURIComponent(json?.title)}

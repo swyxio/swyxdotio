@@ -8,11 +8,11 @@ I am also a frequent writer and speaker best known for the [Learn in Public](htt
 
 P.S. "swyx" is the initials of my English and Chinese names and you can use it interchangeably with "Shawn". It is pronounced "swicks".
 
-You can find me on [Twitter](https://twitter.com/intent/user?screen_name=swyx), [Github](https://github.com/sw-yx) and [YouTube](https://youtube.com/swyxTV?sub_confirmation=1)!
+You can find me on [Twitter](https://twitter.com/intent/user?screen_name=swyx), [Github](https://github.com/swyxdotio) and [YouTube](https://youtube.com/swyxTV?sub_confirmation=1)!
 
 ## About
 
-I am a [developer](https://github.com/sw-yx)/PM/[angel investor](https://github.com/sw-yx/devtools-angels/), primarily active in the devrel and devtools community as a blogger and speaker. I am a [GitHub Star 🌟](https://stars.github.com/), [Stripe Community Expert](https://twitter.com/swyx/status/1392016498944741376), helped run [the React subreddit for over 200,000 developers](https://www.swyx.io/moderating-rreactjs/) and grew [Svelte Society from 0 to over 15,000 developers](https://twitter.com/swyx/status/1411071913548414976) ([writeup](https://www.swyx.io/starting-dev-community-meetup)).
+I am a [developer](https://github.com/swyxdotio)/PM/[angel investor](https://github.com/swyxdotio/devtools-angels/), primarily active in the devrel and devtools community as a blogger and speaker. I am a [GitHub Star 🌟](https://stars.github.com/), [Stripe Community Expert](https://twitter.com/swyx/status/1392016498944741376), helped run [the React subreddit for over 200,000 developers](https://www.swyx.io/moderating-rreactjs/) and grew [Svelte Society from 0 to over 15,000 developers](https://twitter.com/swyx/status/1411071913548414976) ([writeup](https://www.swyx.io/starting-dev-community-meetup)).
 
 I grew up in Singapore 🇸🇬, but have worked mostly in the US 🇺🇸 and UK 🇬🇧 , most recently remotely out of Miami, Florida, working on Developer Experience for [Netlify](https://www.swyx.io/writing/farewell-netlify/), [Amazon Web Services](https://www.swyx.io/writing/hello-aws/), [Temporal](https://www.swyx.io/why-temporal/), and Airbyte (unannounced).
 
@@ -42,7 +42,7 @@ Selected prior talks:
 
 ### Socials
 
-🔗 [Twitter](https://twitter.com/swyx), [GitHub](https://github.com/sw-yx), [The Coding Career Handbook](https://learninpublic.org).
+🔗 [Twitter](https://twitter.com/swyx), [GitHub](https://github.com/swyxdotio), [The Coding Career Handbook](https://learninpublic.org).
 
 ### Images
 
