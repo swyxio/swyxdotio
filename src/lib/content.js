@@ -69,7 +69,6 @@ export async function listContent(providedFetch) {
 			labels: GH_PUBLISHED_TAGS.toString(),
 			per_page: '100',
 		});
-	console.log(url)
 	// pull issues created by owner only if allowed author = repo owner
 	if (APPROVED_POSTERS_GH_USERNAME.length === 1 && APPROVED_POSTERS_GH_USERNAME[0] === REPO_OWNER) {
 		url += '&' + new URLSearchParams({ creator: REPO_OWNER });
