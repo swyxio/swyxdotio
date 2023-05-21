@@ -1,5 +1,5 @@
 <script>
-	// https://github.com/swyxdotio/domainblocklist/blob/main/README.md
+	// https://github.com/swyxio/domainblocklist/blob/main/README.md
 	let blocklist = [
 		'http://gadgetsearcher.com',
 		'https://pixallus.com',

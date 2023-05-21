@@ -29,7 +29,7 @@
       rocket: 5,
       eyes: 5,
     }}
-    issueUrl="https://github.com/swyxdotio/swyxkit/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc"
+    issueUrl="https://github.com/swyxio/swyxkit/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc"
     />
   </Hst.Variant>
   <Hst.Variant title="No reactions">
@@ -44,7 +44,7 @@
       rocket: 0,
       eyes: 0,
     }}
-    issueUrl="https://github.com/swyxdotio/swyxkit/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc"
+    issueUrl="https://github.com/swyxio/swyxkit/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc"
     />
     
   </Hst.Variant>
@@ -60,7 +60,7 @@
       rocket: 0,
       eyes: 0,
     }}
-    issueUrl="https://github.com/swyxdotio/swyxkit/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc"
+    issueUrl="https://github.com/swyxio/swyxkit/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc"
     />
   </Hst.Variant>
 </Hst.Story>

@@ -31,7 +31,7 @@
 <!-- 
 {
   "url": "https://api.github.com/repos/sw-yx/swyxkit/issues/comments/1008454294",
-  "html_url": "https://github.com/swyxdotio/swyxkit/issues/10#issuecomment-1008454294",
+  "html_url": "https://github.com/swyxio/swyxkit/issues/10#issuecomment-1008454294",
   "issue_url": "https://api.github.com/repos/sw-yx/swyxkit/issues/10",
   "id": 1008454294,
   "node_id": "IC_kwDOFYx2rM48G8qW",
@@ -42,7 +42,7 @@
     "avatar_url": "https://avatars.githubusercontent.com/u/6764957?v=4",
     "gravatar_id": "",
     "url": "https://api.github.com/users/sw-yx",
-    "html_url": "https://github.com/swyxdotio",
+    "html_url": "https://github.com/swyxio",
     "followers_url": "https://api.github.com/users/sw-yx/followers",
     "following_url": "https://api.github.com/users/sw-yx/following{/other_user}",
     "gists_url": "https://api.github.com/users/sw-yx/gists{/gist_id}",

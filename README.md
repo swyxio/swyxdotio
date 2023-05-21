@@ -7,12 +7,12 @@ swyx's personal site, using:
 - Netlify
 - GitHub Issues as CMS
 
-If you want to make a site based on this, see https://github.com/swyxdotio/swyxkit for a cleaner starter template
+If you want to make a site based on this, see https://github.com/swyxio/swyxkit for a cleaner starter template
 
 ## Live URL
 
 See https://swyx.io
 
 - You can see previous iterations of the site from 2017 here: https://www.swyx.io/rewrite-2022
-- The last version of the 2022 site was preserved at https://github.com/swyxdotio/swyxdotio2022
+- The last version of the 2022 site was preserved at https://github.com/swyxio/swyxdotio2022
 - The 2023 site is documented at https://www.swyx.io/rewrite-2023
