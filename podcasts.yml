@@ -1,4 +1,13 @@
 # 2023 podcasts
+
+
+- title: Deno and the Future of Dev Tools with Ryan Dahl
+  slug: deno-devtools
+  tags: [DevTools]
+  venues: Deno
+  date: 2023-06-15
+  url: https://www.youtube.com/watch?v=qvieJBbUuDk
+  description: I was honored to be invited on to Deno's YouTube as part of their Deno KV Hackathon, to riff on KV and other storage solutions with Ryan Dahl.
 - title: Productivity vs Leverage on the Human Skills pod
   slug: human-skills-pod
   tags: [Career]
