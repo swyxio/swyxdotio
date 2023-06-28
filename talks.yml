@@ -1,5 +1,14 @@
 
 
+- title: Chains vs Agents - Langchain Webinar
+  slug: langhchain-vs-agents
+  categories: [AI]
+  description: I joined Harrison for the Langchain webinar showing my current state of thinking on agents
+  instances:
+    - venue: LangChain Webinar
+      date: 2022-09-28
+      video: https://www.youtube.com/@LangChain
+
 - title: Running a $200k side hustle with Stripe Checkout
   slug: stripe-dev-checkout-200k
   categories: [Creators, Stripe, CodingCareer]
