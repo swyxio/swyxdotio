@@ -1,6 +1,13 @@
 # 2023 podcasts
 
 
+- title: Sourcegraph Cody + Exploring smol developer ft. swyx & Beyang Liu
+  slug: smol-sourcegraph
+  tags: [AI]
+  venues: Sourcegraph
+  date: 2023-06-29
+  url: https://www.youtube.com/watch?v=aFOnU4g07Cs
+  description: We ask our AI coding assistant, Cody, to give us a tour of smol developer, a new tool for generating scaffolding for new code projects.
 - title: Deno and the Future of Dev Tools with Ryan Dahl
   slug: deno-devtools
   tags: [DevTools]
