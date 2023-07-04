@@ -42,7 +42,7 @@
 			>The final frontier of language and infra</span
 		><a
 			class="w-full text-gray-900 hover:text-yellow-600 hover:no-underline dark:text-gray-100 dark:hover:text-yellow-100"
-			href="/cloudflare-go"
+			href="/self-provisioning-runtime"
 			><li class="mb-2 w-full flex-auto text-lg sm:font-bold md:text-xl">Self-Prov. Runtimes</li
 			></a
 		>
