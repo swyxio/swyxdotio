@@ -23,9 +23,9 @@
 /now /about#now
 
 
-/talks /ideas?show=Talks
-/writing  /ideas?show=Essays
-/speaking  /ideas?show=Talks&show=Podcasts
+/talks /ideas?show=Talk
+/writing  /ideas?show=Essay
+/speaking  /ideas?show=Talk&show=Podcast
 /talks/react-hooks  https://www.youtube.com/watch?v=KJP1E-Y-xyo
 /talks/concurrent-react  https://egghead.io/talks/react-egghead-talks-concurrent-react-from-scratch
 /talks/*  /ideas?show=Talks&filter=:splat
