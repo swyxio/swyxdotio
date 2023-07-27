@@ -1,6 +1,13 @@
 # 2023 podcasts
 
 
+- title: From Dev to AI Founder with Quincy Larson of FreeCodeCamp
+  slug: freecodecamp-ai
+  tags: [AI]
+  venues: Freecodecamp
+  date: 2023-07-27
+  url: https://freecodecamp.libsyn.com/90-shawn-swyx-wang-from-dev-to-ai-founder
+  description: I caught up with Quincy again after many years from our first pod!
 - title: Sourcegraph Cody + Exploring smol developer ft. swyx & Beyang Liu
   slug: smol-sourcegraph
   tags: [AI]
