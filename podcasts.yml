@@ -291,6 +291,13 @@
   date: 2021-09-10
   url: https://devtools.fm/episode/13
   description: Join us as we chat with Shawn Wang who's Head of Developer Experience at Temporal and a staunch advocate of learning in public.
+- title: How to make your own luck on the Scrimba podcast
+  slug: scrimba-pod-luck
+  tags: [Luck]
+  venues: Scrimba
+  date: 2021-05-25
+  url: https://scrimba.com/podcast/swyx-coding-career-handbook/
+  description: Shawn (Swyx) Wang joins us to discuss his book, The Coding Career Handbook 📖!
 - title: Swyx on DevJourney with Tim Bourgignon
   slug: devjourney-pod
   tags: [LIP]
