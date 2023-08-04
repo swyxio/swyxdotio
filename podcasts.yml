@@ -1,6 +1,13 @@
 # 2023 podcasts
 
 
+- title: swyx and Alessio on AI Breakdown
+  slug: ai-breakdown-1
+  tags: [AI]
+  venues: AIBreakdown
+  date: 2023-08-04
+  url: https://www.latent.space/p/breakdown#details
+  description: The hosts of AI Breakdown and Latent Space get together to discuss GPT4.5, Llama 2, AI Agents, AI Companions, and the Rise of the AI Engineer!
 - title: From Dev to AI Founder with Quincy Larson of FreeCodeCamp
   slug: freecodecamp-ai
   tags: [AI]
