@@ -1,6 +1,13 @@
 # 2023 podcasts
 
 
+- title: Chatting AI on Shoptalk Show
+  slug: shoptalk-ai
+  tags: [AI]
+  venues: ShoptalkShow
+  date: 2023-08-07
+  url: https://shoptalkshow.com/577/
+  description: Rejoined Chris and Dave to reintroduce AI Engineering to the broader frontend world, and demystify things for beginners! Audio starts bad but improves halfway once we discovered I was using the wrong mic
 - title: swyx and Alessio on AI Breakdown
   slug: ai-breakdown-1
   tags: [AI]
