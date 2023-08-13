@@ -1,4 +1,12 @@
-I have done a bunch of [talks](/ideas/?show=Talks) and [podcast](/ideas/?show=Podcast) appearances. The best of which are:
+I have done a bunch of [talks](/ideas/?show=Talks) and [podcast](/ideas/?show=Podcast) appearances. There are different eras:
+
+The modern era:
+
+- **[The Operating System of You](https://www.youtube.com/embed/D-Sj6jo4o1I?autoplay=1)**: The last chapter of my book, in talk form, as a closing keynote at CascadiaJS Confernce
+- **[Paradigm Lost](https://www.youtube.com/embed/KsTAcQJ619o?autoplay=1)**: My career covering the 4 most interesting trends in tech: Local-first, Async programming, Data Engineering, and AI Engineering.
+- **[Mapping Developer Experience](https://www.youtube.com/embed/ddKDPikKbNk?autoplay=1)**:  a talk I did with Silas Sao of DataStax on how I think about devrel/devtools startups.
+
+The JS/Beginner Era:
 
 - **[Getting Closure on Hooks](/hooks)**: My most well received technical talk, where I explain a mental model for React hooks by livecoding a React clone at JSConf Asia. Started as [a tweet](https://twitter.com/swyx/status/1100809424963219456), then [a blogpost.](https://www.swyx.io/writing/getting-closure-on-hooks/)
 - **[Why React is not Reactive](/reactrally)**: My first conference talk ever was at the biggest React venue in the world, React Rally. I spent a month writing [my CFP on the most interesting React question I could think of](https://twitter.com/swyx/status/1112513571315830784?s=20).
