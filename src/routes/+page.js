@@ -15,5 +15,5 @@ export async function load({ setHeaders, fetch }) {
   setHeaders({
     'cache-control': 'public, max-age=3600' // 1 hour
   });
-  return { items: items.slice(0, 10) };
+  return { items: items.slice(0, 20) };
 }

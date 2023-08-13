@@ -2,6 +2,7 @@
 	import Newsletter from '../components/Newsletter.svelte';
 	import FeatureCard from '../components/FeatureCard.svelte';
 	import LatestPosts from '../components/LatestPosts.svelte';
+	import YTEmbed from '../components/YouTubeEmbed.svelte';
 	import FeaturedWriting from '../components/FeaturedWriting.svx';
 	import FeaturedSpeaking from '../components/FeaturedSpeaking.svx';
 	import {
@@ -47,21 +48,22 @@
 			<h1 id="me" class="mb-3 text-3xl font-bold tracking-tight text-black dark:text-white md:text-5xl">
 				Shawn
 				<span
-					class="relative ml-2 inline-block before:absolute before:-inset-1 before:block before:-skew-y-3 before:bg-red-500"
+					class="relative ml-2 inline-block before:absolute before:-inset-1 before:block before:-skew-y-3 before:bg-red-600"
 				>
 					<span class="relative skew-y-3 text-yellow-400">@swyx</span>
 				</span>
 				Wang
 			</h1>
 			<h2 id="bio" class="mb-4 italic text-gray-700 dark:text-gray-200">
-				Writer, Speaker, Developer Advocate
+				Writer, Founder, Devtools Startup Advisor
 			</h2>
 			<p class="mb-4 text-gray-700 dark:text-gray-200">
-				I help devtools cross the chasm (devrel, advising and investing) and help developers <a href="/learn-in-public"
-					>Learn in Public</a
-				>!
+				I document <a href="https://www.latent.space/p/ai-engineer">the Rise of the AI Engineer</a> on <a href="https://latent.space/">Latent.Space</a>, and am working on
+				<a href="https://smol.ai">the Smol AI company</a> based in San Francisco. I also help devtools startups cross the chasm (devrel, advising and investing) and will always be the champion for <a href="/learn-in-public"
+				>Learning in Public</a
+			>!
 			</p>
-				<a  class="text-gray-600 dark:text-gray-400" href="/about">More on About page</a>
+				<a class="text-gray-600 dark:text-gray-400 italic" href="/about"> → More on About page</a>
 		</div>
 		<img
 				class="w-[80px] rounded-full sm:w-[176px] relative mb-8 sm:mb-0 mr-auto bg-cyan-300 bg-opacity-25"
@@ -134,63 +136,14 @@
 		<h3 id="speaking" class="mb-6 text-2xl font-bold tracking-tight text-black dark:text-white md:text-4xl">
 			Most Popular Speaking
 		</h3>
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-6 place-items-center my-16">
-			<iframe
-			class="object-contain"
-			src="https://www.youtube.com/embed/KJP1E-Y-xyo"
-			title="video123"
-			name="video123"
-			allow="accelerometer; autoplay; encrypted-media; gyroscope;
-			picture-in-picture"
-			frameBorder="0"
-			webkitallowfullscreen="true"
-			mozallowfullscreen="true"
-			width="300"
-			height="200"
-			allowFullScreen
-			aria-hidden="true"></iframe>
-			<iframe
-			class="object-contain"
-			src="https://www.youtube.com/embed/D-Sj6jo4o1I"
-			title="video123"
-			name="video123"
-			allow="accelerometer; autoplay; encrypted-media; gyroscope;
-			picture-in-picture"
-			frameBorder="0"
-			webkitallowfullscreen="true"
-			mozallowfullscreen="true"
-			width="300"
-			height="200"
-			allowFullScreen
-			aria-hidden="true"></iframe>
-			<iframe
-			class="object-contain"
-			src="https://www.youtube.com/embed/GWCcZ6fnpn4"
-			title="video123"
-			name="video123"
-			allow="accelerometer; autoplay; encrypted-media; gyroscope;
-			picture-in-picture"
-			frameBorder="0"
-			webkitallowfullscreen="true"
-			mozallowfullscreen="true"
-			width="300"
-			height="200"
-			allowFullScreen
-			aria-hidden="true"></iframe>
-			<iframe
-			class="object-contain"
-			src="https://www.youtube.com/embed/nyFHR0dDZo0"
-			title="video123"
-			name="video123"
-			allow="accelerometer; autoplay; encrypted-media; gyroscope;
-			picture-in-picture"
-			frameBorder="0"
-			webkitallowfullscreen="true"
-			mozallowfullscreen="true"
-			width="300"
-			height="200"
-			allowFullScreen
-			aria-hidden="true"></iframe>
+		<div class="grid grid-cols-1 md:grid-cols-3 gap-6 place-items-center my-16">
+			<YTEmbed videoId={"KsTAcQJ619o"} classes="w-[300px] h-[200px]" />
+			<YTEmbed videoId={"ddKDPikKbNk"} classes="w-[300px] h-[200px]" />
+			<YTEmbed videoId={"S-UxzCtpB74"} classes="w-[300px] h-[200px]" />
+			<YTEmbed videoId={"KJP1E-Y-xyo"} classes="w-[300px] h-[200px]" />
+			<YTEmbed videoId={"D-Sj6jo4o1I"} classes="w-[300px] h-[200px]" />
+			<!-- <YTEmbed videoId={"GWCcZ6fnpn4"} classes="w-[300px] h-[200px]" /> contributing to react -->
+			<YTEmbed videoId={"nyFHR0dDZo0"} classes="w-[300px] h-[200px]" />
 		</div>
 		<FeaturedSpeaking />
 	</section>
