@@ -10,7 +10,7 @@
 /learn-in-public-hack /puwtpd
 /growing /ideas/?filter=growing&show=Talks
 /jsconfhi /ideas/?filter=babel%20macros&show=Talks
-/reactrally /ideas/?filter=react%20rally&show=Talks
+/reactrally /ideas?filter=reactive+react&show=Essay%2CTalk
 /getting-closure-on-hooks /hooks
 /react-from-scratch /ideas/?filter=react%20scratch&show=Talks
 /career  https://gumroad.com/products/bAZJq/
