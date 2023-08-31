@@ -14,7 +14,7 @@ You can find me on [Twitter](https://twitter.com/intent/user?screen_name=swyx), 
 
 I am a [developer](https://github.com/swyxio)/PM/[angel investor](https://github.com/swyxio/devtools-angels/), primarily active in the devrel and devtools community as a blogger and speaker. I am a [GitHub Star 🌟](https://stars.github.com/), [Stripe Community Expert](https://twitter.com/swyx/status/1392016498944741376), helped run [the React subreddit for over 200,000 developers](https://www.swyx.io/moderating-rreactjs/) and grew [Svelte Society from 0 to over 15,000 developers](https://twitter.com/swyx/status/1411071913548414976) ([writeup](https://www.swyx.io/starting-dev-community-meetup)).
 
-I grew up in Singapore 🇸🇬, but have worked mostly in the US 🇺🇸 and UK 🇬🇧 , most recently remotely out of Miami, Florida, working on Developer Experience for [Netlify](https://www.swyx.io/writing/farewell-netlify/), [Amazon Web Services](https://www.swyx.io/writing/hello-aws/), [Temporal](https://www.swyx.io/why-temporal/), and Airbyte (unannounced).
+I grew up in Singapore 🇸🇬, but have worked mostly in the US and UK, most recently remotely out of Miami, Florida, working on Developer Experience for [Netlify](https://www.swyx.io/writing/farewell-netlify/), [Amazon Web Services](https://www.swyx.io/writing/hello-aws/), [Temporal](https://www.swyx.io/why-temporal/), and Airbyte (unannounced).
 
 I am best known for being a [#LearnInPublic](/learn-in-public) evangelist and [my speaking/writing on React, JavaScript and the future of the Web](/ideas?filter=React&show=Essays&show=Talks&show=Podcasts). I am also known for my technical/book reviews, from [TypeScript in 50 Lessons](https://twitter.com/swyx/status/1361712610593316866), [Programming TypeScript](https://twitter.com/swyx/status/1135525665971695617), [Landing Page Hot Tips](https://twitter.com/swyx/status/1303062410157158401), and [The GraphQL Guide](https://share.transistor.fm/s/aebece15).
 
@@ -51,7 +51,7 @@ Pictures of me you can use without asking
 - [200x200](https://avatars3.githubusercontent.com/u/6764957?s=200&v=4)
 - [460x460](https://user-images.githubusercontent.com/6764957/103350806-26d9ca80-4adc-11eb-9e53-a8ce9ca3f21f.jpeg)
   - [transparent background variant](https://user-images.githubusercontent.com/6764957/166125711-7dd63d46-3405-4c66-a6bd-92a34dbf58f6.png)
-- [640x640](https://scontent-sjc3-1.xx.fbcdn.net/v/t1.18169-9/11156121_10155432584530585_2487387677739128251_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=ipUbLzsc5RgAX9ySbjJ&_nc_ht=scontent-sjc3-1.xx&oh=00_AfAG9rAcrcZPJ3U97w3clE9tg7iMw-Qsp6kV4KLJ3c99Xg&oe=646136B8)
+- [640x640](https://github.com/swyxio/swyxdotio/assets/6764957/e082b7d4-d6e8-49d3-90a0-6f02e8446327)
 - Speaking photos
   - [React Advanced](https://user-images.githubusercontent.com/6764957/182177069-eae41bb1-ec46-4622-9659-ec9392b5add8.png), 
   [more](https://user-images.githubusercontent.com/6764957/182177450-d2cb675e-a1bd-4ee1-83b4-dfd060da17c2.png),
