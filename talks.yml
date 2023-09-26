@@ -1,5 +1,13 @@
 
 
+- title: Software 3.0 and the AI Engineer Landscape
+  slug: software-3-landscape
+  categories: [AI]
+  description: The talk form of my AI Eng blogpost, debuting a new chart of how I see the AI Eng landscape at a high level. Keynote at Infobip Shift 2023 pending.
+  instances:
+    - venue: Daily.dev Livestream
+      date: 2023-09-26
+      video: https://www.youtube.com/watch?v=m83-uZ6U_Hg
 - title: Chains vs Agents - Langchain Webinar
   slug: langhchain-vs-agents
   categories: [AI]
