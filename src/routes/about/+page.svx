@@ -5,7 +5,7 @@
 
 Hey, I'm swyx! I help build great developer experiences, from demos to docs to dev tools to dev communities. I am currently working on the Smol AI Company working in San Francisco and Singapore.
 
-I am also a frequent writer and speaker best known for [the Rise of the AI Engineer](https://www.latent.space/p/ai-engineer) on [Latent Space](https://www.latent.space/), the [Self Provisioning Runtime](https://www.swyx.io/self-provisioning-runtime) and [Third Age of JS](https://www.swyx.io/js-third-age), and finally on the nontechnical side, the [Learn in Public](https://swyx.io/LIP) movement and [The Coding Career Handbook](https://learninpublic.org).
+I am also a frequent writer and speaker best known for [the Rise of the AI Engineer](https://www.latent.space/p/ai-engineer) on [Latent Space](https://www.latent.space/), the [Self Provisioning Runtime](https://www.swyx.io/self-provisioning-runtime) and [Third Age of JS](https://www.swyx.io/js-third-age), and the [End of Localhost](https://dx.tips/the-end-of-localhost) on DX.Tips, and finally on the nontechnical side, the [Learn in Public](https://swyx.io/LIP) movement and [The Coding Career Handbook](https://learninpublic.org).
 
 P.S. "swyx" is the initials of my English and Chinese names and you can use it interchangeably with "Shawn". It is pronounced "swicks".
 
