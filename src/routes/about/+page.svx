@@ -3,8 +3,9 @@
 
 ## TL;DR
 
-Hey, I'm swyx! I help build great developer experiences, from documentation to dev tools to dev communities, most recently as Head of DX at [Airbyte](https://airbyte.io/), based out of Miami.
-I am also a frequent writer and speaker best known for the [Learn in Public](https://swyx.io/LIP) movement and recently published [The Coding Career Handbook](https://learninpublic.org) with more advice for engineers going from Junior to Senior.
+Hey, I'm swyx! I help build great developer experiences, from demos to docs to dev tools to dev communities. I am currently working on the Smol AI Company working in San Francisco and Singapore.
+
+I am also a frequent writer and speaker best known for [the Rise of the AI Engineer](https://www.latent.space/p/ai-engineer) on [Latent Space](https://www.latent.space/), the [Self Provisioning Runtime](https://www.swyx.io/self-provisioning-runtime) and [Third Age of JS](https://www.swyx.io/js-third-age), and finally on the nontechnical side, the [Learn in Public](https://swyx.io/LIP) movement and [The Coding Career Handbook](https://learninpublic.org).
 
 P.S. "swyx" is the initials of my English and Chinese names and you can use it interchangeably with "Shawn". It is pronounced "swicks".
 
@@ -12,33 +13,41 @@ You can find me on [Twitter](https://twitter.com/intent/user?screen_name=swyx), 
 
 ## About
 
-I am a [developer](https://github.com/swyxio)/PM/[angel investor](https://github.com/swyxio/devtools-angels/), primarily active in the devrel and devtools community as a blogger and speaker. I am a [GitHub Star 🌟](https://stars.github.com/), [Stripe Community Expert](https://twitter.com/swyx/status/1392016498944741376), helped run [the React subreddit for over 200,000 developers](https://www.swyx.io/moderating-rreactjs/) and grew [Svelte Society from 0 to over 15,000 developers](https://twitter.com/swyx/status/1411071913548414976) ([writeup](https://www.swyx.io/starting-dev-community-meetup)).
+I am a [developer](https://github.com/swyxio)/PM/[angel investor](https://github.com/swyxio/devtools-angels/), primarily active in the AI and devtools community as a blogger and speaker. I am a [GitHub Star](https://stars.github.com/), [Stripe Community Expert](https://twitter.com/swyx/status/1392016498944741376), helped run [the React subreddit for over 200,000 developers](https://www.swyx.io/moderating-rreactjs/) and grew [Svelte Society from 0 to over 15,000 developers](https://twitter.com/swyx/status/1411071913548414976) ([writeup](https://www.swyx.io/starting-dev-community-meetup)).
 
-I grew up in Singapore 🇸🇬, but have worked mostly in the US and UK, most recently remotely out of Miami, Florida, working on Developer Experience for [Netlify](https://www.swyx.io/writing/farewell-netlify/), [Amazon Web Services](https://www.swyx.io/writing/hello-aws/), [Temporal](https://www.swyx.io/why-temporal/), and Airbyte (unannounced).
+I grew up in Singapore 🇸🇬, but have worked mostly in the US and UK, working on Developer Experience for [Netlify](https://www.swyx.io/writing/farewell-netlify/), [Amazon Web Services](https://www.swyx.io/writing/hello-aws/), [Temporal](https://www.swyx.io/why-temporal/), and Airbyte. I am now independently working on [Latent Space](https://latent.space/), the [AI Engineer Summit](https://ai.engineer/) and Foundation, and the Smol AI Company.
 
-I am best known for being a [#LearnInPublic](/learn-in-public) evangelist and [my speaking/writing on React, JavaScript and the future of the Web](/ideas?filter=React&show=Essays&show=Talks&show=Podcasts). I am also known for my technical/book reviews, from [TypeScript in 50 Lessons](https://twitter.com/swyx/status/1361712610593316866), [Programming TypeScript](https://twitter.com/swyx/status/1135525665971695617), [Landing Page Hot Tips](https://twitter.com/swyx/status/1303062410157158401), and [The GraphQL Guide](https://share.transistor.fm/s/aebece15).
+<details>
+<summary>
+In a past life:
+</summary>
 
-In a past life I was a [currency options trader turned TMT hedge fund analyst](https://www.freecodecamp.org/news/shawn-wang-podcast-interview/) as well, and I often do approach tech from an investing and risk management angle.
+I was a [currency options trader turned TMT hedge fund analyst](https://www.freecodecamp.org/news/shawn-wang-podcast-interview/) as well, and I often do approach tech from an investing and risk management angle.
+
+
+I was known for being a [#LearnInPublic](/learn-in-public) evangelist and [my speaking/writing on React, JavaScript and the future of the Web](/ideas?filter=React&show=Essays&show=Talks&show=Podcasts). I am also known for my technical/book reviews, from [TypeScript in 50 Lessons](https://twitter.com/swyx/status/1361712610593316866), [Programming TypeScript](https://twitter.com/swyx/status/1135525665971695617), [Landing Page Hot Tips](https://twitter.com/swyx/status/1303062410157158401), and [The GraphQL Guide](https://share.transistor.fm/s/aebece15).
+
+</details>
 
 <h2>What I'm Doing Now <a href="https://nownownow.com/about"><svg class="inline" xmlns="http://www.w3.org/2000/svg" width="0.75em" height="0.75em" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12" y2="17"></line></svg></a></h2>
 
-- I most recently am [working on Developer Experience at Airbyte.io](https://www.swyx.io/why-temporal/).
+- I most recently was [working on Developer Experience at Airbyte.io](https://www.swyx.io/why-temporal/).
 - Apart from [my personal blog](https://swyx.io/ideas) and [magazine DX.tips](https://dx.tips/), I also regularly maintain community and updates for [my book](https://learninpublic.org).
 - I am also a regular on [Svelte Radio](https://www.svelteradio.com/) and my own [Swyx Mixtape](http://swyx.transistor.fm/).
 - You can get more high frequency updates on [my Twitter](https://twitter.com/swyx).
 
 ## Bio for Event Organizers
 
-swyx has helped Developer Tools cross the chasm at [AWS](https://www.swyx.io/hello-aws/), Two Sigma, and three devtool unicorns - [Netlify](https://www.swyx.io/farewell-netlify/), [Temporal](https://www.swyx.io/why-temporal/), and most recently as [Airbyte](https://airbyte.io/). 
+swyx is Editor of Latent.Space and Founder of the Smol AI Company. He has helped Developer Tools cross the chasm at [AWS](https://www.swyx.io/hello-aws/), Two Sigma, and three devtool unicorns - [Netlify](https://www.swyx.io/farewell-netlify/), [Temporal](https://www.swyx.io/why-temporal/), and most recently as [Airbyte](https://airbyte.io/). 
 
-He has started and run communities for hundreds of thousands of developers, like [Svelte Society](https://twitter.com/sveltesociety/), [/r/reactjs](https://www.swyx.io/moderating-rreactjs/), and the [React TypeScript Cheatsheet](https://github.com/typescript-cheatsheets/react).
-His blog (https://www.swyx.io/ideas) covers Tech, Careers, and Indie Hacking, and his nontechnical writing was published in [the Coding Career Handbook](https://learninpublic.org/) for Junior to Senior developers.
+He has started and run communities for hundreds of thousands of developers, like [Svelte Society](https://twitter.com/sveltesociety/), [/r/reactjs](https://www.swyx.io/moderating-rreactjs/), and the [React TypeScript Cheatsheet](https://github.com/typescript-cheatsheets/react). While [Latent Space](https://www.latent.space/) covers [the Rise of the AI Engineer](https://www.latent.space/p/ai-engineer),  his personal blog (https://www.swyx.io/ideas) covers Tech, Careers, and Indie Hacking, and his nontechnical writing was published in [the Coding Career Handbook](https://learninpublic.org/) for developers going from Junior to Senior.
 
 Selected prior talks:
 
 - The Hooks talk: https://swyx.io/hooks
 - The Concurrent React talk: https://www.youtube.com/watch?v=nyFHR0dDZo0
 - The Operating System of You: https://www.youtube.com/watch?v=D-Sj6jo4o1I
+- Paradigm Lost (Cascadia JS 2022): https://www.swyx.io/paradigm-lost
 
 ### Socials
 
@@ -76,11 +85,9 @@ Pictures of me you can use without asking
 
 ## Tech behind this site
 
-See https://swyxkit.netlify.app/about
+See https://swyxkit.netlify.app/about to clone my boilerplate.
 
-## Further Reading
-
-You can read:
+for more on tech opinions, further reading:
 
 - [Why I Enjoy Svelte](https://www.swyx.io/svelte-why/)
 - [Svelte for Sites, React for Apps](https://www.swyx.io/svelte-sites-react-apps/)
