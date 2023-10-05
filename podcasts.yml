@@ -1,6 +1,12 @@
 # 2023 podcasts
 
-
+- title: Software 3.0 and and the AI engineer with Swyx
+  slug: podrocket-ai-eng
+  tags: [AI]
+  venues: PodRocket
+  date: 2023-10-04
+  url: https://podrocket.logrocket.com/software-3-and-the-ai-engineer
+  description: Went back on Podrocket to talk about AI Eng - with Tejas, who I fortunately hung out with at Infobip Shift in Croatia just a few weeks prior. This convo was really well done and edited and Tejas is an incredible interviewer. Proud of this one.
 - title: Chatting AI on Shoptalk Show
   slug: shoptalk-ai
   tags: [AI]
