@@ -48,6 +48,11 @@ Selected prior talks:
 - The Operating System of You: https://www.youtube.com/watch?v=D-Sj6jo4o1I
 - Paradigm Lost (Cascadia JS 2022): https://www.swyx.io/paradigm-lost
 
+Alternative bios:
+
+- Short AI bio: Swyx is founder of Smol.ai. He is best known for his writing on the Rise of the AI Engineer on the Latent.Space newsletter and podcast. Swyx was most recently co-founder of the AI Engineer Summit and Foundation. You can find him on Twitter, Github, and YouTube.
+- Long bio: Swyx is founder of Smol.ai and author of The Rise of the AI Engineer. After a quantitative finance career he has led developer relations at AWS and three devtools unicorn startups (Netlify, Temporal, Airbyte) and is best known for his work on the Latent Space podcast and the DX.Tips magazine. Swyx is currently working on the Smol AI Company in San Francisco and Singapore, as well as independently working on Latent.Space, the AI Engineer Summit and Foundation. You can find him on Twitter, Github, and YouTube.
+
 ### Socials
 
 🔗 [Twitter](https://twitter.com/swyx), [GitHub](https://github.com/swyxio), [The Coding Career Handbook](https://learninpublic.org).
