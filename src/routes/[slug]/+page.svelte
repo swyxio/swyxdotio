@@ -62,7 +62,8 @@
 	{/if}
 	<meta name="description" content={json.description} />
 	<meta property="og:description" content={json.description} />
-	<meta name="twitter:card" content={json.image ? 'summary_large_image' : 'summary'} />
+	<meta name="twitter:card" content={'summary'} />
+	<!-- no more summary_large_image because elon https://twitter.com/simonw/status/1725285182159417806 -->
 	<meta name="twitter:creator" content={'@' + MY_TWITTER_HANDLE} />
 	<meta name="twitter:title" content={json.title} />
 	<meta name="twitter:description" content={json.description} />
