@@ -5,8 +5,8 @@
   decscription: A quick opening comment for the Microsoft x Latent.Space event celebrating 1 year of ChatGPT.
   instances:
     - venue: Microsoft x Latent.Space event
-    date: 2023-11-16
-    video: https://youtu.be/q6He0QvXgBA
+      date: 2023-11-16
+      video: https://youtu.be/q6He0QvXgBA
 - title: Software 3.0 and the AI Engineer Landscape
   slug: software-3-landscape
   categories: [AI]
