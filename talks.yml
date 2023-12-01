@@ -18,6 +18,9 @@
     - venue: Daily.dev Livestream
       date: 2023-09-26
       video: https://www.youtube.com/watch?v=m83-uZ6U_Hg
+    - venue: React Summit US
+      date: 2023-11-13
+      video: https://www.youtube.com/watch?v=NaKCw2p382s
 - title: Chains vs Agents - Langchain Webinar
   slug: langhchain-vs-agents
   categories: [AI]
