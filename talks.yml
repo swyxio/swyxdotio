@@ -21,6 +21,9 @@
     - venue: React Summit US
       date: 2023-11-13
       video: https://www.youtube.com/watch?v=NaKCw2p382s
+    - venue: Third party talk at Sheffield AI
+      date: 2023-10-14
+      video: https://www.youtube.com/watch?v=e6x-6i3QsJ0
 - title: Chains vs Agents - Langchain Webinar
   slug: langhchain-vs-agents
   categories: [AI]
