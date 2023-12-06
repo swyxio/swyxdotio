@@ -24,6 +24,9 @@
     - venue: Third party talk at Sheffield AI
       date: 2023-10-14
       video: https://www.youtube.com/watch?v=e6x-6i3QsJ0
+    - venue: Real World Serverless
+      date: 2023-12-06
+      video: https://www.youtube.com/watch?v=LhWkNkxDiu4
 - title: Chains vs Agents - Langchain Webinar
   slug: langhchain-vs-agents
   categories: [AI]
@@ -1043,6 +1046,14 @@
     - venue: JAMstackConf
       date: 2018-11-03
       video: https://youtu.be/GgqQI3zdzFY
+- title: How Gatsby v2 Works
+  slug: gatsby-v2
+  categories: [React, Gatsby]
+  description: My talk about how React Static Site Generators should work
+  instances:
+    - venue: ReactNYC
+      date: 2018-10-03
+      video: https://www.youtube.com/live/co_IUlLRaPM?si=HGTK3TBkM5cfj2Mx
 - title: Why React is -NOT- Reactive
   slug: react-not-reactive
   categories: [React, Reactivity]
