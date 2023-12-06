@@ -1,7 +1,13 @@
 # 2023 podcasts
 
 
-
+- title: Rise of the AI Engineer on Real World Serverless
+  slug: rwas-ai-eng
+  tags: [AI]
+  venues: RealWorldServerless
+  date: 2023-12-06
+  url: https://realworldserverless.com/episode/92
+  description: Chatted with Yan Cui who I have long followed on AWS Serverless things, on the Rise Of.
 - title: AI Engineers, Pendants, and Tensions with OpenAI on Cognitive Revolution
   slug: cogrev-ai-eng
   tags: [AI]
