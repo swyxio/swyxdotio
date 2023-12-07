@@ -10,12 +10,14 @@
 	export let stringData = 'no date';
 	let videoID = item?.instances?.[0]?.video
 	if (videoID) {
-		if (videoID.includes('youtube')) {
-			videoID = videoID.split('v=')[1].split('&')[0].split('?')[0]
-			// new URL(item.instances[0].video).searchParams.get('v')
-		} else {
-			videoID = videoID.split('/')[videoID.split('/').length - 1].split('?')[0]
-		}
+		try {
+			if (videoID.includes('youtube')) {
+				videoID = videoID.split('v=')[1].split('&')[0].split('?')[0]
+				// new URL(item.instances[0].video).searchParams.get('v')
+			} else {
+				videoID = videoID.split('/')[videoID.split('/').length - 1].split('?')[0]
+			}
+		catch (err) { console.log({videoID}) }
 	} 
 </script>
 
