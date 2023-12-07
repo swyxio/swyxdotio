@@ -6,7 +6,7 @@
   instances:
     - venue: Microsoft x Latent.Space event
       date: 2023-11-16
-      video: https://youtu.be/q6He0QvXgBA
+      video: https://www.youtube.com/watch?v=q6He0QvXgBA
 - title: Software 3.0 and the AI Engineer Landscape
   slug: software-3-landscape
   categories: [AI]
@@ -64,7 +64,7 @@
       video: https://www.youtube.com/watch?v=ORI29ot_Zck
     - venue: Swyx YouTube
       date: 2022-07-21
-      video: https://www.youtube.com/watch?t=11&v=O7KVEwNau6w&feature=youtu.be
+      video: https://www.youtube.com/watch?t=11&v=O7KVEwNau6w
 - title: Third Age of JavaScript - Three Years In
   slug: third-age-3-talk
   categories: [JS]
@@ -140,7 +140,7 @@
   instances:
     - venue: Swyx Youtube
       date: 2021-10-28
-      video: https://www.youtube.com/watch?v=ddKDPikKbNk&feature=youtu.be
+      video: https://www.youtube.com/watch?v=ddKDPikKbNk
 - title: Scaling and Measuring Developer Relations (with Sai Senthilkumar of Redpoint)
   slug: measuring-devrel-talk
   categories: [Devrel]
@@ -524,7 +524,7 @@
       url: https://www.swyx.io/writing/react-survey-2019/
       date: 2020-02-19
       slides: https://docs.google.com/presentation/d/1M-JUtp9I5_gSk8OpV9Adk9sYzhoU-VNcwz9RUJ1-8Sw/edit#slide=id.p
-      video: https://youtu.be/RCtqCDiNLvU?t=190
+      video: https://www.youtube.com/watch?t=190&v=RCtqCDiNLvU
 - title: What's New in React
   slug: react-whats-new
   categories: [React]
@@ -536,7 +536,7 @@
       video: https://www.youtube.com/watch?v=Qox56z4xH6o
     - venue: IonicConf livestream
       date: 2020-06-24
-      video: https://youtu.be/xh-B-AtsLJc?t=3944
+      video: https://www.youtube.com/watch?v=xh-B-AtsLJc&t=3944s
 
 - title: Data Fetching For Developers Who Are New to Svelte And Wanna Learn To Do Other Stuff Good Too
   slug: svelte-data-fetching
@@ -586,7 +586,7 @@
   instances:
     - venue: SvelteSociety
       date: 2020-04-17
-      video: https://youtu.be/atOIxTHylF8
+      video: https://www.youtube.com/watch?v=atOIxTHylF8&feature=youtu.be
 - title: Intro to Svelte Stores
   slug: svelte-stores
   categories: [Svelte]
@@ -594,7 +594,7 @@
   description: A proper introduction to Svelte Stores
   instances:
     - venue: SvelteSociety
-      video: https://youtu.be/zq6PpM5t3z0?t=360
+      video: https://www.youtube.com/watch?t=360&v=zq6PpM5t3z0&feature=youtu.be
       date: 2020-01-08
 
 # todo: concurrent react from scratch
@@ -612,17 +612,17 @@
   instances:
     - date: 2019-03-30
       venue: Reactathon (Lightning Talk)
-      video: https://youtu.be/Wt4kuspJIxY?t=3236
+      video: https://www.youtube.com/watch?t=3236&v=Wt4kuspJIxY&feature=youtu.be
       url: https://twitter.com/swyx/status/1100809424963219456
     - venue: JSConf Asia
       date: 2019-06-18
       video: https://www.youtube.com/watch?v=KJP1E-Y-xyo
     - venue: Livestream
       date: 2019-06-18
-      video: https://youtu.be/9jWwO7McMbU?t=9451
+      video: https://www.youtube.com/watch?t=9451&v=9jWwO7McMbU&feature=youtu.be
     - venue: Rehearsal
       date: 2019-06-18
-      video: https://youtu.be/6zDQBnbGQx8
+      video: https://www.youtube.com/watch?v=6zDQBnbGQx8&feature=youtu.be
     - venue: Meetup
       date: 2019-06-18
       video: https://www.youtube.com/watch?v=il43iId9JQA
