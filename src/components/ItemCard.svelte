@@ -3,12 +3,14 @@
 	let date = new Date(item?.date).toISOString().slice(0, 10);
 	let videoID = item?.instances?.[0]?.video
 	if (videoID) {
-		if (videoID.includes('youtube')) {
-			videoID = videoID.split('v=')[1].split('&')[0]
-			// new URL(item.instances[0].video).searchParams.get('v')
-		} else {
-			videoID = videoID.split('/')[videoID.split('/').length - 1]
-		}
+		try {
+			if (videoID.includes('youtube')) {
+				videoID = videoID.split('v=')[1].split('&')[0]
+				// new URL(item.instances[0].video).searchParams.get('v')
+			} else {
+				videoID = videoID.split('/')[videoID.split('/').length - 1]
+			}
+		} catch (err) { console.log({videoID}) }
 	} 
 	// console.log(item)
 </script>
