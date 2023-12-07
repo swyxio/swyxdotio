@@ -27,6 +27,9 @@
     - venue: Real World Serverless
       date: 2023-12-06
       video: https://www.youtube.com/watch?v=LhWkNkxDiu4
+    - venue: AI Explained Patreon
+      date: 2023-12-07
+      video: https://youtu.be/0KIuw46asYg
 - title: Chains vs Agents - Langchain Webinar
   slug: langhchain-vs-agents
   categories: [AI]
