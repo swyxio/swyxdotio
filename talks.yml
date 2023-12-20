@@ -1056,7 +1056,7 @@
   instances:
     - venue: ReactNYC
       date: 2018-10-03
-      video: https://www.youtube.com/live/co_IUlLRaPM?si=HGTK3TBkM5cfj2Mx
+      video: https://www.youtube.com/watch?v=co_IUlLRaPM
 - title: Why React is -NOT- Reactive
   slug: react-not-reactive
   categories: [React, Reactivity]
