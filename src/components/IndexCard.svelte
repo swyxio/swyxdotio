@@ -17,6 +17,7 @@
 			} else {
 				videoID = videoID.split('/')[videoID.split('/').length - 1].split('?')[0]
 			}
+		}
 		catch (err) { console.log({videoID}) }
 	} 
 </script>
