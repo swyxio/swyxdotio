@@ -66,6 +66,12 @@ Pictures of me you can use without asking
   - [transparent background variant](https://user-images.githubusercontent.com/6764957/166125711-7dd63d46-3405-4c66-a6bd-92a34dbf58f6.png)
 - [640x640](https://github.com/swyxio/swyxdotio/assets/6764957/e082b7d4-d6e8-49d3-90a0-6f02e8446327)
 - Speaking photos
+  - [AI Engineer Summit](https://www.ai.engineer/summit/schedule/the-1000x-ai-engineer)
+    - https://aie-cms-uploads.s3.us-west-1.amazonaws.com/AIE_Summit_2023_Day_1_WEB_199_a6f7f8b2bf.jpg
+    - https://aie-cms-uploads.s3.us-west-1.amazonaws.com/AIE_Summit_2023_Day_1_WEB_190_94e685c67f.jpg
+    - https://aie-cms-uploads.s3.us-west-1.amazonaws.com/AIE_Summit_2023_Day_1_WEB_196_ae10a5d016.jpg
+    - https://aie-cms-uploads.s3.us-west-1.amazonaws.com/AIE_Summit_2023_Day_1_WEB_192_70dd78550d.jpg
+    - https://aie-cms-uploads.s3.us-west-1.amazonaws.com/AIE_Summit_2023_Day_1_WEB_195_c014c99214.jpg
   - [React Advanced](https://user-images.githubusercontent.com/6764957/182177069-eae41bb1-ec46-4622-9659-ec9392b5add8.png), 
   [more](https://user-images.githubusercontent.com/6764957/182177450-d2cb675e-a1bd-4ee1-83b4-dfd060da17c2.png),
   [more](https://user-images.githubusercontent.com/6764957/182177069-eae41bb1-ec46-4622-9659-ec9392b5add8.png),
