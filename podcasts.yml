@@ -1,6 +1,16 @@
+# 2024 podcasts
+
+
+  
 # 2023 podcasts
 
-
+- title: Navigating AI and Software 3.0 Tech Career on Code Ryan channel
+  slug: code-ryan
+  tags: [AI, Careers]
+  venues: CodeRyan
+  date: 2023-12-21
+  url: https://www.youtube.com/watch?v=i5qfKKct6dc
+  description: Ryan is a newish creator who cold email, and I did my best to support him!
 - title: Rise of the AI Engineer on Real World Serverless
   slug: rwas-ai-eng
   tags: [AI]
