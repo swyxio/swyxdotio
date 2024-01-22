@@ -1,4 +1,12 @@
 
+- title: ModCon Panel - Future of AI Software
+  slug: modcon-panel
+  categories: [AI]
+  decscription: I was a panelist on Chris Lattner's ModCon conference.
+  instances:
+    - venue: Modular ModCon
+      date: 2023-12-08
+      video: https://www.youtube.com/watch?v=TvmTPKr1Aak
 - title: One Year of ChatGPT
   slug: chatgpt-1-year
   categories: [AI]
