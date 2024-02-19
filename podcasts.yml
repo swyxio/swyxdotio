@@ -1,9 +1,16 @@
 # 2024 podcasts
 
+- title: swyx on ChinaTalk
+  slug: chinatalk-swyx
+  tags: [AI]
+  venues: ChinaTalk
+  date: 2024-02-15
+  url: https://www.listennotes.com/podcasts/chinatalk/can-china-fast-follow-on-ai-38qumFCti59/
+  description: swyx and Alessio joined Jordan Schneider to talk Latent Space with Chinese characteristics.
 - title: swyx on ThursdAI
   slug: thursdai-swyx
   tags: [AI]
-  venues: ThursddAI
+  venues: ThursdAI
   date: 2024-02-15
   url: https://sub.thursdai.news/p/thursdai-feb-15-2024-openai-changes
   description: swyx joined Alex Volkov on his podcast for a surprise interview on Latent Space and AI Engineer.
