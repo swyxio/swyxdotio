@@ -1,4 +1,6 @@
 
+# 2023 talks
+
 - title: ModCon Panel - Future of AI Software
   slug: modcon-panel
   categories: [AI]
@@ -38,6 +40,9 @@
     - venue: AI Explained Patreon
       date: 2023-12-07
       video: https://www.youtube.com/watch?v=0KIuw46asYg
+    - venue: Build Club ANZ
+      date: 2024-02-16
+      video: https://www.youtube.com/watch?v=ezhSIGKFtOc
 - title: Chains vs Agents - Langchain Webinar
   slug: langhchain-vs-agents
   categories: [AI]
