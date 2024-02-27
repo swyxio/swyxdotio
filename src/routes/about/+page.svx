@@ -30,7 +30,9 @@ I was known for being a [#LearnInPublic](/learn-in-public) evangelist and [my sp
 
 </details>
 
-<h2>What I'm Doing Now <a href="https://nownownow.com/about"><svg class="inline" xmlns="http://www.w3.org/2000/svg" width="0.75em" height="0.75em" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12" y2="17"></line></svg></a></h2>
+## Now
+
+(aka "What I'm Doing Now" <a href="https://nownownow.com/about"><svg class="inline" xmlns="http://www.w3.org/2000/svg" width="0.75em" height="0.75em" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12" y2="17"></line></svg></a>)
 
 - I am Editor of [the Latent.Space newsletter and podcast](https://www.latent.space/), and co-organizer of [the AI Engineer Summit](https://ai.engineer/)
 - I am also working on the Smol AI Company (unannounced) and [Smol Haus](https://smol.ai/haus) in [the Arena](https://twitter.com/swyx/status/1699971413707571634)
