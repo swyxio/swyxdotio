@@ -218,7 +218,7 @@ function parseIssue(issue) {
 		} else if (data.devToUrl) {
 			slug = data.devToUrl.split('/')[4] // if from devto, but no slug, it used the devto slug
 		} else {
-			slug = slugify(title);
+			slug = slugify(title, {remove: /[*+~.()'"!:@]/g}); // otherwise titles with : colons wont parse
 		}
 
 		let description = data.description ?? content.trim().split('\n')[0];
