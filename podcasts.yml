@@ -1,5 +1,12 @@
 # 2024 podcasts
 
+- title: swyx on Thursday Nights in AI
+  slug: tnai-swyx
+  tags: [AI]
+  venues: TNAI
+  date: 2024-03-04
+  url: https://www.youtube.com/watch?v=yj2Bm_XYOVs
+  description: At this Thursday Nights in Ai hosts Ali Rohde and Josh Albrecht talk about the Rise of the AI Engineer with @swyx, host of the Latent Space podcast, and one of the most in-the-weeds commentators on the companies, papers, and trends rising and falling in AI, every single week.
 - title: swyx on ChinaTalk
   slug: chinatalk-swyx
   tags: [AI]
