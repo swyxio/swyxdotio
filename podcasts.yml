@@ -1,5 +1,19 @@
 # 2024 podcasts
 
+- title: AI Engineer Trends - Latent Space x AI Breakdown
+  slug: breakdown-4wars
+  tags: [AI]
+  venues: AIBreakdown
+  date: 2024-03-29
+  url: https://www.listennotes.com/podcasts/the-ai-breakdown/what-ai-developers-are-CPKz4Yed9rv/
+  description: NLW is back with Part 2 of his conversation with the hosts of Latent Space. In this segment they hone in on the trends Swyx and Alessio are seeing in what developers are building.
+- title: Four Wars - Latent Space x AI Breakdown
+  slug: breakdown-4wars
+  tags: [AI]
+  venues: AIBreakdown
+  date: 2024-03-29
+  url: https://www.listennotes.com/podcasts/the-ai-breakdown/the-four-wars-of-the-ai-Fhtlb4M2yzI/
+  description: NLW is joined today by the hosts of the Latent Space podcast for part one of a wide-ranging conversation about the changes and shifts in the AI market in early 2024.
 - title: swyx on Thursday Nights in AI
   slug: tnai-swyx
   tags: [AI]
