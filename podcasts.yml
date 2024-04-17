@@ -1,5 +1,12 @@
 # 2024 podcasts
 
+- title: AI Engineering, Devin, and the Future of Software - swyx on Modern Web Podcast
+  slug: modernweb-swyx
+  tags: [AI]
+  venues: ModernWeb
+  date: 2024-04-17
+  url: https://www.listennotes.com/podcasts/modern-web/modern-web-podcast-s12e03-rl_OLdGJHS8/
+  description: swyx rejoined Tracy and Rob for an introductory convo on AI Engineering and live Devin demo
 - title: AI Engineer Trends - Latent Space x AI Breakdown
   slug: breakdown-4wars
   tags: [AI]
