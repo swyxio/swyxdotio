@@ -1,5 +1,26 @@
 # 2024 podcasts
 
+- title: DevRel Death and ZIRP, AI Engineering, Cognition/Devin
+  slug: changelog-devrel-zirp
+  tags: [AI]
+  venues: Changelog
+  date: 2024-07-09
+  url: https://changelog.com/friends/52
+  description: Shawn “swyx” Wang is back to talk with us about the state of DevRel according to ZIRP (the Zero Interest Rate Phenomenon), the data that backs up the rise and fall of job openings, whether or not DevRel is dead or dying, speculation of the near-term arrival of AGI, AI Engineering as the last job standing, the innovation from Cognition with Devin as well as their mis-steps during Devin’s launch, and what’s to come in the next innovation round of AI.
+- title: Inventing the AI Engineer with Raza Habib
+  slug: highagency-aieng
+  tags: [AI]
+  venues: HighAgency
+  date: 2024-06-20
+  url: https://share.transistor.fm/s/890b0ab6
+  description: In this episode, I chatted with Shawn Wang about his upcoming AI engineering conference and what an AI engineer really is. It's been a year since he penned the viral essay "Rise of the AI Engineer' and we discuss if this new role will be enduring, the make up of the optimal AI team and trends in machine learning.
+- title: Swyx on Plan B Singapore podcast
+  slug: planb-swyx
+  tags: [AI]
+  venues: PlanB
+  date: 2024-07-03
+  url: https://www.listennotes.com/podcasts/plan-b-news-beat-ZoCrxdekY79/
+  description: We speak with Shawn Wang, CEO of SMOL AI, often credited for coining the term "AI Engineer". Living in San Francisco means riding driverless cars to work is an everyday affair, so how far behind is Singapore in AI adoption? Or are the citizens of Southeast Asia's tech hub too skeptical for it to work?
 - title: AI Engineering, Devin, and the Future of Software - swyx on Modern Web Podcast
   slug: modernweb-swyx
   tags: [AI]
