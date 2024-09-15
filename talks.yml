@@ -1,4 +1,15 @@
+# 2023 talks
 
+- title: What Works in AI UX - AGI House Hackathon talk
+  slug: ai-ux-agi-house
+  categories: [AI]
+  decscription: I was invited to open the AGI House AI UX Hackathon, and shared lightly prepared remarks on what works and what doesn't.
+  slides: https://docs.google.com/presentation/d/1RgJ6rtiG9Ts726kkXfji2Tc0q5P1eVx297IzYdWHQPQ/edit?usp=sharing
+  instances:
+    - venue: AGI House
+      date: 2024-09-14
+      video: https://www.youtube.com/watch?v=PkHjoihjo6U
+      
 # 2023 talks
 
 - title: ModCon Panel - Future of AI Software
