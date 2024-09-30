@@ -1,5 +1,11 @@
 # 2024 podcasts
-
+- title: AI Eng with Sandra Kublik
+  slug: aiewf-sandra-kublik
+  tags: [AI]
+  venues: SandraKublik
+  date: 2024-09-30
+  url: https://sites.libsyn.com/493303/building-ai-in-2024-is-not-what-you-think-with-swyx
+  description: The AI Engineer Persona - What defines this new role and how it keeps evolving
 - title: DevRel Death and ZIRP, AI Engineering, Cognition/Devin
   slug: changelog-devrel-zirp
   tags: [AI]
