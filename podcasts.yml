@@ -1,4 +1,11 @@
 # 2024 podcasts
+- title: Winning, AI Eng, Devtools Angels, and DevRel
+  slug: scaling-devtools-2
+  tags: [AI, DevRel]
+  venues: ScalingDevtools
+  date: 2024-10-10
+  url: https://podcast.scalingdevtools.com/episodes/swyx-2
+  description: Second chat with Jack Bridger about a variety of pet topics with devtools and ai.
 - title: AI Eng with Sandra Kublik
   slug: aiewf-sandra-kublik
   tags: [AI]
