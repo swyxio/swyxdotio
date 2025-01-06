@@ -32,16 +32,41 @@ I was known for being a [#LearnInPublic](/learn-in-public) evangelist and [my sp
 
 ## Now
 
-> Last updated at Feb 1 2024
+> Last updated Jan 2025
 
 (aka "What I'm Doing Now" <a href="https://nownownow.com/about"><svg class="inline" xmlns="http://www.w3.org/2000/svg" width="0.75em" height="0.75em" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12" y2="17"></line></svg></a>)
 
 - I am Editor of [the Latent.Space newsletter and podcast](https://www.latent.space/), and co-organizer of [the AI Engineer Summit](https://ai.engineer/)
 - I am also working on the Smol AI Company (unannounced) and [Smol Haus](https://smol.ai/haus) in [the Arena](https://twitter.com/swyx/status/1699971413707571634)
 - I less frequently update [my personal blog](https://swyx.io/ideas) and [magazine DX.tips](https://dx.tips/).
-- You can get more high frequency updates on [my Twitter](https://twitter.com/swyx).
+- You can get more high frequency updates on [my Twitter](https://x.com/swyx).
 
-## Bio for Event Organizers
+## Third person bio for Event Organizers
+
+> Last updated Jan 2025
+
+swyx (Shawn Wang) is Editor of Latent.Space. As a developer experience leader and angel investor, swyx led developer tooling at [AWS](https://www.swyx.io/hello-aws/), Two Sigma, and three devtool unicorns ([Netlify](https://www.swyx.io/farewell-netlify/), [Temporal](https://www.swyx.io/why-temporal/), [Airbyte](https://airbyte.io/)). He is also the founder of Smol AI, the LLM data pipeline company that produces [AI News](https://smol.ai/news), the widely read AI industry newsletter 99% created by customizable research agents.
+
+swyx has started and run communities for hundreds of thousands of developers, like [the Latent Space Paper Club](https://www.latent.space/p/paperclub), [Svelte Society](https://twitter.com/sveltesociety/), [/r/reactjs](https://www.swyx.io/moderating-rreactjs/), and the [React TypeScript Cheatsheet](https://github.com/typescript-cheatsheets/react). His main platform [Latent Space](https://www.latent.space/) covers [the Rise of the AI Engineer](https://www.latent.space/p/ai-engineer) in podcast, newsletter, and YouTube formats.
+
+Selected prior talks:
+
+- Engineering AI Agents: https://swyx.io/ai-eng-agents
+- The Hooks talk: https://swyx.io/hooks
+- The Concurrent React talk: https://www.youtube.com/watch?v=nyFHR0dDZo0
+- The Operating System of You: https://www.youtube.com/watch?v=D-Sj6jo4o1I
+- Paradigm Lost (Cascadia JS 2022): https://www.swyx.io/paradigm-lost
+
+Alternative bios:
+
+- Short AI bio: Swyx is Editor of Latent.Space. He is best known for his writing on the Rise of the AI Engineer on the Latent.Space newsletter and podcast, and for curating the AI Engineer Summit, the top conference for AI Engineers. You can find him on Twitter, Github, and YouTube.
+- Long bio: Swyx is Editor of Latent.Space and founder of Smol.ai. After a quantitative finance career he has led developer relations at AWS and three devtools unicorn startups (Netlify, Temporal, Airbyte) and is best known for his work on the Latent Space podcast and the DX.Tips magazine. Swyx is currently working on the Smol AI Company in San Francisco and Singapore, as well as independently working on Latent.Space and the AI Engineer conferences. You can find him on Twitter, Github, and YouTube.
+
+
+<details>
+<summary>
+Feb 2024 version
+</summary>
 
 swyx is Editor of Latent.Space and Founder of the Smol AI Company. He has helped Developer Tools cross the chasm at [AWS](https://www.swyx.io/hello-aws/), Two Sigma, and three devtool unicorns - [Netlify](https://www.swyx.io/farewell-netlify/), [Temporal](https://www.swyx.io/why-temporal/), and most recently as [Airbyte](https://airbyte.io/). 
 
@@ -58,6 +83,9 @@ Alternative bios:
 
 - Short AI bio: Swyx is founder of Smol.ai. He is best known for his writing on the Rise of the AI Engineer on the Latent.Space newsletter and podcast. Swyx was most recently co-founder of the AI Engineer Summit and Foundation. You can find him on Twitter, Github, and YouTube.
 - Long bio: Swyx is founder of Smol.ai and author of The Rise of the AI Engineer. After a quantitative finance career he has led developer relations at AWS and three devtools unicorn startups (Netlify, Temporal, Airbyte) and is best known for his work on the Latent Space podcast and the DX.Tips magazine. Swyx is currently working on the Smol AI Company in San Francisco and Singapore, as well as independently working on Latent.Space, the AI Engineer Summit and Foundation. You can find him on Twitter, Github, and YouTube.
+
+</details>
+
 
 ### Socials
 
