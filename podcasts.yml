@@ -1,4 +1,11 @@
 # 2025 podcasts
+- title: Last Week in AI - guest host in Jan
+  slug: lwai-2025
+  tags: [AI]
+  venues: LastWeekinAI
+  date: 2025-01-20
+  url: https://www.listennotes.com/podcasts/last-week-in-ai/197-free-ai-in-gmail-minimax-fCdt-x_RXAF/
+  description: guest hosting last week in ai
 - title: Ride Home podcast with Simon Willison
   slug: ridehome-2025
   tags: [AI]
