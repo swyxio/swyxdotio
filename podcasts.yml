@@ -93,6 +93,13 @@
   date: 2024-02-15
   url: https://sub.thursdai.news/p/thursdai-feb-15-2024-openai-changes
   description: swyx joined Alex Volkov on his podcast for a surprise interview on Latent Space and AI Engineer.
+- title: The Making of an Industry - The Rise of AI Engineering, with Swyx
+  slug: scrimba-aieng
+  tags: [AI]
+  venues: Scrimba
+  date: 2024-01-24
+  url: https://www.listennotes.com/podcasts/the-scrimba-podcast/the-making-of-an-industry-SphYCd8lAUc/
+  description: Last summer, Swyx wrote a blog post titled The Rise of the AI Engineer, which quickly went viral. In this episode, Swyx will revisit that blog post to see if anything changed. You will learn why AI engineers are a thing, the differences between AI and ML engineers, and why the demand for this specialization is larger than the supply. Swyx also reveals what defines an industry (and why it's not only about tools) and gives many good examples of successful products made using existing foundation models. Swyx and Alex also talk about the inner workings of AI and whether it's a good idea to run AI models on your own hardware.
 
   
 # 2023 podcasts
