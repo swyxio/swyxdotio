@@ -1,4 +1,21 @@
+# 2025 podcasts
+- title: Ride Home podcast with Simon Willison
+  slug: ridehome-2025
+  tags: [AI]
+  venues: TechMemeRideHome
+  date: 2025-01-11
+  url: https://www.listennotes.com/podcasts/techmeme-ride-home/bns-simon-willison-and-swyx-4i_tP-5Ofqp/
+  description: https://www.latent.space/p/2024-simonw
+
+
 # 2024 podcasts
+- title: The State of the AI in 2024 with ChitChatStocks
+  slug: chitchatstocks-ai
+  tags: [AI, Finance]
+  venues: ChitChatMoney
+  date: 2024-12-18
+  url: https://www.listennotes.com/podcasts/chit-chat-stocks/the-future-of-artificial-3ylaqngtMR7/
+  description: On this episode of Chit Chat Stocks, Ryan and Brett speak to Shawn Wang of Latent Space, who is an expert and on the ground working in the AI start-up space
 - title: Winning, AI Eng, Devtools Angels, and DevRel
   slug: scaling-devtools-2
   tags: [AI, DevRel]
