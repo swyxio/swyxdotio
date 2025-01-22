@@ -1,4 +1,11 @@
 # 2025 podcasts
+- title: WHCR Community & Technology
+  slug: whcr-ai-2025
+  tags: [AI]
+  venues: WHCR
+  date: 2025-01-21
+  url: https://youtu.be/iLa7TkX90AY
+  description: random radio chat
 - title: Last Week in AI - guest host in Jan
   slug: lwai-2025
   tags: [AI]
