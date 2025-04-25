@@ -1,4 +1,11 @@
 # 2025 podcasts
+- title: ThisDot Leadership
+  slug: thisdor-leadership
+  tags: [AI]
+  venues: thisdor
+  date: 2025-04-25
+  url: https://www.youtube.com/watch?v=hXASMaM2e6s
+  description: random radio chat
 - title: WHCR Community & Technology
   slug: whcr-ai-2025
   tags: [AI]
