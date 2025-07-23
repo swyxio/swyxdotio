@@ -1,8 +1,15 @@
 # 2025 podcasts
+- title: AIE on MonkCast
+  slug: aie-monkcast
+  tags: [AI]
+  venues: redmonkaie
+  date: 2025-07-23
+  url:  https://www.listennotes.com/podcasts/the-monkcast/how-shawn-swyx-wang-defines-MdyeEiCavOA/
+  description: chat with Redmonk analyst Kate on 
 - title: ThisDot Leadership
   slug: thisdor-leadership
   tags: [AI]
-  venues: thisdor
+  venues: thisdot
   date: 2025-04-25
   url: https://www.youtube.com/watch?v=hXASMaM2e6s
   description: random radio chat
