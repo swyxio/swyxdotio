@@ -59,7 +59,7 @@
 			</h2>
 			<p class="mb-4 text-gray-700 dark:text-gray-200">
 				I document <a href="https://www.latent.space/p/ai-engineer">the Rise of the AI Engineer</a> on <a href="https://latent.space/">Latent.Space</a>, and am working on
-				<a href="https://smol.ai">the Smol AI company</a> based in San Francisco. I also help devtools startups cross the chasm (devrel, advising and investing) and will always be the champion for <a href="/learn-in-public"
+				<a href="https://smol.ai">the Smol AI company</a> based in San Francisco. I also help devtools startups cross the chasm (devrel, advising and <a href="/portfolio">investing</a>) and will always be the champion for <a href="/learn-in-public"
 				>Learning in Public</a
 			>!
 			</p>
