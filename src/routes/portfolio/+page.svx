@@ -1,0 +1,64 @@
+## Advising and Investing Portfolio
+
+For the last 5ish years I have been advising and investing in startups, having started the [devtools-angels community](https://dx.tips/angel-101).
+                                                                                                                       
+
+I mostly help startups do a few things:
+  - figure out their devrel & dev community strategy
+  - hire their first few devrels
+  - give AI product feedback and launch guidance.
+
+My portcos do not get any guaranteed spots in either Latent Space or AI Engineer, however of course familiarity with them and their progress can cause their odds of being featured to go up. However if they're not a fit, orders of magnitude more of my self worth and identity and principles and value is in LS and AIE and I will not "sell out" just to "pump my bags".
+  
+Here is a sampling of the companies I have previously advised and invested in (NO PARTICULAR ORDER THIS WAS JUST BRAINDUMPED):
+
+  - Well known names
+    - Supabase (Postgres)
+    - MatX (Inference ASICs)
+    - Artifical Analysis (Gartner of AI)
+    - BrowserBase (Browsers for Agents)
+    - Resend (new email api)
+    - Modal
+  - You should know
+    - Datalab (see AIE talk)
+    - Promptfoo
+    - Astral (Ruff, uv)
+    - Fireworks (inference)
+    - E2b (sandboxes for agents)
+    - Daytona (sandboxes for agents... i know i know)
+    - Sphere Semiconductor (tba)
+    - Brightwave
+    - Quadratic (AI spreadsheet)
+    - Flutterflow (low code Flutter builder)
+    - Circle.so (creator Community tooling)
+    - Val.town (gists that run)
+    - Railway.app (better heroku)
+    - Chroma (vectordb)
+    - Stackblitz/Bolt (ai builder in wasm webcontainers)
+    - Brev.dev (exited, Nvidia)
+  - Smaller names
+    - Clarify.ai (tba)
+    - Phonic (see Moin Nadeem)
+    - Keycard Labs (see AIE talk)
+    - Confident Security (see latent space pod)
+    - Lightweight Labs (accounting)
+    - Gabber.dev (see AIE talk)
+    - Wordware (low code automation)
+    - Polyhive
+    - Sailplane
+    - Morph.so
+    - Codegen.ai
+    - Fireproof Storage
+    - Arcjet
+    - Cosine (see LS feature)
+    - Responsive.dev
+    - Dimension.dev
+    - Zeta AI
+    - Budibase
+    - Gel data (fka EdgeDB)
+    - 100ms.live
+    - Expand.ai
+    - Begin.com (dead)
+    - Replay.io (dead)
+      
+I am no longer taking new advising inquiries. If you are fundraising, please get a warm intro if you want to reach me - primarily preseed-seed-series A. Thanks for your interest!
