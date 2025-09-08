@@ -1,8 +1,7 @@
 ## Advising and Investing Portfolio
 
-For the last 5ish years I have been advising and investing in startups, having started the [devtools-angels community](https://dx.tips/angel-101).
+My largest shareholdings are Temporal and Netlify, but for the last 5ish years I have been advising and investing in startups, having started the [devtools-angels community](https://dx.tips/angel-101).
                                                                                                                        
-
 I mostly help startups do a few things:
   - figure out their devrel & dev community strategy
   - hire their first few devrels
@@ -19,6 +18,8 @@ Here is a sampling of the companies I have previously advised and invested in (N
     - BrowserBase (Browsers for Agents)
     - Resend (new email api)
     - Modal
+    - Airbyte
+    - (new) Cognition
   - You should know
     - Datalab (see AIE talk)
     - Promptfoo
