@@ -39,6 +39,7 @@
 			<NavLink href="/ideas">Ideas</NavLink>
 			<span class="absolute hidden group-hover:flex text-center top-8 text-xs text-opacity-50">Writing & Speaking</span>
 		</li>
+		<!--
 		<li class="group flex relative items-center">
 			<a
 				class="hidden rounded-lg p-1 text-gray-800 transition-all hover:bg-yellow-200 dark:text-gray-200 dark:hover:bg-yellow-800 sm:px-3 sm:py-2 md:inline-block"
@@ -48,6 +49,7 @@
 			</a>
 			<span class="absolute hidden group-hover:flex text-center top-8 text-xs text-opacity-50">Tactics, Strategy, Principles</span>
 		</li>
+		-->
 		<li class="group flex relative items-center">
 			<NavLink href="/about">About</NavLink>
 			<span class="absolute hidden group-hover:flex text-center top-8 -ml-2 text-xs text-opacity-50">Bio, Talks, Photos</span>
