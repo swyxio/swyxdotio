@@ -29,7 +29,6 @@
 			<a class="text-gray-500 transition hover:text-gray-300" href="/">Home</a>
 			<a class="text-gray-500 transition hover:text-gray-300" href="/about">About</a>
 			<a class="text-gray-500 transition hover:text-gray-300" href="/subscribe">Newsletter</a>
-			<a class="text-gray-500 transition hover:text-gray-300" href="/portfolio">Portfolio</a>
 			<a class="text-gray-500 transition hover:text-gray-300" href="/rss.xml" rel="external">
 				RSS
 			</a>
