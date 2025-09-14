@@ -17,9 +17,9 @@ Here is a sampling of the companies I have previously advised and invested in (N
     - Artifical Analysis (Gartner of AI)
     - BrowserBase (Browsers for Agents)
     - Resend (new email api)
-    - Modal
-    - Airbyte
-    - (new) Cognition
+    - Modal (serverless python with fast containers and gpus)
+    - Airbyte (open source fivetran)
+    - (new) Cognition (ai engineer agent)
   - You should know
     - Datalab (see AIE talk)
     - Promptfoo
