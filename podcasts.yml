@@ -6,14 +6,14 @@
   tags: [AI]
   venues: deltainst
   date: 2025-10-22
-  url:  https://www.youtube.com/watch?v=CYr1mSDNqKM
+  url: https://www.youtube.com/watch?v=CYr1mSDNqKM
   description: chat with Ankit
 - title: AIE on MonkCast
   slug: aie-monkcast
   tags: [AI]
   venues: redmonkaie
   date: 2025-07-23
-  url:  https://www.listennotes.com/podcasts/the-monkcast/how-shawn-swyx-wang-defines-MdyeEiCavOA/
+  url: https://www.listennotes.com/podcasts/the-monkcast/how-shawn-swyx-wang-defines-MdyeEiCavOA/
   description: chat with Redmonk analyst Kate on building the AIE conf
 - title: ThisDot Leadership
   slug: thisdor-leadership
