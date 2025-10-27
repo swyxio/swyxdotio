@@ -1,12 +1,11 @@
 # 2025 podcasts
 
-  
 - title: on Delta Institute - on Cognition and Meaning of life
   slug: delta-institute
   tags: [AI]
   venues: deltainst
   date: 2025-10-22
-  url: https://www.youtube.com/watch?v=CYr1mSDNqKM
+  url: https://www.youtube.com/watch?v=CYr1mSDNqKM
   description: chat with Ankit
 - title: AIE on MonkCast
   slug: aie-monkcast
@@ -138,7 +137,6 @@
   url: https://www.listennotes.com/podcasts/the-scrimba-podcast/the-making-of-an-industry-SphYCd8lAUc/
   description: Last summer, Swyx wrote a blog post titled The Rise of the AI Engineer, which quickly went viral. In this episode, Swyx will revisit that blog post to see if anything changed. You will learn why AI engineers are a thing, the differences between AI and ML engineers, and why the demand for this specialization is larger than the supply. Swyx also reveals what defines an industry (and why it's not only about tools) and gives many good examples of successful products made using existing foundation models. Swyx and Alex also talk about the inner workings of AI and whether it's a good idea to run AI models on your own hardware.
 
-  
 # 2023 podcasts
 
 - title: Navigating AI and Software 3.0 Tech Career on Code Ryan channel
@@ -421,7 +419,7 @@
   url: https://www.thecloudcast.net/2022/01/2022-look-ahead-developer-careers.html
   description: Shawn Wang (@swyx, Head of Developer Experience @Temporalio) talks about the breadth of developer skills needed, how developers learn new technologies, and insights into important future trends for a broad set of developers. 
 
-  # 2021 podcasts
+# 2021 podcasts
 - title: Dev Community on SourceGraph podcast
   slug: sourcegraph-pod
   tags: [Community]
