@@ -1,4 +1,16 @@
-# 2023 talks
+# 2025 talks
+
+- title: The Impossible Triangle of LLM Infra
+  slug: llm-infra-triangle
+  categories: [AI]
+  decscription: https://www.swyx.io/impossible-triangle
+  slides: https://docs.google.com/presentation/d/1NnQ3H5Bki3vWRRJdVXoCFJ5dsNKH9QrC-eEQ2Z8olck/edit?usp=sharing
+  instances:
+    - venue: Mastra TS AI Conf
+      date: 2025-11-06
+      video: https://www.youtube.com/watch?v=3TqaDP63Qdk
+      
+# 2024 talks
 
 - title: What Works in AI UX - AGI House Hackathon talk
   slug: ai-ux-agi-house
