@@ -36,7 +36,6 @@ Here is a sampling of the companies I have previously advised and invested in (N
     - Railway.app (better heroku)
     - Chroma (vectordb)
     - Stackblitz/Bolt (ai builder in wasm webcontainers)
-    - Brev.dev (exited, Nvidia)
   - Smaller names
     - Clarify.ai (tba)
     - Phonic (see Moin Nadeem)
@@ -56,9 +55,12 @@ Here is a sampling of the companies I have previously advised and invested in (N
     - Dimension.dev
     - Zeta AI
     - Budibase
-    - Gel data (fka EdgeDB)
     - 100ms.live
     - Expand.ai
+ - Done
+    - Brev.dev (exited, Nvidia)
+    - Gel data (fka EdgeDB, exited Vercel)
+    - Dynamic (exited Fireblocks)
     - Begin.com (dead)
     - Replay.io (dead)
       
