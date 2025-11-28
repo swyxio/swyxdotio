@@ -8,6 +8,7 @@ I do a bunch of [personal and work-related writing](/ideas/?show=Essays), and re
 - **[The Part Time Creator Manifesto](/part-time-creator-manifesto/)**: Have a job, but don't BE your job.
 - **[Temporal - the iPhone of System Design](/why-temporal/)**: Why Temporal is a big deal.
 - **[The Rise of the AI Engineer](https://www.latent.space/p/ai-engineer)**: Why AI Engineering will be come its own, possibly larger, discipline in contrast to ML Researchers/ML Engineers.
+- **[Cognition: The Devin is in the Details](https://www.swyx.io/cognition)**: my thinking for why Cognition is working in [the age of the Agent Lab](https://www.latent.space/p/agent-labs).
 - **[About](/about/)**: My personal story, [README](https://github.com/swyxio/README/blob/master/README.md) , and [podcast with Quincy Larson](https://www.freecodecamp.org/news/shawn-wang-podcast-interview/) (2023 update [now available](https://freecodecamp.libsyn.com/90-shawn-swyx-wang-from-dev-to-ai-founder)!).
 
 You can find all my writing on RSS or [on the /ideas page](/ideas/?show=Essays).
