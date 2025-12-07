@@ -1,5 +1,12 @@
 # 2025 podcasts
 
+- title: Winning, AI Eng, Devtools Angels, and DevRel
+  slug: scaling-devtools-3
+  tags: [AI, DevRel]
+  venues: ScalingDevtools
+  date: 2025-12-05
+  url: https://scalingdevtools.com/podcast/episodes/scaling-devtools-episode-swyx-final-2-mp4
+  description: Third chat with Jack Bridger about a variety of pet topics with devtools and ai.
 - title: on Delta Institute - on Cognition and Meaning of life
   slug: delta-institute
   tags: [AI]
@@ -58,7 +65,7 @@
   venues: ScalingDevtools
   date: 2024-10-10
   url: https://podcast.scalingdevtools.com/episodes/swyx-2
-  description: Second chat with Jack Bridger about a variety of pet topics with devtools and ai.
+  description: Second chat with Jack Bridger about a variety of pet topics with devtools and ai.  
 - title: AI Eng with Sandra Kublik
   slug: aiewf-sandra-kublik
   tags: [AI]
