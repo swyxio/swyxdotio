@@ -47,7 +47,6 @@ Here is a sampling of the companies I have previously advised and invested in (N
     - Polyhive
     - Sailplane
     - Morph.so
-    - Codegen.ai
     - Fireproof Storage
     - Arcjet
     - Cosine (see LS feature)
@@ -58,6 +57,7 @@ Here is a sampling of the companies I have previously advised and invested in (N
     - 100ms.live
     - Expand.ai
  - Done
+    - Codegen.ai (exited, ClickUp)
     - Brev.dev (exited, Nvidia)
     - Gel data (fka EdgeDB, exited Vercel)
     - Dynamic (exited Fireblocks)
