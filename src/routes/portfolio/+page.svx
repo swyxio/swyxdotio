@@ -16,16 +16,15 @@ Here is a sampling of the companies I have previously advised and invested in (N
     - MatX (Inference ASICs)
     - Artifical Analysis (Gartner of AI)
     - 🅱️rowserbase (Browsers for Agents)
-    - Astral (Ruff, uv)
     - Fireworks (inference)
     - E2b (sandboxes for agents)
     - Resend (new email api)
     - Modal (serverless python with fast containers and gpus)
     - Airbyte (open source fivetran)
-    - (new) Cognition (ai engineer agent)
+    - Cognition (ai engineer agent)
   - You should know
+    - Conductor (https://x.com/charlieholtz/status/2039027121901957349)
     - Datalab (see AIE talk)
-    - Promptfoo (evals/security)
     - Daytona (sandboxes for agents... i know i know)
     - Sphere Semiconductor (tba)
     - Brightwave (deep research for finance)
@@ -34,15 +33,15 @@ Here is a sampling of the companies I have previously advised and invested in (N
     - Circle.so (creator Community tooling)
     - Val.town (gists that run)
     - Railway.app (better heroku)
-    - Chroma (vectordb)
+    - Chroma (https://www.latent.space/p/chroma)
     - Stackblitz/Bolt (ai builder in wasm webcontainers)
+    - Zeta AI / Viktor
   - Smaller names
     - Clarify.ai (tba)
     - Phonic (see Moin Nadeem)
     - Keycard Labs (see AIE talk)
     - Confident Security (see latent space pod)
     - Lightweight Labs (accounting)
-    - Gabber.dev (see AIE talk)
     - Wordware (low code automation)
     - Polyhive
     - Sailplane
@@ -51,12 +50,13 @@ Here is a sampling of the companies I have previously advised and invested in (N
     - Arcjet
     - Cosine (see LS feature)
     - Responsive.dev
-    - Dimension.dev
-    - Zeta AI
     - Budibase
     - 100ms.live
     - Expand.ai
  - Done
+    - Astral (exited, OpenAI)
+    - Promptfoo (exited, OpenAI)
+    - Gabber.dev (exited, Livekit)
     - Codegen.ai (exited, ClickUp)
     - Brev.dev (exited, Nvidia)
     - Gel data (fka EdgeDB, exited Vercel)
