@@ -23,11 +23,13 @@ Here is a sampling of the companies I have previously advised and invested in (N
     - Modal (serverless python with fast containers and gpus)
     - Airbyte (open source fivetran)
     - Zeta AI / [Viktor](http://getviktor.com/)
-    - Cognition (ai engineer agent)
+    - [Cognition](https://swyx.io/cognition)
     - Conductor (https://x.com/charlieholtz/status/2039027121901957349)
     - Sphere Semiconductor (tba)
     - Railway.app (better heroku)
     - Chroma (https://www.latent.space/p/chroma)
+    - Logan Kilpatrick
+    - Matthew Berman
   - You should know
     - Datalab (see AIE talk)
     - Brightwave (deep research for finance)
@@ -37,7 +39,9 @@ Here is a sampling of the companies I have previously advised and invested in (N
     - Val.town (gists that run)
     - Stackblitz/Bolt (ai builder in wasm webcontainers)
   - Smaller names
-    - Clarify.ai (tba)
+    - Preference Model (Ning Cao)
+    - Tinybird (Alap Shah)
+    - Clarify.ai (Patrick Thompson)
     - Phonic (see Moin Nadeem)
     - Keycard Labs (see AIE talk)
     - Confident Security (see latent space pod)
@@ -53,6 +57,7 @@ Here is a sampling of the companies I have previously advised and invested in (N
     - Budibase
     - 100ms.live
     - Expand.ai
+    - Catamaran Research (Derek Zaw)
  - Done
     - Astral (exited, OpenAI)
     - Promptfoo (exited, OpenAI)
