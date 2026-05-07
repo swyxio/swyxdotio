@@ -18,24 +18,24 @@ Here is a sampling of the companies I have previously advised and invested in (N
     - 🅱️rowserbase (Browsers for Agents)
     - Fireworks (inference)
     - E2b (sandboxes for agents)
+    - Daytona (sandboxes for agents... i know i know)
     - Resend (new email api)
     - Modal (serverless python with fast containers and gpus)
     - Airbyte (open source fivetran)
+    - Zeta AI / [Viktor](http://getviktor.com/)
     - Cognition (ai engineer agent)
-  - You should know
     - Conductor (https://x.com/charlieholtz/status/2039027121901957349)
-    - Datalab (see AIE talk)
-    - Daytona (sandboxes for agents... i know i know)
     - Sphere Semiconductor (tba)
+    - Railway.app (better heroku)
+    - Chroma (https://www.latent.space/p/chroma)
+  - You should know
+    - Datalab (see AIE talk)
     - Brightwave (deep research for finance)
     - Quadratic (AI spreadsheet)
     - Flutterflow (low code Flutter builder)
     - Circle.so (creator Community tooling)
     - Val.town (gists that run)
-    - Railway.app (better heroku)
-    - Chroma (https://www.latent.space/p/chroma)
     - Stackblitz/Bolt (ai builder in wasm webcontainers)
-    - Zeta AI / Viktor
   - Smaller names
     - Clarify.ai (tba)
     - Phonic (see Moin Nadeem)
@@ -64,4 +64,4 @@ Here is a sampling of the companies I have previously advised and invested in (N
     - Begin.com (dead)
     - Replay.io (dead)
       
-I am no longer taking new advising inquiries. If you are fundraising, please get a warm intro if you want to reach me - primarily preseed-seed-series A. Thanks for your interest!
+I am no longer taking new advising inquiries. If you are fundraising, please get a warm intro from someone who knows me, if you want to reach me - primarily preseed-seed-series A. Thanks for your interest!
