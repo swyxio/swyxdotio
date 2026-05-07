@@ -12,30 +12,31 @@ My portcos do not get any guaranteed spots in either Latent Space or AI Engineer
 Here is a sampling of the companies I have previously advised and invested in (NO PARTICULAR ORDER THIS WAS JUST BRAINDUMPED):
 
   - Well known names
+    - [Temporal](https://swyx.io/why-temporal)
+    - [Cognition](https://swyx.io/cognition)
     - Supabase (Postgres)
-    - MatX (Inference ASICs)
+    - Railway.app (better heroku)
+    - [MatX](https://www.youtube.com/watch?v=qvrdCpLPbuQ)
     - Artifical Analysis (Gartner of AI)
-    - 🅱️rowserbase (Browsers for Agents)
+    - [🅱️rowserbase](https://www.latent.space/p/browserbase) (i was in [the video](https://x.com/pk_iv/status/1934986965998608745)!)
     - Fireworks (inference)
     - E2b (sandboxes for agents)
     - Daytona (sandboxes for agents... i know i know)
     - Resend (new email api)
     - Modal (serverless python with fast containers and gpus)
-    - Airbyte (open source fivetran)
-    - Zeta AI / [Viktor](http://getviktor.com/)
-    - [Cognition](https://swyx.io/cognition)
     - Conductor (https://x.com/charlieholtz/status/2039027121901957349)
-    - Sphere Semiconductor (tba)
-    - Railway.app (better heroku)
     - Chroma (https://www.latent.space/p/chroma)
     - Logan Kilpatrick
     - Matthew Berman
   - You should know
     - Datalab (see AIE talk)
+    - Zeta AI / [Viktor](http://getviktor.com/)
     - Brightwave (deep research for finance)
     - Quadratic (AI spreadsheet)
     - Flutterflow (low code Flutter builder)
     - Circle.so (creator Community tooling)
+    - Airbyte (open source fivetran)
+    - Sphere Semiconductor (tba)
     - Val.town (gists that run)
     - Stackblitz/Bolt (ai builder in wasm webcontainers)
   - Smaller names
