@@ -37,6 +37,7 @@ Here is a sampling of the companies I have previously advised and invested in (N
     - Circle.so (creator Community tooling)
     - Airbyte (open source fivetran)
     - Sphere Semiconductor (tba)
+    - Restate.dev (serverless fast Temporal)
     - Val.town (gists that run)
     - Stackblitz/Bolt (ai builder in wasm webcontainers)
   - Smaller names
@@ -59,6 +60,8 @@ Here is a sampling of the companies I have previously advised and invested in (N
     - 100ms.live
     - Expand.ai
     - Catamaran Research (Derek Zaw)
+    - Dimension.dev
+    - Replay.io (still alive!)
  - Done
     - Astral (exited, OpenAI)
     - Promptfoo (exited, OpenAI)
@@ -68,6 +71,5 @@ Here is a sampling of the companies I have previously advised and invested in (N
     - Gel data (fka EdgeDB, exited Vercel)
     - Dynamic (exited Fireblocks)
     - Begin.com (dead)
-    - Replay.io (dead)
       
 I am no longer taking new advising inquiries. If you are fundraising, please get a warm intro from someone who knows me, if you want to reach me - primarily preseed-seed-series A. Thanks for your interest!
