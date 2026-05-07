@@ -24,8 +24,8 @@ Here is a sampling of the companies I have previously advised and invested in (N
     - Daytona (sandboxes for agents... i know i know)
     - Resend (new email api)
     - Modal (serverless python with fast containers and gpus)
-    - Conductor (https://x.com/charlieholtz/status/2039027121901957349)
-    - Chroma (https://www.latent.space/p/chroma)
+    - [Conductor](https://x.com/charlieholtz/status/2039027121901957349)
+    - [Chroma](https://www.latent.space/p/chroma)
     - Logan Kilpatrick
     - Matthew Berman
   - You should know
