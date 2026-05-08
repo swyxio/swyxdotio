@@ -60,7 +60,6 @@ Here is a sampling of the companies I have previously advised and invested in (N
     - 100ms.live
     - Expand.ai
     - Catamaran Research (Derek Zaw)
-    - Dimension.dev
     - Replay.io (still alive!)
  - Done
     - Astral (exited, OpenAI)
@@ -71,5 +70,6 @@ Here is a sampling of the companies I have previously advised and invested in (N
     - Gel data (fka EdgeDB, exited Vercel)
     - Dynamic (exited Fireblocks)
     - Begin.com (dead)
+    - Dimension.dev (dead)
       
 I am no longer taking new advising inquiries. If you are fundraising, please get a warm intro from someone who knows me, if you want to reach me - primarily preseed-seed-series A. Thanks for your interest!
