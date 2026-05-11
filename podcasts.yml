@@ -1,5 +1,12 @@
 # 2026
 
+- title: Software Unscripted on State of AI
+  slug: feldman-2026
+  tags: [AI]
+  venues: Software-Unscripted
+  date: 2026-03-08
+  url: https://shows.acast.com/software-unscripted/episodes/ai-software-quality-with-shawn-wang-aka-swyx
+  description: Richard talks with AI expert Shawn "swyx" Wang about all sorts of AI topics, including how it fits into IDEs, AI agent implementations, the economics of AI subscriptions, the future of AI in software, and how all of this affects software quality.
 - title: FreeCodecamp on AI directions
   slug: fcc-2026
   tags: [AI]
