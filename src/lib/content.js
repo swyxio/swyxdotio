@@ -79,8 +79,18 @@ export async function listContent(providedFetch) {
 		});
 
 		const issues = await res.json();
-		if ('message' in issues && res.status > 400)
+		if ('message' in issues && res.status > 400) {
+			if (allBlogposts.length > 0) {
+				console.error(
+					'failed to refresh blogposts from GitHub; serving cached blogposts',
+					res.status,
+					res.statusText,
+					issues.message
+				);
+				return allBlogposts;
+			}
 			throw new Error(res.status + ' ' + res.statusText + '\n' + (issues && issues.message));
+		}
 		issues.forEach(
 			/** @param {import('./types').GithubIssue} issue */
 			(issue) => {
