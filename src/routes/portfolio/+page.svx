@@ -27,6 +27,7 @@ Here is a sampling of the companies I have previously advised and invested in (N
     - Modal (serverless python with fast containers and gpus)
     - [Conductor](https://x.com/charlieholtz/status/2039027121901957349)
     - [Chroma](https://www.latent.space/p/chroma)
+    - Restate.dev (serverless fast Temporal)
     - Logan Kilpatrick
     - Matthew Berman
   - You should know
@@ -38,7 +39,6 @@ Here is a sampling of the companies I have previously advised and invested in (N
     - Circle.so (creator Community tooling)
     - Airbyte (open source fivetran)
     - Sphere Semiconductor (tba)
-    - Restate.dev (serverless fast Temporal)
     - Val.town (gists that run)
     - Stackblitz/Bolt (ai builder in wasm webcontainers)
   - Smaller names
