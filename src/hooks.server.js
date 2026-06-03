@@ -14,11 +14,19 @@ export async function handle({ event, resolve }) {
 	// `caches.default` is Cloudflare-specific; undefined in dev / non-CF runtimes.
 	const cache = /** @type {any} */ (globalThis.caches)?.default;
 	const cacheable = event.request.method === 'GET' && !!cache;
+	const cacheUrl = new URL(event.request.url);
+	if (
+		cacheUrl.pathname === '/api/listContent.json' ||
+		cacheUrl.pathname === '/api/latestPosts.json'
+	) {
+		cacheUrl.search = '';
+	}
+	const cacheRequest = new Request(cacheUrl.toString(), event.request);
 
 	// Cache reads must never break the request — fall through to render on any error.
 	if (cacheable) {
 		try {
-			const hit = await cache.match(event.request);
+			const hit = await cache.match(cacheRequest);
 			if (hit) return hit;
 		} catch {
 			/* ignore cache read failures */
@@ -37,10 +45,10 @@ export async function handle({ event, resolve }) {
 			const ctx = event.platform?.context;
 			try {
 				if (ctx?.waitUntil) {
-					ctx.waitUntil(cache.put(event.request, toCache));
+					ctx.waitUntil(cache.put(cacheRequest, toCache));
 				} else {
 					// best-effort if no execution context is available
-					await cache.put(event.request, toCache);
+					await cache.put(cacheRequest, toCache);
 				}
 			} catch {
 				/* ignore cache write failures */

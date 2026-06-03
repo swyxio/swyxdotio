@@ -5,7 +5,7 @@ swyx's personal site, using:
 - SvelteKit 2 + Svelte 5
 - Tailwind 3 + Tailwind Typography
 - `marked` + `shiki` for markdown rendering (replaced mdsvex/remark)
-- Cloudflare Pages (hybrid: prerendered static pages + on-demand SSR posts, edge-cached)
+- Cloudflare Workers with Static Assets (hybrid: prerendered static pages + on-demand SSR posts, edge-cached)
 - GitHub Issues as CMS
 
 If you want to make a site based on this, see https://github.com/swyxio/swyxkit for a cleaner starter template
@@ -19,7 +19,7 @@ If you want to make a site based on this, see https://github.com/swyxio/swyxkit 
 - **Instant publishing:** a GitHub Issues webhook hits `/api/revalidate`, which verifies the
   signature and purges the affected URLs from the edge cache (on-demand revalidation).
 
-## Environment variables (Cloudflare Pages)
+## Environment variables (Cloudflare Workers)
 
 ### What each variable does
 
@@ -37,21 +37,21 @@ If you want to make a site based on this, see https://github.com/swyxio/swyxkit 
 - **`CF_ZONE_ID`** — Cloudflare dashboard → your domain → **Overview** (bottom-right "API" section).
 - **`CF_API_TOKEN`** — Cloudflare dashboard → **My Profile → API Tokens → Create Token**, with permission `Zone → Cache Purge → Purge`.
 
-### Set them on Cloudflare Pages
+### Set them on Cloudflare Workers
 
-**Option A — Dashboard:** Cloudflare dashboard → **Workers & Pages** → your Pages project → **Settings → Environment variables**. Add each variable for **Production** (and Preview if you use it). Click **Encrypt** to store them as secrets. `GH_TOKEN` must be present in **both** the Production runtime vars and, because prerendering reads it, the **build** environment — Pages applies the same env vars to the build, so adding it once here covers both.
+**Option A — Dashboard:** Cloudflare dashboard → **Workers & Pages** → your Worker → **Settings → Variables and Secrets**. Add each runtime value and encrypt secrets. `GH_TOKEN` must also be present in the Git-connected build environment because prerendered pages read it during builds.
 
 **Option B — Wrangler CLI:**
 
 ```sh
 # runtime secrets (encrypted)
-npx wrangler pages secret put GH_TOKEN
-npx wrangler pages secret put GH_WEBHOOK_SECRET
-npx wrangler pages secret put CF_API_TOKEN   # optional
-npx wrangler pages secret put CF_ZONE_ID     # optional
+npx wrangler secret put GH_TOKEN
+npx wrangler secret put GH_WEBHOOK_SECRET
+npx wrangler secret put CF_API_TOKEN   # optional
+npx wrangler secret put CF_ZONE_ID     # optional
 ```
 
-Each command prompts for the value. List them with `npx wrangler pages secret list`.
+Each command prompts for the value. List them with `npx wrangler secret list`.
 
 > Local dev reads the same names from a gitignored `.env` file (see `.env.example`).
 
@@ -70,7 +70,7 @@ On each Issue create/edit, the endpoint verifies the signature, derives the affe
 
 - `npm run dev` — local dev server
 - `npm run build` — production build (Cloudflare adapter)
-- `npm run preview` — preview the build with `wrangler pages dev`
+- `npm run preview` — preview the build with `wrangler dev`
 - `node tests/markdown.test.mjs` — markdown renderer regression checks
 - `npm test` — Playwright e2e (requires GH content)
 
