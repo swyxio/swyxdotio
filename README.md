@@ -23,7 +23,8 @@ If you want to make a site based on this, see https://github.com/swyxio/swyxkit 
   RSS, and sitemap paths. Full-body search remains available through `/api/searchContent.json`,
   which the browser downloads only after a reader uses the search box.
 - **Instant publishing:** a GitHub Issues webhook hits `/api/revalidate`, which verifies the
-  signature, refreshes the KV manifest, and purges the affected URLs from the edge cache.
+  signature, refreshes the KV manifest, and rolls a KV-backed cache generation. Cache keys also
+  include the Worker version, so both publishes and deploys bypass older edge entries.
 
 ## Environment variables (Cloudflare Workers)
 
@@ -32,16 +33,12 @@ If you want to make a site based on this, see https://github.com/swyxio/swyxkit 
 | Variable            | Required?   | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | ------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `GH_TOKEN`          | **Yes**     | A GitHub Personal Access Token used to authenticate calls to the GitHub Issues API (the CMS). Without it, requests are unauthenticated and capped at **60/hr**, which the site blows through quickly and starts failing. With it, the limit is **5000/hr**. Read at runtime via `$env/dynamic/private` (Cloudflare `platform.env`) **and** at build time for the prerendered pages — so it must be set in **both** the runtime secrets and the build environment. |
-| `GH_WEBHOOK_SECRET` | Recommended | A shared secret used to verify (HMAC SHA‑256) that incoming requests to `/api/revalidate` actually came from your GitHub webhook. This is what enables **instant publishing**: editing an Issue purges the affected pages from the edge cache instead of waiting for the `s-maxage` TTL. If unset, `/api/revalidate` returns 500 and you fall back to TTL-based freshness.                                                                                        |
-| `CF_API_TOKEN`      | Optional    | A Cloudflare API token (scoped to **Zone → Cache Purge**). Lets `/api/revalidate` issue a **zone-wide** CDN purge via the Cloudflare API, in addition to the local Cache API purge. Only needed if you want edits reflected across all edge locations immediately rather than per-colo.                                                                                                                                                                           |
-| `CF_ZONE_ID`        | Optional    | The Cloudflare Zone ID for your domain. Required together with `CF_API_TOKEN` for the zone-wide purge (it's the target of the purge call).                                                                                                                                                                                                                                                                                                                        |
+| `GH_WEBHOOK_SECRET` | Recommended | A shared secret used to verify (HMAC SHA‑256) that incoming requests to `/api/revalidate` actually came from your GitHub webhook. This enables fast publishing: editing an Issue refreshes the KV manifest and rolls the cache generation instead of waiting for the `s-maxage` TTL. If unset, `/api/revalidate` returns 500 and you fall back to TTL-based freshness.                                                                                            |
 
 ### Where to get the values
 
 - **`GH_TOKEN`** — GitHub → Settings → Developer settings → **Personal access tokens**. A classic token with `public_repo` (or `repo` for private) scope is sufficient since it only reads Issues.
 - **`GH_WEBHOOK_SECRET`** — generate any strong random string, e.g. `openssl rand -hex 32`. You'll paste the same value into the GitHub webhook config (below).
-- **`CF_ZONE_ID`** — Cloudflare dashboard → your domain → **Overview** (bottom-right "API" section).
-- **`CF_API_TOKEN`** — Cloudflare dashboard → **My Profile → API Tokens → Create Token**, with permission `Zone → Cache Purge → Purge`.
 
 ### Set them on Cloudflare Workers
 
@@ -53,8 +50,6 @@ If you want to make a site based on this, see https://github.com/swyxio/swyxkit 
 # runtime secrets (encrypted)
 npx wrangler secret put GH_TOKEN
 npx wrangler secret put GH_WEBHOOK_SECRET
-npx wrangler secret put CF_API_TOKEN   # optional
-npx wrangler secret put CF_ZONE_ID     # optional
 ```
 
 Each command prompts for the value. List them with `npx wrangler secret list`.
@@ -68,15 +63,14 @@ deployment and the Worker fills it on the first uncached content request.
 
 In your content repo: **Settings → Webhooks → Add webhook**:
 
-- **Payload URL:** `https://www.swyx.io/api/revalidate`
+- **Payload URL:** `https://swyxdotio.swyxio.workers.dev/api/revalidate`
 - **Content type:** `application/json`
 - **Secret:** the same value as `GH_WEBHOOK_SECRET`
 - **Events:** "Let me select individual events" → check **Issues** only
 
 On each Issue create/edit, the endpoint verifies the signature, refreshes the durable content
-manifest, derives the affected slug, and purges the relevant pages (`/`, `/ideas`, `/{slug}`,
-`/rss.xml`, `/sitemap.xml`, and the list/`api` endpoints) from the local edge cache for both the
-webhook origin and canonical site, plus the canonical URLs through Cloudflare's zone purge API.
+manifest, derives the affected slug, and rolls the cache generation for the relevant pages (`/`,
+`/ideas`, `/{slug}`, `/rss.xml`, `/sitemap.xml`, and the list/`api` endpoints).
 
 ## Commands
 

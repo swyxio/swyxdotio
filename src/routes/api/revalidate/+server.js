@@ -1,14 +1,14 @@
-// On-demand revalidation: GitHub Issues webhook -> purge the Cloudflare edge cache
-// for the affected post + list pages, so edits go live in seconds instead of
-// waiting for the s-maxage TTL.
+// On-demand revalidation: GitHub Issues webhook -> refresh the KV manifest and
+// roll the cache generation, so every edge naturally stops reading older
+// cached renders as the KV update propagates.
 //
 // Configure a GitHub webhook (content-type application/json, event: Issues)
 // pointing at https://<site>/api/revalidate with secret = GH_WEBHOOK_SECRET.
 import { error, json } from '@sveltejs/kit';
 import grayMatter from 'gray-matter';
 import slugify from 'slugify';
-import { SITE_URL } from '$lib/siteConfig';
 import { refreshContentManifest } from '$lib/content';
+import { readContentCacheGeneration } from '$lib/content-manifest';
 import { env } from '$env/dynamic/private';
 
 export const prerender = false;
@@ -108,58 +108,15 @@ export async function POST({ request, platform, fetch }) {
 	if (previousSlug && previousSlug !== slug) {
 		paths.push(`/${previousSlug}`, `/api/ideas/${previousSlug}.json`);
 	}
-	const canonicalUrls = paths.map((p) => new URL(p, SITE_URL).toString());
-	const requestOrigin = new URL(request.url).origin;
-	const urls = [
-		...new Set([...canonicalUrls, ...paths.map((p) => new URL(p, requestOrigin).toString())])
-	];
-
-	// Purge the Cloudflare edge cache (Cache API) for each URL.
-	const cache = globalThis.caches?.default;
-	let purged = 0;
-	if (cache) {
-		await Promise.all(
-			urls.map(async (u) => {
-				if (await cache.delete(u)) purged++;
-			})
-		);
-	}
-
-	// Optionally also issue a zone-wide purge via the Cloudflare API (covers
-	// the global CDN, not just the local colo's Cache API).
-	const apiToken = env.CF_API_TOKEN;
-	const zoneId = env.CF_ZONE_ID;
-	if (apiToken && zoneId) {
-		try {
-			const purgeResponse = await fetch(
-				`https://api.cloudflare.com/client/v4/zones/${zoneId}/purge_cache`,
-				{
-					method: 'POST',
-					headers: {
-						Authorization: `Bearer ${apiToken}`,
-						'content-type': 'application/json'
-					},
-					body: JSON.stringify({ files: canonicalUrls })
-				}
-			);
-			if (!purgeResponse.ok) {
-				console.error('cloudflare purge_cache failed', {
-					status: purgeResponse.status,
-					statusText: purgeResponse.statusText
-				});
-			}
-		} catch (err) {
-			console.error('cloudflare purge_cache failed', err);
-		}
-	}
+	const cacheGeneration = await readContentCacheGeneration(platform?.env?.CONTENT_MANIFEST);
 
 	return json({
 		ok: true,
 		action: payload.action,
 		slug,
 		previousSlug,
-		urls,
-		purged,
+		invalidatedPaths: paths,
+		cacheGeneration,
 		refreshedBlogposts: refreshedBlogposts.length
 	});
 }

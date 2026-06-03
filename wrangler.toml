@@ -14,6 +14,9 @@ main = ".svelte-kit/cloudflare/_worker.js"
 binding = "ASSETS"
 directory = ".svelte-kit/cloudflare"
 
+[version_metadata]
+binding = "CF_VERSION_METADATA"
+
 [secrets]
 required = ["GH_TOKEN"]
 

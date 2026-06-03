@@ -2,10 +2,12 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
+	CONTENT_CACHE_GENERATION_KEY,
 	CONTENT_MANIFEST_KEY,
 	decodeContentManifest,
 	encodeContentManifest,
 	isContentManifestStale,
+	readContentCacheGeneration,
 	readContentManifest,
 	writeContentManifest
 } from '../src/lib/content-manifest.js';
@@ -40,7 +42,9 @@ test('content manifest reads and writes a KV-compatible store', async () => {
 	assert.equal(await readContentManifest(store), null);
 	assert.equal(await writeContentManifest(store, blogposts), true);
 	assert.ok(values.has(CONTENT_MANIFEST_KEY));
+	assert.ok(values.has(CONTENT_CACHE_GENERATION_KEY));
 	assert.deepEqual((await readContentManifest(store))?.blogposts, blogposts);
+	assert.equal(await readContentCacheGeneration(store), values.get(CONTENT_CACHE_GENERATION_KEY));
 });
 
 test('content manifest ignores corrupt KV data so callers can refresh', async () => {

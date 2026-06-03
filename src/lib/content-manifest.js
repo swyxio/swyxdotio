@@ -1,4 +1,5 @@
 export const CONTENT_MANIFEST_KEY = 'github-content-manifest:v1';
+export const CONTENT_CACHE_GENERATION_KEY = 'github-content-cache-generation:v1';
 export const CONTENT_MANIFEST_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 const CONTENT_MANIFEST_WRITE_MAX_ATTEMPTS = 3;
 
@@ -103,6 +104,22 @@ export async function readContentManifest(store) {
 
 /**
  * @param {ContentManifestStore | undefined} store
+ * @returns {Promise<string | null>}
+ */
+export async function readContentCacheGeneration(store) {
+	if (!store) return null;
+	try {
+		return await store.get(CONTENT_CACHE_GENERATION_KEY);
+	} catch (err) {
+		console.error('Content cache generation read failed; using the Worker version only', {
+			errorName: errorName(err)
+		});
+		return null;
+	}
+}
+
+/**
+ * @param {ContentManifestStore | undefined} store
  * @param {import('./types').ContentItem[]} blogposts
  * @returns {Promise<boolean>}
  */
@@ -111,6 +128,7 @@ export async function writeContentManifest(store, blogposts) {
 	for (let attempt = 1; attempt <= CONTENT_MANIFEST_WRITE_MAX_ATTEMPTS; attempt++) {
 		try {
 			await store.put(CONTENT_MANIFEST_KEY, encodeContentManifest(blogposts));
+			await store.put(CONTENT_CACHE_GENERATION_KEY, new Date().toISOString());
 			return true;
 		} catch (err) {
 			if (attempt === CONTENT_MANIFEST_WRITE_MAX_ATTEMPTS) throw err;

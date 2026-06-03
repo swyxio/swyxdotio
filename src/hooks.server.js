@@ -4,10 +4,11 @@
 // is stored in the Cloudflare Cache API (`caches.default`). Subsequent
 // requests are served from the edge cache in O(1) without re-rendering or
 // hitting the GitHub API. Freshness is driven by `s-maxage`, and edits are made
-// live instantly by the `/api/revalidate` webhook which purges the affected
-// URLs. Cloudflare Cache API ignores `stale-while-revalidate` on cache.put().
+// live after the `/api/revalidate` webhook rolls the KV-backed cache generation.
+// Cloudflare Cache API ignores `stale-while-revalidate` on cache.put().
 //
 // In dev / non-Cloudflare runtimes `caches` is undefined and we no-op.
+import { readContentCacheGeneration } from '$lib/content-manifest';
 
 // Security headers applied to all SSR/dynamic responses. On Cloudflare Workers
 // the `_headers` file only covers static-asset responses (served by the asset
@@ -32,6 +33,12 @@ export async function handle({ event, resolve }) {
 		cacheUrl.pathname === '/api/searchContent.json'
 	) {
 		cacheUrl.search = '';
+	}
+	if (cacheable) {
+		const version = event.platform?.env?.CF_VERSION_METADATA?.id ?? 'local';
+		const generation =
+			(await readContentCacheGeneration(event.platform?.env?.CONTENT_MANIFEST)) ?? 'initial';
+		cacheUrl.searchParams.set('__swyxCache', `${version}:${generation}`);
 	}
 	const cacheRequest = new Request(cacheUrl.toString(), event.request);
 

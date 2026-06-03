@@ -10,8 +10,11 @@ declare namespace App {
 		env?: {
 			GH_TOKEN?: string;
 			GH_WEBHOOK_SECRET?: string;
-			CF_API_TOKEN?: string;
-			CF_ZONE_ID?: string;
+			CF_VERSION_METADATA?: {
+				id: string;
+				tag?: string;
+				timestamp: string;
+			};
 			CONTENT_MANIFEST?: {
 				get(key: string): Promise<string | null>;
 				put(key: string, value: string): Promise<void>;
