@@ -21,6 +21,17 @@ const SECURITY_HEADERS = {
 	'X-Clacks-Overhead': 'GNU Terry Pratchett'
 };
 
+/**
+ * Cache API entries keep their shared TTL internally, but public responses must
+ * not be recached ahead of the Worker or versioned lookups cannot run.
+ * @param {Response} response
+ */
+function toClientResponse(response) {
+	const clientResponse = new Response(response.body, response);
+	clientResponse.headers.set('Cache-Control', 'private, max-age=0, no-store');
+	return clientResponse;
+}
+
 /** @type {import('@sveltejs/kit').Handle} */
 export async function handle({ event, resolve }) {
 	// `caches.default` is Cloudflare-specific; undefined in dev / non-CF runtimes.
@@ -39,6 +50,15 @@ export async function handle({ event, resolve }) {
 		const generation =
 			(await readContentCacheGeneration(event.platform?.env?.CONTENT_MANIFEST)) ?? 'initial';
 		cacheUrl.searchParams.set('__swyxCache', `${version}:${generation}`);
+		// Clear entries written before cache keys were versioned. This is local
+		// to the serving colo and can be removed after the transition TTL passes.
+		const legacyCacheUrl = new URL(event.request.url);
+		legacyCacheUrl.search = '';
+		try {
+			await cache.delete(new Request(legacyCacheUrl.toString(), event.request));
+		} catch {
+			/* ignore legacy cache cleanup failures */
+		}
 	}
 	const cacheRequest = new Request(cacheUrl.toString(), event.request);
 
@@ -46,7 +66,7 @@ export async function handle({ event, resolve }) {
 	if (cacheable) {
 		try {
 			const hit = await cache.match(cacheRequest);
-			if (hit) return hit;
+			if (hit) return toClientResponse(hit);
 		} catch {
 			/* ignore cache read failures */
 		}
@@ -80,5 +100,5 @@ export async function handle({ event, resolve }) {
 		}
 	}
 
-	return response;
+	return cacheable ? toClientResponse(response) : response;
 }
