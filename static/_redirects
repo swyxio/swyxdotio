@@ -1,4 +1,5 @@
-/api/rss.xml /rss.xml # this is mostly here to support old (pre Aug 2022) swyxkits where the RSS was at the /api/rss.xml was at
+# /api/rss.xml supports old (pre Aug 2022) swyxkits where the RSS lived at /api/rss.xml
+/api/rss.xml /rss.xml
 /feed /rss.xml
 /rss /rss.xml
 
