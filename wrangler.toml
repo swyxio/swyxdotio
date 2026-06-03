@@ -19,6 +19,7 @@ required = ["GH_TOKEN"]
 
 [[kv_namespaces]]
 binding = "CONTENT_MANIFEST"
+id = "b1c7b0dfb8ed438998b7850a2293368a"
 
 # Example bindings for future use (uncomment + configure when needed):
 # [[durable_objects.bindings]]
