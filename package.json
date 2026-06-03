@@ -6,9 +6,9 @@
 		"dev": "vite dev",
 		"start": "vite dev",
 		"validate:yaml": "node scripts/validate-yaml.js",
-		"prebuild": "npm run validate:yaml",
+		"prebuild": "npm run validate:yaml && svelte-kit sync",
 		"build": "vite build",
-		"preview": "wrangler pages dev",
+		"preview": "wrangler dev",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch",
 		"test": "playwright test",
@@ -34,7 +34,7 @@
 		"prettier-plugin-tailwindcss": "^0.5.2",
 		"slugify": "^1.6.6",
 		"svelte": "^5.0.0",
-		"svelte-check": "^3.6.0",
+		"svelte-check": "^4.0.0",
 		"tailwindcss": "^3.3.3",
 		"tslib": "^2.6.1",
 		"typescript": "^5.4.0",
@@ -46,6 +46,9 @@
 		"node": ">=20"
 	},
 	"type": "module",
+	"overrides": {
+		"@sveltejs/vite-plugin-svelte": "^4.0.0"
+	},
 	"dependencies": {
 		"@leeoniya/ufuzzy": "^1.0.8",
 		"date-fns": "^2.30.0",
