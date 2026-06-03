@@ -1,4 +1,6 @@
 .DS_Store
+.wrangler
+.dev.vars
 node_modules
 /.svelte-kit
 /package
@@ -16,4 +18,4 @@ vite.config.ts.timestamp-*
 
 # Local Netlify folder
 .netlify
-.histoire
+.histoire.dev.vars

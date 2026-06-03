@@ -11,12 +11,18 @@
 
 /** @type {import('@sveltejs/kit').Handle} */
 export async function handle({ event, resolve }) {
-	const cache = globalThis.caches?.default;
+	// `caches.default` is Cloudflare-specific; undefined in dev / non-CF runtimes.
+	const cache = /** @type {any} */ (globalThis.caches)?.default;
 	const cacheable = event.request.method === 'GET' && !!cache;
 
+	// Cache reads must never break the request — fall through to render on any error.
 	if (cacheable) {
-		const hit = await cache.match(event.request);
-		if (hit) return hit;
+		try {
+			const hit = await cache.match(event.request);
+			if (hit) return hit;
+		} catch {
+			/* ignore cache read failures */
+		}
 	}
 
 	const response = await resolve(event);
@@ -26,12 +32,18 @@ export async function handle({ event, resolve }) {
 		// only cache responses that explicitly opt in to shared caching
 		if (cc.includes('s-maxage')) {
 			const toCache = response.clone();
-			const waitUntil = event.platform?.context?.waitUntil;
-			if (waitUntil) {
-				waitUntil(cache.put(event.request, toCache));
-			} else {
-				// best-effort if no execution context is available
-				cache.put(event.request, toCache);
+			// IMPORTANT: call waitUntil/put on their owner objects so `this` is bound
+			// correctly — destructuring them triggers "Illegal invocation" on Workers.
+			const ctx = event.platform?.context;
+			try {
+				if (ctx?.waitUntil) {
+					ctx.waitUntil(cache.put(event.request, toCache));
+				} else {
+					// best-effort if no execution context is available
+					await cache.put(event.request, toCache);
+				}
+			} catch {
+				/* ignore cache write failures */
 			}
 		}
 	}

@@ -48,9 +48,13 @@ export async function listContent(providedFetch) {
 	let _allBlogposts = [];
 	let next = null;
 	let limit = 0; // just a failsafe against infinite loop - feel free to remove
-	// env.GH_TOKEN works on both Cloudflare (platform.env) and Node (process.env)
-	const authheader = env.GH_TOKEN && {
-		Authorization: `token ${env.GH_TOKEN}`
+	// env.GH_TOKEN works on both Cloudflare (platform.env) and Node (process.env).
+	// GitHub's API REQUIRES a User-Agent header — Node's fetch sets one automatically
+	// but Cloudflare Workers' fetch does not, so we set it explicitly or GitHub returns
+	// "Request forbidden by administrative rules" (a non-JSON 403 body).
+	const ghHeaders = {
+		'User-Agent': GH_USER_REPO,
+		...(env.GH_TOKEN ? { Authorization: `token ${env.GH_TOKEN}` } : {})
 	};
 	let url =
 		`https://api.github.com/repos/${GH_USER_REPO}/issues?` +
@@ -65,7 +69,7 @@ export async function listContent(providedFetch) {
 	}
 	do {
 		const res = await providedFetch(next ?? url, {
-			headers: authheader
+			headers: ghHeaders
 		});
 
 		const issues = await res.json();
