@@ -229,7 +229,7 @@
 			{/await}
 		</div>
 		{#if fetchState === 'fetching'}
-			<div />
+			<div></div>
 		{:else if mentions.length === 0}
 			<div>
 				No replies yet.

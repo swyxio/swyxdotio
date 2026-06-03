@@ -4,7 +4,7 @@
   export let classes = ''
 </script>
 <style>
-  body, .youtubeembed {
+  .youtubeembed {
 	width: 100%;
 	height: 90%;
 	margin: 0;
@@ -22,8 +22,9 @@
 <a
 	  href='https://www.youtube.com/embed/{videoId}?autoplay=1'
 	  class={'relative youtubeembed ' + classes}
+	  aria-label='Play YouTube video'
 >
-	<img src='https://img.youtube.com/vi/{videoId}/sddefault.jpg' />
+	<img src='https://img.youtube.com/vi/{videoId}/sddefault.jpg' alt='YouTube video thumbnail' />
 	<svg
 version='1.1'
 viewBox='0 0 68 48'

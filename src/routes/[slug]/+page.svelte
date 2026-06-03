@@ -96,7 +96,7 @@
 	</div>
 	<div
 		class="-mx-4 my-2 flex h-1 w-[100vw] bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 sm:mx-0 sm:w-full"
-	/>
+	></div>
 
 	{#if json.disclosure}
 		<p class="mt-4 text-sm text-gray-600 dark:text-gray-400">
