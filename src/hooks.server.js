@@ -1,4 +1,4 @@
-// Edge caching for dynamic (on-demand) routes on Cloudflare Pages.
+// Edge caching for dynamic (on-demand) routes on Cloudflare Workers.
 //
 // Strategy: any GET response that opts in via `Cache-Control: s-maxage=...`
 // is stored in the Cloudflare Cache API (`caches.default`). Subsequent
