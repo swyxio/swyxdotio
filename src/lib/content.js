@@ -30,6 +30,8 @@ function nextLink(header) {
 let allBlogposts = [];
 // let etag = null // todo - implmement etag header
 
+const GITHUB_FETCH_MAX_ATTEMPTS = 3;
+const GITHUB_FETCH_RETRY_DELAY_MS = 100;
 
 /**
  * @param {string} text
@@ -38,6 +40,134 @@ let allBlogposts = [];
 function readingTime(text) {
 	let minutes = Math.ceil(text.trim().split(' ').length / 225);
 	return minutes > 1 ? `${minutes} minutes` : `${minutes} minute`;
+}
+
+/**
+ * @param {string} url
+ * @returns {string}
+ */
+function safeEndpoint(url) {
+	try {
+		const parsedUrl = new URL(url);
+		return parsedUrl.origin + parsedUrl.pathname;
+	} catch {
+		return 'invalid GitHub URL';
+	}
+}
+
+/**
+ * @param {unknown} err
+ * @returns {string}
+ */
+function errorName(err) {
+	return err instanceof Error ? err.name : typeof err;
+}
+
+/**
+ * @param {number} attempt
+ * @returns {Promise<void>}
+ */
+function waitForRetry(attempt) {
+	const delay = Math.min(GITHUB_FETCH_RETRY_DELAY_MS * attempt, 500);
+	return new Promise((resolve) => setTimeout(resolve, delay));
+}
+
+/**
+ * @param {number} status
+ * @returns {boolean}
+ */
+function isTransientStatus(status) {
+	return status === 403 || status === 429 || status >= 500;
+}
+
+/**
+ * @param {Function} providedFetch
+ * @param {string} url
+ * @param {Record<string, string>} headers
+ * @returns {Promise<{ issues: import('./types').GithubIssue[], next: string | null }>}
+ */
+async function fetchGithubIssuesPage(providedFetch, url, headers) {
+	for (let attempt = 1; attempt <= GITHUB_FETCH_MAX_ATTEMPTS; attempt++) {
+		let res;
+		try {
+			res = await providedFetch(url, { headers });
+		} catch (err) {
+			const willRetry = attempt < GITHUB_FETCH_MAX_ATTEMPTS;
+			console.error('GitHub content fetch failed', {
+				endpoint: safeEndpoint(url),
+				attempt,
+				maxAttempts: GITHUB_FETCH_MAX_ATTEMPTS,
+				failure: 'fetch',
+				errorName: errorName(err),
+				willRetry
+			});
+			if (willRetry) {
+				await waitForRetry(attempt);
+				continue;
+			}
+			throw new Error('GitHub content fetch failed after retries');
+		}
+
+		if (!res.ok) {
+			const willRetry = isTransientStatus(res.status) && attempt < GITHUB_FETCH_MAX_ATTEMPTS;
+			console.error('GitHub content fetch failed', {
+				endpoint: safeEndpoint(url),
+				attempt,
+				maxAttempts: GITHUB_FETCH_MAX_ATTEMPTS,
+				failure: 'http',
+				status: res.status,
+				statusText: res.statusText,
+				willRetry
+			});
+			if (willRetry) {
+				await waitForRetry(attempt);
+				continue;
+			}
+			throw new Error(`GitHub content fetch failed (${res.status} ${res.statusText})`);
+		}
+
+		let issues;
+		try {
+			issues = await res.json();
+		} catch (err) {
+			const willRetry = attempt < GITHUB_FETCH_MAX_ATTEMPTS;
+			console.error('GitHub content fetch failed', {
+				endpoint: safeEndpoint(url),
+				attempt,
+				maxAttempts: GITHUB_FETCH_MAX_ATTEMPTS,
+				failure: 'non-json',
+				status: res.status,
+				errorName: errorName(err),
+				willRetry
+			});
+			if (willRetry) {
+				await waitForRetry(attempt);
+				continue;
+			}
+			throw new Error('GitHub content fetch returned non-JSON after retries');
+		}
+
+		if (!Array.isArray(issues)) {
+			const willRetry = attempt < GITHUB_FETCH_MAX_ATTEMPTS;
+			console.error('GitHub content fetch failed', {
+				endpoint: safeEndpoint(url),
+				attempt,
+				maxAttempts: GITHUB_FETCH_MAX_ATTEMPTS,
+				failure: 'unexpected-json-shape',
+				status: res.status,
+				willRetry
+			});
+			if (willRetry) {
+				await waitForRetry(attempt);
+				continue;
+			}
+			throw new Error('GitHub content fetch returned unexpected JSON after retries');
+		}
+
+		return { issues, next: nextLink(res.headers.get('Link')) };
+	}
+
+	throw new Error('GitHub content fetch failed after retries');
 }
 
 export async function listContent(providedFetch) {
@@ -67,38 +197,33 @@ export async function listContent(providedFetch) {
 	if (APPROVED_POSTERS_GH_USERNAME.length === 1 && APPROVED_POSTERS_GH_USERNAME[0] === REPO_OWNER) {
 		url += '&' + new URLSearchParams({ creator: REPO_OWNER });
 	}
-	do {
-		const res = await providedFetch(next ?? url, {
-			headers: ghHeaders
-		});
-
-		const issues = await res.json();
-		if ('message' in issues && res.status > 400) {
-			if (allBlogposts.length > 0) {
-				console.error(
-					'failed to refresh blogposts from GitHub; serving cached blogposts',
-					res.status,
-					res.statusText,
-					issues.message
-				);
-				return allBlogposts;
-			}
-			throw new Error(res.status + ' ' + res.statusText + '\n' + (issues && issues.message));
-		}
-		issues.forEach(
-			/** @param {import('./types').GithubIssue} issue */
-			(issue) => {
-				if (
-					// labels check not needed anymore as we have set the labels param in github api
-					// issue.labels.some((label) => GH_PUBLISHED_TAGS.includes(label.name)) &&
-					APPROVED_POSTERS_GH_USERNAME.includes(issue.user.login)
-				) {
-					_allBlogposts.push(parseIssue(issue));
+	try {
+		do {
+			const page = await fetchGithubIssuesPage(providedFetch, next ?? url, ghHeaders);
+			page.issues.forEach(
+				/** @param {import('./types').GithubIssue} issue */
+				(issue) => {
+					if (
+						// labels check not needed anymore as we have set the labels param in github api
+						// issue.labels.some((label) => GH_PUBLISHED_TAGS.includes(label.name)) &&
+						APPROVED_POSTERS_GH_USERNAME.includes(issue.user.login)
+					) {
+						_allBlogposts.push(parseIssue(issue));
+					}
 				}
-			}
-		);
-		next = nextLink(res.headers.get('Link'));
-	} while (next && limit++ < 1000); // just a failsafe against infinite loop - feel free to remove
+			);
+			next = page.next;
+		} while (next && limit++ < 1000); // just a failsafe against infinite loop - feel free to remove
+	} catch (err) {
+		if (allBlogposts.length > 0) {
+			console.error('GitHub content refresh failed; serving stale cache', {
+				cachedBlogposts: allBlogposts.length,
+				errorName: errorName(err)
+			});
+			return allBlogposts;
+		}
+		throw err;
+	}
 	_allBlogposts.sort((a, b) => b.date.valueOf() - a.date.valueOf()); // use valueOf to make TS happy https://stackoverflow.com/a/60688789/1106414
 	allBlogposts = _allBlogposts;
 	return _allBlogposts;
@@ -161,7 +286,7 @@ function parseIssue(issue) {
 		description = description.replace(/<[^>]*>?/gm, '');
 		// strip markdown
 		// description = description.replace(/[[\]]/gm, '');
-	
+
 		// you may wish to use a truncation approach like this instead...
 		// let description = (data.content.length > 300) ? data.content.slice(0, 300) + '...' : data.content
 
