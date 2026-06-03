@@ -9,6 +9,17 @@
 //
 // In dev / non-Cloudflare runtimes `caches` is undefined and we no-op.
 
+// Security headers applied to all SSR/dynamic responses. On Cloudflare Workers
+// the `_headers` file only covers static-asset responses (served by the asset
+// handler), NOT responses rendered by this Worker — so we set them here to keep
+// parity with the old Pages behavior across every page.
+const SECURITY_HEADERS = {
+	'X-Frame-Options': 'DENY',
+	'X-XSS-Protection': '1; mode=block',
+	'X-Content-Type-Options': 'nosniff',
+	'X-Clacks-Overhead': 'GNU Terry Pratchett'
+};
+
 /** @type {import('@sveltejs/kit').Handle} */
 export async function handle({ event, resolve }) {
 	// `caches.default` is Cloudflare-specific; undefined in dev / non-CF runtimes.
@@ -34,6 +45,11 @@ export async function handle({ event, resolve }) {
 	}
 
 	const response = await resolve(event);
+
+	// Apply security headers before caching so the cached copy carries them too.
+	for (const [k, v] of Object.entries(SECURITY_HEADERS)) {
+		response.headers.set(k, v);
+	}
 
 	if (cacheable && response.status === 200) {
 		const cc = response.headers.get('cache-control') || '';
