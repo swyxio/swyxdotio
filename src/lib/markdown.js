@@ -4,6 +4,7 @@
 import { Marked } from 'marked';
 import { gfmHeadingId } from 'marked-gfm-heading-id';
 import { createHighlighter } from 'shiki';
+import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
 import { GH_USER_REPO } from './siteConfig.js';
 
 const THEME = 'github-dark';
@@ -35,8 +36,13 @@ const LANGS = [
 let highlighterPromise = null;
 function getHighlighter() {
 	if (!highlighterPromise) {
-		// Uses Shiki's default (JS) engine — no WASM/oniguruma, Workers-safe.
-		highlighterPromise = createHighlighter({ themes: [THEME], langs: LANGS });
+		// Workers disallow runtime WASM compilation, so opt out of Shiki's
+		// default Oniguruma engine and use native JavaScript RegExp instead.
+		highlighterPromise = createHighlighter({
+			themes: [THEME],
+			langs: LANGS,
+			engine: createJavaScriptRegexEngine()
+		});
 	}
 	return highlighterPromise;
 }
