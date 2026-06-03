@@ -72,7 +72,8 @@ In your content repo: **Settings → Webhooks → Add webhook**:
 
 On each Issue create/edit, the endpoint verifies the signature, refreshes the durable content
 manifest, derives the affected slug, and purges the relevant pages (`/`, `/ideas`, `/{slug}`,
-`/rss.xml`, `/sitemap.xml`, and the list/`api` endpoints) from the edge cache.
+`/rss.xml`, `/sitemap.xml`, and the list/`api` endpoints) from the local edge cache for both the
+webhook origin and canonical site, plus the canonical URLs through Cloudflare's zone purge API.
 
 ## Commands
 

@@ -107,7 +107,11 @@ export async function POST({ request, platform, fetch }) {
 	if (previousSlug && previousSlug !== slug) {
 		paths.push(`/${previousSlug}`, `/api/ideas/${previousSlug}.json`);
 	}
-	const urls = paths.map((p) => new URL(p, SITE_URL).toString());
+	const canonicalUrls = paths.map((p) => new URL(p, SITE_URL).toString());
+	const requestOrigin = new URL(request.url).origin;
+	const urls = [
+		...new Set([...canonicalUrls, ...paths.map((p) => new URL(p, requestOrigin).toString())])
+	];
 
 	// Purge the Cloudflare edge cache (Cache API) for each URL.
 	const cache = globalThis.caches?.default;
@@ -134,7 +138,7 @@ export async function POST({ request, platform, fetch }) {
 						Authorization: `Bearer ${apiToken}`,
 						'content-type': 'application/json'
 					},
-					body: JSON.stringify({ files: urls })
+					body: JSON.stringify({ files: canonicalUrls })
 				}
 			);
 			if (!purgeResponse.ok) {
