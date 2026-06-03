@@ -84,6 +84,7 @@ manifest, derives the affected slug, and rolls the cache generation for the rele
 
 See https://swyx.io
 
+- [Netlify to Cloudflare DNS cutover notes](docs/cloudflare-cutover.md)
 - https://sw-yx.js.org/ old site when learning to code[.](https://sw-yx.js.org/2017/07/20/secret-master-plan)
 - You can see previous iterations of the site from 2017 here: https://www.swyx.io/rewrite-2022
 - The last version of the 2022 site was preserved at https://github.com/swyxio/swyxdotio2022
