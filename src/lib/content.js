@@ -378,6 +378,7 @@ function parseIssue(issue) {
 			description,
 			category: data.category?.toLowerCase() || 'note', // all posts assumed to be "note"s unless otherwise specified
 			tags,
+			isPrivate: Boolean(data.isPrivate ?? data.private ?? false),
 			image: data.image ?? data.cover_image,
 			canonical: data.canonical || data.canonical_url, // for canonical URLs of something published elsewhere
 			slug: `${slug}`.toLowerCase(),

@@ -28,7 +28,8 @@ export async function handle({ event, resolve }) {
 	const cacheUrl = new URL(event.request.url);
 	if (
 		cacheUrl.pathname === '/api/listContent.json' ||
-		cacheUrl.pathname === '/api/latestPosts.json'
+		cacheUrl.pathname === '/api/latestPosts.json' ||
+		cacheUrl.pathname === '/api/searchContent.json'
 	) {
 		cacheUrl.search = '';
 	}

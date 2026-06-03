@@ -1,5 +1,5 @@
 <script>
-	// import { browser } from '$app/environment';
+	import { browser } from '$app/environment';
 	// import { goto } from '$app/navigation';
 	// import { page } from '$app/stores';
 	import { queryParam, ssp } from 'sveltekit-search-params';
@@ -12,9 +12,11 @@
 	/** @type {import('./$types').PageData} */
 	export let data;
 
-	// technically this is a slighlty different type because doesnt have 'content' but we'll let it slide
+	// List metadata stays small; full article bodies are fetched only when search is used.
 	/** @type {import('$lib/types').ContentItem[]} */
 	$: items = data.items;
+	/** @type {import('$lib/types').ContentItem[]} */
+	let searchableItems = data.items;
 
 	// https://github.com/paoloricciuti/sveltekit-search-params#how-to-use-it
 	/** @type import('svelte/store').Writable<String[] | null> */
@@ -41,42 +43,46 @@
 	// https://github.com/swyxio/swyxkit/pull/171
 	// this will be slow if you have thousands of items, but most people don't
 	let isTruncated = data.items.length > 20;
-	
-	
-	
+
 	// we are lazy loading a fuzzy search function
 	// with a fallback to a simple filter function
-	let loaded = false;
 	const filterCategories = async (_items, _, s) => {
 		if ($selectedCategories?.length) {
 			_items = _items.filter((item) => {
-					return $selectedCategories
-						.map((element) => {
-							return element.toLowerCase();
-						})
-						.includes(item.category.toLowerCase());
-				})
+				return $selectedCategories
+					.map((element) => {
+						return element.toLowerCase();
+					})
+					.includes(item.category.toLowerCase());
+			});
 		}
 		if (s?.length) {
-			_items = _items.filter((item) => item.toString().toLowerCase().includes(s));
+			_items = _items.filter((item) =>
+				JSON.stringify(item).toLowerCase().includes(s.toLowerCase())
+			);
 		}
-		return _items
+		return _items;
 	};
 	$: searchFn = filterCategories;
+	/** @type {Promise<void> | undefined} */
+	let searchLoad;
 	function loadsearchFn() {
-		if (loaded) return;
-		import('./fuzzySearch').then((fuzzy) => {
-			searchFn = fuzzy.fuzzySearch;
-			loaded = true;
-		});
+		if (searchLoad) return searchLoad;
+		searchLoad = Promise.all([import('./fuzzySearch'), fetch('/api/searchContent.json')])
+			.then(async ([fuzzy, res]) => {
+				searchFn = fuzzy.fuzzySearch;
+				if (!res.ok) throw new Error(`failed to load search content (${res.status})`);
+				searchableItems = await res.json();
+			})
+			.catch((err) => console.error('failed to load full-body search content', err));
+		return searchLoad;
 	}
-	if ($search) loadsearchFn()
+	$: if (browser && $search) loadsearchFn();
+	$: filteredItems = $search ? searchableItems : items;
 	/** @type import('$lib/types').ContentItem[]  */
 	let list = data.items.slice(0, isTruncated ? 20 : data.items.length);
-	$: searchFn(items, $selectedCategories, $search)
-	.then(_items => {
-		list = _items
-			.slice(0, isTruncated ? 20 : items.length);
+	$: searchFn(filteredItems, $selectedCategories, $search).then((_items) => {
+		list = _items.slice(0, isTruncated ? 20 : items.length);
 	});
 	// $: console.log({list})
 </script>
@@ -106,7 +112,6 @@
 			type="text"
 			bind:value={$search}
 			bind:this={inputEl}
-			on:focus={loadsearchFn}
 			placeholder="Hit / to search"
 			class="block w-full rounded-md border border-gray-200 bg-white px-4 py-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-900 dark:bg-gray-800 dark:text-gray-100"
 		/><svg

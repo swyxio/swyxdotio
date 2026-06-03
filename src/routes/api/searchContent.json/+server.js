@@ -1,11 +1,11 @@
-import { toContentListItem } from '$lib/content-list';
+import { toSearchContentItem } from '$lib/content-list';
 import { listAllContent } from '$lib/list-all-content';
 
 /**
  * @type {import('./$types').RequestHandler}
  */
 export async function GET({ fetch, setHeaders, platform }) {
-	const list = (await listAllContent(fetch, platform)).map(toContentListItem);
+	const list = (await listAllContent(fetch, platform)).map(toSearchContentItem);
 	setHeaders({
 		'Cache-Control': 'public, max-age=0, s-maxage=86400, stale-while-revalidate=604800'
 	});

@@ -99,7 +99,8 @@ export async function POST({ request, platform, fetch }) {
 		'/rss.xml',
 		'/sitemap.xml',
 		'/api/listContent.json',
-		'/api/latestPosts.json'
+		'/api/latestPosts.json',
+		'/api/searchContent.json'
 	];
 	if (slug) {
 		paths.push(`/${slug}`, `/api/ideas/${slug}.json`);

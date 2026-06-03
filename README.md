@@ -19,6 +19,9 @@ If you want to make a site based on this, see https://github.com/swyxio/swyxkit 
 - **Durable content manifest:** the Worker reads the parsed GitHub Issues CMS data from the
   `CONTENT_MANIFEST` KV namespace. GitHub is only queried to bootstrap an empty namespace or
   refresh it after a webhook, so ordinary cache misses do not depend on GitHub availability.
+- **Compact ideas list:** `/api/listContent.json` omits article bodies for the default `/ideas`,
+  RSS, and sitemap paths. Full-body search remains available through `/api/searchContent.json`,
+  which the browser downloads only after a reader uses the search box.
 - **Instant publishing:** a GitHub Issues webhook hits `/api/revalidate`, which verifies the
   signature, refreshes the KV manifest, and purges the affected URLs from the edge cache.
 
