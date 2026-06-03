@@ -11,12 +11,12 @@ export async function GET({ fetch, params, setHeaders }) {
 	if (!isBlogSlug(slug)) throw error(404, ' - invalid slug');
 	try {
 		data = await getContent(fetch, slug);
-		setHeaders({
-			'Cache-Control': `max-age=0, s-max-age=${3600}` // 1 hour
-		})
+		const cacheControl = 'public, max-age=0, s-maxage=86400, stale-while-revalidate=604800';
+		setHeaders({ 'Cache-Control': cacheControl });
 		return new Response(JSON.stringify(data), {
 			headers: {
-				'Cache-Control': `max-age=0, s-max-age=${3600}` // 1 hour
+				'content-type': 'application/json; charset=utf-8',
+				'Cache-Control': cacheControl
 			}
 		});
 	} catch (err) {

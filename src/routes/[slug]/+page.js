@@ -2,13 +2,11 @@ import { error } from '@sveltejs/kit';
 import { REPO_URL } from '$lib/siteConfig';
 import { isBlogSlug } from '$lib/slug';
 
-// we choose NOT to prerender blog pages because it is easier to edit and see changes immediately
-// instead we set cache control headers
-// export const prerender = true
-
-// March 2023 update - we are going back to prerender because we are seeing 6 seconds render times
-// https://www.webpagetest.org/result/230309_AiDcTC_7S0/1/details/#waterfall_view_step1
-export const prerender = 'auto';
+// Posts are rendered on-demand (SSR on Cloudflare Workers) and cached at the
+// edge via the Cache API (see src/hooks.server.js). New posts therefore appear
+// without a rebuild; freshness on edits is handled by the /api/revalidate
+// webhook which purges the affected URLs.
+export const prerender = false;
 
 /** @type {import('./$types').PageLoad} */
 export async function load({ params, fetch, setHeaders }) {
@@ -33,7 +31,9 @@ export async function load({ params, fetch, setHeaders }) {
 		list = (await listData.json()).slice(0, 10);
 	}
 	setHeaders({
-		'cache-control': 'public, max-age=3600' // 1 hour
+		// browser revalidates; shared/edge cache holds for a day and may serve
+		// stale for a week while revalidating. Edits are purged via /api/revalidate.
+		'cache-control': 'public, max-age=0, s-maxage=86400, stale-while-revalidate=604800'
 	});
 	return {
 		json: await pageData.json(),

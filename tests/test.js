@@ -1,8 +1,10 @@
 import { expect, test } from '@playwright/test';
 
-test('about page has expected h1', async ({ page }) => {
+test('about page renders markdown headings (marked + prerender)', async ({ page }) => {
   await page.goto('/about');
-  expect(await page.textContent('h1')).toBe('About swyxkit!');
+  // about content is rendered from content.md via marked at build time
+  await expect(page.locator('h2#tldr')).toBeVisible();
+  await expect(page.locator('article.prose')).toBeVisible();
 });
 
 test.describe('test blog page', () => {

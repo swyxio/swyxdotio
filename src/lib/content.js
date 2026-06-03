@@ -1,5 +1,5 @@
-import { compile } from 'mdsvex';
 import { dev } from '$app/environment';
+import { env } from '$env/dynamic/private';
 import grayMatter from 'gray-matter';
 
 import {
@@ -8,34 +8,23 @@ import {
 	GH_PUBLISHED_TAGS,
 	REPO_OWNER
 } from './siteConfig';
-import parse from 'parse-link-header';
 import slugify from 'slugify';
-import { remark } from 'remark';
-import remarkParse from 'remark-parse';
-import remarkStringify from 'remark-stringify';
-import rehypeStringify from 'rehype-stringify';
-import rehypeSlug from 'rehype-slug';
-import rehypeAutoLink from 'rehype-autolink-headings';
+import { renderMarkdown } from './markdown';
 
-import remarkToc from 'remark-toc';
-import remarkGithub from 'remark-github';
-import remarkGfm from 'remark-gfm';
-const remarkPlugins = [
-	remarkToc,
-	[remarkGithub, { repository: 'https://github.com/swyxio/swyxdotio/' }],
-	[remarkGfm, { repository: 'https://github.com/swyxio/swyxdotio/' }],
-];
-const rehypePlugins = [
-	rehypeStringify,
-	rehypeSlug,
-	[
-		rehypeAutoLink,
-		{
-			behavior: 'wrap',
-			properties: { class: 'hover:text-yellow-100 no-underline' }
-		}
-	]
-];
+/**
+ * Minimal parser for the GitHub `Link` header — returns the `next` page URL
+ * if present. Replaces `parse-link-header` (which depends on node builtins).
+ * @param {string | null} header
+ * @returns {string | null}
+ */
+function nextLink(header) {
+	if (!header) return null;
+	for (const part of header.split(',')) {
+		const m = part.match(/<([^>]+)>;\s*rel="?next"?/);
+		if (m) return m[1];
+	}
+	return null;
+}
 
 /** @type {import('./types').ContentItem[]} */
 let allBlogposts = [];
@@ -59,8 +48,9 @@ export async function listContent(providedFetch) {
 	let _allBlogposts = [];
 	let next = null;
 	let limit = 0; // just a failsafe against infinite loop - feel free to remove
-	const authheader = process.env.GH_TOKEN && {
-		Authorization: `token ${process.env.GH_TOKEN}`
+	// env.GH_TOKEN works on both Cloudflare (platform.env) and Node (process.env)
+	const authheader = env.GH_TOKEN && {
+		Authorization: `token ${env.GH_TOKEN}`
 	};
 	let url =
 		`https://api.github.com/repos/${GH_USER_REPO}/issues?` +
@@ -74,7 +64,7 @@ export async function listContent(providedFetch) {
 		url += '&' + new URLSearchParams({ creator: REPO_OWNER });
 	}
 	do {
-		const res = await providedFetch(next?.url ?? url, {
+		const res = await providedFetch(next ?? url, {
 			headers: authheader
 		});
 
@@ -103,8 +93,7 @@ export async function listContent(providedFetch) {
 				}
 			}
 		);
-		const headers = parse(res.headers.get('Link'));
-		next = headers && headers.next;
+		next = nextLink(res.headers.get('Link'));
 	} while (next && limit++ < 1000); // just a failsafe against infinite loop - feel free to remove
 	_allBlogposts.sort((a, b) => b.date.valueOf() - a.date.valueOf()); // use valueOf to make TS happy https://stackoverflow.com/a/60688789/1106414
 	allBlogposts = _allBlogposts;
@@ -123,89 +112,15 @@ export async function getContent(providedFetch, slug) {
 		allBlogposts = await listContent(providedFetch);
 		console.log('loaded ' + allBlogposts.length + ' blogposts');
 		if (!allBlogposts.length)
-			throw new Error(
-				'failed to load blogposts for some reason. check token' + process.env.GH_TOKEN
-			);
+			throw new Error('failed to load blogposts for some reason. check GH_TOKEN');
 	}
 	if (!allBlogposts.length) throw new Error('no blogposts');
 	// find the blogpost that matches this slug
 	const blogpost = allBlogposts.find((post) => post.slug === slug);
 	if (blogpost) {
-		const blogbody = blogpost.content
-			.replace(/\n{% youtube (.*?) %}/g, (_, x) => {
-				// https://stackoverflow.com/a/27728417/1106414
-				function youtube_parser(url) {
-					var rx =
-						/^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/)|(?:(?:watch)?\?v(?:i)?=|&v(?:i)?=))([^#&?]*).*/;
-					if (url.match(rx)) return url.match(rx)[1];
-					return url.slice(-11);
-				}
-				const videoId = x.startsWith('https://') ? youtube_parser(x) : x;
-				return `<iframe
-			class="w-full object-contain"
-			srcdoc="
-				<style>
-				    body, .youtubeembed {
-					width: 100%;
-					height: 100%;
-					margin: 0;
-					position: absolute;
-					display: flex;
-					justify-content: center;
-					object-fit: cover;
-				    }
-				</style>
-				<a
-				    href='https://www.youtube.com/embed/${videoId}?autoplay=1'
-				    class='youtubeembed'
-				>
-				    <img
-					src='https://img.youtube.com/vi/${videoId}/sddefault.jpg'
-					class='youtubeembed'
-				    />
-				    <svg
-					version='1.1'
-					viewBox='0 0 68 48'
-					width='68px'
-					style='position: relative;'
-				    >
-					<path d='M66.52,7.74c-0.78-2.93-2.49-5.41-5.42-6.19C55.79,.13,34,0,34,0S12.21,.13,6.9,1.55 C3.97,2.33,2.27,4.81,1.48,7.74C0.06,13.05,0,24,0,24s0.06,10.95,1.48,16.26c0.78,2.93,2.49,5.41,5.42,6.19 C12.21,47.87,34,48,34,48s21.79-0.13,27.1-1.55c2.93-0.78,4.64-3.26,5.42-6.19C67.94,34.95,68,24,68,24S67.94,13.05,66.52,7.74z' fill='#f00'></path>
-					<path d='M 45,24 27,14 27,34' fill='#fff'></path>
-				    </svg>
-				</a>
-			"
-			title="video123"
-			name="video123"
-			allow="accelerometer; autoplay; encrypted-media; gyroscope;
-			picture-in-picture"
-			frameBorder="0"
-			webkitallowfullscreen="true"
-			mozallowfullscreen="true"
-			width="600"
-			height="400"
-			allowFullScreen
-			aria-hidden="true"></iframe>`;
-			})
-			.replace(/\n{% (tweet|twitter) (.*?) %}/g, (_, _2, x) => {
-				const url = x.startsWith('https://twitter.com/') ? x : `https://twitter.com/x/status/${x}`;
-				return `
-					<blockquote class="twitter-tweet" data-lang="en" data-dnt="true" data-theme="dark">
-					<a href="${url}"></a></blockquote> 
-					<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-					`;
-			});
-
-		// compile it with mdsvex
-		const content = (
-			await compile(blogbody, {
-				remarkPlugins,
-				// @ts-ignore
-				rehypePlugins
-			})
-		).code
-			// https://github.com/pngwn/MDsveX/issues/392
-			.replace(/>{@html `<code class="language-/g, '><code class="language-')
-			.replace(/<\/code>`}<\/pre>/g, '</code></pre>');
+		// render markdown -> trusted HTML string via marked + shiki (see ./markdown.js)
+		// youtube/tweet shortcodes and GitHub autolinks are handled as marked extensions
+		const content = await renderMarkdown(blogpost.content);
 
 		return { ...blogpost, content };
 	} else {
@@ -232,13 +147,12 @@ function parseIssue(issue) {
 		}
 
 		let description = data.description ?? content.trim().split('\n')[0];
-		// extract plain text from markdown
-		description = remark()
-			.use(remarkParse)
-			.use(remarkStringify)
-			.processSync(description)
-			.toString();
+		// extract plain text from the (usually single-line) description
 		description = description.replace(/\n/g, ' ');
+		// strip basic markdown emphasis/link syntax so the meta description is clean text
+		description = description
+			.replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1') // [text](url) / ![alt](url) -> text
+			.replace(/[*_`~]/g, ''); // emphasis / code markers
 		// strip html
 		description = description.replace(/<[^>]*>?/gm, '');
 		// strip markdown

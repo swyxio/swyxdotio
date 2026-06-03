@@ -1,11 +1,12 @@
-import { resolve } from 'path';
-import { promises as fs } from 'fs';
 import YAML from 'yaml';
+// Bundle the data files into the worker (Cloudflare has no runtime fs).
+// Vite's `?raw` suffix inlines the file contents as a string at build time.
+import podcastsYml from '../../podcasts.yml?raw';
+import talksYml from '../../talks.yml?raw';
 
 export async function listSpeaking() {
-	const x = await fs.readFile(resolve('./podcasts.yml'), 'utf8');
-	const y = await fs.readFile(resolve('./talks.yml'), 'utf8');
-	// const x = import.meta.globEager('/podcasts.yml') // doesnt work even when i add rollup plugin yml to vite config
+	const x = podcastsYml;
+	const y = talksYml;
 	const podcasts = YAML.parse(x).map((x) => {
 		x.category = 'podcast';
 		x.date = new Date(x.date);

@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>swyx.io — The 2026 Migration</title>
+		<meta
+			name="description"
+			content="A posterity record of the 2026 rebuild of swyx.io: Netlify → Cloudflare, SvelteKit 1 → 2 / Svelte 5, mdsvex → marked + Shiki, and an edge-cached hybrid rendering model."
+		/>
+		<style>
+			:root {
+				--bg: #0b0f17;
+				--panel: #121826;
+				--panel-2: #0e1420;
+				--border: #1f2937;
+				--text: #e5e7eb;
+				--muted: #9ca3af;
+				--accent: #38bdf8;
+				--accent-2: #a78bfa;
+				--good: #34d399;
+				--bad: #f87171;
+				--mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+				--sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+					sans-serif;
+			}
+			* {
+				box-sizing: border-box;
+			}
+			html {
+				font-size: clamp(16px, 0.95rem + 0.25vw, 18px);
+				scroll-behavior: smooth;
+			}
+			body {
+				margin: 0;
+				background: radial-gradient(1200px 600px at 80% -10%, #14243a 0%, transparent 60%), var(--bg);
+				color: var(--text);
+				font-family: var(--sans);
+				line-height: 1.65;
+				-webkit-font-smoothing: antialiased;
+			}
+			.wrap {
+				max-width: 880px;
+				margin: 0 auto;
+				padding: 4rem 1.25rem 6rem;
+			}
+			header.hero {
+				border: 1px solid var(--border);
+				background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
+				border-radius: 18px;
+				padding: 2.5rem 2rem;
+				margin-bottom: 2.5rem;
+			}
+			.eyebrow {
+				font-family: var(--mono);
+				font-size: 0.8rem;
+				letter-spacing: 0.12em;
+				text-transform: uppercase;
+				color: var(--accent);
+				margin: 0 0 0.75rem;
+			}
+			h1 {
+				font-size: clamp(1.9rem, 1.2rem + 3vw, 3rem);
+				line-height: 1.1;
+				margin: 0 0 0.75rem;
+				background: linear-gradient(90deg, #fff, var(--accent) 60%, var(--accent-2));
+				-webkit-background-clip: text;
+				background-clip: text;
+				color: transparent;
+			}
+			.lede {
+				color: var(--muted);
+				font-size: 1.08rem;
+				margin: 0;
+				max-width: 60ch;
+			}
+			.meta {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.5rem;
+				margin-top: 1.5rem;
+			}
+			.tag {
+				font-family: var(--mono);
+				font-size: 0.78rem;
+				border: 1px solid var(--border);
+				background: #0b1120;
+				color: var(--muted);
+				padding: 0.3rem 0.6rem;
+				border-radius: 999px;
+			}
+			h2 {
+				font-size: 1.5rem;
+				margin: 3rem 0 1rem;
+				padding-bottom: 0.5rem;
+				border-bottom: 1px solid var(--border);
+			}
+			h3 {
+				font-size: 1.1rem;
+				margin: 2rem 0 0.5rem;
+				color: #fff;
+			}
+			p {
+				color: #d1d5db;
+			}
+			a {
+				color: var(--accent);
+			}
+			code {
+				font-family: var(--mono);
+				font-size: 0.88em;
+				background: #0b1120;
+				border: 1px solid var(--border);
+				padding: 0.1rem 0.35rem;
+				border-radius: 6px;
+				color: #e5e7eb;
+			}
+			table {
+				width: 100%;
+				border-collapse: collapse;
+				margin: 1rem 0 0.5rem;
+				font-size: 0.95rem;
+			}
+			th,
+			td {
+				text-align: left;
+				padding: 0.7rem 0.85rem;
+				border: 1px solid var(--border);
+				vertical-align: top;
+			}
+			th {
+				background: #0b1120;
+				font-family: var(--mono);
+				font-size: 0.78rem;
+				letter-spacing: 0.06em;
+				text-transform: uppercase;
+				color: var(--muted);
+			}
+			td.before {
+				color: #fca5a5;
+			}
+			td.after {
+				color: #86efac;
+			}
+			.dim {
+				color: var(--muted);
+			}
+			.cards {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+				gap: 1rem;
+				margin-top: 1rem;
+			}
+			.card {
+				border: 1px solid var(--border);
+				background: var(--panel);
+				border-radius: 14px;
+				padding: 1.1rem 1.2rem;
+			}
+			.card .k {
+				font-family: var(--mono);
+				font-size: 1.6rem;
+				color: var(--accent);
+				display: block;
+			}
+			.card .v {
+				color: var(--muted);
+				font-size: 0.9rem;
+			}
+			.flow {
+				border: 1px solid var(--border);
+				background: var(--panel-2);
+				border-radius: 14px;
+				padding: 1.25rem 1.4rem;
+				font-family: var(--mono);
+				font-size: 0.82rem;
+				color: #cbd5e1;
+				overflow-x: auto;
+				line-height: 1.7;
+				white-space: pre;
+			}
+			ul.clean {
+				list-style: none;
+				padding: 0;
+			}
+			ul.clean li {
+				padding-left: 1.6rem;
+				position: relative;
+				margin: 0.5rem 0;
+			}
+			ul.clean li::before {
+				content: "→";
+				position: absolute;
+				left: 0;
+				color: var(--accent);
+			}
+			.pill {
+				display: inline-block;
+				font-family: var(--mono);
+				font-size: 0.72rem;
+				padding: 0.15rem 0.5rem;
+				border-radius: 6px;
+				border: 1px solid var(--border);
+			}
+			.pill.good {
+				color: var(--good);
+				border-color: #14532d;
+				background: #052e1a;
+			}
+			.pill.bad {
+				color: var(--bad);
+				border-color: #7f1d1d;
+				background: #2a0d0d;
+			}
+			footer {
+				margin-top: 4rem;
+				padding-top: 1.5rem;
+				border-top: 1px solid var(--border);
+				color: var(--muted);
+				font-size: 0.88rem;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="wrap">
+			<header class="hero">
+				<p class="eyebrow">Posterity Record · swyx.io</p>
+				<h1>The 2026 Migration</h1>
+				<p class="lede">
+					A complete re-platforming of swyx.io — off Netlify and onto Cloudflare, onto SvelteKit 2 /
+					Svelte 5, off the mdsvex/remark markdown toolchain, and onto an edge-cached hybrid
+					rendering model where new posts go live with no rebuild.
+				</p>
+				<div class="meta">
+					<span class="tag">June 2026</span>
+					<span class="tag">Netlify → Cloudflare</span>
+					<span class="tag">SvelteKit 2 · Svelte 5</span>
+					<span class="tag">marked + Shiki</span>
+					<span class="tag">GitHub Issues CMS</span>
+				</div>
+			</header>
+
+			<section>
+				<h2>Why</h2>
+				<p>
+					The site renders blog posts from GitHub Issues at request time. Under the old setup, the
+					GitHub token wasn't reliably available at runtime, so the app frequently fell back to the
+					<strong>unauthenticated GitHub API (60 requests/hour)</strong> and broke. The markdown
+					pipeline (mdsvex + remark/rehype) had also drifted into a pile of regex workarounds, and the
+					toolchain was a major version behind across the board.
+				</p>
+				<p>
+					The 2026 rebuild fixes the root causes: authenticate properly on the edge, render markdown
+					with a lean modern pipeline, and cache aggressively at the edge so publishing is instant and
+					serving is O(1).
+				</p>
+			</section>
+
+			<section>
+				<h2>Before → After</h2>
+				<table>
+					<thead>
+						<tr>
+							<th>Area</th>
+							<th>Before</th>
+							<th>After</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Host / adapter</td>
+							<td class="before">Netlify (<code>adapter-netlify</code>)</td>
+							<td class="after">Cloudflare Pages (<code>adapter-cloudflare</code>)</td>
+						</tr>
+						<tr>
+							<td>Framework</td>
+							<td class="before">SvelteKit 1 · Svelte 4</td>
+							<td class="after">SvelteKit 2 · Svelte 5 (runes)</td>
+						</tr>
+						<tr>
+							<td>Build tool / Node</td>
+							<td class="before">Vite 4 · Node 18</td>
+							<td class="after">Vite 5 · Node 20</td>
+						</tr>
+						<tr>
+							<td>Markdown rendering</td>
+							<td class="before">mdsvex + remark / rehype (+ regex hacks)</td>
+							<td class="after"><code>marked</code> + <code>shiki</code> (server-only)</td>
+						</tr>
+						<tr>
+							<td>Syntax highlighting</td>
+							<td class="before">shipped to the client (~800&nbsp;KB chunk)</td>
+							<td class="after">server-only; 35&nbsp;KB largest client chunk</td>
+						</tr>
+						<tr>
+							<td>RSS / link parsing</td>
+							<td class="before"><code>rss</code> + <code>parse-link-header</code> (Node-only builtins)</td>
+							<td class="after">tiny Workers-safe inline implementations</td>
+						</tr>
+						<tr>
+							<td>Component workshop</td>
+							<td class="before">Histoire (stories + deps)</td>
+							<td class="after">removed</td>
+						</tr>
+						<tr>
+							<td>GitHub auth at runtime</td>
+							<td class="before"><code>process.env.GH_TOKEN</code> (empty on edge → 60/hr)</td>
+							<td class="after"><code>$env/dynamic/private</code> (resolves via <code>platform.env</code>)</td>
+						</tr>
+						<tr>
+							<td>Rendering model</td>
+							<td class="before">mostly prerender / ad-hoc cache headers</td>
+							<td class="after">hybrid: static shell + on-demand SSR, edge-cached</td>
+						</tr>
+						<tr>
+							<td>Publishing a post</td>
+							<td class="before">required a rebuild / redeploy</td>
+							<td class="after">instant — webhook purges the edge cache</td>
+						</tr>
+						<tr>
+							<td>Light-mode body color</td>
+							<td class="before">white-on-white (invisible) bug</td>
+							<td class="after">fixed; system fonts + fluid type</td>
+						</tr>
+					</tbody>
+				</table>
+			</section>
+
+			<section>
+				<h2>The rendering model</h2>
+				<p>
+					Pages split into two buckets. Truly static pages are prerendered at build. Everything that
+					depends on post content is rendered on demand on Cloudflare Workers and stored in the Cache
+					API with <code>stale-while-revalidate</code>, so the first request renders and the rest are
+					served instantly from the edge.
+				</p>
+				<h3>Prerendered at build <span class="pill good">static</span></h3>
+				<ul class="clean">
+					<li><code>/about</code>, <code>/portfolio</code>, <code>/subscribe</code> — rendered once from local markdown</li>
+				</ul>
+				<h3>Dynamic + edge-cached <span class="pill">SWR</span></h3>
+				<ul class="clean">
+					<li><code>/</code>, <code>/ideas</code>, <code>/[slug]</code></li>
+					<li><code>/rss.xml</code>, <code>/sitemap.xml</code></li>
+					<li><code>/api/*</code> (listContent, latestPosts, ideas/[slug])</li>
+				</ul>
+
+				<h3>Request flow</h3>
+				<div class="flow">GET /some-post
+  │
+  ├─ hooks.server.js → caches.default.match()
+  │        │
+  │        ├─ HIT  → return cached response            (O(1), no GitHub call)
+  │        └─ MISS → resolve() → SSR render
+  │                    ├─ fetch GitHub Issues (authenticated)
+  │                    ├─ marked + shiki → HTML
+  │                    └─ if Cache-Control has s-maxage:
+  │                         ctx.waitUntil(cache.put(...))
+  │
+  └─ Cache-Control: public, max-age=0,
+                    s-maxage=86400,
+                    stale-while-revalidate=604800</div>
+
+				<h3>Instant publishing (on-demand revalidation)</h3>
+				<div class="flow">Edit a GitHub Issue
+  │
+  └─ GitHub webhook (issues event)
+       │
+       └─ POST /api/revalidate
+            ├─ verify HMAC SHA-256 (GH_WEBHOOK_SECRET, Web Crypto)
+            ├─ derive slug from issue frontmatter
+            └─ purge edge cache for:
+                 / · /ideas · /rss.xml · /sitemap.xml
+                 /{slug} · /api/ideas/{slug}.json · list endpoints
+                 (+ optional zone-wide purge via CF API)</div>
+			</section>
+
+			<section>
+				<h2>By the numbers</h2>
+				<div class="cards">
+					<div class="card">
+						<span class="k">60 → 5000</span>
+						<span class="v">GitHub API requests/hr once authenticated on the edge</span>
+					</div>
+					<div class="card">
+						<span class="k">~800KB → 35KB</span>
+						<span class="v">largest client JS chunk (Shiki moved server-side)</span>
+					</div>
+					<div class="card">
+						<span class="k">0s</span>
+						<span class="v">rebuild time to publish a new post (webhook purge)</span>
+					</div>
+					<div class="card">
+						<span class="k">O(1)</span>
+						<span class="v">edge-cache serving for repeat requests</span>
+					</div>
+				</div>
+			</section>
+
+			<section>
+				<h2>New / changed files of note</h2>
+				<ul class="clean">
+					<li><code>src/lib/markdown.js</code> — marked + Shiki renderer with youtube/tweet shortcodes and GitHub autolinks</li>
+					<li><code>src/hooks.server.js</code> — Cache API edge caching with SWR opt-in</li>
+					<li><code>src/routes/api/revalidate/+server.js</code> — HMAC-verified webhook cache purge</li>
+					<li><code>wrangler.toml</code> + <code>static/_headers</code> — Cloudflare config & security headers</li>
+					<li><code>src/routes/{about,portfolio}/content.md</code> — ex-<code>.svx</code> content, now marked-rendered</li>
+					<li><code>tests/markdown.test.mjs</code> — renderer regression checks (embeds, heading IDs, autolinks, highlighting)</li>
+				</ul>
+			</section>
+
+			<section>
+				<h2>Required environment</h2>
+				<table>
+					<thead>
+						<tr>
+							<th>Variable</th>
+							<th>Purpose</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>GH_TOKEN</code></td>
+							<td>GitHub PAT — raises rate limit 60 → 5000/hr. Needed at build <em>and</em> runtime.</td>
+						</tr>
+						<tr>
+							<td><code>GH_WEBHOOK_SECRET</code></td>
+							<td>Shared secret to verify the GitHub Issues webhook hitting <code>/api/revalidate</code>.</td>
+						</tr>
+						<tr>
+							<td><code>CF_API_TOKEN</code> · <code>CF_ZONE_ID</code></td>
+							<td class="dim">Optional — enables a zone-wide CDN purge in addition to the local Cache API purge.</td>
+						</tr>
+					</tbody>
+				</table>
+			</section>
+
+			<footer>
+				<p>
+					Generated as a posterity artifact for the June 2026 rebuild of
+					<a href="https://www.swyx.io">swyx.io</a>. Lineage:
+					<a href="https://www.swyx.io/rewrite-2022">2022</a> ·
+					<a href="https://www.swyx.io/rewrite-2023">2023</a> · 2026 (this one).
+				</p>
+			</footer>
+		</div>
+	</body>
+</html>

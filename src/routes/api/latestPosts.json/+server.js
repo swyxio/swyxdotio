@@ -15,9 +15,8 @@ export async function GET({ fetch, setHeaders }) {
 		return [];
 	});
 	list = list.concat(speaking).sort((a, b) => b.date - a.date);
-	setHeaders({
-		'Cache-Control': `max-age=0, s-max-age=${3600}` // 1 hour
-	});
+	const cacheControl = 'public, max-age=0, s-maxage=86400, stale-while-revalidate=604800';
+	setHeaders({ 'Cache-Control': cacheControl });
 	return new Response(
 		JSON.stringify(
 			list
@@ -36,7 +35,7 @@ export async function GET({ fetch, setHeaders }) {
 		{
 			headers: {
 				'content-type': 'application/json; charset=utf-8',
-				'Cache-Control': `max-age=0, s-max-age=${3600}` // 1 hour
+				'Cache-Control': cacheControl
 			}
 		}
 	);

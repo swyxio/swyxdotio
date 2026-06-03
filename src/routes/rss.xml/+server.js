@@ -1,39 +1,45 @@
-import RSS from 'rss';
 import { SITE_TITLE, SITE_URL } from '$lib/siteConfig';
-import { remark } from 'remark';
-import remarkHTML from 'remark-html';
 import { listContent } from '$lib/content';
 
-// Reference: https://github.com/sveltejs/kit/blob/master/examples/hn.svelte.dev/src/routes/%5Blist%5D/rss.js
+/** Escape a string for safe inclusion in XML. */
+function xml(str) {
+	return String(str ?? '')
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&apos;');
+}
+
 /** @type {import('@sveltejs/kit').RequestHandler} */
 export async function GET({ fetch }) {
-	const feed = new RSS({
-		title: SITE_TITLE + ' RSS Feed',
-		site_url: SITE_URL,
-		feed_url: SITE_URL + '/api/rss.xml'
-	});
-
 	const allBlogs = await listContent(fetch);
-	allBlogs.forEach((post) => {
+	const items = allBlogs
+		.map(
+			(post) => `
+		<item>
+			<title>${xml(post.title)}</title>
+			<link>${SITE_URL}/${xml(post.slug)}</link>
+			<guid isPermaLink="true">${SITE_URL}/${xml(post.slug)}</guid>
+			<pubDate>${new Date(post.date).toUTCString()}</pubDate>
+			<description>${xml(post.description)}</description>
+		</item>`
+		)
+		.join('');
 
+	const body = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+	<channel>
+		<title>${xml(SITE_TITLE + ' RSS Feed')}</title>
+		<link>${SITE_URL}</link>
+		<atom:link href="${SITE_URL}/rss.xml" rel="self" type="application/rss+xml" />
+		<description>${xml(SITE_TITLE)}</description>${items}
+	</channel>
+</rss>`;
 
-		// extract HTML from markdown
-		const htmlDescription = remark()
-			.use(remarkHTML)
-			.processSync(post.description)
-
-		feed.item({
-			title: post.title,
-			url: SITE_URL + `/${post.slug}`,
-			date: post.date,
-			description: htmlDescription.toString()
-		});
-	});
-
-	// Suggestion (check for correctness before using):
-	return new Response(feed.xml({ indent: true }), {
+	return new Response(body, {
 		headers: {
-			'Cache-Control': `max-age=0, s-maxage=${86400}`, // 24 hours
+			'Cache-Control': 'public, max-age=0, s-maxage=86400, stale-while-revalidate=604800',
 			'Content-Type': 'application/rss+xml'
 		}
 	});

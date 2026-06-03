@@ -6,5 +6,16 @@ declare namespace App {
 	// interface Error {}
 	// interface Locals {}
 	// interface PageData {}
-	// interface Platform {}
+	interface Platform {
+		env?: {
+			GH_TOKEN?: string;
+			GH_WEBHOOK_SECRET?: string;
+			CF_API_TOKEN?: string;
+			CF_ZONE_ID?: string;
+		};
+		context?: {
+			waitUntil(promise: Promise<unknown>): void;
+		};
+		caches?: CacheStorage & { default: Cache };
+	}
 }

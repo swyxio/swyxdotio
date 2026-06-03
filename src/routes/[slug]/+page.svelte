@@ -2,7 +2,6 @@
 	import { MY_TWITTER_HANDLE, SITE_URL } from '$lib/siteConfig';
 	// import Comments from '../../components/Comments.svelte';
 
-	import 'prism-themes/themes/prism-shades-of-purple.min.css';
 	import Newsletter from '../../components/Newsletter.svelte';
 	import Reactions from '../../components/Reactions.svelte';
 	import LatestPosts from '../../components/LatestPosts.svelte';
@@ -10,13 +9,13 @@
 
 
 	// https://svelte-put.vnphanquang.com/docs/toc
-  import { toc, createTocStore } from '@svelte-put/toc';
+  import { Toc } from '@svelte-put/toc';
 	import TableOfContents from './TableOfContents.svelte';
 	import utterances, {injectScript}  from './loadUtterances'
 	import WebMentions from '../../components/WebMentions.svelte';
 
-	// table of contennts
-  const tocStore = createTocStore();
+	// table of contents (@svelte-put/toc v6)
+  const toc = new Toc({ selector: ':where(h1, h2, h3)', anchor: false, observe: true });
 
 
 	/** @type {import('./$types').PageData} */
@@ -71,9 +70,9 @@
 	<meta name="twitter:image" content={image} />
 </svelte:head>
 
-<TableOfContents {tocStore} />
+<TableOfContents {toc} />
 
-<article use:toc={{ store: tocStore, anchor: false, observe: true, selector: ':where(h1, h2, h3)' }} class="items-start justify-center w-full mx-auto mt-16 mb-32 prose swyxcontent dark:prose-invert max-w-none">
+<article use:toc.actions.root class="items-start justify-center w-full mx-auto mt-16 mb-32 prose swyxcontent dark:prose-invert max-w-none">
 	<h1 class="md:text-center mb-8 text-3xl font-bold tracking-tight text-black dark:text-white md:text-5xl ">
 		{json.title}
 	</h1>
@@ -185,20 +184,15 @@
 		.swyxcontent {
 			--gap: clamp(1rem, 6vw, 3rem);
 			--full: minmax(var(--gap), 1fr);
-			/* --content: min(65ch, 100% - var(--gap) * 2); */
-			--content: minmax(65ch, 56rem);
+			--content: minmax(0, 56rem);
 			--popout: minmax(0, 2rem);
 			--feature: minmax(0, 5rem);
 
 			display: grid;
 			grid-template-columns: 
-				[full-start] var(--full)
-				[feature-start] 0rem
-				[popout-start] 0rem
-				[content-start] var(--content) [content-end]
-				[popout-end] 0rem
-				[feature-end] 0rem
-				var(--full) [full-end]
+				[full-start feature-start popout-start content-start]
+				minmax(0, 1fr)
+				[content-end popout-end feature-end full-end]
 		}
 
 		@media (min-width: 768px) {
@@ -216,6 +210,7 @@
 
 	:global(.swyxcontent > *) {
 		grid-column: content;
+		min-width: 0;
 	}
 
 	article :global(pre) {

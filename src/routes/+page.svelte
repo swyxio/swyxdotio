@@ -3,8 +3,8 @@
 	import FeatureCard from '../components/FeatureCard.svelte';
 	import LatestPosts from '../components/LatestPosts.svelte';
 	import YTEmbed from '../components/YouTubeEmbed.svelte';
-	import FeaturedWriting from '../components/FeaturedWriting.svx';
-	import FeaturedSpeaking from '../components/FeaturedSpeaking.svx';
+	import FeaturedWriting from '../components/FeaturedWriting.svelte';
+	import FeaturedSpeaking from '../components/FeaturedSpeaking.svelte';
 	import {
 		SITE_URL,
 		REPO_URL,

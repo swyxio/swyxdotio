@@ -1,9 +1,10 @@
 <script>
 	import { onMount } from "svelte";
 
-
-	export let tocStore;
-	let isOpen = false;
+	// @svelte-put/toc v6 Toc instance (runes-based reactive state)
+	let { toc } = $props();
+	let isOpen = $state(false);
+	let items = $derived([...toc.items.values()]);
 	onMount(() => {
 		// set isOpen if window width is mobile checking the media query
 		if (window.matchMedia("(min-width: 640px)").matches) {
@@ -14,7 +15,7 @@
 </script>
 
 <!-- Table of contents thing -->
-{#if Object.values($tocStore.items).length && Object.values($tocStore.items).length > 1}
+{#if items.length > 1}
 	<section
 		class="fixed right-4 bottom-1 max-w-[12em] rounded-xl bg-white/25 hover:bg-white/30 p-2 backdrop-blur"
 	>
@@ -29,11 +30,11 @@
 					Table of Contents
 					<button class="hover:text-white" on:click={() => (isOpen = !isOpen)}> [X] </button>
 				</h2>
-				{#each Object.values($tocStore.items) as { id, text }}
+				{#each items as { id, text }}
 					<a
 						class="ml-2 block bg-opacity-25 text-sm"
-						class:!text-red-300={$tocStore.activeItem?.id === id}
-						class:underline={$tocStore.activeItem?.id === id}
+						class:!text-red-300={toc.activeItem?.id === id}
+						class:underline={toc.activeItem?.id === id}
 						href="#{id}"
 					>
 						<li>{text}</li>

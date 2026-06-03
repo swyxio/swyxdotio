@@ -13,7 +13,8 @@ export async function load({ setHeaders, fetch }) {
   /** @type {import('$lib/types').ContentItem[]} */
   const items = await res.json();
   setHeaders({
-    'cache-control': 'public, max-age=3600' // 1 hour
+    // dynamic + edge-cached (see hooks.server.js); purged on publish via /api/revalidate
+    'cache-control': 'public, max-age=0, s-maxage=86400, stale-while-revalidate=604800'
   });
   return { items: items.slice(0, 20) };
 }
