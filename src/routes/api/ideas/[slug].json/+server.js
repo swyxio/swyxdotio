@@ -4,13 +4,15 @@ import { error } from '@sveltejs/kit';
 /**
  * @type {import('@sveltejs/kit').RequestHandler}
  */
-export async function GET({ fetch, params, setHeaders }) {
+export async function GET({ fetch, params, setHeaders, platform }) {
 	const { slug } = params;
 	let data;
 	if (!slug) throw error(404, ' - no slug provided');
 	if (!isBlogSlug(slug)) throw error(404, ' - invalid slug');
 	try {
-		data = await getContent(fetch, slug);
+		data = await getContent(fetch, slug, platform?.env?.CONTENT_MANIFEST, {
+			context: platform?.context
+		});
 		const cacheControl = 'public, max-age=0, s-maxage=86400, stale-while-revalidate=604800';
 		setHeaders({ 'Cache-Control': cacheControl });
 		return new Response(JSON.stringify(data), {
@@ -20,7 +22,7 @@ export async function GET({ fetch, params, setHeaders }) {
 			}
 		});
 	} catch (err) {
-		console.log("didn't find ", slug)
+		console.log("didn't find ", slug);
 		console.error(err);
 		throw error(404, err.message);
 	}

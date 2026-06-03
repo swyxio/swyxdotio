@@ -5,10 +5,12 @@ import { listSpeaking } from '$lib/local-content';
 /**
  * @type {import('./$types').RequestHandler}
  */
-export async function GET({ fetch, setHeaders }) {
+export async function GET({ fetch, setHeaders, platform }) {
 	let degraded = false;
-	let list = await listContent(fetch).catch((err) => {
-		console.error('failed to load GitHub content for latest posts', err);
+	let list = await listContent(fetch, platform?.env?.CONTENT_MANIFEST, {
+		context: platform?.context
+	}).catch((err) => {
+		console.error('failed to load content manifest for latest posts', err);
 		degraded = true;
 		return [];
 	});
@@ -25,7 +27,7 @@ export async function GET({ fetch, setHeaders }) {
 	return new Response(
 		JSON.stringify(
 			list
-					.slice(0, 20) // homepage uses 20; article pages trim this to 10
+				.slice(0, 20) // homepage uses 20; article pages trim this to 10
 				.map((item) => {
 					return {
 						slug: item.slug,

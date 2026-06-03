@@ -3,9 +3,9 @@
 // Strategy: any GET response that opts in via `Cache-Control: s-maxage=...`
 // is stored in the Cloudflare Cache API (`caches.default`). Subsequent
 // requests are served from the edge cache in O(1) without re-rendering or
-// hitting the GitHub API. Freshness is driven by `s-maxage` +
-// `stale-while-revalidate`, and edits are made live instantly by the
-// `/api/revalidate` webhook which purges the affected URLs.
+// hitting the GitHub API. Freshness is driven by `s-maxage`, and edits are made
+// live instantly by the `/api/revalidate` webhook which purges the affected
+// URLs. Cloudflare Cache API ignores `stale-while-revalidate` on cache.put().
 //
 // In dev / non-Cloudflare runtimes `caches` is undefined and we no-op.
 

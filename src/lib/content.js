@@ -1,4 +1,3 @@
-import { dev } from '$app/environment';
 import { env } from '$env/dynamic/private';
 import grayMatter from 'gray-matter';
 
@@ -10,6 +9,11 @@ import {
 } from './siteConfig';
 import slugify from 'slugify';
 import { renderMarkdown } from './markdown';
+import {
+	isContentManifestStale,
+	readContentManifest,
+	writeContentManifest
+} from './content-manifest';
 
 /**
  * Minimal parser for the GitHub `Link` header — returns the `next` page URL
@@ -28,6 +32,8 @@ function nextLink(header) {
 
 /** @type {import('./types').ContentItem[]} */
 let allBlogposts = [];
+/** @type {Promise<import('./types').ContentItem[]> | undefined} */
+let backgroundRefresh;
 // let etag = null // todo - implmement etag header
 
 const GITHUB_FETCH_MAX_ATTEMPTS = 3;
@@ -170,12 +176,17 @@ async function fetchGithubIssuesPage(providedFetch, url, headers) {
 	throw new Error('GitHub content fetch failed after retries');
 }
 
-export async function listContent(providedFetch) {
+/**
+ * @param {Function | undefined} providedFetch
+ * @returns {Promise<import('./types').ContentItem[]>}
+ */
+async function fetchContentFromGithub(providedFetch) {
 	// use a diff var so as to not have race conditions while fetching
 	// TODO: make sure to handle this better when doing etags or cache restore
 
 	/** @type {import('./types').ContentItem[]} */
 	let _allBlogposts = [];
+	const contentFetch = providedFetch ?? globalThis.fetch;
 	let next = null;
 	let limit = 0; // just a failsafe against infinite loop - feel free to remove
 	// env.GH_TOKEN works on both Cloudflare (platform.env) and Node (process.env).
@@ -191,29 +202,86 @@ export async function listContent(providedFetch) {
 		new URLSearchParams({
 			state: 'all',
 			labels: GH_PUBLISHED_TAGS.toString(),
-			per_page: '100',
+			per_page: '100'
 		});
 	// pull issues created by owner only if allowed author = repo owner
 	if (APPROVED_POSTERS_GH_USERNAME.length === 1 && APPROVED_POSTERS_GH_USERNAME[0] === REPO_OWNER) {
 		url += '&' + new URLSearchParams({ creator: REPO_OWNER });
 	}
-	try {
-		do {
-			const page = await fetchGithubIssuesPage(providedFetch, next ?? url, ghHeaders);
-			page.issues.forEach(
-				/** @param {import('./types').GithubIssue} issue */
-				(issue) => {
-					if (
-						// labels check not needed anymore as we have set the labels param in github api
-						// issue.labels.some((label) => GH_PUBLISHED_TAGS.includes(label.name)) &&
-						APPROVED_POSTERS_GH_USERNAME.includes(issue.user.login)
-					) {
-						_allBlogposts.push(parseIssue(issue));
-					}
+	do {
+		const page = await fetchGithubIssuesPage(contentFetch, next ?? url, ghHeaders);
+		page.issues.forEach(
+			/** @param {import('./types').GithubIssue} issue */
+			(issue) => {
+				if (
+					// labels check not needed anymore as we have set the labels param in github api
+					// issue.labels.some((label) => GH_PUBLISHED_TAGS.includes(label.name)) &&
+					APPROVED_POSTERS_GH_USERNAME.includes(issue.user.login)
+				) {
+					_allBlogposts.push(parseIssue(issue));
 				}
-			);
-			next = page.next;
-		} while (next && limit++ < 1000); // just a failsafe against infinite loop - feel free to remove
+			}
+		);
+		next = page.next;
+	} while (next && limit++ < 1000); // just a failsafe against infinite loop - feel free to remove
+	_allBlogposts.sort((a, b) => b.date.valueOf() - a.date.valueOf()); // use valueOf to make TS happy https://stackoverflow.com/a/60688789/1106414
+	return _allBlogposts;
+}
+
+/**
+ * @param {Function | undefined} providedFetch
+ * @param {import('./content-manifest').ContentManifestStore | undefined} contentManifest
+ * @param {{ requireManifestWrite?: boolean }} [options]
+ * @returns {Promise<import('./types').ContentItem[]>}
+ */
+export async function refreshContentManifest(
+	providedFetch,
+	contentManifest,
+	{ requireManifestWrite = false } = {}
+) {
+	const refreshedBlogposts = await fetchContentFromGithub(providedFetch);
+	allBlogposts = refreshedBlogposts;
+	try {
+		const persisted = await writeContentManifest(contentManifest, refreshedBlogposts);
+		if (requireManifestWrite && !persisted) {
+			throw new Error('CONTENT_MANIFEST KV binding not configured');
+		}
+	} catch (err) {
+		console.error('Content manifest write failed', { errorName: errorName(err) });
+		if (requireManifestWrite) throw err;
+	}
+	return refreshedBlogposts;
+}
+
+/**
+ * @param {Function | undefined} providedFetch
+ * @param {import('./content-manifest').ContentManifestStore | undefined} contentManifest
+ * @param {{ context?: { waitUntil(promise: Promise<unknown>): void } }} [options]
+ * @returns {Promise<import('./types').ContentItem[]>}
+ */
+export async function listContent(providedFetch, contentManifest, { context } = {}) {
+	const persistedManifest = await readContentManifest(contentManifest);
+	if (persistedManifest) {
+		allBlogposts = persistedManifest.blogposts;
+		if (context?.waitUntil && isContentManifestStale(persistedManifest)) {
+			if (!backgroundRefresh) {
+				backgroundRefresh = refreshContentManifest(providedFetch, contentManifest)
+					.catch((err) => {
+						console.error('Background content manifest refresh failed', {
+							errorName: errorName(err)
+						});
+						return allBlogposts;
+					})
+					.finally(() => {
+						backgroundRefresh = undefined;
+					});
+			}
+			context.waitUntil(backgroundRefresh);
+		}
+		return persistedManifest.blogposts;
+	}
+	try {
+		return await refreshContentManifest(providedFetch, contentManifest);
 	} catch (err) {
 		if (allBlogposts.length > 0) {
 			console.error('GitHub content refresh failed; serving stale cache', {
@@ -224,25 +292,21 @@ export async function listContent(providedFetch) {
 		}
 		throw err;
 	}
-	_allBlogposts.sort((a, b) => b.date.valueOf() - a.date.valueOf()); // use valueOf to make TS happy https://stackoverflow.com/a/60688789/1106414
-	allBlogposts = _allBlogposts;
-	return _allBlogposts;
 }
 
 /**
  * @param {Function} providedFetch from sveltekit
  * @param {string} slug of the file to retrieve
+ * @param {import('./content-manifest').ContentManifestStore | undefined} contentManifest
+ * @param {{ context?: { waitUntil(promise: Promise<unknown>): void } }} [options]
  * @returns {Promise<import('./types').ContentItem[]>}
  */
-export async function getContent(providedFetch, slug) {
-	// get all blogposts if not already done - or in development
-	if (dev || allBlogposts.length === 0) {
-		console.log('loading allBlogposts');
-		allBlogposts = await listContent(providedFetch);
-		console.log('loaded ' + allBlogposts.length + ' blogposts');
-		if (!allBlogposts.length)
-			throw new Error('failed to load blogposts for some reason. check GH_TOKEN');
-	}
+export async function getContent(providedFetch, slug, contentManifest, options) {
+	console.log('loading allBlogposts');
+	allBlogposts = await listContent(providedFetch, contentManifest, options);
+	console.log('loaded ' + allBlogposts.length + ' blogposts');
+	if (!allBlogposts.length)
+		throw new Error('failed to load blogposts for some reason. check GH_TOKEN');
 	if (!allBlogposts.length) throw new Error('no blogposts');
 	// find the blogpost that matches this slug
 	const blogpost = allBlogposts.find((post) => post.slug === slug);
@@ -270,9 +334,9 @@ function parseIssue(issue) {
 		if (data.slug) {
 			slug = data.slug;
 		} else if (data.devToUrl) {
-			slug = data.devToUrl.split('/')[4] // if from devto, but no slug, it used the devto slug
+			slug = data.devToUrl.split('/')[4]; // if from devto, but no slug, it used the devto slug
 		} else {
-			slug = slugify(title, {remove: /[*+~.()'"!:@]/g}); // otherwise titles with : colons wont parse
+			slug = slugify(title, { remove: /[*+~.()'"!:@]/g }); // otherwise titles with : colons wont parse
 		}
 
 		let description = data.description ?? content.trim().split('\n')[0];

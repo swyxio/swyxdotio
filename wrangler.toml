@@ -17,6 +17,9 @@ directory = ".svelte-kit/cloudflare"
 [secrets]
 required = ["GH_TOKEN"]
 
+[[kv_namespaces]]
+binding = "CONTENT_MANIFEST"
+
 # Example bindings for future use (uncomment + configure when needed):
 # [[durable_objects.bindings]]
 # name = "MY_DO"

@@ -12,6 +12,10 @@ declare namespace App {
 			GH_WEBHOOK_SECRET?: string;
 			CF_API_TOKEN?: string;
 			CF_ZONE_ID?: string;
+			CONTENT_MANIFEST?: {
+				get(key: string): Promise<string | null>;
+				put(key: string, value: string): Promise<void>;
+			};
 		};
 		context?: {
 			waitUntil(promise: Promise<unknown>): void;

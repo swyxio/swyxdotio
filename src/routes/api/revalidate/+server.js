@@ -8,6 +8,8 @@ import { error, json } from '@sveltejs/kit';
 import grayMatter from 'gray-matter';
 import slugify from 'slugify';
 import { SITE_URL } from '$lib/siteConfig';
+import { refreshContentManifest } from '$lib/content';
+import { env } from '$env/dynamic/private';
 
 export const prerender = false;
 
@@ -24,8 +26,7 @@ async function verifySignature(secret, payload, signatureHeader) {
 	);
 	const sigBuffer = await crypto.subtle.sign('HMAC', key, enc.encode(payload));
 	const expected =
-		'sha256=' +
-		[...new Uint8Array(sigBuffer)].map((b) => b.toString(16).padStart(2, '0')).join('');
+		'sha256=' + [...new Uint8Array(sigBuffer)].map((b) => b.toString(16).padStart(2, '0')).join('');
 	// length-safe compare
 	if (expected.length !== signatureHeader.length) return false;
 	let mismatch = 0;
@@ -49,9 +50,21 @@ function deriveSlug(issue) {
 	}
 }
 
+/** Derive the previous slug when an edit renamed the post URL. */
+function derivePreviousSlug(payload) {
+	const previousBody = payload.changes?.body?.from;
+	const previousTitle = payload.changes?.title?.from;
+	if (!previousBody && !previousTitle) return null;
+	return deriveSlug({
+		...payload.issue,
+		body: previousBody ?? payload.issue.body,
+		title: previousTitle ?? payload.issue.title
+	});
+}
+
 /** @type {import('./$types').RequestHandler} */
-export async function POST({ request, platform }) {
-	const secret = platform?.env?.GH_WEBHOOK_SECRET ?? process.env.GH_WEBHOOK_SECRET;
+export async function POST({ request, platform, fetch }) {
+	const secret = env.GH_WEBHOOK_SECRET;
 	if (!secret) throw error(500, 'GH_WEBHOOK_SECRET not configured');
 
 	const raw = await request.text();
@@ -65,14 +78,34 @@ export async function POST({ request, platform }) {
 		return json({ ok: true, skipped: `event ${event}` });
 	}
 
-	/** @type {{ action: string, issue: any }} */
+	/** @type {{ action: string, issue: any, changes?: { body?: { from?: string }, title?: { from?: string } } }} */
 	const payload = JSON.parse(raw);
 	const slug = deriveSlug(payload.issue);
+	const previousSlug = derivePreviousSlug(payload);
+	let refreshedBlogposts;
+	try {
+		refreshedBlogposts = await refreshContentManifest(fetch, platform?.env?.CONTENT_MANIFEST, {
+			requireManifestWrite: true
+		});
+	} catch (err) {
+		console.error('Content manifest refresh failed; keeping existing edge cache', err);
+		throw error(502, 'content manifest refresh failed');
+	}
 
 	// URLs whose cached render is affected by a publish/edit.
-	const paths = ['/', '/ideas', '/rss.xml', '/sitemap.xml', '/api/listContent.json', '/api/latestPosts.json'];
+	const paths = [
+		'/',
+		'/ideas',
+		'/rss.xml',
+		'/sitemap.xml',
+		'/api/listContent.json',
+		'/api/latestPosts.json'
+	];
 	if (slug) {
 		paths.push(`/${slug}`, `/api/ideas/${slug}.json`);
+	}
+	if (previousSlug && previousSlug !== slug) {
+		paths.push(`/${previousSlug}`, `/api/ideas/${previousSlug}.json`);
 	}
 	const urls = paths.map((p) => new URL(p, SITE_URL).toString());
 
@@ -89,18 +122,39 @@ export async function POST({ request, platform }) {
 
 	// Optionally also issue a zone-wide purge via the Cloudflare API (covers
 	// the global CDN, not just the local colo's Cache API).
-	const apiToken = platform?.env?.CF_API_TOKEN ?? process.env.CF_API_TOKEN;
-	const zoneId = platform?.env?.CF_ZONE_ID ?? process.env.CF_ZONE_ID;
+	const apiToken = env.CF_API_TOKEN;
+	const zoneId = env.CF_ZONE_ID;
 	if (apiToken && zoneId) {
-		await fetch(`https://api.cloudflare.com/client/v4/zones/${zoneId}/purge_cache`, {
-			method: 'POST',
-			headers: {
-				Authorization: `Bearer ${apiToken}`,
-				'content-type': 'application/json'
-			},
-			body: JSON.stringify({ files: urls })
-		}).catch((err) => console.error('cloudflare purge_cache failed', err));
+		try {
+			const purgeResponse = await fetch(
+				`https://api.cloudflare.com/client/v4/zones/${zoneId}/purge_cache`,
+				{
+					method: 'POST',
+					headers: {
+						Authorization: `Bearer ${apiToken}`,
+						'content-type': 'application/json'
+					},
+					body: JSON.stringify({ files: urls })
+				}
+			);
+			if (!purgeResponse.ok) {
+				console.error('cloudflare purge_cache failed', {
+					status: purgeResponse.status,
+					statusText: purgeResponse.statusText
+				});
+			}
+		} catch (err) {
+			console.error('cloudflare purge_cache failed', err);
+		}
 	}
 
-	return json({ ok: true, action: payload.action, slug, urls, purged });
+	return json({
+		ok: true,
+		action: payload.action,
+		slug,
+		previousSlug,
+		urls,
+		purged,
+		refreshedBlogposts: refreshedBlogposts.length
+	});
 }
