@@ -80,7 +80,7 @@
 			Latest Swyx Content
 		</h3>
 		<ul class="text-white">
-			{#each items as item (item.slug)}
+			{#each items as item (item.url ?? item.slug)}
 			<li>
 					{#if item.category === 'podcast'}
 					🎧 <a href={item.url}>{item.title}</a>

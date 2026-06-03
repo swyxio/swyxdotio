@@ -40,7 +40,7 @@
 	// we know this has js weight, but we tried lazyloading and it wasnt significant enough for the added complexity
 	// https://github.com/swyxio/swyxkit/pull/171
 	// this will be slow if you have thousands of items, but most people don't
-	let isTruncated = items?.length > 20;
+	let isTruncated = data.items.length > 20;
 	
 	
 	
@@ -72,11 +72,11 @@
 	}
 	if ($search) loadsearchFn()
 	/** @type import('$lib/types').ContentItem[]  */
-	let list;
+	let list = data.items.slice(0, isTruncated ? 20 : data.items.length);
 	$: searchFn(items, $selectedCategories, $search)
 	.then(_items => {
 		list = _items
-		.slice(0, isTruncated ? 2 : items.length);
+			.slice(0, isTruncated ? 20 : items.length);
 	});
 	// $: console.log({list})
 </script>
@@ -160,7 +160,7 @@
 
 	{#if list?.length}
 		<ul class="max-w-full">
-			{#each list as item (item.slug)}
+			{#each list as item (item.url ?? item.slug)}
 				<li class="mb-8 text-lg">
 					<!-- <code class="mr-4">{item.data.date}</code> -->
 					<IndexCard
