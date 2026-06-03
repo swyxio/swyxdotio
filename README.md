@@ -52,6 +52,7 @@ npx wrangler secret put CF_ZONE_ID     # optional
 ```
 
 Each command prompts for the value. List them with `npx wrangler secret list`.
+`wrangler.toml` declares `GH_TOKEN` as required, so deployments fail clearly instead of publishing a Worker without CMS authentication.
 
 > Local dev reads the same names from a gitignored `.env` file (see `.env.example`).
 
