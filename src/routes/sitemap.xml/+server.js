@@ -1,9 +1,10 @@
 import { SITE_URL } from '$lib/siteConfig';
-import { listContent } from '$lib/content';
 
 /** @type {import('@sveltejs/kit').RequestHandler} */
 export async function GET({ fetch }) {
-  const posts = await listContent(fetch);
+	const res = await fetch('/api/listContent.json');
+	if (!res.ok) throw new Error(`failed to load sitemap content (${res.status})`);
+	const posts = (await res.json()).filter((post) => post.type === 'blog');
 	const pages = [`about`];
 	const body = sitemap(posts, pages);
 
