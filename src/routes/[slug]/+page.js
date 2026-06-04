@@ -25,7 +25,7 @@ export async function load({ params, fetch, setHeaders }) {
 		throw error(pageData.status, await pageData.text());
 	}
 	let list = [];
-	if (listData?.status > 400) {
+	if (listData && listData.status > 400) {
 		console.error('latest posts returned an error', listData.status, await listData.text());
 	} else if (listData) {
 		list = (await listData.json()).slice(0, 10);

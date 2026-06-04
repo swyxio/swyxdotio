@@ -1,21 +1,31 @@
 export type ContentItem = {
-	type: 'blog';
-	content: string;
-	frontmatter: {
-		[key: string]: string;
-	};
+	type?: 'blog';
+	content?: string;
+	frontmatter?: Record<string, unknown>;
 	title: string;
-	subtitle: string;
-	description: string;
+	subtitle?: string;
+	description?: string;
+	desc?: string;
 	category: string;
-	tags: string[];
-	isPrivate: boolean;
-	image: string;
-	canonical: string;
+	tags?: string[];
+	isPrivate?: boolean;
+	image?: string;
+	canonical?: string;
 	slug: string;
 	date: Date;
-	readingTime: string;
-	ghMetadata: GHMetadata;
+	readingTime?: string;
+	ghMetadata?: GHMetadata;
+	url?: string;
+	venues?: string;
+	instances?: {
+		date?: Date | string;
+		venue?: string;
+		video?: string;
+	}[];
+	disclosure?: string;
+	devToReactions?: number;
+	devToUrl?: string;
+	highlightedResults?: string;
 };
 
 export type GHMetadata = {

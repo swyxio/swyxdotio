@@ -58,6 +58,27 @@ test('content manifest ignores corrupt KV data so callers can refresh', async ()
 	assert.equal(await readContentManifest(store), null);
 });
 
+test('content manifest rejects reserved blog slugs so callers can refresh', () => {
+	assert.throws(
+		() =>
+			decodeContentManifest(
+				JSON.stringify({
+					version: 1,
+					generatedAt: new Date().toISOString(),
+					blogposts: [{ ...blogposts[0], slug: 'about' }]
+				})
+			),
+		/Invalid or reserved blog slug/
+	);
+});
+
+test('content manifest refuses to encode reserved blog slugs', () => {
+	assert.throws(
+		() => encodeContentManifest([{ ...blogposts[0], slug: 'tools' }]),
+		/Invalid or reserved blog slug/
+	);
+});
+
 test('content manifest becomes stale after one day', () => {
 	const manifest = decodeContentManifest(encodeContentManifest(blogposts));
 	const twentyFiveHoursLater = new Date(manifest.generatedAt.valueOf() + 25 * 60 * 60 * 1000);

@@ -1,6 +1,9 @@
 import { SITE_TITLE, SITE_URL } from '$lib/siteConfig';
 
-/** Escape a string for safe inclusion in XML. */
+/**
+ * Escape a string for safe inclusion in XML.
+ * @param {unknown} str
+ */
 function xml(str) {
 	return String(str ?? '')
 		.replace(/&/g, '&amp;')
@@ -14,7 +17,9 @@ function xml(str) {
 export async function GET({ fetch }) {
 	const res = await fetch('/api/listContent.json');
 	if (!res.ok) throw new Error(`failed to load RSS content (${res.status})`);
-	const allBlogs = (await res.json()).filter((post) => post.type === 'blog');
+	const allBlogs = /** @type {import('$lib/types').ContentItem[]} */ (await res.json()).filter(
+		(post) => post.type === 'blog'
+	);
 	const items = allBlogs
 		.map(
 			(post) => `

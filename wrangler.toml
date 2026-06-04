@@ -1,4 +1,5 @@
 name = "swyxdotio"
+account_id = "2d017c943ff16e4c52783635ef05e535"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 keep_vars = true
@@ -18,11 +19,15 @@ directory = ".svelte-kit/cloudflare"
 binding = "CF_VERSION_METADATA"
 
 [secrets]
-required = ["GH_TOKEN"]
+required = ["GH_TOKEN", "PODCAST_ADMIN_PASSWORD", "PODCAST_ADMIN_SESSION_SECRET"]
 
 [[kv_namespaces]]
 binding = "CONTENT_MANIFEST"
 id = "b1c7b0dfb8ed438998b7850a2293368a"
+
+[[r2_buckets]]
+binding = "PODCAST_MEDIA"
+bucket_name = "swyxdotio-podcast-media"
 
 # Example bindings for future use (uncomment + configure when needed):
 # [[durable_objects.bindings]]

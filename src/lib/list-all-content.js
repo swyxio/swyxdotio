@@ -2,9 +2,9 @@ import { listContent } from './content';
 import { listSpeaking } from './local-content';
 
 /**
- * @param {Function | undefined} providedFetch
+ * @param {typeof globalThis.fetch | undefined} providedFetch
  * @param {App.Platform | undefined} platform
- * @returns {Promise<Record<string, any>[]>}
+ * @returns {Promise<import('./types').ContentItem[]>}
  */
 export async function listAllContent(providedFetch, platform) {
 	const blogposts = await listContent(providedFetch, platform?.env?.CONTENT_MANIFEST, {

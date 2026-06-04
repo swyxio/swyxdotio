@@ -24,6 +24,6 @@ export async function GET({ fetch, params, setHeaders, platform }) {
 	} catch (err) {
 		console.log("didn't find ", slug);
 		console.error(err);
-		throw error(404, err.message);
+		throw error(404, err instanceof Error ? err.message : 'Blogpost not found');
 	}
 }

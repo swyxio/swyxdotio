@@ -9,6 +9,7 @@ import {
 } from './siteConfig';
 import slugify from 'slugify';
 import { renderMarkdown } from './markdown';
+import { isBlogSlug, normalizeBlogSlug } from './slug';
 import {
 	isContentManifestStale,
 	readContentManifest,
@@ -87,7 +88,7 @@ function isTransientStatus(status) {
 }
 
 /**
- * @param {Function} providedFetch
+ * @param {typeof globalThis.fetch} providedFetch
  * @param {string} url
  * @param {Record<string, string>} headers
  * @returns {Promise<{ issues: import('./types').GithubIssue[], next: string | null }>}
@@ -177,7 +178,7 @@ async function fetchGithubIssuesPage(providedFetch, url, headers) {
 }
 
 /**
- * @param {Function | undefined} providedFetch
+ * @param {typeof globalThis.fetch | undefined} providedFetch
  * @returns {Promise<import('./types').ContentItem[]>}
  */
 async function fetchContentFromGithub(providedFetch) {
@@ -218,7 +219,8 @@ async function fetchContentFromGithub(providedFetch) {
 					// issue.labels.some((label) => GH_PUBLISHED_TAGS.includes(label.name)) &&
 					APPROVED_POSTERS_GH_USERNAME.includes(issue.user.login)
 				) {
-					_allBlogposts.push(parseIssue(issue));
+					const blogpost = parseIssue(issue);
+					if (blogpost) _allBlogposts.push(blogpost);
 				}
 			}
 		);
@@ -229,7 +231,7 @@ async function fetchContentFromGithub(providedFetch) {
 }
 
 /**
- * @param {Function | undefined} providedFetch
+ * @param {typeof globalThis.fetch | undefined} providedFetch
  * @param {import('./content-manifest').ContentManifestStore | undefined} contentManifest
  * @param {{ requireManifestWrite?: boolean }} [options]
  * @returns {Promise<import('./types').ContentItem[]>}
@@ -254,7 +256,7 @@ export async function refreshContentManifest(
 }
 
 /**
- * @param {Function | undefined} providedFetch
+ * @param {typeof globalThis.fetch | undefined} providedFetch
  * @param {import('./content-manifest').ContentManifestStore | undefined} contentManifest
  * @param {{ context?: { waitUntil(promise: Promise<unknown>): void } }} [options]
  * @returns {Promise<import('./types').ContentItem[]>}
@@ -295,11 +297,11 @@ export async function listContent(providedFetch, contentManifest, { context } = 
 }
 
 /**
- * @param {Function} providedFetch from sveltekit
+ * @param {typeof globalThis.fetch} providedFetch from sveltekit
  * @param {string} slug of the file to retrieve
  * @param {import('./content-manifest').ContentManifestStore | undefined} contentManifest
  * @param {{ context?: { waitUntil(promise: Promise<unknown>): void } }} [options]
- * @returns {Promise<import('./types').ContentItem[]>}
+ * @returns {Promise<import('./types').ContentItem>}
  */
 export async function getContent(providedFetch, slug, contentManifest, options) {
 	console.log('loading allBlogposts');
@@ -313,7 +315,7 @@ export async function getContent(providedFetch, slug, contentManifest, options) 
 	if (blogpost) {
 		// render markdown -> trusted HTML string via marked + shiki (see ./markdown.js)
 		// youtube/tweet shortcodes and GitHub autolinks are handled as marked extensions
-		const content = await renderMarkdown(blogpost.content);
+		const content = await renderMarkdown(blogpost.content ?? '');
 
 		return { ...blogpost, content };
 	} else {
@@ -323,7 +325,7 @@ export async function getContent(providedFetch, slug, contentManifest, options) 
 
 /**
  * @param {import('./types').GithubIssue} issue
- * @returns {import('./types').ContentItem}
+ * @returns {import('./types').ContentItem | null}
  */
 function parseIssue(issue) {
 	const src = issue.body;
@@ -337,6 +339,14 @@ function parseIssue(issue) {
 			slug = data.devToUrl.split('/')[4]; // if from devto, but no slug, it used the devto slug
 		} else {
 			slug = slugify(title, { remove: /[*+~.()'"!:@]/g }); // otherwise titles with : colons wont parse
+		}
+		slug = normalizeBlogSlug(slug);
+		if (!isBlogSlug(slug)) {
+			console.warn('Skipping published issue with invalid or reserved blog slug', {
+				issueUrl: issue.html_url,
+				slug
+			});
+			return null;
 		}
 
 		let description = data.description ?? content.trim().split('\n')[0];
@@ -358,11 +368,11 @@ function parseIssue(issue) {
 		if (data.tags)
 			tags = Array.isArray(data.tags)
 				? data.tags
-				: [...data.tags.split(',').map((tag) => tag.trim())];
+				: [...data.tags.split(',').map((/** @type {string} */ tag) => tag.trim())];
 		else if (data.categories) {
 			tags = Array.isArray(data.categories)
 				? data.categories
-				: [...data.categories.split(',').map((tag) => tag.trim())];
+				: [...data.categories.split(',').map((/** @type {string} */ tag) => tag.trim())];
 			console.log(`${slug} is still using the categories field`);
 		} else {
 			// console.log(`WARN: ${slug} has no tags`) // todo: go thru and check thru old content
@@ -381,7 +391,7 @@ function parseIssue(issue) {
 			isPrivate: Boolean(data.isPrivate ?? data.private ?? false),
 			image: data.image ?? data.cover_image,
 			canonical: data.canonical || data.canonical_url, // for canonical URLs of something published elsewhere
-			slug: `${slug}`.toLowerCase(),
+			slug,
 			date: new Date(data.date ?? data.devToPublishedAt ?? issue.created_at),
 			readingTime: readingTime(content),
 			ghMetadata: {

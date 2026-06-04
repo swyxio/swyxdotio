@@ -26,6 +26,21 @@ These appear in the DNS table as read-only `Worker` records. They are managed
 through the Worker's Custom Domains settings rather than as manually edited
 `A`, `AAAA`, or `CNAME` records.
 
+Podcast audio is stored separately from the Worker static-assets bundle:
+
+| Hostname        | Target R2 bucket             | Purpose                 |
+| --------------- | ---------------------------- | ----------------------- |
+| `media.swyx.io` | `swyxdotio-podcast-media`    | Podcast artwork and MP3 |
+
+The Worker serves the canonical podcast RSS URLs from small XML objects in the
+same bucket:
+
+```text
+https://swyx.io/podcast/learn-in-podcast/rss.xml
+https://swyx.io/podcast/the-temporal-podcast/rss.xml
+https://swyx.io/podcast/career-chats/rss.xml
+```
+
 Three Cloudflare Redirect Rules enforce HTTPS and the canonical hostname:
 
 | Incoming request        | Redirect target     |
@@ -54,6 +69,9 @@ for route in \
   /api/latestPosts.json \
   /api/searchContent.json \
   /rss.xml \
+  /podcast/learn-in-podcast/rss.xml \
+  /podcast/the-temporal-podcast/rss.xml \
+  /podcast/career-chats/rss.xml \
   /sitemap.xml \
   /why-temporal \
   /api/ideas/why-temporal.json \

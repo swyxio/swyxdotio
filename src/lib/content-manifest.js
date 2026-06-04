@@ -1,3 +1,5 @@
+import { assertBlogSlug } from './slug.js';
+
 export const CONTENT_MANIFEST_KEY = 'github-content-manifest:v1';
 export const CONTENT_CACHE_GENERATION_KEY = 'github-content-cache-generation:v1';
 export const CONTENT_MANIFEST_MAX_AGE_MS = 24 * 60 * 60 * 1000;
@@ -52,7 +54,10 @@ export function encodeContentManifest(blogposts) {
 	return JSON.stringify({
 		version: 1,
 		generatedAt: new Date().toISOString(),
-		blogposts
+		blogposts: blogposts.map((blogpost) => ({
+			...blogpost,
+			slug: assertBlogSlug(blogpost.slug)
+		}))
 	});
 }
 
@@ -71,6 +76,7 @@ export function decodeContentManifest(encoded) {
 		generatedAt: reviveDate(manifest.generatedAt),
 		blogposts: blogposts.map((blogpost) => ({
 			...blogpost,
+			slug: assertBlogSlug(blogpost.slug),
 			date: reviveDate(blogpost.date)
 		}))
 	};

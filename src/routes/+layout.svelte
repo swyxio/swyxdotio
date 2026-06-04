@@ -15,62 +15,24 @@
 	<link rel="pingback" href="https://webmention.io/www.swyx.io/xmlrpc" />
 </svelte:head>
 
-<div class="flex flex-col justify-center bg-gray-50 px-4 dark:bg-gray-900 sm:px-8">
+<div class="site-shell">
 	<Nav />
 </div>
-<main id="skip" class="flex flex-col justify-center bg-gray-50 px-4 dark:bg-gray-900 sm:px-8">
+<main id="skip" class="site-main">
 	<slot />
 </main>
 
-<footer class="mx-auto mb-8 flex w-full max-w-2xl flex-col items-start justify-center">
-	<hr class="border-1 mb-8 w-full border-gray-200 dark:border-gray-800" />
-	<div class="grid w-full max-w-2xl grid-cols-1 gap-4 px-4 pb-16 sm:grid-cols-2 sm:px-8">
-		<div class="flex flex-col space-y-4">
-			<a class="text-gray-500 transition hover:text-gray-300" href="/">Home</a>
-			<a class="text-gray-500 transition hover:text-gray-300" href="/about">About</a>
-			<a class="text-gray-500 transition hover:text-gray-300" href="/subscribe">Newsletter</a>
-			<a class="text-gray-500 transition hover:text-gray-300" href="/rss.xml" rel="external">
-				RSS
-			</a>
-		</div>
-		<div class="flex flex-col space-y-4">
-			<a
-				class="text-gray-500 transition hover:text-gray-300"
-				target="_blank"
-				rel="noopener noreferrer"
-				href={'/portfolio'}
-			>
-				Portfolio
-			</a>
-			<a
-				class="text-gray-500 transition hover:text-gray-300"
-				target="_blank"
-				rel="noopener noreferrer"
-				href={'https://twitter.com/intent/follow?screen_name=' + MY_TWITTER_HANDLE}
-			>
-				Twitter
-			</a>
-			<a
-				class="text-gray-500 transition hover:text-gray-300"
-				target="_blank"
-				rel="noopener noreferrer"
-				href={REPO_URL}
-			>
-				GitHub
-			</a>
-			<a
-				class="text-gray-500 transition hover:text-gray-300"
-				target="_blank"
-				rel="noopener noreferrer"
-				href={MY_YOUTUBE}
-			>
-				YouTube
-			</a>
-		</div>
-	</div>
-	<p class="prose px-4 dark:prose-invert sm:px-8">
-		This blog is based on the
-		<a href="https://swyxkit.netlify.app/">swyxkit</a>
-		template.
+<footer class="site-shell mb-8 mt-16">
+	<hr class="plain-rule mb-4" />
+	<p class="plain-muted text-sm">
+		<a href="/">Home</a> · <a href="/about">About</a> · <a href="/podcasts">Podcasts</a> ·
+		<a href="/subscribe">Newsletter</a> ·
+		<a href="/rss.xml" rel="external" data-sveltekit-reload>RSS</a> ·
+		<a href="/portfolio">Portfolio</a> ·
+		<a href={'https://twitter.com/intent/follow?screen_name=' + MY_TWITTER_HANDLE}>Twitter</a> ·
+		<a href={REPO_URL}>GitHub</a> · <a href={MY_YOUTUBE}>YouTube</a>
+	</p>
+	<p class="plain-muted mt-4 text-sm">
+		Based on the <a href="https://swyxkit.netlify.app/">swyxkit</a> template.
 	</p>
 </footer>

@@ -9,11 +9,22 @@ import grayMatter from 'gray-matter';
 import slugify from 'slugify';
 import { refreshContentManifest } from '$lib/content';
 import { readContentCacheGeneration } from '$lib/content-manifest';
+import { assertBlogSlug } from '$lib/slug';
 import { env } from '$env/dynamic/private';
 
 export const prerender = false;
 
-/** Constant-time-ish HMAC SHA-256 verification of the GitHub signature. */
+/**
+ * @typedef {{ body?: string, title: string }} GithubWebhookIssue
+ * @typedef {{ action: string, issue: GithubWebhookIssue, changes?: { body?: { from?: string }, title?: { from?: string } } }} GithubIssuesWebhook
+ */
+
+/**
+ * Constant-time-ish HMAC SHA-256 verification of the GitHub signature.
+ * @param {string} secret
+ * @param {string} payload
+ * @param {string | null} signatureHeader
+ */
 async function verifySignature(secret, payload, signatureHeader) {
 	if (!signatureHeader?.startsWith('sha256=')) return false;
 	const enc = new TextEncoder();
@@ -36,7 +47,10 @@ async function verifySignature(secret, payload, signatureHeader) {
 	return mismatch === 0;
 }
 
-/** Derive the post slug from the issue, mirroring parseIssue() in content.js. */
+/**
+ * Derive the post slug from the issue, mirroring parseIssue() in content.js.
+ * @param {GithubWebhookIssue} issue
+ */
 function deriveSlug(issue) {
 	try {
 		const { data } = grayMatter(issue.body || '');
@@ -44,13 +58,16 @@ function deriveSlug(issue) {
 		if (data.slug) slug = data.slug;
 		else if (data.devToUrl) slug = data.devToUrl.split('/')[4];
 		else slug = slugify(data.title ?? issue.title, { remove: /[*+~.()'"!:@]/g });
-		return `${slug}`.toLowerCase();
+		return assertBlogSlug(slug);
 	} catch {
 		return null;
 	}
 }
 
-/** Derive the previous slug when an edit renamed the post URL. */
+/**
+ * Derive the previous slug when an edit renamed the post URL.
+ * @param {GithubIssuesWebhook} payload
+ */
 function derivePreviousSlug(payload) {
 	const previousBody = payload.changes?.body?.from;
 	const previousTitle = payload.changes?.title?.from;
@@ -78,7 +95,7 @@ export async function POST({ request, platform, fetch }) {
 		return json({ ok: true, skipped: `event ${event}` });
 	}
 
-	/** @type {{ action: string, issue: any, changes?: { body?: { from?: string }, title?: { from?: string } } }} */
+	/** @type {GithubIssuesWebhook} */
 	const payload = JSON.parse(raw);
 	const slug = deriveSlug(payload.issue);
 	const previousSlug = derivePreviousSlug(payload);

@@ -1,58 +1,63 @@
-
 // this is an action that loads utterances comments when the element is in view
 // so as not to incur the JS cost upfront if the person never scrolls down to the comments
 
 // https://svelte.dev/repl/c6a402704224403f96a3db56c2f48dfc?version=3.55.1
 
-import { GH_USER_REPO } from "$lib/siteConfig";
+import { GH_USER_REPO } from '$lib/siteConfig';
 
-/** @type any */
+/** @type {IntersectionObserver | undefined} */
 let intersectionObserver;
 
-let hasLoaded = false
+let hasLoaded = false;
 
+/**
+ * @param {HTMLElement} element
+ * @param {string | undefined} number
+ */
 export function injectScript(element, number) {
-  // have to do this because direct injection using @html doesnt work
-  // adapted from https://github.com/utterance/utterances/issues/161#issuecomment-550991248
-  const scriptElem = document.createElement("script");
-  scriptElem.src = "https://utteranc.es/client.js";
-  scriptElem.async = true;
-  scriptElem.crossOrigin = "anonymous";
-  scriptElem.setAttribute("repo", GH_USER_REPO);
-  scriptElem.setAttribute("issue-number", number);
-  // scriptElem.setAttribute("label", "blog-comment");
-  const theme = document.documentElement.classList.contains('dark') ? 'icy-dark' : 'github-light';
-  scriptElem.setAttribute("theme", theme);
+	// have to do this because direct injection using @html doesnt work
+	// adapted from https://github.com/utterance/utterances/issues/161#issuecomment-550991248
+	const scriptElem = document.createElement('script');
+	scriptElem.src = 'https://utteranc.es/client.js';
+	scriptElem.async = true;
+	scriptElem.crossOrigin = 'anonymous';
+	scriptElem.setAttribute('repo', GH_USER_REPO);
+	scriptElem.setAttribute('issue-number', String(number));
+	// scriptElem.setAttribute("label", "blog-comment");
+	const theme = document.documentElement.classList.contains('dark') ? 'icy-dark' : 'github-light';
+	scriptElem.setAttribute('theme', theme);
 
-  // replace all contents of element and append script
-  element.innerHTML = "";
-  element.appendChild(scriptElem);
+	// replace all contents of element and append script
+	element.innerHTML = '';
+	element.appendChild(scriptElem);
 }
 
+/**
+ * @param {HTMLElement} element
+ * @param {{ number: string | undefined }} options
+ */
 export default function viewport(element, { number }) {
+	function ensureIntersectionObserver() {
+		if (!intersectionObserver) {
+			intersectionObserver = new IntersectionObserver((entries) => {
+				entries.forEach((entry) => {
+					if (!hasLoaded && entry.isIntersecting) {
+						injectScript(element, number);
+						hasLoaded = true;
+					}
+				});
+			});
+		}
+		return intersectionObserver;
+	}
+	const observer = ensureIntersectionObserver();
 
-  function ensureIntersectionObserver() {
-    if (intersectionObserver) return;
+	observer.observe(element);
 
-    intersectionObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach(entry => {
-          if (!hasLoaded && entry.isIntersecting) {
-            injectScript(element, number);
-            hasLoaded = true
-          }
-        });
-      }
-    );
-  }
-  ensureIntersectionObserver();
-
-  intersectionObserver.observe(element);
-
-  return {
-    destroy() {
-      hasLoaded = false
-      intersectionObserver.unobserve(element);
-    }
-  }
+	return {
+		destroy() {
+			hasLoaded = false;
+			observer.unobserve(element);
+		}
+	};
 }

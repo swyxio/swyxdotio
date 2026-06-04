@@ -26,7 +26,7 @@ In a past life:
 
 I was a [currency options trader turned TMT hedge fund analyst](https://www.freecodecamp.org/news/shawn-wang-podcast-interview/) as well, and I often do approach tech from an investing and risk management angle.
 
-I was known for being a [#LearnInPublic](/learn-in-public) evangelist and [my speaking/writing on React, JavaScript and the future of the Web](/ideas?filter=React&show=Essays&show=Talks&show=Podcasts). I am also known for my technical/book reviews, from [TypeScript in 50 Lessons](https://twitter.com/swyx/status/1361712610593316866), [Programming TypeScript](https://twitter.com/swyx/status/1135525665971695617), [Landing Page Hot Tips](https://twitter.com/swyx/status/1303062410157158401), and [The GraphQL Guide](https://share.transistor.fm/s/aebece15).
+I was known for being a [#LearnInPublic](/learn-in-public) evangelist and [my speaking/writing on React, JavaScript and the future of the Web](/ideas?filter=React&show=Essays&show=Talks&show=Podcasts). I am also known for my technical/book reviews, from [TypeScript in 50 Lessons](https://twitter.com/swyx/status/1361712610593316866), [Programming TypeScript](https://twitter.com/swyx/status/1135525665971695617), [Landing Page Hot Tips](https://twitter.com/swyx/status/1303062410157158401), and [The GraphQL Guide](https://media.swyx.io/podcasts/learn-in-podcast/enclosures/6355ee1958f312f4-b2e9c0a7.mp3).
 
 </details>
 

@@ -109,7 +109,7 @@
   tags: [AI]
   venues: HighAgency
   date: 2024-06-20
-  url: https://share.transistor.fm/s/890b0ab6
+  url: https://media.swyx.io/podcasts/learn-in-podcast/enclosures/132bfc6390b46486-b3167616.mp3
   description: In this episode, I chatted with Shawn Wang about his upcoming AI engineering conference and what an AI engineer really is. It's been a year since he penned the viral essay "Rise of the AI Engineer' and we discuss if this new role will be enduring, the make up of the optimal AI team and trends in machine learning.
 - title: Swyx on Plan B Singapore podcast
   slug: planb-swyx
@@ -556,7 +556,7 @@
   tags: [DigitalGardens]
   venues: Swyx YouTube
   date: 2021-02-13
-  url: https://share.transistor.fm/s/41a6f89a
+  url: https://media.swyx.io/podcasts/learn-in-podcast/enclosures/02ddab2751782fd1-75f5fec5.mp3
   description: Maggie and I hosted a Clubhouse chat on Digital Gardens and here is the recording! Later joined by Nikita Voloboev and other listeners. 
 - title: How to Launch Your Product and Sustain Revenue - with Ryan Chenkie's Entrepreneurial Coders Podcast
   slug: ecoder-book
@@ -673,7 +673,6 @@
   date: 2020-06-17
   github: https://gist.github.com/swyxio/02c28094f7d898554deee1ba7f96a502
   url: https://www.softwaresessions.com/episodes/learning-in-public/
-  url2: https://media.transistor.fm/b2abc441.mp3
   description: I chatted with Jeremy Jung, host on Software Engineering Radio and now Software Sessions, about Learn in Public and the Coding Career Handbook!
 - title: Dev Career Advice for the Coronavirus Recession
   slug: recession-prep-tanay

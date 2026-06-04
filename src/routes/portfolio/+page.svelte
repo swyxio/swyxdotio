@@ -1,6 +1,6 @@
 <script>
 	import { SITE_TITLE } from '$lib/siteConfig';
-	/** @type {{ data: { html: string } }} */
+	/** @type {{ html: string }} */
 	export let data;
 </script>
 

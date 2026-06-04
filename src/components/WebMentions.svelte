@@ -78,59 +78,72 @@
 		'https://neoweb4u.com',
 		'https://www.websjohn.com',
 		'https://www.webhostpolice.com',
-		    'https://lzomedia.com',
-		    'https://jateng.co',
-		    'https://news.priviw.com',
-		    'https://movilgadget.com',
-		    'https://kitdeveloper.ru',
-		    '.thats.im',     // 'https://bdbloger.thats.im', 'https://mdsohel.thats.im', 'https://sazelab.thats.im/'
-		    '.cu.ma', // 'https://bdbloger.cu.ma', 'https://mdsazel.cu.ma/'
-		    'https://reactjsexample.com',
-		    'https://dentedreality.com.au',
-		    'https://platoblockchain.net',
-		    'http://aayugcreation.com',
-		    'https://www.67nj.org',
-		    'https://wpnewshub.com',
-		    'https://codinghindi.in',
-		    'https://programmer.chimpymail.com',
-		    'https://sayed.work',
-		    'https://infos.by',
-		    'https://data-science-austria.at',
-		    'https://www.techyrack.com',
-				'https://wazooy.com',
-				'https://simpleenews.qblnet.us',
-				'https://dandp.ltd',
-				'https://e-digitaltechnology.com',
-				'https://aruf.store',
-				'https://wons.store',
-				'http://trainingwingsworkshop.com',
-				'https://aruf.ru',
-				'https://new-bie.xyz'
+		'https://lzomedia.com',
+		'https://jateng.co',
+		'https://news.priviw.com',
+		'https://movilgadget.com',
+		'https://kitdeveloper.ru',
+		'.thats.im', // 'https://bdbloger.thats.im', 'https://mdsohel.thats.im', 'https://sazelab.thats.im/'
+		'.cu.ma', // 'https://bdbloger.cu.ma', 'https://mdsazel.cu.ma/'
+		'https://reactjsexample.com',
+		'https://dentedreality.com.au',
+		'https://platoblockchain.net',
+		'http://aayugcreation.com',
+		'https://www.67nj.org',
+		'https://wpnewshub.com',
+		'https://codinghindi.in',
+		'https://programmer.chimpymail.com',
+		'https://sayed.work',
+		'https://infos.by',
+		'https://data-science-austria.at',
+		'https://www.techyrack.com',
+		'https://wazooy.com',
+		'https://simpleenews.qblnet.us',
+		'https://dandp.ltd',
+		'https://e-digitaltechnology.com',
+		'https://aruf.store',
+		'https://wons.store',
+		'http://trainingwingsworkshop.com',
+		'https://aruf.ru',
+		'https://new-bie.xyz'
 	];
+	/** @typedef {{ like: number, mention: number, reply: number, repost: number }} MentionCounts */
+	/** @typedef {{ type: MentionCounts }} MentionCountResponse */
+	/** @typedef {{ name?: string, photo?: string, url?: string }} MentionAuthor */
+	/** @typedef {{ author?: MentionAuthor, url: string, published?: string, content?: string }} MentionData */
+	/** @typedef {{ activity: { type: string }, source: string, data: MentionData, verified_date: string }} Mention */
 	let page = 0;
+	/** @type {(string | undefined)[]} */
 	export let targets;
-	export let devto_reactions;
-	$: _targets = [...new Set(targets.filter(Boolean))];
+	/** @type {number} */
+	export let devto_reactions = 0;
+	/** @type {string[]} */
+	$: _targets = [...new Set(targets.filter((target) => typeof target === 'string'))];
 	if (!targets) throw new Error('error: no target');
+	/** @type {Promise<MentionCounts> | undefined} */
 	let counts;
+	/** @type {Mention[]} */
 	let mentions = [];
 	let fetchState = 'fetching';
 	import { onMount } from 'svelte';
 	onMount(() => {
 		const fetches = _targets.map((target) =>
-			fetch(`https://webmention.io/api/count.json?target=${target}/`).then((res) => res.json())
+			fetch(`https://webmention.io/api/count.json?target=${target}/`).then(
+				(res) => /** @type {Promise<MentionCountResponse>} */ (res.json())
+			)
 		);
-		counts = Promise.all(fetches).then(
-			(arr) =>
-				arr
-					.map((x) => x.type)
-					.reduce((acc, cur) => ({
+		counts = Promise.all(fetches).then((arr) =>
+			arr
+				.map((x) => x.type)
+				.reduce(
+					(acc, cur) => ({
 						like: (acc.like || 0) + (cur.like || 0),
 						mention: (acc.mention || 0) + (cur.mention || 0),
 						reply: (acc.reply || 0) + (cur.reply || 0),
 						repost: (acc.repost || 0) + (cur.repost || 0)
-					})),
-			{}
+					}),
+					{ like: 0, mention: 0, reply: 0, repost: 0 }
+				)
 		);
 		// .then(x => console.log({xx: x}) || x)
 		getMentions().then((x) => {
@@ -139,6 +152,7 @@
 			return fetchMore();
 		});
 	});
+	/** @param {Mention} link */
 	function filterOutLinks(link) {
 		if (link.activity.type === 'like') return false;
 		if (blocklist.includes(new URL(link.source).origin)) return false;
@@ -146,9 +160,9 @@
 	}
 	function getMentions() {
 		const fetches = _targets.map((target) =>
-			fetch(
-				`https://webmention.io/api/mentions?page=${page}&per-page=20&target=${target}/`
-			).then((x) => x.json())
+			fetch(`https://webmention.io/api/mentions?page=${page}&per-page=20&target=${target}/`).then(
+				(x) => /** @type {Promise<{ links: Mention[] }>} */ (x.json())
+			)
 		);
 		// remember trailing slash impt
 		// maybe want to sort someday
@@ -167,6 +181,7 @@
 			}
 		});
 	};
+	/** @param {string} str */
 	function cleanString(str) {
 		if (str.length > 300) str = str.slice(0, 300);
 		const withSlash = _targets[0] + '/'; // todo: figure out proper fix
@@ -180,9 +195,7 @@
 <div id="WebMentions" class="prose dark:prose-invert">
 	<div class="myflexresponsive justify-between">
 		<div>
-			<span font-family="system" font-size="4" font-weight="bold" class="text-2xl font-bold">
-				Webmentions
-			</span>
+			<span class="text-2xl font-bold"> Webmentions </span>
 			<a
 				aria-label="Clientside Webmentions"
 				target="_blank"
@@ -241,9 +254,7 @@
 		{:else}
 			<ul>
 				{#each mentions as link}
-					<li
-						class="myflexresponsive WebMentionReply"
-					>
+					<li class="myflexresponsive WebMentionReply">
 						{#if link.data.author && link.data.author.photo}
 							<div class="Avatar">
 								<a
@@ -267,7 +278,7 @@
 							{link.data.author && link.data.author.name}
 							<a href={link.data.url}>retweeted</a>
 						{:else}
-							<span font-family="system" color="text" font-weight="bold">
+							<span>
 								{link.data.author ? `${link.data.author.name} ` : ' '}
 								<a target="_blank" rel="noopener" href={link.data.url} color="blue">
 									mentioned this
@@ -281,12 +292,7 @@
 							</span>
 							{#if link.data.content}
 								<div>
-									<p
-										class="prose dark:prose-invert italic border-l-2 pl-2 border-teal-500"
-										font-family="system"
-										color="tertiary"
-										font-size="2"
-									>
+									<p class="prose dark:prose-invert italic border-l-2 pl-2 border-teal-500">
 										{@html cleanString(link.data.content)}
 									</p>
 								</div>

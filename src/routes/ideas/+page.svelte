@@ -9,17 +9,44 @@
 	import IndexCard from '../../components/IndexCard.svelte';
 	import MostPopular from './MostPopular.svelte';
 
+	/**
+	 * @typedef {import('$lib/types').ContentItem & {
+	 *   highlightedResults?: string;
+	 *   url?: string;
+	 * }} SearchContentItem
+	 */
+
+	/** @type {import('$lib/types').GHMetadata} */
+	const EMPTY_GH_METADATA = {
+		issueUrl: '',
+		commentsUrl: '',
+		title: '',
+		created_at: new Date(0),
+		updated_at: new Date(0),
+		reactions: {
+			total_count: 0,
+			'+1': 0,
+			'-1': 0,
+			laugh: 0,
+			hooray: 0,
+			confused: 0,
+			heart: 0,
+			rocket: 0,
+			eyes: 0
+		}
+	};
+
 	/** @type {import('./$types').PageData} */
 	export let data;
 
 	// List metadata stays small; full article bodies are fetched only when search is used.
-	/** @type {import('$lib/types').ContentItem[]} */
+	/** @type {SearchContentItem[]} */
 	$: items = data.items;
-	/** @type {import('$lib/types').ContentItem[]} */
+	/** @type {SearchContentItem[]} */
 	let searchableItems = data.items;
 
 	// https://github.com/paoloricciuti/sveltekit-search-params#how-to-use-it
-	/** @type import('svelte/store').Writable<String[] | null> */
+	/** @type {import('svelte/store').Writable<string[] | null>} */
 	let selectedCategories = queryParam(
 		'show',
 		{
@@ -32,8 +59,10 @@
 		debounceHistory: 500
 	});
 
+	/** @type {HTMLInputElement | undefined} */
 	let inputEl;
 
+	/** @param {KeyboardEvent} e */
 	function focusSearch(e) {
 		if (e.key === '/' && inputEl) inputEl.select();
 	}
@@ -46,10 +75,17 @@
 
 	// we are lazy loading a fuzzy search function
 	// with a fallback to a simple filter function
+	/**
+	 * @param {SearchContentItem[]} _items
+	 * @param {string[] | null} _
+	 * @param {string | null} s
+	 * @returns {Promise<SearchContentItem[]>}
+	 */
 	const filterCategories = async (_items, _, s) => {
-		if ($selectedCategories?.length) {
+		const categories = $selectedCategories;
+		if (categories?.length) {
 			_items = _items.filter((item) => {
-				return $selectedCategories
+				return categories
 					.map((element) => {
 						return element.toLowerCase();
 					})
@@ -63,6 +99,7 @@
 		}
 		return _items;
 	};
+	/** @type {(items: SearchContentItem[], categories: string[] | null, search: string | null) => Promise<SearchContentItem[]>} */
 	$: searchFn = filterCategories;
 	/** @type {Promise<void> | undefined} */
 	let searchLoad;
@@ -72,14 +109,14 @@
 			.then(async ([fuzzy, res]) => {
 				searchFn = fuzzy.fuzzySearch;
 				if (!res.ok) throw new Error(`failed to load search content (${res.status})`);
-				searchableItems = await res.json();
+				searchableItems = /** @type {SearchContentItem[]} */ (await res.json());
 			})
 			.catch((err) => console.error('failed to load full-body search content', err));
 		return searchLoad;
 	}
 	$: if (browser && $search) loadsearchFn();
 	$: filteredItems = $search ? searchableItems : items;
-	/** @type import('$lib/types').ContentItem[]  */
+	/** @type {SearchContentItem[]} */
 	let list = data.items.slice(0, isTruncated ? 20 : data.items.length);
 	$: searchFn(filteredItems, $selectedCategories, $search).then((_items) => {
 		list = _items.slice(0, isTruncated ? 20 : items.length);
@@ -94,17 +131,12 @@
 
 <svelte:window on:keyup={focusSearch} />
 
-<section class="mx-auto mb-16 flex max-w-2xl flex-col items-start justify-center px-4 sm:px-8">
-	<h1 class="mb-4 text-3xl font-bold tracking-tight text-black dark:text-white md:text-5xl">
-		Idea Showcase
-	</h1>
-	<p class="mt-3 text-xl italic leading-7 text-black dark:text-white sm:mt-4">
-		For Free: Great Ideas. Lightly Used.
-	</p>
-	<p class="mb-4 text-gray-600 dark:text-gray-400">
-		In total, I've written <span class="bg-orange-400 bg-opacity-70 px-2 font-mono text-white"
-			>{items.length}</span
-		> essays, snippets, tutorials, podcasts, talks, and notes!
+<section class="site-shell mb-16">
+	<h1 class="mb-2 text-3xl font-bold">Ideas</h1>
+	<p class="mb-1 italic">For free: great ideas, lightly used.</p>
+	<p class="plain-muted mb-4">
+		<strong class="accent-text">{items.length}</strong> essays, snippets, tutorials, podcasts, talks,
+		and notes.
 	</p>
 	<div class="relative mb-4 w-full">
 		<input
@@ -113,43 +145,26 @@
 			bind:value={$search}
 			bind:this={inputEl}
 			placeholder="Hit / to search"
-			class="block w-full rounded-md border border-gray-200 bg-white px-4 py-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-900 dark:bg-gray-800 dark:text-gray-100"
-		/><svg
-			class="absolute right-3 top-3 h-5 w-5 text-gray-400 dark:text-gray-300"
-			xmlns="http://www.w3.org/2000/svg"
-			fill="none"
-			viewBox="0 0 24 24"
-			stroke="currentColor"
-			><path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="2"
-				d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-			/></svg
-		>
+			class="plain-input block w-full"
+		/>
 	</div>
 
 	<!-- if you have multiple categories enabled -->
 	{#if POST_CATEGORIES.length > 1}
-		<div class="mt-2 mb-8 flex items-center">
-			<div class="mr-2 text-gray-900 dark:text-gray-400">Filter:</div>
-			<div class="grid grid-cols-2 rounded-md shadow-sm sm:grid-cols-6">
+		<div class="mb-8">
+			<p class="mb-1">Filter:</p>
+			<div class="flex flex-wrap gap-2">
 				{#each POST_CATEGORIES as availableCategory}
-					<div>
+					<label class="filter-option flex cursor-pointer items-center gap-1">
 						<input
 							id="category-{availableCategory}"
-							class="peer sr-only"
+							class="filter-checkbox"
 							type="checkbox"
 							bind:group={$selectedCategories}
 							value={availableCategory}
 						/>
-						<label
-							for="category-{availableCategory}"
-							class="inline-flex w-full cursor-pointer items-center justify-between border border-gray-200 bg-white px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-gray-600 peer-checked:border-purple-600 peer-checked:text-purple-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300 dark:peer-checked:text-purple-500"
-						>
-							{availableCategory}
-						</label>
-					</div>
+						{availableCategory}
+					</label>
 				{/each}
 			</div>
 		</div>
@@ -158,21 +173,19 @@
 	<!-- you can hardcode yourmost popular posts or pinned post here if you wish -->
 	{#if !$search && !$selectedCategories?.length}
 		<MostPopular />
-		<h3 class="mt-8 mb-4 text-2xl font-bold tracking-tight text-black dark:text-white md:text-4xl">
-			All Posts
-		</h3>
+		<h2 class="section-heading mb-4 mt-8 text-2xl font-bold">All posts</h2>
 	{/if}
 
 	{#if list?.length}
-		<ul class="max-w-full">
+		<ul class="archive-list max-w-full">
 			{#each list as item (item.url ?? item.slug)}
-				<li class="mb-8 text-lg">
+				<li>
 					<!-- <code class="mr-4">{item.data.date}</code> -->
 					<IndexCard
-						href={item.category === 'podcast' ? item.url : item.slug}
+						href={item.category === 'podcast' && item.url ? item.url : item.slug}
 						title={item.title}
 						stringData={new Date(item.date).toISOString().slice(0, 10)}
-						ghMetadata={item.ghMetadata}
+						ghMetadata={item.ghMetadata ?? EMPTY_GH_METADATA}
 						{item}
 					>
 						{#if item.highlightedResults}
@@ -187,12 +200,9 @@
 			{/each}
 		</ul>
 		{#if isTruncated}
-			<div class="flex justify-center">
-				<button
-					on:click={() => (isTruncated = false)}
-					class="inline-block rounded bg-blue-100 p-4 text-lg font-bold tracking-tight text-black hover:text-yellow-900 dark:bg-blue-900 dark:text-white hover:dark:text-yellow-200 md:text-2xl"
-				>
-					Load More Posts...
+			<div>
+				<button on:click={() => (isTruncated = false)} class="plain-button">
+					Load more posts
 				</button>
 			</div>
 		{/if}
@@ -201,7 +211,7 @@
 			No posts found for
 			<code>{$search}</code>.
 		</div>
-		<button class="bg-slate-500 p-2" on:click={() => ($search = '')}>Clear your search</button>
+		<button class="plain-button mt-2" on:click={() => ($search = '')}>Clear your search</button>
 	{:else}
 		<div class="prose dark:prose-invert">No content found! Try widening your search again</div>
 	{/if}

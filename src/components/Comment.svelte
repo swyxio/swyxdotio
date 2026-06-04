@@ -13,6 +13,7 @@
 	let body = doc.body.innerHTML;
 
 	// https://github.com/developit/snarkdown/issues/11
+	/** @param {string} markdown */
 	function snarkdownEnhanced(markdown) {
 		return markdown
 			.split(/(?:\r?\n){2,}/)
@@ -25,10 +26,12 @@
 	}
 
 	// https://github.com/developit/snarkdown/issues/70
+	/** @param {Node} node */
 	function _sanitize(node) {
-		if (node.nodeType === 3) return;
-		if (node.nodeType !== 1 || /^(script|iframe|object|embed|svg)$/i.test(node.tagName)) {
-			return node.remove();
+		if (node.nodeType === Node.TEXT_NODE) return;
+		if (!(node instanceof Element) || /^(script|iframe|object|embed|svg)$/i.test(node.tagName)) {
+			node.parentNode?.removeChild(node);
+			return;
 		}
 		for (let i = node.attributes.length; i--; ) {
 			const name = node.attributes[i].name;

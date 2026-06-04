@@ -19,3 +19,6 @@ vite.config.ts.timestamp-*
 # Local Netlify folder
 .netlify
 .histoire.dev.vars
+/.podcast-migration/
+/.podcast-studio-credentials
+test-results/

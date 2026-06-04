@@ -29,3 +29,36 @@ npm run build
 - Invalid YAML structure
 
 The validation will fail the build if any YAML files are malformed, preventing deployment of broken configurations.
+
+## Podcast migration
+
+The podcast scripts preserve Transistor RSS metadata, download media into an
+ignored resumable staging directory, upload assets to Cloudflare R2, and verify
+feed parity.
+
+```bash
+npm run podcast:migrate -- \
+  --source https://feeds.transistor.fm/learn-in-podcast --slug learn-in-podcast \
+  --source https://feeds.transistor.fm/the-temporal-podcast --slug the-temporal-podcast \
+  --source https://feeds.transistor.fm/career-chats --slug career-chats
+
+npm run podcast:validate -- \
+  --slug learn-in-podcast \
+  --slug the-temporal-podcast \
+  --slug career-chats
+
+npm run podcast:upload -- \
+  --bucket swyxdotio-podcast-media \
+  --slug learn-in-podcast \
+  --slug the-temporal-podcast \
+  --slug career-chats
+```
+
+Uploads target remote R2 by default. Pass `--local` only for an intentional
+Wrangler local-storage smoke test. The scripts keep checkpoint manifests under
+`.podcast-migration/`, so rerunning a command resumes completed downloads and
+uploads.
+
+Before the final Transistor redirect cutover, freeze publishing and repeat the
+migration command with `--refresh-feed --refresh-assets` so same-URL media edits
+are also detected.

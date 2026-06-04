@@ -1,8 +1,5 @@
 <script>
 	import Newsletter from '../components/Newsletter.svelte';
-	import FeatureCard from '../components/FeatureCard.svelte';
-	import LatestPosts from '../components/LatestPosts.svelte';
-	import YTEmbed from '../components/YouTubeEmbed.svelte';
 	import FeaturedWriting from '../components/FeaturedWriting.svelte';
 	import FeaturedSpeaking from '../components/FeaturedSpeaking.svelte';
 	import {
@@ -13,7 +10,6 @@
 		DEFAULT_OG_IMAGE,
 		MY_TWITTER_HANDLE
 	} from '$lib/siteConfig';
-
 
 	/** @type {import('./$types').PageData} */
 	export let data;
@@ -39,112 +35,55 @@
 	<meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
 </svelte:head>
 
+<div class="site-shell">
+	<section class="plain-section">
+		<h1 id="me" class="mb-2 text-3xl font-bold">Shawn @swyx Wang</h1>
+		<p id="bio" class="plain-muted mb-4 italic">Writer, Founder, Devtools Startup Advisor</p>
+		<p class="mb-4">
+			I foster <a href="https://www.latent.space/p/ai-engineer">the Rise of the AI Engineer</a> and
+			am working on
+			<a href="https://latent.space">Latent Space</a>,
+			<a href="https://ai.engineer">AI Engineer</a>, and
+			<a href="https://www.swyx.io/cognition">Cognition</a>
+			based in San Francisco. I also help devtools startups cross the chasm (devrel, advising and
+			<a href="/portfolio">investing</a>) and will always be the champion for
+			<a href="/learn-in-public">Learning in Public</a>!
+		</p>
+		<p><a href="/about">More on the about page</a>.</p>
+	</section>
 
-<div
-	class="mx-auto flex max-w-4xl flex-col items-start justify-center border-gray-200 px-4 dark:border-gray-700 sm:px-8"
->
-	<div class="flex flex-col-reverse items-start sm:flex-row">
-		<div class="flex flex-col pr-8 mb-16 ">
-			<h1 id="me" class="mb-3 text-3xl font-bold tracking-tight text-black dark:text-white md:text-5xl">
-				Shawn
-				<span
-					class="relative ml-2 inline-block before:absolute before:-inset-1 before:block before:-skew-y-3 before:bg-red-600"
-				>
-					<span class="relative skew-y-3 text-yellow-400">@swyx</span>
-				</span>
-				Wang
-			</h1>
-			<h2 id="bio" class="mb-4 italic text-gray-700 dark:text-gray-200">
-				Writer, Founder, Devtools Startup Advisor
-			</h2>
-			<p class="mb-4 text-gray-700 dark:text-gray-200">
-				I foster <a href="https://www.latent.space/p/ai-engineer">the Rise of the AI Engineer</a> and am working on
-				<a href="https://latent.space">Latent Space</a>, <a href="https://ai.engineer">AI Engineer</a>, and <a href="https://www.swyx.io/cognition">Cognition</a> based in San Francisco. I also help devtools startups cross the chasm (devrel, advising and <a href="/portfolio">investing</a>) and will always be the champion for <a href="/learn-in-public"
-				>Learning in Public</a
-			>!
-			</p>
-				<a class="text-gray-600 dark:text-gray-400 italic" href="/about"> → More on About page</a>
-		</div>
-		<img
-				class="w-[80px] rounded-full sm:w-[176px] relative mb-8 sm:mb-0 mr-auto bg-cyan-300 bg-opacity-25"
-				src="/swyx-ski.jpeg" alt="swyx at Niseko" 
-		
-			/>
-	</div>
-
-	<!-- <section class="mb-16 w-full">
-		<pre>{JSON.stringify(speaking, null, 2)}</pre>
-	</section> -->
-	<section class="mb-8 w-full">
-		<h3 id="latest" class="mb-6 text-2xl font-bold tracking-tight text-black dark:text-white md:text-4xl">
-			Latest Swyx Content
-		</h3>
-		<ul class="text-white">
+	<section class="plain-section">
+		<hr class="plain-rule mb-4" />
+		<h2 id="latest" class="mb-2 text-2xl font-bold">Latest content</h2>
+		<ul>
 			{#each items as item (item.url ?? item.slug)}
-			<li>
+				<li>
 					{#if item.category === 'podcast'}
-					🎧 <a href={item.url}>{item.title}</a>
+						🎧 <a href={item.url}>{item.title}</a>
 					{:else if item.category === 'talk'}
-					📺 <a href={item.instances[0].video}>{item.title}</a>
+						📺 <a href={item.instances?.[0]?.video ?? item.slug}>{item.title}</a>
 					{:else if item.category === 'essay'}
-					📙 <a href={item.slug}>{item.title}</a>
+						📙 <a href={item.slug}>{item.title}</a>
 					{:else if item.category === 'tutorial'}
-					📘 <a href={item.slug}>{item.title}</a>
+						📘 <a href={item.slug}>{item.title}</a>
 					{:else}
-					📓 <a href={item.slug}>{item.title}</a>
+						📓 <a href={item.slug}>{item.title}</a>
 					{/if}
-					<span class="text-xs text-black dark:text-gray-400">{new Date(item.date).toISOString().slice(0, 10)}</span>
+					<span class="plain-muted text-sm">{new Date(item.date).toISOString().slice(0, 10)}</span>
 				</li>
 			{/each}
 		</ul>
-		<a
-			class="mt-8 flex h-6 rounded-lg leading-7 text-gray-600 
-			 transition-all dark:text-gray-400 dark:hover:text-gray-200"
-			href="/ideas"
-			>See all posts<svg
-				xmlns="http://www.w3.org/2000/svg"
-				fill="none"
-				viewBox="0 0 24 24"
-				class="ml-1 h-6 w-6"
-				><path
-					stroke="currentColor"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M17.5 12h-15m11.667-4l3.333 4-3.333-4zm3.333 4l-3.333 4 3.333-4z"
-				/></svg
-			></a
-		>
+		<p class="mt-2"><a href="/ideas">See all posts</a>.</p>
 	</section>
 	<Newsletter />
-	<section class="mb-8 w-full">
-		<h3 id="writing" class="mb-6 text-2xl font-bold tracking-tight text-black dark:text-white md:text-4xl">
-			Most Popular Writing
-		</h3>
-		<!-- <div class="flex flex-col gap-6 md:flex-row mb-8">
-			<FeatureCard title="Learn in Public" href="/learn-in-public" stringData={'Jun 2018'} />
-			<FeatureCard
-				title="The Third Age of JavaScript"
-				href="/js-third-age"
-				stringData={'May 2020'}
-			/>
-			<FeatureCard title="AWS plays Chess, but Cloudflare plays Go" href="/cloudflare-go" stringData={'Oct 2021'} />
-		</div> -->
+	<section class="plain-section">
+		<hr class="plain-rule mb-4" />
+		<h2 id="writing" class="mb-2 text-2xl font-bold">Popular writing</h2>
 		<FeaturedWriting />
 	</section>
-	<section class="mb-8 w-full">
-		<h3 id="speaking" class="mb-6 text-2xl font-bold tracking-tight text-black dark:text-white md:text-4xl">
-			Most Popular Speaking
-		</h3>
-		<div class="grid grid-cols-1 md:grid-cols-3 gap-6 place-items-center my-16">
-			<YTEmbed videoId={"KsTAcQJ619o"} classes="w-[300px] h-[200px]" />
-			<YTEmbed videoId={"ddKDPikKbNk"} classes="w-[300px] h-[200px]" />
-			<YTEmbed videoId={"S-UxzCtpB74"} classes="w-[300px] h-[200px]" />
-			<YTEmbed videoId={"KJP1E-Y-xyo"} classes="w-[300px] h-[200px]" />
-			<YTEmbed videoId={"D-Sj6jo4o1I"} classes="w-[300px] h-[200px]" />
-			<!-- <YTEmbed videoId={"GWCcZ6fnpn4"} classes="w-[300px] h-[200px]" /> contributing to react -->
-			<YTEmbed videoId={"nyFHR0dDZo0"} classes="w-[300px] h-[200px]" />
-		</div>
+	<section class="plain-section">
+		<hr class="plain-rule mb-4" />
+		<h2 id="speaking" class="mb-2 text-2xl font-bold">Popular speaking</h2>
 		<FeaturedSpeaking />
 	</section>
 </div>

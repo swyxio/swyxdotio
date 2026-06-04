@@ -4,18 +4,23 @@ import YAML from 'yaml';
 import podcastsYml from '../../podcasts.yml?raw';
 import talksYml from '../../talks.yml?raw';
 
+/**
+ * @typedef {import('./types').ContentItem & { instances?: { date?: Date | string, venue?: string, video?: string }[] }} SpeakingItem
+ */
+
+/** @returns {Promise<SpeakingItem[]>} */
 export async function listSpeaking() {
 	const x = podcastsYml;
 	const y = talksYml;
-	const podcasts = YAML.parse(x).map((x) => {
-		x.category = 'podcast';
-		x.date = new Date(x.date);
-		return x;
+	const podcasts = /** @type {SpeakingItem[]} */ (YAML.parse(x)).map((podcast) => {
+		podcast.category = 'podcast';
+		podcast.date = new Date(podcast.date);
+		return podcast;
 	});
-	const talks = YAML.parse(y).map((x) => {
-		x.category = 'talk';
-		x.date = new Date(x.instances[0].date);
-		return x;
+	const talks = /** @type {SpeakingItem[]} */ (YAML.parse(y)).map((talk) => {
+		talk.category = 'talk';
+		talk.date = new Date(talk.instances?.[0]?.date ?? 0);
+		return talk;
 	});
 	return podcasts.concat(talks);
 }

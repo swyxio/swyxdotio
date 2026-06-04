@@ -7,6 +7,7 @@ import { listSpeaking } from '$lib/local-content';
  */
 export async function GET({ fetch, setHeaders, platform }) {
 	let degraded = false;
+	/** @type {import('$lib/types').ContentItem[]} */
 	let list = await listContent(fetch, platform?.env?.CONTENT_MANIFEST, {
 		context: platform?.context
 	}).catch((err) => {
@@ -19,7 +20,7 @@ export async function GET({ fetch, setHeaders, platform }) {
 		degraded = true;
 		return [];
 	});
-	list = list.concat(speaking).sort((a, b) => b.date - a.date);
+	list = list.concat(speaking).sort((a, b) => b.date.valueOf() - a.date.valueOf());
 	const cacheControl = degraded
 		? 'public, max-age=0, s-maxage=60'
 		: 'public, max-age=0, s-maxage=86400, stale-while-revalidate=604800';

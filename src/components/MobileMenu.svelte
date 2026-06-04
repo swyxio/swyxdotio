@@ -1,6 +1,6 @@
 <script>
 	let isOpen = false;
-	let isMenuRendered;
+	let isMenuRendered = false;
 	$: {
 		if (isOpen) {
 			setTimeout(() => {
@@ -60,7 +60,7 @@
 	</button>
 	{#if isOpen}
 		<ul
-			class="menu absolute flex flex-col bg-gray-50 text-2xl  uppercase dark:bg-gray-900"
+			class="menu absolute flex flex-col bg-gray-50 text-2xl uppercase dark:bg-gray-900"
 			class:menuRendered={isMenuRendered}
 		>
 			<li
@@ -138,7 +138,9 @@
 		top: 50%;
 		left: 50%;
 		opacity: 1;
-		transition: opacity 300ms ease, transform 300ms ease;
+		transition:
+			opacity 300ms ease,
+			transform 300ms ease;
 	}
 
 	.menu {
@@ -150,13 +152,19 @@
 		z-index: 1000;
 		opacity: 0;
 		left: 0;
-		transition: opacity 300ms ease, transform 300ms ease;
+		transition:
+			opacity 300ms ease,
+			transform 300ms ease;
 	}
 
 	.menu li {
 		transform: translateX(-16px);
 		opacity: 0;
-		transition: opacity 300ms ease, transform 300ms ease, width 300ms ease, border-color 300ms ease;
+		transition:
+			opacity 300ms ease,
+			transform 300ms ease,
+			width 300ms ease,
+			border-color 300ms ease;
 		width: 0px;
 		white-space: nowrap;
 	}

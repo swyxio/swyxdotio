@@ -48,12 +48,14 @@ function getHighlighter() {
 }
 
 // --- YouTube embed (ported from the old `{% youtube %}` regex hack) ---
+/** @param {string} url */
 function youtubeParser(url) {
 	const rx =
 		/^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/)|(?:(?:watch)?\?v(?:i)?=|&v(?:i)?=))([^#&?]*).*/;
 	const m = url.match(rx);
 	return m ? m[1] : url.slice(-11);
 }
+/** @param {string} arg */
 function youtubeEmbed(arg) {
 	const videoId = arg.startsWith('https://') ? youtubeParser(arg) : arg;
 	return `<iframe
@@ -75,6 +77,7 @@ function youtubeEmbed(arg) {
 		frameBorder="0" webkitallowfullscreen="true" mozallowfullscreen="true"
 		width="600" height="400" allowFullScreen aria-hidden="true"></iframe>`;
 }
+/** @param {string} arg */
 function tweetEmbed(arg) {
 	const url = arg.startsWith('https://twitter.com/') ? arg : `https://twitter.com/x/status/${arg}`;
 	return `<blockquote class="twitter-tweet" data-lang="en" data-dnt="true" data-theme="dark"><a href="${url}"></a></blockquote>
@@ -87,13 +90,16 @@ function tweetEmbed(arg) {
 const shortcodeExtension = {
 	name: 'shortcode',
 	level: 'block',
+	/** @param {string} src */
 	start(src) {
 		return src.match(/\{% /)?.index;
 	},
+	/** @param {string} src */
 	tokenizer(src) {
 		const m = /^\{% (youtube|tweet|twitter) (.*?) %\}\s*/.exec(src);
 		if (m) return { type: 'shortcode', raw: m[0], kind: m[1], arg: m[2].trim() };
 	},
+	/** @param {import('marked').Tokens.Generic} token */
 	renderer(token) {
 		if (token.kind === 'youtube') return youtubeEmbed(token.arg);
 		return tweetEmbed(token.arg);
@@ -104,13 +110,16 @@ const shortcodeExtension = {
 const ghIssueExtension = {
 	name: 'ghIssue',
 	level: 'inline',
+	/** @param {string} src */
 	start(src) {
 		return src.match(/#\d/)?.index;
 	},
+	/** @param {string} src */
 	tokenizer(src) {
 		const m = /^#(\d+)\b/.exec(src);
 		if (m) return { type: 'ghIssue', raw: m[0], num: m[1] };
 	},
+	/** @param {import('marked').Tokens.Generic} token */
 	renderer(token) {
 		return `<a href="https://github.com/${GH_USER_REPO}/issues/${token.num}">#${token.num}</a>`;
 	}
@@ -122,13 +131,16 @@ const ghIssueExtension = {
 const ghMentionExtension = {
 	name: 'ghMention',
 	level: 'inline',
+	/** @param {string} src */
 	start(src) {
 		return src.match(/@[a-zA-Z0-9]/)?.index;
 	},
+	/** @param {string} src */
 	tokenizer(src) {
 		const m = /^@([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?)\b/.exec(src);
 		if (m) return { type: 'ghMention', raw: m[0], user: m[1] };
 	},
+	/** @param {import('marked').Tokens.Generic} token */
 	renderer(token) {
 		return `<a href="https://github.com/${token.user}">@${token.user}</a>`;
 	}
@@ -137,6 +149,7 @@ const ghMentionExtension = {
 // Pre-highlight code tokens with Shiki, then emit as raw HTML.
 const shikiWalk = {
 	async: true,
+	/** @param {import('marked').Token} token */
 	async walkTokens(token) {
 		if (token.type !== 'code') return;
 		const highlighter = await getHighlighter();
@@ -144,9 +157,10 @@ const shikiWalk = {
 		const lang = token.lang && loaded.includes(token.lang) ? token.lang : 'text';
 		const html = highlighter.codeToHtml(token.text, { lang, theme: THEME });
 		// Convert the code token into a raw HTML token so the renderer passes it through.
-		token.type = 'html';
-		token.block = true;
-		token.text = html;
+		const htmlToken = /** @type {import('marked').Tokens.HTML} */ (/** @type {unknown} */ (token));
+		htmlToken.type = 'html';
+		htmlToken.block = true;
+		htmlToken.text = html;
 	}
 };
 
@@ -158,6 +172,7 @@ function createRenderer() {
 	return marked;
 }
 
+/** @type {Marked | undefined} */
 let _marked;
 
 /**

@@ -7,44 +7,38 @@
 	import LatestPosts from '../../components/LatestPosts.svelte';
 	import { page } from '$app/stores';
 
-
-	// https://svelte-put.vnphanquang.com/docs/toc
-  import { Toc } from '@svelte-put/toc';
-	import TableOfContents from './TableOfContents.svelte';
-	import utterances, {injectScript}  from './loadUtterances'
+	import utterances, { injectScript } from './loadUtterances';
 	import WebMentions from '../../components/WebMentions.svelte';
-
-	// table of contents (@svelte-put/toc v6)
-  const toc = new Toc({ selector: ':where(h1, h2, h3)', anchor: false, observe: true });
-
 
 	/** @type {import('./$types').PageData} */
 	export let data;
-	
+
 	/** @type {import('$lib/types').ContentItem} */
 	$: json = data.json; // warning: if you try to destructure content here, make sure to make it reactive, or your page content will not update when your user navigates
 
-	export let commentsEl;
-	$: issueNumber = json?.ghMetadata?.issueUrl?.split('/')?.pop()
+	/** @type {HTMLDivElement | undefined} */
+	let commentsEl;
+	$: issueNumber = json?.ghMetadata?.issueUrl?.split('/')?.pop();
 
-	$: canonical =  json.canonical ? json.canonical : SITE_URL + $page.url.pathname;
+	$: canonical = json.canonical ? json.canonical : SITE_URL + $page.url.pathname;
 
 	// customize this with https://tailgraph.com/
 	// discuss this decision at https://github.com/swyxio/swyxkit/pull/161
-	$: image = json?.image || `https://og.tailgraph.com/og
+	$: image =
+		json?.image ||
+		`https://og.tailgraph.com/og
 															?fontFamily=Roboto
 															&title=${encodeURIComponent(json?.title)}
 															&titleTailwind=font-bold%20bg-transparent%20text-7xl
 															&titleFontFamily=Poppins
-															${json?.subtitle ? '&text='+ encodeURIComponent(json?.subtitle) : ''}
+															${json?.subtitle ? '&text=' + encodeURIComponent(json?.subtitle) : ''}
 															&textTailwind=text-2xl%20mt-4
 															&logoTailwind=h-8
 															&bgUrl=https%3A%2F%2Fwallpaper.dog%2Flarge%2F20455104.jpg
 															&footer=${encodeURIComponent(SITE_URL)}
 															&footerTailwind=text-teal-900
 															&containerTailwind=border-2%20border-orange-200%20bg-transparent%20p-4
-															`.replace(/\s/g,'') // remove whitespace
-
+															`.replace(/\s/g, ''); // remove whitespace
 </script>
 
 <svelte:head>
@@ -70,10 +64,10 @@
 	<meta name="twitter:image" content={image} />
 </svelte:head>
 
-<TableOfContents {toc} />
-
-<article use:toc.actions.root class="items-start justify-center w-full mx-auto mt-16 mb-32 prose swyxcontent dark:prose-invert max-w-none">
-	<h1 class="md:text-center mb-8 text-3xl font-bold tracking-tight text-black dark:text-white md:text-5xl ">
+<article
+	class="prose swyxcontent mx-auto mt-8 w-full max-w-none items-start justify-center dark:prose-invert"
+>
+	<h1 class="mb-4 text-3xl font-bold">
 		{json.title}
 	</h1>
 	{#if json.subtitle}
@@ -81,22 +75,20 @@
 			{json.subtitle}
 		</p>
 	{/if}
-	<div
-		class="flex justify-between w-full mt-2 bg border-red sm:items-start md:flex-row md:items-center"
-	>
-		<span class="flex items-center text-sm text-gray-700 dark:text-gray-300">swyx</span>
-		<span class="flex items-center text-sm text-gray-600 dark:text-gray-400">
-			<a href={json.ghMetadata.issueUrl} rel="external noreferrer" class="no-underline" target="_blank">
-				<!-- <span class="mr-4 font-mono text-xs text-gray-700 text-opacity-70 dark:text-gray-300"
-					>{json.ghMetadata.reactions.total_count} reactions</span
-				> -->
+	<div class="plain-muted mt-2 flex w-full justify-between text-sm">
+		<span>swyx</span>
+		<span>
+			<a
+				href={json.ghMetadata?.issueUrl ?? '#'}
+				rel="external noreferrer"
+				class="no-underline"
+				target="_blank"
+			>
 				{new Date(json.date).toISOString().slice(0, 10)}
 			</a>
 		</span>
 	</div>
-	<div
-		class="-mx-4 my-2 flex h-1 w-[100vw] bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 sm:mx-0 sm:w-full"
-	></div>
+	<hr class="plain-rule mb-8 mt-2" />
 
 	{#if json.disclosure}
 		<p class="mt-4 text-sm text-gray-600 dark:text-gray-400">
@@ -132,10 +124,10 @@
 	{@html json.content}
 </article>
 
-<div class="max-w-2xl mx-auto">
+<div class="site-shell mb-12 max-w-2xl">
 	{#if json?.tags?.length}
 		<p class="!text-slate-400 flex-auto mb-4 italic">
-			Tagged in: 
+			Tagged in:
 			{#each json.tags as tag}
 				<span class="px-1">
 					<a href={`/ideas?filter=hashtag-${tag}`}>#{tag}</a>
@@ -143,15 +135,17 @@
 			{/each}
 		</p>
 	{/if}
-	<div class="max-w-full p-4 mb-12 prose border-t border-b border-blue-800 dark:prose-invert">
-		{#if json.ghMetadata.reactions.total_count > 0}
-			Reactions: <Reactions
-				issueUrl={json.ghMetadata.issueUrl}
-				reactions={json.ghMetadata.reactions}
-			/>
-		{:else}
-			<a href={json.ghMetadata.issueUrl}>Leave a reaction </a>
-			if you liked this post! 🧡
+	<div class="plain-section prose max-w-full border-y py-3 dark:prose-invert">
+		{#if json.ghMetadata}
+			{#if json.ghMetadata.reactions.total_count > 0}
+				Reactions: <Reactions
+					issueUrl={json.ghMetadata.issueUrl}
+					reactions={json.ghMetadata.reactions}
+				/>
+			{:else}
+				<a href={json.ghMetadata.issueUrl}>Leave a reaction </a>
+				if you liked this post! 🧡
+			{/if}
 		{/if}
 		{#if json.devToReactions}
 			<a href={json.devToUrl} rel="external noreferrer" class="no-underline" target="_blank">
@@ -161,18 +155,24 @@
 			</a>
 		{/if}
 	</div>
-	<div class="mb-8 text-black dark:text-white " bind:this={commentsEl} use:utterances={{number: issueNumber}}>
+	<div class="mb-8" bind:this={commentsEl} use:utterances={{ number: issueNumber }}>
 		Loading comments...
 		<!-- svelte-ignore a11y-mouse-events-have-key-events -->
-		<button class="my-4 bg-blue-200 hover:bg-blue-100 text-black p-2 rounded-lg" 
-			on:click={() => injectScript(commentsEl, issueNumber)}
-			on:mouseover={() => injectScript(commentsEl, issueNumber)}
-		>Load now</button>
+		<button
+			class="plain-button my-4"
+			on:click={() => commentsEl && injectScript(commentsEl, issueNumber)}
+			on:mouseover={() => commentsEl && injectScript(commentsEl, issueNumber)}>Load now</button
+		>
 		<!-- <Comments ghMetadata={json.ghMetadata} /> -->
 	</div>
 	<WebMentions
 		devto_reactions={json.devToReactions}
-		targets={[`https://www.swyx.io/${json.slug}`, `https://www.swyx.io/writing/${json.slug}`, json.devToUrl, canonical]}
+		targets={[
+			`https://www.swyx.io/${json.slug}`,
+			`https://www.swyx.io/writing/${json.slug}`,
+			json.devToUrl,
+			canonical
+		]}
 	/>
 
 	<Newsletter />
@@ -181,32 +181,33 @@
 
 <style>
 	/* https://ryanmulligan.dev/blog/layout-breakouts/ */
+	.swyxcontent {
+		--gap: clamp(1rem, 6vw, 3rem);
+		--full: minmax(var(--gap), 1fr);
+		--content: minmax(0, 56rem);
+		--popout: minmax(0, 2rem);
+		--feature: minmax(0, 5rem);
+
+		display: grid;
+		grid-template-columns:
+			[full-start] var(--site-gutter)
+			[feature-start popout-start content-start] minmax(0, 1fr)
+			[content-end popout-end feature-end] var(--site-gutter)
+			[full-end];
+	}
+
+	@media (min-width: 768px) {
 		.swyxcontent {
-			--gap: clamp(1rem, 6vw, 3rem);
-			--full: minmax(var(--gap), 1fr);
-			--content: minmax(0, 56rem);
-			--popout: minmax(0, 2rem);
-			--feature: minmax(0, 5rem);
-
-			display: grid;
-			grid-template-columns: 
-				[full-start feature-start popout-start content-start]
-				minmax(0, 1fr)
-				[content-end popout-end feature-end full-end]
+			grid-template-columns:
+				[full-start] var(--full)
+				[feature-start] var(--feature)
+				[popout-start] var(--popout)
+				[content-start] var(--content) [content-end]
+				var(--popout) [popout-end]
+				var(--feature) [feature-end]
+				var(--full) [full-end];
 		}
-
-		@media (min-width: 768px) {
-			.swyxcontent {
-				grid-template-columns:
-					[full-start] var(--full)
-					[feature-start] var(--feature)
-					[popout-start] var(--popout)
-					[content-start] var(--content) [content-end]
-					var(--popout) [popout-end]
-					var(--feature) [feature-end]
-					var(--full) [full-end];
-			}
-		}
+	}
 
 	:global(.swyxcontent > *) {
 		grid-column: content;
@@ -215,8 +216,14 @@
 
 	article :global(pre) {
 		grid-column: feature;
-		margin-left: -1rem;
-		margin-right: -1rem;
+		margin-inline: 0;
+	}
+
+	@media (min-width: 768px) {
+		article :global(pre) {
+			margin-left: -1rem;
+			margin-right: -1rem;
+		}
 	}
 
 	/* hacky thing because otherwise the summary>pre causes overflow */
@@ -236,7 +243,9 @@
 	}
 
 	article :global(.admonition) {
-		@apply p-8 border-4 border-red-500;
+		padding: 2rem;
+		border-width: 4px;
+		border-color: rgb(239 68 68);
 	}
 
 	/* fix github codefence diff styling from our chosen prismjs theme */
