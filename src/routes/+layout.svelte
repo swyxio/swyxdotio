@@ -15,15 +15,14 @@
 	<link rel="pingback" href="https://webmention.io/www.swyx.io/xmlrpc" />
 </svelte:head>
 
-<div class="site-shell">
+<div class="site-shell site-nav-shell">
 	<Nav />
 </div>
 <main id="skip" class="site-main">
 	<slot />
 </main>
 
-<footer class="site-shell mb-8 mt-16">
-	<hr class="plain-rule mb-4" />
+<footer class="site-shell site-panel mb-8 mt-8 p-4">
 	<p class="plain-muted text-sm">
 		<a href="/">Home</a> · <a href="/about">About</a> · <a href="/podcasts">Podcasts</a> ·
 		<a href="/subscribe">Newsletter</a> ·

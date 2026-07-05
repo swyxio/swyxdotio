@@ -21,9 +21,10 @@ sharing. Mutations reject missing or cross-origin `Origin` headers.
 Configure both Worker secrets before deploying:
 
 ```sh
-CF_API_TOKEN= CLOUDFLARE_API_TOKEN= npx wrangler secret put PODCAST_ADMIN_PASSWORD
-CF_API_TOKEN= CLOUDFLARE_API_TOKEN= npx wrangler secret put PODCAST_ADMIN_SESSION_SECRET
-CF_API_TOKEN= CLOUDFLARE_API_TOKEN= npx wrangler secret put RECLIP_URL
+unset CF_API_TOKEN CLOUDFLARE_API_TOKEN
+npx wrangler secret put PODCAST_ADMIN_PASSWORD
+npx wrangler secret put PODCAST_ADMIN_SESSION_SECRET
+npx wrangler secret put RECLIP_URL
 ```
 
 Generate values with:

@@ -87,12 +87,15 @@ API because Wrangler's single-object CLI path rejects larger uploads.
 
 ## Wrangler Authentication
 
-The repo-local `.env` has a legacy `CF_API_TOKEN` that is useful for older zone
-operations but does not have R2 permissions. For R2 commands, force Wrangler to
-use the OAuth login:
+Wrangler should use the local OAuth login for deploys, R2 commands, and Worker
+secret updates. Do not keep `CF_API_TOKEN` or `CLOUDFLARE_API_TOKEN` in `.env`
+or `.dev.vars`; those environment variables override OAuth and stale tokens can
+silently remove required permissions.
 
 ```sh
-CF_API_TOKEN= CLOUDFLARE_API_TOKEN= npx wrangler r2 bucket list
+unset CF_API_TOKEN CLOUDFLARE_API_TOKEN
+npx wrangler whoami
+npx wrangler r2 bucket list
 ```
 
 ## Cancellation Gate

@@ -1,5 +1,7 @@
 import { error } from '@sveltejs/kit';
+import { toArchiveContentItem } from '$lib/content-list';
 // export const prerender = true; // turned off so it refreshes quickly
+
 export async function load({ setHeaders, fetch }) {
 	const res = await fetch(`/api/listContent.json`);
 	// alternate strategy https://www.davidwparker.com/posts/how-to-make-an-rss-feed-in-sveltekit
@@ -14,5 +16,5 @@ export async function load({ setHeaders, fetch }) {
 		// dynamic + edge-cached (see hooks.server.js); purged on publish via /api/revalidate
 		'cache-control': 'public, max-age=0, s-maxage=86400, stale-while-revalidate=604800'
 	});
-	return { items };
+	return { items: items.slice(0, 80).map(toArchiveContentItem), totalCount: items.length };
 }

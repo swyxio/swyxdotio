@@ -1,5 +1,4 @@
-<section class="plain-section w-full" id="newsletter">
-	<hr class="plain-rule mb-4" />
+<section class="plain-section site-card w-full" id="newsletter">
 	<h3 class="mb-2 text-xl font-bold">Subscribe to the newsletter</h3>
 	<p class="mb-3">
 		Join &gt;10,000 subscribers getting occasional updates on new posts and projects.
