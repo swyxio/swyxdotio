@@ -8,6 +8,8 @@ export const READ_SAMPLE_RATE = 0.005;
 export const READ_SAMPLE_WEIGHT = 200;
 export const READ_SAMPLING_POLICY = 'v1-p005';
 export const READ_COUNT_VISIBILITY_KEY = 'swyx:read-count-visibility:v1';
+export const READ_COUNT_VISIBILITY_EVENT = 'swyx:read-count-visibility';
+export const READ_COUNT_BATCH_LIMIT = 80;
 
 const BOT_USER_AGENT =
 	/(?:bot|crawler|spider|slurp|preview|facebookexternalhit|twitterbot|linkedinbot|discordbot|whatsapp|telegrambot|headless|lighthouse|pagespeed)/i;
@@ -127,6 +129,24 @@ export async function getReadCount(database, pageKey) {
 		.bind(pageKey)
 		.first();
 	return normalizeReadCount(row?.read_count);
+}
+
+/**
+ * Fetch display-only counts in one D1 query. This must never increment reads.
+ * @param {D1Database} database
+ * @param {string[]} pageKeys
+ */
+export async function getReadCounts(database, pageKeys) {
+	const uniqueKeys = [...new Set(pageKeys)].slice(0, READ_COUNT_BATCH_LIMIT);
+	if (!uniqueKeys.length) return new Map();
+	const placeholders = uniqueKeys.map((_, index) => `?${index + 1}`).join(', ');
+	const result = await database
+		.prepare(`SELECT page_key, read_count FROM page_reads WHERE page_key IN (${placeholders})`)
+		.bind(...uniqueKeys)
+		.all();
+	return new Map(
+		(result.results ?? []).map((row) => [`${row.page_key}`, normalizeReadCount(row.read_count)])
+	);
 }
 
 /** @param {D1Database} database @param {string} pageKey */

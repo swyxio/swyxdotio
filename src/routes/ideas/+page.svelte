@@ -1,10 +1,17 @@
 <script>
 	import { browser } from '$app/environment';
+	import { onMount } from 'svelte';
 	// import { goto } from '$app/navigation';
 	// import { page } from '$app/stores';
 	import { queryParam, ssp } from 'sveltekit-search-params';
 
 	import { POST_CATEGORIES } from '$lib/siteConfig';
+	import {
+		READ_COUNT_BATCH_LIMIT,
+		READ_COUNT_VISIBILITY_EVENT,
+		READ_COUNT_VISIBILITY_KEY,
+		readCountsAreHidden
+	} from '$lib/read-counter';
 	import SocialMeta from '../../components/SocialMeta.svelte';
 	import { getPageSocialMeta } from '$lib/social-meta';
 
@@ -60,6 +67,14 @@
 
 	/** @type {HTMLInputElement | undefined} */
 	let inputEl;
+	let countsHidden = false;
+	/** @type {Record<string, number>} */
+	let readCounts = {};
+	const requestedReadKeys = new Set();
+	const readFormatter = new Intl.NumberFormat('en-US', {
+		notation: 'compact',
+		maximumFractionDigits: 1
+	});
 
 	/** @param {KeyboardEvent} e */
 	function focusSearch(e) {
@@ -200,6 +215,77 @@
 			(item.devToReactions ?? 0)
 		);
 	}
+
+	/** @param {ArchiveItem[]} visibleItems */
+	async function loadReadCounts(visibleItems) {
+		if (countsHidden) return;
+		const keys = [
+			...new Set(
+				visibleItems
+					.filter((item) => !isExternalItem(item))
+					.map((item) => item.slug)
+					.filter((slug) => slug && !requestedReadKeys.has(slug))
+			)
+		];
+		for (let offset = 0; offset < keys.length; offset += READ_COUNT_BATCH_LIMIT) {
+			const chunk = keys.slice(offset, offset + READ_COUNT_BATCH_LIMIT);
+			chunk.forEach((key) => requestedReadKeys.add(key));
+			const params = new URLSearchParams();
+			chunk.forEach((key) => params.append('key', key));
+			try {
+				const response = await fetch(`/api/reads/batch?${params}`);
+				if (!response.ok) throw new Error(`read counts unavailable (${response.status})`);
+				const payload = await response.json();
+				readCounts = { ...readCounts, ...payload.reads };
+			} catch (error) {
+				chunk.forEach((key) => requestedReadKeys.delete(key));
+				console.error('failed to load archive view counts', error);
+			}
+		}
+	}
+
+	function toggleReadCountVisibility() {
+		countsHidden = !countsHidden;
+		try {
+			if (countsHidden) localStorage.setItem(READ_COUNT_VISIBILITY_KEY, 'hidden');
+			else localStorage.removeItem(READ_COUNT_VISIBILITY_KEY);
+		} catch {
+			// The in-page preference still works when storage is unavailable.
+		}
+		window.dispatchEvent(
+			new CustomEvent(READ_COUNT_VISIBILITY_EVENT, { detail: { hidden: countsHidden } })
+		);
+		if (!countsHidden) void loadReadCounts(list);
+	}
+
+	onMount(() => {
+		function readPreference() {
+			try {
+				countsHidden = readCountsAreHidden(localStorage.getItem(READ_COUNT_VISIBILITY_KEY));
+			} catch {
+				countsHidden = false;
+			}
+		}
+		/** @param {StorageEvent} event */
+		function handleStorage(event) {
+			if (event.key === READ_COUNT_VISIBILITY_KEY) readPreference();
+		}
+		/** @param {Event} event */
+		function handlePreferenceEvent(event) {
+			const detail = /** @type {CustomEvent<{ hidden?: unknown }>} */ (event).detail;
+			countsHidden = detail?.hidden === true;
+			if (!countsHidden) void loadReadCounts(list);
+		}
+		readPreference();
+		window.addEventListener('storage', handleStorage);
+		window.addEventListener(READ_COUNT_VISIBILITY_EVENT, handlePreferenceEvent);
+		return () => {
+			window.removeEventListener('storage', handleStorage);
+			window.removeEventListener(READ_COUNT_VISIBILITY_EVENT, handlePreferenceEvent);
+		};
+	});
+
+	$: if (browser && !countsHidden && list.length) void loadReadCounts(list);
 </script>
 
 <SocialMeta {...social} />
@@ -240,6 +326,9 @@
 			placeholder="Hit / to search"
 			class="ideas-search"
 		/>
+		<button class="views-toggle" type="button" on:click={toggleReadCountVisibility}>
+			{countsHidden ? 'Show views' : 'Hide views'}
+		</button>
 	</div>
 
 	{#if !$search && !$selectedCategories?.length}
@@ -276,6 +365,13 @@
 						{/if}
 						{#if reactionCount(item)}
 							<span class="reaction-chip">{reactionCount(item)} ♥</span>
+						{/if}
+						{#if !countsHidden && Number.isSafeInteger(readCounts[item.slug])}
+							<span
+								class="view-count"
+								title="Approximate lifetime views: historical estimate plus sampled engaged reads"
+								>~{readFormatter.format(readCounts[item.slug])} views</span
+							>
 						{/if}
 					</span>
 				</a>
@@ -408,6 +504,25 @@
 		outline-offset: 1px;
 	}
 
+	.views-toggle {
+		flex: 0 0 auto;
+		border: 0;
+		padding: 0.12rem 0;
+		background: transparent;
+		color: var(--page-muted);
+		font: inherit;
+		font-size: 0.72rem;
+		line-height: 1.45;
+		text-decoration: underline;
+		text-underline-offset: 0.16em;
+		cursor: pointer;
+	}
+
+	.views-toggle:hover,
+	.views-toggle:focus-visible {
+		color: var(--page-text);
+	}
+
 	.ideas-featured {
 		padding: 1rem clamp(0.9rem, 2vw, 2rem);
 		border-bottom: 1px solid var(--page-border);
@@ -516,6 +631,15 @@
 		border-radius: 0.35rem;
 		padding: 0.08rem 0.38rem;
 		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.view-count {
+		flex: 0 0 auto;
+		min-width: 5.2rem;
+		color: var(--page-muted);
+		font-variant-numeric: tabular-nums;
+		text-align: right;
 		white-space: nowrap;
 	}
 

@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import {
 		READ_COUNT_VISIBILITY_KEY,
+		READ_COUNT_VISIBILITY_EVENT,
 		READ_DEDUPE_MS,
 		READ_SAMPLE_WEIGHT,
 		READ_SCROLL_FRACTION,
@@ -21,7 +22,6 @@
 	const ANALYTICS_SESSION_KEY = 'swyx:analytics:session:v1';
 	const ANALYTICS_SESSION_TIMEOUT_MS = 30 * 60 * 1000;
 	const READ_COUNT_KEY_PREFIX = 'swyx:read-count:';
-	const READ_COUNT_VISIBILITY_EVENT = 'swyx:read-count-visibility';
 
 	const formatter = new Intl.NumberFormat('en-US', {
 		notation: 'compact',

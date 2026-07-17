@@ -23,6 +23,13 @@ The displayed total is:
 static historical estimate + sampled D1 estimate
 ```
 
+Individual articles render the counter beside their publication metadata. The
+Ideas archive also shows the same approximate total on each internal article
+row. It uses display-only `GET /api/reads/batch` requests in chunks of at most
+80 slugs, so opening the index never records engagement for every listed post.
+External podcast and talk links do not receive a site view count. A single
+stored show/hide preference controls both article and archive displays.
+
 ## Historical backfill
 
 The static table lives in

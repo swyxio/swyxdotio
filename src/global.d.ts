@@ -60,6 +60,7 @@ interface R2MultipartUpload {
 interface D1PreparedStatement {
 	bind(...values: unknown[]): D1PreparedStatement;
 	first<T = Record<string, unknown>>(): Promise<T | null>;
+	all<T = Record<string, unknown>>(): Promise<{ results: T[]; success: boolean }>;
 }
 
 interface D1Database {

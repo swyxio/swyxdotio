@@ -3,6 +3,7 @@ import test from 'node:test';
 
 import {
 	canonicalReadPath,
+	getReadCounts,
 	incrementReadCount,
 	isAutomatedRead,
 	isObviousBot,
@@ -193,6 +194,43 @@ test('persists only the server-owned sample weight and policy', async () => {
 	};
 	assert.equal(await incrementReadCount(database, 'article:learn-in-public'), 400);
 	assert.deepEqual(bindings, ['article:learn-in-public', 200, 'v1-p005']);
+});
+
+test('fetches multiple display counts in one read-only query', async () => {
+	let query = '';
+	let bindings = [];
+	const database = {
+		prepare(sql) {
+			query = sql;
+			return {
+				bind(...values) {
+					bindings = values;
+					return this;
+				},
+				async all() {
+					return {
+						success: true,
+						results: [
+							{ page_key: 'article:learn-in-public', read_count: 400 },
+							{ page_key: 'article:missing', read_count: -1 }
+						]
+					};
+				}
+			};
+		}
+	};
+	const counts = await getReadCounts(database, [
+		'article:learn-in-public',
+		'article:missing',
+		'article:learn-in-public'
+	]);
+	assert.match(
+		query,
+		/^SELECT page_key, read_count FROM page_reads WHERE page_key IN \(\?1, \?2\)$/
+	);
+	assert.deepEqual(bindings, ['article:learn-in-public', 'article:missing']);
+	assert.equal(counts.get('article:learn-in-public'), 400);
+	assert.equal(counts.get('article:missing'), 0);
 });
 
 test('validates a minimal pseudonymous GA4 context', () => {
