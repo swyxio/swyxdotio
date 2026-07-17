@@ -136,3 +136,29 @@ npx wrangler d1 execute swyxdotio-read-counters --remote --command \
 The monthly Worker requires the `GOOGLE_SERVICE_ACCOUNT_JSON` secret and GA4
 Viewer access for that service-account email. The optional
 `CALIBRATION_ALERT_WEBHOOK_URL` secret enables major-discontinuity alerts.
+
+### Calibration interpretation and known limits
+
+- The first run is only a D1 baseline. It does not request a Google OAuth token
+  or call the Analytics Data API. Confirm the service-account path from the
+  first comparison report or a dedicated read-only smoke test; the existence of
+  a baseline row is not proof that GA credentials work.
+- At the 0.5% sample rate, the 20-sample alert threshold needs roughly 4,000
+  eligible engaged reads in one reporting window. Lower-traffic windows remain
+  `insufficient_data`, so the absence of an alert is not evidence of delivery
+  parity.
+- The stored `correction_factor` currently divides the D1 weighted delta by GA
+  sampled sessions multiplied by the same weight. Applying that ratio back to
+  the GA estimate algebraically reproduces the D1 delta. Treat it only as a
+  session-alignment diagnostic; it is not independent evidence for changing
+  `HISTORICAL_READ_ESTIMATES`.
+- D1 deltas use exact Worker capture timestamps while GA reports use inclusive
+  calendar dates. The property timezone and the 08:15 UTC cron can therefore
+  create boundary differences. Compare multi-month trends rather than treating
+  one window as audited reconciliation.
+- The current job clamps negative D1 deltas to zero. A reset, restoration, or
+  counter loss can therefore resemble a quiet month. Review cumulative D1
+  totals alongside every report before accepting its status.
+- Measurement Protocol success means Google accepted the HTTP request, not
+  necessarily that every event passed semantic validation. Use GA DebugView or
+  the Measurement Protocol validation endpoint when changing the payload.

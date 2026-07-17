@@ -297,6 +297,11 @@ GA4 is a secondary reporting mirror. D1 remains authoritative because Measuremen
 delivery is best-effort and browser privacy/network behavior introduces systematic bias beyond the
 normal sampling error.
 
+A separate monthly calibration Worker compares D1 sample deltas with GA4 delivery and stores a
+diagnostic report. Its setup, interpretation limits, and production queries are documented in
+`docs/read-counter.md`. In particular, its current session ratio is not an independent estimate of
+historical traffic and must not be used to rewrite the static lifetime backfill.
+
 ### Capacity and cost envelope
 
 The 0.5% policy is deliberately bounded for an expected maximum of 10 million reads/day:
@@ -374,6 +379,8 @@ node --test tests/*.test.mjs
 npm run check
 npm run build
 npx wrangler d1 migrations apply swyxdotio-read-counters --remote
+npm run deploy:presence
+npm run deploy:calibration
 npx wrangler deploy
 ```
 
