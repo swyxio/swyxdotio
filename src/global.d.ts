@@ -66,6 +66,17 @@ interface D1Database {
 	prepare(query: string): D1PreparedStatement;
 }
 
+interface DurableObjectId {}
+
+interface DurableObjectStub {
+	fetch(request: Request): Promise<Response>;
+}
+
+interface DurableObjectNamespace {
+	idFromName(name: string): DurableObjectId;
+	get(id: DurableObjectId): DurableObjectStub;
+}
+
 declare namespace App {
 	// interface Error {}
 	// interface Locals {}
@@ -89,6 +100,9 @@ declare namespace App {
 				put(key: string, value: string): Promise<void>;
 			};
 			READ_COUNTERS?: D1Database;
+			PRESENCE_ROOMS?: DurableObjectNamespace;
+			PRESENCE_ENABLED?: string;
+			PUBLIC_PRESENCE_ADMISSION_RATE?: string;
 			PODCAST_MEDIA?: R2Bucket;
 		};
 		context?: {

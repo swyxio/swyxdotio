@@ -1,0 +1,16 @@
+name = "swyxdotio-presence"
+account_id = "2d017c943ff16e4c52783635ef05e535"
+main = "workers/presence/index.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# PresenceRoom intentionally performs no storage reads or writes. The SQLite
+# class declaration is still required once to create its Durable Object
+# namespace; subsequent deployments keep the same v1 migration tag.
+[[durable_objects.bindings]]
+name = "PRESENCE_ROOMS"
+class_name = "PresenceRoom"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["PresenceRoom"]

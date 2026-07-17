@@ -13,6 +13,8 @@ main = ".svelte-kit/cloudflare/_worker.js"
 
 [vars]
 GA4_MEASUREMENT_ID = "G-TW6GTQ9Q4N"
+PRESENCE_ENABLED = "true"
+PUBLIC_PRESENCE_ADMISSION_RATE = "1"
 
 [assets]
 binding = "ASSETS"
@@ -33,6 +35,11 @@ binding = "READ_COUNTERS"
 database_name = "swyxdotio-read-counters"
 database_id = "9990fd0c-2211-4bf4-b263-ddbb8aaed34e"
 migrations_dir = "migrations/read-counters"
+
+[[durable_objects.bindings]]
+name = "PRESENCE_ROOMS"
+class_name = "PresenceRoom"
+script_name = "swyxdotio-presence"
 
 [[r2_buckets]]
 binding = "PODCAST_MEDIA"

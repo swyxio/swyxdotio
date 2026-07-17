@@ -9,6 +9,8 @@
 		"prebuild": "npm run validate:yaml && svelte-kit sync",
 		"build": "vite build",
 		"preview": "wrangler dev",
+		"preview:presence": "wrangler dev -c wrangler.toml -c wrangler.presence.toml",
+		"deploy:presence": "wrangler deploy -c wrangler.presence.toml",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch",
 		"podcast:migrate": "node scripts/migrate-podcast-feed.mjs",

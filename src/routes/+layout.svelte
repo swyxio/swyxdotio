@@ -2,11 +2,17 @@
 	import '../tailwind.css';
 	import Nav from '../components/Nav.svelte';
 	import ReadCounter from '../components/ReadCounter.svelte';
+	import LivePresence from '../components/LivePresence.svelte';
+	import SelectionShare from '../components/SelectionShare.svelte';
+	import { env } from '$env/dynamic/public';
 	import { page } from '$app/stores';
 	import { publicPageKeyForPath } from '$lib/read-counter';
 	import { MY_TWITTER_HANDLE, MY_YOUTUBE, REPO_URL, SITE_TITLE } from '$lib/siteConfig';
 
 	$: publicPageKey = $page.status === 200 ? publicPageKeyForPath($page.url.pathname) : null;
+	$: presencePageKey =
+		$page.status === 200 && typeof $page.data?.slug === 'string' ? $page.data.slug : publicPageKey;
+	$: presenceAdmissionRate = Number(env.PUBLIC_PRESENCE_ADMISSION_RATE ?? 1);
 </script>
 
 <svelte:head>
@@ -46,3 +52,10 @@
 		{/if}
 	</p>
 </footer>
+
+{#if presencePageKey}
+	{#key presencePageKey}
+		<LivePresence pageKey={presencePageKey} admissionRate={presenceAdmissionRate} />
+		<SelectionShare />
+	{/key}
+{/if}

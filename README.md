@@ -37,19 +37,24 @@ If you want to make a site based on this, see https://github.com/swyxio/swyxkit 
   accepted sample adds the server-owned weight of 200, and a best-effort copy is sent to GA4 via
   Measurement Protocol. Selected older articles also have a static, explicitly approximate
   historical estimate that is added only when returning the public count.
+- **Ephemeral live readers:** public pages optionally join a page-scoped, hibernating Durable
+  Object room. Readers exchange only short-lived country, position, mode, reaction, and fixed share
+  celebration frames; there is no identity, history, free-form chat, or presence database.
 
 ## Environment variables (Cloudflare Workers)
 
 ### What each variable does
 
-| Variable                       | Required?      | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| ------------------------------ | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GH_TOKEN`                     | **Yes**        | A GitHub Personal Access Token used to authenticate calls to the GitHub Issues API (the CMS). Without it, requests are unauthenticated and capped at **60/hr**, which the site blows through quickly and starts failing. With it, the limit is **5000/hr**. Read at runtime via `$env/dynamic/private` (Cloudflare `platform.env`) **and** at build time for the prerendered pages — so it must be set in **both** the runtime secrets and the build environment. |
-| `GH_WEBHOOK_SECRET`            | Recommended    | A shared secret used to verify (HMAC SHA‑256) that incoming requests to `/api/revalidate` actually came from your GitHub webhook. This enables fast publishing: editing an Issue refreshes the KV manifest and rolls the cache generation instead of waiting for the `s-maxage` TTL. If unset, `/api/revalidate` returns 500 and you fall back to TTL-based freshness.                                                                                            |
-| `GA4_MEASUREMENT_ID`           | Recommended    | Public GA4 stream identifier used only by the server-side read-event mirror. Production currently uses `G-TW6GTQ9Q4N` and declares it as a non-secret `[vars]` value in `wrangler.toml`.                                                                                                                                                                                                                                                                          |
-| `GA4_API_SECRET`               | **Production** | Secret for the GA4 Measurement Protocol stream. It is sent only from the Worker and must never be committed, placed in a URL in source code, or exposed to the browser. The application treats it as optional so D1 counting survives a GA outage, but `wrangler.toml` requires it for production deployment.                                                                                                                                                     |
-| `PODCAST_ADMIN_PASSWORD`       | **Yes**        | Password for the private podcast studio.                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `PODCAST_ADMIN_SESSION_SECRET` | **Yes**        | Signs private podcast-studio sessions. Rotate it to invalidate every existing session.                                                                                                                                                                                                                                                                                                                                                                            |
+| Variable                         | Required?      | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| -------------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GH_TOKEN`                       | **Yes**        | A GitHub Personal Access Token used to authenticate calls to the GitHub Issues API (the CMS). Without it, requests are unauthenticated and capped at **60/hr**, which the site blows through quickly and starts failing. With it, the limit is **5000/hr**. Read at runtime via `$env/dynamic/private` (Cloudflare `platform.env`) **and** at build time for the prerendered pages — so it must be set in **both** the runtime secrets and the build environment. |
+| `GH_WEBHOOK_SECRET`              | Recommended    | A shared secret used to verify (HMAC SHA‑256) that incoming requests to `/api/revalidate` actually came from your GitHub webhook. This enables fast publishing: editing an Issue refreshes the KV manifest and rolls the cache generation instead of waiting for the `s-maxage` TTL. If unset, `/api/revalidate` returns 500 and you fall back to TTL-based freshness.                                                                                            |
+| `GA4_MEASUREMENT_ID`             | Recommended    | Public GA4 stream identifier used only by the server-side read-event mirror. Production currently uses `G-TW6GTQ9Q4N` and declares it as a non-secret `[vars]` value in `wrangler.toml`.                                                                                                                                                                                                                                                                          |
+| `GA4_API_SECRET`                 | **Production** | Secret for the GA4 Measurement Protocol stream. It is sent only from the Worker and must never be committed, placed in a URL in source code, or exposed to the browser. The application treats it as optional so D1 counting survives a GA outage, but `wrangler.toml` requires it for production deployment.                                                                                                                                                     |
+| `PODCAST_ADMIN_PASSWORD`         | **Yes**        | Password for the private podcast studio.                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `PODCAST_ADMIN_SESSION_SECRET`   | **Yes**        | Signs private podcast-studio sessions. Rotate it to invalidate every existing session.                                                                                                                                                                                                                                                                                                                                                                            |
+| `PRESENCE_ENABLED`               | Recommended    | Server-side emergency kill switch for new live-reader sockets. Set to `false` and deploy the main Worker to reject presence while leaving every page usable.                                                                                                                                                                                                                                                                                                      |
+| `PUBLIC_PRESENCE_ADMISSION_RATE` | Recommended    | Deployment-time browser admission fraction from `0` through `1`. Production starts at `1`; use `0.1` during a viral spike to reduce socket workload by roughly 90%. This value is public by design.                                                                                                                                                                                                                                                               |
 
 ### Where to get the values
 
@@ -80,6 +85,9 @@ configuration.
 It also declares the existing `CONTENT_MANIFEST` KV, `READ_COUNTERS` D1, and `PODCAST_MEDIA` R2
 bindings. A fork or new Cloudflare account must create those resources first and replace their IDs
 in `wrangler.toml`; Wrangler cannot recreate resources from another account's IDs.
+
+The `PRESENCE_ROOMS` binding is different: it points to the separately deployed
+`swyxdotio-presence` Worker. Deploy that Worker before the main site Worker.
 
 > Local Wrangler preview reads secrets from a gitignored `.dev.vars`; ordinary Vite development
 > can also use `.env`. Never copy production secret values into README, `.env.example`, tests, or
@@ -131,6 +139,81 @@ outside the migration command.
 
 Do not seed historical estimates into D1. D1 is the independently auditable post-launch sample
 ledger; the historical estimates are a separate static presentation layer.
+
+## Live reader presence and sharing
+
+Presence is intentionally playful and approximate. On desktop, admitted readers see ephemeral
+country-labelled cursors. On mobile, the persistent representation is a flag bead on a reading
+progress rail; a tap or drag adds a temporary passive touch cursor without interfering with native
+scrolling. The only room communication is movement, one of `👋 ❤️ 💡 😂 ✨`, and a fixed share
+sparkle. Highlighted quote text, URLs, destinations, IP addresses, and user agents never enter the
+Durable Object.
+
+The browser waits until the page has been visible for two seconds before connecting. The feature
+is on by default and has a persistent **Hide live readers** preference. Hidden tabs stop sending;
+after 30 hidden seconds the socket closes. Rooms admit at most 32 readers, use WebSocket
+hibernation, and store no application data. Room IDs are resolved from the same finite public-page
+registry and persisted non-private article manifest used by read counts, so tools, APIs, feeds,
+errors, private articles, and arbitrary attacker-controlled keys cannot create rooms.
+
+### Deploy and develop
+
+The Durable Object is an auxiliary Worker because the SvelteKit adapter owns the generated main
+Worker entrypoint. Its declarative SQLite export lives in `wrangler.presence.toml`; SQLite is used
+for the Durable Object class declaration only and the application performs no SQL writes.
+
+```sh
+# Local: build the SvelteKit Worker, then run both Workers together
+npm run build
+npm run preview:presence
+
+# Production: this order is required for the external binding
+npm run deploy:presence
+npx wrangler deploy -c wrangler.toml
+```
+
+For a fast production smoke test, open the same public page in two normal browser contexts and
+confirm the pill changes from `1 here` to `2 here`. Then verify hiding persists across reloads,
+mobile emulation shows the reading rail, a reaction travels, a highlighted quote opens sharing,
+and the browser network panel contains no selected text in WebSocket frames. An overflowed room
+closes excess clients with `1013`; malformed/abusive frames close with `1008`.
+
+### Cost envelope and controls
+
+The workload model assumes one admitted socket and an average of 12 compact incoming frames per
+eligible visit. Hibernated idle sockets are not billed for duration, outgoing WebSocket messages
+are free, and incoming messages are billed in 20-message request units. Under July 2026 Cloudflare
+Workers/Durable Objects paid pricing, the planning envelope is:
+
+| Eligible views/day | Estimated total monthly workload cost |
+| -----------------: | ------------------------------------: |
+|             25,000 |                                ~$5.03 |
+|          1,000,000 |                                  ~$18 |
+|          5,000,000 |                                  ~$92 |
+|         10,000,000 |                                 ~$187 |
+
+The first row is mostly the existing $5 Workers plan. These are engineering estimates, not a bill
+forecast: visit length, motion, cache behavior, and other site Worker traffic can move the result.
+Do not add application heartbeats; they waste billable incoming messages and defeat hibernation.
+
+Operational thresholds:
+
+1. Start with `PUBLIC_PRESENCE_ADMISSION_RATE = "1"` and `PRESENCE_ENABLED = "true"`.
+2. If projected incremental presence cost exceeds $25/month or traffic approaches 1M eligible
+   views/day, set the build-time public admission value to `0.1`, build, and deploy the main Worker:
+   `PUBLIC_PRESENCE_ADMISSION_RATE=0.1 npm run build && npx wrangler deploy -c wrangler.toml`.
+   Keep the matching `wrangler.toml` value as an operational record. Existing rooms remain useful
+   while roughly 90% of browsers avoid opening a socket at all.
+3. For emergency shutdown, set `PRESENCE_ENABLED = "false"`, rebuild with public admission `0`,
+   then deploy the main Worker. Pages, read counts, selection sharing, and local confetti continue
+   to work.
+4. Monitor only aggregate Worker/DO requests, active duration, `room-full`, malformed-frame, and
+   rate-limit counts. Never add logs containing peer IDs, countries, coordinates, selections, or
+   share destinations.
+
+Pricing references: [Durable Objects pricing](https://developers.cloudflare.com/durable-objects/platform/pricing/),
+[WebSocket hibernation](https://developers.cloudflare.com/durable-objects/best-practices/websockets/),
+and [multi-Worker local development](https://developers.cloudflare.com/workers/local-development/multi-workers/).
 
 ## Open Graph image system
 

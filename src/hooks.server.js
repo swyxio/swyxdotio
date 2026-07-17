@@ -47,6 +47,12 @@ export function isPublicReadCountRequest(url) {
 
 /** @type {import('@sveltejs/kit').Handle} */
 export async function handle({ event, resolve }) {
+	// A WebSocket response cannot be cloned, cached, or reconstructed. Presence
+	// ingress performs its own origin and public-page validation.
+	if (event.request.headers.get('upgrade')?.toLowerCase() === 'websocket') {
+		return resolve(event);
+	}
+
 	// `caches.default` is Cloudflare-specific; undefined in dev / non-CF runtimes.
 	const cache = /** @type {any} */ (globalThis.caches)?.default;
 	const cacheUrl = new URL(event.request.url);
