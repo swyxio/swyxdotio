@@ -1,5 +1,7 @@
 <script>
-	import { MY_TWITTER_HANDLE, SITE_URL } from '$lib/siteConfig';
+	import { SITE_URL } from '$lib/siteConfig';
+	import SocialMeta from '../../components/SocialMeta.svelte';
+	import { getArticleSocialMeta } from '$lib/social-meta';
 	// import Comments from '../../components/Comments.svelte';
 
 	import Newsletter from '../../components/Newsletter.svelte';
@@ -21,47 +23,15 @@
 	$: issueNumber = json?.ghMetadata?.issueUrl?.split('/')?.pop();
 
 	$: canonical = json.canonical ? json.canonical : SITE_URL + $page.url.pathname;
-
-	// customize this with https://tailgraph.com/
-	// discuss this decision at https://github.com/swyxio/swyxkit/pull/161
-	$: image =
-		json?.image ||
-		`https://og.tailgraph.com/og
-															?fontFamily=Roboto
-															&title=${encodeURIComponent(json?.title)}
-															&titleTailwind=font-bold%20bg-transparent%20text-7xl
-															&titleFontFamily=Poppins
-															${json?.subtitle ? '&text=' + encodeURIComponent(json?.subtitle) : ''}
-															&textTailwind=text-2xl%20mt-4
-															&logoTailwind=h-8
-															&bgUrl=https%3A%2F%2Fwallpaper.dog%2Flarge%2F20455104.jpg
-															&footer=${encodeURIComponent(SITE_URL)}
-															&footerTailwind=text-teal-900
-															&containerTailwind=border-2%20border-orange-200%20bg-transparent%20p-4
-															`.replace(/\s/g, ''); // remove whitespace
+	$: social = getArticleSocialMeta(json, canonical);
 </script>
 
+<SocialMeta {...social} />
+
 <svelte:head>
-	<title>{json.title}</title>
-
-	<!-- reference: https://gist.github.com/whitingx/3840905 -->
-
-	<link rel="canonical" href={canonical} />
-	<meta property="og:url" content={canonical} />
-	<meta property="og:type" content="article" />
-	<meta property="og:title" content={json.title} />
 	{#if json.subtitle}
 		<meta property="subtitle" content={json.subtitle} />
 	{/if}
-	<meta name="description" content={json.description} />
-	<meta property="og:description" content={json.description} />
-	<meta name="twitter:card" content={'summary'} />
-	<!-- no more summary_large_image because elon https://twitter.com/simonw/status/1725285182159417806 -->
-	<meta name="twitter:creator" content={'@' + MY_TWITTER_HANDLE} />
-	<meta name="twitter:title" content={json.title} />
-	<meta name="twitter:description" content={json.description} />
-	<meta property="og:image" content={image} />
-	<meta name="twitter:image" content={image} />
 </svelte:head>
 
 <article

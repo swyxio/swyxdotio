@@ -1,6 +1,10 @@
 <script>
+	import SocialMeta from '../../components/SocialMeta.svelte';
+	import { getPageSocialMeta } from '$lib/social-meta';
+
 	/** @type {import('./$types').PageData} */
 	export let data;
+	const social = getPageSocialMeta('podcasts');
 
 	const latentSpace = {
 		siteUrl: 'https://www.latent.space/podcast',
@@ -17,13 +21,7 @@
 	$: episodeCount = data.shows.reduce((total, show) => total + show.episodes.length, 0);
 </script>
 
-<svelte:head>
-	<title>Podcasts · swyx</title>
-	<meta
-		name="description"
-		content="Browse the swyx podcast feeds and listen to the complete first-party episode archives."
-	/>
-</svelte:head>
+<SocialMeta {...social} />
 
 <section class="site-shell mb-16">
 	<header class="plain-section">

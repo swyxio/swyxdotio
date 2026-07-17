@@ -1,26 +1,14 @@
 <script>
 	import Newsletter from '../../components/Newsletter.svelte';
-	let title = 'subscribe to swyxletter';
-	let seoDescription = "Signup for swyx's Newsletter!";
+	import SocialMeta from '../../components/SocialMeta.svelte';
+	import { getPageSocialMeta } from '$lib/social-meta';
+	const social = getPageSocialMeta('subscribe');
 </script>
 
+<SocialMeta {...social} />
+
 <svelte:head>
-	<title>swyx's Newsletter</title>
 	<link rel="alternate" type="application/rss+xml" href="https://swyx.io/rss.xml" />
-	<meta property="og:url" content={'https://swyx.io/subscribe'} />
-	<meta property="og:type" content="article" />
-	<meta property="og:title" content={title} />
-	<meta name="Description" content={seoDescription} />
-	<meta property="og:description" content={seoDescription} />
-	<meta name="twitter:card" content={'summary'} />
-	<meta name="twitter:domain" content="swyx.io" />
-	<meta name="twitter:creator" content="@swyx" />
-	<meta name="twitter:title" content={title} />
-	<meta name="twitter:description" content={seoDescription} />
-	<meta name="twitter:label1" content="Top picks" />
-	<meta name="twitter:data1" content={'Weekly'} />
-	<meta name="twitter:label2" content="Value" />
-	<meta name="twitter:data2" content={'Priceless'} />
 </svelte:head>
 
 <article class="site-shell py-8 sm:py-12">

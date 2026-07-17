@@ -9,6 +9,7 @@ import {
 } from './siteConfig';
 import slugify from 'slugify';
 import { renderMarkdown } from './markdown';
+import { extractContentDescription } from './content-description.js';
 import { isBlogSlug, normalizeBlogSlug } from './slug';
 import {
 	isContentManifestStale,
@@ -349,20 +350,7 @@ function parseIssue(issue) {
 			return null;
 		}
 
-		let description = data.description ?? content.trim().split('\n')[0];
-		// extract plain text from the (usually single-line) description
-		description = description.replace(/\n/g, ' ');
-		// strip basic markdown emphasis/link syntax so the meta description is clean text
-		description = description
-			.replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1') // [text](url) / ![alt](url) -> text
-			.replace(/[*_`~]/g, ''); // emphasis / code markers
-		// strip html
-		description = description.replace(/<[^>]*>?/gm, '');
-		// strip markdown
-		// description = description.replace(/[[\]]/gm, '');
-
-		// you may wish to use a truncation approach like this instead...
-		// let description = (data.content.length > 300) ? data.content.slice(0, 300) + '...' : data.content
+		const description = extractContentDescription(content, data.description);
 
 		let tags = [];
 		if (data.tags)

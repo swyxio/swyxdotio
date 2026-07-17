@@ -1,12 +1,12 @@
 <script>
-	import { SITE_TITLE } from '$lib/siteConfig';
+	import SocialMeta from '../../components/SocialMeta.svelte';
+	import { getPageSocialMeta } from '$lib/social-meta';
 	/** @type {{ html: string }} */
 	export let data;
+	const social = getPageSocialMeta('portfolio');
 </script>
 
-<svelte:head>
-	<title>Portfolio | {SITE_TITLE}</title>
-</svelte:head>
+<SocialMeta {...social} />
 
 <article
 	class="site-shell site-card prose mb-12 mt-4 hover:prose-a:text-blue-300 prose-ul:list-disc dark:prose-invert md:mt-6"

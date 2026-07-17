@@ -26,10 +26,18 @@ const SECURITY_HEADERS = {
  * not be recached ahead of the Worker or versioned lookups cannot run.
  * @param {Response} response
  */
-function toClientResponse(response) {
+
+function toClientResponse(response, preservePublicCache = false) {
 	const clientResponse = new Response(response.body, response);
-	clientResponse.headers.set('Cache-Control', 'private, max-age=0, no-store');
+	if (!preservePublicCache) {
+		clientResponse.headers.set('Cache-Control', 'private, max-age=0, no-store');
+	}
 	return clientResponse;
+}
+
+/** @param {URL} url */
+export function isVersionedOgRequest(url) {
+	return url.pathname.startsWith('/og/') && url.searchParams.has('v');
 }
 
 /** @type {import('@sveltejs/kit').Handle} */
@@ -38,6 +46,7 @@ export async function handle({ event, resolve }) {
 	const cache = /** @type {any} */ (globalThis.caches)?.default;
 	const cacheable = event.request.method === 'GET' && !!cache;
 	const cacheUrl = new URL(event.request.url);
+	const preservePublicCache = isVersionedOgRequest(cacheUrl);
 	if (
 		cacheUrl.pathname === '/api/listContent.json' ||
 		cacheUrl.pathname === '/api/latestPosts.json' ||
@@ -66,7 +75,7 @@ export async function handle({ event, resolve }) {
 	if (cacheable) {
 		try {
 			const hit = await cache.match(cacheRequest);
-			if (hit) return toClientResponse(hit);
+			if (hit) return toClientResponse(hit, preservePublicCache);
 		} catch {
 			/* ignore cache read failures */
 		}
@@ -100,5 +109,5 @@ export async function handle({ event, resolve }) {
 		}
 	}
 
-	return cacheable ? toClientResponse(response) : response;
+	return cacheable ? toClientResponse(response, preservePublicCache) : response;
 }

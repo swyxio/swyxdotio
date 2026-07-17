@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#F3F4F6"/>
+  <rect x="30" y="30" width="1140" height="570" rx="2" fill="#F9FAFB" stroke="#D9DDE4" stroke-width="2"/>
+  <line x1="79" y1="30" x2="79" y2="600" stroke="#C0392B" stroke-opacity=".28" stroke-width="2"/>
+  <text x="108" y="112" fill="#2563EB" font-family="Arial, sans-serif" font-size="22" letter-spacing="4">PUBLIC NOTEBOOK</text>
+  <text x="108" y="316" fill="#1F2937" font-family="Georgia, serif" font-size="82" font-weight="bold">swyx.io</text>
+  <text x="108" y="376" fill="#566273" font-family="Arial, sans-serif" font-size="28">Ideas, notes, talks, and things worth sharing.</text>
+  <text x="108" y="536" fill="#C0392B" font-family="Georgia, serif" font-size="31">[ learn in public</text>
+  <path d="M1102 600 L1170 532" fill="none" stroke="#2563EB" stroke-width="3"/>
+</svg>

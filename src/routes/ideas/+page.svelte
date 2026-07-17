@@ -4,9 +4,13 @@
 	// import { page } from '$app/stores';
 	import { queryParam, ssp } from 'sveltekit-search-params';
 
-	import { SITE_TITLE, POST_CATEGORIES } from '$lib/siteConfig';
+	import { POST_CATEGORIES } from '$lib/siteConfig';
+	import SocialMeta from '../../components/SocialMeta.svelte';
+	import { getPageSocialMeta } from '$lib/social-meta';
 
 	import MostPopular from './MostPopular.svelte';
+
+	const social = getPageSocialMeta('ideas');
 
 	/**
 	 * @typedef {{
@@ -198,10 +202,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Swyx Idea Showcase</title>
-	<meta name="description" content={`Latest ${SITE_TITLE} posts`} />
-</svelte:head>
+<SocialMeta {...social} />
 
 <svelte:window on:keyup={focusSearch} />
 
