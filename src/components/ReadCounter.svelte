@@ -1,6 +1,12 @@
 <script>
 	import { onMount } from 'svelte';
-	import { READ_DEDUPE_MS, READ_SCROLL_FRACTION, READ_VISIBLE_MS } from '$lib/read-counter';
+	import {
+		READ_DEDUPE_MS,
+		READ_SAMPLE_WEIGHT,
+		READ_SCROLL_FRACTION,
+		READ_VISIBLE_MS,
+		shouldSampleRead
+	} from '$lib/read-counter';
 
 	/** @type {string} */
 	export let pageKey;
@@ -8,6 +14,10 @@
 
 	/** @type {number | null} */
 	let reads = null;
+	const ANALYTICS_CLIENT_KEY = 'swyx:analytics:client:v2';
+	const ANALYTICS_SESSION_KEY = 'swyx:analytics:session:v1';
+	const ANALYTICS_SESSION_TIMEOUT_MS = 30 * 60 * 1000;
+	const READ_COUNT_KEY_PREFIX = 'swyx:read-count:';
 
 	const formatter = new Intl.NumberFormat('en-US', {
 		notation: 'compact',
@@ -16,18 +26,65 @@
 
 	/** @param {'GET' | 'POST'} method @param {AbortSignal} signal */
 	async function requestCount(method, signal) {
+		const analytics = method === 'POST' ? getAnalyticsContext() : null;
 		const response = await fetch(`/api/reads/${encodeURIComponent(pageKey)}`, {
 			method,
 			signal,
 			credentials: 'same-origin',
 			keepalive: method === 'POST',
-			headers: method === 'POST' ? { 'x-swyx-read': 'engaged' } : undefined
+			headers:
+				method === 'POST'
+					? {
+							'content-type': 'application/json',
+							'x-swyx-read': 'engaged',
+							'x-swyx-sample-weight': `${READ_SAMPLE_WEIGHT}`
+						}
+					: undefined,
+			body: method === 'POST' ? JSON.stringify(analytics) : undefined
 		});
 		if (!response.ok) return false;
 		const payload = await response.json();
 		if (!Number.isSafeInteger(payload.reads) || payload.reads < 0) return false;
 		reads = payload.reads;
+		try {
+			localStorage.setItem(`${READ_COUNT_KEY_PREFIX}${pageKey}`, `${reads}`);
+		} catch {
+			// Cached display values are optional.
+		}
 		return true;
+	}
+
+	function getAnalyticsContext() {
+		const globalPrivacyControl = /** @type {Navigator & { globalPrivacyControl?: boolean }} */ (
+			navigator
+		).globalPrivacyControl;
+		const doNotTrack = navigator.doNotTrack?.toLowerCase();
+		if (globalPrivacyControl || doNotTrack === '1' || doNotTrack === 'yes') return null;
+		try {
+			let clientId = localStorage.getItem(ANALYTICS_CLIENT_KEY);
+			if (!clientId) {
+				const random = crypto.getRandomValues(new Uint32Array(1))[0];
+				clientId = `${random}.${Math.floor(Date.now() / 1000)}`;
+				localStorage.setItem(ANALYTICS_CLIENT_KEY, clientId);
+			}
+			const now = Date.now();
+			const storedSession = JSON.parse(localStorage.getItem(ANALYTICS_SESSION_KEY) || 'null');
+			const sessionId =
+				storedSession && now - Number(storedSession.lastSeenMs) < ANALYTICS_SESSION_TIMEOUT_MS
+					? `${storedSession.id}`
+					: `${Math.floor(now / 1000)}`;
+			localStorage.setItem(
+				ANALYTICS_SESSION_KEY,
+				JSON.stringify({ id: sessionId, lastSeenMs: now })
+			);
+			return {
+				clientId,
+				sessionId,
+				engagementTimeMs: READ_VISIBLE_MS
+			};
+		} catch {
+			return null;
+		}
 	}
 
 	onMount(() => {
@@ -41,7 +98,13 @@
 		}
 
 		if (Date.now() - storedAt < READ_DEDUPE_MS) {
-			void requestCount('GET', controller.signal).catch(() => {});
+			try {
+				const storedCount = Number(localStorage.getItem(`${READ_COUNT_KEY_PREFIX}${pageKey}`));
+				if (Number.isSafeInteger(storedCount) && storedCount >= 0) reads = storedCount;
+				else void requestCount('GET', controller.signal).catch(() => {});
+			} catch {
+				void requestCount('GET', controller.signal).catch(() => {});
+			}
 			return () => controller.abort();
 		}
 
@@ -58,13 +121,12 @@
 			if (recording || visibleMs < READ_VISIBLE_MS || !depthReached) return;
 			recording = true;
 			try {
-				if (await requestCount('POST', controller.signal)) {
-					try {
-						localStorage.setItem(storageKey, `${Date.now()}`);
-					} catch {
-						// The counter intentionally does not require persistent client storage.
-					}
-				}
+				localStorage.setItem(storageKey, `${Date.now()}`);
+			} catch {
+				// Sampling does not depend on storage being available.
+			}
+			try {
+				await requestCount(shouldSampleRead(Math.random()) ? 'POST' : 'GET', controller.signal);
 			} catch {
 				// Counting must never affect reading the page.
 			}
@@ -93,8 +155,8 @@
 {#if reads !== null}
 	<span
 		class="read-counter"
-		title="Privacy-friendly engaged reads, counted at most once per browser per day"
-		>{formatter.format(reads)} {reads === 1 ? 'read' : 'reads'}</span
+		title="Estimated engaged reads from a 0.5% sample, counted at most once per browser per day"
+		>~{formatter.format(reads)} {reads === 1 ? 'read' : 'reads'}</span
 	>
 {/if}
 

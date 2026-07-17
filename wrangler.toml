@@ -11,6 +11,9 @@ keep_vars = true
 # the worker for dynamic/SSR routes.
 main = ".svelte-kit/cloudflare/_worker.js"
 
+[vars]
+GA4_MEASUREMENT_ID = "G-TW6GTQ9Q4N"
+
 [assets]
 binding = "ASSETS"
 directory = ".svelte-kit/cloudflare"
@@ -19,7 +22,7 @@ directory = ".svelte-kit/cloudflare"
 binding = "CF_VERSION_METADATA"
 
 [secrets]
-required = ["GH_TOKEN", "PODCAST_ADMIN_PASSWORD", "PODCAST_ADMIN_SESSION_SECRET"]
+required = ["GH_TOKEN", "PODCAST_ADMIN_PASSWORD", "PODCAST_ADMIN_SESSION_SECRET", "GA4_API_SECRET"]
 
 [[kv_namespaces]]
 binding = "CONTENT_MANIFEST"

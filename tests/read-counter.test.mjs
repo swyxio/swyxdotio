@@ -2,12 +2,24 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
+	canonicalReadPath,
+	incrementReadCount,
 	isObviousBot,
 	isSameOriginRead,
 	normalizeReadCount,
 	publicPageKeyForPath,
-	resolveReadCounterKey
+	readAnalyticsTitle,
+	READ_SAMPLE_RATE,
+	READ_SAMPLE_WEIGHT,
+	resolveReadCounterKey,
+	shouldSampleRead
 } from '../src/lib/read-counter.js';
+import {
+	buildGa4ReadPayload,
+	hasAnalyticsOptOut,
+	normalizeReadAnalyticsContext,
+	sendGa4Read
+} from '../src/lib/read-analytics.js';
 
 const manifest = {
 	generatedAt: new Date(),
@@ -30,6 +42,14 @@ test('resolves finite page keys and persisted public articles', () => {
 	assert.equal(resolveReadCounterKey(manifest, 'secret-note'), null);
 	assert.equal(resolveReadCounterKey(manifest, 'unknown-note'), null);
 	assert.equal(resolveReadCounterKey(manifest, '../escape'), null);
+});
+
+test('builds canonical public paths without accepting arbitrary input', () => {
+	assert.equal(canonicalReadPath('home'), '/');
+	assert.equal(canonicalReadPath('learn-in-public'), '/learn-in-public');
+	assert.equal(canonicalReadPath('../escape'), null);
+	assert.equal(readAnalyticsTitle(manifest, 'home'), 'Shawn @swyx Wang');
+	assert.equal(readAnalyticsTitle(manifest, 'learn-in-public'), 'Learn in Public');
 });
 
 test('rejects bot-like and missing user agents', () => {
@@ -62,4 +82,103 @@ test('normalizes invalid database counts safely', () => {
 	assert.equal(normalizeReadCount('12'), 12);
 	assert.equal(normalizeReadCount(-1), 0);
 	assert.equal(normalizeReadCount('nope'), 0);
+});
+
+test('uses a server-controlled half-percent sampling policy', () => {
+	assert.equal(READ_SAMPLE_RATE, 0.005);
+	assert.equal(READ_SAMPLE_WEIGHT, 200);
+	assert.equal(shouldSampleRead(0), true);
+	assert.equal(shouldSampleRead(0.004999), true);
+	assert.equal(shouldSampleRead(0.005), false);
+	assert.equal(shouldSampleRead(1), false);
+});
+
+test('persists only the server-owned sample weight and policy', async () => {
+	let bindings = [];
+	const database = {
+		prepare(query) {
+			assert.match(query, /sample_count = sample_count \+ 1/);
+			return {
+				bind(...values) {
+					bindings = values;
+					return this;
+				},
+				async first() {
+					return { read_count: 400 };
+				}
+			};
+		}
+	};
+	assert.equal(await incrementReadCount(database, 'article:learn-in-public'), 400);
+	assert.deepEqual(bindings, ['article:learn-in-public', 200, 'v1-p005']);
+});
+
+test('validates a minimal pseudonymous GA4 context', () => {
+	const context = normalizeReadAnalyticsContext({
+		clientId: '192837465.1784330000',
+		sessionId: '1784330000',
+		engagementTimeMs: 8_100
+	});
+	assert.deepEqual(context, {
+		clientId: '192837465.1784330000',
+		sessionId: 1784330000,
+		engagementTimeMs: 8_100
+	});
+	assert.equal(normalizeReadAnalyticsContext({ clientId: 'shared', sessionId: 1 }), null);
+});
+
+test('honors browser privacy opt-out headers', () => {
+	assert.equal(
+		hasAnalyticsOptOut(new Request('https://www.swyx.io', { headers: { dnt: '1' } })),
+		true
+	);
+	assert.equal(
+		hasAnalyticsOptOut(new Request('https://www.swyx.io', { headers: { 'sec-gpc': '1' } })),
+		true
+	);
+	assert.equal(
+		hasAnalyticsOptOut(new Request('https://www.swyx.io', { headers: { dnt: 'yes' } })),
+		true
+	);
+	assert.equal(hasAnalyticsOptOut(new Request('https://www.swyx.io')), false);
+});
+
+test('builds a non-advertising engaged-read event', () => {
+	const payload = buildGa4ReadPayload(
+		{
+			clientId: '192837465.1784330000',
+			sessionId: 1784330000,
+			engagementTimeMs: 8_000
+		},
+		'/learn-in-public',
+		'Learn in Public'
+	);
+	assert.equal(payload.events[0].name, 'engaged_read');
+	assert.equal(payload.events[0].params.page_location, 'https://www.swyx.io/learn-in-public');
+	assert.equal(payload.events[0].params.page_title, 'Learn in Public');
+	assert.equal(payload.events[0].params.session_engaged, 1);
+	assert.equal(payload.events[0].params.read_weight, 200);
+	assert.deepEqual(payload.consent, { ad_user_data: 'DENIED', ad_personalization: 'DENIED' });
+});
+
+test('GA4 delivery is optional and never throws into the counter request', async () => {
+	const context = {
+		clientId: '192837465.1784330000',
+		sessionId: 1784330000,
+		engagementTimeMs: 8_000
+	};
+	assert.equal(await sendGa4Read({ context, canonicalPath: '/', pageTitle: 'Home' }), false);
+	assert.equal(
+		await sendGa4Read({
+			measurementId: 'G-TW6GTQ9Q4N',
+			apiSecret: 'test-secret',
+			context,
+			canonicalPath: '/',
+			pageTitle: 'Home',
+			fetcher: async () => {
+				throw new Error('offline');
+			}
+		}),
+		false
+	);
 });

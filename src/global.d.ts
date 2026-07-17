@@ -72,6 +72,8 @@ declare namespace App {
 	// interface PageData {}
 	interface Platform {
 		env?: {
+			GA4_MEASUREMENT_ID?: string;
+			GA4_API_SECRET?: string;
 			GH_TOKEN?: string;
 			GH_WEBHOOK_SECRET?: string;
 			PODCAST_ADMIN_PASSWORD?: string;

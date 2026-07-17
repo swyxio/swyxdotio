@@ -4,6 +4,9 @@ import { isBlogSlug } from './slug.js';
 export const READ_DEDUPE_MS = 24 * 60 * 60 * 1000;
 export const READ_VISIBLE_MS = 8 * 1000;
 export const READ_SCROLL_FRACTION = 0.25;
+export const READ_SAMPLE_RATE = 0.005;
+export const READ_SAMPLE_WEIGHT = 200;
+export const READ_SAMPLING_POLICY = 'v1-p005';
 
 const BOT_USER_AGENT =
 	/(?:bot|crawler|spider|slurp|preview|facebookexternalhit|twitterbot|linkedinbot|discordbot|whatsapp|telegrambot|headless|lighthouse|pagespeed)/i;
@@ -30,6 +33,25 @@ export function resolveReadCounterKey(manifest, requestedKey) {
 	return article ? `article:${requestedKey}` : null;
 }
 
+/** @param {string} requestedKey */
+export function canonicalReadPath(requestedKey) {
+	const page = Object.entries(PAGE_SOCIAL_CARDS).find(([key]) => key === requestedKey)?.[1];
+	if (page) return page.path;
+	return isBlogSlug(requestedKey) ? `/${requestedKey}` : null;
+}
+
+/**
+ * @param {import('./content-manifest').ContentManifest | null} manifest
+ * @param {string} requestedKey
+ */
+export function readAnalyticsTitle(manifest, requestedKey) {
+	const page = Object.entries(PAGE_SOCIAL_CARDS).find(([key]) => key === requestedKey)?.[1];
+	if (page) return page.title;
+	return (
+		manifest?.blogposts.find((item) => item.slug === requestedKey && !item.isPrivate)?.title ?? ''
+	);
+}
+
 /** @param {string | null} userAgent */
 export function isObviousBot(userAgent) {
 	return !userAgent || BOT_USER_AGENT.test(userAgent);
@@ -48,6 +70,11 @@ export function normalizeReadCount(value) {
 	return Number.isSafeInteger(count) && count >= 0 ? count : 0;
 }
 
+/** @param {number} draw */
+export function shouldSampleRead(draw) {
+	return Number.isFinite(draw) && draw >= 0 && draw < READ_SAMPLE_RATE;
+}
+
 /** @param {D1Database} database @param {string} pageKey */
 export async function getReadCount(database, pageKey) {
 	const row = await database
@@ -61,14 +88,17 @@ export async function getReadCount(database, pageKey) {
 export async function incrementReadCount(database, pageKey) {
 	const row = await database
 		.prepare(
-			`INSERT INTO page_reads (page_key, read_count, updated_at)
-			 VALUES (?1, 1, unixepoch())
+			`INSERT INTO page_reads (
+			   page_key, read_count, sample_count, sampling_policy_version, updated_at
+			 ) VALUES (?1, ?2, 1, ?3, unixepoch())
 			 ON CONFLICT(page_key) DO UPDATE SET
-			   read_count = read_count + 1,
+			   read_count = read_count + excluded.read_count,
+			   sample_count = sample_count + 1,
+			   sampling_policy_version = excluded.sampling_policy_version,
 			   updated_at = unixepoch()
 			 RETURNING read_count`
 		)
-		.bind(pageKey)
+		.bind(pageKey, READ_SAMPLE_WEIGHT, READ_SAMPLING_POLICY)
 		.first();
 	return normalizeReadCount(row?.read_count);
 }

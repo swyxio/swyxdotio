@@ -40,14 +40,18 @@ export function isVersionedOgRequest(url) {
 	return url.pathname.startsWith('/og/') && url.searchParams.has('v');
 }
 
+/** @param {URL} url */
+export function isPublicReadCountRequest(url) {
+	return url.pathname.startsWith('/api/reads/');
+}
+
 /** @type {import('@sveltejs/kit').Handle} */
 export async function handle({ event, resolve }) {
 	// `caches.default` is Cloudflare-specific; undefined in dev / non-CF runtimes.
 	const cache = /** @type {any} */ (globalThis.caches)?.default;
 	const cacheUrl = new URL(event.request.url);
-	const cacheable =
-		event.request.method === 'GET' && !!cache && !cacheUrl.pathname.startsWith('/api/reads/');
-	const preservePublicCache = isVersionedOgRequest(cacheUrl);
+	const cacheable = event.request.method === 'GET' && !!cache;
+	const preservePublicCache = isVersionedOgRequest(cacheUrl) || isPublicReadCountRequest(cacheUrl);
 	if (
 		cacheUrl.pathname === '/api/listContent.json' ||
 		cacheUrl.pathname === '/api/latestPosts.json' ||
