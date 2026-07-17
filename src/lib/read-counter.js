@@ -7,6 +7,7 @@ export const READ_SCROLL_FRACTION = 0.25;
 export const READ_SAMPLE_RATE = 0.005;
 export const READ_SAMPLE_WEIGHT = 200;
 export const READ_SAMPLING_POLICY = 'v1-p005';
+export const READ_COUNT_VISIBILITY_KEY = 'swyx:read-count-visibility:v1';
 
 const BOT_USER_AGENT =
 	/(?:bot|crawler|spider|slurp|preview|facebookexternalhit|twitterbot|linkedinbot|discordbot|whatsapp|telegrambot|headless|lighthouse|pagespeed)/i;
@@ -73,6 +74,11 @@ export function normalizeReadCount(value) {
 /** @param {number} draw */
 export function shouldSampleRead(draw) {
 	return Number.isFinite(draw) && draw >= 0 && draw < READ_SAMPLE_RATE;
+}
+
+/** @param {unknown} storedPreference */
+export function readCountsAreHidden(storedPreference) {
+	return storedPreference === 'hidden';
 }
 
 /** @param {D1Database} database @param {string} pageKey */

@@ -49,7 +49,9 @@
 	<div class="plain-muted mt-2 flex w-full flex-wrap justify-between gap-x-4 text-sm">
 		<span>swyx</span>
 		<span class="flex items-center gap-2">
-			<ReadCounter pageKey={data.slug} requireDepth />
+			{#key data.slug}
+				<ReadCounter pageKey={data.slug} requireDepth />
+			{/key}
 			<span aria-hidden="true">·</span>
 			<a
 				href={json.ghMetadata?.issueUrl ?? '#'}

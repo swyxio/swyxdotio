@@ -194,6 +194,9 @@ Current policy (`v1-p005`):
   and requires the expected sample-weight header. The client cannot choose the persisted weight.
 - Unsampled engaged readers may GET the public total. The browser remembers the displayed count for
   24 hours; the API is browser-cached for 5 minutes and edge-cached for 1 hour.
+- Counts are visible by default. A reader can hide them globally from any displayed counter; the
+  choice is stored locally and can be reversed with the adjacent “Show view count” control. Hiding
+  the presentation does not disable anonymous counting or change GA privacy behavior.
 - Successful D1 increments are mirrored asynchronously to GA4 as `engaged_read`. GA failure,
   timeout, or missing configuration never affects the counter response and is never retried.
 - Global Privacy Control and Do Not Track suppress GA delivery and identifier creation. The GA

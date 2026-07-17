@@ -39,7 +39,10 @@
 	<p class="plain-muted mt-4 text-sm">
 		Based on the <a href="https://swyxkit.netlify.app/">swyxkit</a> template.
 		{#if publicPageKey}
-			· <ReadCounter pageKey={publicPageKey} />
+			·
+			{#key publicPageKey}
+				<ReadCounter pageKey={publicPageKey} />
+			{/key}
 		{/if}
 	</p>
 </footer>
