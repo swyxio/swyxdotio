@@ -20,6 +20,12 @@ import {
 	normalizeReadAnalyticsContext,
 	sendGa4Read
 } from '../src/lib/read-analytics.js';
+import {
+	displayedReadCount,
+	historicalReadEstimate,
+	HISTORICAL_READ_ESTIMATES,
+	HISTORICAL_READ_ESTIMATE_VERSION
+} from '../src/lib/server/historical-read-estimates.js';
 
 const manifest = {
 	generatedAt: new Date(),
@@ -82,6 +88,15 @@ test('normalizes invalid database counts safely', () => {
 	assert.equal(normalizeReadCount('12'), 12);
 	assert.equal(normalizeReadCount(-1), 0);
 	assert.equal(normalizeReadCount('nope'), 0);
+});
+
+test('adds static historical estimates only to nominated articles', () => {
+	assert.equal(HISTORICAL_READ_ESTIMATE_VERSION, 'historical_estimate_v1');
+	assert.equal(historicalReadEstimate('learn-in-public'), 10_000_000);
+	assert.equal(displayedReadCount('learn-in-public', 1_200), 10_001_200);
+	assert.equal(displayedReadCount('unknown-note', 1_200), 1_200);
+	assert.equal(displayedReadCount('learn-in-public', -1), 10_000_000);
+	assert.equal(Object.keys(HISTORICAL_READ_ESTIMATES).length, 24);
 });
 
 test('uses a server-controlled half-percent sampling policy', () => {

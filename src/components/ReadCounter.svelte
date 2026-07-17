@@ -155,7 +155,7 @@
 {#if reads !== null}
 	<span
 		class="read-counter"
-		title="Estimated engaged reads from a 0.5% sample, counted at most once per browser per day"
+		title="Approximate lifetime reads: historical estimate plus engaged reads from a 0.5% sample"
 		>~{formatter.format(reads)} {reads === 1 ? 'read' : 'reads'}</span
 	>
 {/if}

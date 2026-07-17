@@ -15,6 +15,7 @@ import {
 	normalizeReadAnalyticsContext,
 	sendGa4Read
 } from '$lib/read-analytics.js';
+import { displayedReadCount } from '$lib/server/historical-read-estimates.js';
 
 export const prerender = false;
 
@@ -40,7 +41,8 @@ async function resolveRequest(platform, requestedKey) {
 export async function GET({ params, platform }) {
 	const { database, pageKey } = await resolveRequest(platform, params.key);
 	try {
-		return json({ reads: await getReadCount(database, pageKey) }, { headers: GET_HEADERS });
+		const sampledReads = await getReadCount(database, pageKey);
+		return json({ reads: displayedReadCount(params.key, sampledReads) }, { headers: GET_HEADERS });
 	} catch (cause) {
 		console.error('Read counter lookup failed', {
 			pageKey,
@@ -64,7 +66,7 @@ export async function POST({ params, platform, request }) {
 		params.key
 	);
 	try {
-		const reads = await incrementReadCount(database, pageKey);
+		const sampledReads = await incrementReadCount(database, pageKey);
 		if (!hasAnalyticsOptOut(request)) {
 			const contentLength = Number(request.headers.get('content-length') || 0);
 			if (contentLength <= 512) {
@@ -88,7 +90,7 @@ export async function POST({ params, platform, request }) {
 				}
 			}
 		}
-		return json({ reads }, { headers: POST_HEADERS });
+		return json({ reads: displayedReadCount(params.key, sampledReads) }, { headers: POST_HEADERS });
 	} catch (cause) {
 		console.error('Read counter increment failed', {
 			pageKey,
