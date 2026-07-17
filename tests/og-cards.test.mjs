@@ -85,6 +85,13 @@ test('frontmatter images require bounded successful HTTPS image responses', asyn
 	);
 });
 
+test('frontmatter image timeout returns even when fetch ignores abort signals', async () => {
+	const neverSettles = () => new Promise(() => {});
+	const started = Date.now();
+	assert.equal(await fetchCardImage('https://example.com/slow.png', neverSettles, 10), undefined);
+	assert.ok(Date.now() - started < 250);
+});
+
 test('raw notebook templates escape article text and preserve unicode', () => {
 	const html = renderNotebookTemplate(
 		{
@@ -100,6 +107,6 @@ test('raw notebook templates escape article text and preserve unicode', () => {
 	);
 
 	assert.doesNotMatch(html, /<script>/);
-	assert.match(html, /&lt;script&gt;alert\(&quot;nope&quot;\)&lt;\/script&gt; — Português/);
-	assert.match(html, /Use &lt;strong&gt;plain text&lt;\/strong&gt; safely\./);
+	assert.match(html, /‹script›alert\("nope"\)‹\/script› — Português/);
+	assert.match(html, /Use ‹strong›plain text‹\/strong› safely\./);
 });

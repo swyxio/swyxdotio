@@ -7,12 +7,12 @@ import { renderNotebookCard } from '$lib/og/render.js';
 export const prerender = false;
 
 /** @type {import('./$types').RequestHandler} */
-export async function GET({ params, platform, fetch }) {
+export async function GET({ params, platform }) {
 	const manifest = await readContentManifest(platform?.env?.CONTENT_MANIFEST);
 	const card = resolveArticleCard(manifest, params.slug);
 	if (!card) throw error(404, 'Unknown article');
 
 	const article = manifest?.blogposts.find((item) => item.slug === params.slug);
-	card.image = await fetchCardImage(article?.image, fetch);
+	card.image = await fetchCardImage(article?.image, globalThis.fetch);
 	return renderNotebookCard(card);
 }

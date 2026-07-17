@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { extractContentDescription } from '../src/lib/content-description.js';
+import { decodeHtmlEntities, extractContentDescription } from '../src/lib/content-description.js';
 
 test('uses and cleans an explicit frontmatter description', () => {
 	assert.equal(
@@ -44,4 +44,9 @@ test('returns an empty string when no prose exists', () => {
 		extractContentDescription('# Heading\n\n![Image](https://example.com/a.png)', undefined),
 		''
 	);
+});
+
+test('decodes legacy HTML entities before producing plain text', () => {
+	assert.equal(decodeHtmlEntities('Swyx&#39;s &amp; friends'), "Swyx's & friends");
+	assert.equal(extractContentDescription('', '&gt; A quoted description'), 'A quoted description');
 });

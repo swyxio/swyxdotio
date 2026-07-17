@@ -18,9 +18,10 @@ function toBase64(buffer) {
  * performs an unbounded second fetch.
  * @param {string | undefined} source
  * @param {typeof globalThis.fetch} providedFetch
+ * @param {number} [timeoutMs]
  * @returns {Promise<string | undefined>}
  */
-export async function fetchCardImage(source, providedFetch) {
+export async function fetchCardImage(source, providedFetch, timeoutMs = IMAGE_TIMEOUT_MS) {
 	if (!source) return undefined;
 	let url;
 	try {
@@ -31,12 +32,22 @@ export async function fetchCardImage(source, providedFetch) {
 	if (url.protocol !== 'https:') return undefined;
 
 	const controller = new AbortController();
-	const timeout = setTimeout(() => controller.abort(), IMAGE_TIMEOUT_MS);
+	/** @type {ReturnType<typeof setTimeout> | undefined} */
+	let timeout;
 	try {
-		const response = await providedFetch(url, {
-			signal: controller.signal,
-			headers: { Accept: 'image/avif,image/webp,image/png,image/jpeg' }
-		});
+		const response = await Promise.race([
+			providedFetch(url, {
+				signal: controller.signal,
+				headers: { Accept: 'image/avif,image/webp,image/png,image/jpeg' }
+			}),
+			new Promise((resolve) => {
+				timeout = setTimeout(() => {
+					controller.abort();
+					resolve(null);
+				}, timeoutMs);
+			})
+		]);
+		if (!response) return undefined;
 		if (!response.ok) return undefined;
 		const contentType = (response.headers.get('content-type') || '').split(';')[0].toLowerCase();
 		if (!SUPPORTED_TYPES.has(contentType)) return undefined;
@@ -48,6 +59,6 @@ export async function fetchCardImage(source, providedFetch) {
 	} catch {
 		return undefined;
 	} finally {
-		clearTimeout(timeout);
+		if (timeout) clearTimeout(timeout);
 	}
 }

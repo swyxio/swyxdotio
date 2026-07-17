@@ -1,4 +1,5 @@
 import { OG_DESIGN_VERSION, PAGE_SOCIAL_CARDS } from '../social-meta.js';
+import { decodeHtmlEntities, extractContentDescription } from '../content-description.js';
 
 export const OG_WIDTH = 1200;
 export const OG_HEIGHT = 630;
@@ -81,7 +82,7 @@ export function getPageCard(key) {
  * @returns {NotebookCard}
  */
 export function getArticleCard(article, image) {
-	const title = truncateTitle(article.title);
+	const title = truncateTitle(decodeHtmlEntities(article.title));
 	const imageAlt =
 		typeof article.frontmatter?.image_alt === 'string'
 			? article.frontmatter.image_alt
@@ -91,7 +92,7 @@ export function getArticleCard(article, image) {
 	return {
 		kind: 'article',
 		title,
-		description: article.description || article.subtitle || '',
+		description: extractContentDescription('', article.description || article.subtitle || ''),
 		label: article.category || 'note',
 		date: formatCardDate(article.date),
 		image,
