@@ -44,8 +44,9 @@ export function isVersionedOgRequest(url) {
 export async function handle({ event, resolve }) {
 	// `caches.default` is Cloudflare-specific; undefined in dev / non-CF runtimes.
 	const cache = /** @type {any} */ (globalThis.caches)?.default;
-	const cacheable = event.request.method === 'GET' && !!cache;
 	const cacheUrl = new URL(event.request.url);
+	const cacheable =
+		event.request.method === 'GET' && !!cache && !cacheUrl.pathname.startsWith('/api/reads/');
 	const preservePublicCache = isVersionedOgRequest(cacheUrl);
 	if (
 		cacheUrl.pathname === '/api/listContent.json' ||

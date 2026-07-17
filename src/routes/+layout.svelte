@@ -1,7 +1,12 @@
 <script>
 	import '../tailwind.css';
 	import Nav from '../components/Nav.svelte';
+	import ReadCounter from '../components/ReadCounter.svelte';
+	import { page } from '$app/stores';
+	import { publicPageKeyForPath } from '$lib/read-counter';
 	import { MY_TWITTER_HANDLE, MY_YOUTUBE, REPO_URL, SITE_TITLE } from '$lib/siteConfig';
+
+	$: publicPageKey = $page.status === 200 ? publicPageKeyForPath($page.url.pathname) : null;
 </script>
 
 <svelte:head>
@@ -33,5 +38,8 @@
 	</p>
 	<p class="plain-muted mt-4 text-sm">
 		Based on the <a href="https://swyxkit.netlify.app/">swyxkit</a> template.
+		{#if publicPageKey}
+			· <ReadCounter pageKey={publicPageKey} />
+		{/if}
 	</p>
 </footer>

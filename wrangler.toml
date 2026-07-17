@@ -25,6 +25,12 @@ required = ["GH_TOKEN", "PODCAST_ADMIN_PASSWORD", "PODCAST_ADMIN_SESSION_SECRET"
 binding = "CONTENT_MANIFEST"
 id = "b1c7b0dfb8ed438998b7850a2293368a"
 
+[[d1_databases]]
+binding = "READ_COUNTERS"
+database_name = "swyxdotio-read-counters"
+database_id = "9990fd0c-2211-4bf4-b263-ddbb8aaed34e"
+migrations_dir = "migrations/read-counters"
+
 [[r2_buckets]]
 binding = "PODCAST_MEDIA"
 bucket_name = "swyxdotio-podcast-media"

@@ -57,6 +57,15 @@ interface R2MultipartUpload {
 	abort(): Promise<void>;
 }
 
+interface D1PreparedStatement {
+	bind(...values: unknown[]): D1PreparedStatement;
+	first<T = Record<string, unknown>>(): Promise<T | null>;
+}
+
+interface D1Database {
+	prepare(query: string): D1PreparedStatement;
+}
+
 declare namespace App {
 	// interface Error {}
 	// interface Locals {}
@@ -77,6 +86,7 @@ declare namespace App {
 				get(key: string): Promise<string | null>;
 				put(key: string, value: string): Promise<void>;
 			};
+			READ_COUNTERS?: D1Database;
 			PODCAST_MEDIA?: R2Bucket;
 		};
 		context?: {

@@ -11,6 +11,7 @@
 
 	import utterances, { injectScript } from './loadUtterances';
 	import WebMentions from '../../components/WebMentions.svelte';
+	import ReadCounter from '../../components/ReadCounter.svelte';
 
 	/** @type {import('./$types').PageData} */
 	export let data;
@@ -45,9 +46,11 @@
 			{json.subtitle}
 		</p>
 	{/if}
-	<div class="plain-muted mt-2 flex w-full justify-between text-sm">
+	<div class="plain-muted mt-2 flex w-full flex-wrap justify-between gap-x-4 text-sm">
 		<span>swyx</span>
-		<span>
+		<span class="flex items-center gap-2">
+			<ReadCounter pageKey={data.slug} requireDepth />
+			<span aria-hidden="true">·</span>
 			<a
 				href={json.ghMetadata?.issueUrl ?? '#'}
 				rel="external noreferrer"
