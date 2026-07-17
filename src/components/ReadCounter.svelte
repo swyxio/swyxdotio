@@ -154,6 +154,10 @@
 			return () => controller.abort();
 		}
 
+		// Populate the header immediately. Engagement still controls whether this
+		// visit is eligible for the sampled write below.
+		void requestCount('GET', controller.signal).catch(() => {});
+
 		let visibleMs = 0;
 		let depthReached = !requireDepth;
 		let recording = false;
@@ -171,10 +175,12 @@
 			} catch {
 				// Sampling does not depend on storage being available.
 			}
-			try {
-				await requestCount(shouldSampleRead(Math.random()) ? 'POST' : 'GET', controller.signal);
-			} catch {
-				// Counting must never affect reading the page.
+			if (shouldSampleRead(Math.random())) {
+				try {
+					await requestCount('POST', controller.signal);
+				} catch {
+					// Counting must never affect reading the page.
+				}
 			}
 		}
 
@@ -209,8 +215,8 @@
 	<span class="read-counter-control">
 		<span
 			class="read-counter"
-			title="Approximate lifetime reads: historical estimate plus engaged reads from a 0.5% sample"
-			>~{formatter.format(reads)} {reads === 1 ? 'read' : 'reads'}</span
+			title="Approximate lifetime views: historical estimate plus engaged reads from a 0.5% sample"
+			>~{formatter.format(reads)} {reads === 1 ? 'view' : 'views'}</span
 		>
 		<button
 			type="button"

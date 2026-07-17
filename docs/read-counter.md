@@ -11,10 +11,12 @@ auditable and changing a seed does not require a database migration.
 
 ## Live reads
 
-The browser waits for 8 visible seconds and, on articles, 25% scroll depth. It
-deduplicates in local storage for 24 hours and samples 0.5% of eligible reads.
-Each accepted sample adds 200 estimated reads to D1. Obvious bots, cross-origin
-requests, and invalid engagement signals are rejected. See
+The browser fetches the display total immediately so article headers do not
+wait on the engagement threshold. It then waits for 8 visible seconds and, on
+articles, 25% scroll depth before sampling 0.5% of eligible reads. Unsampled
+visits make no second request. Each accepted sample adds 200 estimated reads to
+D1. The signal is deduplicated in local storage for 24 hours. Obvious bots,
+cross-origin requests, and invalid engagement signals are rejected. See
 `src/lib/read-counter.js` for the authoritative policy constants.
 
 The displayed total is:
