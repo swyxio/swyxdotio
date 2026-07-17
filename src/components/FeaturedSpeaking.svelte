@@ -44,7 +44,7 @@
 				>My most well received technical talk, where I explain a mental model for React hooks by
 				livecoding a React clone at JSConf Asia. Started as
 				<a href="https://twitter.com/swyx/status/1100809424963219456">a tweet</a>, then
-				<a href="https://www.swyx.io/writing/getting-closure-on-hooks/">a blogpost.</a></span
+				<a href="https://swyx.io/getting-closure-on-hooks">a blogpost.</a></span
 			>
 		</li>
 		<li>

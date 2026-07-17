@@ -58,6 +58,15 @@ export function isObviousBot(userAgent) {
 	return !userAgent || BOT_USER_AGENT.test(userAgent);
 }
 
+/** @param {Request & { cf?: { botManagement?: { verifiedBot?: boolean } } }} request */
+export function isAutomatedRead(request) {
+	if (isObviousBot(request.headers.get('user-agent'))) return true;
+	if (request.cf?.botManagement?.verifiedBot === true) return true;
+	return ['purpose', 'sec-purpose', 'x-moz'].some((header) =>
+		/prefetch|prerender/i.test(request.headers.get(header) || '')
+	);
+}
+
 /** @param {Request} request */
 export function isSameOriginRead(request) {
 	const origin = request.headers.get('origin');
@@ -74,6 +83,36 @@ export function normalizeReadCount(value) {
 /** @param {number} draw */
 export function shouldSampleRead(draw) {
 	return Number.isFinite(draw) && draw >= 0 && draw < READ_SAMPLE_RATE;
+}
+
+/**
+ * Cloudflare's rate-limit bindings are deliberately approximate and local to a
+ * colo. That is sufficient here: their job is to bound abusive bursts before a
+ * sampled read can cause a D1 write, not to provide billing-grade accounting.
+ *
+ * @param {{
+ *   READ_IP_RATE_LIMITER?: RateLimit;
+ *   READ_SESSION_RATE_LIMITER?: RateLimit;
+ * }} env
+ * @param {string} clientAddress
+ * @param {number | undefined} sessionId
+ */
+export async function isReadRateAllowed(env, clientAddress, sessionId) {
+	try {
+		if (env.READ_IP_RATE_LIMITER) {
+			const result = await env.READ_IP_RATE_LIMITER.limit({ key: `ip:${clientAddress}` });
+			if (!result.success) return false;
+		}
+		if (env.READ_SESSION_RATE_LIMITER && sessionId) {
+			const result = await env.READ_SESSION_RATE_LIMITER.limit({ key: `session:${sessionId}` });
+			if (!result.success) return false;
+		}
+		return true;
+	} catch {
+		// Counting is optional. If an explicitly configured protection binding is
+		// unavailable, fail closed rather than expose D1 to an unbounded write path.
+		return !env.READ_IP_RATE_LIMITER && !env.READ_SESSION_RATE_LIMITER;
+	}
 }
 
 /** @param {unknown} storedPreference */

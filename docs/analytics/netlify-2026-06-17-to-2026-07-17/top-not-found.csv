@@ -1,0 +1,16 @@
+path,requests
+/robots.txt,475
+/ip,133
+/.env,30
+/api/config,28
+/sitemap.xml,27
+/netlify.toml,26
+/.env.local,26
+/.env.production,25
+/env-config.js,24
+/.env.old,23
+/.git/config,22
+/api/env,22
+/api/debug,21
+/api/health,21
+/.env.backup,21

@@ -1,4 +1,4 @@
-import { SITE_URL } from '$lib/siteConfig';
+import { buildSitemap } from '$lib/sitemap';
 
 /** @type {import('@sveltejs/kit').RequestHandler} */
 export async function GET({ fetch }) {
@@ -7,57 +7,11 @@ export async function GET({ fetch }) {
 	const posts = /** @type {import('$lib/types').ContentItem[]} */ (await res.json()).filter(
 		(post) => post.type === 'blog'
 	);
-	const pages = [`about`, `podcasts`, `subscribe`];
-	const body = sitemap(posts, pages);
 
-	return new Response(body, {
+	return new Response(buildSitemap(posts), {
 		headers: {
 			'Cache-Control': 'public, max-age=0, s-maxage=86400, stale-while-revalidate=604800',
 			'Content-Type': 'application/xml'
 		}
 	});
 }
-
-/**
- * @param {import('$lib/types').ContentItem[]} posts
- * @param {string[]} pages
- */
-const sitemap = (posts, pages) => `<?xml version="1.0" encoding="UTF-8" ?>
-  <urlset
-    xmlns="https://www.sitemaps.org/schemas/sitemap/0.9"
-    xmlns:news="https://www.google.com/schemas/sitemap-news/0.9"
-    xmlns:xhtml="https://www.w3.org/1999/xhtml"
-    xmlns:mobile="https://www.google.com/schemas/sitemap-mobile/1.0"
-    xmlns:image="https://www.google.com/schemas/sitemap-image/1.1"
-    xmlns:video="https://www.google.com/schemas/sitemap-video/1.1"
-  >
-    <url>
-      <loc>${SITE_URL}</loc>
-      <changefreq>daily</changefreq>
-      <priority>0.7</priority>
-    </url>
-    ${pages
-			.map(
-				(page) => `
-    <url>
-      <loc>${SITE_URL}/${page}</loc>
-      <changefreq>daily</changefreq>
-      <priority>0.7</priority>
-    </url>
-    `
-			)
-			.join('')}
-    ${posts
-			.map((post) =>
-				post.isPrivate
-					? null
-					: `
-    <url>
-      <loc>${SITE_URL}/${post.slug}</loc>
-      <changefreq>daily</changefreq>
-      <priority>0.7</priority>
-    </url>
-    `
-			)
-			.join('')}
-  </urlset>`;

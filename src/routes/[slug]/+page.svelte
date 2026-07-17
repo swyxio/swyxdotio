@@ -72,7 +72,7 @@
 				target="_blank"
 				title="What is my disclosure policy?"
 				rel="noopener noreferrer"
-				href="https://www.swyx.io/digital-garden-tos/#2-epistemic-disclosure"
+				href="https://swyx.io/digital-garden-tos/#2-epistemic-disclosure"
 				color="blue"
 			>
 				<span class="relative font-bold"

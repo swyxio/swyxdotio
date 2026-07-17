@@ -44,16 +44,15 @@
 			>
 		</li>
 		<li>
-			<strong><a href="https://www.swyx.io/sg-guide">Swyx's Simple Guide to Singapore</a></strong>
+			<strong><a href="https://swyx.io/sg-guide">Swyx's Simple Guide to Singapore</a></strong>
 			<span class="feature-description">Self explanatory.</span>
 		</li>
 		<li>
-			<strong><a href="https://www.swyx.io/upload">The Upload</a></strong>
+			<strong><a href="https://swyx.io/upload">The Upload</a></strong>
 			<span class="feature-description">So far my only fiction sci-fi work.</span>
 		</li>
 		<li>
-			<strong
-				><a href="https://www.swyx.io/cognition">Cognition: The Devin is in the Details</a></strong
+			<strong><a href="https://swyx.io/cognition">Cognition: The Devin is in the Details</a></strong
 			>
 			<span class="feature-description"
 				>My thinking for why Cognition is working in

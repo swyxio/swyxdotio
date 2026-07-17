@@ -1,4 +1,9 @@
 import { MY_TWITTER_HANDLE, SITE_TITLE, SITE_URL } from './siteConfig.js';
+import {
+	articleStructuredData,
+	profilePageStructuredData,
+	websiteStructuredData
+} from './structured-data.js';
 
 export const OG_DESIGN_VERSION = '1';
 
@@ -22,6 +27,7 @@ export const OG_DESIGN_VERSION = '1';
  *   imageAlt: string;
  *   type: 'article' | 'website';
  *   twitterHandle: string;
+ *   structuredData?: Record<string, any>;
  * }} SocialMetadata
  */
 
@@ -93,7 +99,8 @@ export function getPageSocialMeta(key) {
 		portfolio: `Portfolio | ${SITE_TITLE}`,
 		subscribe: "swyx's Newsletter"
 	};
-	return {
+	/** @type {SocialMetadata} */
+	const metadata = {
 		title: card.title,
 		documentTitle: documentTitles[key],
 		description: card.description,
@@ -103,6 +110,9 @@ export function getPageSocialMeta(key) {
 		type: 'website',
 		twitterHandle: MY_TWITTER_HANDLE
 	};
+	if (key === 'home') metadata.structuredData = websiteStructuredData();
+	if (key === 'about') metadata.structuredData = profilePageStructuredData();
+	return metadata;
 }
 
 /**
@@ -115,17 +125,32 @@ export function getArticleSocialMeta(article, canonical) {
 	const updatedVersion = normaliseVersionDate(updated);
 	const version = `${updatedVersion}-${OG_DESIGN_VERSION}`;
 	const imagePath = `/og/article/${encodeURIComponent(article.slug)}.png?v=${encodeURIComponent(version)}`;
+	const normalizedCanonical = normalizeCanonical(canonical);
 
-	return {
+	/** @type {SocialMetadata} */
+	const metadata = {
 		title: article.title,
 		documentTitle: article.title,
 		description: article.description ?? '',
-		canonical,
+		canonical: normalizedCanonical,
 		image: new URL(imagePath, SITE_URL).href,
 		imageAlt: `Public notebook card for ${article.title}`,
 		type: 'article',
 		twitterHandle: MY_TWITTER_HANDLE
 	};
+	metadata.structuredData = articleStructuredData(article, metadata);
+	return metadata;
+}
+
+/** @param {string} canonical */
+function normalizeCanonical(canonical) {
+	try {
+		const url = new URL(canonical, SITE_URL);
+		if (url.hostname === 'www.swyx.io') url.hostname = 'swyx.io';
+		return url.href;
+	} catch {
+		return canonical;
+	}
 }
 
 /** @param {Date | string} value */

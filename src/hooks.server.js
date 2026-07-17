@@ -45,6 +45,11 @@ export function isPublicReadCountRequest(url) {
 	return url.pathname.startsWith('/api/reads/');
 }
 
+/** @param {URL} url */
+export function isPublicSitemapRequest(url) {
+	return url.pathname === '/sitemap.xml';
+}
+
 /** @type {import('@sveltejs/kit').Handle} */
 export async function handle({ event, resolve }) {
 	// A WebSocket response cannot be cloned, cached, or reconstructed. Presence
@@ -57,7 +62,10 @@ export async function handle({ event, resolve }) {
 	const cache = /** @type {any} */ (globalThis.caches)?.default;
 	const cacheUrl = new URL(event.request.url);
 	const cacheable = event.request.method === 'GET' && !!cache;
-	const preservePublicCache = isVersionedOgRequest(cacheUrl) || isPublicReadCountRequest(cacheUrl);
+	const preservePublicCache =
+		isVersionedOgRequest(cacheUrl) ||
+		isPublicReadCountRequest(cacheUrl) ||
+		isPublicSitemapRequest(cacheUrl);
 	if (
 		cacheUrl.pathname === '/api/listContent.json' ||
 		cacheUrl.pathname === '/api/latestPosts.json' ||

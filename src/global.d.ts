@@ -66,6 +66,10 @@ interface D1Database {
 	prepare(query: string): D1PreparedStatement;
 }
 
+interface RateLimit {
+	limit(options: { key: string }): Promise<{ success: boolean }>;
+}
+
 interface DurableObjectId {}
 
 interface DurableObjectStub {
@@ -100,6 +104,8 @@ declare namespace App {
 				put(key: string, value: string): Promise<void>;
 			};
 			READ_COUNTERS?: D1Database;
+			READ_IP_RATE_LIMITER?: RateLimit;
+			READ_SESSION_RATE_LIMITER?: RateLimit;
 			PRESENCE_ROOMS?: DurableObjectNamespace;
 			PRESENCE_ENABLED?: string;
 			PUBLIC_PRESENCE_ADMISSION_RATE?: string;

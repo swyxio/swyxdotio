@@ -1,0 +1,22 @@
+name = "swyxdotio-read-calibration"
+account_id = "2d017c943ff16e4c52783635ef05e535"
+main = "workers/read-calibration/index.js"
+compatibility_date = "2026-07-17"
+workers_dev = false
+
+[vars]
+GA4_PROPERTY_ID = "391847479"
+
+[triggers]
+crons = ["15 8 3 * *"]
+
+[observability.logs]
+enabled = true
+
+[[d1_databases]]
+binding = "READ_COUNTERS"
+database_name = "swyxdotio-read-counters"
+database_id = "9990fd0c-2211-4bf4-b263-ddbb8aaed34e"
+
+[secrets]
+required = ["GOOGLE_SERVICE_ACCOUNT_JSON"]

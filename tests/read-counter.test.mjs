@@ -4,7 +4,9 @@ import test from 'node:test';
 import {
 	canonicalReadPath,
 	incrementReadCount,
+	isAutomatedRead,
 	isObviousBot,
+	isReadRateAllowed,
 	isSameOriginRead,
 	normalizeReadCount,
 	publicPageKeyForPath,
@@ -64,6 +66,64 @@ test('rejects bot-like and missing user agents', () => {
 	assert.equal(isObviousBot(null), true);
 });
 
+test('rejects prefetches and Cloudflare-verified bots before counting', () => {
+	assert.equal(
+		isAutomatedRead(
+			new Request('https://swyx.io/api/reads/home', {
+				headers: { 'user-agent': 'Mozilla/5.0', purpose: 'prefetch' }
+			})
+		),
+		true
+	);
+	const verifiedBotRequest = new Request('https://swyx.io/api/reads/home', {
+		headers: { 'user-agent': 'Mozilla/5.0' }
+	});
+	verifiedBotRequest.cf = { botManagement: { verifiedBot: true } };
+	assert.equal(isAutomatedRead(verifiedBotRequest), true);
+	assert.equal(
+		isAutomatedRead(
+			new Request('https://swyx.io/api/reads/home', {
+				headers: { 'user-agent': 'Mozilla/5.0 Chrome/126 Safari/537.36' }
+			})
+		),
+		false
+	);
+});
+
+test('caps bursts by edge IP and analytics session without persisting identifiers', async () => {
+	const seen = [];
+	const limiter = {
+		async limit({ key }) {
+			seen.push(key);
+			return { success: true };
+		}
+	};
+	assert.equal(
+		await isReadRateAllowed(
+			{ READ_IP_RATE_LIMITER: limiter, READ_SESSION_RATE_LIMITER: limiter },
+			'203.0.113.4',
+			1784330000
+		),
+		true
+	);
+	assert.deepEqual(seen, ['ip:203.0.113.4', 'session:1784330000']);
+	assert.equal(
+		await isReadRateAllowed(
+			{
+				READ_IP_RATE_LIMITER: {
+					async limit() {
+						return { success: false };
+					}
+				}
+			},
+			'203.0.113.4',
+			undefined
+		),
+		false
+	);
+	assert.equal(await isReadRateAllowed({}, 'unknown', undefined), true);
+});
+
 test('accepts only matching browser origins', () => {
 	assert.equal(
 		isSameOriginRead(
@@ -90,13 +150,20 @@ test('normalizes invalid database counts safely', () => {
 	assert.equal(normalizeReadCount('nope'), 0);
 });
 
-test('adds static historical estimates only to nominated articles', () => {
-	assert.equal(HISTORICAL_READ_ESTIMATE_VERSION, 'historical_estimate_v1');
+test('adds static editorial and cohort historical estimates', () => {
+	assert.equal(HISTORICAL_READ_ESTIMATE_VERSION, 'historical_estimate_v2');
 	assert.equal(historicalReadEstimate('learn-in-public'), 10_000_000);
+	assert.equal(historicalReadEstimate('gatsby-static-dynamic'), 50_000);
+	assert.equal(historicalReadEstimate('firebase-analytics-in-30-seconds-6pp'), 25_000);
+	assert.equal(historicalReadEstimate('2025-advice'), 3_000);
 	assert.equal(displayedReadCount('learn-in-public', 1_200), 10_001_200);
 	assert.equal(displayedReadCount('unknown-note', 1_200), 1_200);
 	assert.equal(displayedReadCount('learn-in-public', -1), 10_000_000);
-	assert.equal(Object.keys(HISTORICAL_READ_ESTIMATES).length, 24);
+	assert.equal(Object.keys(HISTORICAL_READ_ESTIMATES).length, 426);
+	assert.equal(
+		Object.values(HISTORICAL_READ_ESTIMATES).reduce((total, count) => total + count, 0),
+		25_921_500
+	);
 });
 
 test('uses a server-controlled half-percent sampling policy', () => {
@@ -169,7 +236,7 @@ test('builds a non-advertising engaged-read event', () => {
 		'Learn in Public'
 	);
 	assert.equal(payload.events[0].name, 'engaged_read');
-	assert.equal(payload.events[0].params.page_location, 'https://www.swyx.io/learn-in-public');
+	assert.equal(payload.events[0].params.page_location, 'https://swyx.io/learn-in-public');
 	assert.equal(payload.events[0].params.page_title, 'Learn in Public');
 	assert.equal(payload.events[0].params.session_engaged, 1);
 	assert.equal(payload.events[0].params.read_weight, 200);

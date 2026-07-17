@@ -1,4 +1,4 @@
-export const SITE_URL = 'https://www.swyx.io';
+export const SITE_URL = 'https://swyx.io';
 export const GH_USER_REPO = 'swyxio/swyxdotio'; // used for pulling github issues and offering comments
 export const SITE_TITLE = "swyx's site";
 export const SITE_DESCRIPTION =
@@ -6,7 +6,6 @@ export const SITE_DESCRIPTION =
 export const DEFAULT_OG_IMAGE = SITE_URL + '/swyx-ski.jpeg';
 export const MY_TWITTER_HANDLE = 'swyx';
 export const MY_YOUTUBE = 'https://youtube.com/swyxTV?sub_confirmation=1';
-
 
 export const APPROVED_POSTERS_GH_USERNAME = ['sw-yx', 'swyxio'];
 export const POST_CATEGORIES = ['Essay', 'Note', 'Talk', 'Podcast', 'Tutorial', 'Snippet']; // Other categories you can consider adding: Talks, Tutorials, Snippets, Podcasts, Notes...

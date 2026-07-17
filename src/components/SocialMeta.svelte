@@ -17,8 +17,13 @@
 	export let type = 'website';
 	/** @type {string} */
 	export let twitterHandle = 'swyx';
+	/** @type {Record<string, unknown> | undefined} */
+	export let structuredData = undefined;
 
 	$: twitterAccount = twitterHandle.startsWith('@') ? twitterHandle : `@${twitterHandle}`;
+	$: structuredDataJson = structuredData
+		? JSON.stringify(structuredData).replaceAll('<', '\\u003c')
+		: undefined;
 </script>
 
 <svelte:head>
@@ -44,4 +49,8 @@
 	<meta name="twitter:description" content={description} />
 	<meta name="twitter:image" content={image} />
 	<meta name="twitter:image:alt" content={imageAlt} />
+
+	{#if structuredDataJson}
+		{@html `<script type="application/ld+json">${structuredDataJson}</script>`}
+	{/if}
 </svelte:head>
