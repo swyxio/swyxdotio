@@ -53,6 +53,9 @@
 			<a href="/learn-in-public">Learning in Public</a>!
 		</p>
 		<p><a href="/about">More on the about page</a>.</p>
+		<p class="plain-muted">
+			Recent experiment: <a href="https://strata.swyx.io">play Strata in your browser</a>.
+		</p>
 	</section>
 
 	<section class="home-section site-card">
