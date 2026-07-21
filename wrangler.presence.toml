@@ -4,12 +4,17 @@ main = "workers/presence/index.js"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 
-# PresenceRoom intentionally performs no storage reads or writes. The SQLite
-# class declaration is still required once to create its Durable Object
-# namespace; subsequent deployments keep the same v1 migration tag.
+# PresenceRoom does not use Durable Object storage. The SQLite class declaration
+# is still required once to create its namespace; aggregate anomaly counters are
+# written separately to the READ_COUNTERS D1 binding.
 [[durable_objects.bindings]]
 name = "PRESENCE_ROOMS"
 class_name = "PresenceRoom"
+
+[[d1_databases]]
+binding = "READ_COUNTERS"
+database_name = "swyxdotio-read-counters"
+database_id = "9990fd0c-2211-4bf4-b263-ddbb8aaed34e"
 
 [[migrations]]
 tag = "v1"

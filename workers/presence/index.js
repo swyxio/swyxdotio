@@ -6,6 +6,8 @@ import {
 	createPresenceRateState,
 	normalizePresenceCountry,
 	parsePresenceClientFrame,
+	presenceAggregateDelta,
+	presenceBucketStart,
 	presenceFrame
 } from '../../src/lib/presence-contracts.js';
 
@@ -13,6 +15,7 @@ const POLICY_VIOLATION = 1008;
 const TRY_AGAIN_LATER = 1013;
 const REACTION_INTERVAL_MS = 2_000;
 const RATE_LIMIT_CLOSE_THRESHOLD = 20;
+const PERSISTED_PRESENCE_KINDS = new Set(['roomFull', 'malformed', 'rateLimited']);
 
 function socketAttachment(socket) {
 	try {
@@ -48,9 +51,11 @@ function makeJoinFrame(peer) {
 }
 
 export class PresenceRoom {
-	constructor(ctx) {
+	constructor(ctx, env) {
 		this.ctx = ctx;
+		this.env = env;
 		this.rateStates = new Map();
+		this.aggregateBucketStart = presenceBucketStart(Date.now());
 		this.aggregateCounts = { connections: 0, malformed: 0, rateLimited: 0, roomFull: 0 };
 	}
 
@@ -59,11 +64,22 @@ export class PresenceRoom {
 	}
 
 	report(kind) {
+		const bucketStart = presenceBucketStart(Date.now());
+		if (bucketStart !== this.aggregateBucketStart) {
+			this.aggregateBucketStart = bucketStart;
+			this.aggregateCounts = { connections: 0, malformed: 0, rateLimited: 0, roomFull: 0 };
+		}
 		const count = (this.aggregateCounts[kind] ?? 0) + 1;
 		this.aggregateCounts[kind] = count;
+		const persistedDelta = presenceAggregateDelta(count);
 		// Emit sparse aggregate-only diagnostics. Never include room, peer, country,
 		// position, reaction, URL, user agent, or network identifiers.
-		if ((count & (count - 1)) === 0) console.warn('presence.aggregate', { kind, count });
+		if (persistedDelta > 0) console.warn('presence.aggregate', { kind, count });
+		if (persistedDelta > 0 && PERSISTED_PRESENCE_KINDS.has(kind) && this.env?.READ_COUNTERS) {
+			this.ctx.waitUntil(
+				incrementPresenceCounter(this.env.READ_COUNTERS, kind, persistedDelta, bucketStart)
+			);
+		}
 	}
 
 	broadcast(frame, except = null) {
@@ -196,3 +212,15 @@ export default {
 		return new Response('Not found', { status: 404 });
 	}
 };
+
+/** @param {D1Database} database @param {string} kind @param {number} delta @param {number} bucketStart */
+async function incrementPresenceCounter(database, kind, delta, bucketStart) {
+	await database
+		.prepare(
+			`INSERT INTO presence_monitor_hourly (bucket_start, kind, count)
+			 VALUES (?1, ?2, ?3)
+			 ON CONFLICT(bucket_start, kind) DO UPDATE SET count = count + excluded.count`
+		)
+		.bind(bucketStart, kind, delta)
+		.run();
+}

@@ -1,0 +1,25 @@
+name = "swyxdotio-read-presence-monitor"
+account_id = "2d017c943ff16e4c52783635ef05e535"
+main = "workers/read-presence-monitor/index.js"
+compatibility_date = "2026-07-19"
+workers_dev = false
+
+[vars]
+CLOUDFLARE_ACCOUNT_ID = "2d017c943ff16e4c52783635ef05e535"
+MONITOR_BASE_URL = "https://swyx.io"
+MONITOR_SITE_SCRIPT_NAME = "swyxdotio"
+MONITOR_LOOKBACK_MINUTES = "60"
+MONITOR_MIN_SAMPLE_COUNT = "20"
+MONITOR_EXCEEDED_RESOURCES_MIN_COUNT = "5"
+MONITOR_EXCEEDED_RESOURCES_MAX_RATE = "0.005"
+
+[triggers]
+crons = ["17 * * * *"]
+
+[observability.logs]
+enabled = true
+
+[[d1_databases]]
+binding = "READ_COUNTERS"
+database_name = "swyxdotio-read-counters"
+database_id = "9990fd0c-2211-4bf4-b263-ddbb8aaed34e"

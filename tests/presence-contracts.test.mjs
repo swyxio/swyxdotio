@@ -9,6 +9,8 @@ import {
 	createPresenceRateState,
 	normalizePresenceCountry,
 	parsePresenceClientFrame,
+	presenceAggregateDelta,
+	presenceBucketStart,
 	presenceFrame
 } from '../src/lib/presence-contracts.js';
 
@@ -56,4 +58,17 @@ test('token bucket allows burst ten and replenishes at five frames per second', 
 	assert.equal(state.violations, 1);
 	assert.equal(consumePresenceToken(state, 1_200), true);
 	assert.equal(consumePresenceToken(state, 1_200), false);
+});
+
+test('presence aggregate persistence uses logarithmic checkpoints', () => {
+	assert.deepEqual(
+		Array.from({ length: 9 }, (_, index) => presenceAggregateDelta(index + 1)),
+		[1, 1, 0, 2, 0, 0, 0, 4, 0]
+	);
+	assert.equal(presenceAggregateDelta(0), 0);
+	assert.equal(presenceAggregateDelta(Number.MAX_SAFE_INTEGER + 1), 0);
+	assert.equal(
+		presenceBucketStart(Date.parse('2026-07-21T20:59:59.999Z')),
+		Date.parse('2026-07-21T20:00:00Z') / 1000
+	);
 });

@@ -171,3 +171,65 @@ Viewer access for that service-account email. The optional
 - Measurement Protocol success means Google accepted the HTTP request, not
   necessarily that every event passed semantic validation. Use GA DebugView or
   the Measurement Protocol validation endpoint when changing the payload.
+
+## Hourly read and presence monitor
+
+`workers/read-presence-monitor/index.js` runs as the separately deployed
+`swyxdotio-read-presence-monitor` Worker at `17 * * * *`. It records a compact
+operational snapshot in D1 and can optionally post an alert webhook when the
+monitor detects production drift.
+
+Each snapshot stores:
+
+- cumulative D1 `page_reads` totals and samples since the latest calibration capture;
+- the latest `read_calibration_reports` row status and capture time;
+- a read-only public smoke check for `GET /api/reads/batch`;
+- a read-only presence smoke check that plain HTTP access to
+  `/api/presence/home` still rejects with `403`;
+- optional Cloudflare main-Worker request/error/status data for the last
+  `MONITOR_LOOKBACK_MINUTES` window when `CLOUDFLARE_ANALYTICS_TOKEN` is set;
+- aggregate presence anomaly totals from `presence_monitor_hourly` for
+  `roomFull`, malformed-frame closes, and rate-limit events. Because those
+  counters are hourly and flushed at logarithmic checkpoints, the monitor reads
+  completed, non-overlapping buckets. Current-hour events appear in the next
+  scheduled snapshot instead of being
+  skipped at a rolling-window boundary. Counts are exact at each checkpoint and
+  conservative lower bounds between checkpoints.
+
+The monitor alerts on three things by default:
+
+1. D1 samples since the latest calibration capture below
+   `MONITOR_MIN_SAMPLE_COUNT` (`20` by default), because calibration remains
+   statistically inactive below that per-window threshold.
+2. Elevated main-Worker `exceededResources` if both the count and rate exceed
+   the configured hourly thresholds.
+3. Any persisted presence anomaly counts in the lookback window.
+
+Operational commands:
+
+```sh
+npx wrangler d1 migrations apply swyxdotio-read-counters --remote
+npm run preview:monitor
+npx wrangler deploy -c wrangler.presence.toml
+npx wrangler deploy -c wrangler.monitor.toml
+npx wrangler d1 execute swyxdotio-read-counters --remote --command \
+  "SELECT captured_at, alert_count, alert_summary FROM ops_monitor_snapshots ORDER BY captured_at DESC LIMIT 5"
+```
+
+Secrets and vars:
+
+- `MONITOR_ALERT_WEBHOOK_URL` is optional and only used when an alert should be
+  pushed outward.
+- `CLOUDFLARE_ANALYTICS_TOKEN` is optional; without it, the monitor still runs
+  smoke checks and D1 snapshots but leaves main-Worker status metrics empty.
+- `MONITOR_EXCEEDED_RESOURCES_MIN_COUNT` and
+  `MONITOR_EXCEEDED_RESOURCES_MAX_RATE` tune the main-Worker alert.
+
+Provision monitor secrets against the monitor Worker explicitly so they are not
+uploaded to the main site Worker:
+
+```sh
+npx wrangler secret put CLOUDFLARE_ANALYTICS_TOKEN -c wrangler.monitor.toml
+npx wrangler secret put MONITOR_ALERT_WEBHOOK_URL -c wrangler.monitor.toml
+npx wrangler secret list -c wrangler.monitor.toml
+```

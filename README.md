@@ -39,7 +39,8 @@ If you want to make a site based on this, see https://github.com/swyxio/swyxkit 
   historical estimate that is added only when returning the public count.
 - **Ephemeral live readers:** public pages optionally join a page-scoped, hibernating Durable
   Object room. Readers exchange only short-lived country, position, mode, reaction, and fixed share
-  celebration frames; there is no identity, history, free-form chat, or presence database.
+  celebration frames. There is no identity, history, free-form chat, or per-reader presence
+  database; D1 stores only aggregate hourly abuse and capacity counters.
 
 ## Environment variables (Cloudflare Workers)
 
@@ -209,7 +210,8 @@ Operational thresholds:
    to work.
 4. Monitor only aggregate Worker/DO requests, active duration, `room-full`, malformed-frame, and
    rate-limit counts. Never add logs containing peer IDs, countries, coordinates, selections, or
-   share destinations.
+   share destinations. Presence anomalies flush to D1 only at power-of-two checkpoints, bounding
+   write amplification while keeping counts conservative between checkpoints.
 
 Pricing references: [Durable Objects pricing](https://developers.cloudflare.com/durable-objects/platform/pricing/),
 [WebSocket hibernation](https://developers.cloudflare.com/durable-objects/best-practices/websockets/),
@@ -381,6 +383,7 @@ npm run build
 npx wrangler d1 migrations apply swyxdotio-read-counters --remote
 npm run deploy:presence
 npm run deploy:calibration
+npm run deploy:monitor
 npx wrangler deploy
 ```
 
@@ -395,7 +398,9 @@ After deployment:
    `private, no-store`.
 5. Check D1 rows and GA Realtime `engaged_read` independently. Neither alone proves the other
    system is healthy.
-6. Keep the worktree clean and never commit `.dev.vars`, GA API secrets, or Cloudflare tokens.
+6. If using the hourly monitor, verify that `ops_monitor_snapshots` receives a fresh row and that
+   `presence_monitor_hourly` stays aggregate-only.
+7. Keep the worktree clean and never commit `.dev.vars`, GA API secrets, or Cloudflare tokens.
 
 ## Commands
 
@@ -403,6 +408,7 @@ After deployment:
 - `npm run build` — production build (Cloudflare adapter)
 - `npm run preview` — preview with `wrangler dev`; use this rather than plain Vite when testing
   local KV, D1, R2, Cache API, or Worker bindings
+- `npm run deploy:monitor` — deploy the hourly read/presence monitor Worker
 - `node --test tests/*.test.mjs` — fast unit and contract tests, including OG and read analytics
 - `node tests/markdown.test.mjs` — markdown renderer regression checks
 - `npm test` — Playwright e2e (requires GH content)

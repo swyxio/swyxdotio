@@ -131,3 +131,19 @@ export function consumePresenceToken(state, now = Date.now()) {
 	state.violations = Math.max(0, state.violations - 1);
 	return true;
 }
+
+/**
+ * Returns the aggregate delta to persist at power-of-two checkpoints. This
+ * bounds write amplification while keeping the stored count exact at each
+ * checkpoint and a lower bound between checkpoints.
+ * @param {number} count
+ */
+export function presenceAggregateDelta(count) {
+	if (!Number.isSafeInteger(count) || count < 1 || !Number.isInteger(Math.log2(count))) return 0;
+	return count === 1 ? 1 : count / 2;
+}
+
+/** @param {number} nowMs */
+export function presenceBucketStart(nowMs) {
+	return Math.floor(nowMs / 3_600_000) * 3_600;
+}
