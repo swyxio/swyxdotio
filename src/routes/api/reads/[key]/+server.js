@@ -17,6 +17,11 @@ import {
 	sendGa4Read
 } from '$lib/read-analytics.js';
 import { displayedReadCount } from '$lib/server/historical-read-estimates.js';
+import {
+	incrementReadFunnelStage,
+	isArticleReadFunnelKey,
+	READ_FUNNEL_ACCEPTED_STAGE
+} from '$lib/read-funnel.js';
 
 export const prerender = false;
 
@@ -91,6 +96,18 @@ export async function POST({ params, platform, request, getClientAddress }) {
 	);
 	try {
 		const sampledReads = await incrementReadCount(database, pageKey);
+		if (isArticleReadFunnelKey(pageKey) && !hasAnalyticsOptOut(request)) {
+			const acceptedTelemetry = incrementReadFunnelStage(
+				database,
+				READ_FUNNEL_ACCEPTED_STAGE
+			).catch((cause) => {
+				console.warn('Read funnel acceptance telemetry failed', {
+					errorName: cause instanceof Error ? cause.name : typeof cause
+				});
+			});
+			if (platform?.context?.waitUntil) platform.context.waitUntil(acceptedTelemetry);
+			else await acceptedTelemetry;
+		}
 		if (!hasAnalyticsOptOut(request) && analytics) {
 			const mirror = sendGa4Read({
 				measurementId: platform?.env?.GA4_MEASUREMENT_ID,

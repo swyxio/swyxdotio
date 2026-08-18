@@ -17,10 +17,11 @@ export default {
 export async function runMonitor(env, now) {
 	const config = monitorConfig(env);
 	const capturedAt = Math.floor(now.valueOf() / 1000);
-	const [totals, calibration, smoke, presence] = await Promise.all([
+	const [totals, calibration, smoke, presenceSocket, presence] = await Promise.all([
 		readTotals(env.READ_COUNTERS),
 		readLatestCalibration(env.READ_COUNTERS),
 		runSmokeChecks(config.baseUrl),
+		runPresenceWebSocketCheck(config.baseUrl),
 		readPresenceCounts(env.READ_COUNTERS, capturedAt, config.lookbackMinutes)
 	]);
 	const worker = await readWorkerStatus(env, now, config).catch((error) => {
@@ -40,6 +41,7 @@ export async function runMonitor(env, now) {
 		calibrationSampleCount,
 		readBatchOk: smoke.readBatchOk,
 		presenceHttpOk: smoke.presenceHttpOk,
+		presenceSocket,
 		calibrationStatus: calibration.status,
 		workerRequests: worker.requests,
 		workerExceededResources: worker.exceededResources,
@@ -54,6 +56,7 @@ export async function runMonitor(env, now) {
 		calibration,
 		calibrationSampleCount,
 		smoke,
+		presenceSocket,
 		worker,
 		presence,
 		analysis
@@ -66,6 +69,7 @@ export async function runMonitor(env, now) {
 		calibration,
 		calibrationSampleCount,
 		smoke,
+		presenceSocket,
 		worker,
 		presence,
 		analysis,
@@ -84,7 +88,13 @@ export async function runMonitor(env, now) {
 		workerExceededResources: worker.exceededResources,
 		presenceRoomFull: presence.roomFull,
 		presenceMalformed: presence.malformed,
-		presenceRateLimited: presence.rateLimited
+		presenceRateLimited: presence.rateLimited,
+		presenceWebSocketOpenOk: presenceSocket.openOk,
+		presenceWebSocketWelcomeOk: presenceSocket.welcomeOk,
+		presenceWebSocketCloseOk: presenceSocket.closeOk,
+		presenceWebSocketFailureStage: presenceSocket.failureStage,
+		presenceWebSocketCloseCode: presenceSocket.closeCode,
+		presenceWebSocketDurationMs: presenceSocket.durationMs
 	};
 	console.log(JSON.stringify(payload));
 
@@ -196,6 +206,146 @@ export async function runSmokeChecks(baseUrl, fetchImpl = fetch) {
 	};
 }
 
+const DEFAULT_PRESENCE_SOCKET_TIMEOUTS = Object.freeze({
+	upgrade: 4_000,
+	welcome: 3_000,
+	close: 3_000
+});
+
+/**
+ * Exercise the public WebSocket lifecycle without retaining frame contents or
+ * connection identity. The result is deliberately aggregate-only.
+ * @param {string} baseUrl
+ * @param {typeof fetch} [fetchImpl]
+ * @param {{ upgrade?: number; welcome?: number; close?: number }} [timeouts]
+ */
+export async function runPresenceWebSocketCheck(
+	baseUrl,
+	fetchImpl = fetch,
+	timeouts = DEFAULT_PRESENCE_SOCKET_TIMEOUTS
+) {
+	const startedAt = Date.now();
+	const result = {
+		openOk: false,
+		welcomeOk: false,
+		closeOk: false,
+		failureStage: /** @type {string | null} */ (null),
+		closeCode: /** @type {number | null} */ (null),
+		durationMs: 0
+	};
+	const finish = (failureStage) => {
+		result.failureStage = failureStage;
+		result.durationMs = Math.max(0, Date.now() - startedAt);
+		return result;
+	};
+
+	const presenceUrl = monitorSmokeUrls(baseUrl).presenceUrl;
+	let response;
+	try {
+		response = await fetchImpl(presenceUrl, {
+			headers: {
+				origin: new URL(baseUrl).origin,
+				'sec-fetch-site': 'same-origin',
+				upgrade: 'websocket',
+				'user-agent': 'swyxdotio-presence-monitor/1.0'
+			},
+			signal: AbortSignal.timeout(timeouts.upgrade ?? DEFAULT_PRESENCE_SOCKET_TIMEOUTS.upgrade)
+		});
+	} catch {
+		return finish('transport_error');
+	}
+
+	const socket = response?.webSocket;
+	if (response?.status !== 101 || !socket) return finish('upgrade');
+	try {
+		socket.accept();
+		result.openOk = true;
+	} catch {
+		return finish('transport_error');
+	}
+
+	const welcome = await waitForSocketEvent(
+		socket,
+		'message',
+		timeouts.welcome ?? DEFAULT_PRESENCE_SOCKET_TIMEOUTS.welcome
+	);
+	if (welcome.type === 'timeout') {
+		safeClose(socket);
+		return finish('welcome_timeout');
+	}
+	if (welcome.type !== 'message') {
+		safeClose(socket);
+		return finish('transport_error');
+	}
+
+	let validWelcome = false;
+	try {
+		const frame = JSON.parse(typeof welcome.event?.data === 'string' ? welcome.event.data : '');
+		validWelcome = Array.isArray(frame) && frame[0] === 1 && frame[1] === 'w';
+	} catch {
+		validWelcome = false;
+	}
+	if (!validWelcome) {
+		safeClose(socket);
+		return finish('welcome_invalid');
+	}
+	result.welcomeOk = true;
+
+	const closed = waitForSocketEvent(
+		socket,
+		'close',
+		timeouts.close ?? DEFAULT_PRESENCE_SOCKET_TIMEOUTS.close
+	);
+	try {
+		socket.close(1000, 'monitor');
+	} catch {
+		return finish('transport_error');
+	}
+	const closeOutcome = await closed;
+	if (closeOutcome.type === 'timeout') return finish('close_timeout');
+	if (closeOutcome.type !== 'close') return finish('transport_error');
+
+	const code = Number(closeOutcome.event?.code);
+	result.closeCode = Number.isInteger(code) ? code : null;
+	result.closeOk = result.closeCode === 1000 && closeOutcome.event?.wasClean === true;
+	return finish(result.closeOk ? null : 'close_abnormal');
+}
+
+/** @param {WebSocket} socket @param {'message' | 'close'} expected @param {number} timeoutMs */
+function waitForSocketEvent(socket, expected, timeoutMs) {
+	return new Promise((resolve) => {
+		let settled = false;
+		const cleanup = () => {
+			clearTimeout(timer);
+			socket.removeEventListener(expected, onExpected);
+			if (expected !== 'close') socket.removeEventListener('close', onClose);
+			socket.removeEventListener('error', onError);
+		};
+		const settle = (value) => {
+			if (settled) return;
+			settled = true;
+			cleanup();
+			resolve(value);
+		};
+		const onExpected = (event) => settle({ type: expected, event });
+		const onClose = (event) => settle({ type: 'close', event });
+		const onError = (event) => settle({ type: 'error', event });
+		const timer = setTimeout(() => settle({ type: 'timeout', event: null }), timeoutMs);
+		socket.addEventListener(expected, onExpected, { once: true });
+		if (expected !== 'close') socket.addEventListener('close', onClose, { once: true });
+		socket.addEventListener('error', onError, { once: true });
+	});
+}
+
+/** @param {WebSocket} socket */
+function safeClose(socket) {
+	try {
+		socket.close(1000, 'monitor');
+	} catch {
+		// The transport may already be closed.
+	}
+}
+
 /** @param {Record<string, any>} env @param {Date} now @param {ReturnType<typeof monitorConfig>} config */
 async function readWorkerStatus(env, now, config) {
 	if (!env.CLOUDFLARE_ANALYTICS_TOKEN || !env.CLOUDFLARE_ACCOUNT_ID) {
@@ -276,11 +426,13 @@ async function writeSnapshot(database, snapshot) {
 			`INSERT INTO ops_monitor_snapshots (
 			   captured_at, lookback_minutes, read_count_total, sample_count_total,
 			   calibration_status, calibration_captured_at, read_batch_ok, presence_http_ok,
+			   presence_ws_open_ok, presence_ws_welcome_ok, presence_ws_close_ok,
+			   presence_ws_failure_stage, presence_ws_close_code, presence_ws_duration_ms,
 			   worker_request_count, worker_error_count, worker_exceeded_resources_count,
 			   worker_client_disconnected_count, presence_room_full_count,
 			   presence_malformed_count, presence_rate_limited_count, alert_count,
 			   alert_summary, report_markdown
-			 ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18)`
+			 ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24)`
 		)
 		.bind(
 			snapshot.capturedAt,
@@ -291,6 +443,12 @@ async function writeSnapshot(database, snapshot) {
 			snapshot.calibration.captured_at,
 			snapshot.smoke.readBatchOk ? 1 : 0,
 			snapshot.smoke.presenceHttpOk ? 1 : 0,
+			snapshot.presenceSocket.openOk ? 1 : 0,
+			snapshot.presenceSocket.welcomeOk ? 1 : 0,
+			snapshot.presenceSocket.closeOk ? 1 : 0,
+			snapshot.presenceSocket.failureStage,
+			snapshot.presenceSocket.closeCode,
+			snapshot.presenceSocket.durationMs,
 			snapshot.worker.requests,
 			snapshot.worker.errors,
 			snapshot.worker.exceededResources,

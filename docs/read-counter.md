@@ -109,6 +109,23 @@ cannot classify semantically:
 - identifiers are used only as ephemeral limiter keys and are never stored in
   D1 or sent to the calibration report.
 
+Article instrumentation uses a separate `READ_FUNNEL_RATE_LIMITER`, so
+diagnostic events cannot consume the allowance for a real sampled read. The
+browser sends only a pathless stage enum, and D1 stores only the UTC hour,
+stage, and aggregate count in `read_funnel_hourly`. It never stores an article
+key, URL, referrer, identifier, user agent, location, or client timestamp.
+
+The stages are `eligible`, `visible_8s`, `depth_25`, `sample_selected`, and the
+server-owned `d1_accepted`. `eligible` means an article attempt that was not
+already suppressed by the engaged-read 24-hour dedupe; it is not a unique-user
+count. DNT and Global Privacy Control suppress funnel telemetry. Inspect the
+aggregate conversion shape with:
+
+```sh
+npx wrangler d1 execute swyxdotio-read-counters --remote --command \
+  "SELECT datetime(bucket_start, 'unixepoch') AS hour, stage, count FROM read_funnel_hourly ORDER BY bucket_start DESC, stage LIMIT 120"
+```
+
 The limiters are intentionally approximate and colo-local. Their purpose is to
 bound abuse cheaply before the sampled D1 write, not to produce precise counts.
 Cloudflare's managed DDoS protections should remain enabled; no custom rule is
@@ -186,6 +203,10 @@ Each snapshot stores:
 - a read-only public smoke check for `GET /api/reads/batch`;
 - a read-only presence smoke check that plain HTTP access to
   `/api/presence/home` still rejects with `403`;
+- a same-origin WebSocket lifecycle check that opens the public presence path,
+  validates only the welcome frame type, requests a normal close, and records
+  only aggregate open/welcome/clean-close outcomes, close code, failure stage,
+  and total duration;
 - optional Cloudflare main-Worker request/error/status data for the last
   `MONITOR_LOOKBACK_MINUTES` window when `CLOUDFLARE_ANALYTICS_TOKEN` is set;
 - aggregate presence anomaly totals from `presence_monitor_hourly` for
@@ -203,7 +224,13 @@ The monitor alerts on three things by default:
    statistically inactive below that per-window threshold.
 2. Elevated main-Worker `exceededResources` if both the count and rate exceed
    the configured hourly thresholds.
-3. Any persisted presence anomaly counts in the lookback window.
+3. Any failed WebSocket open, welcome, or clean-close lifecycle check.
+4. Any persisted presence anomaly counts in the lookback window.
+
+The presence Worker explicitly enables `web_socket_auto_reply_to_close` so the
+runtime reciprocates normal close frames even though the Worker retains its
+older compatibility date. This keeps the change scoped to standards-compliant
+close behavior instead of opting into unrelated runtime changes.
 
 Operational commands:
 
@@ -215,6 +242,30 @@ npx wrangler deploy -c wrangler.monitor.toml
 npx wrangler d1 execute swyxdotio-read-counters --remote --command \
   "SELECT captured_at, alert_count, alert_summary FROM ops_monitor_snapshots ORDER BY captured_at DESC LIMIT 5"
 ```
+
+## Privacy-minimal Worker fault attribution
+
+`swyxdotio-fault-attribution` is a Tail Worker attached to the main site
+Worker. It ignores successful, canceled, and response-stream-disconnected
+invocations. For true runtime faults it immediately collapses the default-
+redacted trace to four bounded fields: UTC hour, coarse route class, runtime
+outcome, and wall-duration bucket. It never calls `getUnredacted()` and never
+persists request URLs, query strings, headers, logs, exceptions, content, or
+identifiers.
+
+Static assets are intentionally absent because asset-first routing serves them
+without invoking the main Worker. Tail delivery is best-effort, so compare its
+completed-hour totals with Cloudflare GraphQL before treating missing rows as
+zero. Query attribution with:
+
+```sh
+npx wrangler d1 execute swyxdotio-read-counters --remote --command \
+  "SELECT datetime(bucket_start, 'unixepoch') AS hour, route_class, outcome, duration_bucket, count FROM worker_fault_hourly ORDER BY bucket_start DESC, count DESC LIMIT 120"
+```
+
+Production dependency order is: apply D1 migrations, deploy the Tail Worker,
+deploy presence and verify a clean close, deploy the monitor, then deploy the
+main site Worker that attaches the Tail consumer and exposes the funnel.
 
 Secrets and vars:
 

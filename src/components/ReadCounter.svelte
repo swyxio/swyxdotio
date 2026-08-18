@@ -10,6 +10,7 @@
 		readCountsAreHidden,
 		shouldSampleRead
 	} from '$lib/read-counter';
+	import { hasReadFunnelPrivacyOptOut } from '$lib/read-funnel';
 
 	/** @type {string} */
 	export let pageKey;
@@ -56,6 +57,18 @@
 			// Cached display values are optional.
 		}
 		return true;
+	}
+
+	/** @param {'eligible' | 'visible_8s' | 'depth_25' | 'sample_selected'} stage */
+	async function recordFunnelStage(stage) {
+		if (!requireDepth || hasReadFunnelPrivacyOptOut(navigator)) return;
+		await fetch('/api/read-funnel', {
+			method: 'POST',
+			credentials: 'same-origin',
+			keepalive: true,
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify({ stage })
+		});
 	}
 
 	function getAnalyticsContext() {
@@ -161,10 +174,17 @@
 		let visibleMs = 0;
 		let depthReached = !requireDepth;
 		let recording = false;
+		let visibleRecorded = false;
+		let depthRecorded = false;
+		void recordFunnelStage('eligible').catch(() => {});
 
 		function updateDepth() {
 			const scrollable = document.documentElement.scrollHeight - window.innerHeight;
 			depthReached = scrollable <= 600 || window.scrollY / scrollable >= READ_SCROLL_FRACTION;
+			if (depthReached && !depthRecorded) {
+				depthRecorded = true;
+				void recordFunnelStage('depth_25').catch(() => {});
+			}
 		}
 
 		async function recordIfEngaged() {
@@ -176,6 +196,7 @@
 				// Sampling does not depend on storage being available.
 			}
 			if (shouldSampleRead(Math.random())) {
+				void recordFunnelStage('sample_selected').catch(() => {});
 				try {
 					await requestCount('POST', controller.signal);
 				} catch {
@@ -191,7 +212,13 @@
 		}
 
 		const timer = window.setInterval(() => {
-			if (document.visibilityState === 'visible') visibleMs += 1000;
+			if (document.visibilityState === 'visible') {
+				visibleMs += 1000;
+				if (visibleMs >= READ_VISIBLE_MS && !visibleRecorded) {
+					visibleRecorded = true;
+					void recordFunnelStage('visible_8s').catch(() => {});
+				}
+			}
 			void recordIfEngaged();
 		}, 1000);
 

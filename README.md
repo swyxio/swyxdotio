@@ -36,11 +36,16 @@ If you want to make a site based on this, see https://github.com/swyxio/swyxkit 
 - **Approximate read counts:** public pages use a 0.5% engaged-read sample backed by D1. Each
   accepted sample adds the server-owned weight of 200, and a best-effort copy is sent to GA4 via
   Measurement Protocol. Selected older articles also have a static, explicitly approximate
-  historical estimate that is added only when returning the public count.
+  historical estimate that is added only when returning the public count. A separate pathless,
+  aggregate-only funnel distinguishes eligible article attempts, visible dwell, depth, sampling,
+  and accepted D1 writes without storing article keys or reader identifiers.
 - **Ephemeral live readers:** public pages optionally join a page-scoped, hibernating Durable
   Object room. Readers exchange only short-lived country, position, mode, reaction, and fixed share
   celebration frames. There is no identity, history, free-form chat, or per-reader presence
   database; D1 stores only aggregate hourly abuse and capacity counters.
+- **Runtime-fault attribution:** a dedicated Tail Worker ignores lifecycle churn and stores only
+  hourly coarse route, outcome, and duration enums for failed main-Worker invocations. It never
+  retains URLs, headers, trace payloads, exceptions, or identity data.
 
 ## Environment variables (Cloudflare Workers)
 

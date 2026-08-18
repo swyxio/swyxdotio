@@ -1,0 +1,17 @@
+name = "swyxdotio-fault-attribution"
+account_id = "2d017c943ff16e4c52783635ef05e535"
+main = "workers/fault-attribution/index.js"
+compatibility_date = "2026-08-18"
+workers_dev = false
+
+[vars]
+PRODUCER_SCRIPT_NAME = "swyxdotio"
+
+[observability.logs]
+enabled = true
+
+[[d1_databases]]
+binding = "READ_COUNTERS"
+database_name = "swyxdotio-read-counters"
+database_id = "9990fd0c-2211-4bf4-b263-ddbb8aaed34e"
+migrations_dir = "migrations/read-counters"

@@ -51,6 +51,7 @@ export function monitorConfig(env) {
  *  calibrationSampleCount: number;
  *  readBatchOk: boolean;
  *  presenceHttpOk: boolean;
+ *  presenceSocket: { openOk: boolean; welcomeOk: boolean; closeOk: boolean; failureStage: string | null; closeCode: number | null; durationMs: number; };
  *  calibrationStatus: string | null;
  *  workerRequests: number | null;
  *  workerExceededResources: number | null;
@@ -70,6 +71,15 @@ export function analyzeMonitor(input) {
 
 	if (!input.readBatchOk) alerts.push('Public read-count smoke check failed');
 	if (!input.presenceHttpOk) alerts.push('Presence HTTP gating smoke check failed');
+	if (
+		!input.presenceSocket.openOk ||
+		!input.presenceSocket.welcomeOk ||
+		!input.presenceSocket.closeOk
+	) {
+		alerts.push(
+			`Presence WebSocket lifecycle smoke check failed: ${input.presenceSocket.failureStage ?? 'unknown'}`
+		);
+	}
 
 	if (
 		input.workerRequests !== null &&
@@ -115,6 +125,7 @@ export function analyzeMonitor(input) {
  *  calibration: { captured_at: number | null; d1_sample_total: number | null; status: string | null; };
  *  calibrationSampleCount: number;
  *  smoke: { readBatchOk: boolean; presenceHttpOk: boolean; publicReads: Record<string, number>; };
+ *  presenceSocket: { openOk: boolean; welcomeOk: boolean; closeOk: boolean; failureStage: string | null; closeCode: number | null; durationMs: number; };
  *  worker: { requests: number | null; errors: number | null; exceededResources: number | null; clientDisconnected: number | null; };
  *  presence: { roomFull: number; malformed: number; rateLimited: number; };
  *  analysis: ReturnType<typeof analyzeMonitor>;
@@ -130,6 +141,9 @@ export function renderMonitorReport(snapshot) {
 		snapshot.analysis.alerts.length > 0
 			? snapshot.analysis.alerts.map((line) => `- ${line}`).join('\n')
 			: '- none';
+	const presenceSocket = snapshot.presenceSocket.closeOk
+		? `open ok, welcome ok, close clean (${snapshot.presenceSocket.durationMs}ms)`
+		: `failed at ${snapshot.presenceSocket.failureStage ?? 'unknown'} (${snapshot.presenceSocket.durationMs}ms)`;
 
 	return `# Read and presence monitor snapshot
 
@@ -141,6 +155,7 @@ export function renderMonitorReport(snapshot) {
 - Latest calibration row: ${snapshot.calibration.status ?? 'none'}${snapshot.calibration.captured_at ? ` at ${new Date(snapshot.calibration.captured_at * 1000).toISOString()}` : ''}
 - Public read smoke: ${snapshot.smoke.readBatchOk ? 'ok' : 'failed'}
 - Presence HTTP smoke: ${snapshot.smoke.presenceHttpOk ? 'ok' : 'failed'}
+- Presence WebSocket smoke: ${presenceSocket}
 - Main Worker window: ${workerWindow}
 - Presence anomalies: room-full ${snapshot.presence.roomFull}, malformed ${snapshot.presence.malformed}, rate-limited ${snapshot.presence.rateLimited}
 - Public reads checked: ${Object.entries(snapshot.smoke.publicReads)

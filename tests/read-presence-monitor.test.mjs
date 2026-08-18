@@ -12,8 +12,50 @@ import {
 import {
 	postMonitorAlert,
 	readPresenceCounts,
+	runPresenceWebSocketCheck,
 	runSmokeChecks
 } from '../workers/read-presence-monitor/index.js';
+
+const healthyPresenceSocket = Object.freeze({
+	openOk: true,
+	welcomeOk: true,
+	closeOk: true,
+	failureStage: null,
+	closeCode: 1000,
+	durationMs: 12
+});
+
+class FakeWebSocket extends EventTarget {
+	constructor({
+		welcome = '[1,"w","private-peer",[]]',
+		close = { code: 1000, wasClean: true }
+	} = {}) {
+		super();
+		this.welcome = welcome;
+		this.closeOutcome = close;
+	}
+
+	accept() {
+		if (this.welcome === null) return;
+		queueMicrotask(() => {
+			const event = new Event('message');
+			Object.defineProperty(event, 'data', { value: this.welcome });
+			this.dispatchEvent(event);
+		});
+	}
+
+	close() {
+		if (this.closeOutcome === null) return;
+		queueMicrotask(() => {
+			const event = new Event('close');
+			Object.defineProperties(event, {
+				code: { value: this.closeOutcome.code },
+				wasClean: { value: this.closeOutcome.wasClean }
+			});
+			this.dispatchEvent(event);
+		});
+	}
+}
 
 test('monitor smoke URL preserves every required public read key', () => {
 	const { readsUrl, presenceUrl } = monitorSmokeUrls('https://swyx.io');
@@ -81,6 +123,84 @@ test('monitor smoke check validates both public read keys and presence gating', 
 	});
 });
 
+test('presence WebSocket smoke validates open, welcome, and a clean close without exposing frames', async () => {
+	const socket = new FakeWebSocket();
+	const result = await runPresenceWebSocketCheck(
+		'https://swyx.io',
+		async (_input, init) => {
+			assert.equal(init?.headers.origin, 'https://swyx.io');
+			assert.equal(init?.headers['sec-fetch-site'], 'same-origin');
+			assert.equal(init?.headers.upgrade, 'websocket');
+			return { status: 101, webSocket: socket };
+		},
+		{ upgrade: 20, welcome: 20, close: 20 }
+	);
+	assert.deepEqual({ ...result, durationMs: 0 }, { ...healthyPresenceSocket, durationMs: 0 });
+	assert.doesNotMatch(JSON.stringify(result), /private-peer/);
+});
+
+test('presence WebSocket smoke classifies invalid welcome, welcome timeout, and close failures', async () => {
+	const scenarios = [
+		{
+			socket: new FakeWebSocket({ welcome: '[1,"unexpected","private-peer",[]]' }),
+			failureStage: 'welcome_invalid',
+			openOk: true,
+			welcomeOk: false
+		},
+		{
+			socket: new FakeWebSocket({ welcome: null }),
+			failureStage: 'welcome_timeout',
+			openOk: true,
+			welcomeOk: false
+		},
+		{
+			socket: new FakeWebSocket({ close: null }),
+			failureStage: 'close_timeout',
+			openOk: true,
+			welcomeOk: true
+		},
+		{
+			socket: new FakeWebSocket({ close: { code: 1006, wasClean: false } }),
+			failureStage: 'close_abnormal',
+			openOk: true,
+			welcomeOk: true
+		}
+	];
+
+	for (const scenario of scenarios) {
+		const result = await runPresenceWebSocketCheck(
+			'https://swyx.io',
+			async () => ({ status: 101, webSocket: scenario.socket }),
+			{ upgrade: 10, welcome: 10, close: 10 }
+		);
+		assert.equal(result.failureStage, scenario.failureStage);
+		assert.equal(result.openOk, scenario.openOk);
+		assert.equal(result.welcomeOk, scenario.welcomeOk);
+		assert.equal(result.closeOk, false);
+		assert.doesNotMatch(JSON.stringify(result), /private-peer/);
+	}
+});
+
+test('presence WebSocket smoke classifies upgrade and transport failures', async () => {
+	const upgrade = await runPresenceWebSocketCheck(
+		'https://swyx.io',
+		async () => ({ status: 403, webSocket: null }),
+		{ upgrade: 10 }
+	);
+	assert.equal(upgrade.failureStage, 'upgrade');
+	assert.equal(upgrade.openOk, false);
+
+	const transport = await runPresenceWebSocketCheck(
+		'https://swyx.io',
+		async () => {
+			throw new Error('private transport detail');
+		},
+		{ upgrade: 10 }
+	);
+	assert.equal(transport.failureStage, 'transport_error');
+	assert.doesNotMatch(JSON.stringify(transport), /private transport detail/);
+});
+
 test('calibration activity counts samples since the latest captured total', () => {
 	assert.equal(calibrationWindowSampleCount(18, 1), 17);
 	assert.equal(calibrationWindowSampleCount(18, null), 18);
@@ -113,6 +233,7 @@ test('monitor flags insufficient samples and elevated exceededResources', () => 
 		calibrationSampleCount: 7,
 		readBatchOk: true,
 		presenceHttpOk: true,
+		presenceSocket: healthyPresenceSocket,
 		calibrationStatus: 'baseline',
 		workerRequests: 500,
 		workerExceededResources: 6,
@@ -131,6 +252,14 @@ test('monitor flags presence anomalies and smoke failures', () => {
 		calibrationSampleCount: 30,
 		readBatchOk: false,
 		presenceHttpOk: false,
+		presenceSocket: {
+			openOk: true,
+			welcomeOk: true,
+			closeOk: false,
+			failureStage: 'close_timeout',
+			closeCode: null,
+			durationMs: 3000
+		},
 		calibrationStatus: 'delivery_anomaly',
 		workerRequests: null,
 		workerExceededResources: null,
@@ -139,7 +268,8 @@ test('monitor flags presence anomalies and smoke failures', () => {
 		config
 	});
 	assert.equal(analysis.status, 'alert');
-	assert.equal(analysis.alerts.length, 6);
+	assert.equal(analysis.alerts.length, 7);
+	assert.match(analysis.alerts.join('\n'), /close_timeout/);
 });
 
 test('rendered monitor report includes public read checks and alerts', () => {
@@ -148,6 +278,7 @@ test('rendered monitor report includes public read checks and alerts', () => {
 		calibrationSampleCount: 7,
 		readBatchOk: true,
 		presenceHttpOk: true,
+		presenceSocket: healthyPresenceSocket,
 		calibrationStatus: 'baseline',
 		workerRequests: null,
 		workerExceededResources: null,
@@ -170,11 +301,13 @@ test('rendered monitor report includes public read checks and alerts', () => {
 			presenceHttpOk: true,
 			publicReads: { home: 1, 'learn-in-public': 10000201 }
 		},
+		presenceSocket: healthyPresenceSocket,
 		worker: { requests: null, errors: null, exceededResources: null, clientDisconnected: null },
 		presence: { roomFull: 0, malformed: 0, rateLimited: 0 },
 		analysis
 	});
 	assert.match(report, /home=1, learn-in-public=10000201/);
 	assert.match(report, /Current calibration window: 7\/20 samples/);
+	assert.match(report, /Presence WebSocket smoke: open ok, welcome ok, close clean/);
 	assert.match(report, /Calibration remains statistically inactive/);
 });

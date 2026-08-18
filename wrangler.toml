@@ -52,6 +52,17 @@ namespace_id = "41002"
   limit = 1
   period = 60
 
+[[ratelimits]]
+name = "READ_FUNNEL_RATE_LIMITER"
+namespace_id = "41003"
+
+  [ratelimits.simple]
+  limit = 8
+  period = 60
+
+[[tail_consumers]]
+service = "swyxdotio-fault-attribution"
+
 [[durable_objects.bindings]]
 name = "PRESENCE_ROOMS"
 class_name = "PresenceRoom"
