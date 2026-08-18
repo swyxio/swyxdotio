@@ -16,6 +16,7 @@ const TRY_AGAIN_LATER = 1013;
 const REACTION_INTERVAL_MS = 2_000;
 const RATE_LIMIT_CLOSE_THRESHOLD = 20;
 const PERSISTED_PRESENCE_KINDS = new Set(['roomFull', 'malformed', 'rateLimited']);
+const UNSENDABLE_CLOSE_CODES = new Set([1004, 1005, 1006]);
 
 function socketAttachment(socket) {
 	try {
@@ -40,6 +41,14 @@ function close(socket, code, reason) {
 	} catch {
 		// The peer may already have gone away.
 	}
+}
+
+function isReplyableCloseCode(code) {
+	return (
+		Number.isInteger(code) &&
+		((code >= 1000 && code <= 1014 && !UNSENDABLE_CLOSE_CODES.has(code)) ||
+			(code >= 3000 && code <= 4999))
+	);
 }
 
 function peerRow(peer) {
@@ -191,7 +200,11 @@ export class PresenceRoom {
 		}
 	}
 
-	webSocketClose(socket) {
+	webSocketClose(socket, code) {
+		// Explicitly reciprocate valid peer Close frames. The runtime compatibility
+		// flag should do this automatically, but older hibernated objects have been
+		// observed leaving clients at 1006 without this reply.
+		if (isReplyableCloseCode(code)) close(socket, code, '');
 		this.remove(socket);
 	}
 

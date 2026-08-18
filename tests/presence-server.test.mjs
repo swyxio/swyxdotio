@@ -6,6 +6,7 @@ import {
 	normalizeCountryCode,
 	resolvePresenceRoom
 } from '../src/lib/presence-server.js';
+import { PresenceRoom } from '../workers/presence/index.js';
 
 const manifest = {
 	generatedAt: new Date(),
@@ -57,4 +58,22 @@ test('presence ingress requires a same-origin browser WebSocket upgrade', () => 
 		),
 		false
 	);
+});
+
+test('presence room reciprocates valid close frames without echoing the peer reason', () => {
+	const replies = [];
+	const socket = {
+		close(code, reason) {
+			replies.push([code, reason]);
+		},
+		deserializeAttachment() {
+			return { id: 'ephemeral-peer' };
+		}
+	};
+	const room = new PresenceRoom({ getWebSockets: () => [] }, {});
+
+	room.webSocketClose(socket, 1000, 'private peer reason', true);
+	room.webSocketClose(socket, 1006, '', false);
+
+	assert.deepEqual(replies, [[1000, '']]);
 });
