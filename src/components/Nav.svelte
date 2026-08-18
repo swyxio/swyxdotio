@@ -7,6 +7,7 @@
 		{ href: '/', label: 'home' },
 		{ href: '/ideas', label: 'ideas' },
 		{ href: '/podcasts', label: 'podcasts' },
+		{ href: 'https://learninpublic.org/', label: 'free book' },
 		{ href: '/about', label: 'about' },
 		{ href: '/subscribe', label: 'subscribe' }
 	];

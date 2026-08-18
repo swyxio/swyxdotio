@@ -1,9 +1,9 @@
 <!-- Converted from FeaturedWriting.svx (mdsvex removed in favor of marked) -->
 <article class="prose max-w-none prose-ul:list-disc dark:prose-invert">
 	<p>
-		I do a bunch of <a href="/ideas/?show=Essays">personal and work-related writing</a>, and
-		recently published <a href="https://learninpublic.org/">The Coding Career Handbook</a> with the best
-		of my nontechnical writing.
+		I do a bunch of <a href="/ideas/?show=Essays">personal and work-related writing</a>. My book,
+		<a href="https://learninpublic.org/">The Coding Career Handbook</a>, is now free and
+		<a href="https://forge.smol.ai/swyx/codingcareer">open source</a>.
 	</p>
 	<ul class="feature-list">
 		<li>

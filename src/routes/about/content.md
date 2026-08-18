@@ -4,7 +4,7 @@
 
 Hey, I'm swyx! I help foster the Rise of the AI Engineer. I am currently working on <a href="http://latent.space/">Latent Space</a>, <a href="https://ai.engineer">AI Engineer</a>, and <a href="/cognition">Cognition</a> in San Francisco.
 
-I am also a frequent writer and speaker best known for [the Rise of the AI Engineer](https://www.latent.space/p/ai-engineer) on [Latent Space](https://www.latent.space/), the [Self Provisioning Runtime](https://swyx.io/self-provisioning-runtime) and [Third Age of JS](https://swyx.io/js-third-age), and the [End of Localhost](https://dx.tips/the-end-of-localhost) on DX.Tips, and finally on the nontechnical side, the [Learn in Public](https://swyx.io/LIP) movement and [The Coding Career Handbook](https://learninpublic.org).
+I am also a frequent writer and speaker best known for [the Rise of the AI Engineer](https://www.latent.space/p/ai-engineer) on [Latent Space](https://www.latent.space/), the [Self Provisioning Runtime](https://swyx.io/self-provisioning-runtime) and [Third Age of JS](https://swyx.io/js-third-age), and the [End of Localhost](https://dx.tips/the-end-of-localhost) on DX.Tips, and finally on the nontechnical side, the [Learn in Public](https://swyx.io/LIP) movement and the now free and open-source [Coding Career Handbook](https://learninpublic.org).
 
 P.S. "swyx" is the initials of my English and Chinese names and you can use it interchangeably with "Shawn". It is pronounced "swicks".
 

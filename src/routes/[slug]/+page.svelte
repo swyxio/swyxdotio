@@ -12,6 +12,7 @@
 	import utterances, { injectScript } from './loadUtterances';
 	import WebMentions from '../../components/WebMentions.svelte';
 	import ReadCounter from '../../components/ReadCounter.svelte';
+	import BookLaunchCallout from '../../components/BookLaunchCallout.svelte';
 
 	/** @type {import('./$types').PageData} */
 	export let data;
@@ -23,8 +24,15 @@
 	let commentsEl;
 	$: issueNumber = json?.ghMetadata?.issueUrl?.split('/')?.pop();
 
+	$: isCodingCareerLaunch = data.slug === 'launching-coding-career';
+	$: socialArticle = isCodingCareerLaunch && json.ghMetadata
+		? {
+				...json,
+				ghMetadata: { ...json.ghMetadata, updated_at: new Date('2026-08-18T00:00:00.000Z') }
+			}
+		: json;
 	$: canonical = json.canonical ? json.canonical : SITE_URL + $page.url.pathname;
-	$: social = getArticleSocialMeta(json, canonical);
+	$: social = getArticleSocialMeta(socialArticle, canonical);
 </script>
 
 <SocialMeta {...social} />
@@ -53,17 +61,26 @@
 				<ReadCounter pageKey={data.slug} requireDepth />
 			{/key}
 			<span aria-hidden="true">·</span>
-			<a
-				href={json.ghMetadata?.issueUrl ?? '#'}
-				rel="external noreferrer"
-				class="no-underline"
-				target="_blank"
-			>
-				{new Date(json.date).toISOString().slice(0, 10)}
-			</a>
+			{#if isCodingCareerLaunch}
+				<a href="https://learninpublic.org/" rel="external" class="no-underline">
+					Open Sourced August 18, 2026
+				</a>
+			{:else}
+				<a
+					href={json.ghMetadata?.issueUrl ?? '#'}
+					rel="external noreferrer"
+					class="no-underline"
+					target="_blank"
+				>
+					{new Date(json.date).toISOString().slice(0, 10)}
+				</a>
+			{/if}
 		</span>
 	</div>
 	<hr class="plain-rule mb-8 mt-2" />
+	{#if isCodingCareerLaunch}
+		<BookLaunchCallout />
+	{/if}
 
 	{#if json.disclosure}
 		<p class="mt-4 text-sm text-gray-600 dark:text-gray-400">

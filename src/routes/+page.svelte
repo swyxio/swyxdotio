@@ -2,6 +2,7 @@
 	import Newsletter from '../components/Newsletter.svelte';
 	import FeaturedWriting from '../components/FeaturedWriting.svelte';
 	import FeaturedSpeaking from '../components/FeaturedSpeaking.svelte';
+	import BookLaunchCallout from '../components/BookLaunchCallout.svelte';
 	import SocialMeta from '../components/SocialMeta.svelte';
 	import { SITE_URL } from '$lib/siteConfig';
 	import { getPageSocialMeta } from '$lib/social-meta';
@@ -57,6 +58,7 @@
 			Recent experiment: <a href="https://overgrid.swyx.io">play OverGrid in your browser</a>.
 		</p>
 	</section>
+	<BookLaunchCallout />
 
 	<section class="home-section site-card">
 		<div class="section-header">
