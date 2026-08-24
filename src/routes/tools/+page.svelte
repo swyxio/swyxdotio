@@ -61,6 +61,12 @@
 		<p class="plain-muted">Small private utilities for maintaining swyx.io.</p>
 		<ul class="tool-list">
 			<li>
+				<a href="/box">
+					<strong>Big text box</strong>
+					<span>A distraction-free, oversized text box for quick notes.</span>
+				</a>
+			</li>
+			<li>
 				<a href="/tools/podcast">
 					<strong>Podcast studio</strong>
 					<span>Upload MP3s and prepend episodes to an R2-backed RSS feed.</span>

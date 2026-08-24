@@ -13,6 +13,7 @@
 	$: presencePageKey =
 		$page.status === 200 && typeof $page.data?.slug === 'string' ? $page.data.slug : publicPageKey;
 	$: presenceAdmissionRate = Number(env.PUBLIC_PRESENCE_ADMISSION_RATE ?? 1);
+	$: immersiveTool = $page.url.pathname === '/box';
 </script>
 
 <svelte:head>
@@ -26,32 +27,36 @@
 	<link rel="pingback" href="https://webmention.io/www.swyx.io/xmlrpc" />
 </svelte:head>
 
-<div class="site-shell site-nav-shell">
-	<Nav />
-</div>
+{#if !immersiveTool}
+	<div class="site-shell site-nav-shell">
+		<Nav />
+	</div>
+{/if}
 <main id="skip" class="site-main">
 	<slot />
 </main>
 
-<footer class="site-shell site-panel mb-8 mt-8 p-4">
-	<p class="plain-muted text-sm">
-		<a href="/">Home</a> · <a href="/about">About</a> · <a href="/podcasts">Podcasts</a> ·
-		<a href="/subscribe">Newsletter</a> ·
-		<a href="/rss.xml" rel="external" data-sveltekit-reload>RSS</a> ·
-		<a href="/portfolio">Portfolio</a> ·
-		<a href={'https://twitter.com/intent/follow?screen_name=' + MY_TWITTER_HANDLE}>Twitter</a> ·
-		<a href={REPO_URL}>GitHub</a> · <a href={MY_YOUTUBE}>YouTube</a>
-	</p>
-	<p class="plain-muted mt-4 text-sm">
-		Based on the <a href="https://swyxkit.netlify.app/">swyxkit</a> template.
-		{#if publicPageKey}
-			·
-			{#key publicPageKey}
-				<ReadCounter pageKey={publicPageKey} />
-			{/key}
-		{/if}
-	</p>
-</footer>
+{#if !immersiveTool}
+	<footer class="site-shell site-panel mb-8 mt-8 p-4">
+		<p class="plain-muted text-sm">
+			<a href="/">Home</a> · <a href="/about">About</a> · <a href="/podcasts">Podcasts</a> ·
+			<a href="/subscribe">Newsletter</a> ·
+			<a href="/rss.xml" rel="external" data-sveltekit-reload>RSS</a> ·
+			<a href="/portfolio">Portfolio</a> ·
+			<a href={'https://twitter.com/intent/follow?screen_name=' + MY_TWITTER_HANDLE}>Twitter</a> ·
+			<a href={REPO_URL}>GitHub</a> · <a href={MY_YOUTUBE}>YouTube</a>
+		</p>
+		<p class="plain-muted mt-4 text-sm">
+			Based on the <a href="https://swyxkit.netlify.app/">swyxkit</a> template.
+			{#if publicPageKey}
+				·
+				{#key publicPageKey}
+					<ReadCounter pageKey={publicPageKey} />
+				{/key}
+			{/if}
+		</p>
+	</footer>
+{/if}
 
 {#if presencePageKey}
 	{#key presencePageKey}
