@@ -125,8 +125,10 @@
 	/** @type {Mention[]} */
 	let mentions = [];
 	let fetchState = 'fetching';
+	/** @type {HTMLDivElement | undefined} */
+	let mentionsElement;
 	import { onMount } from 'svelte';
-	onMount(() => {
+	function loadMentions() {
 		const fetches = _targets.map((target) =>
 			fetch(`https://webmention.io/api/count.json?target=${target}/`).then(
 				(res) => /** @type {Promise<MentionCountResponse>} */ (res.json())
@@ -151,6 +153,22 @@
 			fetchState = 'done';
 			return fetchMore();
 		});
+	}
+	onMount(() => {
+		if (!mentionsElement || typeof IntersectionObserver === 'undefined') {
+			loadMentions();
+			return;
+		}
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				if (!entry?.isIntersecting) return;
+				observer.disconnect();
+				loadMentions();
+			},
+			{ rootMargin: '400px 0px' }
+		);
+		observer.observe(mentionsElement);
+		return () => observer.disconnect();
 	});
 	/** @param {Mention} link */
 	function filterOutLinks(link) {
@@ -192,7 +210,7 @@
 	}
 </script>
 
-<div id="WebMentions" class="prose dark:prose-invert">
+<div id="WebMentions" class="prose dark:prose-invert" bind:this={mentionsElement}>
 	<div class="myflexresponsive justify-between">
 		<div>
 			<span class="text-2xl font-bold"> Webmentions </span>
@@ -266,6 +284,8 @@
 									<img
 										width="40"
 										height="40"
+										loading="lazy"
+										decoding="async"
 										alt="avatar of {link.data.author && link.data.author.name}"
 										src={link.data.author && link.data.author.photo}
 									/>

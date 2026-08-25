@@ -78,15 +78,6 @@ export async function handle({ event, resolve }) {
 		const generation =
 			(await readContentCacheGeneration(event.platform?.env?.CONTENT_MANIFEST)) ?? 'initial';
 		cacheUrl.searchParams.set('__swyxCache', `${version}:${generation}`);
-		// Clear entries written before cache keys were versioned. This is local
-		// to the serving colo and can be removed after the transition TTL passes.
-		const legacyCacheUrl = new URL(event.request.url);
-		legacyCacheUrl.search = '';
-		try {
-			await cache.delete(new Request(legacyCacheUrl.toString(), event.request));
-		} catch {
-			/* ignore legacy cache cleanup failures */
-		}
 	}
 	const cacheRequest = new Request(cacheUrl.toString(), event.request);
 

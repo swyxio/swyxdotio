@@ -18,6 +18,9 @@
 			'https://open.spotify.com/embed/show/2p7zZVwVF6Yk0Zsb4QmT7t?utm_source=generator'
 	};
 
+	let showApplePlayer = false;
+	let showSpotifyPlayer = false;
+
 	$: episodeCount = data.shows.reduce((total, show) => total + show.episodes.length, 0);
 </script>
 
@@ -53,20 +56,42 @@
 			<a href={latentSpace.spotifyUrl}>Spotify</a>
 		</p>
 		<div class="platform-embeds">
-			<iframe
-				title="Latent Space on Apple Podcasts"
-				src={latentSpace.appleEmbedUrl}
-				height="175"
-				loading="lazy"
-				allow="autoplay *; encrypted-media *; fullscreen *"
-			></iframe>
-			<iframe
-				title="Latent Space on Spotify"
-				src={latentSpace.spotifyEmbedUrl}
-				height="352"
-				loading="lazy"
-				allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-			></iframe>
+			{#if showApplePlayer}
+				<iframe
+					title="Latent Space on Apple Podcasts"
+					src={latentSpace.appleEmbedUrl}
+					height="175"
+					allow="autoplay *; encrypted-media *; fullscreen *"
+				></iframe>
+			{:else}
+				<button
+					class="platform-embed-preview"
+					type="button"
+					style="min-height: 175px"
+					on:click={() => (showApplePlayer = true)}
+				>
+					<span aria-hidden="true">▶</span>
+					<span>Load Apple Podcasts player</span>
+				</button>
+			{/if}
+			{#if showSpotifyPlayer}
+				<iframe
+					title="Latent Space on Spotify"
+					src={latentSpace.spotifyEmbedUrl}
+					height="352"
+					allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+				></iframe>
+			{:else}
+				<button
+					class="platform-embed-preview"
+					type="button"
+					style="min-height: 352px"
+					on:click={() => (showSpotifyPlayer = true)}
+				>
+					<span aria-hidden="true">▶</span>
+					<span>Load Spotify player</span>
+				</button>
+			{/if}
 		</div>
 	</article>
 
@@ -162,6 +187,25 @@
 		border: 0;
 		border-radius: 0.75rem;
 		width: 100%;
+	}
+
+	.platform-embed-preview {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.65rem;
+		width: 100%;
+		border: 1px solid var(--page-border);
+		border-radius: 0.75rem;
+		background: var(--page-surface);
+		color: var(--page-text);
+		font-weight: 600;
+		cursor: pointer;
+	}
+
+	.platform-embed-preview:hover {
+		border-color: var(--page-accent);
+		background: var(--page-accent-soft);
 	}
 
 	.show-jump {
