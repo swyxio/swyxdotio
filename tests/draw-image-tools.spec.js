@@ -67,6 +67,13 @@ test('selected images expose private tools, exact model sizes, and disclosed fal
 
 	await expect(toolbox.getByText('Runs privately on your device')).toBeVisible();
 	await expect(toolbox.getByText('Uploads this image to fal.ai')).toBeVisible();
+	const modelPicker = toolbox.getByRole('combobox', { name: 'AI image editing model' });
+	await expect(modelPicker).toHaveValue('nano-banana-2');
+	await expect(modelPicker.locator('option')).toHaveCount(5);
+	await expect(toolbox.getByText('fal top pick')).toBeVisible();
+	await modelPicker.selectOption('gpt-image-2');
+	await expect(toolbox.getByText('AA #3', { exact: true })).toBeVisible();
+	await expect(toolbox.getByText('~$0.219/edit · cloud processing')).toBeVisible();
 	await expect(toolbox.getByText('First use downloads ~13.8 MB.')).toBeVisible();
 	await expect(toolbox.getByRole('button', { name: 'Magic Select', exact: true })).toBeVisible();
 	await expect(toolbox.getByRole('button', { name: 'Magic Eraser', exact: true })).toBeVisible();
@@ -216,7 +223,7 @@ test('local image editing failures remain visible without mutating the canvas', 
 test('prompt editing sends only image and editable prompt through the authenticated proxy', async ({
 	page
 }) => {
-	/** @type {{image:string,prompt:string}|undefined} */
+	/** @type {{image:string,prompt:string,model:string}|undefined} */
 	let captured;
 	await page.route('**/tools/api/draw/edit', async (route) => {
 		captured = route.request().postDataJSON();
@@ -226,11 +233,15 @@ test('prompt editing sends only image and editable prompt through the authentica
 	});
 	const toolbox = await pasteSelectedImage(page);
 	const original = await selectedSceneImage(page);
+	await toolbox
+		.getByRole('combobox', { name: 'AI image editing model' })
+		.selectOption('seedream-5-pro');
 	await toolbox.getByRole('button', { name: 'Product mockup' }).click();
 	await toolbox.getByRole('button', { name: 'Generate AI image edit' }).click();
 	await expect.poll(async () => (await selectedSceneImage(page)).fileId).not.toBe(original.fileId);
 	expect(captured?.prompt).toMatch(/studio product mockup/i);
 	expect(captured?.image).toMatch(/^data:image\//);
-	expect(Object.keys(captured ?? {}).sort()).toEqual(['image', 'prompt']);
+	expect(captured?.model).toBe('seedream-5-pro');
+	expect(Object.keys(captured ?? {}).sort()).toEqual(['image', 'model', 'prompt']);
 	await expect(toolbox.getByText('AI edit applied')).toBeVisible();
 });

@@ -1,6 +1,11 @@
 <script>
 	import { DRAW_IMAGE_TOOLS, processImageTool } from '$lib/draw-image-tools.js';
 	import { replaceDrawingImage } from '$lib/draw-image-scene.js';
+	import {
+		DEFAULT_DRAW_FAL_MODEL,
+		DRAW_FAL_MODELS,
+		getDrawFalModel
+	} from '$lib/draw-fal-models.js';
 
 	/**
 	 * @typedef {import('@excalidraw/excalidraw/types').ExcalidrawImperativeAPI} DrawingEditor
@@ -60,6 +65,7 @@
 	let blurStrength = $state(14);
 	let focusDepth = $state(0.55);
 	let prompt = $state('');
+	let falModelId = $state(/** @type {string} */ (DEFAULT_DRAW_FAL_MODEL.id));
 	let operationStatus = $state('');
 	let operationProgress = $state(0);
 	let operationError = $state('');
@@ -69,6 +75,7 @@
 	let operationAbort;
 	const selectedTool = $derived(DRAW_IMAGE_TOOLS[action]);
 	const needsTarget = $derived(action === 'magic-select' || action === 'magic-eraser');
+	const selectedFalModel = $derived(getDrawFalModel(falModelId) ?? DEFAULT_DRAW_FAL_MODEL);
 	const downloadSize = $derived(
 		selectedTool?.downloadBytes ? `~${(selectedTool.downloadBytes / 1_000_000).toFixed(1)} MB` : ''
 	);
@@ -209,7 +216,11 @@
 				method: 'POST',
 				credentials: 'same-origin',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ image: selected.file.dataURL, prompt: prompt.trim() }),
+				body: JSON.stringify({
+					image: selected.file.dataURL,
+					prompt: prompt.trim(),
+					model: selectedFalModel.id
+				}),
 				signal: operationAbort.signal
 			});
 			const result = await response.json().catch(() => ({}));
@@ -348,6 +359,23 @@
 			<strong>AI prompt edit</strong>
 			<span>Uploads this image to fal.ai</span>
 		</div>
+		<div class="fal-model-picker">
+			<select
+				aria-label="AI image editing model"
+				bind:value={falModelId}
+				disabled={processing || processingFal}
+			>
+				{#each DRAW_FAL_MODELS as model (model.id)}
+					<option value={model.id}>
+						{model.label} · AA #{model.artificialAnalysisRank} · {model.price}
+					</option>
+				{/each}
+			</select>
+			<div class="fal-model-detail">
+				<span>{selectedFalModel.description}</span>
+				<strong>{selectedFalModel.badge}</strong>
+			</div>
+		</div>
 		<textarea
 			aria-label="AI image editing prompt"
 			placeholder="Describe how you want to edit this image…"
@@ -368,7 +396,7 @@
 			{/each}
 		</div>
 		<div class="fal-action-row">
-			<span>Cloud processing · requires sign-in</span>
+			<span>{selectedFalModel.price}/edit · cloud processing</span>
 			{#if processingFal}
 				<button type="button" class="secondary-action" onclick={() => operationAbort?.abort()}>
 					Cancel
@@ -529,6 +557,36 @@
 		margin-top: 12px;
 		padding-top: 11px;
 		border-top: 1px solid #ececf0;
+	}
+
+	.fal-model-picker {
+		margin-top: 8px;
+	}
+
+	.fal-model-picker select {
+		width: 100%;
+		height: 34px;
+		padding: 0 8px;
+		border: 1px solid #dedee6;
+		border-radius: 7px;
+		background: #fff;
+		color: #27272a;
+		font-size: 10px;
+	}
+
+	.fal-model-detail {
+		display: flex;
+		justify-content: space-between;
+		gap: 8px;
+		margin-top: 5px;
+		color: #71717a;
+		font-size: 9px;
+	}
+
+	.fal-model-detail strong {
+		flex: none;
+		color: #6554c0;
+		font-weight: 600;
 	}
 
 	.fal-edit textarea {

@@ -1,5 +1,6 @@
 import { isPodcastStudioSessionValid, podcastStudioCookieName } from '../podcast-admin-auth.js';
 import { privateJson, requireSameOrigin } from '../podcast-admin-route.js';
+import { DEFAULT_DRAW_FAL_MODEL, DRAW_FAL_MODELS, getDrawFalModel } from '../draw-fal-models.js';
 
 const MAX_REQUEST_BYTES = 1_900_000;
 const MAX_PROMPT_LENGTH = 1_000;
@@ -11,7 +12,7 @@ const encoder = new TextEncoder();
  * paid model or turn this endpoint into an authenticated forwarding proxy.
  */
 export const drawingFalTasks = Object.freeze({
-	'image-edit': Object.freeze({ model: 'fal-ai/flux-2/edit' })
+	'image-edit': Object.freeze({ model: DEFAULT_DRAW_FAL_MODEL.model, models: DRAW_FAL_MODELS })
 });
 
 /**
@@ -96,7 +97,7 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 		return privateJson({ error: 'The image-editing request is invalid.' }, { status: 400 });
 	}
 
-	const input = /** @type {{ prompt?: unknown, image?: unknown }} */ (body);
+	const input = /** @type {{ prompt?: unknown, image?: unknown, model?: unknown }} */ (body);
 	const prompt = typeof input.prompt === 'string' ? input.prompt.trim() : '';
 	if (!prompt || prompt.length > MAX_PROMPT_LENGTH) {
 		return privateJson(
@@ -115,11 +116,17 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 		);
 	}
 
-	const task = drawingFalTasks['image-edit'];
+	const model = input.model === undefined ? DEFAULT_DRAW_FAL_MODEL : getDrawFalModel(input.model);
+	if (!model) {
+		return privateJson(
+			{ error: 'Choose one of the available image-editing models.' },
+			{ status: 422 }
+		);
+	}
 	/** @type {Response} */
 	let upstream;
 	try {
-		upstream = await fetchProvider(`https://fal.run/${task.model}`, {
+		upstream = await fetchProvider(`https://fal.run/${model.model}`, {
 			method: 'POST',
 			headers: {
 				Authorization: `Key ${falKey}`,
@@ -129,9 +136,8 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 				prompt,
 				image_urls: [input.image],
 				sync_mode: true,
-				output_format: 'png',
 				num_images: 1,
-				enable_safety_checker: true
+				...model.settings
 			}),
 			signal: AbortSignal.timeout(120_000)
 		});
@@ -164,5 +170,5 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 		);
 	}
 
-	return privateJson({ image, model: task.model });
+	return privateJson({ image, model: model.model });
 }
