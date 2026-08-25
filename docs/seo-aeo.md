@@ -64,13 +64,15 @@ before treating the property-wide 0.8% click-through rate as one optimization ta
 
 - `/robots.txt` permits `search=yes` and `ai-input=yes`. It intentionally does not assert a model
   training preference.
-- `/sitemap.xml` lists public canonical pages, including `/box` and `/draw`, using the exact
-  sitemap-protocol XML namespace and without trailing-slash redirect targets.
+- `/sitemap.xml` lists public canonical pages using the exact sitemap-protocol XML namespace and
+  without trailing-slash redirect targets.
 - `/llms.txt` always returns the complete public discovery index as `text/plain`.
 - `/llms.md` always returns the same discovery index as `text/markdown`.
 - `/llms` serves HTML to browsers and plain text or Markdown to clients that negotiate those types.
 - `/{article-slug}.md` serves the original published article Markdown with source attribution.
 - Private posts and externally canonical posts are excluded from AI discovery and Markdown output.
+- Personal `/box` and `/draw` tools are omitted from the sitemap and AI index and prohibit indexing
+  with `noindex, nofollow, noarchive` in both HTML and `X-Robots-Tag`; they remain directly usable.
 - Public discovery files carry `Content-Signal: search=yes, ai-input=yes` and remain edge-cacheable.
 - Legacy URL aliases permanently redirect with HTTP 301, and archive filters use valid singular
   category names.

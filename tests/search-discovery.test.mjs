@@ -30,13 +30,17 @@ test('homepage archive links use valid categories and canonical article paths', 
 	assert.doesNotMatch(writing, /href="\/(?:learn-in-public|create-luck|js-third-age|about)\/"/);
 });
 
-test('public writing and drawing tools are canonical and discoverable', async () => {
-	assert.ok(PUBLIC_PAGE_PATHS.includes('/box'));
-	assert.ok(PUBLIC_PAGE_PATHS.includes('/draw'));
+test('personal writing and drawing tools prohibit indexing and stay out of discovery', async () => {
+	assert.equal(PUBLIC_PAGE_PATHS.includes('/box'), false);
+	assert.equal(PUBLIC_PAGE_PATHS.includes('/draw'), false);
 	for (const tool of ['box', 'draw']) {
 		const source = await readFile(new URL(`src/routes/${tool}/+page.svelte`, root), 'utf8');
-		assert.match(source, new RegExp(`rel="canonical" href="https://swyx\\.io/${tool}"`));
+		assert.match(source, /<meta name="robots" content="noindex, nofollow, noarchive"\s*\/>/);
+		assert.doesNotMatch(source, /rel="canonical"/);
 	}
+
+	const hooks = await readFile(new URL('src/hooks.server.js', root), 'utf8');
+	assert.match(hooks, /'X-Robots-Tag', 'noindex, nofollow, noarchive'/);
 });
 
 test('identity and portfolio pages each expose a visible primary heading', async () => {

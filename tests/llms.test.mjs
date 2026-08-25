@@ -47,6 +47,12 @@ test('AI discovery excludes private, duplicate, and externally canonical content
 	);
 });
 
+test('AI discovery excludes personal writing and drawing tools', () => {
+	const result = buildLlmsIndex([publicPost]);
+
+	assert.doesNotMatch(result, /\[(?:Box|Draw)\]|https:\/\/swyx\.io\/(?:box|draw)(?:\)|\/|\s)/);
+});
+
 test('article Markdown exposes original source, canonical attribution, and publication date', () => {
 	const result = buildArticleMarkdown(publicPost);
 

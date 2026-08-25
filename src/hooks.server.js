@@ -95,6 +95,10 @@ export async function handle({ event, resolve }) {
 
 	const response = await resolve(event);
 
+	if (cacheUrl.pathname === '/box' || cacheUrl.pathname === '/draw') {
+		response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+	}
+
 	// Apply security headers before caching so the cached copy carries them too.
 	for (const [k, v] of Object.entries(SECURITY_HEADERS)) {
 		response.headers.set(k, v);
