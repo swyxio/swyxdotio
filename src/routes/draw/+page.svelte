@@ -72,6 +72,7 @@
 	/** @type {{ pageId: string, scene: DrawingScene } | undefined} */
 	let pendingSave;
 	let isSwitchingPage = false;
+	let isLibraryOpen = $state(false);
 	let selectedImageId = $state('');
 	let selectedImageDataUrl = $state('');
 	let backgroundMode = $state('portrait-fast');
@@ -761,6 +762,8 @@
 	 * @param {import('@excalidraw/excalidraw/types').BinaryFiles} files
 	 */
 	function saveScene(elements, appState, files) {
+		const nextLibraryOpen = appState.openSidebar?.name === 'default';
+		if (isLibraryOpen !== nextLibraryOpen) isLibraryOpen = nextLibraryOpen;
 		if (!activePageId || isSwitchingPage) return;
 		const selectedIds = Object.entries(appState.selectedElementIds)
 			.filter(([, selected]) => selected)
@@ -1173,7 +1176,7 @@
 	</div>
 {/if}
 
-{#if editor && presets.length > 0}
+{#if editor && presets.length > 0 && !isLibraryOpen}
 	<button
 		type="button"
 		class="compact-library-toggle"

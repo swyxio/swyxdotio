@@ -65,9 +65,12 @@ for (const viewport of [
 		expect(pageBounds.x + pageBounds.width).toBeLessThanOrEqual(templateBounds.x);
 
 		await templates.click();
+		await expect(templates).toHaveCount(0);
 		await expect(page.getByRole('tab', { name: 'Presets', exact: true })).toBeVisible();
 		await page.getByRole('tab', { name: 'Memes', exact: true }).click();
 		await expect(page.getByRole('region', { name: 'Meme templates' })).toBeVisible();
+		await page.getByTestId('sidebar-close').click();
+		await expect(templates).toBeVisible();
 	});
 }
 
