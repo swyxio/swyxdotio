@@ -1,34 +1,84 @@
-import { createShapeId, toRichText } from '@tldraw/tlschema';
-
-/** @typedef {import('tldraw').TLCreateShapePartial} PresetShape */
-/** @typedef {import('tldraw').TLCreateShapePartial<import('tldraw').TLGeoShape>} GeoShape */
-/** @typedef {import('tldraw').TLCreateShapePartial<import('tldraw').TLTextShape>} TextShape */
-/** @typedef {import('tldraw').TLCreateShapePartial<import('tldraw').TLArrowShape>} ArrowShape */
+/** @typedef {'black' | 'grey' | 'blue' | 'light-blue' | 'green' | 'light-green' | 'orange' | 'light-red' | 'yellow' | 'violet'} PresetColor */
+/** @typedef {'s' | 'm' | 'l' | 'xl'} PresetSize */
 
 /**
  * @typedef {{
- *   color?: import('tldraw').TLDefaultColorStyle,
- *   fill?: import('tldraw').TLDefaultFillStyle,
- *   geo?: import('tldraw').TLGeoShapeGeoStyle,
- *   size?: import('tldraw').TLDefaultSizeStyle
+ *   id: string,
+ *   type: 'rectangle' | 'ellipse' | 'text' | 'arrow',
+ *   x: number,
+ *   y: number,
+ *   width?: number,
+ *   height?: number,
+ *   strokeColor: string,
+ *   backgroundColor?: string,
+ *   fillStyle?: 'hachure' | 'solid',
+ *   strokeWidth: number,
+ *   strokeStyle: 'solid' | 'dashed',
+ *   roughness: number,
+ *   text?: string,
+ *   fontFamily?: number,
+ *   fontSize?: number,
+ *   textAlign?: 'left' | 'center',
+ *   label?: { text: string, fontFamily: number, fontSize: number },
+ *   points?: Array<[number, number]>,
+ *   startArrowhead?: null,
+ *   endArrowhead?: 'arrow' | null,
+ *   roundness?: { type: number } | null
+ * }} PresetShape
+ */
+
+/** @type {Record<PresetColor, { stroke: string, background: string }>} */
+const PALETTE = {
+	black: { stroke: '#10243b', background: '#e8ecf0' },
+	grey: { stroke: '#74808d', background: '#eef0f2' },
+	blue: { stroke: '#155f9b', background: '#dbeafa' },
+	'light-blue': { stroke: '#5292c8', background: '#e3f0fb' },
+	green: { stroke: '#346b4e', background: '#ddf0e3' },
+	'light-green': { stroke: '#6e9d77', background: '#e9f3e5' },
+	orange: { stroke: '#e14d2a', background: '#ffeadf' },
+	'light-red': { stroke: '#cf6258', background: '#fce7e3' },
+	yellow: { stroke: '#bd900c', background: '#fff2bb' },
+	violet: { stroke: '#7650a0', background: '#eee4fa' }
+};
+
+/** @type {Record<PresetSize, number>} */
+const FONT_SIZES = { s: 17, m: 23, l: 30, xl: 38 };
+
+/** @type {Record<PresetSize, number>} */
+const STROKE_WIDTHS = { s: 1, m: 2, l: 3, xl: 4 };
+
+const HAND_DRAWN_FONT = 5;
+let shapeSequence = 0;
+
+function createShapeId() {
+	shapeSequence += 1;
+	return `visual-${Date.now().toString(36)}-${shapeSequence.toString(36)}`;
+}
+
+/**
+ * @typedef {{
+ *   color?: PresetColor,
+ *   fill?: 'none' | 'semi' | 'solid',
+ *   geo?: 'rectangle' | 'ellipse',
+ *   size?: PresetSize
  * }} GeoOptions
  */
 
 /**
  * @typedef {{
- *   color?: import('tldraw').TLDefaultColorStyle,
- *   size?: import('tldraw').TLDefaultSizeStyle,
+ *   color?: PresetColor,
+ *   size?: PresetSize,
  *   width?: number,
- *   align?: import('tldraw').TLDefaultTextAlignStyle
+ *   align?: 'start' | 'middle'
  * }} TextOptions
  */
 
 /**
  * @typedef {{
- *   color?: import('tldraw').TLDefaultColorStyle,
- *   size?: import('tldraw').TLDefaultSizeStyle,
+ *   color?: PresetColor,
+ *   size?: PresetSize,
  *   bend?: number,
- *   dash?: import('tldraw').TLDefaultDashStyle,
+ *   dash?: 'solid' | 'dashed',
  *   head?: boolean
  * }} ArrowOptions
  */
@@ -47,7 +97,7 @@ import { createShapeId, toRichText } from '@tldraw/tlschema';
  * @param {number} y
  * @param {string} content
  * @param {TextOptions} [options]
- * @returns {TextShape}
+ * @returns {PresetShape}
  */
 function text(x, y, content, options = {}) {
 	const { color = 'black', size = 'm', width = 420, align = 'start' } = options;
@@ -56,15 +106,15 @@ function text(x, y, content, options = {}) {
 		type: 'text',
 		x,
 		y,
-		props: {
-			color,
-			size,
-			font: 'sans',
-			textAlign: align,
-			w: width,
-			autoSize: false,
-			richText: toRichText(content)
-		}
+		width,
+		text: content,
+		fontFamily: HAND_DRAWN_FONT,
+		fontSize: FONT_SIZES[size],
+		textAlign: align === 'middle' ? 'center' : 'left',
+		strokeColor: PALETTE[color].stroke,
+		strokeWidth: STROKE_WIDTHS[size],
+		strokeStyle: 'solid',
+		roughness: 1
 	};
 }
 
@@ -75,29 +125,31 @@ function text(x, y, content, options = {}) {
  * @param {number} height
  * @param {string} label
  * @param {GeoOptions} [options]
- * @returns {GeoShape}
+ * @returns {PresetShape}
  */
 function card(x, y, width, height, label, options = {}) {
 	const { color = 'blue', fill = 'semi', geo = 'rectangle', size = 'm' } = options;
 	return {
 		id: createShapeId(),
-		type: 'geo',
+		type: geo,
 		x,
 		y,
-		props: {
-			geo,
-			w: width,
-			h: height,
-			color,
-			fill,
-			dash: 'solid',
-			size,
-			font: 'sans',
-			align: 'middle',
-			verticalAlign: 'middle',
-			labelColor: 'black',
-			richText: toRichText(label)
-		}
+		width,
+		height,
+		strokeColor: PALETTE[color].stroke,
+		backgroundColor:
+			fill === 'none'
+				? 'transparent'
+				: fill === 'solid'
+					? PALETTE[color].stroke
+					: PALETTE[color].background,
+		fillStyle: fill === 'solid' ? 'solid' : 'hachure',
+		strokeWidth: STROKE_WIDTHS[size],
+		strokeStyle: 'solid',
+		roughness: 2,
+		...(label
+			? { label: { text: label, fontFamily: HAND_DRAWN_FONT, fontSize: FONT_SIZES[size] } }
+			: {})
 	};
 }
 
@@ -107,26 +159,37 @@ function card(x, y, width, height, label, options = {}) {
  * @param {number} endX
  * @param {number} endY
  * @param {ArrowOptions} [options]
- * @returns {ArrowShape}
+ * @returns {PresetShape}
  */
 function arrow(startX, startY, endX, endY, options = {}) {
 	const { color = 'black', size = 'm', bend = 0, dash = 'solid', head = true } = options;
+	const deltaX = endX - startX;
+	const deltaY = endY - startY;
+	const length = Math.hypot(deltaX, deltaY);
+	/** @type {Array<[number, number]>} */
+	const points = bend
+		? [
+				[0, 0],
+				[deltaX / 2 - (deltaY / length) * bend, deltaY / 2 + (deltaX / length) * bend],
+				[deltaX, deltaY]
+			]
+		: [
+				[0, 0],
+				[deltaX, deltaY]
+			];
 	return {
 		id: createShapeId(),
 		type: 'arrow',
 		x: startX,
 		y: startY,
-		props: {
-			kind: 'arc',
-			color,
-			dash,
-			size,
-			start: { x: 0, y: 0 },
-			end: { x: endX - startX, y: endY - startY },
-			arrowheadStart: 'none',
-			arrowheadEnd: head ? 'arrow' : 'none',
-			bend
-		}
+		strokeColor: PALETTE[color].stroke,
+		strokeWidth: STROKE_WIDTHS[size],
+		strokeStyle: dash,
+		roughness: 2,
+		points,
+		startArrowhead: null,
+		endArrowhead: head ? 'arrow' : null,
+		roundness: bend ? { type: 2 } : null
 	};
 }
 
@@ -167,6 +230,7 @@ function createDecisionMatrix() {
 
 /** @returns {PresetShape[]} */
 function createAxisChart() {
+	/** @type {Array<{ x: number, y: number, label: string, color: PresetColor }>} */
 	const points = [
 		{ x: 215, y: 420, label: 'Option A', color: 'blue' },
 		{ x: 375, y: 315, label: 'Option B', color: 'green' },
@@ -188,7 +252,7 @@ function createAxisChart() {
 		shapes.push(
 			card(point.x, point.y, 34, 34, '', {
 				geo: 'ellipse',
-				color: /** @type {import('tldraw').TLDefaultColorStyle} */ (point.color),
+				color: point.color,
 				fill: 'solid',
 				size: 's'
 			}),
@@ -200,7 +264,7 @@ function createAxisChart() {
 
 /** @returns {PresetShape[]} */
 function createGrowthCurves() {
-	/** @type {Array<{ label: string, color: import('tldraw').TLDefaultColorStyle, points: Array<[number, number]> }>} */
+	/** @type {Array<{ label: string, color: PresetColor, points: Array<[number, number]> }>} */
 	const curves = [
 		{
 			label: 'Baseline',
@@ -293,6 +357,7 @@ function createAdoptionCurve() {
 
 /** @returns {PresetShape[]} */
 function createCareerLadder() {
+	/** @type {Array<{ title: string, subtitle: string, color: PresetColor }>} */
 	const steps = [
 		{ title: '01\nEXPLORE', subtitle: 'Find the problem', color: 'light-blue' },
 		{ title: '02\nPRACTICE', subtitle: 'Build your skills', color: 'blue' },
@@ -311,7 +376,7 @@ function createCareerLadder() {
 		const y = 515 - index * 83;
 		shapes.push(
 			card(x, y, 155, 105, step.title, {
-				color: /** @type {import('tldraw').TLDefaultColorStyle} */ (step.color),
+				color: step.color,
 				fill: 'semi',
 				size: 's'
 			}),
@@ -326,6 +391,7 @@ function createCareerLadder() {
 
 /** @returns {PresetShape[]} */
 function createFunnel() {
+	/** @type {Array<{ label: string, detail: string, width: number, color: PresetColor }>} */
 	const layers = [
 		{
 			label: 'AWARENESS',
@@ -353,7 +419,7 @@ function createFunnel() {
 		const y = 145 + index * 122;
 		shapes.push(
 			card(x, y, layer.width, 103, `${layer.label}\n${layer.detail}`, {
-				color: /** @type {import('tldraw').TLDefaultColorStyle} */ (layer.color),
+				color: layer.color,
 				size: 's'
 			})
 		);
@@ -417,6 +483,7 @@ function createFlywheel() {
 
 /** @returns {PresetShape[]} */
 function createComparisonCards() {
+	/** @type {Array<{ name: string, color: PresetColor }>} */
 	const columns = [
 		{ name: 'OPTION A', color: 'blue' },
 		{ name: 'OPTION B', color: 'green' },
@@ -429,7 +496,7 @@ function createComparisonCards() {
 
 	columns.forEach((column, index) => {
 		const x = 55 + index * 267;
-		const color = /** @type {import('tldraw').TLDefaultColorStyle} */ (column.color);
+		const color = column.color;
 		shapes.push(
 			card(x, 150, 245, 410, '', { color, fill: 'none', size: 's' }),
 			card(x, 150, 245, 84, column.name, { color, fill: 'semi', size: 's' }),

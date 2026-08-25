@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
 
+/** @typedef {{ isDeleted?: boolean, text?: string, roughness?: number }} DrawingElement */
+
 test('drawing canvas is public, fullscreen, and persists drawings in the browser', async ({
 	page
 }) => {
@@ -12,8 +14,8 @@ test('drawing canvas is public, fullscreen, and persists drawings in the browser
 	await expect(page.locator('footer')).toHaveCount(0);
 
 	const editor = page.locator('.draw-canvas');
-	const canvas = editor.locator('.tl-canvas');
-	const drawTool = editor.getByRole('button', { name: /^(draw|pencil)\b/i }).first();
+	const canvas = editor.locator('canvas.excalidraw__canvas.interactive');
+	const drawTool = editor.getByRole('radio', { name: /^draw$/i });
 
 	await expect(editor).toBeVisible();
 	await expect(canvas).toBeVisible();
@@ -24,7 +26,7 @@ test('drawing canvas is public, fullscreen, and persists drawings in the browser
 	expect(bounds?.width).toBeGreaterThanOrEqual((viewport?.width ?? 0) * 0.95);
 	expect(bounds?.height).toBeGreaterThanOrEqual((viewport?.height ?? 0) * 0.95);
 
-	await drawTool.click();
+	await drawTool.check({ force: true });
 
 	const canvasBounds = await canvas.boundingBox();
 	expect(canvasBounds).not.toBeNull();
@@ -37,39 +39,29 @@ test('drawing canvas is public, fullscreen, and persists drawings in the browser
 	await page.mouse.move(startX + 120, startY + 60, { steps: 12 });
 	await page.mouse.up();
 
-	const shapes = editor.locator('.tl-shape');
-	await expect(shapes).toHaveCount(1);
-
 	await expect
 		.poll(() =>
-			page.evaluate(
-				() =>
-					new Promise((resolve, reject) => {
-						const request = indexedDB.open('TLDRAW_DOCUMENT_v2swyx-draw');
-						request.onerror = () => reject(request.error);
-						request.onsuccess = () => {
-							const database = request.result;
-							const records = database
-								.transaction('records', 'readonly')
-								.objectStore('records')
-								.getAll();
-							records.onerror = () => {
-								database.close();
-								reject(records.error);
-							};
-							records.onsuccess = () => {
-								database.close();
-								resolve(records.result.filter((record) => record.typeName === 'shape').length);
-							};
-						};
-					})
-			)
+			page.evaluate(() => {
+				const scene = /** @type {{ elements: DrawingElement[] }} */ (
+					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+				);
+				return scene.elements.filter((element) => !element.isDeleted).length;
+			})
 		)
 		.toBe(1);
 
 	await page.reload();
 	await expect(canvas).toBeVisible();
-	await expect(shapes).toHaveCount(1);
+	await expect
+		.poll(() =>
+			page.evaluate(() => {
+				const scene = /** @type {{ elements: DrawingElement[] }} */ (
+					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+				);
+				return scene.elements.filter((element) => !element.isDeleted).length;
+			})
+		)
+		.toBe(1);
 });
 
 test('visual presets insert labeled editable diagrams without replacing existing work', async ({
@@ -85,43 +77,59 @@ test('visual presets insert labeled editable diagrams without replacing existing
 	await expect(presetOptions).toHaveCount(9);
 
 	await page.getByRole('button', { name: /insert priority quadrants preset/i }).click();
-	await expect(page.getByText('Act now', { exact: true })).toBeVisible();
-	await expect(page.getByText('Plan', { exact: true })).toBeVisible();
-
-	const existingShapes = page.locator('.draw-canvas .tl-shape');
-	const initialShapeCount = await existingShapes.count();
+	await expect
+		.poll(() =>
+			page.evaluate(() => {
+				const scene = /** @type {{ elements: DrawingElement[] }} */ (
+					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+				);
+				return scene.elements.some((element) => element.text?.includes('Act now'));
+			})
+		)
+		.toBe(true);
+	const initialScene = await page.evaluate(
+		() =>
+			/** @type {{ elements: DrawingElement[] }} */ (
+				JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+			)
+	);
+	const initialShapeCount = initialScene.elements.filter((element) => !element.isDeleted).length;
 	expect(initialShapeCount).toBeGreaterThan(4);
+	expect(initialScene.elements.some((element) => element.text?.includes('Plan'))).toBe(true);
+	expect(initialScene.elements.some((element) => element.roughness === 2)).toBe(true);
 
 	await browsePresets.click();
 	await page.getByRole('button', { name: /insert strategy scatterplot preset/i }).click();
-	await expect(page.getByText('Strategic fit', { exact: true }).last()).toBeVisible();
-	await expect(page.getByText('Effort', { exact: true }).last()).toBeVisible();
-
 	await expect
 		.poll(() =>
-			page.evaluate(
-				() =>
-					new Promise((resolve, reject) => {
-						const request = indexedDB.open('TLDRAW_DOCUMENT_v2swyx-draw');
-						request.onerror = () => reject(request.error);
-						request.onsuccess = () => {
-							const database = request.result;
-							const records = database
-								.transaction('records', 'readonly')
-								.objectStore('records')
-								.getAll();
-							records.onerror = () => reject(records.error);
-							records.onsuccess = () => {
-								database.close();
-								resolve(records.result.filter((record) => record.typeName === 'shape').length);
-							};
-						};
-					})
-			)
+			page.evaluate(() => {
+				const scene = /** @type {{ elements: DrawingElement[] }} */ (
+					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+				);
+				return scene.elements.filter((element) => !element.isDeleted).length;
+			})
 		)
 		.toBeGreaterThan(initialShapeCount);
+	const combinedScene = await page.evaluate(
+		() =>
+			/** @type {{ elements: DrawingElement[] }} */ (
+				JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+			)
+	);
+	expect(combinedScene.elements.some((element) => element.text === 'Strategic fit')).toBe(true);
+	expect(combinedScene.elements.some((element) => element.text === 'Effort')).toBe(true);
+	expect(combinedScene.elements.some((element) => element.text?.includes('Act now'))).toBe(true);
 
 	await page.reload();
-	await expect.poll(() => existingShapes.count()).toBeGreaterThan(initialShapeCount);
-	await expect(page.getByText('Strategic fit', { exact: true }).first()).toBeAttached();
+	await expect(page.locator('.draw-canvas canvas.excalidraw__canvas.interactive')).toBeVisible();
+	await expect
+		.poll(() =>
+			page.evaluate(() => {
+				const scene = /** @type {{ elements: DrawingElement[] }} */ (
+					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+				);
+				return scene.elements.some((element) => element.text === 'Strategic fit');
+			})
+		)
+		.toBe(true);
 });

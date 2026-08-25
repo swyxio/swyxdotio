@@ -1,15 +1,10 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { arrowShapeProps, geoShapeProps, textShapeProps } from '@tldraw/tlschema';
-
 import { DRAW_PRESETS } from '../src/lib/draw-presets.js';
 
-const validators = {
-	arrow: arrowShapeProps,
-	geo: geoShapeProps,
-	text: textShapeProps
-};
+const SUPPORTED_ELEMENT_TYPES = new Set(['arrow', 'ellipse', 'rectangle', 'text']);
+const HAND_DRAWN_FONT = 5;
 
 test('drawing presets expose the complete named visual-thinking catalog', () => {
 	assert.deepEqual(
@@ -34,7 +29,7 @@ test('drawing presets expose the complete named visual-thinking catalog', () => 
 	}
 });
 
-test('every preset generates independently editable valid native tldraw shapes', () => {
+test('every preset generates independently editable native Excalidraw element skeletons', () => {
 	for (const preset of DRAW_PRESETS) {
 		const shapes = preset.createShapes();
 		const identifiers = new Set();
@@ -42,36 +37,40 @@ test('every preset generates independently editable valid native tldraw shapes',
 		assert.ok(shapes.length >= 6, `${preset.id} must contain a complete editable diagram`);
 
 		for (const shape of shapes) {
-			assert.match(shape.id, /^shape:[a-zA-Z0-9_-]+$/, `${preset.id} has an invalid shape ID`);
+			assert.match(shape.id, /^visual-[a-z0-9]+-[a-z0-9]+$/, `${preset.id} has an invalid ID`);
 			assert.equal(identifiers.has(shape.id), false, `${preset.id} reuses ${shape.id}`);
 			identifiers.add(shape.id);
 			assert.ok(Number.isFinite(shape.x) && shape.x >= 0, `${preset.id} has an invalid x`);
 			assert.ok(Number.isFinite(shape.y) && shape.y >= 0, `${preset.id} has an invalid y`);
 			assert.ok(
-				Object.hasOwn(validators, shape.type),
+				SUPPORTED_ELEMENT_TYPES.has(shape.type),
 				`${preset.id} has unsupported ${shape.type}`
 			);
+			assert.match(shape.strokeColor, /^#[a-f\d]{6}$/i, `${preset.id} has an invalid color`);
+			assert.ok(shape.strokeWidth > 0, `${preset.id} has an invisible ${shape.type}`);
+			assert.ok(shape.roughness >= 1, `${preset.id} is missing its hand-drawn aesthetic`);
+			assert.ok(['solid', 'dashed'].includes(shape.strokeStyle));
 
-			const shapeValidators = validators[shape.type];
-			for (const [property, value] of Object.entries(shape.props)) {
-				assert.ok(
-					Object.hasOwn(shapeValidators, property),
-					`${preset.id} uses unsupported ${shape.type}.${property}`
-				);
-				assert.doesNotThrow(
-					() => shapeValidators[property].validate(value),
-					`${preset.id} has invalid ${shape.type}.${property}`
-				);
-			}
-
-			if (shape.type === 'geo') {
-				assert.ok(shape.props.w > 0 && shape.props.h > 0, `${preset.id} has an empty shape`);
+			if (shape.type === 'rectangle' || shape.type === 'ellipse') {
+				assert.ok(shape.width > 0 && shape.height > 0, `${preset.id} has an empty shape`);
+				assert.ok(['hachure', 'solid'].includes(shape.fillStyle));
+				assert.ok(shape.backgroundColor.length > 0);
+				if (shape.label) {
+					assert.ok(shape.label.text.length > 0, `${preset.id} has an empty bound label`);
+					assert.equal(shape.label.fontFamily, HAND_DRAWN_FONT);
+				}
 			}
 			if (shape.type === 'arrow') {
-				assert.ok(
-					shape.props.end.x !== shape.props.start.x || shape.props.end.y !== shape.props.start.y,
-					`${preset.id} has an empty arrow`
-				);
+				assert.ok(shape.points.length >= 2, `${preset.id} has an empty arrow`);
+				assert.deepEqual(shape.points[0], [0, 0]);
+				const endpoint = shape.points.at(-1);
+				assert.ok(endpoint[0] !== 0 || endpoint[1] !== 0, `${preset.id} has an empty arrow`);
+				assert.ok(shape.endArrowhead === null || shape.endArrowhead === 'arrow');
+			}
+			if (shape.type === 'text') {
+				assert.ok(shape.text.length > 0, `${preset.id} has an empty text label`);
+				assert.equal(shape.fontFamily, HAND_DRAWN_FONT);
+				assert.ok(shape.fontSize >= 16, `${preset.id} has unreadable text`);
 			}
 		}
 	}
@@ -96,9 +95,21 @@ test('preset diagrams contain editable readable labels and structure', () => {
 
 		assert.ok(textShapes.length >= 2, `${preset.id} is missing its heading and caption`);
 		assert.ok(diagramShapes.length >= 3, `${preset.id} is missing its visual structure`);
-		assert.ok(
-			textShapes.every(({ props }) => props.richText?.type === 'doc'),
-			`${preset.id} does not use editable rich-text labels`
-		);
+		assert.ok(textShapes.every(({ text }) => text.length > 0));
 	}
+});
+
+test('priority quadrants and strategy scatterplot retain their meaningful placeholder labels', () => {
+	const matrix = DRAW_PRESETS.find(({ id }) => id === 'decision-matrix');
+	const scatterplot = DRAW_PRESETS.find(({ id }) => id === 'axis-chart');
+	assert.ok(matrix);
+	assert.ok(scatterplot);
+
+	const matrixLabels = matrix.createShapes().map((shape) => shape.text ?? shape.label?.text ?? '');
+	const chartLabels = scatterplot.createShapes().map((shape) => shape.text ?? '');
+
+	assert.ok(matrixLabels.some((label) => label.startsWith('Act now')));
+	assert.ok(matrixLabels.some((label) => label.startsWith('Plan')));
+	assert.ok(chartLabels.includes('Strategic fit'));
+	assert.ok(chartLabels.includes('Effort'));
 });

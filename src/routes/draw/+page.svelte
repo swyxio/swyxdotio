@@ -1,60 +1,119 @@
 <script>
 	import { onMount } from 'svelte';
-	import { env } from '$env/dynamic/public';
-	import 'tldraw/tldraw.css';
+	import '@excalidraw/excalidraw/index.css';
+
+	const STORAGE_KEY = 'swyx-excalidraw';
 
 	/** @type {HTMLDivElement} */
 	let canvas;
-	/** @type {import('tldraw').Editor | null} */
+	/** @type {import('@excalidraw/excalidraw/types').ExcalidrawImperativeAPI | null} */
 	let editor = $state.raw(null);
+	/** @type {typeof import('@excalidraw/excalidraw').convertToExcalidrawElements | null} */
+	let convertElements = null;
 	/** @type {typeof import('$lib/draw-presets.js').DRAW_PRESETS} */
 	let presets = $state([]);
 	let isPresetMenuOpen = $state(false);
 
 	/** @param {typeof presets[number]} preset */
 	function insertPreset(preset) {
-		if (!editor) return;
+		if (!editor || !convertElements) return;
 
-		const existingBounds = editor.getCurrentPageBounds();
-		const offsetX = existingBounds ? existingBounds.x + existingBounds.w + 180 : 0;
-		const offsetY = existingBounds?.y ?? 0;
-		const shapes = preset.createShapes().map((shape) => ({
+		const existingElements = editor.getSceneElements();
+		const offsetX =
+			existingElements.length > 0
+				? Math.max(...existingElements.map((element) => element.x + element.width)) + 180
+				: 0;
+		const offsetY =
+			existingElements.length > 0 ? Math.min(...existingElements.map((element) => element.y)) : 0;
+		const skeletons = preset.createShapes().map((shape) => ({
 			...shape,
 			x: (shape.x ?? 0) + offsetX,
 			y: (shape.y ?? 0) + offsetY
 		}));
+		const shapes = convertElements(
+			/** @type {import('@excalidraw/excalidraw/data/transform').ExcalidrawElementSkeleton[]} */ (
+				skeletons
+			),
+			{ regenerateIds: true }
+		);
 
-		editor.createShapes(shapes);
-		editor.select(...shapes.map((shape) => shape.id).filter((id) => id !== undefined));
-		editor.zoomToSelection({ animation: { duration: 260 } });
+		editor.updateScene({
+			elements: [...existingElements, ...shapes],
+			appState: {
+				selectedElementIds: Object.fromEntries(shapes.map((shape) => [shape.id, true]))
+			}
+		});
+		editor.scrollToContent(shapes, { fitToContent: true, animate: true, duration: 260 });
 		isPresetMenuOpen = false;
 	}
 
+	function restoreScene() {
+		try {
+			const storedScene = localStorage.getItem(STORAGE_KEY);
+			return storedScene ? JSON.parse(storedScene) : undefined;
+		} catch {
+			return undefined;
+		}
+	}
+
+	/**
+	 * @param {readonly import('@excalidraw/excalidraw/element/types').ExcalidrawElement[]} elements
+	 * @param {import('@excalidraw/excalidraw/types').AppState} appState
+	 * @param {import('@excalidraw/excalidraw/types').BinaryFiles} files
+	 */
+	function saveScene(elements, appState, files) {
+		try {
+			localStorage.setItem(
+				STORAGE_KEY,
+				JSON.stringify({
+					elements,
+					appState: {
+						viewBackgroundColor: appState.viewBackgroundColor,
+						scrollX: appState.scrollX,
+						scrollY: appState.scrollY,
+						zoom: appState.zoom
+					},
+					files
+				})
+			);
+		} catch (error) {
+			console.error('Could not save the drawing locally.', error);
+		}
+	}
+
 	onMount(() => {
-		/** @type {import('react-dom/client').Root | undefined} */
+		/** @type {ReturnType<typeof import('react-dom/client').createRoot> | undefined} */
 		let root;
 		let destroyed = false;
 
 		async function mountEditor() {
-			const [{ createElement }, { createRoot }, { Tldraw }, { DRAW_PRESETS }] = await Promise.all([
+			const [
+				{ createElement },
+				{ createRoot },
+				{ Excalidraw, convertToExcalidrawElements },
+				{ DRAW_PRESETS }
+			] = await Promise.all([
 				import('react'),
 				import('react-dom/client'),
-				import('tldraw'),
+				import('@excalidraw/excalidraw'),
 				import('$lib/draw-presets.js')
 			]);
 
 			if (destroyed) return;
 
+			convertElements = convertToExcalidrawElements;
 			presets = DRAW_PRESETS;
 			root = createRoot(canvas);
 			root.render(
-				createElement(Tldraw, {
-					persistenceKey: 'swyx-draw',
-					colorScheme: document.documentElement.classList.contains('dark') ? 'dark' : 'light',
-					onMount: (/** @type {import('tldraw').Editor} */ instance) => {
+				createElement(Excalidraw, {
+					initialData: restoreScene(),
+					theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light',
+					onChange: saveScene,
+					excalidrawAPI: (
+						/** @type {import('@excalidraw/excalidraw/types').ExcalidrawImperativeAPI} */ instance
+					) => {
 						editor = instance;
-					},
-					...(env.PUBLIC_TLDRAW_LICENSE_KEY ? { licenseKey: env.PUBLIC_TLDRAW_LICENSE_KEY } : {})
+					}
 				})
 			);
 		}

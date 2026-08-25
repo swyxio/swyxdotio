@@ -111,7 +111,6 @@ declare namespace App {
 			PRESENCE_ROOMS?: DurableObjectNamespace;
 			PRESENCE_ENABLED?: string;
 			PUBLIC_PRESENCE_ADMISSION_RATE?: string;
-			PUBLIC_TLDRAW_LICENSE_KEY?: string;
 			PODCAST_MEDIA?: R2Bucket;
 		};
 		context?: {
