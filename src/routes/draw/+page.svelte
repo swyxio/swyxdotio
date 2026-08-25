@@ -136,7 +136,13 @@
 
 	/** @param {DrawingImageGeneration} generation */
 	function rememberImageGeneration(generation) {
-		imageGenerations = [generation, ...imageGenerations].slice(0, 12);
+		const history = [generation, ...imageGenerations];
+		const originals = history.filter((image) => image.modelLabel === 'Original');
+		const generated = history.filter((image) => image.modelLabel !== 'Original');
+		imageGenerations = [
+			...generated.slice(0, Math.max(1, 12 - originals.length)),
+			...originals
+		].slice(0, 12);
 	}
 	const recentPages = $derived(orderRecentDrawingPages(pages, activePageId));
 	const filteredComponents = $derived(

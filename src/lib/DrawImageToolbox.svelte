@@ -295,6 +295,16 @@
 			operationStatus = 'Preparing your generated image';
 			const mimeType = result.image.slice(5, result.image.indexOf(';')) || 'image/png';
 			const edited = await insertEditedImage(selected, result.image, mimeType, 'AI edit applied');
+			if (!generations.some((generation) => generation.dataURL === selected.file.dataURL)) {
+				onGeneration?.({
+					id: crypto.randomUUID(),
+					dataURL: selected.file.dataURL,
+					mimeType: selected.file.mimeType,
+					prompt: 'Original image',
+					modelLabel: 'Original',
+					createdAt: Date.now()
+				});
+			}
 			onGeneration?.({
 				id: crypto.randomUUID(),
 				dataURL: edited.dataURL,
@@ -325,11 +335,13 @@
 		operationStatus = 'Restoring generated image';
 		operationAbort = new AbortController();
 		try {
+			const restoredLabel =
+				generation.modelLabel === 'Original' ? 'Original image restored' : 'Generation restored';
 			await insertEditedImage(
 				selectedImage(),
 				generation.dataURL,
 				generation.mimeType,
-				'Generation restored — choose any tool to edit it'
+				`${restoredLabel} — choose any tool to edit it`
 			);
 		} catch (error) {
 			if (!(error instanceof Error && error.name === 'AbortError')) {
@@ -528,6 +540,13 @@
 				maxlength="1000"
 				bind:value={prompt}
 				disabled={processing || processingFal}
+				onkeydown={(event) => {
+					if (event.key !== 'Enter' || (!event.metaKey && !event.ctrlKey) || event.isComposing) {
+						return;
+					}
+					event.preventDefault();
+					void applyFalEdit();
+				}}
 			></textarea>
 			<div class="prompt-presets" aria-label="Editable image prompt presets">
 				{#each PROMPT_PRESETS as preset (preset.label)}
@@ -551,10 +570,11 @@
 						type="button"
 						class="fal-action"
 						aria-label="Generate AI image edit"
+						aria-keyshortcuts="Meta+Enter Control+Enter"
 						disabled={processing || !prompt.trim()}
 						onclick={() => void applyFalEdit()}
 					>
-						Generate
+						Generate <kbd aria-hidden="true">⌘↵</kbd>
 					</button>
 				{/if}
 			</div>
@@ -745,6 +765,13 @@
 	.secondary-action {
 		background: #ecebf2;
 		color: #27272a;
+	}
+
+	.fal-action kbd {
+		margin-left: 4px;
+		font: inherit;
+		font-size: 9px;
+		opacity: 0.8;
 	}
 
 	.fal-model-picker {

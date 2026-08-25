@@ -454,6 +454,14 @@ test('prompt editing shows progress, retains session generations, and restores t
 	});
 	const toolbox = await pasteSelectedImage(page);
 	const original = await selectedSceneImage(page);
+	const originalDataURL = await page.evaluate(() => {
+		const scene =
+			/** @type {{elements:{type:string,fileId:string}[],files:Record<string,{dataURL:string}>}} */ (
+				JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[],"files":{}}')
+			);
+		const image = scene.elements.find((element) => element.type === 'image');
+		return image ? scene.files[image.fileId].dataURL : '';
+	});
 	outputImages = await page.evaluate(() => {
 		const canvas = document.createElement('canvas');
 		canvas.width = 460;
@@ -471,7 +479,12 @@ test('prompt editing shows progress, retains session generations, and restores t
 		.getByRole('combobox', { name: 'AI image model and workflow' })
 		.selectOption('seedream-5-pro');
 	await toolbox.getByRole('button', { name: 'Product mockup' }).click();
-	await toolbox.getByRole('button', { name: 'Generate AI image edit' }).click();
+	const promptInput = toolbox.getByRole('textbox', { name: 'AI image editing prompt' });
+	await expect(toolbox.getByRole('button', { name: 'Generate AI image edit' })).toHaveAttribute(
+		'aria-keyshortcuts',
+		'Meta+Enter Control+Enter'
+	);
+	await promptInput.press('Meta+Enter');
 	await expect(toolbox.getByRole('progressbar', { name: 'AI generation progress' })).toBeVisible();
 	await expect(toolbox.getByText('Generating with Seedream 5.0 Pro')).toBeVisible();
 	await expect(
@@ -485,17 +498,31 @@ test('prompt editing shows progress, retains session generations, and restores t
 	expect(Object.keys(captured[0] ?? {}).sort()).toEqual(['image', 'model', 'prompt']);
 	await expect(toolbox.getByText('AI edit applied')).toBeVisible();
 	const history = toolbox.getByRole('region', { name: 'Generated images from this session' });
-	await expect(history.getByRole('button')).toHaveCount(1);
+	await expect(history.getByRole('button')).toHaveCount(2);
+	await expect(history.getByText('Original', { exact: true })).toBeVisible();
 	await expect(history.getByText('Seedream 5.0 Pro')).toBeVisible();
 
-	await toolbox
-		.getByRole('textbox', { name: 'AI image editing prompt' })
-		.fill('A second variation');
-	await toolbox.getByRole('button', { name: 'Generate AI image edit' }).click();
-	await expect(history.getByRole('button')).toHaveCount(2);
+	await promptInput.fill('A second variation');
+	await promptInput.press('Control+Enter');
+	await expect(history.getByRole('button')).toHaveCount(3);
 	const latest = await selectedSceneImage(page);
-	await history.getByRole('button', { name: /Use generation 2:.*studio product mockup/i }).click();
+	await history.getByRole('button', { name: /Use generation \d+: Original image/ }).click();
 	await expect.poll(async () => (await selectedSceneImage(page)).fileId).not.toBe(latest.fileId);
+	await expect(toolbox.getByText(/Original image restored/)).toBeVisible();
+	const restoredOriginal = await page.evaluate(() => {
+		const scene =
+			/** @type {{elements:{type:string,fileId:string}[],files:Record<string,{dataURL:string}>}} */ (
+				JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[],"files":{}}')
+			);
+		const image = scene.elements.find((element) => element.type === 'image');
+		return image ? scene.files[image.fileId].dataURL : '';
+	});
+	expect(restoredOriginal).toBe(originalDataURL);
+	const originalRestored = await selectedSceneImage(page);
+	await history.getByRole('button', { name: /Use generation 2:.*studio product mockup/i }).click();
+	await expect
+		.poll(async () => (await selectedSceneImage(page)).fileId)
+		.not.toBe(originalRestored.fileId);
 	const restored = await page.evaluate(() => {
 		const scene =
 			/** @type {{elements:{type:string,fileId:string}[],files:Record<string,{dataURL:string}>}} */ (
@@ -506,7 +533,7 @@ test('prompt editing shows progress, retains session generations, and restores t
 	});
 	expect(restored).toBe(outputImages[0]);
 	await toolbox.getByRole('button', { name: 'Magic Select', exact: true }).click();
-	await expect(history.getByRole('button')).toHaveCount(2);
+	await expect(history.getByRole('button')).toHaveCount(3);
 	const selectedGeneration = await selectedSceneImage(page);
 	await toolbox.getByRole('button', { name: 'Apply Magic Select' }).click();
 	await expect
