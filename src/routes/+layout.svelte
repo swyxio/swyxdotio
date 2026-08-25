@@ -25,6 +25,7 @@
 	/>
 	<link rel="webmention" href="https://webmention.io/www.swyx.io/webmention" />
 	<link rel="pingback" href="https://webmention.io/www.swyx.io/xmlrpc" />
+	<link rel="alternate" type="text/plain" title="AI discovery index" href="/llms.txt" />
 </svelte:head>
 
 {#if !immersiveTool}

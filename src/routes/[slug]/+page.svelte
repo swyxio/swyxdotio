@@ -25,12 +25,13 @@
 	$: issueNumber = json?.ghMetadata?.issueUrl?.split('/')?.pop();
 
 	$: isCodingCareerLaunch = data.slug === 'launching-coding-career';
-	$: socialArticle = isCodingCareerLaunch && json.ghMetadata
-		? {
-				...json,
-				ghMetadata: { ...json.ghMetadata, updated_at: new Date('2026-08-18T00:00:00.000Z') }
-			}
-		: json;
+	$: socialArticle =
+		isCodingCareerLaunch && json.ghMetadata
+			? {
+					...json,
+					ghMetadata: { ...json.ghMetadata, updated_at: new Date('2026-08-18T00:00:00.000Z') }
+				}
+			: json;
 	$: canonical = json.canonical ? json.canonical : SITE_URL + $page.url.pathname;
 	$: social = getArticleSocialMeta(socialArticle, canonical);
 </script>
@@ -38,6 +39,7 @@
 <SocialMeta {...social} />
 
 <svelte:head>
+	<link rel="alternate" type="text/markdown" href="/{data.slug}.md" />
 	{#if json.subtitle}
 		<meta property="subtitle" content={json.subtitle} />
 	{/if}

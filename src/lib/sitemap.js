@@ -16,7 +16,7 @@ export function buildSitemap(posts, pagePaths = PUBLIC_PAGE_PATHS) {
 
 	for (const post of posts) {
 		if (post.isPrivate) continue;
-		const localUrl = localCanonicalUrl(post);
+		const localUrl = publicContentUrl(post);
 		if (!localUrl) continue;
 		entries.set(localUrl, {
 			url: localUrl,
@@ -25,13 +25,14 @@ export function buildSitemap(posts, pagePaths = PUBLIC_PAGE_PATHS) {
 	}
 
 	return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${[...entries.values()].map(renderEntry).join('\n')}
 </urlset>`;
 }
 
 /** @param {import('./types').ContentItem} post */
-function localCanonicalUrl(post) {
+export function publicContentUrl(post) {
+	if (post.isPrivate) return null;
 	const fallback = new URL(`/${post.slug}`, SITE_URL);
 	if (!post.canonical) return fallback.href;
 

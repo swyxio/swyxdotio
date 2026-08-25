@@ -8,6 +8,7 @@ test('sitemap emits every public page using the apex canonical host', () => {
 	for (const path of PUBLIC_PAGE_PATHS) {
 		assert.match(xml, new RegExp(`<loc>https://swyx\\.io${path}</loc>`));
 	}
+	assert.match(xml, /<urlset xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9">/);
 	assert.doesNotMatch(xml, /www\.swyx\.io|changefreq|priority/);
 });
 

@@ -46,8 +46,10 @@ export function isPublicReadCountRequest(url) {
 }
 
 /** @param {URL} url */
-export function isPublicSitemapRequest(url) {
-	return url.pathname === '/sitemap.xml';
+export function isPublicCrawlerDiscoveryRequest(url) {
+	return (
+		url.pathname === '/sitemap.xml' || url.pathname === '/llms.txt' || url.pathname.endsWith('.md')
+	);
 }
 
 /** @type {import('@sveltejs/kit').Handle} */
@@ -65,7 +67,7 @@ export async function handle({ event, resolve }) {
 	const preservePublicCache =
 		isVersionedOgRequest(cacheUrl) ||
 		isPublicReadCountRequest(cacheUrl) ||
-		isPublicSitemapRequest(cacheUrl);
+		isPublicCrawlerDiscoveryRequest(cacheUrl);
 	if (
 		cacheUrl.pathname === '/api/listContent.json' ||
 		cacheUrl.pathname === '/api/latestPosts.json' ||

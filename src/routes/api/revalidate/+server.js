@@ -115,15 +115,18 @@ export async function POST({ request, platform, fetch }) {
 		'/ideas',
 		'/rss.xml',
 		'/sitemap.xml',
+		'/llms',
+		'/llms.txt',
+		'/llms.md',
 		'/api/listContent.json',
 		'/api/latestPosts.json',
 		'/api/searchContent.json'
 	];
 	if (slug) {
-		paths.push(`/${slug}`, `/api/ideas/${slug}.json`);
+		paths.push(`/${slug}`, `/${slug}.md`, `/api/ideas/${slug}.json`);
 	}
 	if (previousSlug && previousSlug !== slug) {
-		paths.push(`/${previousSlug}`, `/api/ideas/${previousSlug}.json`);
+		paths.push(`/${previousSlug}`, `/${previousSlug}.md`, `/api/ideas/${previousSlug}.json`);
 	}
 	const cacheGeneration = await readContentCacheGeneration(platform?.env?.CONTENT_MANIFEST);
 
