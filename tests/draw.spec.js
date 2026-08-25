@@ -71,3 +71,57 @@ test('drawing canvas is public, fullscreen, and persists drawings in the browser
 	await expect(canvas).toBeVisible();
 	await expect(shapes).toHaveCount(1);
 });
+
+test('visual presets insert labeled editable diagrams without replacing existing work', async ({
+	page
+}) => {
+	await page.goto('/draw');
+
+	const browsePresets = page.getByRole('button', { name: /presets|templates/i });
+	await expect(browsePresets).toBeVisible();
+	await browsePresets.click();
+
+	const presetOptions = page.getByRole('button', { name: /^insert .+ preset$/i });
+	await expect(presetOptions).toHaveCount(9);
+
+	await page.getByRole('button', { name: /insert priority quadrants preset/i }).click();
+	await expect(page.getByText('Act now', { exact: true })).toBeVisible();
+	await expect(page.getByText('Plan', { exact: true })).toBeVisible();
+
+	const existingShapes = page.locator('.draw-canvas .tl-shape');
+	const initialShapeCount = await existingShapes.count();
+	expect(initialShapeCount).toBeGreaterThan(4);
+
+	await browsePresets.click();
+	await page.getByRole('button', { name: /insert strategy scatterplot preset/i }).click();
+	await expect(page.getByText('Strategic fit', { exact: true }).last()).toBeVisible();
+	await expect(page.getByText('Effort', { exact: true }).last()).toBeVisible();
+
+	await expect
+		.poll(() =>
+			page.evaluate(
+				() =>
+					new Promise((resolve, reject) => {
+						const request = indexedDB.open('TLDRAW_DOCUMENT_v2swyx-draw');
+						request.onerror = () => reject(request.error);
+						request.onsuccess = () => {
+							const database = request.result;
+							const records = database
+								.transaction('records', 'readonly')
+								.objectStore('records')
+								.getAll();
+							records.onerror = () => reject(records.error);
+							records.onsuccess = () => {
+								database.close();
+								resolve(records.result.filter((record) => record.typeName === 'shape').length);
+							};
+						};
+					})
+			)
+		)
+		.toBeGreaterThan(initialShapeCount);
+
+	await page.reload();
+	await expect.poll(() => existingShapes.count()).toBeGreaterThan(initialShapeCount);
+	await expect(page.getByText('Strategic fit', { exact: true }).first()).toBeAttached();
+});
