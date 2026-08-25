@@ -59,7 +59,9 @@ test('Latent Space thumbnails use the official supplied logo and preserve YouTub
 		const logo = result.elements.find((element) => element.type === 'image');
 		assert.equal(logo?.fileId, 'official-logo');
 		assert.equal(logo?.width, logo?.height);
-		assert.ok(result.elements.some((element) => element.text === 'REAL EDITABLE HOOK'));
+		assert.ok(
+			result.elements.some((element) => element.text?.replace(/\n/g, ' ') === 'REAL EDITABLE HOOK')
+		);
 		assert.ok(result.elements.some((element) => element.text === 'ACME   ·   EXAMPLE'));
 		const unsafeEssential = result.elements.filter(
 			(element) =>
@@ -69,6 +71,25 @@ test('Latent Space thumbnails use the official supplied logo and preserve YouTub
 		);
 		assert.deepEqual(unsafeEssential, []);
 	}
+});
+
+test('thumbnail hooks wrap and scale before overlapping the editable guest portrait', () => {
+	for (const id of ['ls-podcast', 'fde-decision']) {
+		const result = createDrawingDesign(id, { headline: 'HARNESS ENGINEERING' });
+		const headline = result.elements.find((element) =>
+			element.text?.includes('HARNESS')
+		);
+		assert.equal(headline?.text, 'HARNESS\nENGINEERING');
+		assert.ok(headline.fontSize <= (id === 'fde-decision' ? 76 : 86));
+		assert.ok(headline.x + 11 * headline.fontSize * 0.58 < 790);
+	}
+
+	const lengthy = createDrawingDesign('ls-podcast', {
+		headline: 'BUILDING RELIABLE PRODUCTION AGENT ENGINEERING WORKFLOWS'
+	});
+	const headline = lengthy.elements.find((element) => element.text?.includes('BUILDING'));
+	assert.ok(headline.fontSize < 86);
+	assert.ok(headline.text.split('\n').length * headline.fontSize * 1.25 <= 225);
 });
 
 test('designs reject unknown templates without inventing people, identities, or companies', () => {

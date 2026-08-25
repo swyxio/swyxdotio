@@ -160,6 +160,37 @@ function text(x, y, content, size, color, options = {}) {
 	};
 }
 
+/** @param {string} headline @param {number} preferredSize */
+function fitThumbnailHeadline(headline, preferredSize) {
+	const availableWidth = 700;
+	const availableHeight = 225;
+	let size = preferredSize;
+	let lines = [headline];
+	for (let attempt = 0; attempt < 3; attempt++) {
+		const charactersPerLine = Math.max(8, Math.floor(availableWidth / (size * 0.58)));
+		lines = headline.split('\n').flatMap((paragraph) => {
+			/** @type {string[]} */
+			const wrapped = [];
+			for (const word of paragraph.trim().split(/\s+/)) {
+				const previous = wrapped.at(-1);
+				if (previous && previous.length + word.length + 1 <= charactersPerLine) {
+					wrapped[wrapped.length - 1] = `${previous} ${word}`;
+				} else wrapped.push(word);
+			}
+			return wrapped;
+		});
+		const longest = Math.max(...lines.map((line) => line.length));
+		const fittedSize = Math.min(
+			preferredSize,
+			Math.floor(availableWidth / (longest * 0.58)),
+			Math.floor(availableHeight / (lines.length * 1.25))
+		);
+		if (fittedSize >= size) break;
+		size = fittedSize;
+	}
+	return { text: lines.join('\n'), size };
+}
+
 /** @param {number} x @param {number} y @param {number} width @param {number} height @param {string} accent */
 function portraitPlaceholder(x, y, width, height, accent) {
 	return [
@@ -203,15 +234,13 @@ export function createDrawingDesign(templateId, options = {}) {
 	const companies = options.companies?.trim().slice(0, 100) ?? 'COMPANY ONE   ·   COMPANY TWO';
 	if (templateId === 'ls-podcast' || templateId === 'fde-decision') {
 		const fde = templateId === 'fde-decision';
+		const fittedHeadline = fitThumbnailHeadline(
+			headline ?? (fde ? 'WHAT CHANGES\nWHEN AI SHIPS?' : 'YOUR SHARPEST\nIDEA HERE'),
+			fde ? 76 : 86
+		);
 		children.push(
 			rectangle(ox + 64, oy + 103, 64, 7, template.accent),
-			text(
-				ox + 66,
-				oy + 140,
-				headline ?? (fde ? 'WHAT CHANGES\nWHEN AI SHIPS?' : 'YOUR SHARPEST\nIDEA HERE'),
-				fde ? 76 : 86,
-				'#ffffff'
-			),
+			text(ox + 66, oy + 140, fittedHeadline.text, fittedHeadline.size, '#ffffff'),
 			text(
 				ox + 68,
 				oy + 387,

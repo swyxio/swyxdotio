@@ -146,7 +146,7 @@ test('authenticated assistant offers grounded Canva-style tasks and creates bran
 									function: {
 										name: 'canvas_bash',
 										arguments: JSON.stringify({
-											command: 'draw design insert ls-podcast --headline "AGENTS THAT SHIP"'
+											command: 'draw design insert ls-podcast --headline "HARNESS ENGINEERING"'
 										})
 									}
 								}
@@ -177,9 +177,15 @@ test('authenticated assistant offers grounded Canva-style tasks and creates bran
 	);
 	await expect
 		.poll(async () =>
-			(await scene(page)).elements.some((element) => element.text === 'AGENTS THAT SHIP')
+			(await scene(page)).elements.some((element) => element.text === 'HARNESS\nENGINEERING')
 		)
 		.toBe(true);
+	const design = await scene(page);
+	const headline = design.elements.find((element) => element.text === 'HARNESS\nENGINEERING');
+	const portrait = design.elements.find(
+		(element) => element.type === 'rectangle' && element.strokeStyle === 'dashed'
+	);
+	expect(headline.x + headline.width).toBeLessThan(portrait.x);
 });
 
 test('design workflows remain reachable and artboard controls stay contained on narrow screens', async ({
