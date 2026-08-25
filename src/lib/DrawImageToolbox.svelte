@@ -8,7 +8,7 @@
 	/**
 	 * @typedef {import('@excalidraw/excalidraw/types').ExcalidrawImperativeAPI} DrawingEditor
 	 * @typedef {'magic-select' | 'magic-eraser' | 'depth-blur' | 'vectorize'} ImageAction
-	 * @typedef {{ id: string, dataURL: string, mimeType: string, prompt: string, modelLabel: string, createdAt: number }} ImageGeneration
+	 * @typedef {import('$lib/draw-generation-history.js').DrawingImageGeneration} ImageGeneration
 	 */
 
 	/** @type {{
@@ -81,6 +81,10 @@
 		{ kind: 'image-edit', label: 'Image editing' },
 		{ kind: 'image-to-video', label: 'Image to video' }
 	]);
+	const FAL_WEIGHT_GROUPS = /** @type {const} */ ([
+		{ weights: 'open', label: 'Open weights' },
+		{ weights: 'closed', label: 'Closed models' }
+	]);
 
 	let imagePreview = $state('');
 	let targetX = $state(0.5);
@@ -108,10 +112,17 @@
 		[...DRAW_FAL_MODELS].sort((left, right) => left.priceUsd - right.priceUsd)
 	);
 	const falWorkflowFolders = $derived(
-		FAL_WORKFLOW_FOLDERS.map((folder) => ({
-			...folder,
-			models: orderedFalModels.filter((model) => model.kind === folder.kind)
-		})).filter((folder) => folder.models.length > 0)
+		FAL_WORKFLOW_FOLDERS.map((folder) => {
+			const models = orderedFalModels.filter((model) => model.kind === folder.kind);
+			return {
+				...folder,
+				models,
+				groups: FAL_WEIGHT_GROUPS.map((group) => ({
+					...group,
+					models: models.filter((model) => model.weights === group.weights)
+				})).filter((group) => group.models.length > 0)
+			};
+		}).filter((folder) => folder.models.length > 0)
 	);
 	const selectedFalModels = $derived(
 		orderedFalModels.filter((model) => selectedFalModelIds.includes(model.id))
@@ -126,6 +137,25 @@
 	const activeVideoGeneration = $derived(
 		generations.find((generation) => generation.id === activeVideoGenerationId)
 	);
+	const activeGeneration = $derived(
+		activeVideoGeneration ?? generations.find((generation) => generation.dataURL === imagePreview)
+	);
+	const activeGenerationLineage = $derived.by(() => {
+		if (!activeGeneration) return [];
+		/** @type {ImageGeneration[]} */
+		const lineage = [];
+		/** @type {ImageGeneration | undefined} */
+		let current = activeGeneration;
+		const visited = new Set();
+		while (current && !visited.has(current.id)) {
+			visited.add(current.id);
+			lineage.unshift(current);
+			current = current.parentGenerationId
+				? generations.find((generation) => generation.id === current?.parentGenerationId)
+				: undefined;
+		}
+		return lineage;
+	});
 	const downloadSize = $derived(
 		selectedTool?.downloadBytes ? `~${(selectedTool.downloadBytes / 1_000_000).toFixed(1)} MB` : ''
 	);
@@ -152,6 +182,30 @@
 		selectedFalModelIds = selectedFalModelIds.includes(modelId)
 			? selectedFalModelIds.filter((id) => id !== modelId)
 			: [...selectedFalModelIds, modelId];
+	}
+
+	/** @param {readonly (typeof DRAW_FAL_MODELS)[number][]} models @param {boolean} selected */
+	function selectFalModels(models, selected) {
+		const ids = /** @type {Set<string>} */ (new Set(models.map((model) => model.id)));
+		selectedFalModelIds = selected
+			? [...new Set([...selectedFalModelIds, ...ids])]
+			: selectedFalModelIds.filter((id) => !ids.has(id));
+	}
+
+	/** @param {MouseEvent} event @param {readonly (typeof DRAW_FAL_MODELS)[number][]} models @param {boolean} selected */
+	function selectFolderModels(event, models, selected) {
+		event.preventDefault();
+		event.stopPropagation();
+		selectFalModels(models, selected);
+	}
+
+	/** @param {ImageGeneration} generation */
+	function restoreGenerationSettings(generation) {
+		if (generation.modelLabel === 'Original') return;
+		prompt = generation.prompt;
+		if (generation.modelId && DRAW_FAL_MODELS.some((model) => model.id === generation.modelId)) {
+			selectedFalModelIds = [generation.modelId];
+		}
 	}
 
 	/** @param {Blob} blob */
@@ -320,7 +374,7 @@
 		operationAbort = generationAbort;
 		try {
 			const source = selectedImage();
-			let originalRemembered = generations.some((entry) => entry.dataURL === source.file.dataURL);
+			let sourceGeneration = generations.find((entry) => entry.dataURL === source.file.dataURL);
 			/** @type {string[]} */
 			const failures = [];
 			let completed = 0;
@@ -369,25 +423,45 @@
 						}
 					});
 					generationAbort.signal.throwIfAborted();
-					if (!originalRemembered) {
-						onGeneration?.({
+					if (!sourceGeneration) {
+						sourceGeneration = {
 							id: crypto.randomUUID(),
 							dataURL: source.file.dataURL,
 							mimeType: source.file.mimeType,
 							prompt: 'Original image',
 							modelLabel: 'Original',
 							createdAt: Date.now()
-						});
-						originalRemembered = true;
+						};
+						onGeneration?.(sourceGeneration);
 					}
+					const recipe = {
+						prompt: generationPrompt,
+						modelLabel: generationModel.label,
+						modelId: generationModel.id,
+						modelEndpoint: generationModel.model,
+						modelProvider: generationModel.provider,
+						modelKind: generationModel.kind,
+						modelWorkflow: generationModel.workflow,
+						modelSettings: { ...generationModel.settings },
+						parentGenerationId: sourceGeneration.id,
+						referenceImages:
+							generationModel.kind === 'text-to-image'
+								? []
+								: [
+										{
+											dataURL: source.file.dataURL,
+											mimeType: source.file.mimeType,
+											generationId: sourceGeneration.id
+										}
+									]
+					};
 					if (generationModel.kind === 'image-to-video') {
 						const id = crypto.randomUUID();
 						onGeneration?.({
+							...recipe,
 							id,
 							dataURL: result.video,
 							mimeType: 'video/mp4',
-							prompt: generationPrompt,
-							modelLabel: generationModel.label,
 							createdAt: Date.now()
 						});
 						activeVideoGenerationId = id;
@@ -402,11 +476,10 @@
 							'AI edit applied'
 						);
 						onGeneration?.({
+							...recipe,
 							id: crypto.randomUUID(),
 							dataURL: edited.dataURL,
 							mimeType: edited.mimeType,
-							prompt: generationPrompt,
-							modelLabel: generationModel.label,
 							createdAt: Date.now()
 						});
 					}
@@ -452,6 +525,7 @@
 	/** @param {ImageGeneration} generation */
 	async function restoreGeneration(generation) {
 		if (processing || processingFal || backgroundProcessing) return;
+		restoreGenerationSettings(generation);
 		if (generation.mimeType.startsWith('video/')) {
 			activeVideoGenerationId = generation.id;
 			operationError = '';
@@ -476,6 +550,37 @@
 		} catch (error) {
 			if (!(error instanceof Error && error.name === 'AbortError')) {
 				operationError = error instanceof Error ? error.message : 'Could not restore the image.';
+			}
+		} finally {
+			processing = false;
+			operationAbort = undefined;
+		}
+	}
+
+	/** @param {ImageGeneration} generation */
+	async function restoreGenerationRecipe(generation) {
+		if (processing || processingFal || backgroundProcessing) return;
+		restoreGenerationSettings(generation);
+		action = 'fal';
+		const reference = generation.referenceImages?.[0];
+		if (!reference) {
+			operationStatus = 'Prompt and model restored — ready to generate';
+			return;
+		}
+		processing = true;
+		operationProgress = 0;
+		operationError = '';
+		operationAbort = new AbortController();
+		try {
+			await insertEditedImage(
+				selectedImage(),
+				reference.dataURL,
+				reference.mimeType,
+				'Reference image, prompt, and model restored — ready to generate'
+			);
+		} catch (error) {
+			if (!(error instanceof Error && error.name === 'AbortError')) {
+				operationError = error instanceof Error ? error.message : 'Could not restore this setup.';
 			}
 		} finally {
 			processing = false;
@@ -694,15 +799,56 @@
 								>
 									<summary class="fal-model-folder-heading">
 										<strong>{folder.label}</strong>
-										<span>
-											{folder.models.filter((model) => selectedFalModelIds.includes(model.id))
-												.length}
-											/ {folder.models.length}
+										<span class="fal-folder-controls">
+											<span>
+												{folder.models.filter((model) => selectedFalModelIds.includes(model.id))
+													.length}
+												/ {folder.models.length}
+											</span>
+											<button
+												type="button"
+												class="fal-model-select-all"
+												aria-label="Select all {folder.label} models"
+												onclick={(event) => selectFolderModels(event, folder.models, true)}>All</button
+											>
+											<button
+												type="button"
+												class="fal-model-select-all"
+												aria-label="Select no {folder.label} models"
+												onclick={(event) => selectFolderModels(event, folder.models, false)}>None</button
+											>
 										</span>
 									</summary>
 									<div class="fal-model-folder-cards">
-										{#each folder.models as model (model.id)}
-											<div
+										{#each folder.groups as group (group.weights)}
+											<section
+												class="fal-model-weight-group"
+												aria-label="{group.label} {folder.label} models"
+											>
+												<div class="fal-model-weight-heading">
+													<strong>{group.label}</strong>
+													<span class="fal-folder-controls">
+														<span>
+															{group.models.filter((model) => selectedFalModelIds.includes(model.id))
+																.length}
+															/ {group.models.length}
+														</span>
+														<button
+															type="button"
+															class="fal-model-select-all"
+															aria-label="Select all {group.label} {folder.label} models"
+															onclick={() => selectFalModels(group.models, true)}>All</button
+														>
+														<button
+															type="button"
+															class="fal-model-select-all"
+															aria-label="Select no {group.label} {folder.label} models"
+															onclick={() => selectFalModels(group.models, false)}>None</button
+														>
+													</span>
+												</div>
+												{#each group.models as model (model.id)}
+													<div
 												class="fal-model-card"
 												class:selected={selectedFalModelIds.includes(model.id)}
 											>
@@ -733,7 +879,9 @@
 												>
 													Only
 												</button>
-											</div>
+													</div>
+												{/each}
+											</section>
 										{/each}
 									</div>
 								</details>
@@ -855,6 +1003,46 @@
 					</button>
 				{/each}
 			</div>
+			{#if activeGeneration && activeGeneration.modelLabel !== 'Original'}
+				<section class="generation-recipe" aria-label="Selected generation details">
+					<div class="generation-recipe-heading">
+						<strong>{activeGeneration.modelLabel}</strong>
+						<span>{new Date(activeGeneration.createdAt).toLocaleString()}</span>
+					</div>
+					{#if activeGeneration.modelWorkflow}
+						<div class="generation-recipe-meta">
+							{activeGeneration.modelProvider} · {activeGeneration.modelWorkflow}
+						</div>
+					{/if}
+					<div class="generation-prompt" aria-label="Generation prompt">
+						{activeGeneration.prompt}
+					</div>
+					{#if activeGeneration.referenceImages?.length}
+						<div class="generation-references" aria-label="Generation reference images">
+							<strong>Reference {activeGeneration.referenceImages.length === 1 ? 'image' : 'images'}</strong>
+							{#each activeGeneration.referenceImages as reference, index (reference.dataURL)}
+								<img src={reference.dataURL} alt="Reference image {index + 1}" />
+							{/each}
+						</div>
+					{:else if activeGeneration.modelKind === 'text-to-image'}
+						<div class="generation-recipe-meta">Prompt only · no reference image</div>
+					{/if}
+					{#if activeGenerationLineage.length > 1}
+						<div class="generation-lineage" aria-label="Generation history">
+							{activeGenerationLineage.map((entry) => entry.modelLabel).join(' → ')}
+						</div>
+					{/if}
+					<button
+						type="button"
+						class="generation-recreate"
+						aria-label="Restore reference image, prompt, and model"
+						disabled={processing || processingFal || backgroundProcessing}
+						onclick={() => void restoreGenerationRecipe(activeGeneration)}
+					>
+						Restore generation setup
+					</button>
+				</section>
+			{/if}
 		</section>
 	{/if}
 
@@ -1162,12 +1350,38 @@
 		color: #71717a;
 	}
 
+	.fal-folder-controls {
+		display: flex;
+		align-items: center;
+		gap: 3px;
+		white-space: nowrap;
+	}
+
 	.fal-model-folder-cards {
 		display: grid;
 		gap: 5px;
 		max-height: 165px;
 		padding: 0 6px 6px;
 		overflow-y: auto;
+	}
+
+	.fal-model-weight-group {
+		display: grid;
+		gap: 5px;
+	}
+
+	.fal-model-weight-heading {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 6px;
+		padding: 3px 1px;
+		color: #71717a;
+		font-size: 8px;
+	}
+
+	.fal-model-weight-heading > strong {
+		color: #52525b;
 	}
 
 	.fal-model-card {
@@ -1361,6 +1575,68 @@
 		font-size: 8px;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+	}
+
+	.generation-recipe {
+		display: grid;
+		gap: 6px;
+		margin-top: 8px;
+		padding: 8px;
+		border: 1px solid #ececf0;
+		border-radius: 7px;
+		background: #fafafa;
+		font-size: 9px;
+	}
+
+	.generation-recipe-heading {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 7px;
+	}
+
+	.generation-recipe-heading > span,
+	.generation-recipe-meta,
+	.generation-lineage {
+		color: #71717a;
+		font-size: 8px;
+	}
+
+	.generation-prompt {
+		padding: 7px;
+		border: 1px solid #e8e8ed;
+		border-radius: 5px;
+		background: #fff;
+		color: #3f3f46;
+		line-height: 1.45;
+		overflow-wrap: anywhere;
+	}
+
+	.generation-references {
+		display: flex;
+		align-items: center;
+		gap: 7px;
+		color: #52525b;
+	}
+
+	.generation-references img {
+		width: 42px;
+		height: 34px;
+		border: 1px solid #e4e4e7;
+		border-radius: 4px;
+		background: repeating-conic-gradient(#f4f4f5 0 25%, #fff 0 50%) 50% / 8px 8px;
+		object-fit: contain;
+	}
+
+	.generation-recreate {
+		justify-self: start;
+		padding: 5px 8px;
+		border: 1px solid #ded9ff;
+		border-radius: 5px;
+		background: #f5f3ff;
+		color: #5142ab;
+		font: inherit;
+		cursor: pointer;
 	}
 
 	.operation-progress {

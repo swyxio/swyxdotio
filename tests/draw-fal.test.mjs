@@ -322,6 +322,7 @@ test('all workflow cards expose sortable estimates and honest reference-image ca
 	for (const model of DRAW_FAL_MODELS) {
 		assert.equal(typeof model.priceUsd, 'number', model.id);
 		assert.ok(model.priceUsd > 0, model.id);
+		assert.ok(['open', 'closed'].includes(model.weights), model.id);
 		assert.ok(
 			model.referenceImages === null || Number.isSafeInteger(model.referenceImages),
 			model.id
@@ -330,6 +331,17 @@ test('all workflow cards expose sortable estimates and honest reference-image ca
 	const sorted = [...DRAW_FAL_MODELS].sort((left, right) => left.priceUsd - right.priceUsd);
 	assert.equal(sorted[0].id, 'flux-klein-9b-generate');
 	assert.equal(sorted.at(-1)?.id, 'grok-imagine-video-1-5');
+	assert.deepEqual(
+		DRAW_FAL_MODELS.filter((model) => model.weights === 'open').map((model) => model.id),
+		[
+			'hunyuan-3-instruct',
+			'hidream-o1',
+			'qwen-image-edit-2511',
+			'flux-klein-9b',
+			'flux-2',
+			'flux-klein-9b-generate'
+		]
+	);
 	assert.deepEqual(Object.keys(drawingFalTasks), ['image-edit', 'text-to-image', 'image-to-video']);
 });
 

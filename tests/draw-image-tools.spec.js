@@ -206,13 +206,35 @@ test('selected images expose private tools, exact model sizes, and disclosed fal
 	await expect(workflowFolders.nth(2).locator('summary')).toContainText('Image to video');
 	await expect(workflowFolders.nth(2).locator('summary')).toContainText('0 / 2');
 	await expect(toolbox.getByRole('checkbox')).toHaveCount(12);
+	const imageEditing = workflowFolders.nth(1);
+	const openEditors = imageEditing.getByRole('region', {
+		name: 'Open weights Image editing models'
+	});
+	const closedEditors = imageEditing.getByRole('region', {
+		name: 'Closed models Image editing models'
+	});
+	await expect(openEditors.getByRole('checkbox')).toHaveCount(5);
+	await expect(closedEditors.getByRole('checkbox')).toHaveCount(7);
+	await openEditors
+		.getByRole('button', { name: 'Select all Open weights Image editing models' })
+		.click();
+	await expect(imageEditing.locator('summary')).toContainText('6 / 12');
+	await closedEditors
+		.getByRole('button', { name: 'Select no Closed models Image editing models' })
+		.click();
+	await expect(imageEditing.locator('summary')).toContainText('5 / 12');
+	await imageEditing.getByRole('button', { name: 'Select no Image editing models' }).click();
+	await expect(imageEditing.locator('summary')).toContainText('0 / 12');
+	await expect(imageEditing).toHaveAttribute('open', '');
+	await imageEditing.getByRole('button', { name: 'Select all Image editing models' }).click();
+	await expect(imageEditing.locator('summary')).toContainText('12 / 12');
 	await workflowFolders.nth(0).locator('summary').click();
 	await workflowFolders.nth(2).locator('summary').click();
 	await expect(toolbox.getByRole('checkbox')).toHaveCount(16);
 	await expect(toolbox.locator('.fal-model-card').first()).toContainText('~$0.006');
 	await expect(toolbox.locator('.fal-model-card').last()).toContainText('~$0.41');
 	await expect(toolbox.getByText('Up to 16 reference images')).toBeVisible();
-	await toolbox.getByRole('button', { name: 'Select all' }).click();
+	await toolbox.getByRole('button', { name: 'Select all', exact: true }).click();
 	await expect(toolbox.getByText('Cheapest first · 16 selected')).toBeVisible();
 	await expect(workflowFolders.nth(0).locator('summary')).toContainText('2 / 2');
 	await expect(workflowFolders.nth(1).locator('summary')).toContainText('12 / 12');
@@ -622,12 +644,12 @@ test('selecting multiple models generates once per model from the same source im
 		.fill('Compare model outputs');
 	await toolbox.getByRole('button', { name: 'Generate AI image edit' }).click();
 	const history = toolbox.getByRole('region', { name: 'Generated images from this session' });
-	await expect(history.getByRole('button')).toHaveCount(3);
+	await expect(history.locator('.generation-card')).toHaveCount(3);
 	expect(captured.map((request) => request.model)).toEqual(['flux-2', 'nano-banana-2']);
 	expect(captured[0]?.image).toBe(captured[1]?.image);
 	await expect(history.getByText('Original', { exact: true })).toBeVisible();
-	await expect(history.getByText('FLUX.2 [dev]')).toBeVisible();
-	await expect(history.getByText('Nano Banana 2')).toBeVisible();
+	await expect(history.locator('.generation-card').getByText('FLUX.2 [dev]')).toBeVisible();
+	await expect(history.locator('.generation-card').getByText('Nano Banana 2')).toBeVisible();
 	await expect(toolbox.getByText('Generated 2 of 2 results')).toBeVisible();
 });
 
@@ -810,13 +832,65 @@ test('prompt editing shows progress, retains session generations, and restores t
 	expect(captured[0]?.requestBytes).toBeLessThan(12_000_000);
 	await expect(toolbox.getByText('AI edit applied')).toBeVisible();
 	const history = toolbox.getByRole('region', { name: 'Generated images from this session' });
-	await expect(history.getByRole('button')).toHaveCount(2);
+	await expect(history.locator('.generation-card')).toHaveCount(2);
 	await expect(history.getByText('Original', { exact: true })).toBeVisible();
-	await expect(history.getByText('Seedream 5.0 Pro')).toBeVisible();
+	await expect(history.locator('.generation-card').getByText('Seedream 5.0 Pro')).toBeVisible();
+	const generationDetails = history.getByRole('region', { name: 'Selected generation details' });
+	await expect(generationDetails.getByLabel('Generation prompt')).toContainText(
+		'studio product mockup'
+	);
+	await expect(generationDetails).toContainText('ByteDance · Precise product 1K edit');
+	await expect(generationDetails.getByAltText('Reference image 1')).toHaveAttribute(
+		'src',
+		originalDataURL
+	);
+	await expect(generationDetails.getByLabel('Generation history')).toHaveText(
+		'Original → Seedream 5.0 Pro'
+	);
+	await expect
+		.poll(async () =>
+			page.evaluate(async () => {
+				const database = await new Promise((resolve, reject) => {
+					const request = indexedDB.open('swyx-draw-generation-history');
+					request.onsuccess = () => resolve(request.result);
+					request.onerror = () => reject(request.error);
+				});
+				const record = await new Promise((resolve, reject) => {
+					const request = /** @type {IDBDatabase} */ (database)
+						.transaction('drawing-pages')
+						.objectStore('drawing-pages')
+						.get('default');
+					request.onsuccess = () => resolve(request.result);
+					request.onerror = () => reject(request.error);
+				});
+				return /** @type {any} */ (record)?.generations?.find(
+					(/** @type {any} */ entry) => entry.modelId === 'seedream-5-pro'
+				);
+			})
+		)
+		.toMatchObject({
+			modelId: 'seedream-5-pro',
+			modelEndpoint: 'bytedance/seedream/v5/pro/edit',
+			modelKind: 'image-edit',
+			modelWorkflow: 'Precise product 1K edit',
+			modelSettings: { image_size: 'auto_1K', output_format: 'jpeg' },
+			referenceImages: [
+				{
+					dataURL: originalDataURL,
+					mimeType: originalDataURL.slice(5, originalDataURL.indexOf(';'))
+				}
+			]
+		});
+	expect(await page.evaluate(() => localStorage.getItem('swyx-excalidraw'))).not.toContain(
+		'bytedance/seedream/v5/pro/edit'
+	);
 
 	await promptInput.fill('A second variation');
 	await promptInput.press('Control+Enter');
-	await expect(history.getByRole('button')).toHaveCount(3);
+	await expect(history.locator('.generation-card')).toHaveCount(3);
+	await expect(generationDetails.getByLabel('Generation history')).toHaveText(
+		'Original → Seedream 5.0 Pro → Seedream 5.0 Pro'
+	);
 	const latest = await selectedSceneImage(page);
 	await history.getByRole('button', { name: /Use generation \d+: Original image/ }).click();
 	await expect.poll(async () => (await selectedSceneImage(page)).fileId).not.toBe(latest.fileId);
@@ -844,13 +918,50 @@ test('prompt editing shows progress, retains session generations, and restores t
 		return image ? scene.files[image.fileId].dataURL : '';
 	});
 	expect(restored).toBe(outputImages[0]);
+	await expect(promptInput).toHaveValue(/studio product mockup/i);
+	const generationsBeforeRecipe = captured.length;
+	await generationDetails
+		.getByRole('button', { name: 'Restore reference image, prompt, and model' })
+		.click();
+	await expect(toolbox.getByText(/Reference image, prompt, and model restored/)).toBeVisible();
+	expect(
+		await page.evaluate(() => {
+			const scene = /** @type {any} */ (
+				JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{}')
+			);
+			const image = scene.elements.find((/** @type {any} */ element) => element.type === 'image');
+			return scene.files[image.fileId].dataURL;
+		})
+	).toBe(originalDataURL);
+	await expect(promptInput).toHaveValue(/studio product mockup/i);
+	await expect(toolbox.getByRole('button', { name: 'AI model and workflow selector' })).toContainText(
+		'Seedream 5.0 Pro'
+	);
+	expect(captured).toHaveLength(generationsBeforeRecipe);
+	await history.getByRole('button', { name: /Use generation 2:.*studio product mockup/i }).click();
 	await toolbox.getByRole('button', { name: 'Magic Select', exact: true }).click();
-	await expect(history.getByRole('button')).toHaveCount(3);
+	await expect(history.locator('.generation-card')).toHaveCount(3);
 	const selectedGeneration = await selectedSceneImage(page);
 	await toolbox.getByRole('button', { name: 'Apply Magic Select' }).click();
 	await expect
 		.poll(async () => (await selectedSceneImage(page)).fileId)
 		.not.toBe(selectedGeneration.fileId);
+
+	await page.reload();
+	const restoredCanvas = page.locator('.draw-canvas canvas.excalidraw__canvas.interactive');
+	await expect(restoredCanvas).toBeVisible();
+	await restoredCanvas.click({ position: { x: 360, y: 280 }, force: true });
+	const restoredHistory = page
+		.getByLabel('AI image toolbox')
+		.getByRole('region', { name: 'Generated images from this session' });
+	await expect(restoredHistory.locator('.generation-card')).toHaveCount(3);
+	await expect(
+		restoredHistory.getByRole('region', { name: 'Selected generation details' })
+	).toContainText('studio product mockup');
+	await expect(restoredHistory.getByAltText('Reference image 1')).toHaveAttribute(
+		'src',
+		originalDataURL
+	);
 });
 
 for (const model of [

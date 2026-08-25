@@ -5,6 +5,10 @@
 	import { orderRecentDrawingPages, searchWorkspaceCommands } from '$lib/draw-workspace.js';
 	import { DEFAULT_DRAW_FAL_MODEL, getDrawFalModel } from '$lib/draw-fal-models.js';
 	import {
+		loadDrawingGenerationHistory,
+		saveDrawingGenerationHistory
+	} from '$lib/draw-generation-history.js';
+	import {
 		executeDrawingAgentCommand,
 		captureVisibleDrawingViewport
 	} from '$lib/draw-agent-tools.js';
@@ -41,7 +45,7 @@
 	 * @typedef {{ id: string, name: string, updatedAt?: string | number }} DrawingPage
 	 * @typedef {{ elements?: readonly import('@excalidraw/excalidraw/element/types').ExcalidrawElement[], appState?: Record<string, any>, files?: import('@excalidraw/excalidraw/types').BinaryFiles }} DrawingScene
 	 * @typedef {{ id: string, label: string, description?: string, category: string, keywords?: string | string[], run: () => void | Promise<void> }} WorkspaceCommand
-	 * @typedef {{ id: string, dataURL: string, mimeType: string, prompt: string, modelLabel: string, createdAt: number }} DrawingImageGeneration
+	 * @typedef {import('$lib/draw-generation-history.js').DrawingImageGeneration} DrawingImageGeneration
 	 */
 
 	/** @type {HTMLDivElement} */
@@ -181,7 +185,35 @@
 			...generated.slice(0, Math.max(1, 32 - originals.length)),
 			...originals
 		].slice(0, 32);
+		void saveDrawingGenerationHistory(activePageId, $state.snapshot(imageGenerations)).catch(
+			(error) => {
+				console.warn('Generation history could not be saved on this device.', error);
+			}
+		);
 	}
+
+	$effect(() => {
+		const pageId = activePageId;
+		if (!pageId) return;
+		imageGenerations = [];
+		let cancelled = false;
+		void loadDrawingGenerationHistory(pageId)
+			.then((history) => {
+				if (cancelled || activePageId !== pageId) return;
+				const pending = imageGenerations;
+				const pendingIds = new Set(pending.map((generation) => generation.id));
+				imageGenerations = [
+					...pending,
+					...history.filter((generation) => !pendingIds.has(generation.id))
+				].slice(0, 32);
+			})
+			.catch((error) => {
+				console.warn('Generation history could not be loaded from this device.', error);
+			});
+		return () => {
+			cancelled = true;
+		};
+	});
 
 	/** @param {boolean} active */
 	function updateImageGenerationState(active) {
@@ -641,21 +673,27 @@
 		let mimeType;
 		/** @type {typeof import('$lib/draw-fal-models.js').DRAW_FAL_MODELS[number] | undefined} */
 		let model;
+		/** @type {DrawingImageGeneration | undefined} */
+		let sourceGeneration;
 		if (action === 'fal') {
 			model = getDrawFalModel(options.model ?? DEFAULT_DRAW_FAL_MODEL.id);
 			if (!model) throw new Error('Choose one of the available fal image models.');
 			const imagePrompt = typeof options.prompt === 'string' ? options.prompt.trim() : '';
 			if (!imagePrompt) throw new Error('Cloud image editing requires --prompt TEXT.');
 			operation.reserveSpending(model.priceUsd, model.label);
-			if (!imageGenerations.some((generation) => generation.dataURL === sourceFile.dataURL)) {
-				rememberImageGeneration({
+			sourceGeneration = imageGenerations.find(
+				(generation) => generation.dataURL === sourceFile.dataURL
+			);
+			if (!sourceGeneration) {
+				sourceGeneration = {
 					id: crypto.randomUUID(),
 					dataURL: sourceFile.dataURL,
 					mimeType: sourceFile.mimeType,
 					prompt: 'Original image',
 					modelLabel: 'Original',
 					createdAt: Date.now()
-				});
+				};
+				rememberImageGeneration(sourceGeneration);
 			}
 			const prepared =
 				model.kind === 'text-to-image'
@@ -692,7 +730,21 @@
 					mimeType: 'video/mp4',
 					prompt: imagePrompt,
 					modelLabel: model.label,
-					createdAt: Date.now()
+					createdAt: Date.now(),
+					modelId: model.id,
+					modelEndpoint: model.model,
+					modelProvider: model.provider,
+					modelKind: model.kind,
+					modelWorkflow: model.workflow,
+					modelSettings: { ...model.settings },
+					parentGenerationId: sourceGeneration.id,
+					referenceImages: [
+						{
+							dataURL: sourceFile.dataURL,
+							mimeType: sourceFile.mimeType,
+							generationId: sourceGeneration.id
+						}
+					]
 				});
 				return {
 					action,
@@ -762,7 +814,24 @@
 				mimeType: updated.mimeType,
 				prompt: String(options.prompt),
 				modelLabel: model.label,
-				createdAt: Date.now()
+				createdAt: Date.now(),
+				modelId: model.id,
+				modelEndpoint: model.model,
+				modelProvider: model.provider,
+				modelKind: model.kind,
+				modelWorkflow: model.workflow,
+				modelSettings: { ...model.settings },
+				parentGenerationId: sourceGeneration?.id,
+				referenceImages:
+					model.kind === 'text-to-image'
+						? []
+						: [
+								{
+									dataURL: sourceFile.dataURL,
+									mimeType: sourceFile.mimeType,
+									...(sourceGeneration ? { generationId: sourceGeneration.id } : {})
+								}
+							]
 			});
 		}
 		return {
