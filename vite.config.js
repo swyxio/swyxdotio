@@ -5,7 +5,25 @@ import { ssp } from 'sveltekit-search-params/plugin';
 
 /** @type {import('vite').UserConfig & { test: { include: string[] } }} */
 const config = {
-	plugins: [ssp(), sveltekit(), sveltekitOG()],
+	plugins: [
+		ssp(),
+		sveltekit(),
+		sveltekitOG(),
+		{
+			name: 'shared-immutable-worker-assets',
+			apply: 'build',
+			configResolved(resolved) {
+				const output = resolved.worker.rollupOptions.output;
+				if (!output || Array.isArray(output)) {
+					throw new Error('Expected SvelteKit to configure one worker asset output.');
+				}
+				output.assetFileNames = '_app/immutable/assets/[name].[hash][extname]';
+			}
+		}
+	],
+	build: {
+		reportCompressedSize: false
+	},
 	worker: {
 		format: 'es'
 	},
