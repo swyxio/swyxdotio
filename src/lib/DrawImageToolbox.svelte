@@ -1368,14 +1368,20 @@
 	.fal-model-weight-group {
 		display: grid;
 		gap: 5px;
+		max-height: 118px;
+		overflow-y: auto;
 	}
 
 	.fal-model-weight-heading {
+		position: sticky;
+		top: 0;
+		z-index: 1;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		gap: 6px;
 		padding: 3px 1px;
+		background: #fff;
 		color: #71717a;
 		font-size: 8px;
 	}

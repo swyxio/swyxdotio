@@ -213,6 +213,8 @@ test('selected images expose private tools, exact model sizes, and disclosed fal
 	const closedEditors = imageEditing.getByRole('region', {
 		name: 'Closed models Image editing models'
 	});
+	await expect(openEditors.getByText('Open weights', { exact: true })).toBeVisible();
+	await expect(closedEditors.getByText('Closed models', { exact: true })).toBeVisible();
 	await expect(openEditors.getByRole('checkbox')).toHaveCount(5);
 	await expect(closedEditors.getByRole('checkbox')).toHaveCount(7);
 	await openEditors
