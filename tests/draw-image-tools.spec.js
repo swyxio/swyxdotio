@@ -17,6 +17,19 @@ async function pasteSelectedImage(page) {
 	const toolbox = page.getByRole('region', { name: 'Selected image tools' });
 	await expect(toolbox).toBeVisible();
 	await expect(toolbox.getByLabel('AI image toolbox')).toBeVisible();
+	await expect
+		.poll(() =>
+			page.evaluate(() => {
+				const scene =
+					/** @type {{elements:{type:string,fileId?:string}[],files:Record<string,unknown>}} */ (
+						JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[],"files":{}}')
+					);
+				const image = scene.elements.find((element) => element.type === 'image');
+				return Boolean(image?.fileId && scene.files[image.fileId]);
+			})
+		)
+		.toBe(true);
+	await expect(toolbox.getByRole('button', { name: 'Choose the subject to select' })).toBeVisible();
 	return toolbox;
 }
 
@@ -31,6 +44,18 @@ async function selectedSceneImage(page) {
 		if (!image) throw new Error('The selected scene image is missing.');
 		return { ...image, mimeType: scene.files[image.fileId]?.mimeType };
 	});
+}
+
+/** @param {import('@playwright/test').Page} page */
+async function commitSelectedImageForUndo(page) {
+	const drawingCanvas = page.locator('.draw-canvas canvas.excalidraw__canvas.interactive');
+	const bounds = await drawingCanvas.boundingBox();
+	if (!bounds) throw new Error('The drawing canvas is not visible.');
+	await page.mouse.move(bounds.x + 360, bounds.y + 280);
+	await page.mouse.down();
+	await page.mouse.move(bounds.x + 390, bounds.y + 300, { steps: 4 });
+	await page.mouse.up();
+	await expect(page.getByRole('button', { name: 'Undo' })).toBeEnabled();
 }
 
 test('selected images expose private tools, exact model sizes, and disclosed fal uploads', async ({
@@ -112,6 +137,7 @@ for (const fixture of [
 		});
 
 		const toolbox = await pasteSelectedImage(page);
+		await commitSelectedImageForUndo(page);
 		const original = await selectedSceneImage(page);
 		await toolbox.getByRole('button', { name: fixture.label, exact: true }).click();
 		if (fixture.id === 'magic-eraser') {
@@ -137,6 +163,38 @@ for (const fixture of [
 		await expect.poll(async () => (await selectedSceneImage(page)).fileId).toBe(original.fileId);
 	});
 }
+
+test('the real local vectorization worker generates compact SVG without model downloads', async ({
+	page
+}) => {
+	/** @type {string[]} */
+	const remoteModelRequests = [];
+	page.on('request', (request) => {
+		if (new URL(request.url()).hostname === 'huggingface.co')
+			remoteModelRequests.push(request.url());
+	});
+	const toolbox = await pasteSelectedImage(page);
+	const original = await selectedSceneImage(page);
+	await toolbox.getByRole('button', { name: 'Vectorize Image', exact: true }).click();
+	await toolbox.getByRole('button', { name: 'Apply Vectorize Image' }).click();
+	await expect.poll(async () => (await selectedSceneImage(page)).fileId).not.toBe(original.fileId);
+
+	const vector = await page.evaluate(async () => {
+		const scene =
+			/** @type {{elements:{type:string,fileId:string}[],files:Record<string,{mimeType:string,dataURL:string}>}} */ (
+				JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[],"files":{}}')
+			);
+		const image = scene.elements.find((element) => element.type === 'image');
+		if (!image) throw new Error('Vector image is missing.');
+		const asset = scene.files[image.fileId];
+		const markup = await fetch(asset.dataURL).then((response) => response.text());
+		return { mimeType: asset.mimeType, markup };
+	});
+	expect(vector.mimeType).toBe('image/svg+xml');
+	expect(vector.markup).toContain('<path');
+	expect(vector.markup).not.toContain('<image');
+	expect(remoteModelRequests).toEqual([]);
+});
 
 test('local image editing failures remain visible without mutating the canvas', async ({
 	page

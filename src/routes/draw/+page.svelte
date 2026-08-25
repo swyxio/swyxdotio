@@ -67,6 +67,7 @@
 	let pendingSave;
 	let isSwitchingPage = false;
 	let selectedImageId = $state('');
+	let selectedImageDataUrl = $state('');
 	let backgroundMode = $state('portrait-fast');
 	let backgroundStatus = $state('');
 	let backgroundProgress = $state(0);
@@ -696,6 +697,11 @@
 				? elements.find((element) => element.id === selectedIds[0] && element.type === 'image')
 				: undefined;
 		const nextSelectedImageId = selected?.id ?? '';
+		const nextSelectedImageDataUrl =
+			selected?.type === 'image' && selected.fileId ? (files[selected.fileId]?.dataURL ?? '') : '';
+		if (selectedImageDataUrl !== nextSelectedImageDataUrl) {
+			selectedImageDataUrl = nextSelectedImageDataUrl;
+		}
 		if (selectedImageId !== nextSelectedImageId) {
 			selectedImageId = nextSelectedImageId;
 			backgroundError = '';
@@ -916,6 +922,7 @@
 			<DrawImageToolbox
 				{editor}
 				imageId={selectedImageId}
+				imageDataUrl={selectedImageDataUrl}
 				{updateElement}
 				captureUpdate={captureImmediately}
 				{cloudAvailable}

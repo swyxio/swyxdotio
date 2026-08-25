@@ -205,7 +205,6 @@ async function downloadInpaintingModel(id) {
 
 /** @param {string} id */
 async function loadInpainter(id) {
-	// @ts-expect-error onnxruntime-web 1.21 omits subpath types from its package exports.
 	const runtime = await import('onnxruntime-web/webgpu');
 	runtime.env.wasm.numThreads = 1;
 	const bytes = await downloadInpaintingModel(id);

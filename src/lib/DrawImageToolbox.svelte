@@ -10,6 +10,7 @@
 	/** @type {{
 	 *  editor: DrawingEditor,
 	 *  imageId: string,
+	 *  imageDataUrl: string,
 	 *  updateElement: typeof import('@excalidraw/excalidraw').newElementWith,
 	 *  captureUpdate: typeof import('@excalidraw/excalidraw').CaptureUpdateAction.IMMEDIATELY,
 	 *  cloudAvailable?: boolean,
@@ -18,6 +19,7 @@
 	let {
 		editor,
 		imageId,
+		imageDataUrl,
 		updateElement,
 		captureUpdate,
 		cloudAvailable = false,
@@ -72,13 +74,7 @@
 	);
 
 	$effect(() => {
-		const selected = editor
-			.getSceneElements()
-			.find((element) => element.id === imageId && element.type === 'image');
-		imagePreview =
-			selected?.type === 'image' && selected.fileId
-				? (editor.getFiles()[selected.fileId]?.dataURL ?? '')
-				: '';
+		imagePreview = imageDataUrl;
 		operationError = '';
 		return () => operationAbort?.abort();
 	});
