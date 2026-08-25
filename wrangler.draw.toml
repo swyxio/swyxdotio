@@ -1,0 +1,13 @@
+name = "swyxdotio-draw"
+account_id = "2d017c943ff16e4c52783635ef05e535"
+main = "workers/draw/index.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[[durable_objects.bindings]]
+name = "DRAW_PAGES"
+class_name = "DrawingPages"
+
+[exports.DrawingPages]
+type = "durable-object"
+storage = "sqlite"

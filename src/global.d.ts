@@ -109,6 +109,7 @@ declare namespace App {
 			READ_SESSION_RATE_LIMITER?: RateLimit;
 			READ_FUNNEL_RATE_LIMITER?: RateLimit;
 			PRESENCE_ROOMS?: DurableObjectNamespace;
+			DRAW_PAGES?: DurableObjectNamespace;
 			PRESENCE_ENABLED?: string;
 			PUBLIC_PRESENCE_ADMISSION_RATE?: string;
 			PODCAST_MEDIA?: R2Bucket;

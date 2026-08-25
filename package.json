@@ -9,6 +9,7 @@
 		"prebuild": "npm run validate:yaml && svelte-kit sync",
 		"build": "vite build",
 		"preview": "wrangler dev",
+		"preview:draw": "wrangler dev -c wrangler.toml -c wrangler.draw.toml",
 		"preview:presence": "wrangler dev -c wrangler.toml -c wrangler.presence.toml",
 		"deploy:presence": "wrangler deploy -c wrangler.presence.toml",
 		"deploy:calibration": "wrangler deploy -c wrangler.calibration.toml",

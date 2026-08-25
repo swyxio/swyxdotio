@@ -69,7 +69,7 @@
 			<li>
 				<a href="/draw">
 					<strong>Draw</strong>
-					<span>A fullscreen whiteboard that saves automatically in your browser.</span>
+					<span>A multipage whiteboard that syncs your drawings securely.</span>
 				</a>
 			</li>
 			<li>

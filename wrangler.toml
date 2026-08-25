@@ -68,6 +68,11 @@ name = "PRESENCE_ROOMS"
 class_name = "PresenceRoom"
 script_name = "swyxdotio-presence"
 
+[[durable_objects.bindings]]
+name = "DRAW_PAGES"
+class_name = "DrawingPages"
+script_name = "swyxdotio-draw"
+
 [[r2_buckets]]
 binding = "PODCAST_MEDIA"
 bucket_name = "swyxdotio-podcast-media"

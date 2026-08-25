@@ -6,6 +6,6 @@ export async function load(event) {
 	const next = event.url.searchParams.get('next');
 	return {
 		...tools,
-		next: next?.startsWith('/tools/') ? next : '/tools'
+		next: next === '/draw' || next?.startsWith('/tools/') ? next : '/tools'
 	};
 }
