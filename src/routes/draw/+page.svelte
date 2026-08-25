@@ -4,6 +4,8 @@
 
 	const STORAGE_KEY = 'swyx-excalidraw';
 	const PAGE_STORAGE_KEY = `${STORAGE_KEY}:pages`;
+	const LIBRARY_STORAGE_KEY = `${STORAGE_KEY}:library`;
+	const INSTALLED_LIBRARY_STORAGE_KEY = `${LIBRARY_STORAGE_KEY}:installed-defaults`;
 	const PAGE_API = '/tools/api/draw/pages';
 	const SAVE_DELAY = 800;
 
@@ -45,6 +47,39 @@
 			return value ? JSON.parse(value) : undefined;
 		} catch {
 			return undefined;
+		}
+	}
+
+	/**
+	 * @param {typeof import('$lib/draw-library.js')} library
+	 */
+	function restoreDrawingLibrary(library) {
+		const storedItems = readStorage(LIBRARY_STORAGE_KEY);
+		const installedDefaults = readStorage(INSTALLED_LIBRARY_STORAGE_KEY);
+		const restored = library.prepareDrawingLibrary({
+			savedItems: Array.isArray(storedItems) ? storedItems : [],
+			installedDefaultIds: Array.isArray(installedDefaults) ? installedDefaults : []
+		});
+
+		try {
+			localStorage.setItem(LIBRARY_STORAGE_KEY, JSON.stringify(restored.libraryItems));
+			localStorage.setItem(
+				INSTALLED_LIBRARY_STORAGE_KEY,
+				JSON.stringify(restored.installedDefaultIds)
+			);
+		} catch (error) {
+			console.error('Could not remember installed drawing libraries.', error);
+		}
+
+		return restored.libraryItems;
+	}
+
+	/** @param {import('@excalidraw/excalidraw/types').LibraryItems} libraryItems */
+	function saveDrawingLibrary(libraryItems) {
+		try {
+			localStorage.setItem(LIBRARY_STORAGE_KEY, JSON.stringify(libraryItems));
+		} catch (error) {
+			console.error('Could not save drawing libraries locally.', error);
 		}
 	}
 
@@ -336,16 +371,18 @@
 
 		async function mountEditor() {
 			const [
-				{ createElement },
+				{ createElement, useState },
 				{ createRoot },
-				{ Excalidraw, convertToExcalidrawElements },
+				{ Excalidraw, convertToExcalidrawElements, useHandleLibrary },
 				{ DRAW_PRESETS },
+				drawingLibrary,
 				initialScene
 			] = await Promise.all([
 				import('react'),
 				import('react-dom/client'),
 				import('@excalidraw/excalidraw'),
 				import('$lib/draw-presets.js'),
+				import('$lib/draw-library.js'),
 				loadInitialPage()
 			]);
 
@@ -353,19 +390,42 @@
 
 			convertElements = convertToExcalidrawElements;
 			presets = DRAW_PRESETS;
-			root = createRoot(canvas);
-			root.render(
-				createElement(Excalidraw, {
+			const initialLibraryItems = restoreDrawingLibrary(drawingLibrary);
+			const libraryAdapter = {
+				load() {
+					const savedItems = readStorage(LIBRARY_STORAGE_KEY);
+					return { libraryItems: Array.isArray(savedItems) ? savedItems : initialLibraryItems };
+				},
+				/** @param {{ libraryItems: import('@excalidraw/excalidraw/types').LibraryItems }} data */
+				save({ libraryItems }) {
+					saveDrawingLibrary(libraryItems);
+				}
+			};
+
+			function DrawingEditor() {
+				const [currentEditor, setCurrentEditor] = useState(
+					/** @type {import('@excalidraw/excalidraw/types').ExcalidrawImperativeAPI | null} */ (
+						null
+					)
+				);
+				useHandleLibrary({ excalidrawAPI: currentEditor, adapter: libraryAdapter });
+
+				return createElement(Excalidraw, {
 					initialData: initialScene,
 					theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light',
 					onChange: saveScene,
+					onLibraryChange: saveDrawingLibrary,
 					excalidrawAPI: (
 						/** @type {import('@excalidraw/excalidraw/types').ExcalidrawImperativeAPI} */ instance
 					) => {
 						editor = instance;
+						setCurrentEditor(instance);
 					}
-				})
-			);
+				});
+			}
+
+			root = createRoot(canvas);
+			root.render(createElement(DrawingEditor));
 		}
 
 		void mountEditor();

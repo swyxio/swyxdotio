@@ -133,3 +133,62 @@ test('visual presets insert labeled editable diagrams without replacing existing
 		)
 		.toBe(true);
 });
+
+test('software architecture libraries preload and preserve personally added components', async ({
+	page
+}) => {
+	await page.goto('/draw');
+
+	await expect
+		.poll(() =>
+			page.evaluate(() => {
+				const items = /** @type {{ id: string }[]} */ (
+					JSON.parse(localStorage.getItem('swyx-excalidraw:library') ?? '[]')
+				);
+				return items.length;
+			})
+		)
+		.toBe(42);
+
+	const items = await page.evaluate(
+		() =>
+			/** @type {{ id: string }[]} */ (
+				JSON.parse(localStorage.getItem('swyx-excalidraw:library') ?? '[]')
+			)
+	);
+	expect(items.filter((item) => item.id.startsWith('software-architecture-'))).toHaveLength(7);
+	expect(items.filter((item) => item.id.startsWith('system-design-components-'))).toHaveLength(24);
+
+	await page.getByRole('checkbox', { name: 'Library' }).check({ force: true });
+	await expect(page.locator('.library-unit.library-unit__active')).toHaveCount(42);
+	await page.locator('.library-unit.library-unit__active .library-unit__dragger').first().click();
+	await expect
+		.poll(() =>
+			page.evaluate(() => {
+				const scene = /** @type {{ elements: unknown[] }} */ (
+					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+				);
+				return scene.elements.length;
+			})
+		)
+		.toBeGreaterThan(0);
+
+	await page.evaluate(() => {
+		const storedItems = /** @type {{ id: string }[]} */ (
+			JSON.parse(localStorage.getItem('swyx-excalidraw:library') ?? '[]')
+		);
+		storedItems.push({ ...storedItems[0], id: 'my-personal-component' });
+		localStorage.setItem('swyx-excalidraw:library', JSON.stringify(storedItems));
+	});
+	await page.reload();
+	await expect
+		.poll(() =>
+			page.evaluate(() => {
+				const storedItems = /** @type {{ id: string }[]} */ (
+					JSON.parse(localStorage.getItem('swyx-excalidraw:library') ?? '[]')
+				);
+				return storedItems.some((item) => item.id === 'my-personal-component');
+			})
+		)
+		.toBe(true);
+});
