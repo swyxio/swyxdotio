@@ -214,6 +214,20 @@ test('selected images expose private tools, exact model sizes, and disclosed fal
 		name: 'Closed models Image editing models'
 	});
 	await expect(openEditors.getByText('Open weights', { exact: true })).toBeVisible();
+	expect(
+		await toolbox
+			.locator('.fal-model-cards')
+			.evaluate((element) => getComputedStyle(element).overflowY)
+	).toBe('auto');
+	expect(
+		await imageEditing
+			.locator('.fal-model-folder-cards')
+			.evaluate((element) => getComputedStyle(element).overflowY)
+	).toBe('visible');
+	expect(await openEditors.evaluate((element) => getComputedStyle(element).overflowY)).toBe(
+		'visible'
+	);
+	await closedEditors.getByText('Closed models', { exact: true }).scrollIntoViewIfNeeded();
 	await expect(closedEditors.getByText('Closed models', { exact: true })).toBeVisible();
 	await expect(openEditors.getByRole('checkbox')).toHaveCount(5);
 	await expect(closedEditors.getByRole('checkbox')).toHaveCount(7);

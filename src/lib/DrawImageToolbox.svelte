@@ -1360,22 +1360,15 @@
 	.fal-model-folder-cards {
 		display: grid;
 		gap: 5px;
-		max-height: 165px;
 		padding: 0 6px 6px;
-		overflow-y: auto;
 	}
 
 	.fal-model-weight-group {
 		display: grid;
 		gap: 5px;
-		max-height: 118px;
-		overflow-y: auto;
 	}
 
 	.fal-model-weight-heading {
-		position: sticky;
-		top: 0;
-		z-index: 1;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
