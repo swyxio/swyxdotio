@@ -140,9 +140,9 @@
 		const originals = history.filter((image) => image.modelLabel === 'Original');
 		const generated = history.filter((image) => image.modelLabel !== 'Original');
 		imageGenerations = [
-			...generated.slice(0, Math.max(1, 12 - originals.length)),
+			...generated.slice(0, Math.max(1, 32 - originals.length)),
 			...originals
-		].slice(0, 12);
+		].slice(0, 32);
 	}
 	const recentPages = $derived(orderRecentDrawingPages(pages, activePageId));
 	const filteredComponents = $derived(

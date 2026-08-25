@@ -1,5 +1,28 @@
 import { expect, test } from '@playwright/test';
 
+/** @param {import('@playwright/test').Request} request */
+async function uploadedFalForm(request) {
+	const body = request.postDataBuffer();
+	const contentType = await request.headerValue('content-type');
+	if (!body || !contentType?.startsWith('multipart/form-data;')) {
+		throw new Error('The selected image must be uploaded as binary multipart data.');
+	}
+	const form = await new Response(new Uint8Array(body), {
+		headers: { 'Content-Type': contentType }
+	}).formData();
+	const image = form.get('image');
+	if (typeof image === 'string' || !image) throw new Error('The uploaded image must be a file.');
+	const dataURL = `data:${image.type};base64,${Buffer.from(await image.arrayBuffer()).toString('base64')}`;
+	return {
+		image: dataURL,
+		imageBytes: image.size,
+		imageMimeType: image.type,
+		prompt: String(form.get('prompt')),
+		model: String(form.get('model')),
+		requestBytes: body.byteLength
+	};
+}
+
 /**
  * @param {import('@playwright/test').Page} page
  * @param {{ width: number, height: number, noisy?: boolean } | undefined} [generatedSize]
@@ -95,6 +118,21 @@ async function commitSelectedImageForUndo(page) {
 	await expect(page.getByRole('button', { name: 'Undo' })).toBeEnabled();
 }
 
+/** @param {import('@playwright/test').Locator} toolbox @param {string} modelId */
+async function chooseOnlyModel(toolbox, modelId) {
+	const workflows = /** @type {Record<string, string>} */ ({
+		'nano-banana-2': 'Nano Banana 2 · Balanced 1K edit',
+		'gpt-image-2': 'GPT Image 2 · High-detail 1.5 MP edit',
+		'seedream-5-pro': 'Seedream 5.0 Pro · Precise product 1K edit',
+		'nano-banana-pro': 'Nano Banana Pro · Premium 1K edit',
+		'flux-2': 'FLUX.2 [dev] · Budget 1 MP edit',
+		'flux-klein-9b-generate': 'FLUX.2 [klein] 9B · Fast open-weight text to image',
+		'grok-imagine-video': 'Grok Imagine Video · Budget 5-second image to video'
+	});
+	await toolbox.getByRole('button', { name: 'AI model and workflow selector' }).click();
+	await toolbox.getByRole('button', { name: `Use only ${workflows[modelId]}` }).click();
+}
+
 test('selected images expose private tools, exact model sizes, and disclosed fal uploads', async ({
 	page
 }) => {
@@ -127,15 +165,21 @@ test('selected images expose private tools, exact model sizes, and disclosed fal
 	await expect(toolbox.getByText('Uploads this image to fal.ai')).toBeVisible();
 	await expect(toolbox.getByText('Runs privately on your device')).toHaveCount(0);
 	await expect(toolbox.getByText('No model download required.')).toHaveCount(0);
-	const modelPicker = toolbox.getByRole('combobox', { name: 'AI image model and workflow' });
-	await expect(toolbox.getByText('Model and workflow')).toBeVisible();
-	await expect(modelPicker.locator('option').first()).toHaveText(/Balanced 1K edit.*Nano Banana 2/);
-	await expect(modelPicker).toHaveValue('nano-banana-2');
-	await expect(modelPicker.locator('option')).toHaveCount(5);
+	const modelPicker = toolbox.getByRole('button', { name: 'AI model and workflow selector' });
+	await expect(toolbox.getByText('Models and workflows')).toBeVisible();
+	await expect(modelPicker).toContainText('Nano Banana 2');
+	await modelPicker.click();
+	await expect(toolbox.getByRole('checkbox')).toHaveCount(16);
+	await expect(toolbox.locator('.fal-model-card').first()).toContainText('~$0.006');
+	await expect(toolbox.locator('.fal-model-card').last()).toContainText('~$0.41');
+	await expect(toolbox.getByText('Up to 16 reference images')).toBeVisible();
+	await toolbox.getByRole('button', { name: 'Select all' }).click();
+	await expect(toolbox.getByText('Cheapest first · 16 selected')).toBeVisible();
+	await toolbox.getByRole('button', { name: 'Use only Nano Banana 2 · Balanced 1K edit' }).click();
 	await expect(toolbox.getByText('fal top pick')).toBeVisible();
-	await modelPicker.selectOption('gpt-image-2');
+	await chooseOnlyModel(toolbox, 'gpt-image-2');
 	await expect(toolbox.getByText('AA #3', { exact: true })).toBeVisible();
-	await expect(toolbox.getByText('~$0.219/edit · cloud processing')).toBeVisible();
+	await expect(toolbox.getByText('~$0.219 total · 1 generation')).toBeVisible();
 	await toolbox.getByRole('button', { name: 'Improve lighting' }).click();
 	const prompt = toolbox.getByRole('textbox', { name: 'AI image editing prompt' });
 	await expect(prompt).toHaveValue(/natural, balanced illumination/i);
@@ -425,6 +469,130 @@ test('large transparent image edits preserve dimensions and synchronize under th
 	}
 });
 
+test('selecting multiple models generates once per model from the same source image', async ({
+	page
+}) => {
+	/** @type {Awaited<ReturnType<typeof uploadedFalForm>>[]} */
+	const captured = [];
+	/** @type {string[]} */
+	let outputImages = [];
+	await page.route('**/tools/api/draw/edit**', async (route) => {
+		if (route.request().method() === 'POST') {
+			const request = await uploadedFalForm(route.request());
+			captured.push(request);
+			await route.fulfill({
+				status: 202,
+				json: { requestId: `batch-${captured.length - 1}`, model: request.model }
+			});
+			return;
+		}
+		const index = Number(
+			new URL(route.request().url()).searchParams.get('requestId')?.split('-').at(-1)
+		);
+		await route.fulfill({ json: { status: 'COMPLETED', image: outputImages[index] } });
+	});
+	const toolbox = await pasteSelectedImage(page);
+	outputImages = await page.evaluate(() => {
+		const canvas = document.createElement('canvas');
+		canvas.width = 128;
+		canvas.height = 128;
+		const context = canvas.getContext('2d');
+		if (!context) throw new Error('A canvas context is required.');
+		return ['#bc364b', '#476fc1'].map((color) => {
+			context.fillStyle = color;
+			context.fillRect(0, 0, canvas.width, canvas.height);
+			return canvas.toDataURL('image/png');
+		});
+	});
+	await toolbox.getByRole('button', { name: 'AI prompt', exact: true }).click();
+	await toolbox.getByRole('button', { name: 'AI model and workflow selector' }).click();
+	await toolbox.getByRole('checkbox', { name: 'FLUX.2 [dev] · Budget 1 MP edit' }).check();
+	await expect(toolbox.getByText('Cheapest first · 2 selected')).toBeVisible();
+	await toolbox.getByRole('button', { name: 'AI model and workflow selector' }).click();
+	await expect(toolbox.getByText('~$0.104 total · 2 generations')).toBeVisible();
+	await toolbox
+		.getByRole('textbox', { name: 'AI image editing prompt' })
+		.fill('Compare model outputs');
+	await toolbox.getByRole('button', { name: 'Generate AI image edit' }).click();
+	const history = toolbox.getByRole('region', { name: 'Generated images from this session' });
+	await expect(history.getByRole('button')).toHaveCount(3);
+	expect(captured.map((request) => request.model)).toEqual(['flux-2', 'nano-banana-2']);
+	expect(captured[0]?.image).toBe(captured[1]?.image);
+	await expect(history.getByText('Original', { exact: true })).toBeVisible();
+	await expect(history.getByText('FLUX.2 [dev]')).toBeVisible();
+	await expect(history.getByText('Nano Banana 2')).toBeVisible();
+	await expect(toolbox.getByText('Generated 2 of 2 results')).toBeVisible();
+});
+
+test('text-to-image never uploads the selected image and generated video stays outside the canvas', async ({
+	page
+}) => {
+	/** @type {{model: string, hasImage: boolean}[]} */
+	const requests = [];
+	let generatedImage = '';
+	const videoUrl = 'https://v3b.fal.media/files/example/generated.mp4';
+	await page.route('https://v3b.fal.media/**', (route) =>
+		route.fulfill({ status: 200, contentType: 'video/mp4', body: Buffer.alloc(0) })
+	);
+	await page.route('**/tools/api/draw/edit**', async (route) => {
+		if (route.request().method() === 'POST') {
+			const body = route.request().postDataBuffer();
+			const contentType = await route.request().headerValue('content-type');
+			if (!body || !contentType) throw new Error('A multipart request is required.');
+			const form = await new Response(new Uint8Array(body), {
+				headers: { 'Content-Type': contentType }
+			}).formData();
+			const model = String(form.get('model'));
+			requests.push({ model, hasImage: form.has('image') });
+			await route.fulfill({ status: 202, json: { requestId: model, model } });
+			return;
+		}
+		const model = new URL(route.request().url()).searchParams.get('model');
+		await route.fulfill({
+			json:
+				model === 'grok-imagine-video'
+					? { status: 'COMPLETED', video: videoUrl }
+					: { status: 'COMPLETED', image: generatedImage }
+		});
+	});
+	const toolbox = await pasteSelectedImage(page);
+	const original = await selectedSceneImage(page);
+	generatedImage = await page.evaluate(() => {
+		const canvas = document.createElement('canvas');
+		canvas.width = 128;
+		canvas.height = 128;
+		const context = canvas.getContext('2d');
+		if (!context) throw new Error('A canvas context is required.');
+		context.fillStyle = '#7a4fc2';
+		context.fillRect(0, 0, 128, 128);
+		return canvas.toDataURL('image/png');
+	});
+	await toolbox.getByRole('button', { name: 'AI prompt', exact: true }).click();
+	await chooseOnlyModel(toolbox, 'flux-klein-9b-generate');
+	await expect(toolbox.getByText('Prompt only · no image upload')).toBeVisible();
+	await toolbox
+		.getByRole('textbox', { name: 'AI image editing prompt' })
+		.fill('Create an alpine landscape');
+	await toolbox.getByRole('button', { name: 'Generate AI image edit' }).click();
+	await expect.poll(async () => (await selectedSceneImage(page)).fileId).not.toBe(original.fileId);
+	expect(requests[0]).toEqual({ model: 'flux-klein-9b-generate', hasImage: false });
+
+	const beforeVideo = await selectedSceneImage(page);
+	await chooseOnlyModel(toolbox, 'grok-imagine-video');
+	await expect(toolbox.getByText('Uploads this image to fal.ai')).toBeVisible();
+	await toolbox.getByRole('button', { name: 'Generate AI image edit' }).click();
+	await expect(toolbox.getByRole('region', { name: 'Generated video preview' })).toBeVisible();
+	await expect(toolbox.getByRole('link', { name: 'Download video' })).toHaveAttribute(
+		'href',
+		videoUrl
+	);
+	expect(requests[1]).toEqual({ model: 'grok-imagine-video', hasImage: true });
+	expect((await selectedSceneImage(page)).fileId).toBe(beforeVideo.fileId);
+	expect(await page.evaluate(() => localStorage.getItem('swyx-excalidraw'))).not.toContain(
+		videoUrl
+	);
+});
+
 test('prompt editing shows progress, retains session generations, and restores them for local tools', async ({
 	page
 }) => {
@@ -434,7 +602,7 @@ test('prompt editing shows progress, retains session generations, and restores t
 			/** @type {Blob} */ source
 		) => source;
 	});
-	/** @type {{image:string,prompt:string,model:string}[]} */
+	/** @type {Awaited<ReturnType<typeof uploadedFalForm>>[]} */
 	const captured = [];
 	/** @type {string[]} */
 	let outputImages = [];
@@ -443,13 +611,40 @@ test('prompt editing shows progress, retains session generations, and restores t
 	const firstGenerationReady = new Promise((resolve) => {
 		continueFirstGeneration = () => resolve(undefined);
 	});
-	await page.route('**/tools/api/draw/edit', async (route) => {
-		const request = route.request().postDataJSON();
-		captured.push(request);
-		const generationIndex = captured.length - 1;
+	let firstGenerationPolls = 0;
+	await page.route('**/tools/api/draw/edit**', async (route) => {
+		if (route.request().method() === 'POST') {
+			const request = await uploadedFalForm(route.request());
+			captured.push(request);
+			await route.fulfill({
+				status: 202,
+				json: {
+					requestId: `generation-${captured.length - 1}`,
+					model: request.model,
+					status: 'IN_QUEUE',
+					queuePosition: 2
+				}
+			});
+			return;
+		}
+		const generationIndex = Number(
+			new URL(route.request().url()).searchParams.get('requestId')?.split('-').at(-1)
+		);
+		if (generationIndex === 0 && firstGenerationPolls++ === 0) {
+			await route.fulfill({ json: { status: 'IN_QUEUE', queuePosition: 2 } });
+			return;
+		}
+		if (generationIndex === 0 && firstGenerationPolls === 2) {
+			await route.fulfill({ json: { status: 'IN_PROGRESS', message: 'Denoising pass 2 of 8' } });
+			return;
+		}
 		if (generationIndex === 0) await firstGenerationReady;
 		await route.fulfill({
-			json: { image: outputImages[generationIndex], model: 'fal-ai/flux-2/edit' }
+			json: {
+				status: 'COMPLETED',
+				image: outputImages[generationIndex],
+				model: 'fal-ai/flux-2/edit'
+			}
 		});
 	});
 	const toolbox = await pasteSelectedImage(page);
@@ -475,9 +670,7 @@ test('prompt editing shows progress, retains session generations, and restores t
 		});
 	});
 	await toolbox.getByRole('button', { name: 'AI prompt', exact: true }).click();
-	await toolbox
-		.getByRole('combobox', { name: 'AI image model and workflow' })
-		.selectOption('seedream-5-pro');
+	await chooseOnlyModel(toolbox, 'seedream-5-pro');
 	await toolbox.getByRole('button', { name: 'Product mockup' }).click();
 	const promptInput = toolbox.getByRole('textbox', { name: 'AI image editing prompt' });
 	await expect(toolbox.getByRole('button', { name: 'Generate AI image edit' })).toHaveAttribute(
@@ -486,7 +679,8 @@ test('prompt editing shows progress, retains session generations, and restores t
 	);
 	await promptInput.press('Meta+Enter');
 	await expect(toolbox.getByRole('progressbar', { name: 'AI generation progress' })).toBeVisible();
-	await expect(toolbox.getByText('Generating with Seedream 5.0 Pro')).toBeVisible();
+	await expect(toolbox.getByText('Waiting for Seedream 5.0 Pro · 2 ahead')).toBeVisible();
+	await expect(toolbox.getByText('Denoising pass 2 of 8')).toBeVisible();
 	await expect(
 		toolbox.getByText('Your result will appear on the canvas and in session history.')
 	).toBeVisible();
@@ -494,8 +688,9 @@ test('prompt editing shows progress, retains session generations, and restores t
 	await expect.poll(async () => (await selectedSceneImage(page)).fileId).not.toBe(original.fileId);
 	expect(captured[0]?.prompt).toMatch(/studio product mockup/i);
 	expect(captured[0]?.image).toMatch(/^data:image\//);
+	expect(captured[0]?.imageBytes).toBeLessThan(captured[0]?.image.length ?? 0);
 	expect(captured[0]?.model).toBe('seedream-5-pro');
-	expect(Object.keys(captured[0] ?? {}).sort()).toEqual(['image', 'model', 'prompt']);
+	expect(captured[0]?.requestBytes).toBeLessThan(12_000_000);
 	await expect(toolbox.getByText('AI edit applied')).toBeVisible();
 	const history = toolbox.getByRole('region', { name: 'Generated images from this session' });
 	await expect(history.getByRole('button')).toHaveCount(2);
@@ -557,13 +752,22 @@ for (const model of [
 				/** @type {Blob} */ source
 			) => new Blob([source, new Uint8Array(1_400_000)], { type: source.type });
 		});
-		/** @type {{ image: string, prompt: string, model: string } | undefined} */
+		/** @type {Awaited<ReturnType<typeof uploadedFalForm>> | undefined} */
 		let uploaded;
 		let requestBytes = 0;
-		await page.route('**/tools/api/draw/edit', async (route) => {
-			uploaded = route.request().postDataJSON();
-			requestBytes = route.request().postDataBuffer()?.byteLength ?? 0;
-			await route.fulfill({ json: { image: uploaded?.image, model: model.id } });
+		await page.route('**/tools/api/draw/edit**', async (route) => {
+			if (route.request().method() === 'POST') {
+				uploaded = await uploadedFalForm(route.request());
+				requestBytes = uploaded.requestBytes;
+				await route.fulfill({
+					status: 202,
+					json: { requestId: 'optimized-job', model: model.id, status: 'IN_QUEUE' }
+				});
+				return;
+			}
+			await route.fulfill({
+				json: { status: 'COMPLETED', image: uploaded?.image, model: model.id }
+			});
 		});
 		const toolbox = await pasteSelectedImage(page, { width: 2400, height: 1600, noisy: true });
 		const imported = await selectedSceneImage(page);
@@ -582,9 +786,7 @@ for (const model of [
 		});
 		expect(originalBytes).toBeGreaterThan(1_900_000);
 		await toolbox.getByRole('button', { name: 'AI prompt', exact: true }).click();
-		await toolbox
-			.getByRole('combobox', { name: 'AI image model and workflow' })
-			.selectOption(model.id);
+		await chooseOnlyModel(toolbox, model.id);
 		await expect(toolbox.getByText(/Large images automatically fit/)).toBeVisible();
 		await toolbox
 			.getByRole('textbox', { name: 'AI image editing prompt' })
@@ -593,8 +795,10 @@ for (const model of [
 		await expect
 			.poll(async () => (await selectedSceneImage(page)).fileId)
 			.not.toBe(original.fileId);
-		expect(requestBytes).toBeLessThan(1_900_000);
+		expect(requestBytes).toBeLessThan(12_000_000);
+		expect(requestBytes).toBeLessThan((uploaded?.image.length ?? 0) + 1000);
 		expect(uploaded?.model).toBe(model.id);
+		expect(uploaded?.imageMimeType).toBe(model.mimeType);
 		expect(uploaded?.image.startsWith(`data:${model.mimeType};base64,`)).toBe(true);
 		const dimensions = await page.evaluate(async (image) => {
 			if (!image) throw new Error('No optimized image was uploaded.');

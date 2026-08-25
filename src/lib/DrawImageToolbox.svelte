@@ -1,12 +1,9 @@
 <script>
 	import { DRAW_IMAGE_TOOLS, processImageTool } from '$lib/draw-image-tools.js';
 	import { prepareDrawingFalImage } from '$lib/draw-fal-image.js';
+	import { runDrawingFalGeneration } from '$lib/draw-fal-queue.js';
 	import { optimizeDrawingImageForCloud, replaceDrawingImage } from '$lib/draw-image-scene.js';
-	import {
-		DEFAULT_DRAW_FAL_MODEL,
-		DRAW_FAL_MODELS,
-		getDrawFalModel
-	} from '$lib/draw-fal-models.js';
+	import { DEFAULT_DRAW_FAL_MODEL, DRAW_FAL_MODELS } from '$lib/draw-fal-models.js';
 
 	/**
 	 * @typedef {import('@excalidraw/excalidraw/types').ExcalidrawImperativeAPI} DrawingEditor
@@ -78,7 +75,9 @@
 	let blurStrength = $state(14);
 	let focusDepth = $state(0.55);
 	let prompt = $state('');
-	let falModelId = $state(/** @type {string} */ (DEFAULT_DRAW_FAL_MODEL.id));
+	let selectedFalModelIds = $state(/** @type {string[]} */ ([DEFAULT_DRAW_FAL_MODEL.id]));
+	let modelPickerOpen = $state(false);
+	let activeVideoGenerationId = $state('');
 	let operationStatus = $state('');
 	let operationProgress = $state(0);
 	let operationError = $state('');
@@ -86,11 +85,28 @@
 	let processingFal = $state(false);
 	/** @type {AbortController | undefined} */
 	let operationAbort;
+	/** @type {{ requestId: string, model: string } | undefined} */
+	let activeFalJob;
 	const selectedTool = $derived(
 		action && action !== 'background' && action !== 'fal' ? DRAW_IMAGE_TOOLS[action] : undefined
 	);
 	const needsTarget = $derived(action === 'magic-select' || action === 'magic-eraser');
-	const selectedFalModel = $derived(getDrawFalModel(falModelId) ?? DEFAULT_DRAW_FAL_MODEL);
+	const orderedFalModels = $derived(
+		[...DRAW_FAL_MODELS].sort((left, right) => left.priceUsd - right.priceUsd)
+	);
+	const selectedFalModels = $derived(
+		orderedFalModels.filter((model) => selectedFalModelIds.includes(model.id))
+	);
+	const selectedFalModel = $derived(selectedFalModels[0] ?? DEFAULT_DRAW_FAL_MODEL);
+	const estimatedFalCost = $derived(
+		selectedFalModels.reduce((total, model) => total + model.priceUsd, 0)
+	);
+	const uploadsSelectedImage = $derived(
+		selectedFalModels.some((model) => model.kind !== 'text-to-image')
+	);
+	const activeVideoGeneration = $derived(
+		generations.find((generation) => generation.id === activeVideoGenerationId)
+	);
 	const downloadSize = $derived(
 		selectedTool?.downloadBytes ? `~${(selectedTool.downloadBytes / 1_000_000).toFixed(1)} MB` : ''
 	);
@@ -98,8 +114,26 @@
 	$effect(() => {
 		imagePreview = imageDataUrl;
 		operationError = '';
+	});
+
+	$effect(() => {
 		return () => operationAbort?.abort();
 	});
+
+	/** @param {typeof DRAW_FAL_MODELS[number]} model */
+	function modelReferenceNote(model) {
+		if (model.referenceImages === 0) return 'Prompt only · no image upload';
+		if (model.referenceImages === 1) return '1 reference image';
+		if (model.referenceImages === null) return 'Multiple reference images';
+		return `Up to ${model.referenceImages} reference images`;
+	}
+
+	/** @param {string} modelId */
+	function toggleFalModel(modelId) {
+		selectedFalModelIds = selectedFalModelIds.includes(modelId)
+			? selectedFalModelIds.filter((id) => id !== modelId)
+			: [...selectedFalModelIds, modelId];
+	}
 
 	/** @param {Blob} blob */
 	function readDataUrl(blob) {
@@ -247,88 +281,154 @@
 	}
 
 	async function applyFalEdit() {
-		if (processing || processingFal || !prompt.trim()) return;
+		if (processing || processingFal || !prompt.trim() || !selectedFalModels.length) return;
 		const generationPrompt = prompt.trim();
-		const generationModel = selectedFalModel;
+		const generationModels = [...selectedFalModels];
 		processingFal = true;
+		modelPickerOpen = false;
 		operationProgress = 0;
-		operationStatus = `Generating with ${generationModel.label}`;
+		operationStatus = `Generating with ${generationModels[0].label}`;
 		operationError = '';
-		operationAbort = new AbortController();
+		const generationAbort = new AbortController();
+		operationAbort = generationAbort;
 		try {
-			const selected = selectedImage();
-			const prepared = await prepareDrawingFalImage({
-				dataURL: selected.file.dataURL,
-				prompt: generationPrompt,
-				model: generationModel,
-				signal: operationAbort.signal,
-				onProgress: (message) => {
-					operationStatus = message;
+			const source = selectedImage();
+			let originalRemembered = generations.some((entry) => entry.dataURL === source.file.dataURL);
+			/** @type {string[]} */
+			const failures = [];
+			let completed = 0;
+			for (const [index, generationModel] of generationModels.entries()) {
+				generationAbort.signal.throwIfAborted();
+				const prefix =
+					generationModels.length > 1 ? `${index + 1}/${generationModels.length} · ` : '';
+				operationStatus = `${prefix}Generating with ${generationModel.label}`;
+				try {
+					const prepared =
+						generationModel.kind === 'text-to-image'
+							? undefined
+							: await prepareDrawingFalImage({
+									dataURL: source.file.dataURL,
+									prompt: generationPrompt,
+									model: generationModel,
+									signal: generationAbort.signal,
+									onProgress: (message) => {
+										operationStatus = `${prefix}${message}`;
+									}
+								});
+					const result = await runDrawingFalGeneration({
+						image: prepared?.blob,
+						prompt: generationPrompt,
+						model: generationModel.id,
+						signal: generationAbort.signal,
+						onProgress: (update) => {
+							if (update.requestId)
+								activeFalJob = { requestId: update.requestId, model: generationModel.id };
+							if (update.status === 'UPLOADING') {
+								operationStatus =
+									generationModel.kind === 'text-to-image'
+										? `${prefix}Sending prompt to ${generationModel.label}`
+										: `${prefix}Uploading optimized image to ${generationModel.label}`;
+							} else if (update.status === 'IN_QUEUE') {
+								const position = update.queuePosition;
+								operationStatus =
+									typeof position === 'number' && Number.isSafeInteger(position) && position > 0
+										? `${prefix}Waiting for ${generationModel.label} · ${position} ahead`
+										: `${prefix}Waiting for ${generationModel.label}`;
+							} else {
+								operationStatus = `${prefix}${update.message || `Generating with ${generationModel.label}`}`;
+							}
+						}
+					});
+					generationAbort.signal.throwIfAborted();
+					if (!originalRemembered) {
+						onGeneration?.({
+							id: crypto.randomUUID(),
+							dataURL: source.file.dataURL,
+							mimeType: source.file.mimeType,
+							prompt: 'Original image',
+							modelLabel: 'Original',
+							createdAt: Date.now()
+						});
+						originalRemembered = true;
+					}
+					if (generationModel.kind === 'image-to-video') {
+						const id = crypto.randomUUID();
+						onGeneration?.({
+							id,
+							dataURL: result.video,
+							mimeType: 'video/mp4',
+							prompt: generationPrompt,
+							modelLabel: generationModel.label,
+							createdAt: Date.now()
+						});
+						activeVideoGenerationId = id;
+						operationStatus = 'Video generated — preview or download below';
+					} else {
+						operationStatus = `${prefix}Preparing your generated image`;
+						const mimeType = result.image.slice(5, result.image.indexOf(';')) || 'image/png';
+						const edited = await insertEditedImage(
+							selectedImage(),
+							result.image,
+							mimeType,
+							'AI edit applied'
+						);
+						onGeneration?.({
+							id: crypto.randomUUID(),
+							dataURL: edited.dataURL,
+							mimeType: edited.mimeType,
+							prompt: generationPrompt,
+							modelLabel: generationModel.label,
+							createdAt: Date.now()
+						});
+					}
+					completed += 1;
+					operationProgress = Math.round((completed / generationModels.length) * 100);
+					activeFalJob = undefined;
+				} catch (error) {
+					if (error instanceof Error && error.name === 'AbortError') throw error;
+					failures.push(
+						`${generationModel.label}: ${error instanceof Error ? error.message : 'Generation failed'}`
+					);
 				}
-			});
-			operationAbort.signal.throwIfAborted();
-			operationStatus = `Generating with ${generationModel.label}`;
-			const response = await fetch('/tools/api/draw/edit', {
-				method: 'POST',
-				credentials: 'same-origin',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					image: prepared.dataURL,
-					prompt: generationPrompt,
-					model: generationModel.id
-				}),
-				signal: operationAbort.signal
-			});
-			const result = await response.json().catch(() => ({}));
-			if (!response.ok) {
-				throw new Error(
-					result.error ??
-						(response.status === 401
-							? 'Sign in to use cloud image editing.'
-							: 'The cloud image edit could not be completed.')
-				);
 			}
-			if (typeof result.image !== 'string' || !result.image.startsWith('data:image/')) {
-				throw new Error('The image-editing service returned an invalid image.');
-			}
-			operationAbort.signal.throwIfAborted();
-			operationStatus = 'Preparing your generated image';
-			const mimeType = result.image.slice(5, result.image.indexOf(';')) || 'image/png';
-			const edited = await insertEditedImage(selected, result.image, mimeType, 'AI edit applied');
-			if (!generations.some((generation) => generation.dataURL === selected.file.dataURL)) {
-				onGeneration?.({
-					id: crypto.randomUUID(),
-					dataURL: selected.file.dataURL,
-					mimeType: selected.file.mimeType,
-					prompt: 'Original image',
-					modelLabel: 'Original',
-					createdAt: Date.now()
-				});
-			}
-			onGeneration?.({
-				id: crypto.randomUUID(),
-				dataURL: edited.dataURL,
-				mimeType: edited.mimeType,
-				prompt: generationPrompt,
-				modelLabel: generationModel.label,
-				createdAt: Date.now()
-			});
+			if (failures.length) operationError = failures.join(' · ');
+			if (generationModels.length > 1 && completed)
+				operationStatus = `Generated ${completed} of ${generationModels.length} results`;
+			if (!completed && failures.length) operationStatus = '';
 		} catch (error) {
-			if (error instanceof Error && error.name === 'AbortError') {
-				operationStatus = '';
-			} else {
+			if (error instanceof Error && error.name === 'AbortError') operationStatus = '';
+			else {
 				operationError = error instanceof Error ? error.message : 'Could not edit the image.';
 				operationStatus = '';
 			}
 		} finally {
 			processingFal = false;
 			operationAbort = undefined;
+			activeFalJob = undefined;
 		}
+	}
+
+	function cancelFalGeneration() {
+		const job = activeFalJob;
+		operationAbort?.abort();
+		if (!job) return;
+		const query = new URLSearchParams(job);
+		void fetch(`/tools/api/draw/edit?${query}`, {
+			method: 'DELETE',
+			credentials: 'same-origin'
+		}).catch(() => {});
 	}
 
 	/** @param {ImageGeneration} generation */
 	async function restoreGeneration(generation) {
 		if (processing || processingFal || backgroundProcessing) return;
+		if (generation.mimeType.startsWith('video/')) {
+			activeVideoGenerationId = generation.id;
+			operationError = '';
+			operationStatus = 'Video ready — preview or download below';
+			return;
+		}
+		activeVideoGenerationId = '';
 		processing = true;
 		operationProgress = 0;
 		operationError = '';
@@ -364,7 +464,9 @@
 		<strong>Image tools</strong>
 		<span>
 			{action === 'fal'
-				? 'Uploads this image to fal.ai'
+				? uploadsSelectedImage
+					? 'Uploads this image to fal.ai'
+					: 'Prompt only · no image upload'
 				: action
 					? 'Runs privately on your device'
 					: 'Choose a tool'}
@@ -512,25 +614,88 @@
 				</div>
 			{/if}
 			<div class="fal-model-picker">
-				<label for="drawing-ai-workflow">Model and workflow</label>
-				<select
+				<label for="drawing-ai-workflow">Models and workflows</label>
+				<button
 					id="drawing-ai-workflow"
-					aria-label="AI image model and workflow"
-					bind:value={falModelId}
+					type="button"
+					class="fal-model-toggle"
+					aria-label="AI model and workflow selector"
+					aria-expanded={modelPickerOpen}
+					aria-controls="drawing-ai-models"
 					disabled={processing || processingFal}
+					onclick={() => (modelPickerOpen = !modelPickerOpen)}
 				>
-					{#each DRAW_FAL_MODELS as model (model.id)}
-						<option value={model.id}>
-							{model.workflow} · {model.label} · {model.price}
-						</option>
-					{/each}
-				</select>
-				<div class="fal-model-detail">
-					<span>{selectedFalModel.description}</span>
-					<strong>{selectedFalModel.badge}</strong>
-				</div>
+					<span>
+						{selectedFalModels.length === 1
+							? `${selectedFalModels[0].label} · ${selectedFalModels[0].workflow}`
+							: selectedFalModels.length
+								? `${selectedFalModels.length} models selected`
+								: 'Select one or more models'}
+					</span>
+					<span aria-hidden="true">{modelPickerOpen ? '▴' : '▾'}</span>
+				</button>
+				{#if modelPickerOpen}
+					<div id="drawing-ai-models" class="fal-model-menu" aria-label="Available AI models">
+						<div class="fal-model-menu-heading">
+							<span>Cheapest first · {selectedFalModels.length} selected</span>
+							<button
+								type="button"
+								class="fal-model-select-all"
+								onclick={() => {
+									selectedFalModelIds =
+										selectedFalModels.length === orderedFalModels.length
+											? []
+											: orderedFalModels.map((model) => model.id);
+								}}
+							>
+								{selectedFalModels.length === orderedFalModels.length ? 'Clear all' : 'Select all'}
+							</button>
+						</div>
+						<div class="fal-model-cards">
+							{#each orderedFalModels as model (model.id)}
+								<div class="fal-model-card" class:selected={selectedFalModelIds.includes(model.id)}>
+									<label class="fal-model-option">
+										<input
+											type="checkbox"
+											aria-label="{model.label} · {model.workflow}"
+											checked={selectedFalModelIds.includes(model.id)}
+											onchange={() => toggleFalModel(model.id)}
+										/>
+										<span class="fal-model-copy">
+											<span class="fal-model-card-title">
+												<strong>{model.label}</strong>
+												<span>{model.price}</span>
+											</span>
+											<span>{model.workflow}</span>
+											<span>{modelReferenceNote(model)} · {model.badge}</span>
+										</span>
+									</label>
+									<button
+										type="button"
+										class="fal-model-only"
+										aria-label="Use only {model.label} · {model.workflow}"
+										onclick={() => {
+											selectedFalModelIds = [model.id];
+											modelPickerOpen = false;
+										}}
+									>
+										Only
+									</button>
+								</div>
+							{/each}
+						</div>
+					</div>
+				{/if}
+				{#if selectedFalModels.length === 1}
+					<div class="fal-model-detail">
+						<span>{selectedFalModel.description}</span>
+						<strong>{selectedFalModel.badge}</strong>
+					</div>
+				{/if}
 				<p class="fal-upload-hint">
-					Large images automatically fit {selectedFalModel.input.size} and the secure upload limit.
+					{uploadsSelectedImage
+						? 'Large images automatically fit each model’s limits and the secure upload limit.'
+						: 'Text-to-image workflows only send your prompt; the selected image is not uploaded.'}
 				</p>
 			</div>
 			<textarea
@@ -560,9 +725,13 @@
 				{/each}
 			</div>
 			<div class="fal-action-row">
-				<span>{selectedFalModel.price}/edit · cloud processing</span>
+				<span>
+					{selectedFalModels.length
+						? `~$${estimatedFalCost.toFixed(3).replace(/0+$/, '').replace(/\.$/, '')} total · ${selectedFalModels.length} ${selectedFalModels.length === 1 ? 'generation' : 'generations'}`
+						: 'Select at least one model'}
+				</span>
 				{#if processingFal}
-					<button type="button" class="secondary-action" onclick={() => operationAbort?.abort()}>
+					<button type="button" class="secondary-action" onclick={cancelFalGeneration}>
 						Cancel
 					</button>
 				{:else}
@@ -571,7 +740,7 @@
 						class="fal-action"
 						aria-label="Generate AI image edit"
 						aria-keyshortcuts="Meta+Enter Control+Enter"
-						disabled={processing || !prompt.trim()}
+						disabled={processing || !prompt.trim() || !selectedFalModels.length}
 						onclick={() => void applyFalEdit()}
 					>
 						Generate <kbd aria-hidden="true">⌘↵</kbd>
@@ -579,6 +748,25 @@
 				{/if}
 			</div>
 		</div>
+	{/if}
+
+	{#if activeVideoGeneration}
+		<section class="video-generation" aria-label="Generated video preview">
+			<div class="history-heading">
+				<strong>{activeVideoGeneration.modelLabel}</strong>
+				<a href={activeVideoGeneration.dataURL} target="_blank" rel="noreferrer">Download video</a>
+			</div>
+			<!-- svelte-ignore a11y_media_has_caption (generated clips do not include transcript tracks) -->
+			<!-- svelte-ignore a11y_media_has_caption (Generated video providers do not supply caption tracks.) -->
+			<video
+				src={activeVideoGeneration.dataURL}
+				controls
+				playsinline
+				preload="metadata"
+				aria-label="Generated video"
+			></video>
+			<p>Video stays outside the canvas and cloud drawing sync.</p>
+		</section>
 	{/if}
 
 	{#if generations.length}
@@ -592,13 +780,19 @@
 					<button
 						type="button"
 						class="generation-card"
-						class:current={imagePreview === generation.dataURL}
+						class:current={imagePreview === generation.dataURL ||
+							activeVideoGenerationId === generation.id}
 						aria-label="Use generation {index + 1}: {generation.prompt}"
-						aria-pressed={imagePreview === generation.dataURL}
+						aria-pressed={imagePreview === generation.dataURL ||
+							activeVideoGenerationId === generation.id}
 						disabled={processing || processingFal || backgroundProcessing}
 						onclick={() => void restoreGeneration(generation)}
 					>
-						<img src={generation.dataURL} alt="" />
+						{#if generation.mimeType.startsWith('video/')}
+							<video src={generation.dataURL} muted playsinline preload="metadata"></video>
+						{:else}
+							<img src={generation.dataURL} alt="" />
+						{/if}
 						<span>{generation.modelLabel}</span>
 					</button>
 				{/each}
@@ -809,7 +1003,11 @@
 		accent-color: #6554c0;
 	}
 
-	.fal-model-picker select {
+	.fal-model-toggle {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
 		width: 100%;
 		height: 34px;
 		padding: 0 8px;
@@ -818,6 +1016,102 @@
 		background: #fff;
 		color: #27272a;
 		font-size: 10px;
+		text-align: left;
+		cursor: pointer;
+	}
+
+	.fal-model-toggle > span:first-child {
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.fal-model-menu {
+		margin-top: 5px;
+		padding: 7px;
+		border: 1px solid #dedee6;
+		border-radius: 8px;
+		background: #fff;
+	}
+
+	.fal-model-menu-heading {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0 2px 6px;
+		color: #71717a;
+		font-size: 9px;
+	}
+
+	.fal-model-select-all,
+	.fal-model-only {
+		padding: 3px 5px;
+		border: 0;
+		border-radius: 4px;
+		background: transparent;
+		color: #6554c0;
+		font-size: 9px;
+		cursor: pointer;
+	}
+
+	.fal-model-cards {
+		display: grid;
+		gap: 5px;
+		max-height: 250px;
+		overflow-y: auto;
+	}
+
+	.fal-model-card {
+		display: flex;
+		align-items: center;
+		gap: 5px;
+		padding: 7px;
+		border: 1px solid #ececf0;
+		border-radius: 7px;
+		background: #fff;
+	}
+
+	.fal-model-card.selected {
+		border-color: #aaa2ed;
+		background: #f7f5ff;
+	}
+
+	.fal-model-option {
+		display: flex;
+		flex: 1;
+		align-items: flex-start;
+		gap: 7px;
+		min-width: 0;
+		cursor: pointer;
+	}
+
+	.fal-model-option input {
+		margin: 2px 0 0;
+		accent-color: #6554c0;
+	}
+
+	.fal-model-copy {
+		display: grid;
+		flex: 1;
+		gap: 2px;
+		min-width: 0;
+		color: #71717a;
+		font-size: 8px;
+	}
+
+	.fal-model-card-title {
+		display: flex;
+		justify-content: space-between;
+		gap: 5px;
+		color: #27272a;
+		font-size: 9px;
+	}
+
+	.fal-model-card-title > span {
+		flex: none;
+		color: #5142ab;
+		font-weight: 600;
 	}
 
 	.fal-model-detail {
@@ -916,13 +1210,40 @@
 		background: #f7f5ff;
 	}
 
-	.generation-card img {
+	.generation-card img,
+	.generation-card video {
 		display: block;
 		width: 100%;
 		height: 49px;
 		border-radius: 4px;
 		background: repeating-conic-gradient(#f4f4f5 0 25%, #fff 0 50%) 50% / 10px 10px;
 		object-fit: contain;
+	}
+
+	.video-generation {
+		margin-top: 11px;
+		padding-top: 10px;
+		border-top: 1px solid #ececf0;
+	}
+
+	.video-generation video {
+		display: block;
+		width: 100%;
+		max-height: 180px;
+		margin-top: 7px;
+		border-radius: 7px;
+		background: #18181b;
+	}
+
+	.video-generation a {
+		color: #6554c0;
+		font-size: 9px;
+	}
+
+	.video-generation p {
+		margin: 5px 0 0;
+		color: #71717a;
+		font-size: 9px;
 	}
 
 	.generation-card span {

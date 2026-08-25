@@ -1,7 +1,7 @@
 import { MAX_DRAW_FAL_REQUEST_BYTES } from './draw-fal-models.js';
 
 const REQUEST_HEADROOM_BYTES = 8192;
-const SUPPORTED_INLINE_IMAGE = /^data:image\/(?:png|jpeg|webp|avif|gif);base64,/;
+const SUPPORTED_IMAGE = /^image\/(?:png|jpeg|webp|avif|gif)$/;
 const encoder = new TextEncoder();
 
 /**
@@ -9,10 +9,15 @@ const encoder = new TextEncoder();
  */
 
 /**
- * @param {{ image: string, prompt: string, model: string }} request
+ * @param {{ imageBytes: number, prompt: string, model: string }} request
  */
-export function estimateDrawingFalRequestBytes(request) {
-	return encoder.encode(JSON.stringify(request)).byteLength;
+export function estimateDrawingFalUploadBytes(request) {
+	return (
+		request.imageBytes +
+		encoder.encode(request.prompt).byteLength +
+		encoder.encode(request.model).byteLength +
+		REQUEST_HEADROOM_BYTES
+	);
 }
 
 /**
@@ -37,20 +42,9 @@ export function drawingFalInputDimensions(width, height, model) {
 	};
 }
 
-/** @param {Blob} blob */
-function readInlineImage(blob) {
-	return new Promise((resolve, reject) => {
-		const reader = new FileReader();
-		reader.onload = () => resolve(/** @type {string} */ (reader.result));
-		reader.onerror = () =>
-			reject(reader.error ?? new Error('Could not prepare the selected image.'));
-		reader.readAsDataURL(blob);
-	});
-}
-
 /**
  * Decode locally, preserve the original aspect ratio, and progressively encode
- * until the complete authenticated JSON request fits its real transport limit.
+ * until the binary multipart upload fits its authenticated transport limit.
  * @param {{
  *  dataURL: string,
  *  prompt: string,
@@ -72,16 +66,16 @@ export async function prepareDrawingFalImage(options) {
 	}
 	try {
 		let dimensions = drawingFalInputDimensions(bitmap.width, bitmap.height, model);
-		const originalRequest = { image: dataURL, prompt, model: model.id };
+		const originalRequest = { imageBytes: originalBlob.size, prompt, model: model.id };
 		if (
-			SUPPORTED_INLINE_IMAGE.test(dataURL) &&
+			SUPPORTED_IMAGE.test(originalBlob.type) &&
+			originalBlob.type === model.input.mimeType &&
 			dimensions.width === bitmap.width &&
 			dimensions.height === bitmap.height &&
-			estimateDrawingFalRequestBytes(originalRequest) <=
-				MAX_DRAW_FAL_REQUEST_BYTES - REQUEST_HEADROOM_BYTES
+			estimateDrawingFalUploadBytes(originalRequest) <= MAX_DRAW_FAL_REQUEST_BYTES
 		) {
 			return {
-				dataURL,
+				blob: originalBlob,
 				width: bitmap.width,
 				height: bitmap.height,
 				originalWidth: bitmap.width,
@@ -109,13 +103,12 @@ export async function prepareDrawingFalImage(options) {
 				signal?.throwIfAborted();
 				const blob = await canvas.convertToBlob({ type: model.input.mimeType, quality });
 				if (blob.type !== model.input.mimeType) continue;
-				const prepared = await readInlineImage(blob);
 				if (
-					estimateDrawingFalRequestBytes({ image: prepared, prompt, model: model.id }) <=
-					MAX_DRAW_FAL_REQUEST_BYTES - REQUEST_HEADROOM_BYTES
+					estimateDrawingFalUploadBytes({ imageBytes: blob.size, prompt, model: model.id }) <=
+					MAX_DRAW_FAL_REQUEST_BYTES
 				) {
 					return {
-						dataURL: prepared,
+						blob,
 						width: dimensions.width,
 						height: dimensions.height,
 						originalWidth: bitmap.width,

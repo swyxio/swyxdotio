@@ -3,12 +3,12 @@ import test from 'node:test';
 
 import {
 	drawingFalInputDimensions,
-	estimateDrawingFalRequestBytes
+	estimateDrawingFalUploadBytes
 } from '../src/lib/draw-fal-image.js';
 import { DRAW_FAL_MODELS, MAX_DRAW_FAL_REQUEST_BYTES } from '../src/lib/draw-fal-models.js';
 
 test('each configured model has an explicit documented resolution and image-format budget', () => {
-	assert.equal(MAX_DRAW_FAL_REQUEST_BYTES, 1_900_000);
+	assert.equal(MAX_DRAW_FAL_REQUEST_BYTES, 12_000_000);
 	for (const model of DRAW_FAL_MODELS) {
 		assert.ok(model.workflow.length > 5, model.id);
 		assert.ok(model.input.maxPixels >= 1_048_576, model.id);
@@ -62,15 +62,15 @@ test('invalid reference dimensions are rejected before upload', () => {
 	}
 });
 
-test('request budgets count the full serialized prompt, model, and UTF-8 payload', () => {
+test('binary upload budgets count raw image bytes, UTF-8 fields, and multipart headroom', () => {
 	const request = {
-		image: 'data:image/webp;base64,YQ==',
+		imageBytes: 2_000_000,
 		prompt: 'Preserve the subject ✨',
 		model: 'flux-2'
 	};
 	assert.equal(
-		estimateDrawingFalRequestBytes(request),
-		new TextEncoder().encode(JSON.stringify(request)).byteLength
+		estimateDrawingFalUploadBytes(request),
+		2_000_000 + new TextEncoder().encode(request.prompt).byteLength + request.model.length + 8192
 	);
-	assert.ok(estimateDrawingFalRequestBytes({ ...request, prompt: 'a'.repeat(1000) }) > 1000);
+	assert.ok(estimateDrawingFalUploadBytes({ ...request, prompt: 'a'.repeat(1000) }) > 2_009_000);
 });

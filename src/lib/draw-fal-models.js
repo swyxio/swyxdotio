@@ -5,7 +5,7 @@
  *
  * Last verified: 2026-08-25.
  */
-export const MAX_DRAW_FAL_REQUEST_BYTES = 1_900_000;
+export const MAX_DRAW_FAL_REQUEST_BYTES = 12_000_000;
 
 export const DRAW_FAL_MODELS = /** @type {const} */ ([
 	{
@@ -13,21 +13,49 @@ export const DRAW_FAL_MODELS = /** @type {const} */ ([
 		label: 'Nano Banana 2',
 		provider: 'Google',
 		model: 'fal-ai/nano-banana-2/edit',
+		kind: 'image-edit',
 		artificialAnalysisRank: 6,
 		price: '$0.08',
+		priceUsd: 0.08,
+		referenceImages: 14,
 		workflow: 'Balanced 1K edit',
 		description: 'Best balance of quality, speed, and cost',
 		badge: 'fal top pick',
 		input: { maxPixels: 1_048_576, maxEdge: 2048, mimeType: 'image/webp', size: '1K' },
-		settings: { resolution: '1K', aspect_ratio: 'auto', output_format: 'webp' }
+		settings: {
+			resolution: '1K',
+			aspect_ratio: 'auto',
+			output_format: 'webp',
+			safety_tolerance: '6'
+		}
+	},
+	{
+		id: 'reve-2-1',
+		label: 'Reve 2.1',
+		provider: 'Reve',
+		model: 'reve/2.1/edit',
+		kind: 'image-edit',
+		artificialAnalysisRank: 2,
+		price: '$0.25',
+		priceUsd: 0.25,
+		referenceImages: 1,
+		workflow: 'Top-ranked 1 MP edit',
+		description: 'Leading prompt adherence, composition, and text rendering',
+		badge: 'AA #2',
+		imageInput: 'image_url',
+		input: { maxPixels: 1_048_576, maxEdge: 2048, mimeType: 'image/webp', size: '1 MP' },
+		settings: { aspect_ratio: 'auto', output_format: 'webp' }
 	},
 	{
 		id: 'gpt-image-2',
 		label: 'GPT Image 2',
 		provider: 'OpenAI',
 		model: 'openai/gpt-image-2/edit',
+		kind: 'image-edit',
 		artificialAnalysisRank: 3,
 		price: '~$0.219',
+		priceUsd: 0.219,
+		referenceImages: 16,
 		workflow: 'High-detail 1.5 MP edit',
 		description: 'Highest-ranked available quality and prompt precision',
 		badge: 'AA #3',
@@ -35,12 +63,31 @@ export const DRAW_FAL_MODELS = /** @type {const} */ ([
 		settings: { quality: 'high', image_size: 'auto', output_format: 'webp' }
 	},
 	{
+		id: 'grok-imagine-2',
+		label: 'Grok Imagine Image 2.0',
+		provider: 'xAI',
+		model: 'xai/grok-imagine-image/v2.0/edit',
+		kind: 'image-edit',
+		artificialAnalysisRank: null,
+		price: '~$0.07',
+		priceUsd: 0.07,
+		referenceImages: 3,
+		workflow: 'Grok 2 medium-quality 1K edit',
+		description: 'Newest Grok image editor with medium-quality 1K output',
+		badge: 'New on fal',
+		input: { maxPixels: 1_048_576, maxEdge: 2048, mimeType: 'image/webp', size: '1K' },
+		settings: { resolution: '1k', quality: 'medium', aspect_ratio: 'auto', output_format: 'webp' }
+	},
+	{
 		id: 'seedream-5-pro',
 		label: 'Seedream 5.0 Pro',
 		provider: 'ByteDance',
 		model: 'bytedance/seedream/v5/pro/edit',
+		kind: 'image-edit',
 		artificialAnalysisRank: 8,
 		price: '$0.0675',
+		priceUsd: 0.0675,
+		referenceImages: 10,
 		workflow: 'Precise product 1K edit',
 		description: 'Precise regional changes and sketch-to-render',
 		badge: 'New on fal',
@@ -48,7 +95,7 @@ export const DRAW_FAL_MODELS = /** @type {const} */ ([
 		settings: {
 			image_size: 'auto_1K',
 			output_format: 'jpeg',
-			enable_safety_checker: true
+			enable_safety_checker: false
 		}
 	},
 	{
@@ -56,26 +103,191 @@ export const DRAW_FAL_MODELS = /** @type {const} */ ([
 		label: 'Nano Banana Pro',
 		provider: 'Google',
 		model: 'fal-ai/nano-banana-pro/edit',
+		kind: 'image-edit',
 		artificialAnalysisRank: 9,
 		price: '$0.15',
+		priceUsd: 0.15,
+		referenceImages: 14,
 		workflow: 'Premium 1K edit',
 		description: 'Premium reasoning, typography, and final-quality edits',
 		badge: 'fal premium pick',
 		input: { maxPixels: 1_048_576, maxEdge: 2048, mimeType: 'image/webp', size: '1K' },
-		settings: { resolution: '1K', aspect_ratio: 'auto', output_format: 'webp' }
+		settings: {
+			resolution: '1K',
+			aspect_ratio: 'auto',
+			output_format: 'webp',
+			safety_tolerance: '6'
+		}
+	},
+	{
+		id: 'ideogram-v4',
+		label: 'Ideogram V4',
+		provider: 'Ideogram',
+		model: 'ideogram/v4/image-to-image',
+		kind: 'image-edit',
+		artificialAnalysisRank: null,
+		price: '~$0.015',
+		priceUsd: 0.015,
+		referenceImages: 1,
+		workflow: 'Typography-focused 1 MP edit',
+		description: 'Balanced image edits with strong typography and composition',
+		badge: 'Typography',
+		imageInput: 'image_url',
+		input: { maxPixels: 1_048_576, maxEdge: 2048, mimeType: 'image/jpeg', size: '1 MP' },
+		settings: {
+			image_size: 'auto',
+			expansion_model: 'None',
+			rendering_speed: 'BALANCED',
+			output_format: 'jpeg',
+			enable_safety_checker: false
+		}
+	},
+	{
+		id: 'hunyuan-3-instruct',
+		label: 'HunyuanImage 3.0 Instruct',
+		provider: 'Tencent',
+		model: 'fal-ai/hunyuan-image/v3/instruct/edit',
+		kind: 'image-edit',
+		artificialAnalysisRank: 12,
+		price: '~$0.09',
+		priceUsd: 0.09,
+		referenceImages: 3,
+		workflow: 'Top open-weight 1 MP edit',
+		description: 'Highest-ranked open-weight editor for instruction-following edits',
+		badge: 'Open #1',
+		input: { maxPixels: 1_048_576, maxEdge: 2048, mimeType: 'image/jpeg', size: '1 MP' },
+		settings: { image_size: 'auto', output_format: 'jpeg', enable_safety_checker: false }
+	},
+	{
+		id: 'hidream-o1',
+		label: 'HiDream-O1 Image',
+		provider: 'HiDream',
+		model: 'fal-ai/hidream-o1-image/edit',
+		kind: 'image-edit',
+		artificialAnalysisRank: 24,
+		price: '~$0.01',
+		priceUsd: 0.01,
+		referenceImages: null,
+		workflow: 'Open-weight value 1 MP edit',
+		description: 'Second-ranked open-weight editor at approximately one cent',
+		badge: 'Open #2',
+		imageInput: 'reference_image_urls',
+		input: { maxPixels: 1_048_576, maxEdge: 2048, mimeType: 'image/webp', size: '1 MP' },
+		settings: { output_format: 'webp', keep_original_aspect: true, enable_safety_checker: false }
+	},
+	{
+		id: 'qwen-image-edit-2511',
+		label: 'Qwen Image Edit 2511',
+		provider: 'Alibaba',
+		model: 'fal-ai/qwen-image-edit-2511',
+		kind: 'image-edit',
+		artificialAnalysisRank: 34,
+		price: '~$0.03',
+		priceUsd: 0.03,
+		referenceImages: null,
+		workflow: 'Qwen open-weight 1 MP edit',
+		description: 'Open-weight Qwen editor with accurate text and subject changes',
+		badge: 'Open weights',
+		input: { maxPixels: 1_048_576, maxEdge: 2048, mimeType: 'image/webp', size: '1 MP' },
+		settings: { output_format: 'webp', enable_safety_checker: false }
+	},
+	{
+		id: 'flux-klein-9b',
+		label: 'FLUX.2 [klein] 9B',
+		provider: 'Black Forest Labs',
+		model: 'fal-ai/flux-2/klein/9b/edit',
+		kind: 'image-edit',
+		artificialAnalysisRank: 33,
+		price: '~$0.022',
+		priceUsd: 0.022,
+		referenceImages: 4,
+		workflow: 'Fast open-weight 1 MP edit',
+		description: 'Third-ranked open-weight editor with fast four-step inference',
+		badge: 'Open #3',
+		input: { maxPixels: 1_048_576, maxEdge: 2048, mimeType: 'image/webp', size: '1 MP' },
+		settings: { output_format: 'webp', enable_safety_checker: false }
 	},
 	{
 		id: 'flux-2',
 		label: 'FLUX.2 [dev]',
 		provider: 'Black Forest Labs',
 		model: 'fal-ai/flux-2/edit',
+		kind: 'image-edit',
 		artificialAnalysisRank: 48,
 		price: '~$0.024',
+		priceUsd: 0.024,
+		referenceImages: 4,
 		workflow: 'Budget 1 MP edit',
 		description: 'Budget-friendly everyday edits at roughly one megapixel',
 		badge: 'Best value',
 		input: { maxPixels: 1_048_576, maxEdge: 2048, mimeType: 'image/webp', size: '1 MP' },
-		settings: { output_format: 'webp', enable_safety_checker: true }
+		settings: { output_format: 'webp', enable_safety_checker: false }
+	},
+	{
+		id: 'flux-klein-9b-generate',
+		label: 'FLUX.2 [klein] 9B',
+		provider: 'Black Forest Labs',
+		model: 'fal-ai/flux-2/klein/9b',
+		kind: 'text-to-image',
+		artificialAnalysisRank: null,
+		price: '~$0.006',
+		priceUsd: 0.006,
+		referenceImages: 0,
+		workflow: 'Fast open-weight text to image',
+		description: 'Generate a new image from your prompt without uploading the canvas image',
+		badge: 'Text to image',
+		input: { maxPixels: 1_048_576, maxEdge: 2048, mimeType: 'image/webp', size: '1 MP' },
+		settings: { image_size: 'square_hd', output_format: 'webp', enable_safety_checker: false }
+	},
+	{
+		id: 'grok-imagine-2-generate',
+		label: 'Grok Imagine Image 2.0',
+		provider: 'xAI',
+		model: 'xai/grok-imagine-image/v2.0/text-to-image',
+		kind: 'text-to-image',
+		artificialAnalysisRank: null,
+		price: '$0.06',
+		priceUsd: 0.06,
+		referenceImages: 0,
+		workflow: 'Grok 2 medium-quality text to image',
+		description: 'Generate an original 1K image from text with no image upload',
+		badge: 'Text to image',
+		input: { maxPixels: 1_048_576, maxEdge: 2048, mimeType: 'image/webp', size: '1K' },
+		settings: { resolution: '1k', quality: 'medium', aspect_ratio: '1:1', output_format: 'webp' }
+	},
+	{
+		id: 'grok-imagine-video',
+		label: 'Grok Imagine Video',
+		provider: 'xAI',
+		model: 'xai/grok-imagine-video/image-to-video',
+		kind: 'image-to-video',
+		artificialAnalysisRank: null,
+		price: '~$0.252',
+		priceUsd: 0.252,
+		referenceImages: 1,
+		workflow: 'Budget 5-second image to video',
+		description: 'Animate the selected image into a five-second 480p video with audio',
+		badge: 'Video · 5s',
+		imageInput: 'image_url',
+		input: { maxPixels: 1_048_576, maxEdge: 2048, mimeType: 'image/jpeg', size: '480p' },
+		settings: { duration: 5, resolution: '480p', aspect_ratio: 'auto' }
+	},
+	{
+		id: 'grok-imagine-video-1-5',
+		label: 'Grok Imagine Video 1.5',
+		provider: 'xAI',
+		model: 'xai/grok-imagine-video/v1.5/image-to-video',
+		kind: 'image-to-video',
+		artificialAnalysisRank: null,
+		price: '~$0.41',
+		priceUsd: 0.41,
+		referenceImages: 1,
+		workflow: 'Premium 5-second image to video',
+		description: 'Animate the selected image with the newest Grok video model and native audio',
+		badge: 'Video 1.5 · 5s',
+		imageInput: 'image_url',
+		input: { maxPixels: 1_048_576, maxEdge: 2048, mimeType: 'image/jpeg', size: '480p' },
+		settings: { duration: 5, resolution: '480p' }
 	}
 ]);
 
