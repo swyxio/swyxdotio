@@ -67,6 +67,12 @@
 				</a>
 			</li>
 			<li>
+				<a href="/draw">
+					<strong>Draw</strong>
+					<span>A fullscreen whiteboard that saves automatically in your browser.</span>
+				</a>
+			</li>
+			<li>
 				<a href="/tools/podcast">
 					<strong>Podcast studio</strong>
 					<span>Upload MP3s and prepend episodes to an R2-backed RSS feed.</span>
