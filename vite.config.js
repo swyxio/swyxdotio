@@ -6,6 +6,9 @@ import { ssp } from 'sveltekit-search-params/plugin';
 /** @type {import('vite').UserConfig & { test: { include: string[] } }} */
 const config = {
 	plugins: [ssp(), sveltekit(), sveltekitOG()],
+	worker: {
+		format: 'es'
+	},
 	test: {
 		include: ['src/**/*.{test,spec}.{js,ts}']
 	},

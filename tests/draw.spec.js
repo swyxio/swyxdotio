@@ -205,3 +205,149 @@ test('software architecture libraries preload and preserve personally added comp
 		)
 		.toBe(true);
 });
+
+for (const fixture of [
+	{ label: 'portrait', path: '/swyx-ski.jpeg', mode: 'portrait-fast' },
+	{ label: 'nonhuman object', path: '/assets/hammers.png', mode: 'general-balanced' }
+]) {
+	test(`image background removal preserves ${fixture.label} dimensions and supports undo`, async ({
+		page
+	}) => {
+		await page.addInitScript(() => {
+			/** @type {any} */ (globalThis).__SWYX_REMOVE_IMAGE_BACKGROUND__ = async (
+				/** @type {Blob} */ source,
+				/** @type {{ mode: string, onProgress: (value: { phase: 'download' | 'processing', progress: number, label: string }) => void }} */ options
+			) => {
+				options.onProgress({ phase: 'download', progress: 0.45, label: 'Downloading test model' });
+				const image = await createImageBitmap(source);
+				const drawing = document.createElement('canvas');
+				drawing.width = image.width;
+				drawing.height = image.height;
+				const context = drawing.getContext('2d');
+				if (!context) throw new Error('Canvas rendering is unavailable.');
+				context.drawImage(image, 0, 0);
+				context.clearRect(0, 0, 1, 1);
+				options.onProgress({ phase: 'processing', progress: 1, label: 'Removing test background' });
+				return new Promise((resolve, reject) => {
+					drawing.toBlob(
+						(blob) => (blob ? resolve(blob) : reject(new Error('Could not create test image.'))),
+						'image/png'
+					);
+				});
+			};
+		});
+		await page.goto('/draw');
+		const drawingCanvas = page.locator('.draw-canvas canvas.excalidraw__canvas.interactive');
+		await expect(drawingCanvas).toBeVisible();
+		await expect(page.getByRole('region', { name: 'Selected image tools' })).toHaveCount(0);
+		await drawingCanvas.click({ position: { x: 360, y: 280 } });
+		await page.evaluate(async (path) => {
+			const source = await fetch(path).then((response) => response.blob());
+			const transfer = new DataTransfer();
+			transfer.items.add(new File([source], 'selected-image.png', { type: source.type }));
+			document.dispatchEvent(
+				new ClipboardEvent('paste', { bubbles: true, cancelable: true, clipboardData: transfer })
+			);
+		}, fixture.path);
+
+		const toolbar = page.getByRole('region', { name: 'Selected image tools' });
+		await expect(toolbar).toBeVisible();
+		await expect
+			.poll(() =>
+				page.evaluate(() => {
+					const scene =
+						/** @type {{ elements: { type: string, width: number, fileId?: string }[], files: Record<string, unknown> }} */ (
+							JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[],"files":{}}')
+						);
+					const image = scene.elements.find((element) => element.type === 'image');
+					return image?.fileId && scene.files[image.fileId] ? image.width : 0;
+				})
+			)
+			.toBeGreaterThan(100);
+		const canvasBounds = await drawingCanvas.boundingBox();
+		if (!canvasBounds) throw new Error('Drawing canvas is not visible.');
+		await page.mouse.move(canvasBounds.x + 360, canvasBounds.y + 280);
+		await page.mouse.down();
+		await page.mouse.move(canvasBounds.x + 390, canvasBounds.y + 300, { steps: 4 });
+		await page.mouse.up();
+		await expect(page.getByRole('button', { name: 'Undo' })).toBeEnabled();
+		const modeSelect = toolbar.getByRole('combobox', { name: 'Background removal model' });
+		await expect(modeSelect.locator('option')).toHaveCount(4);
+		await expect(modeSelect).toHaveValue('portrait-fast');
+		if (fixture.mode !== 'portrait-fast') {
+			await modeSelect.selectOption(fixture.mode);
+			await expect(toolbar.getByText('First use downloads ~85 MB.')).toBeVisible();
+		}
+
+		const original = await page.evaluate(() => {
+			const scene =
+				/** @type {{ elements: { type: string, id: string, fileId: string, x: number, y: number, width: number, height: number }[] }} */ (
+					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+				);
+			return scene.elements.find((element) => element.type === 'image');
+		});
+		expect(original).toBeDefined();
+		if (!original) throw new Error('The pasted image was not added to the canvas.');
+
+		await toolbar.getByRole('button', { name: 'Remove image background' }).click();
+		await expect
+			.poll(() =>
+				page.evaluate(() => {
+					const scene = /** @type {{ elements: { type: string, fileId: string }[] }} */ (
+						JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+					);
+					return scene.elements.find((element) => element.type === 'image')?.fileId;
+				})
+			)
+			.not.toBe(original.fileId);
+
+		const processed = await page.evaluate(async () => {
+			const scene =
+				/** @type {{ elements: { type: string, id: string, fileId: string, x: number, y: number, width: number, height: number }[], files: Record<string, { dataURL: string, mimeType: string }> }} */ (
+					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[],"files":{}}')
+				);
+			const image = scene.elements.find((element) => element.type === 'image');
+			if (!image) throw new Error('Processed image missing.');
+			const asset = scene.files[image.fileId];
+			const bitmap = await createImageBitmap(await fetch(asset.dataURL).then((res) => res.blob()));
+			const drawing = document.createElement('canvas');
+			drawing.width = bitmap.width;
+			drawing.height = bitmap.height;
+			const context = drawing.getContext('2d');
+			if (!context) throw new Error('Canvas rendering is unavailable.');
+			context.drawImage(bitmap, 0, 0);
+			return {
+				image,
+				fileIds: Object.keys(scene.files),
+				mimeType: asset.mimeType,
+				pixelAlpha: context.getImageData(0, 0, 1, 1).data[3],
+				imageWidth: bitmap.width,
+				imageHeight: bitmap.height,
+				rememberedMode: JSON.parse(
+					localStorage.getItem('swyx-excalidraw:background-mode') ?? 'null'
+				)
+			};
+		});
+		expect(processed.image.id).toBe(original.id);
+		expect(processed.image.x).toBe(original.x);
+		expect(processed.image.y).toBe(original.y);
+		expect(processed.image.width).toBe(original.width);
+		expect(processed.image.height).toBe(original.height);
+		expect(processed.fileIds).toEqual([processed.image.fileId]);
+		expect(processed.mimeType).toBe('image/png');
+		expect(processed.pixelAlpha).toBe(0);
+		if (fixture.mode !== 'portrait-fast') expect(processed.rememberedMode).toBe(fixture.mode);
+
+		await page.getByRole('button', { name: 'Undo' }).click();
+		await expect
+			.poll(() =>
+				page.evaluate(() => {
+					const scene = /** @type {{ elements: { type: string, fileId: string }[] }} */ (
+						JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+					);
+					return scene.elements.find((element) => element.type === 'image')?.fileId;
+				})
+			)
+			.toBe(original.fileId);
+	});
+}

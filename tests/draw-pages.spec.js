@@ -97,6 +97,7 @@ test('drawing pages can be created, switched, renamed, and deleted locally', asy
 
 test('unlocking cloud drawing sync returns directly to the drawing canvas', async ({ page }) => {
 	await page.goto('/tools?next=/draw');
+	await page.waitForLoadState('networkidle');
 	await page.getByLabel('Password').fill('draw-test-password');
 	await page.getByRole('button', { name: 'Unlock tools' }).click();
 	await expect(page).toHaveURL(/\/draw$/);

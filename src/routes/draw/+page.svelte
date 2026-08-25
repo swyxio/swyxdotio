@@ -6,8 +6,16 @@
 	const PAGE_STORAGE_KEY = `${STORAGE_KEY}:pages`;
 	const LIBRARY_STORAGE_KEY = `${STORAGE_KEY}:library`;
 	const INSTALLED_LIBRARY_STORAGE_KEY = `${LIBRARY_STORAGE_KEY}:installed-defaults`;
+	const BACKGROUND_MODE_STORAGE_KEY = `${STORAGE_KEY}:background-mode`;
 	const PAGE_API = '/tools/api/draw/pages';
 	const SAVE_DELAY = 800;
+	const MAX_CLOUD_SCENE_BYTES = 1_800_000;
+	const BACKGROUND_MODES = [
+		{ id: 'portrait-fast', label: 'Portrait · fast', size: '~6.6 MB' },
+		{ id: 'general-fast', label: 'General · fast', size: '~42 MB' },
+		{ id: 'general-balanced', label: 'General · balanced', size: '~85 MB' },
+		{ id: 'general-maximum', label: 'General · maximum', size: '~176 MB' }
+	];
 
 	/**
 	 * @typedef {{ id: string, name: string, updatedAt?: string | number }} DrawingPage
@@ -20,6 +28,10 @@
 	let editor = $state.raw(null);
 	/** @type {typeof import('@excalidraw/excalidraw').convertToExcalidrawElements | null} */
 	let convertElements = null;
+	/** @type {typeof import('@excalidraw/excalidraw').newElementWith | null} */
+	let updateElement = null;
+	/** @type {typeof import('@excalidraw/excalidraw').CaptureUpdateAction.IMMEDIATELY | null} */
+	let captureImmediately = null;
 	/** @type {typeof import('$lib/draw-presets.js').DRAW_PRESETS} */
 	let presets = $state([]);
 	let isPresetMenuOpen = $state(false);
@@ -38,7 +50,18 @@
 	/** @type {{ pageId: string, scene: DrawingScene } | undefined} */
 	let pendingSave;
 	let isSwitchingPage = false;
+	let selectedImageId = $state('');
+	let backgroundMode = $state('portrait-fast');
+	let backgroundStatus = $state('');
+	let backgroundProgress = $state(0);
+	let backgroundError = $state('');
+	let isRemovingBackground = $state(false);
+	/** @type {AbortController | undefined} */
+	let backgroundAbort;
 	const activePage = $derived(pages.find((page) => page.id === activePageId));
+	const activeBackgroundMode = $derived(
+		BACKGROUND_MODES.find((mode) => mode.id === backgroundMode) ?? BACKGROUND_MODES[0]
+	);
 
 	/** @param {string} key */
 	function readStorage(key) {
@@ -207,6 +230,7 @@
 		}
 
 		isSwitchingPage = true;
+		backgroundAbort?.abort();
 		await flushPendingSave();
 		try {
 			const response = cloudAvailable
@@ -332,6 +356,163 @@
 		isPresetMenuOpen = false;
 	}
 
+	/** @param {Blob} blob */
+	function readBlobDataUrl(blob) {
+		return new Promise((resolve, reject) => {
+			const reader = new FileReader();
+			reader.onload = () => resolve(/** @type {string} */ (reader.result));
+			reader.onerror = () => reject(reader.error ?? new Error('Could not read the image.'));
+			reader.readAsDataURL(blob);
+		});
+	}
+
+	/**
+	 * @param {readonly import('@excalidraw/excalidraw/element/types').ExcalidrawElement[]} elements
+	 * @param {import('@excalidraw/excalidraw/types').BinaryFiles} files
+	 */
+	function filesUsedByScene(elements, files) {
+		const referencedFiles = new Set(
+			/** @type {string[]} */ (
+				elements.flatMap((element) =>
+					element.type === 'image' && !element.isDeleted && element.fileId ? [element.fileId] : []
+				)
+			)
+		);
+		return Object.fromEntries(
+			Object.entries(files).filter(([fileId]) => referencedFiles.has(fileId))
+		);
+	}
+
+	/**
+	 * @param {{ phase: 'download' | 'processing', progress?: number, percent?: number, loaded?: number, total?: number, label?: string, message?: string }} update
+	 */
+	function updateBackgroundProgress(update) {
+		const progress =
+			update.progress ??
+			(update.percent === undefined ? undefined : update.percent / 100) ??
+			(update.total ? (update.loaded ?? 0) / update.total : undefined);
+		backgroundProgress =
+			progress === undefined ? 0 : Math.round(Math.max(0, Math.min(1, progress)) * 100);
+		backgroundStatus =
+			update.label ??
+			update.message ??
+			(update.phase === 'download'
+				? `Downloading ${activeBackgroundMode.size} model`
+				: 'Removing background');
+	}
+
+	async function removeSelectedImageBackground() {
+		if (!editor || !updateElement || !captureImmediately || !selectedImageId) return;
+		const image = editor
+			.getSceneElements()
+			.find((element) => element.id === selectedImageId && element.type === 'image');
+		if (!image || image.type !== 'image' || !image.fileId) return;
+		const sourceFile = editor.getFiles()[image.fileId];
+		if (!sourceFile?.dataURL) {
+			backgroundError = 'The selected image could not be loaded.';
+			return;
+		}
+		isRemovingBackground = true;
+		backgroundProgress = 0;
+		backgroundStatus = 'Preparing image';
+		backgroundError = '';
+		backgroundAbort = new AbortController();
+
+		try {
+			const sourceBlob = await fetch(sourceFile.dataURL).then((response) => response.blob());
+			const loopback = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
+			const browserTestRemover = loopback
+				? /** @type {any} */ (globalThis).__SWYX_REMOVE_IMAGE_BACKGROUND__
+				: undefined;
+			const removeImageBackground =
+				browserTestRemover ??
+				(await import('$lib/image-background-removal.js')).removeImageBackground;
+			const transparentImage = await removeImageBackground(sourceBlob, {
+				mode: backgroundMode,
+				onProgress: updateBackgroundProgress,
+				signal: backgroundAbort.signal
+			});
+			backgroundAbort.signal.throwIfAborted();
+			const dataURL = /** @type {import('@excalidraw/excalidraw/types').DataURL} */ (
+				await readBlobDataUrl(transparentImage)
+			);
+			const fileId = /** @type {import('@excalidraw/excalidraw/element/types').FileId} */ (
+				crypto.randomUUID()
+			);
+			/** @type {import('@excalidraw/excalidraw/types').BinaryFileData} */
+			const processedFile = {
+				id: fileId,
+				mimeType: 'image/png',
+				dataURL,
+				created: Date.now(),
+				lastRetrieved: Date.now()
+			};
+			const currentElements = editor.getSceneElementsIncludingDeleted();
+			const currentImage = currentElements.find((element) => element.id === image.id);
+			if (!currentImage || currentImage.type !== 'image' || currentImage.fileId !== image.fileId) {
+				throw new Error('The selected image changed before processing finished.');
+			}
+			const replacement = updateElement(currentImage, { fileId, status: 'saved' });
+			const nextElements = currentElements.map((element) =>
+				element.id === currentImage.id ? replacement : element
+			);
+			const nextFiles = filesUsedByScene(nextElements, {
+				...editor.getFiles(),
+				[fileId]: processedFile
+			});
+
+			let exceedsCloudLimit = false;
+			if (cloudAvailable) {
+				const estimatedScene = JSON.stringify({
+					elements: nextElements,
+					appState: { viewBackgroundColor: editor.getAppState().viewBackgroundColor },
+					files: nextFiles
+				});
+				exceedsCloudLimit =
+					new TextEncoder().encode(estimatedScene).byteLength > MAX_CLOUD_SCENE_BYTES;
+			}
+
+			editor.addFiles([processedFile]);
+			editor.updateScene({
+				elements: nextElements,
+				appState: { selectedElementIds: { [replacement.id]: true } },
+				captureUpdate: captureImmediately
+			});
+			backgroundStatus = 'Background removed';
+			backgroundProgress = 100;
+			if (exceedsCloudLimit) {
+				saveStatus = 'error';
+				backgroundError = 'Saved on this device only: image exceeds the 1.8 MB cloud limit.';
+			}
+		} catch (error) {
+			if (error instanceof Error && error.name === 'AbortError') {
+				backgroundStatus = '';
+			} else {
+				backgroundError =
+					error instanceof Error ? error.message : 'Could not remove the background.';
+				backgroundStatus = '';
+			}
+		} finally {
+			isRemovingBackground = false;
+			backgroundAbort = undefined;
+		}
+	}
+
+	function cancelBackgroundRemoval() {
+		backgroundAbort?.abort();
+	}
+
+	/** @param {Event} event */
+	function changeBackgroundMode(event) {
+		backgroundMode = /** @type {HTMLSelectElement} */ (event.currentTarget).value;
+		backgroundError = '';
+		try {
+			localStorage.setItem(BACKGROUND_MODE_STORAGE_KEY, JSON.stringify(backgroundMode));
+		} catch (error) {
+			console.error('Could not remember the background-removal model.', error);
+		}
+	}
+
 	/**
 	 * @param {readonly import('@excalidraw/excalidraw/element/types').ExcalidrawElement[]} elements
 	 * @param {import('@excalidraw/excalidraw/types').AppState} appState
@@ -339,6 +520,19 @@
 	 */
 	function saveScene(elements, appState, files) {
 		if (!activePageId || isSwitchingPage) return;
+		const selectedIds = Object.entries(appState.selectedElementIds)
+			.filter(([, selected]) => selected)
+			.map(([id]) => id);
+		const selected =
+			selectedIds.length === 1
+				? elements.find((element) => element.id === selectedIds[0] && element.type === 'image')
+				: undefined;
+		const nextSelectedImageId = selected?.id ?? '';
+		if (selectedImageId !== nextSelectedImageId) {
+			selectedImageId = nextSelectedImageId;
+			backgroundError = '';
+			if (!isRemovingBackground) backgroundStatus = '';
+		}
 		/** @type {DrawingScene} */
 		const scene = {
 			elements,
@@ -348,7 +542,7 @@
 				scrollY: appState.scrollY,
 				zoom: appState.zoom
 			},
-			files
+			files: filesUsedByScene(elements, files)
 		};
 		try {
 			const serialized = JSON.stringify(scene);
@@ -358,6 +552,13 @@
 			console.error('Could not save the drawing locally.', error);
 		}
 		if (cloudAvailable) {
+			const sceneBytes = new TextEncoder().encode(JSON.stringify(scene)).byteLength;
+			if (sceneBytes > MAX_CLOUD_SCENE_BYTES) {
+				if (saveTimer) clearTimeout(saveTimer);
+				pendingSave = undefined;
+				saveStatus = 'error';
+				return;
+			}
 			pendingSave = { pageId: activePageId, scene };
 			if (saveTimer) clearTimeout(saveTimer);
 			saveTimer = setTimeout(() => void flushPendingSave(), SAVE_DELAY);
@@ -373,7 +574,13 @@
 			const [
 				{ createElement, useState },
 				{ createRoot },
-				{ Excalidraw, convertToExcalidrawElements, useHandleLibrary },
+				{
+					Excalidraw,
+					convertToExcalidrawElements,
+					useHandleLibrary,
+					newElementWith,
+					CaptureUpdateAction
+				},
 				{ DRAW_PRESETS },
 				drawingLibrary,
 				initialScene
@@ -389,7 +596,13 @@
 			if (destroyed) return;
 
 			convertElements = convertToExcalidrawElements;
+			updateElement = newElementWith;
+			captureImmediately = CaptureUpdateAction.IMMEDIATELY;
 			presets = DRAW_PRESETS;
+			const savedBackgroundMode = readStorage(BACKGROUND_MODE_STORAGE_KEY);
+			if (BACKGROUND_MODES.some((mode) => mode.id === savedBackgroundMode)) {
+				backgroundMode = savedBackgroundMode;
+			}
 			const initialLibraryItems = restoreDrawingLibrary(drawingLibrary);
 			const libraryAdapter = {
 				load() {
@@ -436,6 +649,7 @@
 
 		return () => {
 			destroyed = true;
+			backgroundAbort?.abort();
 			document.removeEventListener('visibilitychange', saveWhenHidden);
 			void flushPendingSave();
 			root?.unmount();
@@ -452,6 +666,70 @@
 </svelte:head>
 
 <div class="draw-canvas" role="application" aria-label="Drawing canvas" bind:this={canvas}></div>
+
+{#if selectedImageId || isRemovingBackground}
+	<section class="image-tools" aria-label="Selected image tools">
+		<div class="image-tool-heading">
+			<svg aria-hidden="true" viewBox="0 0 20 20" fill="none">
+				<path
+					d="m10 2.5 1.6 4.2L16 8.3l-4.4 1.6L10 14l-1.6-4.1L4 8.3l4.4-1.6L10 2.5Zm5.2 9.5.9 2.3 2.4.9-2.4.9-.9 2.4-.9-2.4-2.3-.9 2.3-.9.9-2.3Z"
+					stroke="currentColor"
+					stroke-width="1.3"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				/>
+			</svg>
+			<strong>Background</strong>
+			<span>Processed privately on your device</span>
+		</div>
+
+		<div class="image-tool-controls">
+			<select
+				class="background-mode-select"
+				aria-label="Background removal model"
+				value={backgroundMode}
+				disabled={isRemovingBackground}
+				onchange={changeBackgroundMode}
+			>
+				{#each BACKGROUND_MODES as mode (mode.id)}
+					<option value={mode.id}>{mode.label} ({mode.size})</option>
+				{/each}
+			</select>
+
+			{#if isRemovingBackground}
+				<button type="button" class="cancel-background" onclick={cancelBackgroundRemoval}>
+					Cancel
+				</button>
+			{:else}
+				<button
+					type="button"
+					class="remove-background"
+					aria-label="Remove image background"
+					onclick={() => void removeSelectedImageBackground()}
+				>
+					Remove background
+				</button>
+			{/if}
+		</div>
+
+		{#if isRemovingBackground}
+			<div class="background-progress" aria-live="polite">
+				<span>{backgroundStatus}{backgroundProgress ? ` · ${backgroundProgress}%` : ''}</span>
+				<progress
+					aria-label="Background removal progress"
+					max="100"
+					value={backgroundProgress || undefined}
+				></progress>
+			</div>
+		{:else if backgroundError}
+			<p class="background-error" role="alert">{backgroundError}</p>
+		{:else if backgroundMode !== 'portrait-fast'}
+			<p class="background-download-warning">First use downloads {activeBackgroundMode.size}.</p>
+		{:else if backgroundStatus}
+			<p class="background-success" role="status">{backgroundStatus}</p>
+		{/if}
+	</section>
+{/if}
 
 {#if pages.length > 0}
 	<div class="page-picker">
@@ -680,6 +958,117 @@
 		inset: 0;
 		height: 100dvh;
 		width: 100vw;
+	}
+
+	.image-tools {
+		position: fixed;
+		top: 72px;
+		left: 50%;
+		z-index: 1001;
+		width: min(405px, calc(100vw - 28px));
+		padding: 12px;
+		transform: translateX(-50%);
+		border: 1px solid rgb(0 0 0 / 9%);
+		border-radius: 12px;
+		background: #fff;
+		box-shadow: 0 8px 25px rgb(0 0 0 / 12%);
+		color: #1d1d1d;
+		font-family:
+			Inter,
+			-apple-system,
+			BlinkMacSystemFont,
+			'Segoe UI',
+			sans-serif;
+	}
+
+	.image-tool-heading {
+		display: flex;
+		align-items: center;
+		gap: 7px;
+		margin-bottom: 10px;
+		font-size: 12px;
+	}
+
+	.image-tool-heading svg {
+		width: 17px;
+		height: 17px;
+		color: #6554c0;
+	}
+
+	.image-tool-heading span {
+		margin-left: auto;
+		color: #71717a;
+		font-size: 10px;
+	}
+
+	.image-tool-controls {
+		display: flex;
+		gap: 8px;
+	}
+
+	.background-mode-select {
+		flex: 1;
+		min-width: 0;
+		height: 35px;
+		padding: 0 7px;
+		border: 1px solid #dedee6;
+		border-radius: 7px;
+		background: #fff;
+		color: #27272a;
+		font-size: 11px;
+	}
+
+	.remove-background,
+	.cancel-background {
+		flex: none;
+		height: 35px;
+		padding: 0 10px;
+		border: 0;
+		border-radius: 7px;
+		background: #6554c0;
+		color: #fff;
+		font-size: 11px;
+		font-weight: 550;
+		cursor: pointer;
+	}
+
+	.cancel-background {
+		background: #ecebf2;
+		color: #27272a;
+	}
+
+	.background-progress {
+		display: grid;
+		gap: 6px;
+		margin-top: 9px;
+		color: #52525b;
+		font-size: 11px;
+	}
+
+	.background-progress progress {
+		width: 100%;
+		height: 5px;
+		accent-color: #6554c0;
+	}
+
+	.background-download-warning,
+	.background-error,
+	.background-success {
+		margin: 8px 0 0;
+		font-size: 11px;
+		line-height: 1.45;
+	}
+
+	.background-download-warning {
+		color: #8b6400;
+	}
+
+	.background-error {
+		color: #c53434;
+	}
+
+	.background-success {
+		color: #328357;
 	}
 
 	.preset-picker,
@@ -933,6 +1322,14 @@
 	}
 
 	@media (max-width: 600px) {
+		.image-tools {
+			top: 63px;
+		}
+
+		.image-tool-heading span {
+			font-size: 9px;
+		}
+
 		.preset-picker,
 		.page-picker {
 			top: 10px;
