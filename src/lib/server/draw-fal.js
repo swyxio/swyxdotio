@@ -6,6 +6,7 @@ import {
 	MAX_DRAW_FAL_REQUEST_BYTES,
 	getDrawFalModel
 } from '../draw-fal-models.js';
+import { chargeDrawingAgentBudget } from './draw-agent-budget.js';
 
 const MAX_PROMPT_LENGTH = 1_000;
 const IMAGE_MIME_TYPE = /^image\/(?:png|jpeg|webp|avif|gif)$/;
@@ -145,7 +146,8 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 	const fields = [...form.keys()];
 	if (
 		fields.some(
-			(field) => !['image', 'prompt', 'model', 'providerSafetyDefaults'].includes(field)
+			(field) =>
+				!['image', 'prompt', 'model', 'providerSafetyDefaults', 'agentBudget'].includes(field)
 		) ||
 		new Set(fields).size !== fields.length
 	) {
@@ -170,6 +172,32 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 			{ error: 'Choose one of the available image-generation models.' },
 			{ status: 422 }
 		);
+	}
+	const agentBudget = form.get('agentBudget');
+	if ((providerSafetyDefaults === '1') !== (typeof agentBudget === 'string')) {
+		return privateJson(
+			{ error: 'The assistant requires an authorized spending limit.' },
+			{ status: 402 }
+		);
+	}
+	/** @type {{ token: string, spendingUsd: number } | undefined} */
+	let chargedBudget;
+	if (typeof agentBudget === 'string') {
+		try {
+			chargedBudget = await chargeDrawingAgentBudget(
+				agentBudget,
+				model.priceUsd,
+				/** @type {string} */ (event.platform?.env?.PODCAST_ADMIN_SESSION_SECRET)
+			);
+		} catch (error) {
+			return privateJson(
+				{
+					error:
+						error instanceof Error ? error.message : 'The assistant spending limit was reached.'
+				},
+				{ status: 402 }
+			);
+		}
 	}
 	const image = form.get('image');
 	if (model.kind === 'text-to-image') {
@@ -249,7 +277,10 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 			status: 'IN_QUEUE',
 			queuePosition: Number.isSafeInteger(result.queue_position)
 				? Math.max(0, result.queue_position)
-				: undefined
+				: undefined,
+			...(chargedBudget
+				? { agentBudget: chargedBudget.token, spendingUsd: chargedBudget.spendingUsd }
+				: {})
 		},
 		{ status: 202 }
 	);

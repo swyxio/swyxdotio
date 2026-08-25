@@ -16,6 +16,7 @@ function drawingContext() {
 	];
 	/** @type {any[]} */
 	const scenes = [];
+	let nextElementId = 0;
 	const state = {
 		width: 800,
 		height: 600,
@@ -39,7 +40,7 @@ function drawingContext() {
 	const context = {
 		editor,
 		convertElements: (/** @type {any[]} */ shapes) =>
-			shapes.map((shape, index) => ({ id: `new-${index}`, width: 100, height: 40, ...shape })),
+			shapes.map((shape) => ({ id: `new-${nextElementId++}`, width: 100, height: 40, ...shape })),
 		updateElement: (/** @type {any} */ element, /** @type {any} */ changes) => ({
 			...element,
 			...changes
@@ -163,5 +164,91 @@ test('drawing assistant exposes bounded workspace, page, image, and existing com
 			context
 		),
 		{ action: 'depth-blur', options: { id: 'visible', blur: 18 } }
+	);
+});
+
+test('drawing assistant duplicates and aligns shapes with one native undo capture per command', async () => {
+	const { context, scenes } = drawingContext();
+	const duplicated = /** @type {any} */ (
+		await executeDrawingAgentCommand(['duplicate', 'visible', '--dx', '160', '--dy', '5'], context)
+	);
+	assert.equal(duplicated.duplicated[0].x, 180);
+	assert.equal(duplicated.duplicated[0].y, 35);
+	assert.equal(scenes[0].captureUpdate, 'immediately');
+	await executeDrawingAgentCommand(['align', 'top', 'visible', 'new-0'], context);
+	assert.equal(scenes.length, 2);
+	assert.equal(scenes[1].captureUpdate, 'immediately');
+	assert.equal(context.editor.getSceneElements().find((element) => element.id === 'new-0').y, 30);
+	await assert.rejects(
+		() => executeDrawingAgentCommand(['align', 'diagonal', 'visible'], context),
+		/alignment/
+	);
+});
+
+test('drawing assistant evenly distributes elements, groups them, and reverses grouping', async () => {
+	const { context, scenes } = drawingContext();
+	await executeDrawingAgentCommand(
+		[
+			'add',
+			JSON.stringify([
+				{ type: 'rectangle', x: 200, y: 30, width: 40, height: 30 },
+				{ type: 'rectangle', x: 500, y: 30, width: 40, height: 30 }
+			])
+		],
+		context
+	);
+	const result = /** @type {any} */ (
+		await executeDrawingAgentCommand(
+			['distribute', 'horizontal', 'visible', 'new-0', 'new-1'],
+			context
+		)
+	);
+	assert.equal(result.gap, 170);
+	assert.equal(context.editor.getSceneElements().find((element) => element.id === 'new-0').x, 290);
+	const grouped = /** @type {any} */ (
+		await executeDrawingAgentCommand(['group', 'visible', 'new-0'], context)
+	);
+	assert.equal(
+		context.editor.getSceneElements().find((element) => element.id === 'visible').groupIds[0],
+		grouped.grouped
+	);
+	await executeDrawingAgentCommand(['ungroup', 'visible'], context);
+	assert.deepEqual(
+		context.editor.getSceneElements().find((element) => element.id === 'visible').groupIds,
+		[]
+	);
+	assert.equal(
+		scenes.every((scene) => scene.captureUpdate === 'immediately'),
+		true
+	);
+});
+
+test('drawing assistant reorders layers and creates genuinely bound labeled connectors', async () => {
+	const { context, scenes } = drawingContext();
+	await executeDrawingAgentCommand(
+		['add', JSON.stringify({ type: 'rectangle', x: 250, y: 30 })],
+		context
+	);
+	await executeDrawingAgentCommand(['layer', 'front', 'visible'], context);
+	assert.equal(context.editor.getSceneElements().at(-1).id, 'visible');
+	await executeDrawingAgentCommand(['layer', 'back', 'visible'], context);
+	assert.equal(context.editor.getSceneElements()[0].id, 'visible');
+	const linked = /** @type {any} */ (
+		await executeDrawingAgentCommand(['connect', 'visible', 'new-0', '--label', 'next'], context)
+	);
+	const arrow = context.editor.getSceneElements().find((element) => element.type === 'arrow');
+	assert.equal(linked.label, 'next');
+	assert.equal(arrow.startBinding.elementId, 'visible');
+	assert.equal(arrow.endBinding.elementId, 'new-0');
+	assert.ok(
+		context.editor
+			.getSceneElements()
+			.find((element) => element.id === 'visible')
+			.boundElements.some((entry) => entry.id === arrow.id)
+	);
+	assert.equal(scenes.at(-1).captureUpdate, 'immediately');
+	await assert.rejects(
+		() => executeDrawingAgentCommand(['connect', 'visible', 'visible'], context),
+		/different/
 	);
 });

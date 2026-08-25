@@ -35,6 +35,13 @@ draw add '<JSON object or array>'          Add up to 30 Excalidraw shapes with n
 draw update ELEMENT_ID '<JSON object>'    Update safe geometry, color, or text properties
 draw delete ELEMENT_ID [ELEMENT_ID...]     Delete elements with native undo
 draw select ELEMENT_ID [ELEMENT_ID...]     Select existing elements
+draw duplicate [ID...] [--dx 24 --dy 24]   Duplicate selected or named elements
+draw align EDGE [ID...]                    left, center, right, top, middle, bottom
+draw distribute AXIS [ID...]               Space elements along horizontal or vertical
+draw group [ID...]                         Group selected or named elements
+draw ungroup [ID...]                       Ungroup selected or named elements
+draw layer POSITION [ID...]                front, back, forward, or backward
+draw connect FROM_ID TO_ID [--label TEXT]   Add a bound, optionally labeled arrow
 draw viewport [fit|ELEMENT_ID...]          Inspect or focus the visible viewport
 draw presets [insert PRESET_ID]            List or insert drawing presets
 draw components [insert COMPONENT_ID]      List or insert UI wireframe components
@@ -144,6 +151,37 @@ function imageOptions(args) {
 		}
 	}
 	return options;
+}
+
+/** @param {string[]} requested @param {any[]} elements @param {any} state @param {number} minimum */
+function chosenElements(requested, elements, state, minimum = 1) {
+	const ids = requested.length
+		? requested
+		: Object.keys(state.selectedElementIds ?? {}).filter((id) => state.selectedElementIds[id]);
+	if (
+		ids.length < minimum ||
+		ids.length > MAX_MUTATION_ELEMENTS ||
+		new Set(ids).size !== ids.length
+	) {
+		throw new Error(
+			`Choose between ${minimum} and ${MAX_MUTATION_ELEMENTS} distinct drawing elements.`
+		);
+	}
+	const matches = ids.map((id) => elements.find((element) => element.id === id));
+	if (matches.some((element) => !element))
+		throw new Error('A requested drawing element was not found.');
+	return /** @type {any[]} */ (matches);
+}
+
+/** @param {any} context @param {Map<string, any>} changes @param {Record<string, unknown>} [appState] */
+function commitChanges(context, changes, appState) {
+	context.editor.updateScene({
+		elements: context.editor
+			.getSceneElementsIncludingDeleted()
+			.map((/** @type {any} */ element) => changes.get(element.id) ?? element),
+		...(appState ? { appState } : {}),
+		captureUpdate: context.captureUpdate
+	});
 }
 
 /**
@@ -297,6 +335,241 @@ export async function executeDrawingAgentCommand(args, context) {
 			appState: { selectedElementIds: Object.fromEntries(ids.map((id) => [id, true])) }
 		});
 		return { selected: ids };
+	}
+	if (command === 'duplicate') {
+		const tokens = [action, ...rest].filter(Boolean);
+		/** @type {string[]} */
+		const ids = [];
+		let dx = 24;
+		let dy = 24;
+		for (let index = 0; index < tokens.length; index++) {
+			const token = tokens[index];
+			if (token === '--dx' || token === '--dy') {
+				const offset = Number(tokens[++index]);
+				if (!Number.isFinite(offset) || Math.abs(offset) > MAX_COORDINATE) {
+					throw new Error('Duplication offsets must be finite, reasonable numbers.');
+				}
+				if (token === '--dx') dx = offset;
+				else dy = offset;
+			} else if (token.startsWith('--'))
+				throw new Error(`Unsupported duplication option: ${token}`);
+			else ids.push(token);
+		}
+		const originals = chosenElements(ids, elements, state, 1);
+		const copies = context.convertElements(
+			originals.map(({ id, index, version, versionNonce, seed, ...element }) => ({
+				...element,
+				x: element.x + dx,
+				y: element.y + dy,
+				groupIds: [],
+				boundElements: null,
+				...(element.type === 'text' ? { containerId: null } : {}),
+				...(['arrow', 'line'].includes(element.type)
+					? { startBinding: null, endBinding: null }
+					: {})
+			})),
+			{ regenerateIds: true }
+		);
+		editor.updateScene({
+			elements: [...editor.getSceneElementsIncludingDeleted(), ...copies],
+			appState: {
+				selectedElementIds: Object.fromEntries(
+					copies.map((/** @type {any} */ item) => [item.id, true])
+				)
+			},
+			captureUpdate: context.captureUpdate
+		});
+		return { duplicated: copies.map((/** @type {any} */ item) => summarizeElement(item, state)) };
+	}
+	if (command === 'align') {
+		if (!['left', 'center', 'right', 'top', 'middle', 'bottom'].includes(action)) {
+			throw new Error('Choose left, center, right, top, middle, or bottom alignment.');
+		}
+		const chosen = chosenElements(rest, elements, state, 2);
+		const left = Math.min(...chosen.map((element) => element.x));
+		const right = Math.max(...chosen.map((element) => element.x + element.width));
+		const top = Math.min(...chosen.map((element) => element.y));
+		const bottom = Math.max(...chosen.map((element) => element.y + element.height));
+		const changes = new Map(
+			chosen.map((element) => {
+				let x = element.x;
+				let y = element.y;
+				if (action === 'left') x = left;
+				if (action === 'center') x = (left + right - element.width) / 2;
+				if (action === 'right') x = right - element.width;
+				if (action === 'top') y = top;
+				if (action === 'middle') y = (top + bottom - element.height) / 2;
+				if (action === 'bottom') y = bottom - element.height;
+				return [element.id, context.updateElement(element, { x, y })];
+			})
+		);
+		commitChanges(context, changes);
+		return { aligned: action, ids: chosen.map((element) => element.id) };
+	}
+	if (command === 'distribute') {
+		if (!['horizontal', 'vertical'].includes(action))
+			throw new Error('Choose horizontal or vertical distribution.');
+		const chosen = chosenElements(rest, elements, state, 3);
+		const coordinate = action === 'horizontal' ? 'x' : 'y';
+		const size = action === 'horizontal' ? 'width' : 'height';
+		const ordered = [...chosen].sort((first, second) => first[coordinate] - second[coordinate]);
+		const start = ordered[0][coordinate];
+		const end = ordered.at(-1)[coordinate] + ordered.at(-1)[size];
+		const occupied = ordered.reduce((total, element) => total + element[size], 0);
+		const gap = (end - start - occupied) / (ordered.length - 1);
+		let cursor = start;
+		const changes = new Map(
+			ordered.map((element) => {
+				const updated = context.updateElement(element, { [coordinate]: cursor });
+				cursor += element[size] + gap;
+				return [element.id, updated];
+			})
+		);
+		commitChanges(context, changes);
+		return {
+			distributed: action,
+			gap: Math.round(gap * 100) / 100,
+			ids: ordered.map((element) => element.id)
+		};
+	}
+	if (command === 'group' || command === 'ungroup') {
+		const chosen = chosenElements(
+			[action, ...rest].filter(Boolean),
+			elements,
+			state,
+			command === 'group' ? 2 : 1
+		);
+		const groupId = command === 'group' ? crypto.randomUUID() : chosen[0].groupIds?.[0];
+		if (!groupId) throw new Error('The selected drawing elements are not grouped.');
+		/** @type {any[]} */
+		const affected =
+			command === 'group'
+				? chosen
+				: elements.filter((/** @type {any} */ element) => element.groupIds?.includes(groupId));
+		const changes = new Map(
+			affected.map((element) => [
+				element.id,
+				context.updateElement(element, {
+					groupIds:
+						command === 'group'
+							? [groupId, ...(element.groupIds ?? [])]
+							: element.groupIds.filter((/** @type {string} */ id) => id !== groupId)
+				})
+			])
+		);
+		commitChanges(context, changes, {
+			selectedElementIds: Object.fromEntries(affected.map((element) => [element.id, true])),
+			selectedGroupIds: command === 'group' ? { [groupId]: true } : {}
+		});
+		return {
+			[command === 'group' ? 'grouped' : 'ungrouped']: groupId,
+			ids: affected.map((element) => element.id)
+		};
+	}
+	if (command === 'layer') {
+		if (!['front', 'back', 'forward', 'backward'].includes(action)) {
+			throw new Error('Choose front, back, forward, or backward layering.');
+		}
+		const chosen = chosenElements(rest, elements, state, 1);
+		const ids = new Set(chosen.map((element) => element.id));
+		const ordered = [...editor.getSceneElementsIncludingDeleted()];
+		if (action === 'front' || action === 'back') {
+			const moved = ordered.filter((element) => ids.has(element.id));
+			const remaining = ordered.filter((element) => !ids.has(element.id));
+			ordered.splice(
+				0,
+				ordered.length,
+				...(action === 'front' ? [...remaining, ...moved] : [...moved, ...remaining])
+			);
+		} else if (action === 'forward') {
+			for (let index = ordered.length - 2; index >= 0; index--) {
+				if (ids.has(ordered[index].id) && !ids.has(ordered[index + 1].id)) {
+					[ordered[index], ordered[index + 1]] = [ordered[index + 1], ordered[index]];
+				}
+			}
+		} else {
+			for (let index = 1; index < ordered.length; index++) {
+				if (ids.has(ordered[index].id) && !ids.has(ordered[index - 1].id)) {
+					[ordered[index], ordered[index - 1]] = [ordered[index - 1], ordered[index]];
+				}
+			}
+		}
+		editor.updateScene({ elements: ordered, captureUpdate: context.captureUpdate });
+		return { layered: action, ids: chosen.map((element) => element.id) };
+	}
+	if (command === 'connect') {
+		if (!action || !rest[0] || action === rest[0])
+			throw new Error('Choose two different drawing elements to connect.');
+		const [from, to] = chosenElements([action, rest[0]], elements, state, 2);
+		if (
+			!['rectangle', 'ellipse', 'diamond', 'image', 'text'].includes(from.type) ||
+			!['rectangle', 'ellipse', 'diamond', 'image', 'text'].includes(to.type)
+		) {
+			throw new Error('Connect rectangles, ellipses, diamonds, images, or text.');
+		}
+		if (
+			rest.length > 1 &&
+			(rest[1] !== '--label' ||
+				typeof rest[2] !== 'string' ||
+				rest.length !== 3 ||
+				rest[2].length > 300)
+		) {
+			throw new Error('Connector labels must use --label TEXT and stay under 300 characters.');
+		}
+		const dx = to.x + to.width / 2 - (from.x + from.width / 2);
+		const dy = to.y + to.height / 2 - (from.y + from.height / 2);
+		const horizontal = Math.abs(dx) >= Math.abs(dy);
+		const startX =
+			from.x + from.width / 2 + (horizontal ? Math.sign(dx) * (from.width / 2 + 8) : 0);
+		const startY =
+			from.y + from.height / 2 + (horizontal ? 0 : Math.sign(dy) * (from.height / 2 + 8));
+		const endX = to.x + to.width / 2 - (horizontal ? Math.sign(dx) * (to.width / 2 + 8) : 0);
+		const endY = to.y + to.height / 2 - (horizontal ? 0 : Math.sign(dy) * (to.height / 2 + 8));
+		const arrow = {
+			type: 'arrow',
+			x: startX,
+			y: startY,
+			points: [
+				[0, 0],
+				[endX - startX, endY - startY]
+			],
+			startBinding: { elementId: from.id, focus: 0, gap: 8 },
+			endBinding: { elementId: to.id, focus: 0, gap: 8 },
+			...(rest[2] ? { label: { text: rest[2] } } : {})
+		};
+		const converted = context.convertElements([arrow], { regenerateIds: true });
+		const generatedArrow = converted.find((/** @type {any} */ element) => element.type === 'arrow');
+		const connector = context.updateElement(generatedArrow, {
+			startBinding: arrow.startBinding,
+			endBinding: arrow.endBinding
+		});
+		const created = converted.map((/** @type {any} */ element) =>
+			element.id === connector.id ? connector : element
+		);
+		const changes = new Map(
+			[from, to].map((element) => [
+				element.id,
+				context.updateElement(element, {
+					boundElements: [...(element.boundElements ?? []), { id: connector.id, type: 'arrow' }]
+				})
+			])
+		);
+		editor.updateScene({
+			elements: [
+				...editor
+					.getSceneElementsIncludingDeleted()
+					.map((/** @type {any} */ element) => changes.get(element.id) ?? element),
+				...created
+			],
+			appState: { selectedElementIds: { [connector.id]: true } },
+			captureUpdate: context.captureUpdate
+		});
+		return {
+			connected: connector.id,
+			from: from.id,
+			to: to.id,
+			...(rest[2] ? { label: rest[2] } : {})
+		};
 	}
 	if (command === 'viewport') {
 		if (action) {

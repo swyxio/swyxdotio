@@ -7,6 +7,12 @@ import {
 	MAX_DRAW_AGENT_REQUEST_BYTES,
 	runDrawingAgent
 } from '../src/lib/server/draw-agent.js';
+import {
+	chargeDrawingAgentBudget,
+	createDrawingAgentBudget,
+	drawingAgentModelCostUsd,
+	readDrawingAgentBudget
+} from '../src/lib/server/draw-agent-budget.js';
 
 const SESSION_SECRET = 'drawing-agent-test-only-session';
 const SCREENSHOT = 'data:image/webp;base64,c2FmZS12aWV3cG9ydA==';
@@ -101,8 +107,72 @@ test('drawing assistant sends only the visible viewport to the selected vision m
 	const body = JSON.parse(raw);
 	assert.equal(body.toolCalls[0].function.name, 'canvas_bash');
 	assert.deepEqual(body.usage, { inputTokens: 120, outputTokens: 18 });
+	assert.equal(body.modelCostUsd, drawingAgentModelCostUsd(120, 18));
+	assert.equal(body.spendingUsd, body.modelCostUsd);
+	assert.equal((await readDrawingAgentBudget(body.budget, SESSION_SECRET)).spent, 112);
 	assert.equal(raw.includes(SESSION_SECRET), false);
 	assert.equal(raw.includes(SCREENSHOT), false);
+});
+
+test('drawing assistant signs shared run budgets, tracks model tokens, and rejects tampering or overspending', async () => {
+	const first = await runDrawingAgent(
+		await createEvent({
+			body: { messages: [{ role: 'user', content: 'Align the diagram' }], budgetCap: 0.25 },
+			ai: {
+				run: async () => ({
+					choices: [{ message: { content: 'Done.' } }],
+					usage: { prompt_tokens: 1_000, completion_tokens: 100 }
+				})
+			}
+		})
+	);
+	assert.equal(first.status, 200);
+	const firstBody = await first.json();
+	assert.equal(firstBody.spendingUsd, 0.00077);
+	const second = await runDrawingAgent(
+		await createEvent({
+			body: { messages: [{ role: 'user', content: 'Continue' }], budget: firstBody.budget },
+			ai: {
+				run: async () => ({
+					choices: [{ message: { content: 'Done.' } }],
+					usage: { prompt_tokens: 1_000, completion_tokens: 100 }
+				})
+			}
+		})
+	);
+	assert.equal((await second.json()).spendingUsd, 0.00154);
+	const invalid = await runDrawingAgent(
+		await createEvent({
+			body: {
+				messages: [{ role: 'user', content: 'Continue' }],
+				budget: `${firstBody.budget}tampered`
+			}
+		})
+	);
+	assert.equal(invalid.status, 402);
+	let called = false;
+	const exhausted = await chargeDrawingAgentBudget(
+		await createDrawingAgentBudget(0.25, SESSION_SECRET),
+		0.24,
+		SESSION_SECRET
+	);
+	const blocked = await runDrawingAgent(
+		await createEvent({
+			body: { messages: [{ role: 'user', content: 'Continue' }], budget: exhausted.token },
+			ai: {
+				run: async () => {
+					called = true;
+					return {};
+				}
+			}
+		})
+	);
+	assert.equal(blocked.status, 402);
+	assert.equal(called, false);
+	const overMaximum = await runDrawingAgent(
+		await createEvent({ body: { messages: [{ role: 'user', content: 'Continue' }], budgetCap: 5 } })
+	);
+	assert.equal(overMaximum.status, 402);
 });
 
 test('drawing assistant rejects oversized requests, untrusted screenshot URLs, and unknown tool calls', async () => {

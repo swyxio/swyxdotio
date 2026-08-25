@@ -527,7 +527,7 @@
 	/**
 	 * @param {string} action
 	 * @param {Record<string, string | number>} options
-	 * @param {{ signal: AbortSignal, onProgress: (message: string) => void, reserveSpending: (amount: number, label: string) => void }} operation
+	 * @param {{ signal: AbortSignal, onProgress: (message: string) => void, reserveSpending: (amount: number, label: string) => void, getBudget: () => string | undefined, updateBudget: (token: string, spendingUsd: number) => void }} operation
 	 */
 	async function applyAgentImageTool(action, options, operation) {
 		if (!editor || !updateElement || !captureImmediately)
@@ -587,12 +587,17 @@
 							onProgress: operation.onProgress
 						});
 			const generationModel = model;
+			const agentBudget = operation.getBudget();
+			if (!agentBudget) throw new Error('The assistant spending authorization is unavailable.');
 			const generated = await runDrawingFalGeneration({
 				image: prepared?.blob,
 				prompt: imagePrompt,
 				model: model.id,
 				signal: operation.signal,
 				providerSafetyDefaults: true,
+				agentBudget,
+				onBudget: operation.updateBudget,
+				cancelOnAbort: true,
 				onProgress: (progress) =>
 					operation.onProgress(
 						progress.message ??
@@ -690,7 +695,7 @@
 
 	/**
 	 * @param {string[]} args
-	 * @param {{ signal: AbortSignal, onProgress: (message: string) => void, reserveSpending: (amount: number, label: string) => void }} operation
+	 * @param {{ signal: AbortSignal, onProgress: (message: string) => void, reserveSpending: (amount: number, label: string) => void, getBudget: () => string | undefined, updateBudget: (token: string, spendingUsd: number) => void }} operation
 	 */
 	async function executeAgentCommand(args, operation) {
 		operation.signal.throwIfAborted();

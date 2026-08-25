@@ -1,5 +1,11 @@
 import { isPodcastStudioSessionValid, podcastStudioCookieName } from '../podcast-admin-auth.js';
 import { privateJson, requireSameOrigin } from '../podcast-admin-route.js';
+import {
+	chargeDrawingAgentBudget,
+	createDrawingAgentBudget,
+	drawingAgentModelCostUsd,
+	DRAW_AGENT_MODEL_STEP_RESERVE_USD
+} from './draw-agent-budget.js';
 
 export const DRAW_AGENT_MODEL = '@cf/qwen/qwen3.8-27b';
 export const MAX_DRAW_AGENT_REQUEST_BYTES = 1_500_000;
@@ -19,6 +25,13 @@ draw add '<JSON Excalidraw skeleton or array>'
 draw update ELEMENT_ID '<JSON properties>'
 draw delete ELEMENT_ID [ELEMENT_ID...]
 draw select ELEMENT_ID [ELEMENT_ID...]
+draw duplicate [ELEMENT_ID...] [--dx 24] [--dy 24]
+draw align left|center|right|top|middle|bottom [ELEMENT_ID...]
+draw distribute horizontal|vertical [ELEMENT_ID...]
+draw group [ELEMENT_ID...]
+draw ungroup [ELEMENT_ID...]
+draw layer front|back|forward|backward [ELEMENT_ID...]
+draw connect FROM_ID TO_ID [--label TEXT]
 draw viewport [fit|ELEMENT_ID...]
 draw presets [insert PRESET_ID]
 draw components [insert COMPONENT_ID]
@@ -195,6 +208,21 @@ export async function runDrawingAgent(event) {
 	if (messages[0]?.role !== 'user') {
 		return privateJson({ error: 'Begin with a drawing request.' }, { status: 422 });
 	}
+	/** @type {string} */
+	let budget;
+	try {
+		budget = body.budget
+			? body.budget
+			: await createDrawingAgentBudget(body.budgetCap ?? 1, sessionSecret);
+		await chargeDrawingAgentBudget(budget, DRAW_AGENT_MODEL_STEP_RESERVE_USD, sessionSecret);
+	} catch (error) {
+		return privateJson(
+			{
+				error: error instanceof Error ? error.message : 'The assistant spending limit was reached.'
+			},
+			{ status: 402 }
+		);
+	}
 	if (body.screenshot) {
 		messages.push({
 			role: 'user',
@@ -244,12 +272,32 @@ export async function runDrawingAgent(event) {
 	}
 	/** @type {Record<string, unknown>} */
 	const response = { content: content.slice(0, 12_000), toolCalls };
+	let modelCostUsd = DRAW_AGENT_MODEL_STEP_RESERVE_USD;
 	if (result?.usage && typeof result.usage === 'object') {
 		const inputTokens = result.usage.prompt_tokens;
 		const outputTokens = result.usage.completion_tokens;
-		if (Number.isSafeInteger(inputTokens) && Number.isSafeInteger(outputTokens)) {
+		if (
+			Number.isSafeInteger(inputTokens) &&
+			inputTokens >= 0 &&
+			Number.isSafeInteger(outputTokens) &&
+			outputTokens >= 0
+		) {
 			response.usage = { inputTokens, outputTokens };
+			modelCostUsd = drawingAgentModelCostUsd(inputTokens, outputTokens);
 		}
+	}
+	try {
+		const charged = await chargeDrawingAgentBudget(budget, modelCostUsd, sessionSecret);
+		response.budget = charged.token;
+		response.spendingUsd = charged.spendingUsd;
+		response.modelCostUsd = modelCostUsd;
+	} catch (error) {
+		return privateJson(
+			{
+				error: error instanceof Error ? error.message : 'The assistant spending limit was reached.'
+			},
+			{ status: 402 }
+		);
 	}
 	return privateJson(response);
 }

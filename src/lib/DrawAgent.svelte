@@ -8,7 +8,7 @@
 
 	/**
 	 * @typedef {{ role: 'user' | 'assistant' | 'step', content: string, createdAt: number }} AgentMessage
-	 * @typedef {{ signal: AbortSignal, onProgress: (message: string) => void, reserveSpending: (amount: number, label: string) => void }} CommandOptions
+	 * @typedef {{ signal: AbortSignal, onProgress: (message: string) => void, reserveSpending: (amount: number, label: string) => void, getBudget: () => string | undefined, updateBudget: (token: string, spendingUsd: number) => void }} CommandOptions
 	 */
 
 	/** @type {{
@@ -33,6 +33,8 @@
 	let toolCalls = $state(0);
 	let spending = $state(0);
 	let spendingCap = $state(DEFAULT_DRAW_AGENT_BUDGET_USD);
+	/** @type {string | undefined} */
+	let budgetToken;
 	/** @type {{ x: number, y: number } | null} */
 	let position = $state(null);
 	/** @type {HTMLTextAreaElement | undefined} */
@@ -102,7 +104,15 @@
 				`${label} would exceed the $${spendingCap.toFixed(2)} assistant spending cap.`
 			);
 		}
-		spending = Math.round((spending + amount) * 10_000) / 10_000;
+	}
+
+	/** @param {string} token @param {number} spendingUsd */
+	function updateBudget(token, spendingUsd) {
+		if (typeof token !== 'string' || !Number.isFinite(spendingUsd) || spendingUsd < 0) {
+			throw new Error('The assistant spending authorization is invalid.');
+		}
+		budgetToken = token;
+		spending = spendingUsd;
 	}
 
 	/** @param {MessageEvent<any>} event */
@@ -134,7 +144,9 @@
 					onProgress: (message) => {
 						status = message;
 					},
-					reserveSpending
+					reserveSpending,
+					getBudget: () => budgetToken,
+					updateBudget
 				});
 				worker?.postMessage({ type: 'draw-result', id: data.id, result });
 			} catch (failure) {
@@ -188,6 +200,7 @@
 		rounds = 0;
 		toolCalls = 0;
 		spending = 0;
+		budgetToken = undefined;
 		operation = new AbortController();
 		appendMessage('user', request);
 		/** @type {Record<string, unknown>[]} */
@@ -208,12 +221,17 @@
 					method: 'POST',
 					credentials: 'same-origin',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ messages: conversation, ...(screenshot ? { screenshot } : {}) }),
+					body: JSON.stringify({
+						messages: conversation,
+						...(screenshot ? { screenshot } : {}),
+						...(budgetToken ? { budget: budgetToken } : { budgetCap: Number(spendingCap) })
+					}),
 					signal: operation.signal
 				});
 				const result = await response.json().catch(() => ({}));
 				if (!response.ok)
 					throw new Error(result.error ?? 'The drawing assistant could not respond.');
+				if (typeof result.budget === 'string') updateBudget(result.budget, result.spendingUsd);
 				const calls = Array.isArray(result.toolCalls) ? result.toolCalls : [];
 				if (!calls.length) {
 					appendMessage('assistant', result.content || 'Done.');
@@ -257,6 +275,28 @@
 	function stop() {
 		operation?.abort();
 		worker?.postMessage({ type: 'abort' });
+	}
+
+	function clearConversation() {
+		if (running || !messages.length || !confirm('Clear this drawing’s assistant conversation?'))
+			return;
+		messages = [];
+		error = '';
+		status = '';
+		try {
+			localStorage.removeItem(`${HISTORY_PREFIX}${pageId}`);
+		} catch {
+			// The current conversation is still cleared if browser storage is unavailable.
+		}
+		void tick().then(() => composer?.focus());
+	}
+
+	function retryLastMessage() {
+		if (running) return;
+		const previous = messages.findLast((message) => message.role === 'user');
+		if (!previous) return;
+		prompt = previous.content;
+		void sendMessage();
 	}
 
 	/** @param {PointerEvent} event */
@@ -354,24 +394,46 @@
 				<strong>Drawing assistant</strong>
 				<span>Sees your visible canvas</span>
 			</div>
-			<button
-				type="button"
-				class="icon-button"
-				aria-label="Minimize drawing assistant"
-				title="Minimize (Esc)"
-				onclick={() => {
-					minimized = true;
-				}}
-			>
-				<svg aria-hidden="true" viewBox="0 0 20 20" fill="none"
-					><path
-						d="M5 10h10"
-						stroke="currentColor"
-						stroke-width="1.7"
-						stroke-linecap="round"
-					/></svg
+			<div class="header-actions">
+				{#if authenticated && messages.length}
+					<button
+						type="button"
+						class="icon-button"
+						aria-label="Clear assistant conversation"
+						title="Clear conversation"
+						disabled={running}
+						onclick={clearConversation}
+					>
+						<svg aria-hidden="true" viewBox="0 0 20 20" fill="none"
+							><path
+								d="M4.5 6h11M8 6V4h4v2m2.5 0-.7 10H6.2L5.5 6m3 3v4m3-4v4"
+								stroke="currentColor"
+								stroke-width="1.4"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							/></svg
+						>
+					</button>
+				{/if}
+				<button
+					type="button"
+					class="icon-button"
+					aria-label="Minimize drawing assistant"
+					title="Minimize (Esc)"
+					onclick={() => {
+						minimized = true;
+					}}
 				>
-			</button>
+					<svg aria-hidden="true" viewBox="0 0 20 20" fill="none"
+						><path
+							d="M5 10h10"
+							stroke="currentColor"
+							stroke-width="1.7"
+							stroke-linecap="round"
+						/></svg
+					>
+				</button>
+			</div>
 		</header>
 
 		{#if !authenticated}
@@ -414,6 +476,9 @@
 				>
 					{#if running}<span class="status-spinner" aria-hidden="true"></span>{/if}
 					<span>{error || status}</span>
+					{#if error && !running}
+						<button type="button" class="retry-button" onclick={retryLastMessage}>Retry</button>
+					{/if}
 				</div>
 			{/if}
 
@@ -450,7 +515,7 @@
 							<option value={1}>$1.00 max</option>
 						</select>
 					</label>
-					{#if spending}<span class="spending">≈${spending.toFixed(3)} used</span>{/if}
+					{#if spending}<span class="spending">≈${spending.toFixed(4)} used</span>{/if}
 					{#if running}
 						<button type="button" class="stop-button" onclick={stop}>Stop</button>
 					{:else}
@@ -521,8 +586,13 @@
 		cursor: grab;
 		touch-action: none;
 	}
-	.assistant-header div {
+	.assistant-header > div:first-child {
 		display: grid;
+		gap: 2px;
+	}
+	.header-actions {
+		display: flex;
+		align-items: center;
 		gap: 2px;
 	}
 	.assistant-header strong {
@@ -545,6 +615,10 @@
 	}
 	.icon-button:hover {
 		background: #f1f0fa;
+	}
+	.icon-button:disabled {
+		opacity: 0.4;
+		cursor: default;
 	}
 	.assistant-disclosure {
 		padding: 9px 14px;
@@ -615,6 +689,15 @@
 	}
 	.assistant-status.error {
 		color: #b42337;
+	}
+	.retry-button {
+		margin-left: auto;
+		border: 0;
+		background: transparent;
+		color: #6358c8;
+		font-size: 11px;
+		font-weight: 650;
+		cursor: pointer;
 	}
 	.status-spinner {
 		width: 11px;

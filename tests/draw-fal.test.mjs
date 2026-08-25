@@ -9,6 +9,10 @@ import {
 	pollDrawingImage
 } from '../src/lib/server/draw-fal.js';
 import {
+	chargeDrawingAgentBudget,
+	createDrawingAgentBudget
+} from '../src/lib/server/draw-agent-budget.js';
+import {
 	DEFAULT_DRAW_FAL_MODEL,
 	DRAW_FAL_MODELS,
 	MAX_DRAW_FAL_REQUEST_BYTES
@@ -186,7 +190,8 @@ test('autonomous drawing-agent edits preserve provider-managed safety defaults',
 			image: new File(['source'], 'source.png', { type: 'image/png' }),
 			prompt: 'Improve the lighting',
 			model: id,
-			providerSafetyDefaults: '1'
+			providerSafetyDefaults: '1',
+			agentBudget: await createDrawingAgentBudget(1, SESSION_SECRET)
 		});
 		/** @type {Record<string, unknown> | undefined} */
 		let payload;
@@ -195,10 +200,45 @@ test('autonomous drawing-agent edits preserve provider-managed safety defaults',
 			return providerResponse({ request_id: REQUEST_ID }, 202);
 		});
 		assert.equal(response.status, 202);
+		const authorization = await response.json();
+		assert.equal(typeof authorization.agentBudget, 'string');
+		assert.equal(
+			authorization.spendingUsd,
+			DRAW_FAL_MODELS.find((model) => model.id === id)?.priceUsd
+		);
 		assert.ok(payload);
 		assert.equal('enable_safety_checker' in payload, false);
 		assert.equal('safety_tolerance' in payload, false);
 	}
+});
+
+test('autonomous provider jobs require a signed shared budget and reject overspending before fal is called', async () => {
+	const base = {
+		image: new File(['source'], 'source.png', { type: 'image/png' }),
+		prompt: 'Improve the lighting',
+		model: 'nano-banana-2',
+		providerSafetyDefaults: '1'
+	};
+	let providerCalls = 0;
+	const provider = async () => {
+		providerCalls++;
+		return providerResponse({ request_id: REQUEST_ID }, 202);
+	};
+	const missing = await editDrawingImage(await createEvent({ form: createForm(base) }), provider);
+	assert.equal(missing.status, 402);
+	const grant = await createDrawingAgentBudget(0.25, SESSION_SECRET);
+	const almostSpent = await chargeDrawingAgentBudget(grant, 0.2, SESSION_SECRET);
+	const exceeded = await editDrawingImage(
+		await createEvent({ form: createForm({ ...base, agentBudget: almostSpent.token }) }),
+		provider
+	);
+	assert.equal(exceeded.status, 402);
+	const tampered = await editDrawingImage(
+		await createEvent({ form: createForm({ ...base, agentBudget: `${grant}tampered` }) }),
+		provider
+	);
+	assert.equal(tampered.status, 402);
+	assert.equal(providerCalls, 0);
 });
 
 test('text-to-image models send prompts only and reject accidental reference uploads', async () => {

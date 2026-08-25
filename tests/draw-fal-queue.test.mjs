@@ -150,6 +150,53 @@ test('queued generation stops promptly when cancelled', async () => {
 	assert.equal(calls, 2);
 });
 
+test('stopping an autonomous generation cancels its existing fal queue job without resubmitting', async () => {
+	const controller = new AbortController();
+	/** @type {Array<[RequestInfo | URL, RequestInit | undefined]>} */
+	const calls = [];
+	/** @type {Array<[string, number]>} */
+	const budgets = [];
+	await assert.rejects(
+		runDrawingFalGeneration({
+			image: new Blob(['image'], { type: 'image/png' }),
+			prompt: 'Edit',
+			model: 'flux-2',
+			signal: controller.signal,
+			providerSafetyDefaults: true,
+			agentBudget: 'signed-start',
+			onBudget: (token, spending) => budgets.push([token, spending]),
+			cancelOnAbort: true,
+			onProgress: (progress) => {
+				if (progress.status === 'IN_PROGRESS') controller.abort();
+			},
+			fetcher: async (url, init) => {
+				calls.push([url, init]);
+				if (init?.method === 'POST') {
+					assert.equal(/** @type {FormData} */ (init.body).get('agentBudget'), 'signed-start');
+					return response(
+						{
+							requestId: 'job-123',
+							model: 'flux-2',
+							agentBudget: 'signed-next',
+							spendingUsd: 0.024
+						},
+						202
+					);
+				}
+				if (init?.method === 'DELETE') return response({ cancelled: true });
+				return response({ status: 'IN_PROGRESS' });
+			}
+		}),
+		{ name: 'AbortError' }
+	);
+	assert.deepEqual(budgets, [['signed-next', 0.024]]);
+	assert.equal(calls.filter(([, init]) => init?.method === 'POST').length, 1);
+	const cancellation = calls.find(([, init]) => init?.method === 'DELETE');
+	assert.ok(cancellation);
+	assert.equal(cancellation[0], '/tools/api/draw/edit?requestId=job-123&model=flux-2');
+	assert.equal(cancellation[1]?.keepalive, true);
+});
+
 test('a stalled queue poll is retried without resubmitting the paid generation', async () => {
 	let calls = 0;
 	/** @type {{status: string, message?: string, elapsedMs?: number}[]} */
