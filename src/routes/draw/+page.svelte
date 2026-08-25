@@ -909,7 +909,23 @@
 								'aria-label': 'Templates, components, and memes',
 								title: 'Drawing presets, UI components, and meme templates'
 							},
-							'Templates'
+							createElement(
+								'svg',
+								{
+									'aria-hidden': true,
+									viewBox: '0 0 20 20',
+									width: 20,
+									height: 20,
+									fill: 'none'
+								},
+								createElement('path', {
+									d: 'M4 4h5v5H4V4Zm7 0h5v5h-5V4ZM4 11h5v5H4v-5Zm9.5 0v5m-2.5-2.5h5',
+									stroke: 'currentColor',
+									strokeWidth: 1.6,
+									strokeLinecap: 'round',
+									strokeLinejoin: 'round'
+								})
+							)
 						)
 					)
 				);

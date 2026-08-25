@@ -30,6 +30,11 @@ test('drawing canvas always uses light mode even when the site is dark', async (
 	expect(pages).not.toBeNull();
 	expect(toolbar).not.toBeNull();
 	if (pages && toolbar) expect(pages.x + pages.width).toBeLessThanOrEqual(toolbar.x);
+
+	await page.getByRole('checkbox', { name: 'Library' }).check({ force: true });
+	const templatesTab = page.getByRole('tab', { name: 'Templates, components, and memes' });
+	await expect(templatesTab).toHaveText('');
+	await expect(templatesTab.locator('svg')).toBeVisible();
 });
 
 test('drawing canvas is public, fullscreen, and persists drawings in the browser', async ({
