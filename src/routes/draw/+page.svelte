@@ -12,6 +12,13 @@
 	import { prepareDrawingFalImage } from '$lib/draw-fal-image.js';
 	import { runDrawingFalGeneration } from '$lib/draw-fal-queue.js';
 	import { optimizeDrawingImageForCloud, replaceDrawingImage } from '$lib/draw-image-scene.js';
+	import {
+		createDrawingDesign,
+		DRAW_DESIGN_FORMATS,
+		DRAW_DESIGN_TEMPLATES,
+		getDrawingDesignFormat,
+		getDrawingDesignTemplate
+	} from '$lib/draw-designs.js';
 	import DrawAgent from '$lib/DrawAgent.svelte';
 	import DrawImageToolbox from '$lib/DrawImageToolbox.svelte';
 
@@ -47,14 +54,23 @@
 	let updateElement = $state.raw(null);
 	/** @type {typeof import('@excalidraw/excalidraw').CaptureUpdateAction.IMMEDIATELY | null} */
 	let captureImmediately = $state(null);
+	/** @type {typeof import('@excalidraw/excalidraw').exportToBlob | undefined} */
+	let exportToBlob;
+	/** @type {typeof import('@excalidraw/excalidraw').exportToSvg | undefined} */
+	let exportToSvg;
 	/** @type {typeof import('$lib/draw-presets.js').DRAW_PRESETS} */
 	let presets = $state([]);
 	/** @type {typeof import('$lib/draw-ui-components.js').DRAW_UI_COMPONENTS} */
 	let uiComponents = $state([]);
 	/** @type {typeof import('$lib/draw-ui-components.js').createDrawUiComponent | undefined} */
 	let createUiComponent;
-	/** @type {'presets' | 'components' | 'memes'} */
+	/** @type {'presets' | 'designs' | 'components' | 'memes'} */
 	let workspaceSection = $state('presets');
+	let selectedArtboardId = $state('');
+	/** @type {import('@excalidraw/excalidraw/element/types').ExcalidrawFrameElement | undefined} */
+	let selectedArtboard = $state(undefined);
+	let designStatus = $state('');
+	let isExportingDesign = $state(false);
 	let componentQuery = $state('');
 	let memeQuery = $state('');
 	let memeTemplates = $state(DRAW_MEME_TEMPLATES);
@@ -205,6 +221,22 @@
 				run: () => editor?.setActiveTool({ type: 'image', insertOnCanvasDirectly: true })
 			},
 			{
+				id: 'action-browse-designs',
+				label: 'Browse branded design templates',
+				description: 'Thumbnails, speaker cards, blog banners, and slides',
+				category: 'Actions',
+				keywords: ['canva', 'thumbnail', 'youtube', 'brand', 'artboard'],
+				run: () => openWorkspaceSection('designs')
+			},
+			{
+				id: 'action-duplicate-page',
+				label: 'Duplicate current drawing page',
+				description: 'Keep an editable copy for another variant',
+				category: 'Actions',
+				keywords: ['copy', 'variant', 'canva', 'version'],
+				run: () => duplicatePage()
+			},
+			{
 				id: 'action-browse-components',
 				label: 'Browse UI components',
 				description: 'Open the hand-drawn wireframing kit',
@@ -223,6 +255,24 @@
 		];
 
 		commands.push(
+			...DRAW_DESIGN_TEMPLATES.map((design) => ({
+				id: `design-${design.id}`,
+				label: design.label,
+				description: design.description,
+				category: 'Designs',
+				keywords: [
+					'canva',
+					'thumbnail',
+					'youtube',
+					'speaker',
+					'brand',
+					design.format,
+					design.brand
+				],
+				run: async () => {
+					await insertDesign(design.id);
+				}
+			})),
 			...uiComponents.map((component) => ({
 				id: `component-${component.id}`,
 				label: component.title,
@@ -482,6 +532,37 @@
 		}
 	}
 
+	async function duplicatePage() {
+		if (!editor || !activePage) return;
+		await flushPendingSave();
+		const source = {
+			elements: editor.getSceneElementsIncludingDeleted(),
+			appState: { viewBackgroundColor: editor.getAppState().viewBackgroundColor },
+			files: filesUsedByScene(editor.getSceneElementsIncludingDeleted(), editor.getFiles())
+		};
+		const name = `${activePage.name} copy`.slice(0, 120);
+		try {
+			const page = /** @type {DrawingPage} */ (
+				cloudAvailable
+					? await requestPage('', { method: 'POST', body: JSON.stringify({ name }) })
+					: { id: crypto.randomUUID(), name, updatedAt: Date.now() }
+			);
+			if (cloudAvailable) {
+				await requestPage(`/${encodeURIComponent(page.id)}`, {
+					method: 'PUT',
+					body: JSON.stringify({ scene: source })
+				});
+			} else {
+				localStorage.setItem(`${STORAGE_KEY}:${page.id}`, JSON.stringify(source));
+			}
+			setPages([...pages, page]);
+			await switchPage(page);
+		} catch (error) {
+			saveStatus = 'error';
+			console.error('Could not duplicate the drawing page.', error);
+		}
+	}
+
 	/** @param {DrawingPage} page */
 	function startRenaming(page) {
 		renamingPageId = page.id;
@@ -714,8 +795,266 @@
 			renamePage: renamePageFromAgent,
 			insertPreset,
 			insertComponent: insertUiComponent,
+			insertDesign,
+			duplicateDesign,
+			resizeDesign,
+			exportDesign,
 			image: (action, options) => applyAgentImageTool(action, options, operation)
 		});
+	}
+
+	async function loadOfficialBrandLogo() {
+		if (!editor) throw new Error('The drawing editor is unavailable.');
+		const fileId = /** @type {import('@excalidraw/excalidraw/element/types').FileId} */ (
+			'latent-space-official-hex'
+		);
+		if (editor.getFiles()[fileId]) return fileId;
+		const response = await fetch('/assets/latent-space-hex-gradient.png', { cache: 'force-cache' });
+		if (!response.ok) throw new Error('The official Latent Space logo could not be loaded.');
+		const image = await response.blob();
+		const dataURL = /** @type {import('@excalidraw/excalidraw/types').DataURL} */ (
+			await readBlobDataUrl(image)
+		);
+		editor.addFiles([
+			{
+				id: fileId,
+				mimeType: 'image/png',
+				dataURL,
+				created: Date.now(),
+				lastRetrieved: Date.now()
+			}
+		]);
+		return fileId;
+	}
+
+	/** @param {readonly import('@excalidraw/excalidraw/element/types').ExcalidrawElement[]} elements */
+	function focusDesignArtboard(elements) {
+		if (!editor) return;
+		const narrow = window.innerWidth < 650;
+		if (narrow && isLibraryOpen) {
+			editor.updateScene({ appState: { openSidebar: null } });
+		}
+		editor.scrollToContent(elements, {
+			fitToViewport: true,
+			viewportZoomFactor: narrow ? 0.88 : 0.9,
+			animate: false,
+			canvasOffsets: {
+				left: narrow ? 16 : 210,
+				right: !narrow && isLibraryOpen ? 320 : 20,
+				top: narrow ? 120 : 75,
+				bottom: narrow ? 155 : 145
+			}
+		});
+	}
+
+	/** @param {string} templateId @param {Record<string, string>} [options] */
+	async function insertDesign(templateId, options = {}) {
+		if (!editor || !convertElements || !captureImmediately)
+			throw new Error('The drawing canvas is not ready.');
+		const template = getDrawingDesignTemplate(templateId);
+		if (!template) throw new Error('Choose one of the available design templates.');
+		const existing = editor.getSceneElementsIncludingDeleted();
+		const visible = existing.filter((element) => !element.isDeleted);
+		const x = visible.length
+			? Math.max(...visible.map((element) => element.x + element.width)) + 120
+			: 0;
+		const y = visible.length ? Math.min(...visible.map((element) => element.y)) : 0;
+		const logoFileId =
+			template.brand === 'latent-space' ? await loadOfficialBrandLogo() : undefined;
+		const design = createDrawingDesign(templateId, { ...options, x, y, logoFileId });
+		const elements = convertElements(
+			/** @type {import('@excalidraw/excalidraw/data/transform').ExcalidrawElementSkeleton[]} */ (
+				design.elements
+			),
+			{ regenerateIds: true }
+		);
+		const frame = elements.find((element) => element.type === 'frame');
+		if (!frame) throw new Error('The design artboard could not be created.');
+		editor.updateScene({
+			elements: [...existing, ...elements],
+			appState: { selectedElementIds: { [frame.id]: true } },
+			captureUpdate: captureImmediately
+		});
+		selectedArtboardId = frame.id;
+		designStatus = `${design.format.width} × ${design.format.height} artboard created`;
+		focusDesignArtboard(elements);
+		return {
+			frameId: frame.id,
+			template: template.id,
+			name: frame.name,
+			width: frame.width,
+			height: frame.height,
+			elements: elements.length
+		};
+	}
+
+	/** @param {string} frameId @param {string} [name] */
+	function duplicateDesign(frameId, name) {
+		if (!editor || !convertElements || !captureImmediately)
+			throw new Error('The drawing canvas is not ready.');
+		const existing = editor.getSceneElementsIncludingDeleted();
+		const frame = existing.find(
+			(element) => element.id === frameId && element.type === 'frame' && !element.isDeleted
+		);
+		if (!frame || frame.type !== 'frame') throw new Error('Choose an existing design artboard.');
+		const children = existing.filter(
+			(element) => !element.isDeleted && element.frameId === frame.id
+		);
+		const nextX =
+			Math.max(
+				...existing
+					.filter((element) => !element.isDeleted)
+					.map((element) => element.x + element.width)
+			) + 100;
+		const dx = nextX - frame.x;
+		const skeletons = children.map(({ index, version, versionNonce, seed, ...element }) => ({
+			...element,
+			x: element.x + dx,
+			frameId: null
+		}));
+		skeletons.push(
+			/** @type {any} */ ({
+				id: frame.id,
+				type: 'frame',
+				x: frame.x + dx,
+				y: frame.y,
+				width: frame.width,
+				height: frame.height,
+				name: name?.trim().slice(0, 100) || `${frame.name ?? 'Design'} · Variant`,
+				children: children.map((element) => element.id)
+			})
+		);
+		const copied = convertElements(/** @type {any} */ (skeletons), { regenerateIds: true });
+		const nextFrame = copied.find((element) => element.type === 'frame');
+		if (!nextFrame) throw new Error('The design artboard could not be duplicated.');
+		editor.updateScene({
+			elements: [...existing, ...copied],
+			appState: { selectedElementIds: { [nextFrame.id]: true } },
+			captureUpdate: captureImmediately
+		});
+		selectedArtboardId = nextFrame.id;
+		designStatus = 'Editable artboard duplicated';
+		focusDesignArtboard(copied);
+		return {
+			frameId: nextFrame.id,
+			sourceFrameId: frame.id,
+			name: nextFrame.name,
+			width: nextFrame.width,
+			height: nextFrame.height
+		};
+	}
+
+	/** @param {string} frameId @param {string} formatId */
+	function resizeDesign(frameId, formatId) {
+		if (!editor || !updateElement || !captureImmediately)
+			throw new Error('The drawing canvas is not ready.');
+		const format = getDrawingDesignFormat(formatId);
+		if (!format) throw new Error('Choose a supported artboard format.');
+		const existing = editor.getSceneElementsIncludingDeleted();
+		const frame = existing.find(
+			(element) => element.id === frameId && element.type === 'frame' && !element.isDeleted
+		);
+		if (!frame || frame.type !== 'frame') throw new Error('Choose an existing design artboard.');
+		const mutate = updateElement;
+		const scale = Math.min(format.width / frame.width, format.height / frame.height);
+		const insetX = (format.width - frame.width * scale) / 2;
+		const insetY = (format.height - frame.height * scale) / 2;
+		const resized = existing.map((element) => {
+			if (element.id === frame.id)
+				return mutate(element, { width: format.width, height: format.height });
+			if (element.frameId !== frame.id || element.isDeleted) return element;
+			const background =
+				element.x === frame.x &&
+				element.y === frame.y &&
+				element.width === frame.width &&
+				element.height === frame.height;
+			/** @type {Record<string, any>} */
+			const changes = background
+				? { x: frame.x, y: frame.y, width: format.width, height: format.height }
+				: {
+						x: frame.x + insetX + (element.x - frame.x) * scale,
+						y: frame.y + insetY + (element.y - frame.y) * scale,
+						width: element.width * scale,
+						height: element.height * scale
+					};
+			if (element.type === 'text')
+				changes.fontSize = Math.max(10, Math.round(element.fontSize * scale));
+			if ((element.type === 'arrow' || element.type === 'line') && element.points) {
+				changes.points = element.points.map(([x, y]) => [x * scale, y * scale]);
+			}
+			return mutate(element, changes);
+		});
+		editor.updateScene({
+			elements: resized,
+			appState: { selectedElementIds: { [frame.id]: true } },
+			captureUpdate: captureImmediately
+		});
+		designStatus = `Resized to ${format.width} × ${format.height}`;
+		focusDesignArtboard(
+			resized.filter((element) => element.id === frame.id || element.frameId === frame.id)
+		);
+		return { frameId: frame.id, format: format.id, width: format.width, height: format.height };
+	}
+
+	/** @param {string} frameId @param {'png' | 'jpg' | 'svg'} format @param {number} [scale] */
+	async function exportDesign(frameId, format, scale = 1) {
+		if (!editor || !exportToBlob || !exportToSvg)
+			throw new Error('The drawing export is not ready.');
+		const frame = editor
+			.getSceneElements()
+			.find((element) => element.id === frameId && element.type === 'frame');
+		if (!frame || frame.type !== 'frame') throw new Error('Choose an existing design artboard.');
+		isExportingDesign = true;
+		try {
+			const elements = editor
+				.getSceneElements()
+				.filter((element) => element.id === frame.id || element.frameId === frame.id);
+			const options = {
+				elements,
+				files: editor.getFiles(),
+				exportingFrame: frame,
+				exportPadding: 0,
+				appState: { ...editor.getAppState(), exportBackground: true, exportEmbedScene: false }
+			};
+			const blob =
+				format === 'svg'
+					? new Blob([new XMLSerializer().serializeToString(await exportToSvg(options))], {
+							type: 'image/svg+xml'
+						})
+					: await exportToBlob({
+							...options,
+							mimeType: format === 'jpg' ? 'image/jpeg' : 'image/png',
+							quality: 0.92,
+							getDimensions: (/** @type {number} */ width, /** @type {number} */ height) => ({
+								width: Math.round(width * scale),
+								height: Math.round(height * scale),
+								scale
+							})
+						});
+			const url = URL.createObjectURL(blob);
+			const download = document.createElement('a');
+			download.href = url;
+			download.download = `${
+				(frame.name ?? 'design')
+					.toLowerCase()
+					.replace(/[^a-z0-9]+/g, '-')
+					.replace(/^-|-$/g, '') || 'design'
+			}.${format}`;
+			document.body.append(download);
+			download.click();
+			download.remove();
+			setTimeout(() => URL.revokeObjectURL(url), 60_000);
+			designStatus = `Downloaded ${format.toUpperCase()} · ${frame.width * scale} × ${frame.height * scale}`;
+			return {
+				exported: true,
+				format,
+				filename: download.download,
+				width: frame.width * scale,
+				height: frame.height * scale
+			};
+		} finally {
+			isExportingDesign = false;
+		}
 	}
 
 	/** @param {DrawingPage} page */
@@ -795,7 +1134,7 @@
 		editor.scrollToContent(shapes, { fitToContent: false, animate: true, duration: 180 });
 	}
 
-	/** @param {'presets' | 'components' | 'memes'} section */
+	/** @param {'presets' | 'designs' | 'components' | 'memes'} section */
 	function openWorkspaceSection(section) {
 		workspaceSection = section;
 		isPageMenuOpen = false;
@@ -1071,6 +1410,20 @@
 		const selectedIds = Object.entries(appState.selectedElementIds)
 			.filter(([, selected]) => selected)
 			.map(([id]) => id);
+		const selectedElement =
+			selectedIds.length === 1
+				? elements.find((element) => element.id === selectedIds[0])
+				: undefined;
+		const nextSelectedArtboardId =
+			selectedElement?.type === 'frame' ? selectedElement.id : (selectedElement?.frameId ?? '');
+		if (selectedArtboardId !== nextSelectedArtboardId) {
+			selectedArtboardId = nextSelectedArtboardId;
+			if (!nextSelectedArtboardId) designStatus = '';
+		}
+		const nextSelectedArtboard = elements.find(
+			(element) => element.id === nextSelectedArtboardId && element.type === 'frame'
+		);
+		selectedArtboard = nextSelectedArtboard?.type === 'frame' ? nextSelectedArtboard : undefined;
 		const selected =
 			selectedIds.length === 1
 				? elements.find((element) => element.id === selectedIds[0] && element.type === 'image')
@@ -1142,7 +1495,9 @@
 					convertToExcalidrawElements,
 					useHandleLibrary,
 					newElementWith,
-					CaptureUpdateAction
+					CaptureUpdateAction,
+					exportToBlob: excalidrawExportToBlob,
+					exportToSvg: excalidrawExportToSvg
 				},
 				{ DRAW_PRESETS },
 				components,
@@ -1163,6 +1518,8 @@
 			convertElements = convertToExcalidrawElements;
 			updateElement = newElementWith;
 			captureImmediately = CaptureUpdateAction.IMMEDIATELY;
+			exportToBlob = excalidrawExportToBlob;
+			exportToSvg = excalidrawExportToSvg;
 			presets = DRAW_PRESETS;
 			uiComponents = components.DRAW_UI_COMPONENTS;
 			createUiComponent = components.createDrawUiComponent;
@@ -1294,6 +1651,62 @@
 		executeCommand={executeAgentCommand}
 		captureViewport={() => captureVisibleDrawingViewport(canvas)}
 	/>
+{/if}
+
+{#if selectedArtboard && !selectedImageId}
+	<section class="artboard-toolbar" aria-label="Selected design artboard">
+		<div class="artboard-summary">
+			<strong>{selectedArtboard.name ?? 'Design artboard'}</strong>
+			<span>{Math.round(selectedArtboard.width)} × {Math.round(selectedArtboard.height)}</span>
+		</div>
+		<label class="artboard-format">
+			<span class="sr-only">Resize design artboard</span>
+			<select
+				aria-label="Resize design artboard"
+				value={DRAW_DESIGN_FORMATS.find(
+					(format) =>
+						format.width === selectedArtboard?.width && format.height === selectedArtboard?.height
+				)?.id ?? ''}
+				onchange={(event) =>
+					resizeDesign(
+						selectedArtboardId,
+						/** @type {HTMLSelectElement} */ (event.currentTarget).value
+					)}
+			>
+				{#each DRAW_DESIGN_FORMATS as format (format.id)}
+					<option value={format.id}>{format.label}</option>
+				{/each}
+			</select>
+		</label>
+		<button
+			type="button"
+			class="artboard-action"
+			aria-label="Duplicate design artboard"
+			onclick={() => duplicateDesign(selectedArtboardId)}>Duplicate</button
+		>
+		<button
+			type="button"
+			class="artboard-export"
+			disabled={isExportingDesign}
+			aria-label="Download design as PNG"
+			onclick={() => void exportDesign(selectedArtboardId, 'png')}>PNG</button
+		>
+		<button
+			type="button"
+			class="artboard-action"
+			disabled={isExportingDesign}
+			aria-label="Download design as JPG"
+			onclick={() => void exportDesign(selectedArtboardId, 'jpg')}>JPG</button
+		>
+		<button
+			type="button"
+			class="artboard-action"
+			disabled={isExportingDesign}
+			aria-label="Download design as SVG"
+			onclick={() => void exportDesign(selectedArtboardId, 'svg')}>SVG</button
+		>
+	</section>
+	{#if designStatus}<div class="artboard-status" role="status">{designStatus}</div>{/if}
 {/if}
 
 {#if activeImageToolId || isRemovingBackground}
@@ -1467,6 +1880,23 @@
 									/>
 								</svg>
 							</button>
+							{#if page.id === activePageId}
+								<button
+									type="button"
+									class="page-action"
+									aria-label="Duplicate {page.name}"
+									onclick={() => void duplicatePage()}
+								>
+									<svg aria-hidden="true" viewBox="0 0 20 20" fill="none"
+										><path
+											d="M7 4.5h8.5V13H13m-9 3h8.5V7.5H4V16Z"
+											stroke="currentColor"
+											stroke-width="1.4"
+											stroke-linejoin="round"
+										/></svg
+									>
+								</button>
+							{/if}
 							{#if pages.length > 1}
 								<button
 									type="button"
@@ -1537,7 +1967,7 @@
 		use:mountWorkspacePanel
 	>
 		<div class="workspace-sections" role="tablist" aria-label="Template categories">
-			{#each [{ id: 'presets', label: 'Presets' }, { id: 'components', label: 'Components' }, { id: 'memes', label: 'Memes' }] as section (section.id)}
+			{#each [{ id: 'presets', label: 'Presets' }, { id: 'designs', label: 'Design' }, { id: 'components', label: 'Components' }, { id: 'memes', label: 'Memes' }] as section (section.id)}
 				<button
 					type="button"
 					class="workspace-section"
@@ -1545,7 +1975,9 @@
 					role="tab"
 					aria-selected={workspaceSection === section.id}
 					onclick={() =>
-						openWorkspaceSection(/** @type {'presets' | 'components' | 'memes'} */ (section.id))}
+						openWorkspaceSection(
+							/** @type {'presets' | 'designs' | 'components' | 'memes'} */ (section.id)
+						)}
 				>
 					{section.label}
 				</button>
@@ -1613,6 +2045,46 @@
 							<strong>{preset.label}</strong>
 							<span>{preset.description}</span>
 						</span>
+					</button>
+				{/each}
+			</section>
+		{:else if workspaceSection === 'designs'}
+			<section
+				id="drawing-designs"
+				class="workspace-content design-content"
+				aria-label="Branded design templates"
+			>
+				<div class="component-heading">
+					<strong>Create a real design</strong>
+					<span>Editable artboards, brand assets, and exact export sizes.</span>
+				</div>
+				{#each DRAW_DESIGN_TEMPLATES as design (design.id)}
+					<button
+						type="button"
+						class="design-option"
+						aria-label="Insert {design.label} design"
+						onclick={() => void insertDesign(design.id)}
+					>
+						<div class="design-preview" style:background={design.background}>
+							<div class="design-preview-copy">
+								<span style:background={design.accent}></span>
+								<strong
+									>{design.brand === 'latent-space'
+										? 'YOUR NEXT\nBIG IDEA'
+										: design.brand === 'ai-engineer'
+											? 'AI ENGINEER'
+											: 'THE IDEA\nTHAT MATTERS'}</strong
+								>
+							</div>
+							<div class="design-preview-portrait" style:border-color={design.accent}></div>
+						</div>
+						<strong>{design.label}</strong>
+						<span>{design.description}</span>
+						<span class="design-dimensions"
+							>{getDrawingDesignFormat(design.format)?.width} × {getDrawingDesignFormat(
+								design.format
+							)?.height}</span
+						>
 					</button>
 				{/each}
 			</section>
@@ -1783,6 +2255,81 @@
 			'Segoe UI',
 			sans-serif;
 		overflow-y: auto;
+	}
+
+	.artboard-toolbar {
+		position: fixed;
+		left: 50%;
+		bottom: 76px;
+		z-index: 34;
+		display: flex;
+		align-items: center;
+		gap: 7px;
+		max-width: calc(100vw - 24px);
+		padding: 8px 10px;
+		transform: translateX(-50%);
+		border: 1px solid #e3e2eb;
+		border-radius: 11px;
+		background: #fff;
+		box-shadow: 0 9px 30px #2423351c;
+		color: #292833;
+		font-family: system-ui, sans-serif;
+	}
+	.artboard-summary {
+		display: grid;
+		gap: 2px;
+		min-width: 102px;
+		padding-right: 8px;
+		border-right: 1px solid #eeedf2;
+	}
+	.artboard-summary strong {
+		max-width: 164px;
+		overflow: hidden;
+		font-size: 11px;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.artboard-summary span {
+		color: #737180;
+		font-size: 10px;
+	}
+	.artboard-format select,
+	.artboard-action,
+	.artboard-export {
+		height: 30px;
+		padding: 0 8px;
+		border: 0;
+		border-radius: 6px;
+		background: #f3f2f7;
+		color: #454452;
+		font-size: 10px;
+		cursor: pointer;
+	}
+	.artboard-export {
+		background: #6554c0;
+		color: #fff;
+		font-weight: 650;
+	}
+	.artboard-status {
+		position: fixed;
+		bottom: 133px;
+		left: 50%;
+		z-index: 34;
+		padding: 5px 9px;
+		transform: translateX(-50%);
+		border-radius: 6px;
+		background: #f0faf1;
+		color: #28713a;
+		font:
+			10px system-ui,
+			sans-serif;
+	}
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
 	}
 
 	.image-tool-controls {
@@ -1961,7 +2508,7 @@
 
 	.workspace-sections {
 		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
+		grid-template-columns: repeat(4, minmax(0, 1fr));
 		gap: 3px;
 		margin: 7px 9px 5px;
 		padding: 3px;
@@ -1970,14 +2517,16 @@
 	}
 
 	.workspace-section {
+		min-width: 0;
 		min-height: 33px;
 		padding: 5px 4px;
 		border: 0;
 		border-radius: 6px;
 		background: transparent;
 		color: #666574;
-		font-size: 11px;
+		font-size: 9.5px;
 		font-weight: 550;
+		white-space: nowrap;
 		cursor: pointer;
 	}
 
@@ -2132,6 +2681,67 @@
 		font-size: 13px;
 		text-align: left;
 		cursor: pointer;
+	}
+
+	.design-content {
+		display: grid;
+		gap: 9px;
+	}
+	.design-option {
+		display: grid;
+		gap: 5px;
+		padding: 7px;
+		border: 1px solid #edecf1;
+		border-radius: 9px;
+		background: #fff;
+		color: #292833;
+		text-align: left;
+		cursor: pointer;
+	}
+	.design-option:hover,
+	.design-option:focus-visible {
+		border-color: #988de7;
+		outline: none;
+	}
+	.design-option > strong {
+		font-size: 12px;
+	}
+	.design-option > span {
+		color: #747383;
+		font-size: 10px;
+		line-height: 1.4;
+	}
+	.design-option > .design-dimensions {
+		color: #6252bb;
+		font-weight: 600;
+	}
+	.design-preview {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		min-height: 91px;
+		padding: 12px;
+		border-radius: 6px;
+	}
+	.design-preview-copy {
+		display: grid;
+		gap: 8px;
+	}
+	.design-preview-copy > span {
+		width: 22px;
+		height: 3px;
+	}
+	.design-preview-copy > strong {
+		color: #fff;
+		font-size: 11px;
+		line-height: 1.14;
+		white-space: pre-line;
+	}
+	.design-preview-portrait {
+		width: 49px;
+		height: 61px;
+		border: 1px dashed;
+		background: #ffffff0b;
 	}
 
 	.preset-preview {
@@ -2418,6 +3028,20 @@
 	}
 
 	@media (max-width: 600px) {
+		.artboard-toolbar {
+			right: 10px;
+			left: 10px;
+			bottom: 78px;
+			max-width: none;
+			overflow-x: auto;
+			transform: none;
+		}
+		.artboard-summary {
+			min-width: 86px;
+		}
+		.artboard-summary strong {
+			max-width: 96px;
+		}
 		.image-tools {
 			top: 124px;
 		}

@@ -5,6 +5,7 @@
 		MAX_DRAW_AGENT_ROUNDS,
 		MAX_DRAW_AGENT_TOOL_CALLS
 	} from '$lib/draw-agent-tools.js';
+	import { DRAW_AGENT_WORKFLOWS } from '$lib/draw-designs.js';
 
 	/**
 	 * @typedef {{ role: 'user' | 'assistant' | 'step', content: string, createdAt: number }} AgentMessage
@@ -33,6 +34,7 @@
 	let toolCalls = $state(0);
 	let spending = $state(0);
 	let spendingCap = $state(DEFAULT_DRAW_AGENT_BUDGET_USD);
+	let showWorkflowPicker = $state(false);
 	/** @type {string | undefined} */
 	let budgetToken;
 	/** @type {{ x: number, y: number } | null} */
@@ -299,6 +301,13 @@
 		void sendMessage();
 	}
 
+	/** @param {string} task */
+	function useWorkflow(task) {
+		prompt = task;
+		showWorkflowPicker = false;
+		void tick().then(() => composer?.focus());
+	}
+
 	/** @param {PointerEvent} event */
 	function beginDrag(event) {
 		if (event.button !== 0 && event.pointerType !== 'touch') return;
@@ -395,6 +404,26 @@
 				<span>Sees your visible canvas</span>
 			</div>
 			<div class="header-actions">
+				{#if authenticated}
+					<button
+						type="button"
+						class="icon-button"
+						aria-label="Browse assistant design workflows"
+						aria-expanded={showWorkflowPicker}
+						title="Suggested design workflows"
+						disabled={running}
+						onclick={() => (showWorkflowPicker = !showWorkflowPicker)}
+					>
+						<svg aria-hidden="true" viewBox="0 0 20 20" fill="none"
+							><path
+								d="M4.5 5.5h11m-11 4.5h11m-11 4.5h7M3 5.5h.01M3 10h.01M3 14.5h.01"
+								stroke="currentColor"
+								stroke-width="1.5"
+								stroke-linecap="round"
+							/></svg
+						>
+					</button>
+				{/if}
 				{#if authenticated && messages.length}
 					<button
 						type="button"
@@ -446,6 +475,18 @@
 				Visible canvas screenshots are sent to Cloudflare AI. Image generation may also upload
 				selected images to fal.ai.
 			</div>
+			{#if showWorkflowPicker && messages.length}
+				<div class="workflow-picker" aria-label="Suggested design tasks">
+					{#each DRAW_AGENT_WORKFLOWS as workflow (workflow.id)}
+						<button
+							type="button"
+							class="workflow-chip"
+							aria-label="Try {workflow.label} workflow"
+							onclick={() => useWorkflow(workflow.prompt)}>{workflow.label}</button
+						>
+					{/each}
+				</div>
+			{/if}
 			<div class="assistant-transcript" aria-live="polite" bind:this={transcript}>
 				{#if messages.length === 0}
 					<div class="assistant-empty">
@@ -454,6 +495,16 @@
 							>I can inspect the canvas, create diagrams, arrange shapes, use templates, edit
 							images, and review the result.</span
 						>
+						<div class="assistant-workflows" aria-label="Suggested design tasks">
+							{#each DRAW_AGENT_WORKFLOWS as workflow (workflow.id)}
+								<button
+									type="button"
+									class="workflow-chip"
+									aria-label="Try {workflow.label} workflow"
+									onclick={() => useWorkflow(workflow.prompt)}>{workflow.label}</button
+								>
+							{/each}
+						</div>
 					</div>
 				{/if}
 				{#each messages as message, index (`${message.createdAt}-${index}`)}
@@ -649,6 +700,33 @@
 		color: #747482;
 		font-size: 12px;
 		line-height: 1.55;
+	}
+	.assistant-workflows {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+		margin-top: 7px;
+	}
+	.workflow-picker {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+		padding: 10px 13px;
+		border-bottom: 1px solid #f0eff4;
+	}
+	.workflow-chip {
+		padding: 6px 8px;
+		border: 1px solid #e4e2f1;
+		border-radius: 999px;
+		background: #faf9ff;
+		color: #514885;
+		font-size: 10px;
+		cursor: pointer;
+	}
+	.workflow-chip:hover,
+	.workflow-chip:focus-visible {
+		border-color: #9991e5;
+		background: #f0eeff;
 	}
 	.agent-message {
 		max-width: 95%;

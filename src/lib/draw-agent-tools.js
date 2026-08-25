@@ -1,4 +1,5 @@
 import { DRAW_FAL_MODELS } from './draw-fal-models.js';
+import { DRAW_DESIGN_FORMATS, DRAW_DESIGN_TEMPLATES } from './draw-designs.js';
 
 export const MAX_DRAW_AGENT_ROUNDS = 6;
 export const MAX_DRAW_AGENT_TOOL_CALLS = 30;
@@ -42,6 +43,11 @@ draw group [ID...]                         Group selected or named elements
 draw ungroup [ID...]                       Ungroup selected or named elements
 draw layer POSITION [ID...]                front, back, forward, or backward
 draw connect FROM_ID TO_ID [--label TEXT]   Add a bound, optionally labeled arrow
+draw designs                               List branded artboard templates and sizes
+draw design insert TEMPLATE [--headline TEXT] [--subtitle TEXT] [--companies TEXT]
+draw design duplicate FRAME_ID [--name TEXT] Copy an editable artboard for a variant
+draw design resize FRAME_ID FORMAT          Refit to youtube, social, square, portrait, story, slide
+draw export FRAME_ID png|jpg|svg [--scale 2] Download the exact artboard
 draw viewport [fit|ELEMENT_ID...]          Inspect or focus the visible viewport
 draw presets [insert PRESET_ID]            List or insert drawing presets
 draw components [insert COMPONENT_ID]      List or insert UI wireframe components
@@ -153,6 +159,22 @@ function imageOptions(args) {
 	return options;
 }
 
+/** @param {string[]} args @param {string[]} allowed */
+function designOptions(args, allowed) {
+	/** @type {Record<string, string>} */
+	const options = {};
+	for (let index = 0; index < args.length; index += 2) {
+		const key = args[index];
+		const value = args[index + 1];
+		if (!key?.startsWith('--') || value === undefined || !allowed.includes(key.slice(2))) {
+			throw new Error('Design options must use supported --name value pairs.');
+		}
+		if (value.length > 200) throw new Error('Design option values must stay under 200 characters.');
+		options[key.slice(2)] = value;
+	}
+	return options;
+}
+
 /** @param {string[]} requested @param {any[]} elements @param {any} state @param {number} minimum */
 function chosenElements(requested, elements, state, minimum = 1) {
 	const ids = requested.length
@@ -203,6 +225,10 @@ function commitChanges(context, changes, appState) {
  *  renamePage: (id: string, name: string) => Promise<void>,
  *  insertPreset: (preset: any) => void,
  *  insertComponent: (id: string) => void,
+ *  insertDesign?: (id: string, options: Record<string, string>) => Promise<unknown>,
+ *  duplicateDesign?: (frameId: string, name?: string) => unknown,
+ *  resizeDesign?: (frameId: string, formatId: string) => unknown,
+ *  exportDesign?: (frameId: string, format: 'png' | 'jpg' | 'svg', scale: number) => Promise<unknown>,
  *  image: (action: string, options: Record<string, string | number>) => Promise<unknown>
  * }} context
  */
@@ -234,6 +260,15 @@ export async function executeDrawingAgentCommand(args, context) {
 				.filter((/** @type {any} */ element) => isVisible(element, state))
 				.slice(0, MAX_ELEMENTS)
 				.map((/** @type {any} */ element) => summarizeElement(element, state)),
+			artboards: elements
+				.filter((/** @type {any} */ element) => element.type === 'frame')
+				.slice(0, 20)
+				.map((/** @type {any} */ frame) => ({
+					id: frame.id,
+					name: frame.name,
+					width: frame.width,
+					height: frame.height
+				})),
 			imageModels: DRAW_FAL_MODELS.map((model) => ({
 				id: model.id,
 				label: model.label,
@@ -255,6 +290,45 @@ export async function executeDrawingAgentCommand(args, context) {
 			)
 			.slice(0, MAX_ELEMENTS)
 			.map((/** @type {any} */ element) => summarizeElement(element, state));
+	}
+	if (command === 'designs') {
+		return {
+			templates: DRAW_DESIGN_TEMPLATES.map(({ id, label, description, format, brand }) => ({
+				id,
+				label,
+				description,
+				format,
+				brand
+			})),
+			formats: DRAW_DESIGN_FORMATS
+		};
+	}
+	if (command === 'design') {
+		if (action === 'insert' && rest[0] && context.insertDesign) {
+			return context.insertDesign(
+				rest[0],
+				designOptions(rest.slice(1), ['headline', 'subtitle', 'companies', 'name'])
+			);
+		}
+		if (action === 'duplicate' && rest[0] && context.duplicateDesign) {
+			const options = designOptions(rest.slice(1), ['name']);
+			return context.duplicateDesign(rest[0], options.name);
+		}
+		if (action === 'resize' && rest.length === 2 && context.resizeDesign) {
+			return context.resizeDesign(rest[0], rest[1]);
+		}
+		throw new Error(
+			'Use draw design insert TEMPLATE, duplicate FRAME_ID, or resize FRAME_ID FORMAT.'
+		);
+	}
+	if (command === 'export') {
+		if (!action || !['png', 'jpg', 'svg'].includes(rest[0]) || !context.exportDesign) {
+			throw new Error('Use draw export FRAME_ID png, jpg, or svg.');
+		}
+		const options = designOptions(rest.slice(1), ['scale']);
+		const scale = Number(options.scale ?? 1);
+		if (![1, 2].includes(scale)) throw new Error('Choose an export scale of 1 or 2.');
+		return context.exportDesign(action, /** @type {'png' | 'jpg' | 'svg'} */ (rest[0]), scale);
 	}
 	if (command === 'add') {
 		const parsed = parseJson(action, 'Drawing shapes');

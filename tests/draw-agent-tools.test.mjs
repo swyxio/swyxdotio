@@ -252,3 +252,70 @@ test('drawing assistant reorders layers and creates genuinely bound labeled conn
 		/different/
 	);
 });
+
+test('drawing assistant discovers branded templates and executes bounded design, resize, and export tools', async () => {
+	const { context } = drawingContext();
+	/** @type {any[]} */
+	const calls = [];
+	const designContext = {
+		...context,
+		insertDesign: async (
+			/** @type {string} */ id,
+			/** @type {Record<string, string>} */ options
+		) => {
+			calls.push(['insert', id, options]);
+			return { frameId: 'frame-one' };
+		},
+		duplicateDesign: (/** @type {string} */ id, /** @type {string | undefined} */ name) => {
+			calls.push(['duplicate', id, name]);
+			return { frameId: 'frame-two' };
+		},
+		resizeDesign: (/** @type {string} */ id, /** @type {string} */ format) => {
+			calls.push(['resize', id, format]);
+			return { width: 1080, height: 1080 };
+		},
+		exportDesign: async (
+			/** @type {string} */ id,
+			/** @type {'png' | 'jpg' | 'svg'} */ format,
+			/** @type {number} */ scale
+		) => {
+			calls.push(['export', id, format, scale]);
+			return { exported: true };
+		}
+	};
+	const catalog = /** @type {any} */ (await executeDrawingAgentCommand(['designs'], designContext));
+	assert.equal(catalog.templates.length, 5);
+	assert.equal(catalog.formats.length, 6);
+	await executeDrawingAgentCommand(
+		['design', 'insert', 'ls-podcast', '--headline', 'USEFUL HOOK'],
+		designContext
+	);
+	await executeDrawingAgentCommand(
+		['design', 'duplicate', 'frame-one', '--name', 'Version B'],
+		designContext
+	);
+	await executeDrawingAgentCommand(['design', 'resize', 'frame-two', 'square'], designContext);
+	await executeDrawingAgentCommand(['export', 'frame-two', 'png', '--scale', '2'], designContext);
+	assert.deepEqual(calls, [
+		['insert', 'ls-podcast', { headline: 'USEFUL HOOK' }],
+		['duplicate', 'frame-one', 'Version B'],
+		['resize', 'frame-two', 'square'],
+		['export', 'frame-two', 'png', 2]
+	]);
+	await assert.rejects(
+		() => executeDrawingAgentCommand(['export', 'frame-two', 'pdf'], designContext),
+		/png, jpg, or svg/
+	);
+	await assert.rejects(
+		() => executeDrawingAgentCommand(['export', 'frame-two', 'png', '--scale', '9'], designContext),
+		/scale/
+	);
+	await assert.rejects(
+		() =>
+			executeDrawingAgentCommand(
+				['design', 'insert', 'ls-podcast', '--url', 'https://example.com'],
+				designContext
+			),
+		/supported/
+	);
+});
