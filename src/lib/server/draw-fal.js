@@ -98,6 +98,18 @@ async function serverOnlyImageDataUrl(image) {
 }
 
 /**
+ * fal routes submission through the full endpoint path, but queue jobs belong
+ * to the owner/application root regardless of the endpoint's nested subpath.
+ *
+ * @param {typeof DRAW_FAL_MODELS[number]} model
+ * @param {string} requestId
+ */
+function drawingFalJobUrl(model, requestId) {
+	const [owner, application] = model.model.split('/');
+	return `https://queue.fal.run/${owner}/${application}/requests/${requestId}`;
+}
+
+/**
  * @param {Pick<import('@sveltejs/kit').RequestEvent, 'cookies' | 'platform' | 'request' | 'url'>} event
  * @param {typeof fetch} [fetchProvider]
  */
@@ -244,7 +256,7 @@ export async function pollDrawingImage(event, fetchProvider = fetch) {
 	if (!requestId || !REQUEST_ID.test(requestId) || !model) {
 		return privateJson({ error: 'The image-generation request is invalid.' }, { status: 422 });
 	}
-	const jobUrl = `https://queue.fal.run/${model.model}/requests/${requestId}`;
+	const jobUrl = drawingFalJobUrl(model, requestId);
 	const providerOptions = {
 		headers: { Authorization: `Key ${falKey}` },
 		signal: AbortSignal.timeout(20_000)
@@ -341,14 +353,11 @@ export async function cancelDrawingImage(event, fetchProvider = fetch) {
 		return privateJson({ error: 'The image-generation request is invalid.' }, { status: 422 });
 	}
 	try {
-		const upstream = await fetchProvider(
-			`https://queue.fal.run/${model.model}/requests/${requestId}/cancel`,
-			{
-				method: 'PUT',
-				headers: { Authorization: `Key ${falKey}` },
-				signal: AbortSignal.timeout(15_000)
-			}
-		);
+		const upstream = await fetchProvider(`${drawingFalJobUrl(model, requestId)}/cancel`, {
+			method: 'PUT',
+			headers: { Authorization: `Key ${falKey}` },
+			signal: AbortSignal.timeout(15_000)
+		});
 		if (!upstream.ok) return upstreamError(upstream.status);
 	} catch {
 		return privateJson(

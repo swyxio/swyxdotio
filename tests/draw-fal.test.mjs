@@ -277,10 +277,7 @@ test('the authenticated status proxy exposes queue positions and sanitized progr
 	const queued = await pollDrawingImage(
 		await createEvent({ method: 'GET', query }),
 		async (url, init) => {
-			assert.equal(
-				url,
-				`https://queue.fal.run/fal-ai/flux-2/edit/requests/${REQUEST_ID}/status?logs=1`
-			);
+			assert.equal(url, `https://queue.fal.run/fal-ai/flux-2/requests/${REQUEST_ID}/status?logs=1`);
 			assert.equal(new Headers(init?.headers).get('Authorization'), `Key ${FAL_KEY}`);
 			return providerResponse({ status: 'IN_QUEUE', queue_position: 5 });
 		}
@@ -315,8 +312,8 @@ test('completed queue jobs return only private inline image output', async () =>
 		}
 	);
 	assert.deepEqual(calls, [
-		`https://queue.fal.run/fal-ai/flux-2/edit/requests/${REQUEST_ID}/status?logs=1`,
-		`https://queue.fal.run/fal-ai/flux-2/edit/requests/${REQUEST_ID}`
+		`https://queue.fal.run/fal-ai/flux-2/requests/${REQUEST_ID}/status?logs=1`,
+		`https://queue.fal.run/fal-ai/flux-2/requests/${REQUEST_ID}`
 	]);
 	const text = await response.text();
 	assert.deepEqual(JSON.parse(text), {
@@ -332,13 +329,58 @@ test('queued jobs can be cancelled without disclosing credentials', async () => 
 	const response = await cancelDrawingImage(
 		await createEvent({ method: 'DELETE', query }),
 		async (url, init) => {
-			assert.equal(url, `https://queue.fal.run/fal-ai/flux-2/edit/requests/${REQUEST_ID}/cancel`);
+			assert.equal(url, `https://queue.fal.run/fal-ai/flux-2/requests/${REQUEST_ID}/cancel`);
 			assert.equal(init?.method, 'PUT');
 			assert.equal(new Headers(init?.headers).get('Authorization'), `Key ${FAL_KEY}`);
 			return new Response(null, { status: 202 });
 		}
 	);
 	assert.deepEqual(await response.json(), { status: 'CANCELLED' });
+});
+
+test('every model polls, retrieves, and cancels jobs at its canonical application root', async () => {
+	for (const model of DRAW_FAL_MODELS) {
+		const [owner, application] = model.model.split('/');
+		const jobUrl = `https://queue.fal.run/${owner}/${application}/requests/${REQUEST_ID}`;
+		const query = `?requestId=${REQUEST_ID}&model=${model.id}`;
+
+		const queued = await pollDrawingImage(
+			await createEvent({ method: 'GET', query }),
+			async (url) => {
+				assert.equal(url, `${jobUrl}/status?logs=1`, `${model.id} status URL`);
+				return providerResponse({ status: 'IN_QUEUE' });
+			}
+		);
+		assert.equal(queued.status, 200, `${model.id} status response`);
+
+		/** @type {Array<RequestInfo | URL>} */
+		const retrievalCalls = [];
+		const completed = await pollDrawingImage(
+			await createEvent({ method: 'GET', query }),
+			async (url) => {
+				retrievalCalls.push(url);
+				return providerResponse(
+					retrievalCalls.length === 1
+						? { status: 'COMPLETED' }
+						: model.kind === 'image-to-video'
+							? { video: { url: 'https://v3b.fal.media/files/example/output.mp4' } }
+							: { images: [{ url: EDITED_IMAGE }] }
+				);
+			}
+		);
+		assert.equal(completed.status, 200, `${model.id} result response`);
+		assert.deepEqual(retrievalCalls, [`${jobUrl}/status?logs=1`, jobUrl], `${model.id} result URL`);
+
+		const cancelled = await cancelDrawingImage(
+			await createEvent({ method: 'DELETE', query }),
+			async (url, init) => {
+				assert.equal(url, `${jobUrl}/cancel`, `${model.id} cancellation URL`);
+				assert.equal(init?.method, 'PUT');
+				return new Response(null, { status: 202 });
+			}
+		);
+		assert.equal(cancelled.status, 200, `${model.id} cancellation response`);
+	}
 });
 
 test('submit, poll, and cancellation all reject unauthenticated requests', async () => {
