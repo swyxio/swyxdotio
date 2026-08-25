@@ -2,6 +2,7 @@
 	import { onMount, tick } from 'svelte';
 	import '@excalidraw/excalidraw/index.css';
 	import { orderRecentDrawingPages, searchWorkspaceCommands } from '$lib/draw-workspace.js';
+	import DrawImageToolbox from '$lib/DrawImageToolbox.svelte';
 
 	const STORAGE_KEY = 'swyx-excalidraw';
 	const PAGE_STORAGE_KEY = `${STORAGE_KEY}:pages`;
@@ -31,9 +32,9 @@
 	/** @type {typeof import('@excalidraw/excalidraw').convertToExcalidrawElements | null} */
 	let convertElements = null;
 	/** @type {typeof import('@excalidraw/excalidraw').newElementWith | null} */
-	let updateElement = null;
+	let updateElement = $state.raw(null);
 	/** @type {typeof import('@excalidraw/excalidraw').CaptureUpdateAction.IMMEDIATELY | null} */
-	let captureImmediately = null;
+	let captureImmediately = $state(null);
 	/** @type {typeof import('$lib/draw-presets.js').DRAW_PRESETS} */
 	let presets = $state([]);
 	/** @type {typeof import('$lib/draw-ui-components.js').DRAW_UI_COMPONENTS} */
@@ -910,6 +911,17 @@
 		{:else if backgroundStatus}
 			<p class="background-success" role="status">{backgroundStatus}</p>
 		{/if}
+
+		{#if editor && updateElement && captureImmediately && selectedImageId}
+			<DrawImageToolbox
+				{editor}
+				imageId={selectedImageId}
+				{updateElement}
+				captureUpdate={captureImmediately}
+				{cloudAvailable}
+				onCloudLimit={() => (saveStatus = 'error')}
+			/>
+		{/if}
 	</section>
 {/if}
 
@@ -1273,6 +1285,7 @@
 		left: 50%;
 		z-index: 1001;
 		width: min(405px, calc(100vw - 28px));
+		max-height: calc(100dvh - 95px);
 		padding: 12px;
 		transform: translateX(-50%);
 		border: 1px solid rgb(0 0 0 / 9%);
@@ -1286,6 +1299,7 @@
 			BlinkMacSystemFont,
 			'Segoe UI',
 			sans-serif;
+		overflow-y: auto;
 	}
 
 	.image-tool-heading {
