@@ -524,6 +524,10 @@ for (const fixture of [
 		await page.mouse.move(canvasBounds.x + 390, canvasBounds.y + 300, { steps: 4 });
 		await page.mouse.up();
 		await expect(page.getByRole('button', { name: 'Undo' })).toBeEnabled();
+		await expect(toolbar.getByRole('combobox', { name: 'Background removal model' })).toHaveCount(
+			0
+		);
+		await toolbar.getByRole('button', { name: 'Background', exact: true }).click();
 		const modeSelect = toolbar.getByRole('combobox', { name: 'Background removal model' });
 		await expect(modeSelect.locator('option')).toHaveCount(4);
 		await expect(modeSelect).toHaveValue('portrait-fast');

@@ -30,6 +30,9 @@ async function pasteSelectedImage(page, generatedSize) {
 	const toolbox = page.getByRole('region', { name: 'Selected image tools' });
 	await expect(toolbox).toBeVisible();
 	await expect(toolbox.getByLabel('AI image toolbox')).toBeVisible();
+	const collapsedBounds = await toolbox.boundingBox();
+	if (!collapsedBounds) throw new Error('The image toolbox is not visible.');
+	expect(collapsedBounds.height).toBeLessThan(180);
 	await expect
 		.poll(() =>
 			page.evaluate(() => {
@@ -42,6 +45,12 @@ async function pasteSelectedImage(page, generatedSize) {
 			})
 		)
 		.toBe(true);
+	await expect(toolbox.getByRole('combobox', { name: 'Background removal model' })).toHaveCount(0);
+	await expect(toolbox.getByRole('textbox', { name: 'AI image editing prompt' })).toHaveCount(0);
+	await expect(toolbox.getByRole('button', { name: 'Choose the subject to select' })).toHaveCount(
+		0
+	);
+	await toolbox.getByRole('button', { name: 'Magic Select', exact: true }).click();
 	await expect(toolbox.getByRole('button', { name: 'Choose the subject to select' })).toBeVisible();
 	return toolbox;
 }
@@ -79,15 +88,9 @@ test('selected images expose private tools, exact model sizes, and disclosed fal
 	const toolbox = await pasteSelectedImage(page);
 
 	await expect(toolbox.getByText('Runs privately on your device')).toBeVisible();
-	await expect(toolbox.getByText('Uploads this image to fal.ai')).toBeVisible();
-	const modelPicker = toolbox.getByRole('combobox', { name: 'AI image editing model' });
-	await expect(modelPicker).toHaveValue('nano-banana-2');
-	await expect(modelPicker.locator('option')).toHaveCount(5);
-	await expect(toolbox.getByText('fal top pick')).toBeVisible();
-	await modelPicker.selectOption('gpt-image-2');
-	await expect(toolbox.getByText('AA #3', { exact: true })).toBeVisible();
-	await expect(toolbox.getByText('~$0.219/edit · cloud processing')).toBeVisible();
+	await expect(toolbox.getByText('Uploads this image to fal.ai')).toHaveCount(0);
 	await expect(toolbox.getByText('First use downloads ~13.8 MB.')).toBeVisible();
+	await expect(toolbox.getByRole('button', { name: 'Background', exact: true })).toBeVisible();
 	await expect(toolbox.getByRole('button', { name: 'Magic Select', exact: true })).toBeVisible();
 	await expect(toolbox.getByRole('button', { name: 'Magic Eraser', exact: true })).toBeVisible();
 	await expect(toolbox.getByRole('button', { name: 'Depth Blur', exact: true })).toBeVisible();
@@ -105,11 +108,73 @@ test('selected images expose private tools, exact model sizes, and disclosed fal
 	await toolbox.getByRole('button', { name: 'Vectorize Image', exact: true }).click();
 	await expect(toolbox.getByText('No model download required.')).toBeVisible();
 
+	await toolbox.getByRole('button', { name: 'AI prompt', exact: true }).click();
+	await expect(toolbox.getByText('Uploads this image to fal.ai')).toBeVisible();
+	await expect(toolbox.getByText('Runs privately on your device')).toHaveCount(0);
+	await expect(toolbox.getByText('No model download required.')).toHaveCount(0);
+	const modelPicker = toolbox.getByRole('combobox', { name: 'AI image editing model' });
+	await expect(modelPicker).toHaveValue('nano-banana-2');
+	await expect(modelPicker.locator('option')).toHaveCount(5);
+	await expect(toolbox.getByText('fal top pick')).toBeVisible();
+	await modelPicker.selectOption('gpt-image-2');
+	await expect(toolbox.getByText('AA #3', { exact: true })).toBeVisible();
+	await expect(toolbox.getByText('~$0.219/edit · cloud processing')).toBeVisible();
 	await toolbox.getByRole('button', { name: 'Improve lighting' }).click();
 	const prompt = toolbox.getByRole('textbox', { name: 'AI image editing prompt' });
 	await expect(prompt).toHaveValue(/natural, balanced illumination/i);
 	await prompt.fill('Use soft golden-hour lighting.');
 	await expect(prompt).toHaveValue('Use soft golden-hour lighting.');
+
+	await toolbox.getByRole('button', { name: 'Background', exact: true }).click();
+	await expect(toolbox.getByRole('combobox', { name: 'Background removal model' })).toBeVisible();
+	await expect(toolbox.getByRole('textbox', { name: 'AI image editing prompt' })).toHaveCount(0);
+});
+
+test('the selected image chooser stays compact and never stretches previews on narrow screens', async ({
+	page
+}) => {
+	await page.setViewportSize({ width: 390, height: 844 });
+	const toolbox = await pasteSelectedImage(page);
+	const preview = toolbox.getByAltText('Selected canvas artwork');
+	await expect(preview).toBeVisible();
+	expect(await preview.evaluate((image) => getComputedStyle(image).objectFit)).toBe('contain');
+	const localBounds = await toolbox.boundingBox();
+	if (!localBounds) throw new Error('The local image toolbox is not visible.');
+	expect(localBounds.x).toBeGreaterThanOrEqual(0);
+	expect(localBounds.x + localBounds.width).toBeLessThanOrEqual(390);
+	expect(localBounds.height).toBeLessThan(360);
+
+	await toolbox.getByRole('button', { name: 'AI prompt', exact: true }).click();
+	await expect(toolbox.getByRole('textbox', { name: 'AI image editing prompt' })).toBeVisible();
+	await expect(preview).toHaveCount(0);
+	await expect(toolbox.getByRole('combobox', { name: 'Background removal model' })).toHaveCount(0);
+	const cloudBounds = await toolbox.boundingBox();
+	if (!cloudBounds) throw new Error('The cloud image toolbox is not visible.');
+	expect(cloudBounds.height).toBeLessThan(430);
+});
+
+test('the floating image toolbox can be dragged without losing the selected tool', async ({
+	page
+}) => {
+	const toolbox = await pasteSelectedImage(page);
+	const start = await toolbox.boundingBox();
+	const handle = await toolbox.getByRole('button', { name: 'Move image tools' }).boundingBox();
+	if (!start || !handle) throw new Error('The draggable image toolbox is not visible.');
+	await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2);
+	await page.mouse.down();
+	await page.mouse.move(handle.x + handle.width / 2 + 110, handle.y + handle.height / 2 + 90, {
+		steps: 6
+	});
+	await page.mouse.up();
+	const moved = await toolbox.boundingBox();
+	if (!moved) throw new Error('The toolbox disappeared after being dragged.');
+	expect(moved.x).toBeGreaterThan(start.x + 90);
+	expect(moved.y).toBeGreaterThan(start.y + 70);
+	await expect(toolbox.getByRole('button', { name: 'Magic Select', exact: true })).toHaveAttribute(
+		'aria-pressed',
+		'true'
+	);
+	await expect(toolbox.getByRole('button', { name: 'Choose the subject to select' })).toBeVisible();
 });
 
 for (const fixture of [
@@ -343,28 +408,91 @@ test('large transparent image edits preserve dimensions and synchronize under th
 	}
 });
 
-test('prompt editing sends only image and editable prompt through the authenticated proxy', async ({
+test('prompt editing shows progress, retains session generations, and restores them for local tools', async ({
 	page
 }) => {
-	/** @type {{image:string,prompt:string,model:string}|undefined} */
-	let captured;
+	await page.addInitScript(() => {
+		/** @type {any} */ (globalThis).__SWYX_PROCESS_IMAGE_TOOL__ = async (
+			/** @type {string} */ _action,
+			/** @type {Blob} */ source
+		) => source;
+	});
+	/** @type {{image:string,prompt:string,model:string}[]} */
+	const captured = [];
+	/** @type {string[]} */
+	let outputImages = [];
+	/** @type {(() => void) | undefined} */
+	let continueFirstGeneration;
+	const firstGenerationReady = new Promise((resolve) => {
+		continueFirstGeneration = () => resolve(undefined);
+	});
 	await page.route('**/tools/api/draw/edit', async (route) => {
-		captured = route.request().postDataJSON();
+		const request = route.request().postDataJSON();
+		captured.push(request);
+		const generationIndex = captured.length - 1;
+		if (generationIndex === 0) await firstGenerationReady;
 		await route.fulfill({
-			json: { image: captured?.image, model: 'fal-ai/flux-2/edit' }
+			json: { image: outputImages[generationIndex], model: 'fal-ai/flux-2/edit' }
 		});
 	});
 	const toolbox = await pasteSelectedImage(page);
 	const original = await selectedSceneImage(page);
+	outputImages = await page.evaluate(() => {
+		const canvas = document.createElement('canvas');
+		canvas.width = 460;
+		canvas.height = 460;
+		const context = canvas.getContext('2d');
+		if (!context) throw new Error('Could not create mocked generated images.');
+		return ['#e45757', '#5076de'].map((color) => {
+			context.fillStyle = color;
+			context.fillRect(0, 0, canvas.width, canvas.height);
+			return canvas.toDataURL('image/png');
+		});
+	});
+	await toolbox.getByRole('button', { name: 'AI prompt', exact: true }).click();
 	await toolbox
 		.getByRole('combobox', { name: 'AI image editing model' })
 		.selectOption('seedream-5-pro');
 	await toolbox.getByRole('button', { name: 'Product mockup' }).click();
 	await toolbox.getByRole('button', { name: 'Generate AI image edit' }).click();
+	await expect(toolbox.getByRole('progressbar', { name: 'AI generation progress' })).toBeVisible();
+	await expect(toolbox.getByText('Generating with Seedream 5.0 Pro')).toBeVisible();
+	await expect(
+		toolbox.getByText('Your result will appear on the canvas and in session history.')
+	).toBeVisible();
+	continueFirstGeneration?.();
 	await expect.poll(async () => (await selectedSceneImage(page)).fileId).not.toBe(original.fileId);
-	expect(captured?.prompt).toMatch(/studio product mockup/i);
-	expect(captured?.image).toMatch(/^data:image\//);
-	expect(captured?.model).toBe('seedream-5-pro');
-	expect(Object.keys(captured ?? {}).sort()).toEqual(['image', 'model', 'prompt']);
+	expect(captured[0]?.prompt).toMatch(/studio product mockup/i);
+	expect(captured[0]?.image).toMatch(/^data:image\//);
+	expect(captured[0]?.model).toBe('seedream-5-pro');
+	expect(Object.keys(captured[0] ?? {}).sort()).toEqual(['image', 'model', 'prompt']);
 	await expect(toolbox.getByText('AI edit applied')).toBeVisible();
+	const history = toolbox.getByRole('region', { name: 'Generated images from this session' });
+	await expect(history.getByRole('button')).toHaveCount(1);
+	await expect(history.getByText('Seedream 5.0 Pro')).toBeVisible();
+
+	await toolbox
+		.getByRole('textbox', { name: 'AI image editing prompt' })
+		.fill('A second variation');
+	await toolbox.getByRole('button', { name: 'Generate AI image edit' }).click();
+	await expect(history.getByRole('button')).toHaveCount(2);
+	const latest = await selectedSceneImage(page);
+	await history.getByRole('button', { name: /Use generation 2:.*studio product mockup/i }).click();
+	await expect.poll(async () => (await selectedSceneImage(page)).fileId).not.toBe(latest.fileId);
+	const restored = await page.evaluate(() => {
+		const scene =
+			/** @type {{elements:{type:string,fileId:string}[],files:Record<string,{dataURL:string}>}} */ (
+				JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[],"files":{}}')
+			);
+		const image = scene.elements.find((element) => element.type === 'image');
+		return image ? scene.files[image.fileId].dataURL : '';
+	});
+	expect(restored).toBe(outputImages[0]);
+	await toolbox.getByRole('button', { name: 'Magic Select', exact: true }).click();
+	await expect(history.getByRole('button')).toHaveCount(2);
+	const selectedGeneration = await selectedSceneImage(page);
+	await toolbox.getByRole('button', { name: 'Apply Magic Select' }).click();
+	await expect
+		.poll(async () => (await selectedSceneImage(page)).fileId)
+		.not.toBe(selectedGeneration.fileId);
 });

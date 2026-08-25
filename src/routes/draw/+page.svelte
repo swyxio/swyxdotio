@@ -24,6 +24,7 @@
 	 * @typedef {{ id: string, name: string, updatedAt?: string | number }} DrawingPage
 	 * @typedef {{ elements?: readonly import('@excalidraw/excalidraw/element/types').ExcalidrawElement[], appState?: Record<string, any>, files?: import('@excalidraw/excalidraw/types').BinaryFiles }} DrawingScene
 	 * @typedef {{ id: string, label: string, description?: string, category: string, keywords?: string | string[], run: () => void | Promise<void> }} WorkspaceCommand
+	 * @typedef {{ id: string, dataURL: string, mimeType: string, prompt: string, modelLabel: string, createdAt: number }} DrawingImageGeneration
 	 */
 
 	/** @type {HTMLDivElement} */
@@ -75,6 +76,10 @@
 	let isLibraryOpen = $state(false);
 	let selectedImageId = $state('');
 	let selectedImageDataUrl = $state('');
+	let imageGenerations = $state(/** @type {DrawingImageGeneration[]} */ ([]));
+	let imageToolsPosition = $state(/** @type {{ x: number, y: number } | null} */ (null));
+	/** @type {{ pointerId: number, x: number, y: number, left: number, top: number, width: number } | undefined} */
+	let imageToolsDrag;
 	let backgroundMode = $state('portrait-fast');
 	let backgroundStatus = $state('');
 	let backgroundProgress = $state(0);
@@ -86,6 +91,53 @@
 	const activeBackgroundMode = $derived(
 		BACKGROUND_MODES.find((mode) => mode.id === backgroundMode) ?? BACKGROUND_MODES[0]
 	);
+
+	/** @param {PointerEvent} event */
+	function startDraggingImageTools(event) {
+		if (event.button !== 0 && event.pointerType !== 'touch') return;
+		const handle = /** @type {HTMLElement} */ (event.currentTarget);
+		const panel = handle.closest('.image-tools');
+		if (!(panel instanceof HTMLElement)) return;
+		const bounds = panel.getBoundingClientRect();
+		imageToolsDrag = {
+			pointerId: event.pointerId,
+			x: event.clientX,
+			y: event.clientY,
+			left: bounds.left,
+			top: bounds.top,
+			width: bounds.width
+		};
+		handle.setPointerCapture(event.pointerId);
+		event.preventDefault();
+	}
+
+	/** @param {PointerEvent} event */
+	function moveImageTools(event) {
+		if (!imageToolsDrag || imageToolsDrag.pointerId !== event.pointerId) return;
+		imageToolsPosition = {
+			x: Math.max(
+				8,
+				Math.min(
+					window.innerWidth - imageToolsDrag.width - 8,
+					imageToolsDrag.left + event.clientX - imageToolsDrag.x
+				)
+			),
+			y: Math.max(
+				8,
+				Math.min(window.innerHeight - 140, imageToolsDrag.top + event.clientY - imageToolsDrag.y)
+			)
+		};
+	}
+
+	/** @param {PointerEvent} event */
+	function finishDraggingImageTools(event) {
+		if (imageToolsDrag?.pointerId === event.pointerId) imageToolsDrag = undefined;
+	}
+
+	/** @param {DrawingImageGeneration} generation */
+	function rememberImageGeneration(generation) {
+		imageGenerations = [generation, ...imageGenerations].slice(0, 12);
+	}
 	const recentPages = $derived(orderRecentDrawingPages(pages, activePageId));
 	const filteredComponents = $derived(
 		searchWorkspaceCommands(
@@ -976,67 +1028,19 @@
 <div class="draw-canvas" role="application" aria-label="Drawing canvas" bind:this={canvas}></div>
 
 {#if selectedImageId || isRemovingBackground}
-	<section class="image-tools" aria-label="Selected image tools">
-		<div class="image-tool-heading">
-			<svg aria-hidden="true" viewBox="0 0 20 20" fill="none">
-				<path
-					d="m10 2.5 1.6 4.2L16 8.3l-4.4 1.6L10 14l-1.6-4.1L4 8.3l4.4-1.6L10 2.5Zm5.2 9.5.9 2.3 2.4.9-2.4.9-.9 2.4-.9-2.4-2.3-.9 2.3-.9.9-2.3Z"
-					stroke="currentColor"
-					stroke-width="1.3"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-				/>
-			</svg>
-			<strong>Background</strong>
-			<span>Processed privately on your device</span>
-		</div>
-
-		<div class="image-tool-controls">
-			<select
-				class="background-mode-select"
-				aria-label="Background removal model"
-				value={backgroundMode}
-				disabled={isRemovingBackground}
-				onchange={changeBackgroundMode}
-			>
-				{#each BACKGROUND_MODES as mode (mode.id)}
-					<option value={mode.id}>{mode.label} ({mode.size})</option>
-				{/each}
-			</select>
-
-			{#if isRemovingBackground}
-				<button type="button" class="cancel-background" onclick={cancelBackgroundRemoval}>
-					Cancel
-				</button>
-			{:else}
-				<button
-					type="button"
-					class="remove-background"
-					aria-label="Remove image background"
-					onclick={() => void removeSelectedImageBackground()}
-				>
-					Remove background
-				</button>
-			{/if}
-		</div>
-
-		{#if isRemovingBackground}
-			<div class="background-progress" aria-live="polite">
-				<span>{backgroundStatus}{backgroundProgress ? ` · ${backgroundProgress}%` : ''}</span>
-				<progress
-					aria-label="Background removal progress"
-					max="100"
-					value={backgroundProgress || undefined}
-				></progress>
-			</div>
-		{:else if backgroundError}
-			<p class="background-error" role="alert">{backgroundError}</p>
-		{:else if backgroundMode !== 'portrait-fast'}
-			<p class="background-download-warning">First use downloads {activeBackgroundMode.size}.</p>
-		{:else if backgroundStatus}
-			<p class="background-success" role="status">{backgroundStatus}</p>
-		{/if}
-
+	<section
+		class="image-tools"
+		aria-label="Selected image tools"
+		style:left={imageToolsPosition ? `${imageToolsPosition.x}px` : undefined}
+		style:top={imageToolsPosition ? `${imageToolsPosition.y}px` : undefined}
+		style:transform={imageToolsPosition ? 'none' : undefined}
+		style:max-height={imageToolsPosition
+			? `calc(100dvh - ${imageToolsPosition.y + 12}px)`
+			: undefined}
+		onpointermove={moveImageTools}
+		onpointerup={finishDraggingImageTools}
+		onpointercancel={finishDraggingImageTools}
+	>
 		{#if editor && updateElement && captureImmediately && selectedImageId}
 			<DrawImageToolbox
 				{editor}
@@ -1045,8 +1049,62 @@
 				{updateElement}
 				captureUpdate={captureImmediately}
 				{cloudAvailable}
+				backgroundProcessing={isRemovingBackground}
+				generations={imageGenerations}
+				onGeneration={rememberImageGeneration}
+				onDragStart={startDraggingImageTools}
 				onCloudLimit={() => (saveStatus = 'error')}
-			/>
+			>
+				{#snippet backgroundControls()}
+					<div class="image-tool-controls">
+						<select
+							class="background-mode-select"
+							aria-label="Background removal model"
+							value={backgroundMode}
+							disabled={isRemovingBackground}
+							onchange={changeBackgroundMode}
+						>
+							{#each BACKGROUND_MODES as mode (mode.id)}
+								<option value={mode.id}>{mode.label} ({mode.size})</option>
+							{/each}
+						</select>
+
+						{#if isRemovingBackground}
+							<button type="button" class="cancel-background" onclick={cancelBackgroundRemoval}>
+								Cancel
+							</button>
+						{:else}
+							<button
+								type="button"
+								class="remove-background"
+								aria-label="Remove image background"
+								onclick={() => void removeSelectedImageBackground()}
+							>
+								Remove background
+							</button>
+						{/if}
+					</div>
+
+					{#if isRemovingBackground}
+						<div class="background-progress" aria-live="polite">
+							<span>{backgroundStatus}{backgroundProgress ? ` · ${backgroundProgress}%` : ''}</span>
+							<progress
+								aria-label="Background removal progress"
+								max="100"
+								value={backgroundProgress || undefined}
+							></progress>
+						</div>
+					{:else if backgroundError}
+						<p class="background-error" role="alert">{backgroundError}</p>
+					{:else if backgroundMode !== 'portrait-fast'}
+						<p class="background-download-warning">
+							First use downloads {activeBackgroundMode.size}.
+						</p>
+					{:else if backgroundStatus}
+						<p class="background-success" role="status">{backgroundStatus}</p>
+					{/if}
+				{/snippet}
+			</DrawImageToolbox>
 		{/if}
 	</section>
 {/if}
@@ -1450,26 +1508,6 @@
 			'Segoe UI',
 			sans-serif;
 		overflow-y: auto;
-	}
-
-	.image-tool-heading {
-		display: flex;
-		align-items: center;
-		gap: 7px;
-		margin-bottom: 10px;
-		font-size: 12px;
-	}
-
-	.image-tool-heading svg {
-		width: 17px;
-		height: 17px;
-		color: #6554c0;
-	}
-
-	.image-tool-heading span {
-		margin-left: auto;
-		color: #71717a;
-		font-size: 10px;
 	}
 
 	.image-tool-controls {
@@ -2107,10 +2145,6 @@
 	@media (max-width: 600px) {
 		.image-tools {
 			top: 124px;
-		}
-
-		.image-tool-heading span {
-			font-size: 9px;
 		}
 
 		.page-picker {

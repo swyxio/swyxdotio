@@ -42,9 +42,7 @@ test.describe('real private image-model inference', () => {
 			});
 
 			const toolbox = page.getByRole('region', { name: 'Selected image tools' });
-			await expect(
-				toolbox.getByRole('button', { name: 'Choose the subject to select' })
-			).toBeVisible();
+			await expect(toolbox.getByRole('button', { name: tool.label, exact: true })).toBeVisible();
 			const original = await page.evaluate(() => {
 				const scene = /** @type {{ elements: { type: string, fileId: string }[] }} */ (
 					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
