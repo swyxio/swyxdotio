@@ -1,6 +1,7 @@
 <script>
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import '@excalidraw/excalidraw/index.css';
+	import { orderRecentDrawingPages, searchWorkspaceCommands } from '$lib/draw-workspace.js';
 
 	const STORAGE_KEY = 'swyx-excalidraw';
 	const PAGE_STORAGE_KEY = `${STORAGE_KEY}:pages`;
@@ -20,6 +21,7 @@
 	/**
 	 * @typedef {{ id: string, name: string, updatedAt?: string | number }} DrawingPage
 	 * @typedef {{ elements?: readonly import('@excalidraw/excalidraw/element/types').ExcalidrawElement[], appState?: Record<string, any>, files?: import('@excalidraw/excalidraw/types').BinaryFiles }} DrawingScene
+	 * @typedef {{ id: string, label: string, description?: string, category: string, keywords?: string | string[], run: () => void | Promise<void> }} WorkspaceCommand
 	 */
 
 	/** @type {HTMLDivElement} */
@@ -34,7 +36,20 @@
 	let captureImmediately = null;
 	/** @type {typeof import('$lib/draw-presets.js').DRAW_PRESETS} */
 	let presets = $state([]);
+	/** @type {typeof import('$lib/draw-ui-components.js').DRAW_UI_COMPONENTS} */
+	let uiComponents = $state([]);
+	/** @type {typeof import('$lib/draw-ui-components.js').createDrawUiComponent | undefined} */
+	let createUiComponent;
 	let isPresetMenuOpen = $state(false);
+	let isComponentMenuOpen = $state(false);
+	let componentQuery = $state('');
+	let isCommandPaletteOpen = $state(false);
+	let commandQuery = $state('');
+	let highlightedCommandIndex = $state(0);
+	/** @type {HTMLInputElement | undefined} */
+	let commandInput = $state();
+	/** @type {HTMLElement | null} */
+	let commandPreviousFocus = null;
 	/** @type {DrawingPage[]} */
 	let pages = $state([]);
 	let activePageId = $state('');
@@ -62,6 +77,77 @@
 	const activeBackgroundMode = $derived(
 		BACKGROUND_MODES.find((mode) => mode.id === backgroundMode) ?? BACKGROUND_MODES[0]
 	);
+	const recentPages = $derived(orderRecentDrawingPages(pages, activePageId));
+	const filteredComponents = $derived(
+		searchWorkspaceCommands(
+			uiComponents.map((component) => ({ ...component, label: component.title })),
+			componentQuery,
+			{ limit: 100 }
+		)
+	);
+	const filteredComponentCategories = $derived(
+		Array.from(new Set(filteredComponents.map((component) => component.category)))
+	);
+	const workspaceCommands = $derived.by(() => {
+		/** @type {WorkspaceCommand[]} */
+		const commands = [
+			{
+				id: 'action-new-page',
+				label: 'Create new page',
+				description: 'Start a fresh drawing',
+				category: 'Actions',
+				keywords: ['new', 'drawing', 'document'],
+				run: () => createPage()
+			},
+			{
+				id: 'action-import-image',
+				label: 'Import screenshot or image',
+				description: 'Choose an image, or paste one with ⌘V',
+				category: 'Actions',
+				keywords: ['upload', 'paste', 'picture', 'photo', 'screenshot'],
+				run: () => editor?.setActiveTool({ type: 'image', insertOnCanvasDirectly: true })
+			},
+			{
+				id: 'action-browse-components',
+				label: 'Browse UI components',
+				description: 'Open the hand-drawn wireframing kit',
+				category: 'Actions',
+				keywords: ['wireframe', 'interface', 'kit'],
+				run: () => {
+					isComponentMenuOpen = true;
+				}
+			}
+		];
+
+		commands.push(
+			...uiComponents.map((component) => ({
+				id: `component-${component.id}`,
+				label: component.title,
+				description: component.description,
+				category: 'Components',
+				keywords: [component.category, ...(component.keywords ?? [])],
+				run: () => insertUiComponent(component.id)
+			})),
+			...presets.map((preset) => ({
+				id: `preset-${preset.id}`,
+				label: preset.label,
+				description: preset.description,
+				category: 'Presets',
+				keywords: ['framework', 'diagram', 'template'],
+				run: () => insertPreset(preset)
+			})),
+			...recentPages.map((page) => ({
+				id: `page-${page.id}`,
+				label: page.name,
+				description: page.id === activePageId ? 'Current page' : 'Open saved drawing',
+				category: 'Pages',
+				keywords: ['drawing', 'document', 'recent'],
+				run: () => switchPage(page)
+			}))
+		);
+		return commands;
+	});
+	const matchingCommands = $derived(searchWorkspaceCommands(workspaceCommands, commandQuery));
 
 	/** @param {string} key */
 	function readStorage(key) {
@@ -356,6 +442,87 @@
 		isPresetMenuOpen = false;
 	}
 
+	/** @param {string} componentId */
+	function insertUiComponent(componentId) {
+		if (!editor || !convertElements || !createUiComponent) return;
+		const existingElements = editor.getSceneElements();
+		const state = editor.getAppState();
+		const centerX = state.width / (2 * state.zoom.value) - state.scrollX;
+		const centerY = state.height / (2 * state.zoom.value) - state.scrollY;
+		const skeletons = createUiComponent(componentId, centerX - 140, centerY - 65);
+		if (!skeletons.length) return;
+		const shapes = convertElements(
+			/** @type {import('@excalidraw/excalidraw/data/transform').ExcalidrawElementSkeleton[]} */ (
+				skeletons
+			),
+			{ regenerateIds: true }
+		);
+		editor.updateScene({
+			elements: [...existingElements, ...shapes],
+			appState: {
+				selectedElementIds: Object.fromEntries(shapes.map((shape) => [shape.id, true]))
+			},
+			...(captureImmediately ? { captureUpdate: captureImmediately } : {})
+		});
+		editor.scrollToContent(shapes, { fitToContent: false, animate: true, duration: 180 });
+		isComponentMenuOpen = false;
+		componentQuery = '';
+	}
+
+	/** @param {string} [query] */
+	function openCommandPalette(query = '') {
+		commandPreviousFocus =
+			document.activeElement instanceof HTMLElement ? document.activeElement : null;
+		commandQuery = query;
+		highlightedCommandIndex = 0;
+		isPresetMenuOpen = false;
+		isPageMenuOpen = false;
+		isComponentMenuOpen = false;
+		isCommandPaletteOpen = true;
+		void tick().then(() => commandInput?.focus());
+	}
+
+	function closeCommandPalette() {
+		isCommandPaletteOpen = false;
+		commandQuery = '';
+		highlightedCommandIndex = 0;
+		if (commandPreviousFocus?.isConnected) commandPreviousFocus.focus();
+		commandPreviousFocus = null;
+	}
+
+	/** @param {WorkspaceCommand | undefined} command */
+	function runWorkspaceCommand(command) {
+		if (!command) return;
+		closeCommandPalette();
+		void command.run();
+	}
+
+	/** @param {KeyboardEvent} event */
+	function handleCommandKeys(event) {
+		if (event.key === 'Escape') {
+			event.preventDefault();
+			closeCommandPalette();
+			return;
+		}
+		if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+			event.preventDefault();
+			if (!matchingCommands.length) return;
+			const direction = event.key === 'ArrowDown' ? 1 : -1;
+			highlightedCommandIndex =
+				(highlightedCommandIndex + direction + matchingCommands.length) % matchingCommands.length;
+			void tick().then(() =>
+				document.getElementById(`workspace-command-${highlightedCommandIndex}`)?.scrollIntoView({
+					block: 'nearest'
+				})
+			);
+			return;
+		}
+		if (event.key === 'Enter') {
+			event.preventDefault();
+			runWorkspaceCommand(matchingCommands[highlightedCommandIndex]);
+		}
+	}
+
 	/** @param {Blob} blob */
 	function readBlobDataUrl(blob) {
 		return new Promise((resolve, reject) => {
@@ -582,6 +749,7 @@
 					CaptureUpdateAction
 				},
 				{ DRAW_PRESETS },
+				components,
 				drawingLibrary,
 				initialScene
 			] = await Promise.all([
@@ -589,6 +757,7 @@
 				import('react-dom/client'),
 				import('@excalidraw/excalidraw'),
 				import('$lib/draw-presets.js'),
+				import('$lib/draw-ui-components.js'),
 				import('$lib/draw-library.js'),
 				loadInitialPage()
 			]);
@@ -599,6 +768,8 @@
 			updateElement = newElementWith;
 			captureImmediately = CaptureUpdateAction.IMMEDIATELY;
 			presets = DRAW_PRESETS;
+			uiComponents = components.DRAW_UI_COMPONENTS;
+			createUiComponent = components.createDrawUiComponent;
 			const savedBackgroundMode = readStorage(BACKGROUND_MODE_STORAGE_KEY);
 			if (BACKGROUND_MODES.some((mode) => mode.id === savedBackgroundMode)) {
 				backgroundMode = savedBackgroundMode;
@@ -645,12 +816,23 @@
 		const saveWhenHidden = () => {
 			if (document.visibilityState === 'hidden') void flushPendingSave();
 		};
+		/** @param {KeyboardEvent} event */
+		const openCommandsFromKeyboard = (event) => {
+			if (event.key.toLowerCase() !== 'k') return;
+			if (!event.metaKey && !event.ctrlKey) return;
+			event.preventDefault();
+			event.stopPropagation();
+			if (isCommandPaletteOpen) closeCommandPalette();
+			else openCommandPalette();
+		};
 		document.addEventListener('visibilitychange', saveWhenHidden);
+		window.addEventListener('keydown', openCommandsFromKeyboard, { capture: true });
 
 		return () => {
 			destroyed = true;
 			backgroundAbort?.abort();
 			document.removeEventListener('visibilitychange', saveWhenHidden);
+			window.removeEventListener('keydown', openCommandsFromKeyboard, { capture: true });
 			void flushPendingSave();
 			root?.unmount();
 		};
@@ -743,6 +925,7 @@
 			onclick={() => {
 				isPageMenuOpen = !isPageMenuOpen;
 				isPresetMenuOpen = false;
+				isComponentMenuOpen = false;
 			}}
 		>
 			<svg aria-hidden="true" viewBox="0 0 20 20" fill="none">
@@ -769,14 +952,14 @@
 		{#if isPageMenuOpen}
 			<section id="drawing-pages" class="page-menu" aria-label="Drawing pages">
 				<div class="page-heading">
-					<strong>Pages</strong>
+					<strong>Recent pages</strong>
 					<span class="save-status" data-status={saveStatus}>
 						{#if saveStatus === 'saving'}Saving…{:else if saveStatus === 'saved'}Saved to cloud{:else if saveStatus === 'error'}Saved
 							on this device{:else}Saved on this device{/if}
 					</span>
 				</div>
 
-				{#each pages as page (page.id)}
+				{#each recentPages as page (page.id)}
 					<div class="page-row" class:active={page.id === activePageId}>
 						{#if renamingPageId === page.id}
 							<input
@@ -857,6 +1040,71 @@
 	</div>
 {/if}
 
+{#if uiComponents.length > 0}
+	<div class="component-picker">
+		<button
+			type="button"
+			class="component-toggle"
+			aria-label="Browse UI components"
+			aria-expanded={isComponentMenuOpen}
+			aria-controls="drawing-components"
+			title="Browse hand-drawn UI components (⌘K)"
+			disabled={!editor}
+			onclick={() => {
+				isComponentMenuOpen = !isComponentMenuOpen;
+				isPresetMenuOpen = false;
+				isPageMenuOpen = false;
+				componentQuery = '';
+			}}
+		>
+			<svg aria-hidden="true" viewBox="0 0 20 20" fill="none">
+				<path
+					d="M4.2 4.5h11.6v11H4.2v-11Zm0 3.5h11.6M8 8v7.5"
+					stroke="currentColor"
+					stroke-width="1.5"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				/>
+			</svg>
+			<span>Components</span>
+			<kbd>⌘K</kbd>
+		</button>
+
+		{#if isComponentMenuOpen}
+			<section id="drawing-components" class="component-menu" aria-label="UI components">
+				<div class="component-heading">
+					<strong>Sketch an interface</strong>
+					<span>Hand-drawn, editable components.</span>
+				</div>
+				<input
+					class="component-search"
+					aria-label="Search UI components"
+					placeholder="Search components…"
+					bind:value={componentQuery}
+				/>
+				{#if filteredComponents.length === 0}
+					<p class="component-empty">No matching components.</p>
+				{:else}
+					{#each filteredComponentCategories as category (category)}
+						<div class="component-category">{category}</div>
+						{#each filteredComponents.filter((component) => component.category === category) as component (component.id)}
+							<button
+								type="button"
+								class="component-option"
+								aria-label="Insert {component.title} component"
+								onclick={() => insertUiComponent(component.id)}
+							>
+								<strong>{component.title}</strong>
+								<span>{component.description}</span>
+							</button>
+						{/each}
+					{/each}
+				{/if}
+			</section>
+		{/if}
+	</div>
+{/if}
+
 {#if presets.length > 0}
 	<div class="preset-picker">
 		<button
@@ -869,6 +1117,7 @@
 			onclick={() => {
 				isPresetMenuOpen = !isPresetMenuOpen;
 				isPageMenuOpen = false;
+				isComponentMenuOpen = false;
 			}}
 		>
 			<svg aria-hidden="true" viewBox="0 0 20 20" fill="none">
@@ -950,6 +1199,64 @@
 			</section>
 		{/if}
 	</div>
+{/if}
+
+{#if isCommandPaletteOpen}
+	<button
+		type="button"
+		class="command-backdrop"
+		aria-label="Close command palette"
+		onclick={closeCommandPalette}
+	></button>
+	<dialog open class="command-palette" aria-modal="true" aria-label="Workspace commands">
+		<div class="command-input-wrap">
+			<svg aria-hidden="true" viewBox="0 0 20 20" fill="none">
+				<path
+					d="m14.2 14.2 3 3M8.8 15a6.2 6.2 0 1 0 0-12.4A6.2 6.2 0 0 0 8.8 15Z"
+					stroke="currentColor"
+					stroke-width="1.6"
+					stroke-linecap="round"
+				/>
+			</svg>
+			<input
+				bind:this={commandInput}
+				class="command-input"
+				aria-label="Search components, presets, pages, and actions"
+				aria-activedescendant={matchingCommands.length
+					? `workspace-command-${highlightedCommandIndex}`
+					: undefined}
+				aria-controls="workspace-command-results"
+				placeholder="Search components, presets, pages, actions…"
+				bind:value={commandQuery}
+				oninput={() => (highlightedCommandIndex = 0)}
+				onkeydown={handleCommandKeys}
+			/>
+			<kbd>esc</kbd>
+		</div>
+		<div id="workspace-command-results" class="command-results">
+			{#if matchingCommands.length === 0}
+				<p class="command-empty">No matches for “{commandQuery}”.</p>
+			{:else}
+				{#each matchingCommands as command, index (command.id)}
+					{#if index === 0 || matchingCommands[index - 1]?.category !== command.category}
+						<div class="command-category">{command.category}</div>
+					{/if}
+					<button
+						id="workspace-command-{index}"
+						type="button"
+						class="command-option"
+						class:highlighted={highlightedCommandIndex === index}
+						onmouseenter={() => (highlightedCommandIndex = index)}
+						onclick={() => runWorkspaceCommand(command)}
+					>
+						<strong>{command.label}</strong>
+						{#if command.description}<span>{command.description}</span>{/if}
+					</button>
+				{/each}
+			{/if}
+		</div>
+		<div class="command-footer"><kbd>↑↓</kbd> navigate <kbd>↵</kbd> select</div>
+	</dialog>
 {/if}
 
 <style>
@@ -1072,7 +1379,8 @@
 	}
 
 	.preset-picker,
-	.page-picker {
+	.page-picker,
+	.component-picker {
 		position: fixed;
 		top: 12px;
 		z-index: 1000;
@@ -1090,11 +1398,16 @@
 	}
 
 	.page-picker {
+		left: 337px;
+	}
+
+	.component-picker {
 		left: 173px;
 	}
 
 	.preset-toggle,
-	.page-toggle {
+	.page-toggle,
+	.component-toggle {
 		display: flex;
 		align-items: center;
 		gap: 8px;
@@ -1111,7 +1424,19 @@
 	}
 
 	.page-toggle {
-		max-width: min(220px, calc(100vw - 205px));
+		max-width: min(185px, calc(100vw - 369px));
+	}
+
+	.component-toggle kbd,
+	.command-input-wrap kbd,
+	.command-footer kbd {
+		padding: 2px 4px;
+		border: 1px solid #e7e7eb;
+		border-radius: 4px;
+		background: #f8f8fa;
+		color: #71717a;
+		font-family: inherit;
+		font-size: 10px;
 	}
 
 	.page-toggle span {
@@ -1121,13 +1446,15 @@
 	}
 
 	.preset-toggle:disabled,
-	.page-toggle:disabled {
+	.page-toggle:disabled,
+	.component-toggle:disabled {
 		cursor: wait;
 		opacity: 0.65;
 	}
 
 	.preset-toggle svg,
 	.page-toggle svg,
+	.component-toggle svg,
 	.page-action svg,
 	.add-page svg {
 		flex: none;
@@ -1141,7 +1468,8 @@
 	}
 
 	.preset-menu,
-	.page-menu {
+	.page-menu,
+	.component-menu {
 		width: min(310px, calc(100vw - 84px));
 		max-height: min(610px, calc(100dvh - 75px));
 		margin-top: 8px;
@@ -1159,7 +1487,8 @@
 	}
 
 	.preset-heading,
-	.page-heading {
+	.page-heading,
+	.component-heading {
 		display: grid;
 		gap: 4px;
 		padding: 11px 11px 12px;
@@ -1170,7 +1499,8 @@
 
 	.preset-heading span,
 	.preset-option span,
-	.page-heading span {
+	.page-heading span,
+	.component-heading span {
 		color: #71717a;
 		font-size: 12px;
 		line-height: 1.4;
@@ -1316,9 +1646,165 @@
 	}
 
 	.preset-option:hover,
-	.preset-option:focus-visible {
+	.preset-option:focus-visible,
+	.component-option:hover,
+	.component-option:focus-visible {
 		background: #f3f3f5;
 		outline: none;
+	}
+
+	.component-menu {
+		width: min(330px, calc(100vw - 188px));
+	}
+
+	.component-search {
+		width: calc(100% - 12px);
+		margin: 6px;
+		padding: 8px 10px;
+		border: 1px solid #e4e4e7;
+		border-radius: 7px;
+		background: #fff;
+		color: #27272a;
+		font-size: 12px;
+		outline-color: #7768e5;
+	}
+
+	.component-category,
+	.command-category {
+		padding: 12px 9px 5px;
+		color: #71717a;
+		font-size: 10px;
+		font-weight: 650;
+		letter-spacing: 0.05em;
+		text-transform: uppercase;
+	}
+
+	.component-option {
+		display: grid;
+		width: 100%;
+		gap: 3px;
+		padding: 8px 9px;
+		border: 0;
+		border-radius: 7px;
+		background: transparent;
+		color: #27272a;
+		text-align: left;
+		cursor: pointer;
+	}
+
+	.component-option strong,
+	.command-option strong {
+		font-size: 12px;
+		font-weight: 550;
+	}
+
+	.component-option span,
+	.command-option span {
+		color: #71717a;
+		font-size: 11px;
+	}
+
+	.component-empty,
+	.command-empty {
+		padding: 20px 10px;
+		color: #71717a;
+		font-size: 13px;
+		text-align: center;
+	}
+
+	.command-backdrop {
+		position: fixed;
+		inset: 0;
+		z-index: 1100;
+		border: 0;
+		background: rgb(17 17 24 / 34%);
+	}
+
+	.command-palette {
+		position: fixed;
+		top: min(19vh, 155px);
+		left: 50%;
+		z-index: 1101;
+		width: min(560px, calc(100vw - 28px));
+		max-height: min(590px, calc(100dvh - 180px));
+		margin: 0;
+		padding: 0;
+		transform: translateX(-50%);
+		border: 1px solid rgb(0 0 0 / 9%);
+		border-radius: 13px;
+		background: #fff;
+		box-shadow: 0 24px 75px rgb(0 0 0 / 22%);
+		color: #27272a;
+		font-family:
+			Inter,
+			-apple-system,
+			BlinkMacSystemFont,
+			'Segoe UI',
+			sans-serif;
+		overflow: hidden;
+	}
+
+	.command-input-wrap {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		padding: 14px 15px;
+		border-bottom: 1px solid #ededf0;
+	}
+
+	.command-input-wrap svg {
+		flex: none;
+		width: 18px;
+		height: 18px;
+		color: #71717a;
+	}
+
+	.command-input {
+		flex: 1;
+		min-width: 0;
+		border: 0;
+		background: transparent;
+		color: inherit;
+		font-size: 15px;
+		outline: none;
+	}
+
+	.command-results {
+		max-height: min(430px, calc(100dvh - 280px));
+		padding: 4px 7px 9px;
+		overflow-y: auto;
+	}
+
+	.command-option {
+		display: grid;
+		width: 100%;
+		gap: 3px;
+		padding: 9px 10px;
+		border: 0;
+		border-radius: 7px;
+		background: transparent;
+		color: inherit;
+		text-align: left;
+		cursor: pointer;
+	}
+
+	.command-option.highlighted,
+	.command-option:hover {
+		background: #f0efff;
+	}
+
+	.command-footer {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		padding: 9px 12px;
+		border-top: 1px solid #ededf0;
+		color: #71717a;
+		font-size: 10px;
+	}
+
+	.command-footer kbd + kbd {
+		margin-left: 8px;
 	}
 
 	@media (max-width: 600px) {
@@ -1331,7 +1817,8 @@
 		}
 
 		.preset-picker,
-		.page-picker {
+		.page-picker,
+		.component-picker {
 			top: 10px;
 		}
 
@@ -1339,21 +1826,58 @@
 			left: 58px;
 		}
 
-		.page-picker {
+		.component-picker {
 			left: 159px;
 		}
 
+		.page-picker {
+			left: 288px;
+		}
+
 		.preset-toggle,
-		.page-toggle {
+		.page-toggle,
+		.component-toggle {
 			height: 36px;
 			padding: 0 10px;
 		}
 
+		.component-toggle kbd {
+			display: none;
+		}
+
+		.page-toggle {
+			max-width: calc(100vw - 299px);
+		}
+
 		.page-menu {
 			position: relative;
-			left: min(0px, calc(100vw - 420px));
+			left: min(0px, calc(100vw - 570px));
 			width: min(260px, calc(100vw - 24px));
 			min-width: 0;
+		}
+
+		.component-menu {
+			position: relative;
+			left: min(0px, calc(100vw - 495px));
+			width: min(325px, calc(100vw - 24px));
+		}
+
+		.command-palette {
+			top: 11vh;
+		}
+	}
+
+	@media (max-width: 410px) {
+		.component-toggle span {
+			display: none;
+		}
+
+		.page-picker {
+			left: 212px;
+		}
+
+		.page-toggle {
+			max-width: calc(100vw - 225px);
 		}
 	}
 </style>

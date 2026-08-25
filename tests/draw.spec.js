@@ -147,6 +147,129 @@ test('visual presets insert labeled editable diagrams without replacing existing
 		.toBe(true);
 });
 
+test('hand-drawn UI components are searchable, editable, and preserve existing drawings', async ({
+	page
+}) => {
+	await page.goto('/draw');
+	const browseComponents = page.getByRole('button', { name: 'Browse UI components' });
+	await expect(browseComponents).toBeVisible();
+	await browseComponents.click();
+
+	const componentMenu = page.getByRole('region', { name: 'UI components' });
+	await expect(componentMenu).toBeVisible();
+	const componentOptions = componentMenu.getByRole('button', { name: /^insert .+ component$/i });
+	expect(await componentOptions.count()).toBeGreaterThanOrEqual(12);
+
+	const search = componentMenu.getByRole('textbox', { name: 'Search UI components' });
+	await search.fill('button');
+	await expect(componentOptions.first()).toBeVisible();
+	const selectedLabel = await componentOptions.first().getAttribute('aria-label');
+	expect(selectedLabel?.toLowerCase()).toContain('button');
+	await componentOptions.first().click();
+	await expect(componentMenu).toHaveCount(0);
+
+	await expect
+		.poll(() =>
+			page.evaluate(() => {
+				const scene = /** @type {{ elements: DrawingElement[] }} */ (
+					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+				);
+				return scene.elements.filter((element) => !element.isDeleted);
+			})
+		)
+		.toEqual(expect.arrayContaining([expect.objectContaining({ roughness: expect.any(Number) })]));
+	const initialCount = await page.evaluate(
+		() => JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}').elements.length
+	);
+
+	await browseComponents.click();
+	await componentMenu.getByRole('textbox', { name: 'Search UI components' }).fill('table');
+	await componentOptions.first().click();
+	await expect
+		.poll(() =>
+			page.evaluate(
+				() =>
+					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}').elements.length
+			)
+		)
+		.toBeGreaterThan(initialCount);
+
+	await page.reload();
+	await expect(page.locator('.draw-canvas canvas.excalidraw__canvas.interactive')).toBeVisible();
+	await expect
+		.poll(() =>
+			page.evaluate(
+				() =>
+					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}').elements.length
+			)
+		)
+		.toBeGreaterThan(initialCount);
+});
+
+test('command palette searches components, presets, pages, and actions with keyboard controls', async ({
+	page
+}) => {
+	await page.goto('/draw');
+	await expect(page.getByRole('button', { name: 'Browse UI components' })).toBeVisible();
+	await page.keyboard.press('Control+k');
+
+	const palette = page.getByRole('dialog', { name: 'Workspace commands' });
+	const search = palette.getByRole('textbox', {
+		name: 'Search components, presets, pages, and actions'
+	});
+	await expect(palette).toBeVisible();
+	await expect(search).toBeFocused();
+	await expect(palette.getByText('Actions', { exact: true }).first()).toBeVisible();
+	await expect(palette.getByText('Components', { exact: true }).first()).toBeVisible();
+
+	await search.fill('button');
+	await expect(palette.getByRole('button').first()).toContainText(/button/i);
+	await search.press('ArrowDown');
+	await search.press('ArrowUp');
+	await search.press('Enter');
+	await expect(palette).toHaveCount(0);
+	await expect
+		.poll(() =>
+			page.evaluate(
+				() =>
+					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}').elements.length
+			)
+		)
+		.toBeGreaterThan(0);
+
+	await page.keyboard.press('Meta+k');
+	await expect(palette).toBeVisible();
+	await search.fill('priority quadrants');
+	await expect(palette.getByText('Presets', { exact: true })).toBeVisible();
+	await search.press('Enter');
+	await expect
+		.poll(() =>
+			page.evaluate(() => {
+				const scene = /** @type {{ elements: DrawingElement[] }} */ (
+					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+				);
+				return scene.elements.some((element) => element.text?.includes('Act now'));
+			})
+		)
+		.toBe(true);
+
+	await page.keyboard.press('Control+k');
+	await search.fill('page 1');
+	await expect(palette.getByText('Pages', { exact: true })).toBeVisible();
+	await search.fill('import screenshot');
+	await expect(palette.getByRole('button', { name: /import screenshot or image/i })).toBeVisible();
+	await search.fill('nothing matches this phrase');
+	await expect(palette.getByText(/no matches/i)).toBeVisible();
+	await search.press('Escape');
+	await expect(palette).toHaveCount(0);
+
+	await page.keyboard.press('Control+k');
+	await page
+		.getByRole('button', { name: 'Close command palette' })
+		.click({ position: { x: 10, y: 10 } });
+	await expect(palette).toHaveCount(0);
+});
+
 test('software architecture libraries preload and preserve personally added components', async ({
 	page
 }) => {
