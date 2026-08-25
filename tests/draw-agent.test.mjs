@@ -175,6 +175,60 @@ test('drawing assistant signs shared run budgets, tracks model tokens, and rejec
 	assert.equal(overMaximum.status, 402);
 });
 
+test('drawing assistant accepts structured text and empty model completions after successful canvas review', async () => {
+	const structured = await runDrawingAgent(
+		await createEvent({
+			ai: {
+				run: async () => ({
+					choices: [{ message: { content: [{ type: 'text', text: 'Thumbnail is ready.' }] } }]
+				})
+			}
+		})
+	);
+	assert.equal(structured.status, 200);
+	assert.equal((await structured.json()).content, 'Thumbnail is ready.');
+
+	const completed = await runDrawingAgent(
+		await createEvent({
+			body: {
+				messages: [
+					{ role: 'user', content: 'Create and review a thumbnail.' },
+					{
+						role: 'assistant',
+						content: null,
+						tool_calls: [
+							{
+								id: 'review_1',
+								type: 'function',
+								function: {
+									name: 'canvas_bash',
+									arguments: JSON.stringify({ command: 'draw inspect' })
+								}
+							}
+						]
+					},
+					{
+						role: 'tool',
+						tool_call_id: 'review_1',
+						content: JSON.stringify({ stdout: 'Thumbnail ready', stderr: '', exitCode: 0 })
+					}
+				],
+				screenshot: SCREENSHOT
+			},
+			ai: { run: async () => ({ choices: [{ message: { content: null, tool_calls: [] } }] }) }
+		})
+	);
+	assert.equal(completed.status, 200);
+	assert.equal((await completed.json()).content, 'Canvas review complete.');
+
+	const incomplete = await runDrawingAgent(
+		await createEvent({
+			ai: { run: async () => ({ choices: [{ message: { content: null, tool_calls: [] } }] }) }
+		})
+	);
+	assert.equal(incomplete.status, 502);
+});
+
 test('drawing assistant rejects oversized requests, untrusted screenshot URLs, and unknown tool calls', async () => {
 	const oversized = await runDrawingAgent(
 		await createEvent({ contentLength: String(MAX_DRAW_AGENT_REQUEST_BYTES + 1) })

@@ -154,6 +154,32 @@ function normalizeToolCalls(value) {
 	return calls;
 }
 
+/** @param {unknown} value */
+function normalizeResponseContent(value) {
+	if (typeof value === 'string') return value;
+	if (!Array.isArray(value)) return '';
+	return value
+		.map((part) => {
+			if (typeof part === 'string') return part;
+			if (!part || typeof part !== 'object') return '';
+			const text = /** @type {{ text?: unknown }} */ (part).text;
+			return typeof text === 'string' ? text : '';
+		})
+		.filter(Boolean)
+		.join('\n');
+}
+
+/** @param {Record<string, unknown>[]} messages */
+function hasCompletedToolReview(messages) {
+	const result = messages.findLast((message) => message.role === 'tool');
+	if (typeof result?.content !== 'string') return false;
+	try {
+		return JSON.parse(result.content)?.exitCode === 0;
+	} catch {
+		return false;
+	}
+}
+
 /**
  * One bounded model turn. Browser-side tools remain outside the Worker and its
  * secrets; only an authenticated owner can invoke the server-owned AI binding.
@@ -262,18 +288,22 @@ export async function runDrawingAgent(event) {
 		);
 	}
 	const output = result?.choices?.[0]?.message ?? result;
-	const content =
-		typeof output?.content === 'string'
-			? output.content
-			: typeof output?.response === 'string'
-				? output.response
-				: '';
+	let content = normalizeResponseContent(output?.content || output?.response);
 	const toolCalls = output?.tool_calls === undefined ? [] : normalizeToolCalls(output.tool_calls);
-	if (!toolCalls || (!content.trim() && !toolCalls.length)) {
+	if (!toolCalls) {
 		return privateJson(
 			{ error: 'The drawing assistant returned an invalid response.' },
 			{ status: 502 }
 		);
+	}
+	if (!content.trim() && !toolCalls.length) {
+		if (!hasCompletedToolReview(messages)) {
+			return privateJson(
+				{ error: 'The drawing assistant returned an invalid response.' },
+				{ status: 502 }
+			);
+		}
+		content = 'Canvas review complete.';
 	}
 	/** @type {Record<string, unknown>} */
 	const response = { content: content.slice(0, 12_000), toolCalls };
