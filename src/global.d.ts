@@ -90,6 +90,7 @@ declare namespace App {
 		env?: {
 			GA4_MEASUREMENT_ID?: string;
 			GA4_API_SECRET?: string;
+			FAL_KEY?: string;
 			GH_TOKEN?: string;
 			GH_WEBHOOK_SECRET?: string;
 			PODCAST_ADMIN_PASSWORD?: string;

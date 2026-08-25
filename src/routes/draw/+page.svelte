@@ -3,6 +3,7 @@
 	import '@excalidraw/excalidraw/index.css';
 	import { DRAW_MEME_TEMPLATES, fetchMemeTemplates, searchMemeTemplates } from '$lib/draw-memes.js';
 	import { orderRecentDrawingPages, searchWorkspaceCommands } from '$lib/draw-workspace.js';
+	import DrawImageToolbox from '$lib/DrawImageToolbox.svelte';
 
 	const STORAGE_KEY = 'swyx-excalidraw';
 	const PAGE_STORAGE_KEY = `${STORAGE_KEY}:pages`;
@@ -32,9 +33,9 @@
 	/** @type {typeof import('@excalidraw/excalidraw').convertToExcalidrawElements | null} */
 	let convertElements = null;
 	/** @type {typeof import('@excalidraw/excalidraw').newElementWith | null} */
-	let updateElement = null;
+	let updateElement = $state.raw(null);
 	/** @type {typeof import('@excalidraw/excalidraw').CaptureUpdateAction.IMMEDIATELY | null} */
-	let captureImmediately = null;
+	let captureImmediately = $state(null);
 	/** @type {typeof import('$lib/draw-presets.js').DRAW_PRESETS} */
 	let presets = $state([]);
 	/** @type {typeof import('$lib/draw-ui-components.js').DRAW_UI_COMPONENTS} */
@@ -72,6 +73,7 @@
 	let pendingSave;
 	let isSwitchingPage = false;
 	let selectedImageId = $state('');
+	let selectedImageDataUrl = $state('');
 	let backgroundMode = $state('portrait-fast');
 	let backgroundStatus = $state('');
 	let backgroundProgress = $state(0);
@@ -768,6 +770,11 @@
 				? elements.find((element) => element.id === selectedIds[0] && element.type === 'image')
 				: undefined;
 		const nextSelectedImageId = selected?.id ?? '';
+		const nextSelectedImageDataUrl =
+			selected?.type === 'image' && selected.fileId ? (files[selected.fileId]?.dataURL ?? '') : '';
+		if (selectedImageDataUrl !== nextSelectedImageDataUrl) {
+			selectedImageDataUrl = nextSelectedImageDataUrl;
+		}
 		if (selectedImageId !== nextSelectedImageId) {
 			selectedImageId = nextSelectedImageId;
 			backgroundError = '';
@@ -1009,6 +1016,18 @@
 			<p class="background-download-warning">First use downloads {activeBackgroundMode.size}.</p>
 		{:else if backgroundStatus}
 			<p class="background-success" role="status">{backgroundStatus}</p>
+		{/if}
+
+		{#if editor && updateElement && captureImmediately && selectedImageId}
+			<DrawImageToolbox
+				{editor}
+				imageId={selectedImageId}
+				imageDataUrl={selectedImageDataUrl}
+				{updateElement}
+				captureUpdate={captureImmediately}
+				{cloudAvailable}
+				onCloudLimit={() => (saveStatus = 'error')}
+			/>
 		{/if}
 	</section>
 {/if}
@@ -1376,6 +1395,7 @@
 		left: 50%;
 		z-index: 1001;
 		width: min(405px, calc(100vw - 28px));
+		max-height: calc(100dvh - 95px);
 		padding: 12px;
 		transform: translateX(-50%);
 		border: 1px solid rgb(0 0 0 / 9%);
@@ -1389,6 +1409,7 @@
 			BlinkMacSystemFont,
 			'Segoe UI',
 			sans-serif;
+		overflow-y: auto;
 	}
 
 	.image-tool-heading {

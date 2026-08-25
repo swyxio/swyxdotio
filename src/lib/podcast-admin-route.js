@@ -1,5 +1,5 @@
 import { error, json } from '@sveltejs/kit';
-import { isPodcastStudioSessionValid, podcastStudioCookieName } from '$lib/podcast-admin-auth';
+import { isPodcastStudioSessionValid, podcastStudioCookieName } from './podcast-admin-auth.js';
 
 /**
  * @param {Request} request
