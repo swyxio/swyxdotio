@@ -180,6 +180,27 @@ test('all 12 curated models retain their verified endpoints and model-specific p
 	}
 });
 
+test('autonomous drawing-agent edits preserve provider-managed safety defaults', async () => {
+	for (const id of ['nano-banana-2', 'flux-2']) {
+		const form = createForm({
+			image: new File(['source'], 'source.png', { type: 'image/png' }),
+			prompt: 'Improve the lighting',
+			model: id,
+			providerSafetyDefaults: '1'
+		});
+		/** @type {Record<string, unknown> | undefined} */
+		let payload;
+		const response = await editDrawingImage(await createEvent({ form }), async (_url, init) => {
+			payload = JSON.parse(/** @type {string} */ (init?.body));
+			return providerResponse({ request_id: REQUEST_ID }, 202);
+		});
+		assert.equal(response.status, 202);
+		assert.ok(payload);
+		assert.equal('enable_safety_checker' in payload, false);
+		assert.equal('safety_tolerance' in payload, false);
+	}
+});
+
 test('text-to-image models send prompts only and reject accidental reference uploads', async () => {
 	for (const model of DRAW_FAL_MODELS.filter((entry) => entry.kind === 'text-to-image')) {
 		const form = createForm({ prompt: 'A warm sunrise over mountain peaks', model: model.id });

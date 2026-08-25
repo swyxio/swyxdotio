@@ -3,6 +3,34 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { sveltekitOG } from '@ethercorps/sveltekit-og/plugin';
 import { ssp } from 'sveltekit-search-params/plugin';
 
+/**
+ * just-bash's published browser bundle still statically imports node:zlib for
+ * optional gzip support. Those commands are unavailable in our browser sandbox;
+ * keep its compatibility shim scoped to that exact dependency and worker.
+ * @returns {import('vite').Plugin}
+ */
+function drawingSandboxBrowserCompat() {
+	const virtualModule = '\0swyx-draw-agent-browser-zlib';
+	return {
+		name: 'drawing-sandbox-browser-zlib',
+		enforce: 'pre',
+		resolveId(source, importer) {
+			if (
+				source === 'node:zlib' &&
+				importer?.replaceAll('\\', '/').includes('/just-bash/dist/bundle/browser.js')
+			) {
+				return virtualModule;
+			}
+		},
+		load(id) {
+			if (id !== virtualModule) return;
+			return `export const constants = Object.freeze({ Z_BEST_COMPRESSION: 9, Z_BEST_SPEED: 1, Z_DEFAULT_COMPRESSION: -1 });
+export function gunzipSync() { throw new Error('Compressed files are unavailable in the drawing sandbox.'); }
+export function gzipSync() { throw new Error('Compressed files are unavailable in the drawing sandbox.'); }`;
+		}
+	};
+}
+
 /** @type {import('vite').UserConfig & { test: { include: string[] } }} */
 const config = {
 	plugins: [
@@ -25,7 +53,8 @@ const config = {
 		reportCompressedSize: false
 	},
 	worker: {
-		format: 'es'
+		format: 'es',
+		plugins: () => [drawingSandboxBrowserCompat()]
 	},
 	test: {
 		include: ['src/**/*.{test,spec}.{js,ts}']

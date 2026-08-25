@@ -88,6 +88,9 @@ declare namespace App {
 	// interface PageData {}
 	interface Platform {
 		env?: {
+			AI?: {
+				run(model: string, input: Record<string, unknown>): Promise<unknown>;
+			};
 			GA4_MEASUREMENT_ID?: string;
 			GA4_API_SECRET?: string;
 			FAL_KEY?: string;

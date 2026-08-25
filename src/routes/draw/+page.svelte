@@ -3,7 +3,16 @@
 	import '@excalidraw/excalidraw/index.css';
 	import { DRAW_MEME_TEMPLATES, fetchMemeTemplates, searchMemeTemplates } from '$lib/draw-memes.js';
 	import { orderRecentDrawingPages, searchWorkspaceCommands } from '$lib/draw-workspace.js';
-	import { DEFAULT_DRAW_FAL_MODEL } from '$lib/draw-fal-models.js';
+	import { DEFAULT_DRAW_FAL_MODEL, getDrawFalModel } from '$lib/draw-fal-models.js';
+	import {
+		executeDrawingAgentCommand,
+		captureVisibleDrawingViewport
+	} from '$lib/draw-agent-tools.js';
+	import { processImageTool } from '$lib/draw-image-tools.js';
+	import { prepareDrawingFalImage } from '$lib/draw-fal-image.js';
+	import { runDrawingFalGeneration } from '$lib/draw-fal-queue.js';
+	import { optimizeDrawingImageForCloud, replaceDrawingImage } from '$lib/draw-image-scene.js';
+	import DrawAgent from '$lib/DrawAgent.svelte';
 	import DrawImageToolbox from '$lib/DrawImageToolbox.svelte';
 
 	const STORAGE_KEY = 'swyx-excalidraw';
@@ -502,6 +511,206 @@
 			saveStatus = 'error';
 			console.error('Could not rename the drawing page.', error);
 		}
+	}
+
+	/** @param {string} id @param {string} name */
+	async function renamePageFromAgent(id, name) {
+		if (cloudAvailable) {
+			await requestPage(`/${encodeURIComponent(id)}`, {
+				method: 'PUT',
+				body: JSON.stringify({ name })
+			});
+		}
+		setPages(pages.map((page) => (page.id === id ? { ...page, name } : page)));
+	}
+
+	/**
+	 * @param {string} action
+	 * @param {Record<string, string | number>} options
+	 * @param {{ signal: AbortSignal, onProgress: (message: string) => void, reserveSpending: (amount: number, label: string) => void }} operation
+	 */
+	async function applyAgentImageTool(action, options, operation) {
+		if (!editor || !updateElement || !captureImmediately)
+			throw new Error('The drawing editor is unavailable.');
+		const requestedId = typeof options.id === 'string' ? options.id : selectedImageId;
+		const selected = editor
+			.getSceneElements()
+			.find((element) => element.id === requestedId && element.type === 'image');
+		if (!selected || selected.type !== 'image' || !selected.fileId) {
+			throw new Error('Select one canvas image or supply --id ELEMENT_ID.');
+		}
+		const sourceFile = editor.getFiles()[selected.fileId];
+		if (!sourceFile?.dataURL) throw new Error('The selected image could not be loaded.');
+		editor.updateScene({ appState: { selectedElementIds: { [selected.id]: true } } });
+		await tick();
+		operation.signal.throwIfAborted();
+		if (action === 'background') {
+			const abort = () => backgroundAbort?.abort();
+			operation.signal.addEventListener('abort', abort, { once: true });
+			try {
+				operation.onProgress('Removing the image background on your device');
+				await removeSelectedImageBackground();
+				if (backgroundError) throw new Error(backgroundError);
+				return { action, imageId: selected.id, local: true };
+			} finally {
+				operation.signal.removeEventListener('abort', abort);
+			}
+		}
+		let dataURL;
+		let mimeType;
+		/** @type {typeof import('$lib/draw-fal-models.js').DRAW_FAL_MODELS[number] | undefined} */
+		let model;
+		if (action === 'fal') {
+			model = getDrawFalModel(options.model ?? DEFAULT_DRAW_FAL_MODEL.id);
+			if (!model) throw new Error('Choose one of the available fal image models.');
+			const imagePrompt = typeof options.prompt === 'string' ? options.prompt.trim() : '';
+			if (!imagePrompt) throw new Error('Cloud image editing requires --prompt TEXT.');
+			operation.reserveSpending(model.priceUsd, model.label);
+			if (!imageGenerations.some((generation) => generation.dataURL === sourceFile.dataURL)) {
+				rememberImageGeneration({
+					id: crypto.randomUUID(),
+					dataURL: sourceFile.dataURL,
+					mimeType: sourceFile.mimeType,
+					prompt: 'Original image',
+					modelLabel: 'Original',
+					createdAt: Date.now()
+				});
+			}
+			const prepared =
+				model.kind === 'text-to-image'
+					? undefined
+					: await prepareDrawingFalImage({
+							dataURL: sourceFile.dataURL,
+							prompt: imagePrompt,
+							model,
+							signal: operation.signal,
+							onProgress: operation.onProgress
+						});
+			const generationModel = model;
+			const generated = await runDrawingFalGeneration({
+				image: prepared?.blob,
+				prompt: imagePrompt,
+				model: model.id,
+				signal: operation.signal,
+				providerSafetyDefaults: true,
+				onProgress: (progress) =>
+					operation.onProgress(
+						progress.message ??
+							`${progress.status.replaceAll('_', ' ').toLowerCase()} · ${generationModel.label}`
+					)
+			});
+			if (model.kind === 'image-to-video') {
+				rememberImageGeneration({
+					id: crypto.randomUUID(),
+					dataURL: generated.video,
+					mimeType: 'video/mp4',
+					prompt: imagePrompt,
+					modelLabel: model.label,
+					createdAt: Date.now()
+				});
+				return {
+					action,
+					imageId: selected.id,
+					model: model.id,
+					estimatedUsd: model.priceUsd,
+					video: true
+				};
+			}
+			dataURL = generated.image;
+			mimeType = dataURL.slice(5, dataURL.indexOf(';')) || 'image/png';
+		} else {
+			const source = await fetch(sourceFile.dataURL).then((response) => response.blob());
+			const loopback = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
+			const browserTestProcessor = loopback
+				? /** @type {any} */ (globalThis).__SWYX_PROCESS_IMAGE_TOOL__
+				: undefined;
+			const edited = await (browserTestProcessor ?? processImageTool)(
+				/** @type {'magic-select' | 'magic-eraser' | 'depth-blur' | 'vectorize'} */ (action),
+				source,
+				{
+					point: { x: Number(options.x ?? 0.5), y: Number(options.y ?? 0.5) },
+					radius: Number(options.radius ?? 0.12),
+					blur: Number(options.blur ?? 14),
+					focus: Number(options.focus ?? 0.55),
+					signal: operation.signal,
+					onProgress: (
+						/** @type {import('$lib/draw-image-tools.js').DrawImageToolProgress} */ progress
+					) =>
+						operation.onProgress(
+							progress.label ?? progress.message ?? `${action} ${progress.phase}`
+						)
+				}
+			);
+			dataURL = await readBlobDataUrl(edited);
+			mimeType = edited.type || 'image/png';
+		}
+		if (cloudAvailable) {
+			const optimized = await optimizeDrawingImageForCloud({
+				editor,
+				imageId: selected.id,
+				sourceFileId: selected.fileId,
+				dataURL,
+				mimeType,
+				signal: operation.signal,
+				onOptimize: () => operation.onProgress('Optimizing the edited image for cloud sync')
+			});
+			dataURL = optimized.dataURL;
+			mimeType = optimized.mimeType;
+		}
+		operation.signal.throwIfAborted();
+		const updated = replaceDrawingImage({
+			editor,
+			imageId: selected.id,
+			sourceFileId: selected.fileId,
+			dataURL,
+			mimeType,
+			updateElement,
+			captureUpdate: captureImmediately,
+			cloudAvailable
+		});
+		if (updated.exceedsCloudLimit) saveStatus = 'error';
+		if (model) {
+			rememberImageGeneration({
+				id: crypto.randomUUID(),
+				dataURL: updated.dataURL,
+				mimeType: updated.mimeType,
+				prompt: String(options.prompt),
+				modelLabel: model.label,
+				createdAt: Date.now()
+			});
+		}
+		return {
+			action,
+			imageId: selected.id,
+			local: action !== 'fal',
+			cloudSyncable: !updated.exceedsCloudLimit,
+			...(model ? { model: model.id, estimatedUsd: model.priceUsd } : {})
+		};
+	}
+
+	/**
+	 * @param {string[]} args
+	 * @param {{ signal: AbortSignal, onProgress: (message: string) => void, reserveSpending: (amount: number, label: string) => void }} operation
+	 */
+	async function executeAgentCommand(args, operation) {
+		operation.signal.throwIfAborted();
+		return executeDrawingAgentCommand(args, {
+			editor,
+			convertElements,
+			updateElement,
+			captureUpdate: captureImmediately,
+			pageId: activePageId,
+			pages,
+			presets,
+			components: uiComponents,
+			commands: workspaceCommands,
+			createPage,
+			switchPage,
+			renamePage: renamePageFromAgent,
+			insertPreset,
+			insertComponent: insertUiComponent,
+			image: (action, options) => applyAgentImageTool(action, options, operation)
+		});
 	}
 
 	/** @param {DrawingPage} page */
@@ -1071,6 +1280,15 @@
 </svelte:head>
 
 <div class="draw-canvas" role="application" aria-label="Drawing canvas" bind:this={canvas}></div>
+
+{#if editor && activePageId}
+	<DrawAgent
+		authenticated={toolsAuthenticated}
+		pageId={activePageId}
+		executeCommand={executeAgentCommand}
+		captureViewport={() => captureVisibleDrawingViewport(canvas)}
+	/>
+{/if}
 
 {#if activeImageToolId || isRemovingBackground}
 	<section

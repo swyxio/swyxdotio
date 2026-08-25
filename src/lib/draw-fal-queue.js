@@ -43,6 +43,7 @@ async function readResponse(response) {
  *  pollIntervalMs?: number,
  *  requestTimeoutMs?: number,
  *  maxGenerationMs?: number
+ *  providerSafetyDefaults?: boolean
  * }} options
  */
 export async function runDrawingFalGeneration(options) {
@@ -64,6 +65,7 @@ export async function runDrawingFalGeneration(options) {
 	}
 	form.append('prompt', prompt);
 	form.append('model', model);
+	if (options.providerSafetyDefaults) form.append('providerSafetyDefaults', '1');
 	onProgress({ status: 'UPLOADING' });
 	const submitted = await readResponse(
 		await fetcher('/tools/api/draw/edit', {

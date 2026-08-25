@@ -144,7 +144,9 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 	}
 	const fields = [...form.keys()];
 	if (
-		fields.some((field) => !['image', 'prompt', 'model'].includes(field)) ||
+		fields.some(
+			(field) => !['image', 'prompt', 'model', 'providerSafetyDefaults'].includes(field)
+		) ||
 		new Set(fields).size !== fields.length
 	) {
 		return privateJson({ error: 'The image-editing request is invalid.' }, { status: 400 });
@@ -158,6 +160,10 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 		);
 	}
 	const requestedModel = form.get('model');
+	const providerSafetyDefaults = form.get('providerSafetyDefaults');
+	if (providerSafetyDefaults !== null && providerSafetyDefaults !== '1') {
+		return privateJson({ error: 'The image-editing request is invalid.' }, { status: 400 });
+	}
 	const model = requestedModel === null ? DEFAULT_DRAW_FAL_MODEL : getDrawFalModel(requestedModel);
 	if (!model) {
 		return privateJson(
@@ -201,7 +207,12 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 		providerInput.sync_mode = true;
 		providerInput.num_images = 1;
 	}
-	Object.assign(providerInput, model.settings);
+	const modelSettings = { ...model.settings };
+	if (providerSafetyDefaults === '1') {
+		delete (/** @type {Record<string, unknown>} */ (modelSettings).enable_safety_checker);
+		delete (/** @type {Record<string, unknown>} */ (modelSettings).safety_tolerance);
+	}
+	Object.assign(providerInput, modelSettings);
 	/** @type {Response} */
 	let upstream;
 	try {
