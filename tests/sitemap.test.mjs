@@ -56,3 +56,18 @@ test('sitemap normalizes internal legacy www canonicals to the apex host', () =>
 	assert.match(xml, /<loc>https:\/\/swyx\.io\/preferred-path<\/loc>/);
 	assert.doesNotMatch(xml, /<loc>https:\/\/www\.|old=1|#section/);
 });
+
+test('sitemap removes trailing article slashes so canonical entries never redirect', () => {
+	const xml = buildSitemap([
+		{
+			title: 'Legacy trailing slash',
+			slug: 'new-mac-setup',
+			category: 'note',
+			date: new Date('2020-01-01T00:00:00.000Z'),
+			canonical: 'https://www.swyx.io/new-mac-setup/'
+		}
+	]);
+
+	assert.match(xml, /<loc>https:\/\/swyx\.io\/new-mac-setup<\/loc>/);
+	assert.doesNotMatch(xml, /new-mac-setup\/<\/loc>/);
+});

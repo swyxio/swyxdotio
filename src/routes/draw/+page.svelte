@@ -1273,6 +1273,7 @@
 
 <svelte:head>
 	<title>Draw · swyx.io</title>
+	<link rel="canonical" href="https://swyx.io/draw" />
 	<meta
 		name="description"
 		content="A fullscreen drawing canvas with organized pages and automatic saving."

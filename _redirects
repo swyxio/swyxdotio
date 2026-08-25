@@ -1,34 +1,34 @@
 # /api/rss.xml supports old (pre Aug 2022) swyxkits where the RSS lived at /api/rss.xml
-/api/rss.xml /rss.xml
-/feed /rss.xml
-/rss /rss.xml
+/api/rss.xml /rss.xml 301
+/feed /rss.xml 301
+/rss /rss.xml 301
 
 # read docs for more https://docs.netlify.com/routing/redirects/
 
-/LIP /learn-in-public
-/PUWTPD /puwtpd
-/lip /learn-in-public
-/learn-in-public-hack /puwtpd
-/growing /ideas/?filter=growing&show=Talks
-/jsconfhi /ideas/?filter=babel%20macros&show=Talks
-/reactrally /ideas?filter=reactive+react&show=Essay%2CTalk
-/getting-closure-on-hooks /hooks
-/react-from-scratch /ideas/?filter=react%20scratch&show=Talks
-/career  https://gumroad.com/products/bAZJq/
-/youtube  https://youtube.com/swyxTV?sub_confirmation=1
-/writing/js-observability /js-tools-metrics-logs-traces
-/writing/no-controlled-dom /no-controlled-forms
-/writing/prerecording_talks /prerecording-talks
-/prerecording_talks /prerecording-talks
-/create_luck /create-luck
-/now /about#now
+/LIP /learn-in-public 301
+/PUWTPD /puwtpd 301
+/lip /learn-in-public 301
+/learn-in-public-hack /puwtpd 301
+/growing /ideas?filter=growing&show=Talk 301
+/jsconfhi /ideas?filter=babel%20macros&show=Talk 301
+/reactrally /ideas?filter=reactive+react&show=Essay%2CTalk 301
+/getting-closure-on-hooks /hooks 301
+/react-from-scratch /ideas?filter=react%20scratch&show=Talk 301
+/career https://gumroad.com/products/bAZJq/ 301
+/youtube https://youtube.com/swyxTV?sub_confirmation=1 301
+/writing/js-observability /js-tools-metrics-logs-traces 301
+/writing/no-controlled-dom /no-controlled-forms 301
+/writing/prerecording_talks /prerecording-talks 301
+/prerecording_talks /prerecording-talks 301
+/create_luck /create-luck 301
+/now /about#now 301
 
 
-/talks /ideas?show=Talk
-/writing  /ideas?show=Essay
-/speaking  /ideas?show=Talk&show=Podcast
-/talks/react-hooks  https://www.youtube.com/watch?v=KJP1E-Y-xyo
-/talks/concurrent-react  https://egghead.io/talks/react-egghead-talks-concurrent-react-from-scratch
-/talks/*  /ideas?show=Talk&filter=:splat
-/writing/*  /:splat
-/speaking/*  /ideas?show=Talk&show=Podcasts&filter=:splat
+/talks /ideas?show=Talk 301
+/writing /ideas?show=Essay 301
+/speaking /ideas?show=Talk%2CPodcast 301
+/talks/react-hooks https://www.youtube.com/watch?v=KJP1E-Y-xyo 301
+/talks/concurrent-react https://egghead.io/talks/react-egghead-talks-concurrent-react-from-scratch 301
+/talks/* /ideas?show=Talk&filter=:splat 301
+/writing/* /:splat 301
+/speaking/* /ideas?show=Talk%2CPodcast&filter=:splat 301

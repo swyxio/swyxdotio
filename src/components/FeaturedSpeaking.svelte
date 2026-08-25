@@ -1,8 +1,8 @@
 <!-- Converted from FeaturedSpeaking.svx (mdsvex removed in favor of marked) -->
 <article class="prose max-w-none prose-ul:list-disc dark:prose-invert">
 	<p>
-		I have done a bunch of <a href="/ideas/?show=Talks">talks</a> and
-		<a href="/ideas/?show=Podcast">podcast</a> appearances. There are different eras:
+		I have done a bunch of <a href="/ideas?show=Talk">talks</a> and
+		<a href="/ideas?show=Podcast">podcast</a> appearances. There are different eras:
 	</p>
 	<p>The modern era:</p>
 	<ul class="feature-list">
@@ -88,6 +88,6 @@
 		</li>
 	</ul>
 	<p>
-		<a href="/ideas/?show=Talk%2CPodcast">More of my speaking on the /ideas page</a>.
+		<a href="/ideas?show=Talk%2CPodcast">More of my speaking on the /ideas page</a>.
 	</p>
 </article>

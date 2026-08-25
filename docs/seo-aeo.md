@@ -26,17 +26,54 @@ Investigate exact paths and HTTP statuses before interpreting them. The zone-wid
 included missing `robots.txt` files on separately operated `overgrid.swyx.io`, `media.swyx.io`,
 and `strata.swyx.io`; those are outside this site's Worker.
 
+## Google Search Console baseline: August 25, 2026
+
+For July 17 through August 23, the domain property reported 1,994 search clicks, 245,000
+impressions, 0.8% click-through rate, and average position 10.4. It had 508 indexed pages and 1,256
+non-indexed pages. Its indexing report was last updated August 20, so these categories are not a
+real-time production-health report:
+
+| Exclusion reason                          | Pages |
+| ----------------------------------------- | ----: |
+| Page with redirect                        |   646 |
+| Alternate page with proper canonical tag  |   210 |
+| Crawled, currently not indexed            |   141 |
+| Historical server error (5xx)             |   119 |
+| Not found (404)                           |    80 |
+| Duplicate without user-selected canonical |    33 |
+| Soft 404                                  |    12 |
+| Discovered, currently not indexed         |    12 |
+| Google selected another canonical         |     2 |
+| Other 4xx                                 |     1 |
+
+Sampled server-error examples were last crawled in March through May and now resolve successfully;
+several formerly required three to five redirects. Duplicate and soft-404 samples predominantly
+used legacy `www` URLs, trailing slashes, or invalid plural archive filters such as `show=Talks`.
+
+Google has exactly one submitted sitemap: `https://www.swyx.io/sitemap.xml`, submitted July 17 and
+last read August 23. It reports 415 discovered pages, but redirects to the canonical apex host.
+Submitting `https://swyx.io/sitemap.xml` would align the submitted sitemap with the site's actual
+canonical host; this is an external Search Console mutation and requires explicit user approval.
+
+The top ten queries included `swyx` (250 clicks / 1,362 impressions), `shawn wang` (86 / 870), and
+`learn in public` (28 / 161). Low-intent `yt5s` and `yt5s rip` queries contributed 18,477 combined
+impressions but only 37 clicks. Segment branded, high-intent non-branded, and irrelevant discovery
+before treating the property-wide 0.8% click-through rate as one optimization target.
+
 ## Crawler contract
 
 - `/robots.txt` permits `search=yes` and `ai-input=yes`. It intentionally does not assert a model
   training preference.
-- `/sitemap.xml` lists public canonical pages using the exact sitemap-protocol XML namespace.
+- `/sitemap.xml` lists public canonical pages, including `/box` and `/draw`, using the exact
+  sitemap-protocol XML namespace and without trailing-slash redirect targets.
 - `/llms.txt` always returns the complete public discovery index as `text/plain`.
 - `/llms.md` always returns the same discovery index as `text/markdown`.
 - `/llms` serves HTML to browsers and plain text or Markdown to clients that negotiate those types.
 - `/{article-slug}.md` serves the original published article Markdown with source attribution.
 - Private posts and externally canonical posts are excluded from AI discovery and Markdown output.
 - Public discovery files carry `Content-Signal: search=yes, ai-input=yes` and remain edge-cacheable.
+- Legacy URL aliases permanently redirect with HTTP 301, and archive filters use valid singular
+  category names.
 
 Cloudflare's automatic Markdown for Agents feature requires a Pro, Business, or Enterprise plan.
 Native article Markdown routes provide the useful output on the existing Free plan without a paid

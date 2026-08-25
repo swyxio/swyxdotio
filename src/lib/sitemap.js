@@ -1,6 +1,15 @@
 import { SITE_URL } from './siteConfig.js';
 
-export const PUBLIC_PAGE_PATHS = ['/', '/about', '/ideas', '/podcasts', '/portfolio', '/subscribe'];
+export const PUBLIC_PAGE_PATHS = [
+	'/',
+	'/about',
+	'/ideas',
+	'/podcasts',
+	'/portfolio',
+	'/subscribe',
+	'/box',
+	'/draw'
+];
 
 /**
  * @param {import('./types').ContentItem[]} posts
@@ -41,6 +50,7 @@ export function publicContentUrl(post) {
 		if (canonical.hostname !== 'swyx.io' && canonical.hostname !== 'www.swyx.io') return null;
 		canonical.protocol = 'https:';
 		canonical.hostname = 'swyx.io';
+		canonical.pathname = canonical.pathname.replace(/\/$/, '') || '/';
 		canonical.port = '';
 		canonical.hash = '';
 		canonical.search = '';

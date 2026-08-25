@@ -1,5 +1,6 @@
 <svelte:head>
 	<title>Big text box · swyx.io</title>
+	<link rel="canonical" href="https://swyx.io/box" />
 	<meta name="description" content="A distraction-free, oversized text box. Just start typing." />
 </svelte:head>
 

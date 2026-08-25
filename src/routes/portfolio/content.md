@@ -1,4 +1,4 @@
-## Advising and Investing Portfolio
+# Advising and Investing Portfolio
 
 My largest shareholdings are Temporal and Cognition, but for the last 5ish years I have been advising and investing in startups, having started the [devtools-angels community](https://dx.tips/angel-101).
                                                                                                                        

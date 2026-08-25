@@ -146,7 +146,10 @@ export function getArticleSocialMeta(article, canonical) {
 function normalizeCanonical(canonical) {
 	try {
 		const url = new URL(canonical, SITE_URL);
-		if (url.hostname === 'www.swyx.io') url.hostname = 'swyx.io';
+		if (url.hostname === 'www.swyx.io' || url.hostname === 'swyx.io') {
+			url.hostname = 'swyx.io';
+			url.pathname = url.pathname.replace(/\/$/, '') || '/';
+		}
 		return url.href;
 	} catch {
 		return canonical;

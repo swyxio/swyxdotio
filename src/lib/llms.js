@@ -10,7 +10,9 @@ const PAGE_DESCRIPTIONS = {
 	'/ideas': 'Complete archive of essays, notes, talks, and tutorials.',
 	'/podcasts': 'Podcasts and audio conversations.',
 	'/portfolio': 'Projects, work, and investments.',
-	'/subscribe': 'Newsletter subscription and updates.'
+	'/subscribe': 'Newsletter subscription and updates.',
+	'/box': 'A distraction-free, oversized text box for writing.',
+	'/draw': 'A fullscreen drawing canvas with organized pages and AI image tools.'
 };
 
 /** @param {unknown} value */

@@ -74,7 +74,11 @@ test('article metadata normalizes legacy internal www canonicals without changin
 		'https://swyx.io/canonical-test'
 	);
 	assert.equal(
-		getArticleSocialMeta(article, 'https://example.com/original').canonical,
-		'https://example.com/original'
+		getArticleSocialMeta(article, 'https://www.swyx.io/canonical-test/').canonical,
+		'https://swyx.io/canonical-test'
+	);
+	assert.equal(
+		getArticleSocialMeta(article, 'https://example.com/original/').canonical,
+		'https://example.com/original/'
 	);
 });
