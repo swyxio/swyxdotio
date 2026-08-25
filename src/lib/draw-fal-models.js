@@ -5,6 +5,8 @@
  *
  * Last verified: 2026-08-25.
  */
+export const MAX_DRAW_FAL_REQUEST_BYTES = 1_900_000;
+
 export const DRAW_FAL_MODELS = /** @type {const} */ ([
 	{
 		id: 'nano-banana-2',
@@ -13,8 +15,10 @@ export const DRAW_FAL_MODELS = /** @type {const} */ ([
 		model: 'fal-ai/nano-banana-2/edit',
 		artificialAnalysisRank: 6,
 		price: '$0.08',
+		workflow: 'Balanced 1K edit',
 		description: 'Best balance of quality, speed, and cost',
 		badge: 'fal top pick',
+		input: { maxPixels: 1_048_576, maxEdge: 2048, mimeType: 'image/webp', size: '1K' },
 		settings: { resolution: '1K', aspect_ratio: 'auto', output_format: 'webp' }
 	},
 	{
@@ -24,8 +28,10 @@ export const DRAW_FAL_MODELS = /** @type {const} */ ([
 		model: 'openai/gpt-image-2/edit',
 		artificialAnalysisRank: 3,
 		price: '~$0.219',
+		workflow: 'High-detail 1.5 MP edit',
 		description: 'Highest-ranked available quality and prompt precision',
 		badge: 'AA #3',
+		input: { maxPixels: 1_572_864, maxEdge: 2048, mimeType: 'image/webp', size: '1.5 MP' },
 		settings: { quality: 'high', image_size: 'auto', output_format: 'webp' }
 	},
 	{
@@ -35,8 +41,10 @@ export const DRAW_FAL_MODELS = /** @type {const} */ ([
 		model: 'bytedance/seedream/v5/pro/edit',
 		artificialAnalysisRank: 8,
 		price: '$0.0675',
+		workflow: 'Precise product 1K edit',
 		description: 'Precise regional changes and sketch-to-render',
 		badge: 'New on fal',
+		input: { maxPixels: 1_048_576, maxEdge: 2048, mimeType: 'image/jpeg', size: '1K' },
 		settings: {
 			image_size: 'auto_1K',
 			output_format: 'jpeg',
@@ -50,8 +58,10 @@ export const DRAW_FAL_MODELS = /** @type {const} */ ([
 		model: 'fal-ai/nano-banana-pro/edit',
 		artificialAnalysisRank: 9,
 		price: '$0.15',
+		workflow: 'Premium 1K edit',
 		description: 'Premium reasoning, typography, and final-quality edits',
 		badge: 'fal premium pick',
+		input: { maxPixels: 1_048_576, maxEdge: 2048, mimeType: 'image/webp', size: '1K' },
 		settings: { resolution: '1K', aspect_ratio: 'auto', output_format: 'webp' }
 	},
 	{
@@ -61,8 +71,10 @@ export const DRAW_FAL_MODELS = /** @type {const} */ ([
 		model: 'fal-ai/flux-2/edit',
 		artificialAnalysisRank: 48,
 		price: '~$0.024',
+		workflow: 'Budget 1 MP edit',
 		description: 'Budget-friendly everyday edits at roughly one megapixel',
 		badge: 'Best value',
+		input: { maxPixels: 1_048_576, maxEdge: 2048, mimeType: 'image/webp', size: '1 MP' },
 		settings: { output_format: 'webp', enable_safety_checker: true }
 	}
 ]);

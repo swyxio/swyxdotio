@@ -1,5 +1,6 @@
 <script>
 	import { DRAW_IMAGE_TOOLS, processImageTool } from '$lib/draw-image-tools.js';
+	import { prepareDrawingFalImage } from '$lib/draw-fal-image.js';
 	import { optimizeDrawingImageForCloud, replaceDrawingImage } from '$lib/draw-image-scene.js';
 	import {
 		DEFAULT_DRAW_FAL_MODEL,
@@ -256,12 +257,23 @@
 		operationAbort = new AbortController();
 		try {
 			const selected = selectedImage();
+			const prepared = await prepareDrawingFalImage({
+				dataURL: selected.file.dataURL,
+				prompt: generationPrompt,
+				model: generationModel,
+				signal: operationAbort.signal,
+				onProgress: (message) => {
+					operationStatus = message;
+				}
+			});
+			operationAbort.signal.throwIfAborted();
+			operationStatus = `Generating with ${generationModel.label}`;
 			const response = await fetch('/tools/api/draw/edit', {
 				method: 'POST',
 				credentials: 'same-origin',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					image: selected.file.dataURL,
+					image: prepared.dataURL,
 					prompt: generationPrompt,
 					model: generationModel.id
 				}),
@@ -488,14 +500,16 @@
 				</div>
 			{/if}
 			<div class="fal-model-picker">
+				<label for="drawing-ai-workflow">Model and workflow</label>
 				<select
-					aria-label="AI image editing model"
+					id="drawing-ai-workflow"
+					aria-label="AI image model and workflow"
 					bind:value={falModelId}
 					disabled={processing || processingFal}
 				>
 					{#each DRAW_FAL_MODELS as model (model.id)}
 						<option value={model.id}>
-							{model.label} · AA #{model.artificialAnalysisRank} · {model.price}
+							{model.workflow} · {model.label} · {model.price}
 						</option>
 					{/each}
 				</select>
@@ -503,6 +517,9 @@
 					<span>{selectedFalModel.description}</span>
 					<strong>{selectedFalModel.badge}</strong>
 				</div>
+				<p class="fal-upload-hint">
+					Large images automatically fit {selectedFalModel.input.size} and the secure upload limit.
+				</p>
 			</div>
 			<textarea
 				aria-label="AI image editing prompt"
@@ -734,6 +751,14 @@
 		margin-top: 0;
 	}
 
+	.fal-model-picker > label {
+		display: block;
+		margin-bottom: 5px;
+		color: #52525b;
+		font-size: 10px;
+		font-weight: 550;
+	}
+
 	.fal-generation-progress {
 		display: grid;
 		gap: 5px;
@@ -781,6 +806,12 @@
 		flex: none;
 		color: #6554c0;
 		font-weight: 600;
+	}
+
+	.fal-upload-hint {
+		margin: 5px 0 0;
+		color: #71717a;
+		font-size: 9px;
 	}
 
 	.fal-edit textarea {

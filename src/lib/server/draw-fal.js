@@ -1,8 +1,12 @@
 import { isPodcastStudioSessionValid, podcastStudioCookieName } from '../podcast-admin-auth.js';
 import { privateJson, requireSameOrigin } from '../podcast-admin-route.js';
-import { DEFAULT_DRAW_FAL_MODEL, DRAW_FAL_MODELS, getDrawFalModel } from '../draw-fal-models.js';
+import {
+	DEFAULT_DRAW_FAL_MODEL,
+	DRAW_FAL_MODELS,
+	MAX_DRAW_FAL_REQUEST_BYTES,
+	getDrawFalModel
+} from '../draw-fal-models.js';
 
-const MAX_REQUEST_BYTES = 1_900_000;
 const MAX_PROMPT_LENGTH = 1_000;
 const IMAGE_DATA_URL = /^data:image\/(?:png|jpeg|webp|avif|gif);base64,[A-Za-z0-9+/]+={0,2}$/;
 const encoder = new TextEncoder();
@@ -76,12 +80,12 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 	}
 
 	const contentLength = Number(event.request.headers.get('content-length'));
-	if (Number.isFinite(contentLength) && contentLength > MAX_REQUEST_BYTES) {
+	if (Number.isFinite(contentLength) && contentLength > MAX_DRAW_FAL_REQUEST_BYTES) {
 		return privateJson({ error: 'The selected image is too large to edit.' }, { status: 413 });
 	}
 
 	const text = await event.request.text();
-	if (encoder.encode(text).byteLength > MAX_REQUEST_BYTES) {
+	if (encoder.encode(text).byteLength > MAX_DRAW_FAL_REQUEST_BYTES) {
 		return privateJson({ error: 'The selected image is too large to edit.' }, { status: 413 });
 	}
 
@@ -161,7 +165,7 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 	}
 
 	const image = /** @type {{ images?: Array<{ url?: unknown }> }} */ (result)?.images?.[0]?.url;
-	if (!isImageDataUrl(image) || encoder.encode(image).byteLength > MAX_REQUEST_BYTES) {
+	if (!isImageDataUrl(image) || encoder.encode(image).byteLength > MAX_DRAW_FAL_REQUEST_BYTES) {
 		return privateJson(
 			{ error: 'The image-editing provider returned an invalid image.' },
 			{

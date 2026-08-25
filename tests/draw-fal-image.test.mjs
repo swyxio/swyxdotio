@@ -1,0 +1,76 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+
+import {
+	drawingFalInputDimensions,
+	estimateDrawingFalRequestBytes
+} from '../src/lib/draw-fal-image.js';
+import { DRAW_FAL_MODELS, MAX_DRAW_FAL_REQUEST_BYTES } from '../src/lib/draw-fal-models.js';
+
+test('each configured model has an explicit documented resolution and image-format budget', () => {
+	assert.equal(MAX_DRAW_FAL_REQUEST_BYTES, 1_900_000);
+	for (const model of DRAW_FAL_MODELS) {
+		assert.ok(model.workflow.length > 5, model.id);
+		assert.ok(model.input.maxPixels >= 1_048_576, model.id);
+		assert.ok(model.input.maxEdge <= 2048, model.id);
+		assert.ok(['image/jpeg', 'image/webp'].includes(model.input.mimeType), model.id);
+	}
+	assert.equal(
+		DRAW_FAL_MODELS.find((model) => model.id === 'seedream-5-pro')?.input.mimeType,
+		'image/jpeg'
+	);
+	assert.equal(
+		DRAW_FAL_MODELS.find((model) => model.id === 'gpt-image-2')?.input.maxPixels,
+		1_572_864
+	);
+});
+
+test('large references downsize to each model budget while retaining their aspect ratio', () => {
+	for (const model of DRAW_FAL_MODELS) {
+		for (const source of [
+			{ width: 6000, height: 4000 },
+			{ width: 1600, height: 4000 },
+			{ width: 8000, height: 1000 }
+		]) {
+			const resized = drawingFalInputDimensions(source.width, source.height, model);
+			assert.ok(resized.width <= model.input.maxEdge, `${model.id} width`);
+			assert.ok(resized.height <= model.input.maxEdge, `${model.id} height`);
+			assert.ok(resized.width * resized.height <= model.input.maxPixels, `${model.id} pixels`);
+			assert.ok(
+				Math.abs(resized.width / resized.height - source.width / source.height) < 0.04,
+				`${model.id} aspect ratio`
+			);
+		}
+	}
+});
+
+test('small references retain their original dimensions instead of being upscaled', () => {
+	for (const model of DRAW_FAL_MODELS) {
+		assert.deepEqual(drawingFalInputDimensions(420, 280, model), { width: 420, height: 280 });
+	}
+});
+
+test('invalid reference dimensions are rejected before upload', () => {
+	const model = DRAW_FAL_MODELS[0];
+	for (const [width, height] of [
+		[0, 300],
+		[300, -1],
+		[Infinity, 300],
+		[300, NaN]
+	]) {
+		assert.throws(() => drawingFalInputDimensions(width, height, model), /invalid dimensions/i);
+	}
+});
+
+test('request budgets count the full serialized prompt, model, and UTF-8 payload', () => {
+	const request = {
+		image: 'data:image/webp;base64,YQ==',
+		prompt: 'Preserve the subject ✨',
+		model: 'flux-2'
+	};
+	assert.equal(
+		estimateDrawingFalRequestBytes(request),
+		new TextEncoder().encode(JSON.stringify(request)).byteLength
+	);
+	assert.ok(estimateDrawingFalRequestBytes({ ...request, prompt: 'a'.repeat(1000) }) > 1000);
+});

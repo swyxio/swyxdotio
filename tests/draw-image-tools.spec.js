@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 /**
  * @param {import('@playwright/test').Page} page
- * @param {{ width: number, height: number } | undefined} [generatedSize]
+ * @param {{ width: number, height: number, noisy?: boolean } | undefined} [generatedSize]
  */
 async function pasteSelectedImage(page, generatedSize) {
 	await page.goto('/draw');
@@ -15,9 +15,24 @@ async function pasteSelectedImage(page, generatedSize) {
 			const canvas = new OffscreenCanvas(size.width, size.height);
 			const context = canvas.getContext('2d');
 			if (!context) throw new Error('Could not prepare the large test image.');
-			context.fillStyle = '#d3e7fb';
-			context.fillRect(0, 0, size.width, size.height);
-			source = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.8 });
+			if (size.noisy) {
+				const pixels = context.createImageData(size.width, size.height);
+				let random = 1831565813;
+				for (let index = 0; index < pixels.data.length; index += 4) {
+					random ^= random << 13;
+					random ^= random >>> 17;
+					random ^= random << 5;
+					pixels.data[index] = random & 255;
+					pixels.data[index + 1] = (random >>> 8) & 255;
+					pixels.data[index + 2] = (random >>> 16) & 255;
+					pixels.data[index + 3] = 255;
+				}
+				context.putImageData(pixels, 0, 0);
+			} else {
+				context.fillStyle = '#d3e7fb';
+				context.fillRect(0, 0, size.width, size.height);
+			}
+			source = await canvas.convertToBlob({ type: 'image/jpeg', quality: size.noisy ? 0.97 : 0.8 });
 		} else {
 			source = await fetch('/swyx-ski.jpeg').then((response) => response.blob());
 		}
@@ -112,7 +127,9 @@ test('selected images expose private tools, exact model sizes, and disclosed fal
 	await expect(toolbox.getByText('Uploads this image to fal.ai')).toBeVisible();
 	await expect(toolbox.getByText('Runs privately on your device')).toHaveCount(0);
 	await expect(toolbox.getByText('No model download required.')).toHaveCount(0);
-	const modelPicker = toolbox.getByRole('combobox', { name: 'AI image editing model' });
+	const modelPicker = toolbox.getByRole('combobox', { name: 'AI image model and workflow' });
+	await expect(toolbox.getByText('Model and workflow')).toBeVisible();
+	await expect(modelPicker.locator('option').first()).toHaveText(/Balanced 1K edit.*Nano Banana 2/);
 	await expect(modelPicker).toHaveValue('nano-banana-2');
 	await expect(modelPicker.locator('option')).toHaveCount(5);
 	await expect(toolbox.getByText('fal top pick')).toBeVisible();
@@ -451,7 +468,7 @@ test('prompt editing shows progress, retains session generations, and restores t
 	});
 	await toolbox.getByRole('button', { name: 'AI prompt', exact: true }).click();
 	await toolbox
-		.getByRole('combobox', { name: 'AI image editing model' })
+		.getByRole('combobox', { name: 'AI image model and workflow' })
 		.selectOption('seedream-5-pro');
 	await toolbox.getByRole('button', { name: 'Product mockup' }).click();
 	await toolbox.getByRole('button', { name: 'Generate AI image edit' }).click();
@@ -496,3 +513,75 @@ test('prompt editing shows progress, retains session generations, and restores t
 		.poll(async () => (await selectedSceneImage(page)).fileId)
 		.not.toBe(selectedGeneration.fileId);
 });
+
+for (const model of [
+	{ id: 'nano-banana-2', mimeType: 'image/webp', maxPixels: 1_048_576 },
+	{ id: 'gpt-image-2', mimeType: 'image/webp', maxPixels: 1_572_864 },
+	{ id: 'seedream-5-pro', mimeType: 'image/jpeg', maxPixels: 1_048_576 },
+	{ id: 'nano-banana-pro', mimeType: 'image/webp', maxPixels: 1_048_576 },
+	{ id: 'flux-2', mimeType: 'image/webp', maxPixels: 1_048_576 }
+]) {
+	test(`${model.id} automatically downsizes oversized references to its documented model budget`, async ({
+		page
+	}) => {
+		await page.addInitScript(() => {
+			/** @type {any} */ (globalThis).__SWYX_PROCESS_IMAGE_TOOL__ = async (
+				/** @type {string} */ _action,
+				/** @type {Blob} */ source
+			) => new Blob([source, new Uint8Array(1_400_000)], { type: source.type });
+		});
+		/** @type {{ image: string, prompt: string, model: string } | undefined} */
+		let uploaded;
+		let requestBytes = 0;
+		await page.route('**/tools/api/draw/edit', async (route) => {
+			uploaded = route.request().postDataJSON();
+			requestBytes = route.request().postDataBuffer()?.byteLength ?? 0;
+			await route.fulfill({ json: { image: uploaded?.image, model: model.id } });
+		});
+		const toolbox = await pasteSelectedImage(page, { width: 2400, height: 1600, noisy: true });
+		const imported = await selectedSceneImage(page);
+		await toolbox.getByRole('button', { name: 'Apply Magic Select' }).click();
+		await expect
+			.poll(async () => (await selectedSceneImage(page)).fileId)
+			.not.toBe(imported.fileId);
+		const original = await selectedSceneImage(page);
+		const originalBytes = await page.evaluate(() => {
+			const scene =
+				/** @type {{elements:{type:string,fileId:string}[],files:Record<string,{dataURL:string}>}} */ (
+					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[],"files":{}}')
+				);
+			const image = scene.elements.find((element) => element.type === 'image');
+			return image ? new TextEncoder().encode(scene.files[image.fileId].dataURL).byteLength : 0;
+		});
+		expect(originalBytes).toBeGreaterThan(1_900_000);
+		await toolbox.getByRole('button', { name: 'AI prompt', exact: true }).click();
+		await toolbox
+			.getByRole('combobox', { name: 'AI image model and workflow' })
+			.selectOption(model.id);
+		await expect(toolbox.getByText(/Large images automatically fit/)).toBeVisible();
+		await toolbox
+			.getByRole('textbox', { name: 'AI image editing prompt' })
+			.fill('Preserve the entire image');
+		await toolbox.getByRole('button', { name: 'Generate AI image edit' }).click();
+		await expect
+			.poll(async () => (await selectedSceneImage(page)).fileId)
+			.not.toBe(original.fileId);
+		expect(requestBytes).toBeLessThan(1_900_000);
+		expect(uploaded?.model).toBe(model.id);
+		expect(uploaded?.image.startsWith(`data:${model.mimeType};base64,`)).toBe(true);
+		const dimensions = await page.evaluate(async (image) => {
+			if (!image) throw new Error('No optimized image was uploaded.');
+			const bitmap = await createImageBitmap(
+				await fetch(image).then((response) => response.blob())
+			);
+			return { width: bitmap.width, height: bitmap.height };
+		}, uploaded?.image);
+		expect(dimensions.width * dimensions.height).toBeLessThanOrEqual(model.maxPixels);
+		expect(dimensions.width).toBeLessThanOrEqual(2048);
+		expect(dimensions.height).toBeLessThanOrEqual(2048);
+		expect(Math.abs(dimensions.width / dimensions.height - 1.5)).toBeLessThan(0.01);
+		const result = await selectedSceneImage(page);
+		expect(result.width).toBe(original.width);
+		expect(result.height).toBe(original.height);
+	});
+}
