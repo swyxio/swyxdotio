@@ -1173,6 +1173,27 @@
 	</div>
 {/if}
 
+{#if editor && presets.length > 0}
+	<button
+		type="button"
+		class="compact-library-toggle"
+		aria-label="Open drawing templates and library"
+		title="Open presets, components, and meme templates"
+		onclick={() => openWorkspaceSection('presets')}
+	>
+		<svg aria-hidden="true" viewBox="0 0 20 20" fill="none">
+			<path
+				d="M4 4h5v5H4V4Zm7 0h5v5h-5V4ZM4 11h5v5H4v-5Zm9.5 0v5m-2.5-2.5h5"
+				stroke="currentColor"
+				stroke-width="1.6"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			/>
+		</svg>
+		<span>Templates</span>
+	</button>
+{/if}
+
 {#if presets.length > 0 && uiComponents.length > 0}
 	<section
 		class="workspace-library"
@@ -1532,7 +1553,8 @@
 		color: #1d1d1d;
 	}
 
-	.page-toggle {
+	.page-toggle,
+	.compact-library-toggle {
 		display: flex;
 		align-items: center;
 		gap: 8px;
@@ -1546,6 +1568,12 @@
 		font-size: 13px;
 		font-weight: 550;
 		cursor: pointer;
+	}
+
+	.compact-library-toggle {
+		display: none;
+		position: fixed;
+		z-index: 1000;
 	}
 
 	.page-toggle {
@@ -1575,6 +1603,7 @@
 	}
 
 	.page-toggle svg,
+	.compact-library-toggle svg,
 	.page-action svg,
 	.add-page svg {
 		flex: none;
@@ -2046,9 +2075,35 @@
 		margin-left: 8px;
 	}
 
+	@media (max-width: 960px) {
+		.page-picker {
+			top: 72px;
+			left: 12px;
+		}
+
+		.compact-library-toggle {
+			top: 72px;
+			right: 64px;
+			display: flex;
+			min-height: 40px;
+		}
+
+		.page-toggle {
+			min-height: 40px;
+		}
+
+		.page-menu {
+			max-height: calc(100dvh - 135px);
+		}
+
+		.image-tools {
+			top: 126px;
+		}
+	}
+
 	@media (max-width: 600px) {
 		.image-tools {
-			top: 63px;
+			top: 124px;
 		}
 
 		.image-tool-heading span {
@@ -2056,12 +2111,17 @@
 		}
 
 		.page-picker {
-			top: 10px;
-			left: 58px;
+			top: 70px;
+			left: 10px;
+		}
+
+		.compact-library-toggle {
+			top: 70px;
+			right: 59px;
 		}
 
 		.page-toggle {
-			height: 36px;
+			height: 40px;
 			padding: 0 10px;
 			max-width: min(180px, calc(100vw - 125px));
 		}

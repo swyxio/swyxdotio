@@ -37,6 +37,40 @@ test('drawing canvas always uses light mode even when the site is dark', async (
 	await expect(templatesTab.locator('svg')).toBeVisible();
 });
 
+for (const viewport of [
+	{ width: 768, height: 900 },
+	{ width: 390, height: 844 }
+]) {
+	test(`drawing controls stay accessible without overlap at ${viewport.width}px`, async ({
+		page
+	}) => {
+		await page.setViewportSize(viewport);
+		await page.goto('/draw');
+
+		const pages = page.getByRole('button', { name: 'Manage drawing pages' });
+		const templates = page.getByRole('button', { name: 'Open drawing templates and library' });
+		const toolbar = page.locator('.App-toolbar').first();
+		await expect(pages).toBeVisible();
+		await expect(templates).toBeVisible();
+		await expect(toolbar).toBeVisible();
+
+		const pageBounds = await pages.boundingBox();
+		const templateBounds = await templates.boundingBox();
+		const toolbarBounds = await toolbar.boundingBox();
+		if (!pageBounds || !templateBounds || !toolbarBounds) {
+			throw new Error('Compact drawing controls must have visible bounds.');
+		}
+		expect(pageBounds.y).toBeGreaterThanOrEqual(toolbarBounds.y + toolbarBounds.height);
+		expect(templateBounds.y).toBeGreaterThanOrEqual(toolbarBounds.y + toolbarBounds.height);
+		expect(pageBounds.x + pageBounds.width).toBeLessThanOrEqual(templateBounds.x);
+
+		await templates.click();
+		await expect(page.getByRole('tab', { name: 'Presets', exact: true })).toBeVisible();
+		await page.getByRole('tab', { name: 'Memes', exact: true }).click();
+		await expect(page.getByRole('region', { name: 'Meme templates' })).toBeVisible();
+	});
+}
+
 test('drawing canvas is public, fullscreen, and persists drawings in the browser', async ({
 	page
 }) => {
