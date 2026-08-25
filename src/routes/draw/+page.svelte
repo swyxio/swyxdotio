@@ -65,6 +65,7 @@
 	let renamingPageId = $state('');
 	let pageNameDraft = $state('');
 	let cloudAvailable = $state(false);
+	let toolsAuthenticated = $state(false);
 	let needsSignIn = $state(false);
 	/** @type {'local' | 'saving' | 'saved' | 'error'} */
 	let saveStatus = $state('local');
@@ -877,6 +878,12 @@
 		/** @type {ReturnType<typeof import('react-dom/client').createRoot> | undefined} */
 		let root;
 		let destroyed = false;
+		void fetch('/tools/api/session', { credentials: 'same-origin', cache: 'no-store' })
+			.then((response) => (response.ok ? response.json() : undefined))
+			.then((session) => {
+				if (!destroyed) toolsAuthenticated = session?.authenticated === true;
+			})
+			.catch(() => {});
 
 		async function mountEditor() {
 			const [
@@ -1055,6 +1062,7 @@
 				{updateElement}
 				captureUpdate={captureImmediately}
 				{cloudAvailable}
+				authenticated={toolsAuthenticated}
 				backgroundProcessing={isRemovingBackground}
 				generations={imageGenerations}
 				onGeneration={rememberImageGeneration}

@@ -1,5 +1,14 @@
-import { clearPersonalToolsSession, createPersonalToolsSession } from '$lib/personal-tools-auth';
+import {
+	clearPersonalToolsSession,
+	createPersonalToolsSession,
+	isPersonalToolsSessionAuthenticated
+} from '$lib/personal-tools-auth';
 import { privateJson } from '$lib/podcast-admin-route';
+
+/** @type {import('./$types').RequestHandler} */
+export async function GET(event) {
+	return privateJson({ authenticated: await isPersonalToolsSessionAuthenticated(event) });
+}
 
 /** @type {import('./$types').RequestHandler} */
 export async function POST(event) {

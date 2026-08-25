@@ -23,6 +23,17 @@ async function uploadedFalForm(request) {
 	};
 }
 
+/** @param {import('@playwright/test').Page} page */
+async function mockSignedInPersonalTools(page) {
+	await page.route('**/tools/api/session', async (route) => {
+		if (route.request().method() === 'GET') {
+			await route.fulfill({ json: { authenticated: true } });
+			return;
+		}
+		await route.continue();
+	});
+}
+
 /**
  * @param {import('@playwright/test').Page} page
  * @param {{ width: number, height: number, noisy?: boolean } | undefined} [generatedSize]
@@ -163,6 +174,12 @@ test('selected images expose private tools, exact model sizes, and disclosed fal
 
 	await toolbox.getByRole('button', { name: 'AI prompt', exact: true }).click();
 	await expect(toolbox.getByText('Uploads this image to fal.ai')).toBeVisible();
+	await expect(toolbox.getByText(/Sign in required/)).toBeVisible();
+	await expect(toolbox.getByRole('link', { name: 'Sign in to generate' })).toHaveAttribute(
+		'href',
+		'/tools?next=/draw'
+	);
+	await expect(toolbox.getByRole('button', { name: 'Generate AI image edit' })).toHaveCount(0);
 	await expect(toolbox.getByText('Runs privately on your device')).toHaveCount(0);
 	await expect(toolbox.getByText('No model download required.')).toHaveCount(0);
 	const modelPicker = toolbox.getByRole('button', { name: 'AI model and workflow selector' });
@@ -472,6 +489,7 @@ test('large transparent image edits preserve dimensions and synchronize under th
 test('selecting multiple models generates once per model from the same source image', async ({
 	page
 }) => {
+	await mockSignedInPersonalTools(page);
 	/** @type {Awaited<ReturnType<typeof uploadedFalForm>>[]} */
 	const captured = [];
 	/** @type {string[]} */
@@ -527,6 +545,7 @@ test('selecting multiple models generates once per model from the same source im
 test('text-to-image never uploads the selected image and generated video stays outside the canvas', async ({
 	page
 }) => {
+	await mockSignedInPersonalTools(page);
 	/** @type {{model: string, hasImage: boolean}[]} */
 	const requests = [];
 	let generatedImage = '';
@@ -596,6 +615,7 @@ test('text-to-image never uploads the selected image and generated video stays o
 test('prompt editing shows progress, retains session generations, and restores them for local tools', async ({
 	page
 }) => {
+	await mockSignedInPersonalTools(page);
 	await page.addInitScript(() => {
 		/** @type {any} */ (globalThis).__SWYX_PROCESS_IMAGE_TOOL__ = async (
 			/** @type {string} */ _action,
@@ -746,6 +766,7 @@ for (const model of [
 	test(`${model.id} automatically downsizes oversized references to its documented model budget`, async ({
 		page
 	}) => {
+		await mockSignedInPersonalTools(page);
 		await page.addInitScript(() => {
 			/** @type {any} */ (globalThis).__SWYX_PROCESS_IMAGE_TOOL__ = async (
 				/** @type {string} */ _action,
@@ -816,3 +837,30 @@ for (const model of [
 		expect(result.height).toBe(original.height);
 	});
 }
+
+test('the drawing AI action shares the existing password-protected tools session', async ({
+	page
+}) => {
+	let toolbox = await pasteSelectedImage(page);
+	await toolbox.getByRole('button', { name: 'AI prompt', exact: true }).click();
+	const signIn = toolbox.getByRole('link', { name: 'Sign in to generate' });
+	await expect(signIn).toBeVisible();
+	await expect(toolbox.getByText(/Sign in required/)).toBeVisible();
+
+	await signIn.click();
+	await expect(page).toHaveURL(/\/tools\?next=(?:%2F|\/)draw$/);
+	await page.getByLabel('Password').fill('draw-test-password');
+	await page.getByRole('button', { name: 'Unlock tools' }).click();
+	await expect(page).toHaveURL(/\/draw$/);
+
+	const status = await page.request.get(`${new URL(page.url()).origin}/tools/api/session`);
+	expect(status.ok()).toBe(true);
+	expect(await status.json()).toEqual({ authenticated: true });
+	expect(status.headers()['cache-control']).toContain('no-store');
+
+	toolbox = await pasteSelectedImage(page);
+	await toolbox.getByRole('button', { name: 'AI prompt', exact: true }).click();
+	await expect(toolbox.getByText(/Signed in/)).toBeVisible();
+	await expect(toolbox.getByRole('button', { name: 'Generate AI image edit' })).toBeVisible();
+	await expect(toolbox.getByRole('link', { name: 'Sign in to generate' })).toHaveCount(0);
+});

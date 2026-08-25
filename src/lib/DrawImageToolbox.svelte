@@ -18,6 +18,7 @@
 	 *  updateElement: typeof import('@excalidraw/excalidraw').newElementWith,
 	 *  captureUpdate: typeof import('@excalidraw/excalidraw').CaptureUpdateAction.IMMEDIATELY,
 	 *  cloudAvailable?: boolean,
+	 *  authenticated?: boolean,
 	 *  onCloudLimit?: () => void,
 	 *  backgroundProcessing?: boolean,
 	 *  backgroundControls?: import('svelte').Snippet,
@@ -32,6 +33,7 @@
 		updateElement,
 		captureUpdate,
 		cloudAvailable = false,
+		authenticated = false,
 		onCloudLimit,
 		backgroundProcessing = false,
 		backgroundControls,
@@ -281,7 +283,14 @@
 	}
 
 	async function applyFalEdit() {
-		if (processing || processingFal || !prompt.trim() || !selectedFalModels.length) return;
+		if (
+			processing ||
+			processingFal ||
+			!authenticated ||
+			!prompt.trim() ||
+			!selectedFalModels.length
+		)
+			return;
 		const generationPrompt = prompt.trim();
 		const generationModels = [...selectedFalModels];
 		processingFal = true;
@@ -693,6 +702,7 @@
 					</div>
 				{/if}
 				<p class="fal-upload-hint">
+					{authenticated ? 'Signed in · ' : 'Sign in required · '}
 					{uploadsSelectedImage
 						? 'Large images automatically fit each model’s limits and the secure upload limit.'
 						: 'Text-to-image workflows only send your prompt; the selected image is not uploaded.'}
@@ -734,6 +744,8 @@
 					<button type="button" class="secondary-action" onclick={cancelFalGeneration}>
 						Cancel
 					</button>
+				{:else if !authenticated}
+					<a class="fal-action fal-sign-in" href="/tools?next=/draw">Sign in to generate</a>
 				{:else}
 					<button
 						type="button"
@@ -966,6 +978,13 @@
 		font: inherit;
 		font-size: 9px;
 		opacity: 0.8;
+	}
+
+	.fal-sign-in {
+		display: inline-flex;
+		align-items: center;
+		white-space: nowrap;
+		text-decoration: none;
 	}
 
 	.fal-model-picker {

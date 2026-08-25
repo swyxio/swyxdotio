@@ -36,6 +36,17 @@ async function isAuthenticated(cookies, config) {
 }
 
 /**
+ * Read the same signed, HTTP-only session used throughout the private tools.
+ * The cookie remains scoped to /tools, so public routes query this server-side
+ * rather than widening its path or exposing it to browser JavaScript.
+ * @param {Pick<import('@sveltejs/kit').RequestEvent, 'cookies' | 'platform'>} event
+ * @returns {Promise<boolean>}
+ */
+export async function isPersonalToolsSessionAuthenticated({ cookies, platform }) {
+	return isAuthenticated(cookies, toolsConfig(platform));
+}
+
+/**
  * @param {URL} url
  * @returns {Parameters<import('@sveltejs/kit').Cookies['set']>[2]}
  */
@@ -73,14 +84,13 @@ export function clearPersonalToolsSession({ cookies, platform, request, url }) {
 
 /** @type {import('@sveltejs/kit').ServerLoad} */
 export async function loadPersonalTools({ cookies, platform, setHeaders }) {
-	const config = toolsConfig(platform);
 	setHeaders({
 		'Cache-Control': 'private, no-store',
 		'Referrer-Policy': 'no-referrer',
 		'X-Robots-Tag': 'noindex, nofollow, noarchive'
 	});
 	return {
-		authenticated: await isAuthenticated(cookies, config)
+		authenticated: await isPersonalToolsSessionAuthenticated({ cookies, platform })
 	};
 }
 

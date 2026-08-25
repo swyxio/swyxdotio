@@ -20,6 +20,10 @@ test('cloud drawing pages require the existing private tools session', async ({ 
 	const response = await page.request.get(`${origin}${pagesPath}`);
 	expect(response.status()).toBe(401);
 	expect(response.headers()['cache-control']).toContain('no-store');
+	const session = await page.request.get(`${origin}/tools/api/session`);
+	expect(session.ok()).toBe(true);
+	expect(await session.json()).toEqual({ authenticated: false });
+	expect(session.headers()['cache-control']).toContain('no-store');
 
 	const mutation = await page.request.post(`${origin}${pagesPath}`, {
 		headers: { Origin: origin },
