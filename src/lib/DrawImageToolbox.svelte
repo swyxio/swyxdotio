@@ -15,6 +15,10 @@
 	 *  editor: DrawingEditor,
 	 *  imageId: string,
 	 *  imageDataUrl: string,
+	 *  action?: ImageAction | 'background' | 'fal' | null,
+	 *  prompt?: string,
+	 *  operationStatus?: string,
+	 *  selectedFalModelIds?: string[],
 	 *  updateElement: typeof import('@excalidraw/excalidraw').newElementWith,
 	 *  captureUpdate: typeof import('@excalidraw/excalidraw').CaptureUpdateAction.IMMEDIATELY,
 	 *  cloudAvailable?: boolean,
@@ -24,12 +28,17 @@
 	 *  backgroundControls?: import('svelte').Snippet,
 	 *  generations?: ImageGeneration[],
 	 *  onGeneration?: (generation: ImageGeneration) => void,
+	 *  onProcessingChange?: (processing: boolean) => void,
 	 *  onDragStart?: (event: PointerEvent) => void
 	 * }} */
 	let {
 		editor,
 		imageId,
 		imageDataUrl,
+		action = $bindable(null),
+		prompt = $bindable(''),
+		operationStatus = $bindable(''),
+		selectedFalModelIds = $bindable([DEFAULT_DRAW_FAL_MODEL.id]),
 		updateElement,
 		captureUpdate,
 		cloudAvailable = false,
@@ -39,6 +48,7 @@
 		backgroundControls,
 		generations = [],
 		onGeneration,
+		onProcessingChange,
 		onDragStart
 	} = $props();
 
@@ -72,7 +82,6 @@
 		{ kind: 'image-to-video', label: 'Image to video' }
 	]);
 
-	let action = $state(/** @type {ImageAction | 'background' | 'fal' | null} */ (null));
 	let imagePreview = $state('');
 	let targetX = $state(0.5);
 	let targetY = $state(0.5);
@@ -81,11 +90,8 @@
 	let eraserRadius = $state(0.12);
 	let blurStrength = $state(14);
 	let focusDepth = $state(0.55);
-	let prompt = $state('');
-	let selectedFalModelIds = $state(/** @type {string[]} */ ([DEFAULT_DRAW_FAL_MODEL.id]));
 	let modelPickerOpen = $state(false);
 	let activeVideoGenerationId = $state('');
-	let operationStatus = $state('');
 	let operationProgress = $state(0);
 	let operationError = $state('');
 	let processing = $state(false);
@@ -305,6 +311,7 @@
 		const generationPrompt = prompt.trim();
 		const generationModels = [...selectedFalModels];
 		processingFal = true;
+		onProcessingChange?.(true);
 		modelPickerOpen = false;
 		operationProgress = 0;
 		operationStatus = `Generating with ${generationModels[0].label}`;
@@ -343,6 +350,8 @@
 						onProgress: (update) => {
 							if (update.requestId)
 								activeFalJob = { requestId: update.requestId, model: generationModel.id };
+							const elapsedSeconds = Math.floor((update.elapsedMs ?? 0) / 1000);
+							const elapsed = elapsedSeconds >= 5 ? ` · ${elapsedSeconds}s elapsed` : '';
 							if (update.status === 'UPLOADING') {
 								operationStatus =
 									generationModel.kind === 'text-to-image'
@@ -352,10 +361,10 @@
 								const position = update.queuePosition;
 								operationStatus =
 									typeof position === 'number' && Number.isSafeInteger(position) && position > 0
-										? `${prefix}Waiting for ${generationModel.label} · ${position} ahead`
-										: `${prefix}Waiting for ${generationModel.label}`;
+										? `${prefix}Waiting for ${generationModel.label} · ${position} ahead${elapsed}`
+										: `${prefix}Waiting for ${generationModel.label}${elapsed}`;
 							} else {
-								operationStatus = `${prefix}${update.message || `Generating with ${generationModel.label}`}`;
+								operationStatus = `${prefix}${update.message || `Generating with ${generationModel.label}`}${elapsed}`;
 							}
 						}
 					});
@@ -423,6 +432,7 @@
 			}
 		} finally {
 			processingFal = false;
+			onProcessingChange?.(false);
 			operationAbort = undefined;
 			activeFalJob = undefined;
 		}
@@ -630,7 +640,11 @@
 				<div class="fal-generation-progress" role="status" aria-live="polite">
 					<strong>{operationStatus}</strong>
 					<span>Your result will appear on the canvas and in session history.</span>
-					<progress aria-label="AI generation progress"></progress>
+					<progress
+						aria-label="AI generation progress"
+						max="100"
+						value={operationProgress || undefined}
+					></progress>
 				</div>
 			{/if}
 			<div class="fal-model-picker">

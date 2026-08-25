@@ -1,5 +1,6 @@
 const POLL_INTERVAL_MS = 900;
 const MAX_GENERATION_MS = 300_000;
+const POLL_REQUEST_TIMEOUT_MS = 20_000;
 
 /** @param {number} milliseconds @param {AbortSignal} signal */
 function waitForNextPoll(milliseconds, signal) {
@@ -37,9 +38,11 @@ async function readResponse(response) {
  *  prompt: string,
  *  model: string,
  *  signal: AbortSignal,
- *  onProgress: (progress: { status: string, requestId?: string, queuePosition?: number, message?: string }) => void,
+ *  onProgress: (progress: { status: string, requestId?: string, queuePosition?: number, message?: string, elapsedMs?: number }) => void,
  *  fetcher?: typeof fetch,
- *  pollIntervalMs?: number
+ *  pollIntervalMs?: number,
+ *  requestTimeoutMs?: number,
+ *  maxGenerationMs?: number
  * }} options
  */
 export async function runDrawingFalGeneration(options) {
@@ -50,7 +53,9 @@ export async function runDrawingFalGeneration(options) {
 		signal,
 		onProgress,
 		fetcher = fetch,
-		pollIntervalMs = POLL_INTERVAL_MS
+		pollIntervalMs = POLL_INTERVAL_MS,
+		requestTimeoutMs = POLL_REQUEST_TIMEOUT_MS,
+		maxGenerationMs = MAX_GENERATION_MS
 	} = options;
 	const form = new FormData();
 	if (image) {
@@ -79,11 +84,29 @@ export async function runDrawingFalGeneration(options) {
 	onProgress({ status: 'IN_QUEUE', requestId, queuePosition: submitted.queuePosition });
 	const startedAt = Date.now();
 	const query = new URLSearchParams({ requestId, model });
-	while (Date.now() - startedAt < MAX_GENERATION_MS) {
+	while (Date.now() - startedAt < maxGenerationMs) {
 		signal.throwIfAborted();
-		const update = await readResponse(
-			await fetcher(`/tools/api/draw/edit?${query}`, { credentials: 'same-origin', signal })
-		);
+		const remainingMs = maxGenerationMs - (Date.now() - startedAt);
+		const timeout = AbortSignal.timeout(Math.max(1, Math.min(requestTimeoutMs, remainingMs)));
+		const pollingSignal = AbortSignal.any([signal, timeout]);
+		let update;
+		try {
+			update = await readResponse(
+				await fetcher(`/tools/api/draw/edit?${query}`, {
+					credentials: 'same-origin',
+					signal: pollingSignal
+				})
+			);
+		} catch (error) {
+			if (!timeout.aborted || signal.aborted) throw error;
+			onProgress({
+				status: 'IN_PROGRESS',
+				requestId,
+				message: 'Still waiting for the model to respond',
+				elapsedMs: Date.now() - startedAt
+			});
+			continue;
+		}
 		if (update.status === 'COMPLETED') {
 			if (typeof update.video === 'string') {
 				return update;
@@ -100,7 +123,8 @@ export async function runDrawingFalGeneration(options) {
 			status: update.status,
 			requestId,
 			queuePosition: update.queuePosition,
-			message: update.message
+			message: update.message,
+			elapsedMs: Date.now() - startedAt
 		});
 		await waitForNextPoll(pollIntervalMs, signal);
 	}

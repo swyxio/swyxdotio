@@ -280,6 +280,70 @@ test('the floating image toolbox can be dragged without losing the selected tool
 	await expect(toolbox.getByRole('button', { name: 'Choose the subject to select' })).toBeVisible();
 });
 
+test('reselecting an image restores the AI prompt, selected workflow, and drafted text', async ({
+	page
+}) => {
+	const toolbox = await pasteSelectedImage(page);
+	await toolbox.getByRole('button', { name: 'AI prompt', exact: true }).click();
+	await chooseOnlyModel(toolbox, 'flux-2');
+	await toolbox.getByRole('textbox', { name: 'AI image editing prompt' }).fill('Keep this draft');
+
+	const canvas = page.locator('.draw-canvas canvas.excalidraw__canvas.interactive');
+	const bounds = await canvas.boundingBox();
+	if (!bounds) throw new Error('The drawing canvas is not visible.');
+	await canvas.click({ position: { x: bounds.width - 40, y: bounds.height - 120 }, force: true });
+	await expect(toolbox).toHaveCount(0);
+	await canvas.click({ position: { x: 360, y: 280 }, force: true });
+
+	await expect(toolbox).toBeVisible();
+	await expect(toolbox.getByRole('button', { name: 'AI prompt', exact: true })).toHaveAttribute(
+		'aria-pressed',
+		'true'
+	);
+	await expect(toolbox.getByRole('textbox', { name: 'AI image editing prompt' })).toHaveValue(
+		'Keep this draft'
+	);
+	await expect(
+		toolbox.getByRole('button', { name: 'AI model and workflow selector' })
+	).toContainText('FLUX.2 [dev]');
+});
+
+test('the active drawing is persisted once without exhausting storage on a duplicate page copy', async ({
+	page
+}) => {
+	/** @type {string[]} */
+	const storageErrors = [];
+	page.on('console', (message) => {
+		if (message.text().includes('Could not save the drawing locally.')) {
+			storageErrors.push(message.text());
+		}
+	});
+	await page.addInitScript(() => {
+		const originalSetItem = Storage.prototype.setItem;
+		Storage.prototype.setItem = function (/** @type {string} */ key, /** @type {string} */ value) {
+			if (key === 'swyx-excalidraw:default') {
+				throw new DOMException('The storage quota has been exceeded.', 'QuotaExceededError');
+			}
+			return originalSetItem.call(this, key, value);
+		};
+	});
+
+	await pasteSelectedImage(page);
+	const persisted = await page.evaluate(() => {
+		const metadata = JSON.parse(localStorage.getItem('swyx-excalidraw:pages') ?? '{}');
+		const scene = JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}');
+		return {
+			imageCount: scene.elements.filter(
+				(/** @type {{type:string}} */ element) => element.type === 'image'
+			).length,
+			duplicate: localStorage.getItem(`swyx-excalidraw:${metadata.activePageId}`)
+		};
+	});
+
+	expect(persisted).toEqual({ imageCount: 1, duplicate: null });
+	expect(storageErrors).toEqual([]);
+});
+
 for (const fixture of [
 	{ id: 'magic-select', label: 'Magic Select', mimeType: 'image/png' },
 	{ id: 'magic-eraser', label: 'Magic Eraser', mimeType: 'image/png' },
@@ -729,6 +793,14 @@ test('prompt editing shows progress, retains session generations, and restores t
 	await expect(
 		toolbox.getByText('Your result will appear on the canvas and in session history.')
 	).toBeVisible();
+	const drawingCanvas = page.locator('.draw-canvas canvas.excalidraw__canvas.interactive');
+	const drawingBounds = await drawingCanvas.boundingBox();
+	if (!drawingBounds) throw new Error('The drawing canvas is not visible.');
+	await drawingCanvas.click({
+		position: { x: drawingBounds.width - 40, y: drawingBounds.height - 120 },
+		force: true
+	});
+	await expect(toolbox.getByRole('progressbar', { name: 'AI generation progress' })).toBeVisible();
 	continueFirstGeneration?.();
 	await expect.poll(async () => (await selectedSceneImage(page)).fileId).not.toBe(original.fileId);
 	expect(captured[0]?.prompt).toMatch(/studio product mockup/i);

@@ -149,3 +149,49 @@ test('queued generation stops promptly when cancelled', async () => {
 	);
 	assert.equal(calls, 2);
 });
+
+test('a stalled queue poll is retried without resubmitting the paid generation', async () => {
+	let calls = 0;
+	/** @type {{status: string, message?: string, elapsedMs?: number}[]} */
+	const progress = [];
+	const result = await runDrawingFalGeneration({
+		image: new Blob(['image'], { type: 'image/png' }),
+		prompt: 'Edit',
+		model: 'flux-2',
+		signal: new AbortController().signal,
+		requestTimeoutMs: 5,
+		maxGenerationMs: 1_000,
+		pollIntervalMs: 0,
+		onProgress: (update) => progress.push(update),
+		fetcher: async (_url, init) => {
+			calls += 1;
+			if (calls === 1) return response({ requestId: 'job', model: 'flux-2' }, 202);
+			if (calls === 2) {
+				return new Promise((resolve, reject) => {
+					const signal = /** @type {AbortSignal} */ (init?.signal);
+					const pendingRequest = setTimeout(() => {}, 100);
+					signal.addEventListener(
+						'abort',
+						() => {
+							clearTimeout(pendingRequest);
+							reject(signal.reason);
+						},
+						{ once: true }
+					);
+				});
+			}
+			return response({ status: 'COMPLETED', image: 'data:image/png;base64,ZWRpdGVk' });
+		}
+	});
+
+	assert.equal(calls, 3);
+	assert.equal(result.image, 'data:image/png;base64,ZWRpdGVk');
+	assert.ok(
+		progress.some(
+			(update) =>
+				update.status === 'IN_PROGRESS' &&
+				update.message === 'Still waiting for the model to respond' &&
+				typeof update.elapsedMs === 'number'
+		)
+	);
+});

@@ -3,6 +3,7 @@
 	import '@excalidraw/excalidraw/index.css';
 	import { DRAW_MEME_TEMPLATES, fetchMemeTemplates, searchMemeTemplates } from '$lib/draw-memes.js';
 	import { orderRecentDrawingPages, searchWorkspaceCommands } from '$lib/draw-workspace.js';
+	import { DEFAULT_DRAW_FAL_MODEL } from '$lib/draw-fal-models.js';
 	import DrawImageToolbox from '$lib/DrawImageToolbox.svelte';
 
 	const STORAGE_KEY = 'swyx-excalidraw';
@@ -77,6 +78,15 @@
 	let isLibraryOpen = $state(false);
 	let selectedImageId = $state('');
 	let selectedImageDataUrl = $state('');
+	let imageToolAction = $state(
+		/** @type {'magic-select' | 'magic-eraser' | 'depth-blur' | 'vectorize' | 'background' | 'fal' | null} */ (
+			null
+		)
+	);
+	let imageToolPrompt = $state('');
+	let imageToolStatus = $state('');
+	let imageToolModelIds = $state([DEFAULT_DRAW_FAL_MODEL.id]);
+	let processingImage = $state(/** @type {{ id: string, dataURL: string } | null} */ (null));
 	let imageGenerations = $state(/** @type {DrawingImageGeneration[]} */ ([]));
 	let imageToolsPosition = $state(/** @type {{ x: number, y: number } | null} */ (null));
 	/** @type {{ pointerId: number, x: number, y: number, left: number, top: number, width: number } | undefined} */
@@ -89,6 +99,8 @@
 	/** @type {AbortController | undefined} */
 	let backgroundAbort;
 	const activePage = $derived(pages.find((page) => page.id === activePageId));
+	const activeImageToolId = $derived(processingImage?.id ?? selectedImageId);
+	const activeImageToolDataUrl = $derived(processingImage?.dataURL ?? selectedImageDataUrl);
 	const activeBackgroundMode = $derived(
 		BACKGROUND_MODES.find((mode) => mode.id === backgroundMode) ?? BACKGROUND_MODES[0]
 	);
@@ -144,6 +156,11 @@
 			...generated.slice(0, Math.max(1, 32 - originals.length)),
 			...originals
 		].slice(0, 32);
+	}
+
+	/** @param {boolean} active */
+	function updateImageGenerationState(active) {
+		processingImage = active ? { id: selectedImageId, dataURL: selectedImageDataUrl } : null;
 	}
 	const recentPages = $derived(orderRecentDrawingPages(pages, activePageId));
 	const filteredComponents = $derived(
@@ -410,8 +427,21 @@
 			const scene = /** @type {DrawingScene} */ (
 				response?.scene ?? readStorage(`${STORAGE_KEY}:${page.id}`) ?? { elements: [], files: {} }
 			);
+			if (!cloudAvailable) {
+				const previousScene = localStorage.getItem(STORAGE_KEY);
+				if (previousScene !== null) {
+					localStorage.removeItem(STORAGE_KEY);
+					try {
+						localStorage.setItem(`${STORAGE_KEY}:${activePageId}`, previousScene);
+					} catch (error) {
+						localStorage.setItem(STORAGE_KEY, previousScene);
+						throw error;
+					}
+				}
+			}
 			activePageId = page.id;
 			storePages();
+			localStorage.removeItem(`${STORAGE_KEY}:${page.id}`);
 			localStorage.setItem(STORAGE_KEY, JSON.stringify(scene));
 			editor.updateScene({
 				elements: scene.elements ?? [],
@@ -855,8 +885,10 @@
 		};
 		try {
 			const serialized = JSON.stringify(scene);
-			localStorage.setItem(STORAGE_KEY, serialized);
-			localStorage.setItem(`${STORAGE_KEY}:${activePageId}`, serialized);
+			localStorage.removeItem(`${STORAGE_KEY}:${activePageId}`);
+			if (localStorage.getItem(STORAGE_KEY) !== serialized) {
+				localStorage.setItem(STORAGE_KEY, serialized);
+			}
 		} catch (error) {
 			console.error('Could not save the drawing locally.', error);
 		}
@@ -1040,7 +1072,7 @@
 
 <div class="draw-canvas" role="application" aria-label="Drawing canvas" bind:this={canvas}></div>
 
-{#if selectedImageId || isRemovingBackground}
+{#if activeImageToolId || isRemovingBackground}
 	<section
 		class="image-tools"
 		aria-label="Selected image tools"
@@ -1054,11 +1086,15 @@
 		onpointerup={finishDraggingImageTools}
 		onpointercancel={finishDraggingImageTools}
 	>
-		{#if editor && updateElement && captureImmediately && selectedImageId}
+		{#if editor && updateElement && captureImmediately && activeImageToolId}
 			<DrawImageToolbox
 				{editor}
-				imageId={selectedImageId}
-				imageDataUrl={selectedImageDataUrl}
+				imageId={activeImageToolId}
+				imageDataUrl={activeImageToolDataUrl}
+				bind:action={imageToolAction}
+				bind:prompt={imageToolPrompt}
+				bind:operationStatus={imageToolStatus}
+				bind:selectedFalModelIds={imageToolModelIds}
 				{updateElement}
 				captureUpdate={captureImmediately}
 				{cloudAvailable}
@@ -1066,6 +1102,7 @@
 				backgroundProcessing={isRemovingBackground}
 				generations={imageGenerations}
 				onGeneration={rememberImageGeneration}
+				onProcessingChange={updateImageGenerationState}
 				onDragStart={startDraggingImageTools}
 				onCloudLimit={() => (saveStatus = 'error')}
 			>
