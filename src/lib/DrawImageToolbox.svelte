@@ -66,6 +66,11 @@
 			prompt: 'Turn this image into a polished studio product mockup with professional lighting.'
 		}
 	];
+	const FAL_WORKFLOW_FOLDERS = /** @type {const} */ ([
+		{ kind: 'text-to-image', label: 'Text to image' },
+		{ kind: 'image-edit', label: 'Image editing' },
+		{ kind: 'image-to-video', label: 'Image to video' }
+	]);
 
 	let action = $state(/** @type {ImageAction | 'background' | 'fal' | null} */ (null));
 	let imagePreview = $state('');
@@ -95,6 +100,12 @@
 	const needsTarget = $derived(action === 'magic-select' || action === 'magic-eraser');
 	const orderedFalModels = $derived(
 		[...DRAW_FAL_MODELS].sort((left, right) => left.priceUsd - right.priceUsd)
+	);
+	const falWorkflowFolders = $derived(
+		FAL_WORKFLOW_FOLDERS.map((folder) => ({
+			...folder,
+			models: orderedFalModels.filter((model) => model.kind === folder.kind)
+		})).filter((folder) => folder.models.length > 0)
 	);
 	const selectedFalModels = $derived(
 		orderedFalModels.filter((model) => selectedFalModelIds.includes(model.id))
@@ -661,36 +672,57 @@
 							</button>
 						</div>
 						<div class="fal-model-cards">
-							{#each orderedFalModels as model (model.id)}
-								<div class="fal-model-card" class:selected={selectedFalModelIds.includes(model.id)}>
-									<label class="fal-model-option">
-										<input
-											type="checkbox"
-											aria-label="{model.label} · {model.workflow}"
-											checked={selectedFalModelIds.includes(model.id)}
-											onchange={() => toggleFalModel(model.id)}
-										/>
-										<span class="fal-model-copy">
-											<span class="fal-model-card-title">
-												<strong>{model.label}</strong>
-												<span>{model.price}</span>
-											</span>
-											<span>{model.workflow}</span>
-											<span>{modelReferenceNote(model)} · {model.badge}</span>
+							{#each falWorkflowFolders as folder (folder.kind)}
+								<details
+									class="fal-model-folder"
+									aria-label="{folder.label} models"
+									open={folder.kind === 'image-edit'}
+								>
+									<summary class="fal-model-folder-heading">
+										<strong>{folder.label}</strong>
+										<span>
+											{folder.models.filter((model) => selectedFalModelIds.includes(model.id))
+												.length}
+											/ {folder.models.length}
 										</span>
-									</label>
-									<button
-										type="button"
-										class="fal-model-only"
-										aria-label="Use only {model.label} · {model.workflow}"
-										onclick={() => {
-											selectedFalModelIds = [model.id];
-											modelPickerOpen = false;
-										}}
-									>
-										Only
-									</button>
-								</div>
+									</summary>
+									<div class="fal-model-folder-cards">
+										{#each folder.models as model (model.id)}
+											<div
+												class="fal-model-card"
+												class:selected={selectedFalModelIds.includes(model.id)}
+											>
+												<label class="fal-model-option">
+													<input
+														type="checkbox"
+														aria-label="{model.label} · {model.workflow}"
+														checked={selectedFalModelIds.includes(model.id)}
+														onchange={() => toggleFalModel(model.id)}
+													/>
+													<span class="fal-model-copy">
+														<span class="fal-model-card-title">
+															<strong>{model.label}</strong>
+															<span>{model.price}</span>
+														</span>
+														<span>{model.workflow}</span>
+														<span>{modelReferenceNote(model)} · {model.badge}</span>
+													</span>
+												</label>
+												<button
+													type="button"
+													class="fal-model-only"
+													aria-label="Use only {model.label} · {model.workflow}"
+													onclick={() => {
+														selectedFalModelIds = [model.id];
+														modelPickerOpen = false;
+													}}
+												>
+													Only
+												</button>
+											</div>
+										{/each}
+									</div>
+								</details>
 							{/each}
 						</div>
 					</div>
@@ -1076,8 +1108,51 @@
 
 	.fal-model-cards {
 		display: grid;
+		gap: 4px;
+		max-height: 285px;
+		overflow-y: auto;
+	}
+
+	.fal-model-folder {
+		border: 1px solid #ececf0;
+		border-radius: 7px;
+	}
+
+	.fal-model-folder-heading {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		padding: 8px;
+		color: #3f3f46;
+		font-size: 9px;
+		list-style: none;
+		cursor: pointer;
+	}
+
+	.fal-model-folder-heading::-webkit-details-marker {
+		display: none;
+	}
+
+	.fal-model-folder-heading strong::before {
+		margin-right: 6px;
+		color: #6554c0;
+		content: '▸';
+	}
+
+	.fal-model-folder[open] .fal-model-folder-heading strong::before {
+		content: '▾';
+	}
+
+	.fal-model-folder-heading > span {
+		color: #71717a;
+	}
+
+	.fal-model-folder-cards {
+		display: grid;
 		gap: 5px;
-		max-height: 250px;
+		max-height: 165px;
+		padding: 0 6px 6px;
 		overflow-y: auto;
 	}
 

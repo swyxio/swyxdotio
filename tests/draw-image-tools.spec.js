@@ -141,7 +141,17 @@ async function chooseOnlyModel(toolbox, modelId) {
 		'grok-imagine-video': 'Grok Imagine Video · Budget 5-second image to video'
 	});
 	await toolbox.getByRole('button', { name: 'AI model and workflow selector' }).click();
-	await toolbox.getByRole('button', { name: `Use only ${workflows[modelId]}` }).click();
+	const folderLabel =
+		modelId === 'flux-klein-9b-generate'
+			? 'Text to image'
+			: modelId === 'grok-imagine-video'
+				? 'Image to video'
+				: 'Image editing';
+	const folder = toolbox.locator(`.fal-model-folder[aria-label="${folderLabel} models"]`);
+	if (!(await folder.evaluate((element) => element.hasAttribute('open')))) {
+		await folder.locator('summary').click();
+	}
+	await folder.getByRole('button', { name: `Use only ${workflows[modelId]}` }).click();
 }
 
 test('selected images expose private tools, exact model sizes, and disclosed fal uploads', async ({
@@ -186,12 +196,27 @@ test('selected images expose private tools, exact model sizes, and disclosed fal
 	await expect(toolbox.getByText('Models and workflows')).toBeVisible();
 	await expect(modelPicker).toContainText('Nano Banana 2');
 	await modelPicker.click();
+	const workflowFolders = toolbox.locator('.fal-model-folder');
+	await expect(workflowFolders).toHaveCount(3);
+	await expect(workflowFolders.nth(0).locator('summary')).toContainText('Text to image');
+	await expect(workflowFolders.nth(0).locator('summary')).toContainText('0 / 2');
+	await expect(workflowFolders.nth(1).locator('summary')).toContainText('Image editing');
+	await expect(workflowFolders.nth(1).locator('summary')).toContainText('1 / 12');
+	await expect(workflowFolders.nth(1)).toHaveAttribute('open', '');
+	await expect(workflowFolders.nth(2).locator('summary')).toContainText('Image to video');
+	await expect(workflowFolders.nth(2).locator('summary')).toContainText('0 / 2');
+	await expect(toolbox.getByRole('checkbox')).toHaveCount(12);
+	await workflowFolders.nth(0).locator('summary').click();
+	await workflowFolders.nth(2).locator('summary').click();
 	await expect(toolbox.getByRole('checkbox')).toHaveCount(16);
 	await expect(toolbox.locator('.fal-model-card').first()).toContainText('~$0.006');
 	await expect(toolbox.locator('.fal-model-card').last()).toContainText('~$0.41');
 	await expect(toolbox.getByText('Up to 16 reference images')).toBeVisible();
 	await toolbox.getByRole('button', { name: 'Select all' }).click();
 	await expect(toolbox.getByText('Cheapest first · 16 selected')).toBeVisible();
+	await expect(workflowFolders.nth(0).locator('summary')).toContainText('2 / 2');
+	await expect(workflowFolders.nth(1).locator('summary')).toContainText('12 / 12');
+	await expect(workflowFolders.nth(2).locator('summary')).toContainText('2 / 2');
 	await toolbox.getByRole('button', { name: 'Use only Nano Banana 2 · Balanced 1K edit' }).click();
 	await expect(toolbox.getByText('fal top pick')).toBeVisible();
 	await chooseOnlyModel(toolbox, 'gpt-image-2');
