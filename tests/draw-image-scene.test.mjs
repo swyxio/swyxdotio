@@ -2,8 +2,10 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
 	collectReferencedDrawingFiles,
+	estimateDrawingImageReplacementBytes,
 	estimateDrawingSceneBytes,
 	MAX_DRAWING_CLOUD_SCENE_BYTES,
+	optimizeDrawingImageForCloud,
 	replaceDrawingImage
 } from '../src/lib/draw-image-scene.js';
 
@@ -97,6 +99,91 @@ test('cloud scene size is checked before introducing an oversized replacement', 
 	assert.equal(calls.updated.length, 1);
 	assert.equal(MAX_DRAWING_CLOUD_SCENE_BYTES, 1_800_000);
 	assert.ok(estimateDrawingSceneBytes([image], {}, '#fff') > 0);
+});
+
+test('replacement estimates include the selected replacement and exclude unreferenced originals', () => {
+	const { editor, image } = createEditor();
+	const compact = estimateDrawingImageReplacementBytes({
+		editor,
+		imageId: image.id,
+		sourceFileId: image.fileId,
+		dataURL: 'data:image/webp;base64,YQ==',
+		mimeType: 'image/webp'
+	});
+	const expanded = estimateDrawingImageReplacementBytes({
+		editor,
+		imageId: image.id,
+		sourceFileId: image.fileId,
+		dataURL: `data:image/png;base64,${'a'.repeat(1_000)}`,
+		mimeType: 'image/png'
+	});
+	assert.ok(expanded > compact + 900);
+});
+
+test('oversized raster edits are optimized to the first WebP quality fitting the entire scene', async () => {
+	const { editor, image } = createEditor();
+	const qualities = [];
+	let progress = 0;
+	const result = await optimizeDrawingImageForCloud({
+		editor,
+		imageId: image.id,
+		sourceFileId: image.fileId,
+		dataURL: `data:image/png;base64,${'a'.repeat(10_000)}`,
+		mimeType: 'image/png',
+		maxCloudBytes: 8_000,
+		onOptimize: () => progress++,
+		encodeCandidate: async (quality) => {
+			qualities.push(quality);
+			return {
+				dataURL: `data:image/webp;base64,${'a'.repeat(quality > 0.76 ? 9_000 : 500)}`,
+				mimeType: 'image/webp'
+			};
+		}
+	});
+	assert.equal(result.optimized, true);
+	assert.equal(result.mimeType, 'image/webp');
+	assert.deepEqual(qualities, [0.88, 0.76]);
+	assert.equal(progress, 1);
+});
+
+test('small raster and oversized vector outputs remain unchanged without encoding', async () => {
+	const { editor, image } = createEditor();
+	for (const fixture of [
+		{ dataURL: 'data:image/png;base64,YQ==', mimeType: 'image/png' },
+		{ dataURL: `data:image/svg+xml;base64,${'a'.repeat(10_000)}`, mimeType: 'image/svg+xml' }
+	]) {
+		const result = await optimizeDrawingImageForCloud({
+			editor,
+			imageId: image.id,
+			sourceFileId: image.fileId,
+			...fixture,
+			maxCloudBytes: 5_000,
+			encodeCandidate: async () => {
+				throw new Error('Encoding must not run for this image.');
+			}
+		});
+		assert.deepEqual(result, { ...fixture, optimized: false });
+	}
+});
+
+test('oversized edits stay intact when no WebP candidate fits the cloud budget', async () => {
+	const { editor, image } = createEditor();
+	const original = {
+		dataURL: `data:image/png;base64,${'a'.repeat(10_000)}`,
+		mimeType: 'image/png'
+	};
+	const result = await optimizeDrawingImageForCloud({
+		editor,
+		imageId: image.id,
+		sourceFileId: image.fileId,
+		...original,
+		maxCloudBytes: 5_000,
+		encodeCandidate: async () => ({
+			dataURL: `data:image/webp;base64,${'a'.repeat(8_000)}`,
+			mimeType: 'image/webp'
+		})
+	});
+	assert.deepEqual(result, { ...original, optimized: false });
 });
 
 test('stale image selections are rejected without changing the scene', () => {

@@ -1,19 +1,32 @@
 import { expect, test } from '@playwright/test';
 
-/** @param {import('@playwright/test').Page} page */
-async function pasteSelectedImage(page) {
+/**
+ * @param {import('@playwright/test').Page} page
+ * @param {{ width: number, height: number } | undefined} [generatedSize]
+ */
+async function pasteSelectedImage(page, generatedSize) {
 	await page.goto('/draw');
 	const drawingCanvas = page.locator('.draw-canvas canvas.excalidraw__canvas.interactive');
 	await expect(drawingCanvas).toBeVisible();
 	await drawingCanvas.click({ position: { x: 360, y: 280 } });
-	await page.evaluate(async () => {
-		const source = await fetch('/swyx-ski.jpeg').then((response) => response.blob());
+	await page.evaluate(async (size) => {
+		let source;
+		if (size) {
+			const canvas = new OffscreenCanvas(size.width, size.height);
+			const context = canvas.getContext('2d');
+			if (!context) throw new Error('Could not prepare the large test image.');
+			context.fillStyle = '#d3e7fb';
+			context.fillRect(0, 0, size.width, size.height);
+			source = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.8 });
+		} else {
+			source = await fetch('/swyx-ski.jpeg').then((response) => response.blob());
+		}
 		const transfer = new DataTransfer();
 		transfer.items.add(new File([source], 'selected-image.jpg', { type: source.type }));
 		document.dispatchEvent(
 			new ClipboardEvent('paste', { bubbles: true, cancelable: true, clipboardData: transfer })
 		);
-	});
+	}, generatedSize);
 	const toolbox = page.getByRole('region', { name: 'Selected image tools' });
 	await expect(toolbox).toBeVisible();
 	await expect(toolbox.getByLabel('AI image toolbox')).toBeVisible();
@@ -218,6 +231,116 @@ test('local image editing failures remain visible without mutating the canvas', 
 		'The selected model could not be downloaded.'
 	);
 	expect((await selectedSceneImage(page)).fileId).toBe(original.fileId);
+});
+
+test('large transparent image edits preserve dimensions and synchronize under the real cloud limit', async ({
+	page
+}) => {
+	test.setTimeout(45_000);
+	await page.addInitScript(() => {
+		/** @type {any} */ (globalThis).__SWYX_PROCESS_IMAGE_TOOL__ = async (
+			/** @type {string} */ _action,
+			/** @type {Blob} */ source
+		) => {
+			const bitmap = await createImageBitmap(source);
+			const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+			const context = canvas.getContext('2d');
+			if (!context) throw new Error('Could not prepare the generated image.');
+			const pixels = context.createImageData(bitmap.width, bitmap.height);
+			let random = 1831565813;
+			for (let index = 0; index < pixels.data.length; index += 4) {
+				random ^= random << 13;
+				random ^= random >>> 17;
+				random ^= random << 5;
+				pixels.data[index] = random & 255;
+				pixels.data[index + 1] = (random >>> 8) & 255;
+				pixels.data[index + 2] = (random >>> 16) & 255;
+				pixels.data[index + 3] = index < bitmap.width * 4 ? 0 : 255;
+			}
+			context.putImageData(pixels, 0, 0);
+			const result = await canvas.convertToBlob({ type: 'image/png' });
+			/** @type {any} */ (globalThis).__SWYX_GENERATED_IMAGE_BYTES__ = result.size;
+			return result;
+		};
+	});
+	await page.goto('/draw');
+	const origin = new URL(page.url()).origin;
+	const login = await page.request.post(`${origin}/tools/api/session`, {
+		headers: { Origin: origin },
+		data: { password: 'draw-test-password' }
+	});
+	expect(login.ok()).toBe(true);
+	const create = await page.request.post(`${origin}/tools/api/draw/pages`, {
+		headers: { Origin: origin },
+		data: { name: `Image optimization ${Date.now()}` }
+	});
+	expect(create.ok()).toBe(true);
+	const cloudPage = await create.json();
+	await page.evaluate((drawingPage) => {
+		localStorage.setItem(
+			'swyx-excalidraw:pages',
+			JSON.stringify({ pages: [drawingPage], activePageId: drawingPage.id })
+		);
+	}, cloudPage);
+
+	try {
+		const toolbox = await pasteSelectedImage(page, { width: 1200, height: 1000 });
+		const original = await selectedSceneImage(page);
+		await toolbox.getByRole('button', { name: 'Apply Magic Select' }).click();
+		await expect
+			.poll(async () => (await selectedSceneImage(page)).fileId)
+			.not.toBe(original.fileId);
+		const edited = await selectedSceneImage(page);
+		expect(edited.mimeType).toBe('image/webp');
+		expect(edited.width).toBe(original.width);
+		expect(edited.height).toBe(original.height);
+		expect(
+			await page.evaluate(() => /** @type {any} */ (globalThis).__SWYX_GENERATED_IMAGE_BYTES__)
+		).toBeGreaterThan(1_800_000);
+		await expect
+			.poll(
+				async () => {
+					const response = await page.request.get(`${origin}/tools/api/draw/pages/${cloudPage.id}`);
+					if (!response.ok()) return '';
+					const drawing = await response.json();
+					return drawing.scene?.elements?.find(
+						(/** @type {{ type: string }} */ element) => element.type === 'image'
+					)?.fileId;
+				},
+				{ timeout: 15_000 }
+			)
+			.toBe(edited.fileId);
+		await page.getByRole('button', { name: 'Manage drawing pages' }).click();
+		await expect(page.getByText('Saved to cloud')).toBeVisible();
+
+		const persisted = await page.request.get(`${origin}/tools/api/draw/pages/${cloudPage.id}`);
+		expect(persisted.ok()).toBe(true);
+		const saved = await persisted.json();
+		expect(new TextEncoder().encode(JSON.stringify(saved.scene)).byteLength).toBeLessThan(
+			1_800_000
+		);
+		expect(saved.scene.files[edited.fileId].mimeType).toBe('image/webp');
+		const dimensions = await page.evaluate(async (dataURL) => {
+			const bitmap = await createImageBitmap(
+				await fetch(dataURL).then((response) => response.blob())
+			);
+			const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+			const context = canvas.getContext('2d');
+			if (!context) throw new Error('Could not inspect the synchronized image.');
+			context.drawImage(bitmap, 0, 0);
+			return {
+				width: bitmap.width,
+				height: bitmap.height,
+				firstPixelAlpha: context.getImageData(0, 0, 1, 1).data[3]
+			};
+		}, saved.scene.files[edited.fileId].dataURL);
+		expect(dimensions).toEqual({ width: 1200, height: 1000, firstPixelAlpha: 0 });
+	} finally {
+		const remove = await page.request.delete(`${origin}/tools/api/draw/pages/${cloudPage.id}`, {
+			headers: { Origin: origin }
+		});
+		expect(remove.ok()).toBe(true);
+	}
 });
 
 test('prompt editing sends only image and editable prompt through the authenticated proxy', async ({

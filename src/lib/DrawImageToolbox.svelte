@@ -1,6 +1,6 @@
 <script>
 	import { DRAW_IMAGE_TOOLS, processImageTool } from '$lib/draw-image-tools.js';
-	import { replaceDrawingImage } from '$lib/draw-image-scene.js';
+	import { optimizeDrawingImageForCloud, replaceDrawingImage } from '$lib/draw-image-scene.js';
 	import {
 		DEFAULT_DRAW_FAL_MODEL,
 		DRAW_FAL_MODELS,
@@ -139,8 +139,24 @@
 	 * @param {string} mimeType
 	 * @param {string} success
 	 */
-	function insertEditedImage(selected, dataURL, mimeType, success) {
+	async function insertEditedImage(selected, dataURL, mimeType, success) {
 		if (!selected.image.fileId) throw new Error('The selected image is unavailable.');
+		if (cloudAvailable) {
+			const optimized = await optimizeDrawingImageForCloud({
+				editor,
+				imageId: selected.image.id,
+				sourceFileId: selected.image.fileId,
+				dataURL,
+				mimeType,
+				signal: operationAbort?.signal,
+				onOptimize: () => {
+					operationStatus = 'Optimizing image for cloud sync';
+				}
+			});
+			dataURL = optimized.dataURL;
+			mimeType = optimized.mimeType;
+		}
+		operationAbort?.signal.throwIfAborted();
 		const result = replaceDrawingImage({
 			editor,
 			imageId: selected.image.id,
@@ -184,7 +200,7 @@
 			});
 			operationAbort.signal.throwIfAborted();
 			const dataURL = await readDataUrl(result);
-			insertEditedImage(
+			await insertEditedImage(
 				selected,
 				dataURL,
 				result.type || 'image/png',
@@ -237,7 +253,7 @@
 			}
 			operationAbort.signal.throwIfAborted();
 			const mimeType = result.image.slice(5, result.image.indexOf(';')) || 'image/png';
-			insertEditedImage(selected, result.image, mimeType, 'AI edit applied');
+			await insertEditedImage(selected, result.image, mimeType, 'AI edit applied');
 		} catch (error) {
 			if (error instanceof Error && error.name === 'AbortError') {
 				operationStatus = '';
