@@ -2,6 +2,19 @@ import { expect, test } from '@playwright/test';
 
 /** @typedef {{ isDeleted?: boolean, text?: string, roughness?: number }} DrawingElement */
 
+test('drawing canvas always uses light mode even when the site is dark', async ({ page }) => {
+	await page.addInitScript(() => localStorage.setItem('theme', 'dark'));
+	await page.goto('/draw');
+
+	await expect(page.locator('html')).toHaveClass(/dark/);
+	await expect(page.locator('.excalidraw')).toBeVisible();
+	await expect(page.locator('.excalidraw')).not.toHaveClass(/theme--dark/);
+	await expect(page.getByRole('button', { name: 'Manage drawing pages' })).toHaveCSS(
+		'background-color',
+		'rgb(255, 255, 255)'
+	);
+});
+
 test('drawing canvas is public, fullscreen, and persists drawings in the browser', async ({
 	page
 }) => {

@@ -412,7 +412,7 @@
 
 				return createElement(Excalidraw, {
 					initialData: initialScene,
-					theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light',
+					theme: 'light',
 					onChange: saveScene,
 					onLibraryChange: saveDrawingLibrary,
 					excalidrawAPI: (
@@ -930,52 +930,6 @@
 	.preset-option:focus-visible {
 		background: #f3f3f5;
 		outline: none;
-	}
-
-	:global(html.dark) .preset-picker,
-	:global(html.dark) .page-picker {
-		color: #eee;
-	}
-
-	:global(html.dark) .preset-toggle,
-	:global(html.dark) .preset-menu,
-	:global(html.dark) .page-toggle,
-	:global(html.dark) .page-menu {
-		border-color: rgb(255 255 255 / 10%);
-		background: #262626;
-	}
-
-	:global(html.dark) .preset-heading,
-	:global(html.dark) .page-heading,
-	:global(html.dark) .add-page,
-	:global(html.dark) .sync-link {
-		border-color: rgb(255 255 255 / 9%);
-	}
-
-	:global(html.dark) .preset-heading span,
-	:global(html.dark) .preset-option span,
-	:global(html.dark) .page-heading span {
-		color: #a1a1aa;
-	}
-
-	:global(html.dark) .preset-option:hover,
-	:global(html.dark) .preset-option:focus-visible {
-		background: #333;
-	}
-
-	:global(html.dark) .page-row.active {
-		background: #373155;
-	}
-
-	:global(html.dark) .page-action:hover,
-	:global(html.dark) .page-action:focus-visible {
-		background: rgb(255 255 255 / 10%);
-		color: #eee;
-	}
-
-	:global(html.dark) .add-page,
-	:global(html.dark) .sync-link {
-		color: #b4aafa;
 	}
 
 	@media (max-width: 600px) {
