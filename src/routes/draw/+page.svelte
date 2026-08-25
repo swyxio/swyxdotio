@@ -1,6 +1,7 @@
 <script>
 	import { onMount, tick } from 'svelte';
 	import '@excalidraw/excalidraw/index.css';
+	import { DRAW_MEME_TEMPLATES, fetchMemeTemplates, searchMemeTemplates } from '$lib/draw-memes.js';
 	import { orderRecentDrawingPages, searchWorkspaceCommands } from '$lib/draw-workspace.js';
 
 	const STORAGE_KEY = 'swyx-excalidraw';
@@ -40,9 +41,14 @@
 	let uiComponents = $state([]);
 	/** @type {typeof import('$lib/draw-ui-components.js').createDrawUiComponent | undefined} */
 	let createUiComponent;
-	let isPresetMenuOpen = $state(false);
-	let isComponentMenuOpen = $state(false);
+	/** @type {'presets' | 'components' | 'memes'} */
+	let workspaceSection = $state('presets');
 	let componentQuery = $state('');
+	let memeQuery = $state('');
+	let memeTemplates = $state(DRAW_MEME_TEMPLATES);
+	let isLoadingMemeCatalog = $state(false);
+	let isInsertingMeme = $state(false);
+	let memeError = $state('');
 	let isCommandPaletteOpen = $state(false);
 	let commandQuery = $state('');
 	let highlightedCommandIndex = $state(0);
@@ -88,6 +94,9 @@
 	const filteredComponentCategories = $derived(
 		Array.from(new Set(filteredComponents.map((component) => component.category)))
 	);
+	const filteredMemeTemplates = $derived(
+		searchMemeTemplates(memeQuery, memeQuery.trim() ? memeTemplates : DRAW_MEME_TEMPLATES)
+	);
 	const workspaceCommands = $derived.by(() => {
 		/** @type {WorkspaceCommand[]} */
 		const commands = [
@@ -113,9 +122,15 @@
 				description: 'Open the hand-drawn wireframing kit',
 				category: 'Actions',
 				keywords: ['wireframe', 'interface', 'kit'],
-				run: () => {
-					isComponentMenuOpen = true;
-				}
+				run: () => openWorkspaceSection('components')
+			},
+			{
+				id: 'action-browse-memes',
+				label: 'Browse meme templates',
+				description: 'Add a popular meme image to your drawing',
+				category: 'Actions',
+				keywords: ['imgflip', 'image', 'reaction', 'template'],
+				run: () => openWorkspaceSection('memes')
 			}
 		];
 
@@ -143,6 +158,14 @@
 				category: 'Pages',
 				keywords: ['drawing', 'document', 'recent'],
 				run: () => switchPage(page)
+			})),
+			...memeTemplates.map((meme) => ({
+				id: `meme-${meme.id}`,
+				label: meme.name,
+				description: 'Insert meme template',
+				category: 'Memes',
+				keywords: ['meme', 'imgflip', ...(meme.keywords ?? [])],
+				run: () => insertMemeTemplate(meme)
 			}))
 		);
 		return commands;
@@ -439,7 +462,6 @@
 			}
 		});
 		editor.scrollToContent(shapes, { fitToContent: true, animate: true, duration: 260 });
-		isPresetMenuOpen = false;
 	}
 
 	/** @param {string} componentId */
@@ -465,8 +487,61 @@
 			...(captureImmediately ? { captureUpdate: captureImmediately } : {})
 		});
 		editor.scrollToContent(shapes, { fitToContent: false, animate: true, duration: 180 });
-		isComponentMenuOpen = false;
-		componentQuery = '';
+	}
+
+	/** @param {'presets' | 'components' | 'memes'} section */
+	function openWorkspaceSection(section) {
+		workspaceSection = section;
+		isPageMenuOpen = false;
+		editor?.updateScene({ appState: { openSidebar: { name: 'default', tab: 'workspace' } } });
+		if (section === 'memes') void loadMemeCatalog();
+	}
+
+	async function loadMemeCatalog() {
+		if (isLoadingMemeCatalog || memeTemplates.length > DRAW_MEME_TEMPLATES.length) return;
+		isLoadingMemeCatalog = true;
+		memeError = '';
+		try {
+			const currentTemplates = await fetchMemeTemplates();
+			const byId = new Map(
+				[...DRAW_MEME_TEMPLATES, ...currentTemplates].map((template) => [template.id, template])
+			);
+			memeTemplates = [...byId.values()];
+		} catch (error) {
+			memeError = 'More templates could not be loaded. Popular templates remain available.';
+			console.warn('Could not load current Imgflip meme templates.', error);
+		} finally {
+			isLoadingMemeCatalog = false;
+		}
+	}
+
+	/** @param {typeof DRAW_MEME_TEMPLATES[number]} template */
+	async function insertMemeTemplate(template) {
+		if (!editor || !convertElements || !captureImmediately || isInsertingMeme) return;
+		isInsertingMeme = true;
+		memeError = '';
+		try {
+			const { insertMemeImage } = await import('$lib/draw-meme-image.js');
+			await insertMemeImage(editor, template, { convertElements, captureImmediately });
+		} catch (error) {
+			memeError = error instanceof Error ? error.message : 'The meme image could not be added.';
+		} finally {
+			isInsertingMeme = false;
+		}
+	}
+
+	/** @param {HTMLElement} node */
+	function mountWorkspacePanel(node) {
+		node.hidden = true;
+		const attach = () => {
+			const host = canvas?.querySelector('[data-swyx-workspace-panel]');
+			if (host && node.parentNode !== host) host.appendChild(node);
+			node.hidden = !host;
+		};
+		const observer = new MutationObserver(attach);
+		observer.observe(canvas, { childList: true, subtree: true });
+		attach();
+		return { destroy: () => observer.disconnect() };
 	}
 
 	/** @param {string} [query] */
@@ -475,9 +550,7 @@
 			document.activeElement instanceof HTMLElement ? document.activeElement : null;
 		commandQuery = query;
 		highlightedCommandIndex = 0;
-		isPresetMenuOpen = false;
 		isPageMenuOpen = false;
-		isComponentMenuOpen = false;
 		isCommandPaletteOpen = true;
 		void tick().then(() => commandInput?.focus());
 	}
@@ -743,6 +816,8 @@
 				{ createRoot },
 				{
 					Excalidraw,
+					DefaultSidebar,
+					Sidebar,
 					convertToExcalidrawElements,
 					useHandleLibrary,
 					newElementWith,
@@ -794,18 +869,43 @@
 				);
 				useHandleLibrary({ excalidrawAPI: currentEditor, adapter: libraryAdapter });
 
-				return createElement(Excalidraw, {
-					initialData: initialScene,
-					theme: 'light',
-					onChange: saveScene,
-					onLibraryChange: saveDrawingLibrary,
-					excalidrawAPI: (
-						/** @type {import('@excalidraw/excalidraw/types').ExcalidrawImperativeAPI} */ instance
-					) => {
-						editor = instance;
-						setCurrentEditor(instance);
-					}
-				});
+				return createElement(
+					Excalidraw,
+					{
+						initialData: initialScene,
+						theme: 'light',
+						onChange: saveScene,
+						onLibraryChange: saveDrawingLibrary,
+						excalidrawAPI: (
+							/** @type {import('@excalidraw/excalidraw/types').ExcalidrawImperativeAPI} */ instance
+						) => {
+							editor = instance;
+							setCurrentEditor(instance);
+						}
+					},
+					createElement(
+						DefaultSidebar,
+						null,
+						createElement(
+							Sidebar.Tab,
+							{ tab: 'workspace', className: 'swyx-workspace-sidebar-tab' },
+							createElement('div', { 'data-swyx-workspace-panel': true })
+						)
+					),
+					createElement(
+						DefaultSidebar.TabTriggers,
+						null,
+						createElement(
+							Sidebar.TabTrigger,
+							{
+								tab: 'workspace',
+								'aria-label': 'Templates, components, and memes',
+								title: 'Drawing presets, UI components, and meme templates'
+							},
+							'Templates'
+						)
+					)
+				);
 			}
 
 			root = createRoot(canvas);
@@ -924,8 +1024,6 @@
 			disabled={!editor}
 			onclick={() => {
 				isPageMenuOpen = !isPageMenuOpen;
-				isPresetMenuOpen = false;
-				isComponentMenuOpen = false;
 			}}
 		>
 			<svg aria-hidden="true" viewBox="0 0 20 20" fill="none">
@@ -1040,105 +1138,34 @@
 	</div>
 {/if}
 
-{#if uiComponents.length > 0}
-	<div class="component-picker">
-		<button
-			type="button"
-			class="component-toggle"
-			aria-label="Browse UI components"
-			aria-expanded={isComponentMenuOpen}
-			aria-controls="drawing-components"
-			title="Browse hand-drawn UI components (⌘K)"
-			disabled={!editor}
-			onclick={() => {
-				isComponentMenuOpen = !isComponentMenuOpen;
-				isPresetMenuOpen = false;
-				isPageMenuOpen = false;
-				componentQuery = '';
-			}}
-		>
-			<svg aria-hidden="true" viewBox="0 0 20 20" fill="none">
-				<path
-					d="M4.2 4.5h11.6v11H4.2v-11Zm0 3.5h11.6M8 8v7.5"
-					stroke="currentColor"
-					stroke-width="1.5"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-				/>
-			</svg>
-			<span>Components</span>
-			<kbd>⌘K</kbd>
-		</button>
+{#if presets.length > 0 && uiComponents.length > 0}
+	<section
+		class="workspace-library"
+		aria-label="Drawing templates, components, and memes"
+		use:mountWorkspacePanel
+	>
+		<div class="workspace-sections" role="tablist" aria-label="Template categories">
+			{#each [{ id: 'presets', label: 'Presets' }, { id: 'components', label: 'Components' }, { id: 'memes', label: 'Memes' }] as section (section.id)}
+				<button
+					type="button"
+					class="workspace-section"
+					class:active={workspaceSection === section.id}
+					role="tab"
+					aria-selected={workspaceSection === section.id}
+					onclick={() =>
+						openWorkspaceSection(/** @type {'presets' | 'components' | 'memes'} */ (section.id))}
+				>
+					{section.label}
+				</button>
+			{/each}
+		</div>
 
-		{#if isComponentMenuOpen}
-			<section id="drawing-components" class="component-menu" aria-label="UI components">
-				<div class="component-heading">
-					<strong>Sketch an interface</strong>
-					<span>Hand-drawn, editable components.</span>
-				</div>
-				<input
-					class="component-search"
-					aria-label="Search UI components"
-					placeholder="Search components…"
-					bind:value={componentQuery}
-				/>
-				{#if filteredComponents.length === 0}
-					<p class="component-empty">No matching components.</p>
-				{:else}
-					{#each filteredComponentCategories as category (category)}
-						<div class="component-category">{category}</div>
-						{#each filteredComponents.filter((component) => component.category === category) as component (component.id)}
-							<button
-								type="button"
-								class="component-option"
-								aria-label="Insert {component.title} component"
-								onclick={() => insertUiComponent(component.id)}
-							>
-								<strong>{component.title}</strong>
-								<span>{component.description}</span>
-							</button>
-						{/each}
-					{/each}
-				{/if}
-			</section>
-		{/if}
-	</div>
-{/if}
-
-{#if presets.length > 0}
-	<div class="preset-picker">
-		<button
-			type="button"
-			class="preset-toggle"
-			aria-label="Browse drawing presets"
-			aria-expanded={isPresetMenuOpen}
-			aria-controls="drawing-presets"
-			disabled={!editor}
-			onclick={() => {
-				isPresetMenuOpen = !isPresetMenuOpen;
-				isPageMenuOpen = false;
-				isComponentMenuOpen = false;
-			}}
-		>
-			<svg aria-hidden="true" viewBox="0 0 20 20" fill="none">
-				<path
-					d="M4 4h5v5H4V4Zm7 0h5v5h-5V4ZM4 11h5v5H4v-5Zm9.5 0v5m-2.5-2.5h5"
-					stroke="currentColor"
-					stroke-width="1.6"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-				/>
-			</svg>
-			<span>Presets</span>
-		</button>
-
-		{#if isPresetMenuOpen}
-			<section id="drawing-presets" class="preset-menu" aria-label="Drawing presets">
+		{#if workspaceSection === 'presets'}
+			<section id="drawing-presets" class="workspace-content" aria-label="Drawing presets">
 				<div class="preset-heading">
 					<strong>Start with a framework</strong>
 					<span>Every shape stays editable.</span>
 				</div>
-
 				{#each presets as preset (preset.id)}
 					<button
 						type="button"
@@ -1197,8 +1224,84 @@
 					</button>
 				{/each}
 			</section>
+		{:else if workspaceSection === 'components'}
+			<section id="drawing-components" class="workspace-content" aria-label="UI components">
+				<div class="component-heading">
+					<strong>Sketch an interface</strong>
+					<span>Hand-drawn, editable components.</span>
+				</div>
+				<input
+					class="component-search"
+					aria-label="Search UI components"
+					placeholder="Search components…"
+					bind:value={componentQuery}
+				/>
+				{#if filteredComponents.length === 0}
+					<p class="component-empty">No matching components.</p>
+				{:else}
+					{#each filteredComponentCategories as category (category)}
+						<div class="component-category">{category}</div>
+						{#each filteredComponents.filter((component) => component.category === category) as component (component.id)}
+							<button
+								type="button"
+								class="component-option"
+								aria-label="Insert {component.title} component"
+								onclick={() => insertUiComponent(component.id)}
+							>
+								<strong>{component.title}</strong>
+								<span>{component.description}</span>
+							</button>
+						{/each}
+					{/each}
+				{/if}
+			</section>
+		{:else}
+			<section class="workspace-content meme-content" aria-label="Meme templates">
+				<div class="component-heading">
+					<strong>Popular meme templates</strong>
+					<span>Click a template to add it to your canvas.</span>
+				</div>
+				<input
+					class="component-search"
+					aria-label="Search meme templates"
+					placeholder="Search meme templates…"
+					bind:value={memeQuery}
+				/>
+				{#if memeError}<p class="meme-error" role="alert">{memeError}</p>{/if}
+				{#if isLoadingMemeCatalog}<p class="meme-status">Loading more templates…</p>{/if}
+				{#if filteredMemeTemplates.length === 0}
+					<p class="component-empty">No matching meme templates.</p>
+				{:else}
+					<div class="meme-grid">
+						{#each filteredMemeTemplates as meme (meme.id)}
+							<button
+								type="button"
+								class="meme-option"
+								aria-label="Insert {meme.name} meme template"
+								disabled={isInsertingMeme}
+								onclick={() => void insertMemeTemplate(meme)}
+							>
+								<img src={meme.url} alt="" loading="lazy" />
+								<span>{meme.name}</span>
+							</button>
+						{/each}
+					</div>
+				{/if}
+				<div class="meme-attribution">
+					<a href="https://imgflip.com/memetemplates" target="_blank" rel="noreferrer">
+						Templates via Imgflip
+					</a>
+					<a
+						href="https://imgflip.com/memetemplates?search={encodeURIComponent(memeQuery)}"
+						target="_blank"
+						rel="noreferrer"
+					>
+						Search more ↗
+					</a>
+				</div>
+			</section>
 		{/if}
-	</div>
+	</section>
 {/if}
 
 {#if isCommandPaletteOpen}
@@ -1378,11 +1481,10 @@
 		color: #328357;
 	}
 
-	.preset-picker,
-	.page-picker,
-	.component-picker {
+	.page-picker {
 		position: fixed;
 		top: 12px;
+		left: 66px;
 		z-index: 1000;
 		font-family:
 			Inter,
@@ -1393,21 +1495,7 @@
 		color: #1d1d1d;
 	}
 
-	.preset-picker {
-		left: 66px;
-	}
-
-	.page-picker {
-		left: 337px;
-	}
-
-	.component-picker {
-		left: 173px;
-	}
-
-	.preset-toggle,
-	.page-toggle,
-	.component-toggle {
+	.page-toggle {
 		display: flex;
 		align-items: center;
 		gap: 8px;
@@ -1424,10 +1512,9 @@
 	}
 
 	.page-toggle {
-		max-width: min(185px, calc(100vw - 369px));
+		max-width: min(180px, calc(100vw - 140px));
 	}
 
-	.component-toggle kbd,
 	.command-input-wrap kbd,
 	.command-footer kbd {
 		padding: 2px 4px;
@@ -1445,16 +1532,12 @@
 		white-space: nowrap;
 	}
 
-	.preset-toggle:disabled,
-	.page-toggle:disabled,
-	.component-toggle:disabled {
+	.page-toggle:disabled {
 		cursor: wait;
 		opacity: 0.65;
 	}
 
-	.preset-toggle svg,
 	.page-toggle svg,
-	.component-toggle svg,
 	.page-action svg,
 	.add-page svg {
 		flex: none;
@@ -1467,9 +1550,7 @@
 		height: 14px;
 	}
 
-	.preset-menu,
-	.page-menu,
-	.component-menu {
+	.page-menu {
 		width: min(310px, calc(100vw - 84px));
 		max-height: min(610px, calc(100dvh - 75px));
 		margin-top: 8px;
@@ -1482,8 +1563,52 @@
 	}
 
 	.page-menu {
-		width: min(290px, calc(100vw - 188px));
+		width: min(290px, calc(100vw - 84px));
 		min-width: 230px;
+	}
+
+	.workspace-library {
+		color: #27272a;
+		font-family:
+			Inter,
+			-apple-system,
+			BlinkMacSystemFont,
+			'Segoe UI',
+			sans-serif;
+	}
+
+	.workspace-sections {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 3px;
+		margin: 7px 9px 5px;
+		padding: 3px;
+		border-radius: 8px;
+		background: #f2f1f6;
+	}
+
+	.workspace-section {
+		min-height: 33px;
+		padding: 5px 4px;
+		border: 0;
+		border-radius: 6px;
+		background: transparent;
+		color: #666574;
+		font-size: 11px;
+		font-weight: 550;
+		cursor: pointer;
+	}
+
+	.workspace-section.active {
+		background: #fff;
+		box-shadow: 0 1px 3px rgb(0 0 0 / 9%);
+		color: #4e40ae;
+	}
+
+	.workspace-content {
+		max-height: calc(100dvh - 150px);
+		padding: 0 6px 12px;
+		overflow-y: auto;
 	}
 
 	.preset-heading,
@@ -1653,10 +1778,6 @@
 		outline: none;
 	}
 
-	.component-menu {
-		width: min(330px, calc(100vw - 188px));
-	}
-
 	.component-search {
 		width: calc(100% - 12px);
 		margin: 6px;
@@ -1710,6 +1831,87 @@
 		color: #71717a;
 		font-size: 13px;
 		text-align: center;
+	}
+
+	.meme-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 8px;
+		padding: 5px;
+	}
+
+	.meme-option {
+		display: grid;
+		gap: 6px;
+		padding: 5px;
+		border: 1px solid #e9e9ee;
+		border-radius: 8px;
+		background: #fff;
+		color: #30303a;
+		text-align: left;
+		cursor: pointer;
+	}
+
+	.meme-option:hover,
+	.meme-option:focus-visible {
+		border-color: #9a8bec;
+		outline: none;
+	}
+
+	.meme-option:disabled {
+		cursor: wait;
+		opacity: 0.65;
+	}
+
+	.meme-option img {
+		width: 100%;
+		aspect-ratio: 1;
+		border-radius: 5px;
+		background: #f4f4f6;
+		object-fit: contain;
+	}
+
+	.meme-option span {
+		overflow: hidden;
+		font-size: 10px;
+		line-height: 1.3;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.meme-error,
+	.meme-status {
+		margin: 5px 8px 8px;
+		color: #71717a;
+		font-size: 11px;
+	}
+
+	.meme-error {
+		color: #c53434;
+	}
+
+	.meme-attribution {
+		display: flex;
+		justify-content: space-between;
+		gap: 8px;
+		margin-top: 8px;
+		padding: 9px 5px 2px;
+		border-top: 1px solid #ededf0;
+	}
+
+	.meme-attribution a {
+		color: #6554c0;
+		font-size: 10px;
+		text-decoration: none;
+	}
+
+	.meme-attribution a:hover,
+	.meme-attribution a:focus-visible {
+		text-decoration: underline;
+	}
+
+	:global(.swyx-workspace-sidebar-tab) {
+		width: 100%;
 	}
 
 	.command-backdrop {
@@ -1816,68 +2018,24 @@
 			font-size: 9px;
 		}
 
-		.preset-picker,
-		.page-picker,
-		.component-picker {
+		.page-picker {
 			top: 10px;
-		}
-
-		.preset-picker {
 			left: 58px;
 		}
 
-		.component-picker {
-			left: 159px;
-		}
-
-		.page-picker {
-			left: 288px;
-		}
-
-		.preset-toggle,
-		.page-toggle,
-		.component-toggle {
+		.page-toggle {
 			height: 36px;
 			padding: 0 10px;
-		}
-
-		.component-toggle kbd {
-			display: none;
-		}
-
-		.page-toggle {
-			max-width: calc(100vw - 299px);
+			max-width: min(180px, calc(100vw - 125px));
 		}
 
 		.page-menu {
-			position: relative;
-			left: min(0px, calc(100vw - 570px));
 			width: min(260px, calc(100vw - 24px));
 			min-width: 0;
 		}
 
-		.component-menu {
-			position: relative;
-			left: min(0px, calc(100vw - 495px));
-			width: min(325px, calc(100vw - 24px));
-		}
-
 		.command-palette {
 			top: 11vh;
-		}
-	}
-
-	@media (max-width: 410px) {
-		.component-toggle span {
-			display: none;
-		}
-
-		.page-picker {
-			left: 212px;
-		}
-
-		.page-toggle {
-			max-width: calc(100vw - 225px);
 		}
 	}
 </style>

@@ -42,7 +42,9 @@ test('drawing pages can be created, switched, renamed, and deleted locally', asy
 	await pages.click();
 	await expect(page.getByRole('button', { name: 'Page 2', exact: true })).toBeVisible();
 
-	await page.getByRole('button', { name: 'Browse drawing presets' }).click();
+	await page.getByRole('checkbox', { name: 'Library' }).check({ force: true });
+	await page.getByRole('tab', { name: 'Templates, components, and memes' }).click();
+	await page.getByRole('tab', { name: 'Presets', exact: true }).click();
 	await page.getByRole('button', { name: 'Insert Priority quadrants preset' }).click();
 	await expect
 		.poll(() =>

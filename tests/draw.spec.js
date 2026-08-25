@@ -2,6 +2,16 @@ import { expect, test } from '@playwright/test';
 
 /** @typedef {{ isDeleted?: boolean, text?: string, roughness?: number }} DrawingElement */
 
+/**
+ * @param {import('@playwright/test').Page} page
+ * @param {'Presets' | 'Components' | 'Memes'} section
+ */
+async function openDrawingTemplates(page, section) {
+	await page.getByRole('checkbox', { name: 'Library' }).check({ force: true });
+	await page.getByRole('tab', { name: 'Templates, components, and memes' }).click();
+	await page.getByRole('tab', { name: section, exact: true }).click();
+}
+
 test('drawing canvas always uses light mode even when the site is dark', async ({ page }) => {
 	await page.addInitScript(() => localStorage.setItem('theme', 'dark'));
 	await page.goto('/draw');
@@ -13,6 +23,13 @@ test('drawing canvas always uses light mode even when the site is dark', async (
 		'background-color',
 		'rgb(255, 255, 255)'
 	);
+	await expect(page.getByRole('button', { name: 'Browse UI components' })).toHaveCount(0);
+	await expect(page.getByRole('button', { name: 'Browse drawing presets' })).toHaveCount(0);
+	const pages = await page.getByRole('button', { name: 'Manage drawing pages' }).boundingBox();
+	const toolbar = await page.locator('.App-toolbar').first().boundingBox();
+	expect(pages).not.toBeNull();
+	expect(toolbar).not.toBeNull();
+	if (pages && toolbar) expect(pages.x + pages.width).toBeLessThanOrEqual(toolbar.x);
 });
 
 test('drawing canvas is public, fullscreen, and persists drawings in the browser', async ({
@@ -82,9 +99,7 @@ test('visual presets insert labeled editable diagrams without replacing existing
 }) => {
 	await page.goto('/draw');
 
-	const browsePresets = page.getByRole('button', { name: /presets|templates/i });
-	await expect(browsePresets).toBeVisible();
-	await browsePresets.click();
+	await openDrawingTemplates(page, 'Presets');
 
 	const presetOptions = page.getByRole('button', { name: /^insert .+ preset$/i });
 	await expect(presetOptions).toHaveCount(9);
@@ -111,7 +126,6 @@ test('visual presets insert labeled editable diagrams without replacing existing
 	expect(initialScene.elements.some((element) => element.text?.includes('Plan'))).toBe(true);
 	expect(initialScene.elements.some((element) => element.roughness === 2)).toBe(true);
 
-	await browsePresets.click();
 	await page.getByRole('button', { name: /insert strategy scatterplot preset/i }).click();
 	await expect
 		.poll(() =>
@@ -151,9 +165,7 @@ test('hand-drawn UI components are searchable, editable, and preserve existing d
 	page
 }) => {
 	await page.goto('/draw');
-	const browseComponents = page.getByRole('button', { name: 'Browse UI components' });
-	await expect(browseComponents).toBeVisible();
-	await browseComponents.click();
+	await openDrawingTemplates(page, 'Components');
 
 	const componentMenu = page.getByRole('region', { name: 'UI components' });
 	await expect(componentMenu).toBeVisible();
@@ -166,7 +178,7 @@ test('hand-drawn UI components are searchable, editable, and preserve existing d
 	const selectedLabel = await componentOptions.first().getAttribute('aria-label');
 	expect(selectedLabel?.toLowerCase()).toContain('button');
 	await componentOptions.first().click();
-	await expect(componentMenu).toHaveCount(0);
+	await expect(componentMenu).toBeVisible();
 
 	await expect
 		.poll(() =>
@@ -182,7 +194,6 @@ test('hand-drawn UI components are searchable, editable, and preserve existing d
 		() => JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}').elements.length
 	);
 
-	await browseComponents.click();
 	await componentMenu.getByRole('textbox', { name: 'Search UI components' }).fill('table');
 	await componentOptions.first().click();
 	await expect
@@ -206,11 +217,85 @@ test('hand-drawn UI components are searchable, editable, and preserve existing d
 		.toBeGreaterThan(initialCount);
 });
 
+test('meme templates live in the native library, search current memes, and insert undoable images', async ({
+	page
+}) => {
+	let catalogRequests = 0;
+	await page.route('https://api.imgflip.com/get_memes', async (route) => {
+		catalogRequests += 1;
+		await route.fulfill({
+			json: {
+				success: true,
+				data: {
+					memes: [
+						{
+							id: 'test-extended-catalog',
+							name: 'Agentic Rubber Duck Debugger',
+							url: 'https://i.imgflip.com/test-rubber-duck.jpg',
+							width: 460,
+							height: 460
+						}
+					]
+				}
+			}
+		});
+	});
+	await page.route('https://i.imgflip.com/**', (route) =>
+		route.fulfill({
+			path: 'static/swyx-ski.jpeg',
+			headers: { 'access-control-allow-origin': '*' }
+		})
+	);
+	await page.goto('/draw');
+	expect(catalogRequests).toBe(0);
+	await openDrawingTemplates(page, 'Memes');
+
+	const memeLibrary = page.getByRole('region', { name: 'Meme templates' });
+	const templates = memeLibrary.getByRole('button', { name: /^insert .+ meme template$/i });
+	await expect(templates).toHaveCount(20);
+	await expect(memeLibrary.getByRole('link', { name: 'Templates via Imgflip' })).toBeVisible();
+	await expect.poll(() => catalogRequests).toBe(1);
+
+	const search = memeLibrary.getByRole('textbox', { name: 'Search meme templates' });
+	await search.fill('rubber duck');
+	const extendedTemplate = memeLibrary.getByRole('button', {
+		name: 'Insert Agentic Rubber Duck Debugger meme template'
+	});
+	await expect(extendedTemplate).toBeVisible();
+	await extendedTemplate.click();
+	await expect
+		.poll(() =>
+			page.evaluate(() => {
+				const scene =
+					/** @type {{ elements: Array<{ type: string, fileId?: string, isDeleted?: boolean }>, files: Record<string, { dataURL: string }> }} */ (
+						JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[],"files":{}}')
+					);
+				const image = scene.elements.find(
+					(element) => element.type === 'image' && !element.isDeleted
+				);
+				return image?.fileId ? scene.files[image.fileId]?.dataURL.startsWith('data:image/') : false;
+			})
+		)
+		.toBe(true);
+	await page.getByRole('button', { name: 'Undo' }).click();
+	await expect
+		.poll(() =>
+			page.evaluate(() => {
+				const scene = /** @type {{ elements: Array<{ type: string, isDeleted?: boolean }> }} */ (
+					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+				);
+				return scene.elements.filter((element) => element.type === 'image' && !element.isDeleted)
+					.length;
+			})
+		)
+		.toBe(0);
+});
+
 test('command palette searches components, presets, pages, and actions with keyboard controls', async ({
 	page
 }) => {
 	await page.goto('/draw');
-	await expect(page.getByRole('button', { name: 'Browse UI components' })).toBeVisible();
+	await expect(page.getByRole('button', { name: 'Manage drawing pages' })).toBeVisible();
 	await page.keyboard.press('Control+k');
 
 	const palette = page.getByRole('dialog', { name: 'Workspace commands' });
@@ -258,6 +343,9 @@ test('command palette searches components, presets, pages, and actions with keyb
 	await expect(palette.getByText('Pages', { exact: true })).toBeVisible();
 	await search.fill('import screenshot');
 	await expect(palette.getByRole('button', { name: /import screenshot or image/i })).toBeVisible();
+	await search.fill('drake hotline');
+	await expect(palette.getByText('Memes', { exact: true })).toBeVisible();
+	await expect(palette.getByRole('button', { name: /drake hotline bling/i })).toBeVisible();
 	await search.fill('nothing matches this phrase');
 	await expect(palette.getByText(/no matches/i)).toBeVisible();
 	await search.press('Escape');
