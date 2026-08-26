@@ -14,6 +14,8 @@ test('page registry covers every public non-article card variant', () => {
 		['identity', 'identity', 'collection', 'audio', 'portfolio', 'newsletter']
 	);
 	assert.equal(getPageCard('tools'), null);
+	assert.equal(getPageCard('now')?.kind, 'identity');
+	assert.equal(getPageCard('now')?.annotation, 'a note from the present');
 });
 
 test('title sizing and truncation are deterministic', () => {

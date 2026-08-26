@@ -1,6 +1,9 @@
 <script>
 	import SocialMeta from '../../components/SocialMeta.svelte';
 	import { getPageSocialMeta } from '$lib/social-meta';
+	import LetterSection from '$lib/about/LetterSection.svelte';
+	import TextVersions from '$lib/about/TextVersions.svelte';
+	import { introductions, speakerBios } from '$lib/about/copy';
 	/** @type {{ html: string, photoHtml: string }} */
 	export let data;
 	const social = getPageSocialMeta('about');
@@ -39,48 +42,222 @@
 <SocialMeta {...social} />
 
 <article class="site-shell about-page">
-	<header class="about-introduction">
-		<div>
-			<p class="editorial-kicker">About</p>
-			<h1>Shawn Wang (swyx)</h1>
-			<p class="about-hello reading-prose">
-				Hey, I'm swyx! I help foster the
-				<a href="https://www.latent.space/p/ai-engineer">Rise of the AI Engineer</a>.
-			</p>
-			<p class="name-note">
-				“swyx” is the initials of my English and Chinese names. You can call me Shawn, too.
-				Pronounced “swicks”.
-			</p>
-			<ul class="social-links" aria-label="Find me online">
-				<li><a href="https://twitter.com/intent/user?screen_name=swyx">Twitter</a></li>
-				<li><a href="https://github.com/swyxio">GitHub</a></li>
-				<li><a href="https://youtube.com/swyxTV?sub_confirmation=1">YouTube</a></li>
-			</ul>
+	<header class="letter-opening">
+		<div class="about-introduction">
+			<figure class="about-portrait">
+				<img src="/swyx-ski.jpeg" alt="swyx in the snow at Niseko" width="460" height="460" />
+				<figcaption>Out of office, Niseko.</figcaption>
+			</figure>
+			<div class="introduction-copy">
+				<h1>Hey, I’m swyx.</h1>
+				<p class="name-note">Pronounced “swicks”. Shawn works too.</p>
+				<TextVersions id="intro" label="Intro" versions={introductions} />
+				<a class="now-link" href="/now">What I’m doing now →</a>
+			</div>
 		</div>
-		<figure class="about-portrait">
-			<img src="/swyx-ski.jpeg" alt="swyx in the snow at Niseko" width="460" height="460" />
-			<figcaption>Out of office, Niseko.</figcaption>
-		</figure>
+		<aside class="opening-note" aria-label="A note on the name">
+			<p>“swyx” is the initials of my English and Chinese names. You can call me Shawn, too.</p>
+		</aside>
 	</header>
 
-	<nav class="about-sections" aria-label="About sections">
-		<a href="#current-work">Current work</a>
-		<a href="#my-story">My story</a>
-		<a href="#speaker-bio">Speaker bio</a>
-		<a href="#press-photos">Press photos</a>
+	<nav class="about-sections" aria-labelledby="visitor-heading">
+		<h2 id="visitor-heading">What brings you here?</h2>
+		<ol>
+			<li>
+				<a href="#start-here"><span>1.</span> Something to read <span aria-hidden="true">→</span></a
+				>
+			</li>
+			<li>
+				<a href="#current-work"
+					><span>2.</span> What I’m building <span aria-hidden="true">→</span></a
+				>
+			</li>
+			<li>
+				<a href="#founders"><span>3.</span> Building a company? <span aria-hidden="true">→</span></a
+				>
+			</li>
+			<li>
+				<a href="#speaking"><span>4.</span> Invite me to speak <span aria-hidden="true">→</span></a>
+			</li>
+			<li>
+				<a href="#speaker-bio"><span>5.</span> Bio &amp; photos <span aria-hidden="true">→</span></a
+				>
+			</li>
+			<li>
+				<a href="#my-story"><span>6.</span> The longer story <span aria-hidden="true">→</span></a>
+			</li>
+		</ol>
 	</nav>
 
-	<div class="reading-prose about-copy">
-		{@html data.html}
-	</div>
+	<LetterSection id="start-here" title="Start here" number="1">
+		<p>
+			This site is my public notebook. Some entries are technical; others are about careers,
+			ambition, and figuring things out. If you’re new, these are a few places to begin.
+		</p>
+		<ul class="starting-points">
+			<li>
+				<a href="/learn-in-public">Learn in Public</a><span>Learning by sharing what you know.</span
+				>
+			</li>
+			<li>
+				<a href="/create-luck">How to Create Luck</a><span
+					>Making more room for good things to happen.</span
+				>
+			</li>
+			<li>
+				<a href="https://www.latent.space/p/ai-engineer">The Rise of the AI Engineer</a><span
+					>The shift behind much of my current work.</span
+				>
+			</li>
+		</ul>
+		<p class="section-links">
+			<a href="/ideas">Browse the library →</a><a href="/subscribe">Occasional letters →</a>
+		</p>
+		<svelte:fragment slot="commentary"
+			><p>
+				Learning in public starts with making something that would have helped your past self. An
+				audience is a bonus, not a prerequisite.
+			</p></svelte:fragment
+		>
+	</LetterSection>
+
+	<LetterSection id="current-work" title="What I’m working on" number="2">
+		<p>
+			Most of my work lives in <a href="https://www.latent.space/">Latent Space</a>,
+			<a href="https://ai.engineer">AI Engineer</a>, and <a href="/cognition">Cognition</a>.
+		</p>
+		<p>
+			Latent Space is where I write and have conversations about AI and the people building it. AI
+			Engineer brings together people turning new capabilities into useful software. You can read
+			more about my work at <a href="/cognition">Cognition here</a>.
+		</p>
+		<p>
+			For what has my attention these days, there’s <a href="/now">/now</a>. This page is the longer
+			view.
+		</p>
+		<svelte:fragment slot="commentary"
+			><p>
+				My writing moves between technology, markets, and networks. The software matters; so do the
+				people building it and the communities forming around it.
+			</p></svelte:fragment
+		>
+	</LetterSection>
+
+	<LetterSection id="my-story" title="I took the scenic route" number="3">
+		<p>
+			I grew up in Singapore and have worked mostly in the US and UK. Before software, I was a <a
+				href="https://www.freecodecamp.org/news/shawn-wang-podcast-interview/"
+				>currency options trader, then a technology, media, and telecom hedge fund analyst</a
+			>. I still often approach technology from an investing and risk-management angle.
+		</p>
+		<p>
+			My developer-experience work took me through <a href="/farewell-netlify">Netlify</a>,
+			<a href="/hello-aws">Amazon Web Services</a>, <a href="/why-temporal">Temporal</a>, and
+			<a href="https://airbyte.io/">Airbyte</a>. Along the way, I helped run
+			<a href="/moderating-rreactjs">the React subreddit</a>
+			and <a href="/starting-dev-community-meetup">grow Svelte Society</a>.
+		</p>
+		<p>
+			I wrote <a href="/learn-in-public">Learn in Public</a> and collected my nontechnical advice
+			for developers growing from junior to senior in
+			<a href="https://learninpublic.org/">The Coding Career Handbook</a>, now free and open source.
+			My technical writing includes the
+			<a href="/self-provisioning-runtime">Self-Provisioning Runtime</a>, the
+			<a href="/js-third-age">Third Age of JavaScript</a>, and the
+			<a href="https://dx.tips/the-end-of-localhost">End of Localhost</a>.
+		</p>
+		<svelte:fragment slot="commentary"
+			><p>Singapore → finance → developer experience → AI.</p>
+			<p>The industries changed. Thinking about incentives and risk came with me.</p>
+			<img
+				class="letter-bird"
+				src="/assets/literary/messenger-bird.webp"
+				alt=""
+				width="112"
+				height="84"
+				loading="lazy"
+				decoding="async"
+			/></svelte:fragment
+		>
+	</LetterSection>
+
+	<LetterSection id="founders" title="If you’re building a company" number="4">
+		<p>
+			I invest in AI and developer-tool companies. I mostly help with developer relations and
+			community strategy, hiring early devrels, and AI product feedback and launch guidance.
+		</p>
+		<p>
+			My <a href="/portfolio">portfolio</a> explains where I’ve invested and the boundaries between investing
+			and my editorial work. I’m not taking new advising inquiries; the portfolio page has more detail
+			for founders who are fundraising.
+		</p>
+		<svelte:fragment slot="commentary"
+			><p>
+				Backing a company doesn’t buy it a place on the podcast or conference stage. Those are
+				separate decisions.
+			</p></svelte:fragment
+		>
+	</LetterSection>
+
+	<LetterSection id="speaking" title="Speaking & conversations" number="5">
+		<p>
+			I speak and write about AI engineering, developer experience, learning in public, and building
+			a technical career. A few representative talks:
+		</p>
+		<ul class="talk-links">
+			<li><a href="/ai-eng-agents">Engineering AI Agents</a></li>
+			<li><a href="https://www.youtube.com/watch?v=D-Sj6jo4o1I">The Operating System of You</a></li>
+			<li><a href="/paradigm-lost">Paradigm Lost</a></li>
+			<li>
+				<a href="/hooks">The Hooks talk</a> ·
+				<a href="https://www.youtube.com/watch?v=nyFHR0dDZo0">Concurrent React</a>
+			</li>
+		</ul>
+		<p>
+			For an invitation, include the audience, topic, date, location or format, and what you’d like
+			people to leave with. You can find me on <a href="https://x.com/swyx">Twitter</a>; my
+			<a href="/podcasts">podcasts page</a> has more conversations.
+		</p>
+		<svelte:fragment slot="commentary"
+			><p>
+				The audience and the question matter as much as the title of a talk. What would make the
+				conversation useful to the people in the room?
+			</p></svelte:fragment
+		>
+	</LetterSection>
+
+	<LetterSection id="speaker-bio" title="Bios & photos" number="6">
+		<p>
+			Introducing me? Here are two third-person versions you can use. For the name: <strong
+				>Shawn Wang</strong
+			>, usually <strong>swyx</strong>, pronounced “swicks”.
+		</p>
+		<TextVersions id="speaker" label="Bio" versions={speakerBios} />
+		<p class="section-links">
+			<a href="#headshots">Headshots &amp; avatars ↓</a><a href="#press-photos"
+				>Conference &amp; social photos ↓</a
+			>
+		</p>
+		<details class="previous-bios">
+			<summary>Previous bios &amp; older links</summary>
+			<div class="reading-prose about-copy">{@html data.html}</div>
+		</details>
+		<svelte:fragment slot="commentary"
+			><p>
+				A bio is an introduction, not a complete inventory. Pick the length that suits the occasion;
+				the older versions are here for context, not current titles.
+			</p></svelte:fragment
+		>
+	</LetterSection>
 
 	<section class="press-photos" aria-labelledby="press-photos">
 		<header class="reading-prose">
 			<h2 id="press-photos">Press photos</h2>
 			<p>
-				Pictures of me you can use without asking. Recent favorites from
+				Headshots, avatars, and recent favorites from
 				<a href="https://aiengineer.pixieset.com/worldsfair2026/">AI Engineer World’s Fair 2026</a>,
-				plus headshots and avatars.
+				plus earlier events and social photos. Each image links to its original or source post. For
+				reuse of someone else’s photo, check with its photographer or original poster.
 			</p>
 		</header>
 		<div class="press-photo-grid">
@@ -108,37 +285,68 @@
 			{@html data.photoHtml}
 		</div>
 	</section>
+	<footer class="letter-signoff">
+		<p>Thanks for stopping by.<br /><span>— swyx</span></p>
+		<ul class="social-links" aria-label="Find me online">
+			<li><a href="https://x.com/swyx">Twitter</a></li>
+			<li><a href="https://github.com/swyxio">GitHub</a></li>
+			<li><a href="https://youtube.com/swyxTV?sub_confirmation=1">YouTube</a></li>
+		</ul>
+	</footer>
 </article>
 
 <style>
 	.about-page {
+		--site-max-width: 1080px;
 		margin-block: clamp(2rem, 4vw, 3.5rem) 4rem;
+	}
+	.letter-opening {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) 12rem;
+		gap: 3rem;
+		align-items: start;
 	}
 
 	.about-introduction {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) 11rem;
-		align-items: center;
-		gap: clamp(1.5rem, 4vw, 4rem);
-		max-width: 58rem;
+		grid-template-columns: 8rem minmax(0, 1fr);
+		align-items: start;
+		gap: 1.8rem;
+	}
+	.introduction-copy {
+		min-width: 0;
 	}
 
 	h1 {
 		font-family: var(--font-display);
-		font-size: clamp(2.25rem, 4.5vw, 3.4rem);
+		font-size: clamp(2.1rem, 4vw, 3rem);
 		line-height: 1.08;
 		letter-spacing: -0.025em;
 	}
 
-	.about-hello {
-		margin-block: 1.1rem 0.75rem;
-		font-size: 1.3rem;
-	}
-
 	.name-note {
-		max-width: 52ch;
+		margin-block: 0.5rem 0.3rem;
 		color: var(--page-muted);
-		font-size: 0.95rem;
+		font: italic 0.95rem/1.5 var(--font-reading);
+	}
+	.opening-note {
+		border-left: 1px solid var(--page-border);
+		padding: 0.4rem 0 0.4rem 1.2rem;
+		margin-top: 0.4rem;
+		color: var(--page-muted);
+		font: italic 0.96rem/1.6 var(--font-reading);
+	}
+	.opening-note p {
+		margin: 0 0 0.8rem;
+	}
+	.opening-note p:last-child {
+		margin-bottom: 0;
+	}
+	.now-link {
+		display: inline-block;
+		padding-block: 0.75rem 0.2rem;
+		font-family: var(--font-reading);
+		color: var(--page-link);
 	}
 
 	.social-links {
@@ -151,8 +359,7 @@
 		font-size: 0.95rem;
 	}
 
-	.social-links a,
-	.about-sections a {
+	.social-links a {
 		display: inline-flex;
 		align-items: center;
 		min-height: 44px;
@@ -177,13 +384,119 @@
 	}
 
 	.about-sections {
+		margin-block: 1.8rem 2.2rem;
+		padding-block: 0.9rem;
+		border-block: 1px solid var(--page-border);
+		font: 1rem/1.4 var(--font-reading);
+	}
+	.about-sections h2 {
+		font: 500 0.8rem/1.5 var(--font-mono);
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		margin: 0 0 0.5rem;
+		color: var(--page-link);
+	}
+	.about-sections ol {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		grid-auto-flow: column;
+		grid-template-rows: repeat(3, auto);
+		column-gap: 3rem;
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+	.about-sections li {
+		min-width: 0;
+		border-bottom: 1px solid var(--page-border);
+	}
+	.about-sections li:nth-child(3n) {
+		border-bottom: 0;
+	}
+	.about-sections a {
+		display: flex;
+		align-items: center;
+		gap: 0.65rem;
+		min-height: 44px;
+		color: var(--page-link);
+		text-decoration: none;
+	}
+	.about-sections a:hover {
+		text-decoration: underline;
+	}
+	.about-sections a:focus-visible {
+		outline: 2px solid var(--page-link);
+		outline-offset: 3px;
+	}
+	.about-sections a span:last-child {
+		margin-left: auto;
+		color: var(--page-muted);
+	}
+	.starting-points {
+		list-style: none;
+		padding: 0;
+		margin: 1rem 0;
+	}
+	.starting-points li {
+		display: grid;
+		grid-template-columns: minmax(12rem, 0.9fr) minmax(0, 1fr);
+		gap: 0.7rem;
+		padding-block: 0.4rem;
+	}
+	.starting-points a {
+		font-weight: 600;
+	}
+	.starting-points span {
+		font-size: 0.95rem;
+		line-height: 1.65;
+		color: var(--page-muted);
+	}
+	.section-links {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.1rem 1.5rem;
-		margin-block: 1.5rem 2rem;
-		padding-block: 0.4rem;
-		border-block: 1px solid var(--page-border);
-		font-size: 0.9rem;
+		gap: 0.25rem 1.5rem;
+		margin-top: 1rem;
+		font-size: 1rem;
+	}
+	.section-links a {
+		min-height: 44px;
+		display: inline-flex;
+		align-items: center;
+	}
+	.talk-links {
+		padding-left: 1.2rem;
+	}
+	.letter-bird {
+		width: 112px;
+		height: auto;
+		background: transparent;
+		margin: 1.2rem 0 0 auto;
+	}
+	.previous-bios {
+		margin-top: 1.2rem;
+	}
+	.previous-bios > summary {
+		min-height: 44px;
+		cursor: pointer;
+		color: var(--page-link);
+		font: 0.95rem/1.6 var(--font-body);
+	}
+	.about-copy {
+		padding-top: 1rem;
+		font-size: 1rem;
+	}
+	.letter-signoff {
+		margin-top: 2.5rem;
+		padding-top: 1.5rem;
+		border-top: 1px solid var(--page-border);
+		display: flex;
+		align-items: end;
+		justify-content: space-between;
+		gap: 1rem;
+	}
+	.letter-signoff p {
+		margin: 0;
+		font: italic 1rem/1.8 var(--font-reading);
 	}
 
 	.about-copy :global(h2) {
@@ -351,12 +664,37 @@
 			grid-template-columns: repeat(3, minmax(0, 1fr));
 		}
 	}
+	@media (max-width: 900px) {
+		.letter-opening {
+			grid-template-columns: minmax(0, 1fr);
+			gap: 1rem;
+		}
+		.opening-note {
+			margin: 0 0 0 1rem;
+			max-width: 48ch;
+			padding-block: 0;
+		}
+		.about-introduction {
+			grid-template-columns: 7rem minmax(0, 1fr);
+		}
+	}
 
 	@media (max-width: 42rem) {
 		.about-introduction {
-			grid-template-columns: minmax(0, 1fr) 7.5rem;
+			grid-template-columns: 6rem minmax(0, 1fr);
 			align-items: start;
 			gap: 1rem;
+		}
+		.about-sections ol {
+			column-gap: 1.2rem;
+		}
+		.about-sections a {
+			font-size: 0.95rem;
+		}
+		.starting-points li {
+			grid-template-columns: minmax(0, 1fr);
+			gap: 0;
+			padding-block: 0.45rem;
 		}
 
 		.press-photo-grid,
@@ -367,27 +705,52 @@
 
 	@media (max-width: 30rem) {
 		.about-introduction {
-			grid-template-columns: minmax(0, 1fr);
+			grid-template-columns: 4.5rem minmax(0, 1fr);
+			column-gap: 1rem;
+			row-gap: 0.4rem;
+		}
+		.introduction-copy {
+			display: contents;
+		}
+		h1 {
+			grid-column: 2;
+			align-self: end;
+			font-size: 2.05rem;
+		}
+		.name-note {
+			grid-column: 2;
+			margin: 0;
+		}
+		.about-introduction :global(.text-versions) {
+			grid-column: 1 / -1;
+			margin-top: 0.6rem;
+		}
+		.now-link {
+			grid-column: 1 / -1;
 		}
 
 		.about-portrait {
-			display: flex;
-			align-items: flex-end;
-			gap: 0.85rem;
+			grid-column: 1;
+			grid-row: 1 / 3;
 		}
 
 		.about-portrait img {
-			width: 6rem;
+			width: 4.5rem;
 		}
 
 		.about-portrait figcaption {
-			max-width: 9rem;
-			margin: 0;
+			display: none;
 		}
 
 		.about-sections {
-			gap: 0.1rem 1.25rem;
 			margin-block: 1.25rem 1.75rem;
+		}
+		.about-sections a span:last-child {
+			display: none;
+		}
+		.letter-signoff {
+			align-items: start;
+			flex-direction: column;
 		}
 	}
 </style>
