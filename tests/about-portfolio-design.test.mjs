@@ -52,54 +52,28 @@ test('the press kit has real thumbnails, labeled originals, and no known broken 
 	}
 });
 
-test('Portfolio keeps all 57 entries in four semantic, uncollapsed groups', async () => {
-	const [source, content] = await Promise.all([
-		read('src/routes/portfolio/+page.svelte'),
-		read('src/routes/portfolio/content.md')
-	]);
-	const html = await renderMarkdown(content);
-	assert.equal((html.match(/<h1 /g) || []).length, 1);
-	assert.doesNotMatch(source, /site-card/);
-	assert.doesNotMatch(html, /<details/);
-	const groups = [
-		...html.matchAll(
-			/<section class="portfolio-group" aria-labelledby="([^"]+)">([\s\S]*?)<\/section>/g
-		)
-	];
-	assert.deepEqual(
-		groups.map((group) => [group[1], (group[2].match(/<li>/g) || []).length]),
-		[
-			['well-known-names', 18],
-			['you-should-know', 10],
-			['smaller-names', 20],
-			['done', 9]
-		]
-	);
-	for (const group of groups) {
-		assert.ok(group[2].includes(`<h2 id="${group[1]}">`));
-	}
-	assert.match(source, /grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
-	assert.match(source, /@media \(max-width: 42rem\)/);
-	for (const annotation of [
-		'Daytona (sandboxes for agents... i know i know)',
-		'Replay.io (still alive!)',
-		'Begin.com (dead)',
-		'Dimension.dev (dead)',
-		'Artifical Analysis (Gartner of AI)'
-	]) {
-		assert.ok(content.includes(annotation), `Missing candid annotation: ${annotation}`);
+test('Portfolio presents its entries in an accessible, uncollapsed responsive table', async () => {
+	const source = await read('src/routes/portfolio/+page.svelte');
+	assert.equal((source.match(/<h1>/g) || []).length, 1);
+	assert.doesNotMatch(source, /site-card|<details/);
+	assert.match(source, /<table role="table" aria-describedby="valuation-note">/);
+	assert.match(source, /scope="col">Company \/ person/);
+	assert.match(source, /scope="row" class="company-cell"/);
+	assert.match(source, /@media \(max-width: 700px\)/);
+	const companies = JSON.parse(await read('src/lib/data/portfolio.json'));
+	for (const id of ['daytona', 'replay', 'artificial-analysis']) {
+		assert.ok(companies.find((company) => company.id === id).note, `Missing personal note: ${id}`);
 	}
 });
 
 test('Portfolio keeps disclosure and advising boundaries accessible after the companies', async () => {
-	const content = await read('src/routes/portfolio/content.md');
-	const html = await renderMarkdown(content);
-	assert.match(html, /href="#disclosure"/);
-	assert.match(html, /<h2 id="disclosure">Disclosure<\/h2>/);
-	assert.ok(html.indexOf('id="done"') < html.indexOf('id="disclosure"'));
-	assert.match(html, /no particular order/);
-	assert.match(html, /My portcos do not get any guaranteed spots/);
-	assert.match(html, /pump my bags/);
-	assert.match(html, /no longer taking new advising inquiries/);
-	assert.match(html, /give AI product feedback and launch guidance/);
+	const source = await read('src/routes/portfolio/+page.svelte');
+	assert.match(source, /href="#disclosure"/);
+	assert.match(source, /<h2 id="disclosure">A note on editorial independence<\/h2>/);
+	assert.ok(source.indexOf('</table>') < source.indexOf('id="disclosure"'));
+	assert.match(source, /Original order/);
+	assert.match(source, /do not get guaranteed spots/);
+	assert.match(source, /pump my bags/);
+	assert.match(source, /no longer taking new advising inquiries/);
+	assert.match(source, /AI product feedback and launch guidance/);
 });
