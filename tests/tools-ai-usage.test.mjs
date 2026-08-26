@@ -139,6 +139,8 @@ test('sliding hourly counters recover after one hour without resetting daily res
 	assert.equal(ledger.handle('/ai/admit', assistant(), NOW + HOUR).status, 201);
 	const summary = await ledger.handle('/ai/summary', { userId: 'alice' }, NOW + HOUR).json();
 	assert.equal(summary.usage.assistantTurnsThisHour, 1);
+	assert.equal(summary.usage.assistantTurnsToday, 21);
+	assert.equal(summary.usage.mediaJobsToday, 0);
 	assert.equal(summary.usage.estimatedReservedTodayUsd, 1.05);
 });
 
@@ -430,4 +432,26 @@ test('a job transport stays bound to its original adapter and run metadata expir
 	await fixture.object.alarm();
 	for (const table of ['tools_ai_usage', 'tools_ai_generation_runs', 'tools_ai_generation_jobs'])
 		assert.equal(fixture.database.prepare(`SELECT COUNT(*) AS count FROM ${table}`).get().count, 0);
+});
+
+test('daily usage shares the UTC spending boundary, counts failed admissions and isolates accounts', async () => {
+	const ledger = new ToolsAiUsage(createTestAiLedger().sql);
+	const midnight = Math.floor(NOW / DAY) * DAY;
+	ledger.handle('/ai/admit', assistant(), midnight - 1);
+	ledger.handle('/ai/admit', assistant(), midnight);
+	const failed = await ledger.handle('/ai/admit', media(), NOW - 2 * HOUR).json();
+	ledger.handle('/ai/finish', { userId: 'alice', id: failed.id, status: 'failed' }, NOW - HOUR);
+	ledger.handle('/ai/admit', media(), NOW);
+	ledger.handle('/ai/admit', assistant('bob'), NOW);
+	const usage = ledger.summary('alice', NOW);
+	assert.equal(usage.assistantTurnsToday, 1);
+	assert.equal(usage.mediaJobsToday, 2);
+	assert.equal(usage.assistantTurnsThisHour, 0);
+	assert.equal(usage.mediaJobsThisHour, 1);
+	assert.equal(usage.estimatedReservedTodayUsd, 0.15);
+	assert.equal(usage.dayResetsAt, new Date(midnight + DAY).toISOString());
+	const nextDay = ledger.summary('alice', midnight + DAY);
+	assert.equal(nextDay.assistantTurnsToday, 0);
+	assert.equal(nextDay.mediaJobsToday, 0);
+	assert.equal(nextDay.estimatedReservedTodayUsd, 0);
 });
