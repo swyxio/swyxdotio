@@ -18,6 +18,15 @@
 			owner: true
 		},
 		{
+			id: 'cap',
+			name: 'Cap',
+			description: 'Record and share your screen.',
+			href: '/tools/cap',
+			image: '/assets/tools-cabinet/cap.svg',
+			reload: true,
+			owner: true
+		},
+		{
 			id: 'reclip',
 			name: 'Reclip',
 			description: 'Open the media downloader.',
@@ -31,9 +40,14 @@
 	<ul>
 		{#each tools.filter((tool) => !tool.owner || isOwner) as tool}
 			<li class:owner-drawer={tool.owner}>
-				<a href={tool.href} class="drawer">
+				<a href={tool.href} class="drawer" data-sveltekit-reload={tool.reload}>
 					<span class="drawer-face">
-						<img src="/assets/tools-cabinet/{tool.id}.webp" alt="" width="420" height="420" />
+						<img
+							src={tool.image ?? `/assets/tools-cabinet/${tool.id}.webp`}
+							alt=""
+							width="420"
+							height="420"
+						/>
 						<span class="drawer-copy">
 							<strong>{tool.name}</strong>
 							<span class="description">{tool.description}</span>
@@ -205,7 +219,7 @@
 	}
 	@media (min-width: 1050px) {
 		.owner ul {
-			grid-template-columns: repeat(5, minmax(0, 1fr));
+			grid-template-columns: repeat(6, minmax(0, 1fr));
 		}
 	}
 	@media (min-width: 601px) and (max-width: 1049px) {
@@ -214,9 +228,6 @@
 		}
 		.owner li {
 			grid-column: span 2;
-		}
-		.owner li.owner-drawer {
-			grid-column: span 3;
 		}
 		.drawer-face {
 			min-height: 220px;

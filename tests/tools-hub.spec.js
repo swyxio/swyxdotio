@@ -74,8 +74,11 @@ test('account disclosure retains identity, dismisses conventionally, and adapts 
 }) => {
 	await signIn(page);
 	await expect(page.getByRole('navigation', { name: 'Your tools' }).getByRole('link')).toHaveCount(
-		5
+		6
 	);
+	const cap = page.getByRole('link', { name: /^Cap / });
+	await expect(cap).toHaveAttribute('href', '/tools/cap');
+	await expect(cap).toHaveAttribute('data-sveltekit-reload', 'true');
 	const account = page.locator('.account-menu > summary');
 	await account.focus();
 	await page.keyboard.press('Enter');
@@ -94,6 +97,7 @@ test('account disclosure retains identity, dismisses conventionally, and adapts 
 		3
 	);
 	await expect(page.getByRole('link', { name: /Podcast studio/ })).toHaveCount(0);
+	await expect(page.getByRole('link', { name: /^Cap / })).toHaveCount(0);
 	await account.click();
 	await expect(page.getByText(TEST_TOOLS_MEMBER.email, { exact: true })).toBeVisible();
 	await page.getByRole('button', { name: 'Sign out', exact: true }).click();
@@ -166,7 +170,7 @@ for (const [name, width, height] of viewports) {
 			email: 'long.account.with.a.very.long.address@example.com'
 		});
 		const cabinet = page.getByRole('navigation', { name: 'Your tools' });
-		await expect(cabinet.getByRole('link')).toHaveCount(5);
+		await expect(cabinet.getByRole('link')).toHaveCount(6);
 		await expect
 			.poll(() =>
 				cabinet
