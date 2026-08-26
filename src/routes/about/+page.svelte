@@ -80,7 +80,7 @@
 			<p>
 				Pictures of me you can use without asking. Recent favorites from
 				<a href="https://aiengineer.pixieset.com/worldsfair2026/">AI Engineer World’s Fair 2026</a>,
-				with headshots and older photos below.
+				plus headshots and avatars.
 			</p>
 		</header>
 		<div class="press-photo-grid">
@@ -297,6 +297,10 @@
 		gap: 1.5rem 1.25rem;
 	}
 
+	.photo-sources :global(.portrait-previews) {
+		grid-template-columns: repeat(6, minmax(0, 1fr));
+	}
+
 	.photo-sources :global(.photo-preview) {
 		display: block;
 		min-width: 0;
@@ -340,6 +344,12 @@
 		color: var(--page-muted);
 		font-size: 0.8rem;
 		font-weight: 400;
+	}
+
+	@media (max-width: 64rem) {
+		.photo-sources :global(.portrait-previews) {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
 	}
 
 	@media (max-width: 42rem) {
