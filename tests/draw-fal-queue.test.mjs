@@ -270,3 +270,67 @@ test('a stalled queue poll is retried without resubmitting the paid generation',
 		)
 	);
 });
+
+test('client transmits repeated multipart images in order with original long prompt and user/run authorization', async () => {
+	let calls = 0;
+	const images = [
+		new Blob(['first'], { type: 'image/png' }),
+		new Blob(['parent'], { type: 'image/jpeg' })
+	];
+	const prompt = '  ' + 'x'.repeat(31_995) + '  ';
+	const result = await runDrawingGeneration({
+		images,
+		prompt,
+		model: 'gpt-image-2',
+		userId: 'current-user',
+		runId: 'run',
+		clientJobId: 'job',
+		runLimitUsd: 1,
+		signal: new AbortController().signal,
+		onProgress() {},
+		fetcher: async (_url, init) => {
+			calls++;
+			assert.equal(new Headers(init.headers).get('X-Tools-User'), 'current-user');
+			if (calls === 1) {
+				assert.deepEqual(await Promise.all(init.body.getAll('image').map((part) => part.text())), [
+					'first',
+					'parent'
+				]);
+				assert.equal(init.body.get('prompt'), prompt);
+				assert.equal(init.body.get('runId'), 'run');
+				assert.equal(init.body.get('clientJobId'), 'job');
+				return response({ requestId: 'job', model: 'gpt-image-2' }, 202);
+			}
+			return response({ status: 'COMPLETED', image: 'data:image/png;base64,eA==' });
+		}
+	});
+	assert.equal(result.image, 'data:image/png;base64,eA==');
+	assert.equal(calls, 2);
+});
+
+test('client rejects ambiguous image APIs, incompatible counts, long prompt overflow and combined bytes before dispatch', async () => {
+	const image = new Blob(['x'], { type: 'image/png' });
+	for (const overrides of [
+		{ image, images: [] },
+		{ images: Array(17).fill(image) },
+		{ images: [image, image], model: 'reve-2-1' },
+		{ images: [image], model: 'flux-klein-9b-generate' },
+		{ images: [image], prompt: 'x'.repeat(32_001) },
+		{
+			images: [
+				new Blob([new Uint8Array(6_000_000)], { type: 'image/png' }),
+				new Blob([new Uint8Array(6_000_000)], { type: 'image/png' })
+			]
+		}
+	])
+		await assert.rejects(
+			runDrawingGeneration({
+				prompt: 'Edit',
+				model: 'gpt-image-2',
+				signal: new AbortController().signal,
+				onProgress() {},
+				fetcher: async () => assert.fail('Invalid request dispatched'),
+				...overrides
+			})
+		);
+});

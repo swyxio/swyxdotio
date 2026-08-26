@@ -710,11 +710,19 @@ function normalizedParameterValue(key, value) {
  * @param {Record<string, unknown>} overrides
  */
 export function getDrawFalModelOverrides(model, overrides) {
-	/** @type {Record<string, string | number | boolean>} */
+	/** @type {Record<string, string | number | boolean | {width:number,height:number}>} */
 	const accepted = {};
 	for (const parameter of getDrawFalModelParameters(model)) {
 		if (!Object.hasOwn(overrides, parameter.key)) continue;
 		const requested = overrides[parameter.key];
+		if (
+			model.id === 'gpt-image-2' &&
+			parameter.key === 'image_size' &&
+			isDrawFalCustomImageSize(requested)
+		) {
+			accepted[parameter.key] = { width: requested.width, height: requested.height };
+			continue;
+		}
 		if (parameter.type === 'boolean') {
 			if (typeof requested === 'boolean') accepted[parameter.key] = requested;
 			continue;
@@ -740,6 +748,32 @@ export function getDrawFalModelOverrides(model, overrides) {
 	return accepted;
 }
 
+/** GPT Image 2's documented concrete size bounds. @param {unknown} value @returns {value is {width:number,height:number}} */
+export function isDrawFalCustomImageSize(value) {
+	if (
+		!value ||
+		typeof value !== 'object' ||
+		Array.isArray(value) ||
+		Object.keys(value).length !== 2 ||
+		!('width' in value) ||
+		!('height' in value)
+	)
+		return false;
+	const { width, height } = /** @type {{width:number,height:number}} */ (value);
+	return (
+		Number.isSafeInteger(width) &&
+		Number.isSafeInteger(height) &&
+		width > 0 &&
+		height > 0 &&
+		width % 16 === 0 &&
+		height % 16 === 0 &&
+		Math.max(width, height) <= 3840 &&
+		Math.max(width, height) / Math.min(width, height) <= 3 &&
+		width * height >= 655360 &&
+		width * height <= 8294400
+	);
+}
+
 /**
  * Strict server-side validation: no silent coercion, unsupported keys, safety
  * overrides, file URLs, provider credentials, or prototype pollution.
@@ -761,6 +795,8 @@ export function resolveDrawFalModelSettings(model, overrides = {}) {
 	for (const [key, value] of Object.entries(requested)) {
 		const parameter = allowed.find((entry) => entry.key === key);
 		if (!parameter) throw new Error(`This model does not support the ${key} setting.`);
+		if (model.id === 'gpt-image-2' && key === 'image_size' && isDrawFalCustomImageSize(value))
+			continue;
 		if (parameter.type === 'boolean' && typeof value !== 'boolean') {
 			throw new Error(`The ${parameter.label.toLowerCase()} setting is invalid.`);
 		}

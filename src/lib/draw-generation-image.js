@@ -51,10 +51,17 @@ export function drawingGenerationInputDimensions(width, height, model) {
  *  model: Pick<DrawingGenerationModel, 'input' | 'id' | 'label'>,
  *  signal?: AbortSignal,
  *  onProgress?: (message: string) => void
+ *  maxUploadBytes?: number
  * }} options
  */
 export async function prepareDrawingGenerationImage(options) {
 	const { dataURL, prompt, model, signal, onProgress } = options;
+	const maxUploadBytes = Math.min(
+		options.maxUploadBytes ?? MAX_DRAW_GENERATION_REQUEST_BYTES,
+		MAX_DRAW_GENERATION_REQUEST_BYTES
+	);
+	if (!Number.isFinite(maxUploadBytes) || maxUploadBytes <= REQUEST_HEADROOM_BYTES)
+		throw new Error('The reference upload budget is too small.');
 	signal?.throwIfAborted();
 	const originalBlob = await fetch(dataURL, { signal }).then((response) => response.blob());
 	signal?.throwIfAborted();
@@ -72,7 +79,7 @@ export async function prepareDrawingGenerationImage(options) {
 			originalBlob.type === model.input.mimeType &&
 			dimensions.width === bitmap.width &&
 			dimensions.height === bitmap.height &&
-			estimateDrawingGenerationUploadBytes(originalRequest) <= MAX_DRAW_GENERATION_REQUEST_BYTES
+			estimateDrawingGenerationUploadBytes(originalRequest) <= maxUploadBytes
 		) {
 			return {
 				blob: originalBlob,
@@ -108,7 +115,7 @@ export async function prepareDrawingGenerationImage(options) {
 						imageBytes: blob.size,
 						prompt,
 						model: model.id
-					}) <= MAX_DRAW_GENERATION_REQUEST_BYTES
+					}) <= maxUploadBytes
 				) {
 					return {
 						blob,

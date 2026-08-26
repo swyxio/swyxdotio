@@ -1,7 +1,10 @@
 import {
 	getDrawGenerationModel,
 	estimateDrawGenerationModelCost,
-	resolveDrawGenerationModelSettings
+	resolveDrawGenerationModelSettings,
+	getDrawGenerationReferenceLimit,
+	MAX_DRAW_GENERATION_PROMPT_LENGTH,
+	MAX_DRAW_GENERATION_REQUEST_BYTES
 } from './draw-generation-models.js';
 import { runDrawingGeneration } from './draw-generation-client.js';
 import { prepareDrawingGenerationImage } from './draw-generation-image.js';
@@ -27,12 +30,23 @@ export function createDrawingGenerationRun(options) {
 		const model = getDrawGenerationModel(recipe.modelId);
 		if (!model || model.adapter !== recipe.adapterId)
 			throw new Error('The selected model is unavailable.');
-		if (!recipe.prompt.trim() || recipe.prompt.length > 1000)
-			throw new Error('Enter a prompt under 1,000 characters.');
-		if (model.kind !== 'text-to-image' && recipe.referenceImages.length !== 1)
-			throw new Error('Attach one reference image for image editing or video.');
-		if (model.kind === 'text-to-image' && recipe.referenceImages.length)
-			throw new Error('Text-to-image does not send reference images.');
+		if (
+			typeof recipe.prompt !== 'string' ||
+			!recipe.prompt.trim() ||
+			recipe.prompt.length > MAX_DRAW_GENERATION_PROMPT_LENGTH
+		)
+			throw new Error('Enter a prompt of at most 32,000 characters.');
+		const limit = getDrawGenerationReferenceLimit(model);
+		if (
+			!Array.isArray(recipe.referenceImages) ||
+			recipe.referenceImages.length > limit ||
+			(limit > 0 && !recipe.referenceImages.length)
+		)
+			throw new Error(
+				limit === 0
+					? 'Text-to-image does not send reference images.'
+					: `Attach one to ${limit} reference images for this model.`
+			);
 		// Validate supported overrides before any paid job is submitted.
 		const effective = resolveDrawGenerationModelSettings(model, recipe.modelSettings);
 		reserved += estimateToolsMediaReservation(estimateDrawGenerationModelCost(model, effective));
@@ -82,25 +96,31 @@ export async function runDrawingGenerationBatch(options) {
 			job.message = 'Preparing request';
 			onJob({ ...job });
 			try {
-				const reference = job.recipe.referenceImages[0];
-				const prepared = reference
-					? await prepare({
+				const prepared = [];
+				for (const reference of job.recipe.referenceImages) {
+					signal.throwIfAborted();
+					prepared.push(
+						await prepare({
 							dataURL: reference.dataURL,
 							prompt: job.recipe.prompt,
 							model,
 							signal,
+							maxUploadBytes: Math.floor(
+								MAX_DRAW_GENERATION_REQUEST_BYTES / job.recipe.referenceImages.length
+							),
 							onProgress: (message) => {
 								job.message = message;
 								onJob({ ...job });
 							}
 						})
-					: undefined;
+					);
+				}
 				const result = await generate({
 					userId: options.userId,
-					image: prepared?.blob,
+					images: prepared.map((image) => image.blob),
 					prompt: job.recipe.prompt,
 					model: model.id,
-					settings: /** @type {Record<string,string|number|boolean>} */ (job.recipe.modelSettings),
+					settings: job.recipe.modelSettings,
 					runId: run.id,
 					runLimitUsd: run.limitUsd,
 					clientJobId: job.id,
@@ -112,8 +132,8 @@ export async function runDrawingGenerationBatch(options) {
 						job.message =
 							progress.message ??
 							(progress.status === 'UPLOADING'
-								? reference
-									? 'Uploading reference'
+								? prepared.length
+									? `Uploading ${prepared.length} reference${prepared.length === 1 ? '' : 's'}`
 									: 'Sending prompt'
 								: progress.status === 'IN_QUEUE'
 									? `Queued${progress.queuePosition ? ` · ${progress.queuePosition} ahead` : ''}`
@@ -146,7 +166,7 @@ export async function runDrawingGenerationBatch(options) {
 					runId: run.id,
 					jobId: job.id,
 					recipeId: job.recipe.id,
-					context: job.recipe.context,
+					context: structuredClone(job.recipe.context),
 					elapsedMs: Date.now() - started,
 					estimatedUsd: estimateDrawGenerationModelCost(
 						model,

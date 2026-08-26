@@ -136,3 +136,90 @@ test('result survives failed rendering and cancel does not submit remaining item
 	assert.equal(calls, 0);
 	assert.ok(cancelled.jobs.every((job) => job.status === 'stopped'));
 });
+
+test('multi-image batch prepares every ordered reference and snapshots original bytes, roles, labels and context', async () => {
+	const references = [
+		{
+			dataURL: 'data:image/png;base64,Zmlyc3Q=',
+			mimeType: 'image/png',
+			role: 'inspiration',
+			label: 'Example'
+		},
+		{
+			dataURL: 'data:image/png;base64,cGFyZW50',
+			mimeType: 'image/png',
+			role: 'parent',
+			label: 'Selected parent',
+			generationId: 'parent-result'
+		}
+	];
+	const source = {
+		...recipe(),
+		modelId: 'gpt-image-2',
+		prompt: 'p'.repeat(32_000),
+		referenceImages: references,
+		modelSettings: { image_size: { width: 1280, height: 720 } },
+		parentGenerationId: 'parent-result',
+		context: { directionId: 'portrait-led', parentResultIds: ['parent-result'] }
+	};
+	const batch = run([source]);
+	references[0].label = 'Changed after run creation';
+	source.context.directionId = 'changed';
+	const prepared = [];
+	let result;
+	await runDrawingGenerationBatch({
+		run: batch,
+		signal: new AbortController().signal,
+		onJob() {},
+		onResult(generation) {
+			result = generation;
+		},
+		prepare: async (options) => {
+			prepared.push(options);
+			return {
+				blob: new Blob([options.dataURL], { type: 'image/png' }),
+				width: 1,
+				height: 1,
+				originalWidth: 1,
+				originalHeight: 1,
+				optimized: false
+			};
+		},
+		generate: async (options) => {
+			assert.deepEqual(await Promise.all(options.images.map((image) => image.text())), [
+				'data:image/png;base64,Zmlyc3Q=',
+				'data:image/png;base64,cGFyZW50'
+			]);
+			assert.equal(options.image, undefined);
+			assert.equal(options.prompt.length, 32_000);
+			assert.deepEqual(options.settings.image_size, { width: 1280, height: 720 });
+			return { image };
+		}
+	});
+	assert.equal(prepared.length, 2);
+	assert.ok(prepared.every((options) => options.maxUploadBytes === 6_000_000));
+	assert.deepEqual(
+		result.referenceImages.map(({ role, label }) => ({ role, label })),
+		[
+			{ role: 'inspiration', label: 'Example' },
+			{ role: 'parent', label: 'Selected parent' }
+		]
+	);
+	assert.equal(result.parentGenerationId, 'parent-result');
+	assert.equal(result.context.directionId, 'portrait-led');
+	result.context.directionId = 'edited-result';
+	assert.equal(batch.jobs[0].recipe.context.directionId, 'portrait-led');
+});
+
+test('multi-reference run creation rejects unsupported bounds before creating executable jobs', () => {
+	const references = Array.from({ length: 17 }, () => ({ dataURL: image, mimeType: 'image/png' }));
+	assert.throws(
+		() => run([{ ...recipe(), modelId: 'gpt-image-2', referenceImages: references }]),
+		/16/
+	);
+	assert.throws(
+		() => run([{ ...recipe(), modelId: 'reve-2-1', referenceImages: references.slice(0, 2) }]),
+		/one to 1/
+	);
+	assert.throws(() => run([{ ...recipe(), prompt: 'x'.repeat(32_001) }]), /32,000/);
+});

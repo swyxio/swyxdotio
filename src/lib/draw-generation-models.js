@@ -35,6 +35,7 @@ const falCatalog = {
 const catalogs = { fal: falCatalog };
 export const DRAW_GENERATION_MODELS = Object.values(catalogs).flatMap((catalog) => catalog.models);
 export const MAX_DRAW_GENERATION_REQUEST_BYTES = MAX_DRAW_FAL_REQUEST_BYTES;
+export const MAX_DRAW_GENERATION_PROMPT_LENGTH = 32_000;
 export const DEFAULT_DRAW_GENERATION_MODEL = DRAW_GENERATION_MODELS[0];
 export const DEFAULT_DRAW_TEXT_TO_IMAGE_MODEL = DRAW_GENERATION_MODELS.filter(
 	(model) => model.kind === 'text-to-image'
@@ -45,6 +46,18 @@ export const DEFAULT_DRAW_TEXT_TO_IMAGE_MODEL = DRAW_GENERATION_MODELS.filter(
 /** @param {unknown} id */
 export function getDrawGenerationModel(id) {
 	return DRAW_GENERATION_MODELS.find((model) => model.id === id);
+}
+
+/** Actual bounded transport capacity, including scalar provider endpoints. @param {DrawingGenerationModel} model */
+export function getDrawGenerationReferenceLimit(model) {
+	if (model.kind === 'text-to-image') return 0;
+	const providerModel = catalogModel(model).model;
+	if (
+		model.kind === 'image-to-video' ||
+		('imageInput' in providerModel && providerModel.imageInput === 'image_url')
+	)
+		return 1;
+	return Math.min(16, model.referenceImages ?? 16);
 }
 
 /** @param {DrawingGenerationModel} descriptor */
