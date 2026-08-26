@@ -8,3 +8,11 @@ preview_urls = false
 [[routes]]
 pattern = "mixtape.swyx.io"
 custom_domain = true
+
+[[routes]]
+pattern = "temporal.swyx.io"
+custom_domain = true
+
+[[routes]]
+pattern = "careerchats.swyx.io"
+custom_domain = true

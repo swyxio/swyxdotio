@@ -1,9 +1,14 @@
-const ARCHIVE = 'https://swyx.io/podcasts#learn-in-podcast';
+const ARCHIVES = new Map([
+	['mixtape.swyx.io', 'https://swyx.io/podcasts#learn-in-podcast'],
+	['temporal.swyx.io', 'https://swyx.io/podcasts#the-temporal-podcast'],
+	['careerchats.swyx.io', 'https://swyx.io/podcasts#career-chats']
+]);
 
 export default {
 	/** @param {Request} request */
 	fetch(request) {
-		if (new URL(request.url).hostname !== 'mixtape.swyx.io') {
+		const archive = ARCHIVES.get(new URL(request.url).hostname);
+		if (!archive) {
 			return new Response('Not found', { status: 404 });
 		}
 		if (!['GET', 'HEAD'].includes(request.method)) {
@@ -15,7 +20,7 @@ export default {
 		return new Response(null, {
 			status: 301,
 			headers: {
-				Location: ARCHIVE,
+				Location: archive,
 				'Cache-Control': 'public, max-age=3600'
 			}
 		});
