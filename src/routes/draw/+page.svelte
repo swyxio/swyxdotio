@@ -36,6 +36,8 @@
 		isNewBlankDrawing,
 		shouldShowDrawingStart
 	} from '$lib/draw-starting-modes.js';
+	import DrawCreativeWorkspace from '$lib/DrawCreativeWorkspace.svelte';
+	import { creativeSceneActions } from '$lib/draw-creative-scene';
 
 	// Set once after the server identifies the account, before reading any drawing data.
 	let STORAGE_KEY = $state('');
@@ -124,6 +126,8 @@
 	/** @type {{ id: string, email: string, name: string, isOwner: boolean } | null} */
 	let toolsUser = $state(null);
 	let accountError = $state('');
+	/** @type {DrawCreativeWorkspace | undefined} */
+	let creativeWorkspace = $state();
 	let accountChanged = false;
 	let needsSignIn = $state(false);
 	/** @type {'local' | 'saving' | 'saved' | 'error'} */
@@ -392,6 +396,14 @@
 		/** @type {WorkspaceCommand[]} */
 		const commands = [
 			{id:'action-generate-media',label:'Generate image or video',description:'Prompt, compare models, remix and open generation history',category:'Actions',keywords:['ai','image','video','generate','history','experiment'],run:() => openGenerationComposer()},
+			{
+				id: 'action-open-creative-library',
+				label: 'Open assets and creative workspace',
+				description: 'Personal brand kits, sources, house prompts, editable compositions and exports',
+				category: 'Actions',
+				keywords: ['assets', 'brand', 'thumbnail', 'youtube', 'source', 'transcript', 'prompt', 'versions', 'export'],
+				run: () => creativeWorkspace?.show('assets')
+			},
 			{
 				id: 'action-new-page',
 				label: 'Create new page',
@@ -1709,6 +1721,18 @@
 		backgroundAbort?.abort();
 	}
 
+	const creativeActions = creativeSceneActions(() => ({
+		editor,
+		convertElements,
+		captureImmediately,
+		userId: accountChanged ? undefined : toolsUser?.id,
+		pageId: activePageId,
+		exportToBlob,
+		exportToSvg,
+		focus: focusDesignArtboard,
+		status: (message) => { designStatus = message; }
+	}));
+
 	/** @param {Event} event */
 	function changeBackgroundMode(event) {
 		backgroundMode = /** @type {HTMLSelectElement} */ (event.currentTarget).value;
@@ -2039,6 +2063,18 @@
 ></div>
 
 {#if editor && activePageId}
+	{#key toolsUser?.id ?? 'guest'}
+		<DrawCreativeWorkspace
+			bind:this={creativeWorkspace}
+			user={toolsUser}
+			onInsert={creativeActions.insert}
+			onInsertAsset={creativeActions.insertAsset}
+			onBlank={creativeActions.blank}
+			onAdapt={creativeActions.adapt}
+			onExport={creativeActions.download}
+			onSaveSelected={creativeActions.selectedAsset}
+		/>
+	{/key}
 	<DrawAgent
 		bind:this={drawingAssistant}
 		bind:open={assistantOpen}
@@ -2396,6 +2432,10 @@
 				</button>
 			{/each}
 		</div>
+		<button type="button" class="creative-library-entry" onclick={() => void creativeWorkspace?.show('assets')}>
+			Assets & creative workspace
+			<span>Brand kits · sources · editable versions</span>
+		</button>
 
 		{#if workspaceSection === 'presets'}
 			<section id="drawing-presets" class="workspace-content" aria-label="Drawing presets">
@@ -2686,6 +2726,18 @@
 	.generation-launcher:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
 	.image-tools[hidden] { display: none; }
 
+	.creative-library-entry {
+		margin: 10px 12px;
+		padding: 12px;
+		border: 1px solid #d5cbe4;
+		border-radius: 8px;
+		background: #f4f0fa;
+		color: #554071;
+		font-weight: 600;
+		text-align: left;
+		cursor: pointer;
+	}
+	.creative-library-entry span { display: block; margin-top: 4px; font-size: 12px; font-weight: 400; }
 	.account-error {
 		position: fixed;
 		inset: 30% 1rem auto;

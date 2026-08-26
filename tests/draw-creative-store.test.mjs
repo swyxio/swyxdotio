@@ -319,6 +319,8 @@ test('typed compositions, feedback, channel references and exact source evidence
 	const brief = await create(store, 'briefs', {
 		name: 'Episode',
 		channelId: channel.id,
+		peopleAssetIds: [asset.id],
+		peopleNames: [{ assetId: asset.id, name: 'Zoë / 李' }],
 		transcript: 'Useful quote',
 		analysis: {
 			quotes: [
@@ -344,6 +346,7 @@ test('typed compositions, feedback, channel references and exact source evidence
 			chunks: [{ index: 0, startOffset: 0, endOffset: 12, status: 'succeeded' }]
 		}
 	});
+	assert.equal(brief.data.peopleNames[0].name, 'Zoë / 李');
 	const composition = await create(store, 'compositions', {
 		briefId: brief.id,
 		direction: 'editorial',

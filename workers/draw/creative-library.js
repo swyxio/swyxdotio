@@ -223,6 +223,7 @@ const schemas = {
 			sourceUrl: httpsUrl,
 			channelId: optionalId,
 			peopleAssetIds: list(id, 20),
+			peopleNames: list(shape({ assetId: id, name: text(120) }, ['assetId', 'name']), 20),
 			logoAssetIds: list(id, 20),
 			referenceAssetIds: list(id),
 			analysis: shape({
@@ -338,7 +339,7 @@ function validData(data, kind) {
 		return false;
 	return true;
 }
-/** Read incrementally, rejecting dishonest/missing Content-Length without buffering unbounded bodies. @param {Request} request @param {number} limit */
+/** Read incrementally, rejecting dishonest/missing Content-Length without buffering unbounded bodies. @param {Pick<Request, 'body'|'headers'>} request @param {number} limit */
 export async function readCreativeBody(request, limit) {
 	if (Number(request.headers.get('content-length')) > limit)
 		throw Object.assign(new Error('Request exceeds the storage limit.'), { status: 413 });
@@ -467,6 +468,7 @@ export class CreativeLibrary {
 		for (const key of ['assetId', 'generationAssetId']) if (data[key]) refs.push(data[key]);
 		for (const item of [...(data.recipe?.people ?? []), ...(data.recipe?.logos ?? [])])
 			if (item.assetId) refs.push(item.assetId);
+		for (const item of data.peopleNames ?? []) refs.push(item.assetId);
 		for (const item of data.generation?.referenceImages ?? []) refs.push(item.assetId);
 		if (data.generation?.assetId) refs.push(data.generation.assetId);
 		refs.push(...(data.generation?.context?.referenceAssetIds ?? []));
