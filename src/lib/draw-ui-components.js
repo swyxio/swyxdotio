@@ -1,10 +1,11 @@
 import { DRAW_ILLUSTRATION_COMPONENTS } from './draw-illustration.js';
 import { DRAW_ILLUSTRATION_MARK_COMPONENTS } from './draw-illustration-marks.js';
+import { DRAW_DIAGRAM_COMPONENTS } from './draw-diagram-kit.js';
 
 /**
  * @typedef {{
  *   id: string,
- *   type: 'rectangle' | 'ellipse' | 'text' | 'arrow' | 'line',
+ *   type: 'rectangle' | 'ellipse' | 'text' | 'arrow' | 'line' | 'image',
  *   x: number,
  *   y: number,
  *   width?: number,
@@ -23,7 +24,10 @@ import { DRAW_ILLUSTRATION_MARK_COMPONENTS } from './draw-illustration-marks.js'
  *   points?: Array<[number, number]>,
  *   startArrowhead?: 'arrow' | null,
  *   endArrowhead?: 'arrow' | 'triangle' | null,
- *   groupIds?: string[]
+ *   groupIds?: string[],
+ *   fileId?: string,
+ *   scale?: [number, number],
+ *   status?: 'saved'
  * }} UiComponentShape
  */
 
@@ -35,6 +39,8 @@ import { DRAW_ILLUSTRATION_MARK_COMPONENTS } from './draw-illustration-marks.js'
  *   description: string,
  *   category: string,
  *   keywords: string[],
+ *   preview?: string,
+ *   previewBackground?: string,
  *   create: (x?: number, y?: number) => UiComponentShape[],
  *   createShapes: () => UiComponentShape[]
  * }} DrawUiComponent
@@ -511,6 +517,8 @@ function faqAccordion() {
 }
 
 export const DRAW_UI_COMPONENT_CATEGORIES = [
+	{ id: 'diagram icons', label: 'Diagram icons' },
+	{ id: 'logos', label: 'Logos' },
 	{ id: 'illustration', label: 'Technical illustration' },
 	{ id: 'forms', label: 'Forms & controls' },
 	{ id: 'content', label: 'Content & feedback' },
@@ -535,6 +543,7 @@ function component({ build, ...entry }) {
 
 /** @type {DrawUiComponent[]} */
 export const DRAW_UI_COMPONENTS = [
+	...DRAW_DIAGRAM_COMPONENTS,
 	...DRAW_ILLUSTRATION_COMPONENTS,
 	...DRAW_ILLUSTRATION_MARK_COMPONENTS,
 	component({

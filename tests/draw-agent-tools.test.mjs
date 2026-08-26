@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { DRAW_DIAGRAM_COMPONENTS } from '../src/lib/draw-diagram-kit.js';
 
 import {
 	DEFAULT_DRAW_AGENT_BUDGET_USD,
@@ -63,6 +64,27 @@ function drawingContext() {
 	};
 	return { context, scenes };
 }
+
+test('assistant discovers and inserts the shared diagram icon and logo catalog without a provider call', async () => {
+	const { context } = drawingContext();
+	const inserted = [];
+	const shared = {
+		...context,
+		components: DRAW_DIAGRAM_COMPONENTS,
+		insertComponent: (id) => inserted.push(id)
+	};
+	const catalog = await executeDrawingAgentCommand(['components'], shared);
+	assert.equal(catalog.length, DRAW_DIAGRAM_COMPONENTS.length);
+	for (const id of ['diagram-icon-database', 'diagram-logo-openai', 'diagram-logo-latent-space']) {
+		const result = await executeDrawingAgentCommand(['components', 'insert', id], shared);
+		assert.equal(result.inserted, id);
+	}
+	assert.deepEqual(inserted, [
+		'diagram-icon-database',
+		'diagram-logo-openai',
+		'diagram-logo-latent-space'
+	]);
+});
 
 test('drawing assistant inspects the visible viewport separately from distant canvas elements', async () => {
 	const { context } = drawingContext();

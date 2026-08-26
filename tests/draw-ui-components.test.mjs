@@ -5,6 +5,11 @@ import {
 	applyIllustrationBrush
 } from '../src/lib/draw-illustration.js';
 import { DRAW_ILLUSTRATION_MARK_COMPONENTS } from '../src/lib/draw-illustration-marks.js';
+import {
+	DRAW_DIAGRAM_COMPONENTS,
+	DRAW_DIAGRAM_LOGOS,
+	diagramFiles
+} from '../src/lib/draw-diagram-kit.js';
 
 import {
 	createDrawUiComponent,
@@ -14,10 +19,35 @@ import {
 
 const SUPPORTED_ELEMENT_TYPES = new Set(['arrow', 'ellipse', 'rectangle', 'text']);
 
+test('diagram icon and logo library uses local authentic marks and native editable pictograms', () => {
+	assert.equal(DRAW_DIAGRAM_COMPONENTS.filter((c) => c.category === 'diagram icons').length, 14);
+	assert.equal(DRAW_DIAGRAM_COMPONENTS.filter((c) => c.category === 'logos').length, 8);
+	for (const entry of DRAW_DIAGRAM_COMPONENTS) {
+		const shapes = entry.createShapes();
+		assert.match(entry.preview, /^data:image\//);
+		const files = diagramFiles(shapes);
+		assert.equal(files.length, entry.category === 'logos' ? 1 : 0);
+		for (const image of shapes.filter((s) => s.type === 'image')) {
+			const asset = DRAW_DIAGRAM_LOGOS.find((a) => a.id === image.fileId);
+			assert.ok(asset.source && asset.license);
+			assert.equal(image.width / image.height, asset.aspectRatio);
+			assert.match(files[0].dataURL, /^data:image\/(png|svg\+xml);base64,/);
+		}
+		assert.ok(shapes.some((s) => s.type === 'text'));
+		assert.ok(shapes.every((s) => s.roughness === 0));
+	}
+	const mark = DRAW_DIAGRAM_COMPONENTS.find((c) => c.id === 'diagram-logo-openai');
+	assert.equal(
+		diagramFiles([...mark.createShapes(), ...mark.createShapes()]).length,
+		1,
+		'deduplicate shared files across independent logo layers'
+	);
+});
+
 test('UI component catalog includes complete searchable wireframing categories', () => {
 	assert.deepEqual(
 		DRAW_UI_COMPONENT_CATEGORIES.map(({ id }) => id),
-		['illustration', 'forms', 'content', 'data', 'navigation', 'layouts']
+		['diagram icons', 'logos', 'illustration', 'forms', 'content', 'data', 'navigation', 'layouts']
 	);
 	assert.ok(DRAW_UI_COMPONENTS.length >= 25);
 	assert.equal(new Set(DRAW_UI_COMPONENTS.map(({ id }) => id)).size, DRAW_UI_COMPONENTS.length);
@@ -34,7 +64,9 @@ test('UI component catalog includes complete searchable wireframing categories',
 });
 
 test('every wireframe component creates editable hand-drawn native Excalidraw skeletons', () => {
-	for (const component of DRAW_UI_COMPONENTS.filter((item) => item.category !== 'illustration')) {
+	for (const component of DRAW_UI_COMPONENTS.filter(
+		(item) => !['illustration', 'diagram icons', 'logos'].includes(item.category)
+	)) {
 		const shapes = component.createShapes();
 		const identities = new Set();
 		assert.ok(shapes.length >= 2, `${component.id} needs visible editable parts`);
