@@ -14,7 +14,7 @@ async function openDrawingTemplates(page, section) {
 	await page.getByRole('tab', { name: section, exact: true }).click();
 }
 
-/** @param {import('@playwright/test').Page} page */
+/** @param {import('@playwright/test').Page} page @returns {Promise<any[]>} */
 async function illustrationElements(page) {
 	return page.evaluate(() => {
 		const key = document.querySelector('.draw-canvas')?.getAttribute('data-storage-key');
@@ -28,6 +28,7 @@ for (const preset of DRAW_REFERENCE_PRESETS) {
 	test(`reference preset ${preset.id} is native, bound, undoable and exportable`, async ({
 		page
 	}, testInfo) => {
+		/** @type {string[]} */
 		const inference = [];
 		page.on('request', (request) => {
 			if (/\/api\/draw\/(agent|generate|image)/.test(request.url())) inference.push(request.url());
@@ -35,12 +36,19 @@ for (const preset of DRAW_REFERENCE_PRESETS) {
 		await page.goto('/tools/draw');
 		await openDrawingTemplates(page, 'Presets');
 		await page.getByRole('searchbox', { name: 'Find a diagram' }).fill(preset.label);
+		const preview = page.getByRole('img', {
+			name: `${preset.label} editable reconstruction preview`
+		});
+		await expect(preview).toBeVisible();
+		await expect
+			.poll(() => preview.evaluate((/** @type {HTMLImageElement} */ image) => image.naturalWidth))
+			.toBeGreaterThan(0);
 		await page.getByRole('button', { name: `Insert ${preset.label} preset`, exact: true }).click();
 		await expect.poll(async () => (await illustrationElements(page)).length).toBeGreaterThan(60);
 		const elements = await illustrationElements(page);
 		const ids = new Set(elements.map((item) => item.id));
 		expect(elements.every((item) => item.type !== 'image')).toBe(true);
-		expect(elements.some((item) => item.link === preset.source.url)).toBe(true);
+		expect(elements.some((item) => item.link === preset.source?.url)).toBe(true);
 		for (const edge of elements.filter((item) => item.type === 'arrow')) {
 			expect(ids.has(edge.startBinding?.elementId)).toBe(true);
 			expect(ids.has(edge.endBinding?.elementId)).toBe(true);
@@ -54,7 +62,7 @@ for (const preset of DRAW_REFERENCE_PRESETS) {
 		const restored = await illustrationElements(page);
 		// Native history recomputes attached arrow endpoints against rounded outlines.
 		// Nodes/text must not move; connections must retain their actual bindings.
-		const geometry = (items) =>
+		const geometry = (/** @type {any[]} */ items) =>
 			items.map((item) =>
 				item.type === 'arrow'
 					? [item.id, item.startBinding, item.endBinding]

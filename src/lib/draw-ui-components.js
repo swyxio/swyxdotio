@@ -21,7 +21,7 @@ import { DRAW_ILLUSTRATION_MARK_COMPONENTS } from './draw-illustration-marks.js'
  *   fontSize?: number,
  *   textAlign?: 'left' | 'center',
  *   points?: Array<[number, number]>,
- *   startArrowhead?: null,
+ *   startArrowhead?: 'arrow' | null,
  *   endArrowhead?: 'arrow' | 'triangle' | null,
  *   groupIds?: string[]
  * }} UiComponentShape
