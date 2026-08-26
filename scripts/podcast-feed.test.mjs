@@ -86,19 +86,22 @@ test('canonical website links target the archive without changing episodes or fe
 	}
 });
 
-test('legacy Mixtape pages permanently redirect to the archive without an open redirect', () => {
-	for (const method of ['GET', 'HEAD']) {
-		for (const path of ['/', '/episodes/example', '/?url=https://evil.example']) {
-			const response = redirects.fetch(new Request(`https://mixtape.swyx.io${path}`, { method }));
-			assert.equal(response.status, 301);
-			assert.equal(response.headers.get('location'), 'https://swyx.io/podcasts#learn-in-podcast');
+test('legacy podcast pages permanently redirect to their own archive without an open redirect', () => {
+	for (const [host, slug] of [
+		['mixtape.swyx.io', 'learn-in-podcast'],
+		['temporal.swyx.io', 'the-temporal-podcast'],
+		['careerchats.swyx.io', 'career-chats']
+	]) {
+		for (const method of ['GET', 'HEAD']) {
+			for (const path of ['/', '/episodes/example', '/?url=https://evil.example']) {
+				const response = redirects.fetch(new Request(`https://${host}${path}`, { method }));
+				assert.equal(response.status, 301);
+				assert.equal(response.headers.get('location'), `https://swyx.io/podcasts#${slug}`);
+			}
 		}
+		assert.equal(redirects.fetch(new Request(`https://${host}/`, { method: 'POST' })).status, 405);
 	}
 	assert.equal(redirects.fetch(new Request('https://unknown.example/')).status, 404);
-	assert.equal(
-		redirects.fetch(new Request('https://mixtape.swyx.io/', { method: 'POST' })).status,
-		405
-	);
 });
 
 test('offline backups reject unsafe paths and mismatched remote checksums', () => {
