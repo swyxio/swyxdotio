@@ -161,6 +161,26 @@ test('social photos include the six approved picks with exact original posts and
 	}
 });
 
+test('the personal coat of arms is featured in social photos without replacing any photo', async () => {
+	const html = await renderMarkdown(await read('src/routes/about/photos.md'));
+	const social = html.split('<h3 id="social-photos">')[1].split('<h3 id="cartoon-avatars">')[0];
+	assert.match(social, /<figure class="personal-crest" id="coat-of-arms">/);
+	assert.ok(social.indexOf('personal-crest') < social.indexOf('photo-preview-grid'));
+	assert.equal((social.match(/class="photo-preview"/g) || []).length, 9);
+	assert.match(social, /alt="Personal coat of arms with Singapore and US flags/);
+	assert.match(social, /width="800" height="693" loading="lazy" decoding="async"/);
+	assert.match(social, /href="\/about-photos\/swyx-coat-of-arms-original.jpg"/);
+	assert.match(social, /href="\/about-photos\/swyx-coat-of-arms.svg" download/);
+	const preview = await readFile(new URL('static/about-photos/swyx-coat-of-arms.webp', root));
+	assert.equal(preview.toString('ascii', 0, 4), 'RIFF');
+	assert.ok(preview.length < 100_000);
+	const original = await readFile(new URL('static/about-photos/swyx-coat-of-arms-original.jpg', root));
+	assert.equal(original.readUInt16BE(0), 0xffd8);
+	const svg = await read('static/about-photos/swyx-coat-of-arms.svg');
+	assert.match(svg, /<svg /);
+	assert.doesNotMatch(svg, /<script|<foreignObject|\bon\w+=/i);
+});
+
 test('Portfolio presents its entries in an accessible, uncollapsed responsive table', async () => {
 	const source = await read('src/routes/portfolio/+page.svelte');
 	assert.equal((source.match(/<h1>/g) || []).length, 1);

@@ -638,6 +638,58 @@
 		gap: 1.5rem 1.25rem;
 	}
 
+	.photo-sources :global(.personal-crest) {
+		display: grid;
+		grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+		align-items: center;
+		gap: 2rem;
+		margin: 1.5rem 0 2rem;
+		padding-bottom: 1.5rem;
+		border-bottom: 1px solid var(--page-border);
+	}
+	.photo-sources :global(.crest-artwork) {
+		display: block;
+		padding: 1rem;
+		background: #111;
+		border: 1px solid var(--page-border);
+	}
+	.photo-sources :global(.crest-artwork img) {
+		display: block;
+		width: 100%;
+		height: auto;
+		background: transparent;
+	}
+	.photo-sources :global(.personal-crest h4) {
+		margin: 0;
+		font: 600 1.4rem / 1.25 var(--font-reading);
+	}
+	.photo-sources :global(.personal-crest figcaption) {
+		max-width: 40ch;
+	}
+	.photo-sources :global(.crest-links) {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem 1.25rem;
+	}
+	.photo-sources :global(.crest-links a) {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+	}
+	.photo-sources :global(.personal-crest a:focus-visible) {
+		outline: 2px solid var(--page-link);
+		outline-offset: 4px;
+	}
+	@media (max-width: 600px) {
+		.photo-sources :global(.personal-crest) {
+			grid-template-columns: minmax(0, 1fr);
+			gap: 1rem;
+		}
+		.photo-sources :global(.crest-artwork) {
+			max-width: 20rem;
+		}
+	}
+
 	.photo-sources :global(.portrait-previews) {
 		grid-template-columns: repeat(6, minmax(0, 1fr));
 	}

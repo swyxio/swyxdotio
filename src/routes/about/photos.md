@@ -107,7 +107,18 @@ Select any preview to open the full-size original.
 
 ### Social photos
 
-Friends, community, and life between conferences. Select a new photo to see the original post and its context.
+Friends, community, and life between conferences. Select a photo to see the original post and its context.
+
+<figure class="personal-crest" id="coat-of-arms">
+  <a class="crest-artwork" href="/about-photos/swyx-coat-of-arms-original.jpg" aria-label="Open full-size: swyx’s personal coat of arms">
+    <img src="/about-photos/swyx-coat-of-arms.webp" alt="Personal coat of arms with Singapore and US flags, a shield bearing Latent Space, AI Engineer, smol and DX marks, two dogs, and a Shawn swyx Wang banner" width="800" height="693" loading="lazy" decoding="async" />
+  </a>
+  <figcaption>
+    <h4>A coat of arms, of my own</h4>
+    <p>I had this personal coat of arms made for a T-shirt. Singapore and the US above a shield of the things I’ve built, with two dogs keeping watch.</p>
+    <p class="crest-links"><a href="/about-photos/swyx-coat-of-arms-original.jpg">Full-size artwork ↗</a> <a href="/about-photos/swyx-coat-of-arms.svg" download>Download SVG ↓</a></p>
+  </figcaption>
+</figure>
 
 <div class="photo-preview-grid">
   <a class="photo-preview" href="https://x.com/MilksandMatcha/status/1993102854035587370/photo/1" aria-label="Open original: Flowers from the community, posted by Sarah Chieng">
