@@ -1,8 +1,10 @@
 /** Complete, native reconstructions of selected public Alex Xu / ByteByteGo diagrams.
  * Layout and mechanisms follow the linked references; lettering and glyphs are rebuilt.
- * No source bitmaps, logos, model calls, or remote assets are part of an insertion.
+ * No source screenshots, model calls, or remote asset requests are part of an insertion.
+ * The LS data-agent adaptation includes locally bundled authentic logo layers.
  */
 import { shape, rect, oval, path, label, group } from './draw-illustration.js';
+import { createDataAgentPreset } from './draw-data-agent-preset.js';
 
 /** @typedef {import('./draw-presets.js').PresetShape} Shape */
 /** @typedef {import('./draw-presets.js').DrawPreset} Preset */
@@ -1043,150 +1045,6 @@ function gitHistory() {
 	return s;
 }
 
-function dataAgent() {
-	const s = sheet(
-		'How a Data Agent Fits Together',
-		'Reconstruction of the OpenAI data-agent diagram shared by Alex Xu / ByteByteGo',
-		1440,
-		1730,
-		'7467951928778330114'
-	);
-	s.push(
-		...panel(40, 170, 1360, 420, 'OFFLINE DATA PREP'),
-		...panel(40, 645, 1360, 1000, 'RUNTIME WORKFLOW')
-	);
-	const internal = illustrated(
-		s,
-		85,
-		220,
-		410,
-		'Internal data',
-		'Schemas + table metadata',
-		'database',
-		TEAL
-	);
-	const institutional = illustrated(
-		s,
-		575,
-		220,
-		400,
-		'Knowledge',
-		'Docs + institutional context',
-		'document',
-		TEAL
-	);
-	const past = illustrated(s, 1040, 220, 310, 'History', 'Past conversations', 'document', TEAL);
-	const enrich = box(
-		85,
-		365,
-		410,
-		76,
-		'Usage metadata · human annotations\nCodex enrichment',
-		'#ffffff',
-		20
-	);
-	const daily = box(160, 480, 260, 66, 'Daily indexing', TEAL, 22);
-	const index = box(655, 430, 260, 66, 'Indexing job', TEAL, 22);
-	s.push(
-		enrich,
-		daily,
-		index,
-		down(internal, enrich),
-		down(enrich, daily),
-		down(institutional, index)
-	);
-	const tableIndex = box(125, 705, 300, 72, 'Table-description index', TEAL, 21);
-	const knowledgeIndex = box(640, 705, 290, 72, 'Knowledge index', TEAL, 21);
-	const mem = box(1050, 705, 290, 72, 'Scoped memory', TEAL, 21);
-	s.push(
-		tableIndex,
-		knowledgeIndex,
-		mem,
-		down(daily, tableIndex),
-		down(index, knowledgeIndex),
-		down(past, mem)
-	);
-	const search = illustrated(
-		s,
-		465,
-		845,
-		440,
-		'Similarity search',
-		'Relevant tables + documents',
-		'database',
-		TEAL
-	);
-	const scope = box(1040, 860, 305, 80, 'Fetch by scope\n+ filters', '#ffffff', 22);
-	s.push(down(tableIndex, search), down(knowledgeIndex, search), scope, down(mem, scope));
-	const assembled = box(495, 1020, 380, 88, 'Assembled context', GOLD, 25);
-	const embedding = box(85, 1000, 270, 100, 'Embedding model\nQuery → vector', '#ffffff', 22);
-	s.push(
-		assembled,
-		embedding,
-		down(search, assembled),
-		edge(embedding, search, [
-			[220, 1000],
-			[220, 897],
-			[465, 897]
-		]),
-		edge(scope, assembled, [
-			[1192, 940],
-			[1192, 1064],
-			[875, 1064]
-		])
-	);
-	const query = box(85, 1180, 235, 74, 'User query', '#ffffff', 23);
-	const runtime = box(525, 1165, 320, 105, 'Runtime', '#ffffff', 28);
-	const llm = box(1090, 1165, 250, 105, 'LLM', BLUE, 30);
-	s.push(
-		query,
-		runtime,
-		llm,
-		down(assembled, runtime),
-		across(query, runtime),
-		edge(query, embedding, [
-			[203, 1180],
-			[220, 1100]
-		]),
-		across(runtime, llm),
-		edge(llm, runtime, [
-			[1090, 1250],
-			[975, 1310],
-			[845, 1250]
-		]),
-		label(905, 1125, 'Agentic loop', 22)
-	);
-	const toolsPanel = panel(170, 1365, 1100, 130, 'TOOLS', GREY);
-	s.push(...toolsPanel);
-	const tools = [
-		'Company context',
-		'Knowledge search',
-		'Big data systems',
-		'Metadata services'
-	].map((t, i) => box(195 + i * 270, 1408, 245, 61, t, [PURPLE, TEAL, PINK, GOLD][i], 20));
-	s.push(...tools, { ...down(runtime, toolsPanel[0]), startArrowhead: 'arrow' });
-	const systems = box(
-		170,
-		1550,
-		1100,
-		68,
-		'Data warehouse  ·  Data lake  ·  Workflow scheduler  ·  Compute  ·  Metadata catalog',
-		TEAL,
-		22
-	);
-	s.push(systems);
-	tools.forEach((n) =>
-		s.push({
-			...edge(n, systems, [
-				[n.x + (n.width ?? 0) / 2, n.y + (n.height ?? 0)],
-				[n.x + (n.width ?? 0) / 2, 1550]
-			]),
-			startArrowhead: 'arrow'
-		})
-	);
-	return s;
-}
-
 /** @type {Array<[string, string, string, string, () => Shape[]]>} */
 const definitions = [
 	[
@@ -1241,9 +1099,9 @@ const definitions = [
 	[
 		'data-agent',
 		'Data agent architecture',
-		'Offline indexing, context assembly, an agent loop, tools and data systems.',
+		'Latent Space edition: numbered flows, illustrated tools, authentic logos and editable layers.',
 		'7467951928778330114',
-		dataAgent
+		createDataAgentPreset
 	]
 ];
 
@@ -1256,9 +1114,15 @@ export const DRAW_REFERENCE_PRESETS = definitions.map(
 		source: {
 			author: 'Alex Xu / ByteByteGo',
 			url: sourceUrl(urn),
-			note: 'Editable reconstruction; simplified glyphs and wording. Not a pixel-exact or animated copy.'
+			note:
+				id === 'data-agent'
+					? 'Source-faithful layout with a Latent Space palette, native pictograms and bundled logos. Not a pixel-exact or animated copy.'
+					: 'Editable reconstruction; simplified glyphs and wording. Not a pixel-exact or animated copy.'
 		},
-		preview: `/draw-presets/bytebytego-${id}.webp`,
+		preview:
+			id === 'data-agent'
+				? '/draw-presets/bytebytego-data-agent-ls.webp'
+				: `/draw-presets/bytebytego-${id}.webp`,
 		createShapes
 	})
 );
