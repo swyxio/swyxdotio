@@ -271,6 +271,7 @@ test('account switching keeps browser caches separate and removes owner-only too
 		`swyx-excalidraw:google:${TEST_TOOLS_MEMBER.id}`
 	);
 	await expect(page.getByRole('link', { name: /Podcast studio/ })).toHaveCount(0);
+	await page.locator('.account-menu > summary').click();
 	await expect(page.getByText(TEST_TOOLS_MEMBER.email, { exact: true })).toBeVisible();
 	await page.goto('/draw');
 	await expect(page.getByRole('button', { name: 'Manage drawing pages' })).toBeVisible();
@@ -284,6 +285,7 @@ test('account switching keeps browser caches separate and removes owner-only too
 	);
 	expect(memberLibrary).not.toContain('private-owner-library');
 	await page.goto('/tools');
+	await page.locator('.account-menu > summary').click();
 	await page.getByRole('button', { name: 'Sign out', exact: true }).click();
 	await expect(page.getByRole('link', { name: 'Sign in with Google' })).toBeVisible();
 	expect((await page.request.get('/tools/api/draw/pages')).status()).toBe(401);
@@ -303,6 +305,10 @@ test('all accounts see funded AI limits and logging before using the assistant',
 	page
 }) => {
 	await page.goto('/tools');
+	await expect(page.getByRole('complementary', { name: 'Usage allowance' })).toContainText(
+		'rate limited, and logged'
+	);
+	await page.getByText('The rules of the workshop', { exact: true }).click();
 	const notice = page.getByRole('complementary', { name: 'Funded AI usage notice' });
 	await expect(notice).toContainText('rate limited, and logged');
 	await expect(notice).toContainText('20 assistant turns');
