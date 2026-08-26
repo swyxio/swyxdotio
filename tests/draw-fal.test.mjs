@@ -1,17 +1,20 @@
+import { createTestAiLedger, ledgerRequest, seedTestJob } from './helpers/tools-ai-ledger.mjs';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { createPodcastStudioSession } from '../src/lib/podcast-admin-auth.js';
+import { createToolsSession } from '../src/lib/server/tools-auth.js';
 import {
 	cancelDrawingImage,
-	drawingFalTasks,
+	drawingGenerationTasks,
 	editDrawingImage,
 	pollDrawingImage
-} from '../src/lib/server/draw-fal.js';
+} from '../src/lib/server/draw-generation.js';
 import {
 	chargeDrawingAgentBudget,
 	createDrawingAgentBudget
 } from '../src/lib/server/draw-agent-budget.js';
+import { getDrawGenerationModel } from '../src/lib/draw-generation-models.js';
+import { drawingGenerationAdapters } from '../src/lib/server/draw-generation-provider.js';
 import {
 	DEFAULT_DRAW_FAL_MODEL,
 	DRAW_FAL_MODELS,
@@ -23,7 +26,7 @@ import {
 	resolveDrawFalModelSettings
 } from '../src/lib/draw-fal-models.js';
 
-const SESSION_SECRET = 'test-only-session-secret';
+const SESSION_SECRET = 'drawing-fal-test-only-session-secret';
 const FAL_KEY = 'test-only-provider-secret';
 const SOURCE_IMAGE = 'data:image/png;base64,c291cmNl';
 const EDITED_IMAGE = 'data:image/png;base64,ZWRpdGVk';
@@ -31,7 +34,7 @@ const REQUEST_ID = 'queued-job-123';
 
 /**
  * @param {{
- *   authenticated?: boolean,
+ *   authenticated?: boolean, owner?: boolean,
  *   form?: FormData,
  *   contentLength?: string,
  *   contentType?: string,
@@ -39,13 +42,17 @@ const REQUEST_ID = 'queued-job-123';
  *   falKey?: string,
  *   origin?: string,
  *   method?: 'POST' | 'GET' | 'DELETE',
+ *   ledger?: any,
+ *   seedJob?: boolean,
  *   query?: string
  * }} [options]
  */
 async function createEvent(options = {}) {
 	const url = new URL(`https://swyx.io/tools/api/draw/edit${options.query ?? ''}`);
 	const method = options.method ?? 'POST';
-	const headers = new Headers();
+	const headers = new Headers({
+		'X-Tools-User': options.owner === false ? 'other-google-sub' : 'owner-google-sub'
+	});
 	if (method !== 'GET' || options.origin) headers.set('Origin', options.origin ?? url.origin);
 	if (options.contentType) headers.set('Content-Type', options.contentType);
 	if (options.contentLength) headers.set('Content-Length', options.contentLength);
@@ -61,14 +68,42 @@ async function createEvent(options = {}) {
 		...(method === 'POST' ? { body: options.body ?? form } : {})
 	});
 	const session =
-		options.authenticated === false ? undefined : await createPodcastStudioSession(SESSION_SECRET);
+		options.authenticated === false
+			? undefined
+			: await createToolsSession(
+					{
+						id: options.owner === false ? 'other-google-sub' : 'owner-google-sub',
+						email: 'user@example.com',
+						name: 'Test User'
+					},
+					SESSION_SECRET
+				);
+	const ledger = options.ledger ?? createTestAiLedger();
+	const model = getDrawFalModel(url.searchParams.get('model'));
+	const requestId = url.searchParams.get('requestId');
+	if (
+		method !== 'POST' &&
+		options.seedJob !== false &&
+		model &&
+		requestId &&
+		/^[A-Za-z0-9_-]{1,128}$/.test(requestId)
+	) {
+		await seedTestJob(
+			ledger,
+			options.owner === false ? 'other-google-sub' : 'owner-google-sub',
+			model.id,
+			requestId
+		);
+	}
 	return /** @type {any} */ ({
 		request,
 		url,
 		cookies: { get: () => session },
 		platform: {
 			env: {
-				PODCAST_ADMIN_SESSION_SECRET: SESSION_SECRET,
+				TOOLS_SESSION_SECRET: SESSION_SECRET,
+				TOOLS_OWNER_GOOGLE_SUB: 'owner-google-sub',
+				DRAW_PAGES: options.ledger === null ? undefined : ledger.namespace,
 				FAL_KEY: options.falKey === undefined ? FAL_KEY : options.falKey
 			}
 		}
@@ -120,13 +155,16 @@ test('binary uploads authenticate privately, submit fal queue jobs, and keep cre
 	assert.deepEqual(JSON.parse(body), {
 		requestId: REQUEST_ID,
 		model: DEFAULT_DRAW_FAL_MODEL.id,
+		adapter: 'fal',
 		status: 'IN_QUEUE',
 		queuePosition: 3
 	});
 	assert.equal(body.includes(FAL_KEY), false);
 	assert.equal(body.includes(SESSION_SECRET), false);
 	assert.ok(
-		drawingFalTasks['image-edit'].models.some((model) => model.id === DEFAULT_DRAW_FAL_MODEL.id)
+		drawingGenerationTasks['image-edit'].models.some(
+			(model) => model.id === DEFAULT_DRAW_FAL_MODEL.id
+		)
 	);
 });
 
@@ -306,7 +344,7 @@ test('image-to-video models use documented queue inputs and return only trusted 
 		assert.deepEqual(await completed.json(), {
 			status: 'COMPLETED',
 			video: 'https://v3b.fal.media/files/example/output.mp4',
-			model: model.model
+			model: model.id
 		});
 
 		calls = 0;
@@ -373,7 +411,11 @@ test('all workflow cards expose sortable estimates and honest reference-image ca
 			'minimax-h3-video'
 		]
 	);
-	assert.deepEqual(Object.keys(drawingFalTasks), ['image-edit', 'text-to-image', 'image-to-video']);
+	assert.deepEqual(Object.keys(drawingGenerationTasks), [
+		'image-edit',
+		'text-to-image',
+		'image-to-video'
+	]);
 });
 
 test('each endpoint exposes only officially documented modality parameters and exact provider types', () => {
@@ -564,7 +606,10 @@ test('the authenticated status proxy exposes queue positions and sanitized progr
 			logs: [{ message: 'Preparing\nimage' }, { message: 'Denoising 4/12' }]
 		})
 	);
-	assert.deepEqual(await running.json(), { status: 'IN_PROGRESS', message: 'Denoising 4/12' });
+	assert.deepEqual(await running.json(), {
+		status: 'IN_PROGRESS',
+		message: 'The model is generating.'
+	});
 	const leaked = await pollDrawingImage(await createEvent({ method: 'GET', query }), async () =>
 		providerResponse({ status: 'IN_PROGRESS', logs: [{ message: `private ${FAL_KEY}` }] })
 	);
@@ -594,7 +639,7 @@ test('completed queue jobs return only private inline image output', async () =>
 	assert.deepEqual(JSON.parse(text), {
 		status: 'COMPLETED',
 		image: EDITED_IMAGE,
-		model: 'fal-ai/flux-2/edit'
+		model: 'flux-2'
 	});
 	assert.equal(text.includes('private prompt'), false);
 });
@@ -610,7 +655,10 @@ test('queued jobs can be cancelled without disclosing credentials', async () => 
 			return new Response(null, { status: 202 });
 		}
 	);
-	assert.deepEqual(await response.json(), { status: 'CANCELLED' });
+	assert.deepEqual(await response.json(), {
+		status: 'CANCEL_REQUESTED',
+		cancellation: 'requested'
+	});
 });
 
 test('every model polls, retrieves, and cancels jobs at its canonical application root', async () => {
@@ -828,4 +876,233 @@ test('provider network failures never disclose the Worker secret', async () => {
 	});
 	assert.equal(response.status, 502);
 	assert.equal((await response.text()).includes(FAL_KEY), false);
+});
+
+test('signed nonowner Google identities can submit, read, and cancel their own funded provider jobs', async () => {
+	let called = false;
+	for (const [handler, method] of [
+		[editDrawingImage, 'POST'],
+		[pollDrawingImage, 'GET'],
+		[cancelDrawingImage, 'DELETE']
+	]) {
+		const response = await handler(
+			await createEvent({ owner: false, method, query: `?requestId=${REQUEST_ID}&model=flux-2` }),
+			async () => {
+				called = true;
+				return providerResponse(
+					method === 'POST' ? { request_id: REQUEST_ID } : { status: 'IN_QUEUE' }
+				);
+			}
+		);
+		assert.equal(response.status, method === 'POST' ? 202 : 200);
+	}
+	assert.equal(called, true);
+});
+
+test('paid image submission rejects stale account headers before calling the provider', async () => {
+	let called = false;
+	const event = await createEvent();
+	event.request.headers.set('X-Tools-User', 'previous-user');
+	assert.equal(
+		(
+			await editDrawingImage(event, async () => {
+				called = true;
+				return providerResponse({});
+			})
+		).status,
+		409
+	);
+	assert.equal(called, false);
+});
+
+test('provider status, results and cancellation reject unknown or another Google account jobs before network access', async () => {
+	const ledger = createTestAiLedger();
+	await seedTestJob(ledger, 'owner-google-sub', 'flux-2', REQUEST_ID);
+	let called = false;
+	for (const [handler, method] of [
+		[pollDrawingImage, 'GET'],
+		[cancelDrawingImage, 'DELETE']
+	]) {
+		for (const requestId of [REQUEST_ID, 'unknown-job']) {
+			const response = await handler(
+				await createEvent({
+					owner: false,
+					ledger,
+					seedJob: false,
+					method,
+					query: `?requestId=${requestId}&model=flux-2`
+				}),
+				async () => {
+					called = true;
+					return providerResponse({});
+				}
+			);
+			assert.equal(response.status, 404);
+		}
+	}
+	assert.equal(called, false);
+});
+
+test('media submission fails closed without a ledger or after durable funded quota exhaustion', async () => {
+	let called = false;
+	const ledger = createTestAiLedger();
+	for (let index = 0; index < 5; index++)
+		await ledgerRequest(ledger, 'admit', {
+			userId: 'owner-google-sub',
+			kind: 'media',
+			model: 'flux-2',
+			estimatedReservedUsd: 0.05
+		});
+	for (const [value, expected] of [
+		[null, 503],
+		[ledger, 429]
+	]) {
+		const response = await editDrawingImage(await createEvent({ ledger: value }), async () => {
+			called = true;
+			return providerResponse({ request_id: REQUEST_ID });
+		});
+		assert.equal(response.status, expected);
+	}
+	assert.equal(called, false);
+});
+
+test('accepted media jobs are withheld if ownership registration fails, while the estimated reservation remains charged', async () => {
+	const ledger = createTestAiLedger();
+	const realGet = ledger.namespace.get;
+	ledger.namespace.get = (id) => ({
+		fetch: async (request) =>
+			new URL(request.url).pathname === '/ai/register'
+				? new Response('Unavailable', { status: 503 })
+				: realGet(id).fetch(request)
+	});
+	const response = await editDrawingImage(await createEvent({ ledger }), async () =>
+		providerResponse({ request_id: REQUEST_ID })
+	);
+	assert.equal(response.status, 503);
+	assert.equal((await response.text()).includes(REQUEST_ID), false);
+	const row = ledger.database.prepare('SELECT * FROM tools_ai_usage').get();
+	assert.equal(row.status, 'reserved');
+	assert.ok(row.reserved_micros > 0);
+	assert.equal(row.provider_request_id, null);
+});
+
+test('manual concurrent generation reserves one run budget before provider submission and cannot replay a job', async () => {
+	const ledger = createTestAiLedger();
+	let calls = 0;
+	const provider = async () => providerResponse({ request_id: `manual-${++calls}` }, 202);
+	const base = {
+		prompt: 'A simple geometric illustration',
+		model: 'flux-klein-9b-generate',
+		runId: 'manual-run',
+		runLimitUsd: '0.1'
+	};
+	const events = await Promise.all(
+		Array.from({ length: 4 }, (_, index) =>
+			createEvent({ ledger, form: createForm({ ...base, clientJobId: `job-${index}` }) })
+		)
+	);
+	const responses = await Promise.all(events.map((event) => editDrawingImage(event, provider)));
+	assert.equal(responses.filter((response) => response.status === 202).length, 2);
+	assert.equal(responses.filter((response) => response.status === 402).length, 2);
+	assert.equal(calls, 2);
+	const duplicate = await editDrawingImage(
+		await createEvent({ ledger, form: createForm({ ...base, clientJobId: 'job-0' }) }),
+		provider
+	);
+	assert.equal(duplicate.status, 409);
+	assert.equal((await duplicate.json()).code, 'job_already_submitted');
+	assert.equal(calls, 2);
+	for (const fields of [
+		{ runId: 'partial' },
+		{ runId: 'invalid', clientJobId: 'job', runLimitUsd: 'Infinity' },
+		{ runId: 'invalid', clientJobId: 'job', runLimitUsd: '-1' }
+	]) {
+		const response = await editDrawingImage(
+			await createEvent({
+				ledger,
+				form: createForm({ prompt: base.prompt, model: base.model, ...fields })
+			}),
+			provider
+		);
+		assert.equal(response.status, 422);
+	}
+	assert.equal(calls, 2);
+});
+
+test('shared route authenticates and registers a fake adapter, then polls its original binding after catalog routing changes', async () => {
+	const descriptor = getDrawGenerationModel('flux-klein-9b-generate');
+	const originalAdapter = descriptor.adapter;
+	const originalImplementation = drawingGenerationAdapters.fal;
+	const ledger = createTestAiLedger();
+	const calls = [];
+	drawingGenerationAdapters.fal = {
+		configured: () => true,
+		async submit(input) {
+			calls.push('submit');
+			assert.equal(input.image, undefined);
+			return { requestId: 'fake-job' };
+		},
+		async status(job) {
+			calls.push('status');
+			assert.equal(job.model.adapter, 'fal');
+			return { status: 'COMPLETED', image: EDITED_IMAGE };
+		},
+		async cancel() {
+			calls.push('cancel');
+			return { status: 'CANCEL_REQUESTED', cancellation: 'requested' };
+		}
+	};
+	try {
+		const request = await createEvent({
+			ledger,
+			falKey: '',
+			form: createForm({ prompt: 'A tree', model: descriptor.id })
+		});
+		const submitted = await editDrawingImage(request, async () => {
+			throw new Error('No fal network is permitted');
+		});
+		assert.equal(submitted.status, 202);
+		assert.equal((await submitted.json()).adapter, 'fal');
+		descriptor.adapter = 'new-hosting-route';
+		const query = `?model=${descriptor.id}&requestId=fake-job`;
+		const completed = await pollDrawingImage(
+			await createEvent({ ledger, falKey: '', method: 'GET', query, seedJob: false })
+		);
+		assert.equal(completed.status, 200);
+		assert.equal((await completed.json()).image, EDITED_IMAGE);
+		const cancelled = await cancelDrawingImage(
+			await createEvent({ ledger, falKey: '', method: 'DELETE', query, seedJob: false })
+		);
+		assert.equal((await cancelled.json()).cancellation, 'requested');
+		assert.deepEqual(calls, ['submit', 'status', 'cancel']);
+	} finally {
+		descriptor.adapter = originalAdapter;
+		drawingGenerationAdapters.fal = originalImplementation;
+	}
+});
+
+test('accepted cancellation remains a request, with no false refund or terminal completion in the ledger', async () => {
+	const ledger = createTestAiLedger();
+	const query = '?model=flux-2&requestId=cancel-requested';
+	const event = await createEvent({ ledger, method: 'DELETE', query });
+	const response = await cancelDrawingImage(event, async () =>
+		providerResponse({ status: 'CANCELLATION_REQUESTED' })
+	);
+	assert.deepEqual(await response.json(), {
+		status: 'CANCEL_REQUESTED',
+		cancellation: 'requested'
+	});
+	const owned = await ledgerRequest(ledger, 'owned-job', {
+		userId: 'owner-google-sub',
+		model: 'flux-2',
+		requestId: 'cancel-requested'
+	});
+	assert.equal((await owned.json()).status, 'submitted');
+	const progress = await pollDrawingImage(
+		await createEvent({ ledger, method: 'GET', query, seedJob: false }),
+		async () => providerResponse({ status: 'CANCELLED' })
+	);
+	assert.deepEqual(await progress.json(), { status: 'CANCELLED' });
+	const summary = await ledgerRequest(ledger, 'summary', { userId: 'owner-google-sub' });
+	assert.equal((await summary.json()).usage.estimatedReservedTodayUsd, 0.05);
 });

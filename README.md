@@ -51,16 +51,18 @@ If you want to make a site based on this, see https://github.com/swyxio/swyxkit 
 
 ### What each variable does
 
-| Variable                         | Required?      | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| -------------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GH_TOKEN`                       | **Yes**        | A GitHub Personal Access Token used to authenticate calls to the GitHub Issues API (the CMS). Without it, requests are unauthenticated and capped at **60/hr**, which the site blows through quickly and starts failing. With it, the limit is **5000/hr**. Read at runtime via `$env/dynamic/private` (Cloudflare `platform.env`) **and** at build time for the prerendered pages — so it must be set in **both** the runtime secrets and the build environment. |
-| `GH_WEBHOOK_SECRET`              | Recommended    | A shared secret used to verify (HMAC SHA‑256) that incoming requests to `/api/revalidate` actually came from your GitHub webhook. This enables fast publishing: editing an Issue refreshes the KV manifest and rolls the cache generation instead of waiting for the `s-maxage` TTL. If unset, `/api/revalidate` returns 500 and you fall back to TTL-based freshness.                                                                                            |
-| `GA4_MEASUREMENT_ID`             | Recommended    | Public GA4 stream identifier used only by the server-side read-event mirror. Production currently uses `G-TW6GTQ9Q4N` and declares it as a non-secret `[vars]` value in `wrangler.toml`.                                                                                                                                                                                                                                                                          |
-| `GA4_API_SECRET`                 | **Production** | Secret for the GA4 Measurement Protocol stream. It is sent only from the Worker and must never be committed, placed in a URL in source code, or exposed to the browser. The application treats it as optional so D1 counting survives a GA outage, but `wrangler.toml` requires it for production deployment.                                                                                                                                                     |
-| `PODCAST_ADMIN_PASSWORD`         | **Yes**        | Password for the private podcast studio.                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `PODCAST_ADMIN_SESSION_SECRET`   | **Yes**        | Signs private podcast-studio sessions. Rotate it to invalidate every existing session.                                                                                                                                                                                                                                                                                                                                                                            |
-| `PRESENCE_ENABLED`               | Recommended    | Server-side emergency kill switch for new live-reader sockets. Set to `false` and deploy the main Worker to reject presence while leaving every page usable.                                                                                                                                                                                                                                                                                                      |
-| `PUBLIC_PRESENCE_ADMISSION_RATE` | Recommended    | Deployment-time browser admission fraction from `0` through `1`. Production starts at `1`; use `0.1` during a viral spike to reduce socket workload by roughly 90%. This value is public by design.                                                                                                                                                                                                                                                               |
+| Variable                                    | Required?      | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ------------------------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GH_TOKEN`                                  | **Yes**        | A GitHub Personal Access Token used to authenticate calls to the GitHub Issues API (the CMS). Without it, requests are unauthenticated and capped at **60/hr**, which the site blows through quickly and starts failing. With it, the limit is **5000/hr**. Read at runtime via `$env/dynamic/private` (Cloudflare `platform.env`) **and** at build time for the prerendered pages — so it must be set in **both** the runtime secrets and the build environment. |
+| `GH_WEBHOOK_SECRET`                         | Recommended    | A shared secret used to verify (HMAC SHA‑256) that incoming requests to `/api/revalidate` actually came from your GitHub webhook. This enables fast publishing: editing an Issue refreshes the KV manifest and rolls the cache generation instead of waiting for the `s-maxage` TTL. If unset, `/api/revalidate` returns 500 and you fall back to TTL-based freshness.                                                                                            |
+| `GA4_MEASUREMENT_ID`                        | Recommended    | Public GA4 stream identifier used only by the server-side read-event mirror. Production currently uses `G-TW6GTQ9Q4N` and declares it as a non-secret `[vars]` value in `wrangler.toml`.                                                                                                                                                                                                                                                                          |
+| `GA4_API_SECRET`                            | **Production** | Secret for the GA4 Measurement Protocol stream. It is sent only from the Worker and must never be committed, placed in a URL in source code, or exposed to the browser. The application treats it as optional so D1 counting survives a GA outage, but `wrangler.toml` requires it for production deployment.                                                                                                                                                     |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | **Yes**        | Google web OAuth client credentials for tools sign-in.                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `TOOLS_SESSION_SECRET`                      | **Yes**        | Random signing key of at least 32 bytes; rotation invalidates all tools sessions.                                                                                                                                                                                                                                                                                                                                                                                 |
+| `TOOLS_OWNER_GOOGLE_SUB`                    | **Yes**        | Exact immutable Google account ID of the site owner, never an email or a first-login grant.                                                                                                                                                                                                                                                                                                                                                                       |
+| `GOOGLE_REDIRECT_URI`                       | **Yes**        | `https://swyx.io/tools/auth/google/callback`; localhost override for local development.                                                                                                                                                                                                                                                                                                                                                                           |
+| `PRESENCE_ENABLED`                          | Recommended    | Server-side emergency kill switch for new live-reader sockets. Set to `false` and deploy the main Worker to reject presence while leaving every page usable.                                                                                                                                                                                                                                                                                                      |
+| `PUBLIC_PRESENCE_ADMISSION_RATE`            | Recommended    | Deployment-time browser admission fraction from `0` through `1`. Production starts at `1`; use `0.1` during a viral spike to reduce socket workload by roughly 90%. This value is public by design.                                                                                                                                                                                                                                                               |
 
 ### Where to get the values
 
@@ -80,8 +82,10 @@ If you want to make a site based on this, see https://github.com/swyxio/swyxkit 
 npx wrangler secret put GH_TOKEN
 npx wrangler secret put GH_WEBHOOK_SECRET
 npx wrangler secret put GA4_API_SECRET
-npx wrangler secret put PODCAST_ADMIN_PASSWORD
-npx wrangler secret put PODCAST_ADMIN_SESSION_SECRET
+npx wrangler secret put GOOGLE_CLIENT_ID
+npx wrangler secret put GOOGLE_CLIENT_SECRET
+npx wrangler secret put TOOLS_SESSION_SECRET
+npx wrangler secret put TOOLS_OWNER_GOOGLE_SUB
 ```
 
 Each command prompts for the value. List them with `npx wrangler secret list`.
@@ -427,3 +431,102 @@ See https://swyx.io
 - You can see previous iterations of the site from 2017 here: https://www.swyx.io/rewrite-2022
 - The last version of the 2022 site was preserved at https://github.com/swyxio/swyxdotio2022
 - The 2023 site is documented at https://www.swyx.io/rewrite-2023
+
+## Google sign-in and tenant boundaries
+
+Tools follow [Google OpenID Connect](https://developers.google.com/identity/openid-connect/openid-connect) through [`openid-client`](https://github.com/panva/openid-client) with PKCE, state, nonce,
+issuer/audience/expiry checks and signed ID-token verification. `jose` signs the
+seven-day HTTP-only tools session. No Google access/refresh tokens are retained.
+There is no password-login endpoint or legacy session fallback.
+
+- `/draw`: every Google `sub` gets its own Durable Object workspace. Only the
+  configured owner maps to the existing `personal` workspace, preserving production
+  drawings. Requests cannot supply another tenant’s namespace.
+- Browser drawing caches, library, assistant history and generation history are
+  account-scoped. Old unscoped device caches are retained but never automatically
+  imported into a Google account. Guest drawings are not silently uploaded on login.
+- Drawing writes require `X-Tools-User` matching the signed session, so an old tab
+  cannot write into another account after a session switch.
+- `/box` text has no server persistence; signed-in opens have activity metadata.
+  Public articles and podcast feeds remain public.
+- Cloud AI is **site-funded for every signed-in account**, with durable admission
+  limits enforced before provider calls: 20 assistant turns/hour, 5 media jobs/hour,
+  $2/day per account and $20/day site-wide in conservative estimated reservations.
+  These estimates are not exact provider billing caps. Failed attempts retain their
+  reservations. Provider job IDs are bound to their originating Google account.
+- AI admission/status logs contain account ID, request ID, model, timestamp, status
+  and estimated reserved cost only. Retention is 30 days with durable alarm cleanup;
+  prompts/images/tokens/provider keys are never stored in operational logs. Limits
+  and this disclosure are shown before use. `GET /tools/api/ai/usage` returns only
+  the current account's counters and policy. No ledger means no paid request.
+- Podcast publishing, archive migration and the separately hosted Reclip redirect
+  remain **owner-only**. Multi-tenant podcast hosting and the external Reclip service
+  still need their own product/data boundaries before opening them to all accounts.
+
+### Production setup
+
+1. Create a dedicated Google Cloud project and an **External** Google Auth app.
+   Request only `openid`, `email`, `profile`. No Drive/Gmail APIs or offline access.
+2. Create a **Web application** client with redirect URI
+   `https://swyx.io/tools/auth/google/callback`. For local OAuth testing register a
+   separate localhost callback and set `GOOGLE_REDIRECT_URI` to the exact port.
+3. Publish the Google app’s audience for general sign-in rather than relying on a
+   testing-user allowlist. Set the homepage to `https://swyx.io/tools` and privacy
+   URL to `https://swyx.io/tools/privacy`; satisfy Google’s domain/brand requirements.
+4. Store the four required secrets above with Wrangler; never commit/download
+   credentials into the repo or put them in browser storage. Generate a fresh
+   signing key. Verify the owner’s immutable Google `sub` from a validated sign-in;
+   never grant admin based on the first user to register.
+5. Build and test before deploying. Verify a real owner login and a different
+   account’s independent drawing workspace, then verify denied owner endpoints.
+   Do not deploy with incomplete OAuth credentials and strand the current owner.
+6. Old password secrets may be removed from provider configuration only after
+   successful cutover and the rollback window. They are no longer read by code.
+
+Auth pages/APIs bypass shared caches, use `no-store`, and suppress referrer data.
+Local tests use signed fixture identities only on localhost, never a production
+login bypass. Provider-token validation is covered separately with mocked Google
+responses and real test RSA signatures.
+
+### Google project
+
+The auth-only project is `swyx-io-tools` (project number `31511070245`), owned by
+`shawnthe1@gmail.com`; no billing account is linked. Google branding is **swyx.io
+Tools**, audience **External**, client **swyx.io Tools Web**. Registered callbacks
+are production and `http://localhost:4188/tools/auth/google/callback` for verification.
+Deploy the drawing companion first whenever the AI ledger protocol changes, then
+the main Worker. The companion has no public data endpoint.
+
+### Tool logs
+
+`/tools/logs` is the Google-authenticated activity dashboard. Everyone can inspect
+their own records; only the current `TOOLS_OWNER_GOOGLE_SUB` can select **Everyone**.
+Owner access is usage metadata only, not permission to read private drawing assets,
+prompts or generated content. The notice and privacy page disclose owner visibility
+of account names/emails and metadata to all users.
+
+- Filters: last 24 hours / 7 / 30 days, AI / tool actions, and tool. Owner scope is
+  separate from filters. Daily UTC counts, estimated reserved cost, statuses and
+  request IDs are available, with 50-record cursor pages. Totals cover all filtered
+  records, not only the loaded page.
+- AI admissions/statuses are read directly from the existing quota ledger. They
+  are **not actual invoices**; provider token totals and usage outside swyx.io are
+  unavailable. Pending means completion has not been recorded, not success.
+- Server instrumentation records cloud drawing changes, podcast uploads, and
+  Reclip launches. Browser reports cover Draw/Box opens, local image operations,
+  design insert/export, and memes. Tool records are best-effort; offline, blocked,
+  rate-limited or unavailable recording may leave gaps. No anonymous backfill.
+- Records and inactive account-directory entries are pruned after 30 days by the
+  companion’s durable alarm. Browser reporting has a separate 120-events/hour
+  per-account limit and cannot spend or alter AI quotas.
+- `GET /tools/api/logs` accepts `days`, `kind`, `tool`, `scope=mine|all`, and `before`.
+  `all` is server-authorized. Browser `POST` accepts only `{id,action,status}`,
+  requires same origin plus `X-Tools-User`, and gets identity/time/provenance from
+  the server. User IDs, profile fields and arbitrary payloads are rejected.
+
+New tool integrations must extend the bounded vocabulary in
+`src/lib/tools-activity.js`. Use `recordToolActivity(userId, action, status)` only
+for browser-reported actions, and the server activity helpers for authoritative
+operations. Never pass prompts, images, page/file names, URLs, cookies, or keys.
+The logs API and dashboard never expose another account to ordinary users, even
+if they supply an account ID, owner scope, or another account’s cursor.

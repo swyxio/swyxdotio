@@ -1,4 +1,8 @@
-import { cancelDrawingImage, editDrawingImage, pollDrawingImage } from '$lib/server/draw-fal.js';
+import {
+	cancelDrawingImage,
+	editDrawingImage,
+	pollDrawingImage
+} from '$lib/server/draw-generation.js';
 
 export const prerender = false;
 

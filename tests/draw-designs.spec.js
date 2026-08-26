@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
+import { authenticateTools, TEST_TOOLS_OWNER, TEST_TOOLS_MEMBER } from './helpers/tools-auth.js';
 
 /** @param {import('@playwright/test').Page} page */
 async function openDesignLibrary(page) {
@@ -12,7 +13,12 @@ async function openDesignLibrary(page) {
 async function scene(page) {
 	return /** @type {{ elements: any[], files: Record<string, any> }} */ (
 		await page.evaluate(() =>
-			JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[],"files":{}}')
+			JSON.parse(
+				localStorage.getItem(
+					document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+						'swyx-excalidraw:guest'
+				) ?? '{"elements":[],"files":{}}'
+			)
 		)
 	);
 }
@@ -125,14 +131,11 @@ test('authenticated assistant offers grounded Canva-style tasks and creates bran
 }) => {
 	await page.goto('/draw');
 	const origin = new URL(page.url()).origin;
-	const login = await page.request.post(`${origin}/tools/api/session`, {
-		headers: { Origin: origin },
-		data: { password: 'draw-test-password' }
-	});
-	expect(login.ok()).toBe(true);
+	await authenticateTools(page);
 	await page.reload();
 	let round = 0;
 	await page.route('**/tools/api/draw/agent', async (route) => {
+		if (route.request().method() === 'GET') return route.continue();
 		round++;
 		await route.fulfill({
 			json:
@@ -160,7 +163,7 @@ test('authenticated assistant offers grounded Canva-style tasks and creates bran
 	});
 	await page.getByRole('button', { name: 'Open drawing assistant' }).click();
 	const assistant = page.getByRole('region', { name: 'Drawing assistant' });
-	await expect(assistant.getByRole('button', { name: /try .+ workflow/i })).toHaveCount(6);
+	await expect(assistant.getByRole('button', { name: /try .+ workflow/i })).toHaveCount(8);
 	await assistant.getByRole('button', { name: 'Try Podcast thumbnail workflow' }).click();
 	await expect(assistant.getByRole('textbox', { name: 'Message drawing assistant' })).toHaveValue(
 		/timestamp zone/
@@ -170,7 +173,7 @@ test('authenticated assistant offers grounded Canva-style tasks and creates bran
 		timeout: 20_000
 	});
 	await assistant.getByRole('button', { name: 'Browse assistant design workflows' }).click();
-	await expect(assistant.getByRole('button', { name: /try .+ workflow/i })).toHaveCount(6);
+	await expect(assistant.getByRole('button', { name: /try .+ workflow/i })).toHaveCount(8);
 	await assistant.getByRole('button', { name: 'Try Speaker announcement workflow' }).click();
 	await expect(assistant.getByRole('textbox', { name: 'Message drawing assistant' })).toHaveValue(
 		/1080 × 1350/
@@ -193,6 +196,7 @@ test('design workflows remain reachable and artboard controls stay contained on 
 }) => {
 	await page.setViewportSize({ width: 390, height: 844 });
 	await page.goto('/draw');
+	await page.getByRole('button', { name: 'Choose drawing mode and tools' }).click();
 	await page.getByRole('button', { name: 'Open drawing templates and library' }).click();
 	await page.getByRole('tab', { name: 'Design', exact: true }).click();
 	await page.getByRole('button', { name: 'Insert Article launch banner design' }).click();

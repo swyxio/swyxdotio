@@ -12,7 +12,7 @@ https://swyx.io/rss.xml
 
 ## Shows
 
-| Transistor show        | Published episodes | New canonical feed                                     |
+| Transistor show        | Archived episodes | New canonical feed                                     |
 | ---------------------- | -----------------: | ------------------------------------------------------ |
 | `learn-in-podcast`     |                540 | `https://swyx.io/podcast/learn-in-podcast/rss.xml`     |
 | `the-temporal-podcast` |                 25 | `https://swyx.io/podcast/the-temporal-podcast/rss.xml` |
@@ -24,6 +24,65 @@ The Transistor dashboard also reported 6 draft-filter rows for
 feed, three unpublished MP3s were preserved under unlinked checksum-addressed R2
 paths, one metadata-only draft had no downloadable audio, and one row was
 already present in the migrated archive feed.
+
+The August 25 audit matched all 582 currently published Transistor episode
+titles to the archive. The 583rd archive episode is the Chainsmokers draft
+published directly on swyx.io. Channel website links should point to
+`https://swyx.io/podcasts#<slug>`; RSS self-links and feed redirects continue to
+use `https://swyx.io/podcast/<slug>/rss.xml`.
+
+## Offline backup and legacy website cutover
+
+The original ignored `.podcast-migration` staging directory is not guaranteed to
+survive checkout cleanup. Keep a full offline backup outside the repository.
+Given a **complete** Cloudflare R2 List Objects JSON response, the backup script
+downloads the podcast bucket snapshot without changing remote objects:
+
+```sh
+node scripts/backup-podcast-r2.mjs /path/to/r2-objects.json /path/to/offline-backup
+```
+
+Downloads are streamed with three concurrent requests. Each object is checked
+against its recorded byte length, single-part ETag/MD5 where applicable, and
+the SHA-256 prefix in checksum-addressed filenames. The script records full
+SHA-256s in `manifest.json` and `SHA256SUMS`. Reruns hash and verify completed
+files before skipping them. Ctrl-C stops the process; rerun the same command to
+resume. Keep the directory private because it includes unpublished drafts and
+administrative metadata. This backs up the current R2 inventory, not the
+missing original Transistor staging manifests or analytics exports.
+
+The dedicated `wrangler.podcast-redirects.toml` deploy target serves three
+Cloudflare Custom Domains and sends every legacy website path to its matching
+archive. It does not redeploy the main website:
+
+| Transistor website | Owned redirect domain | Archive section |
+| --- | --- | --- |
+| `swyx.transistor.fm` | `mixtape.swyx.io` | `/podcasts#learn-in-podcast` |
+| `temporal.transistor.fm` | `temporal.swyx.io` | `/podcasts#the-temporal-podcast` |
+| `careerchats.transistor.fm` | `careerchats.swyx.io` | `/podcasts#career-chats` |
+
+```sh
+npx wrangler deploy --config wrangler.podcast-redirects.toml
+```
+
+Code, deployment, and live DNS/HTTP verification are separate steps. The
+Transistor-owned `temporal.transistor.fm` and `careerchats.transistor.fm`
+hostnames cannot be configured in our Cloudflare zone. After deploying and
+verifying the owned domains, use each show's **Website > URL** settings to set
+the matching custom domain and enable **Redirect all requests to your custom
+domain**. Verify the full redirect chain, including an episode path.
+Transistor's documentation guarantees RSS redirects after cancellation, but
+does not explicitly guarantee website redirects; confirm their retention with
+support before treating the provider-owned website addresses as permanent.
+Do not substitute a JavaScript redirect for a durable provider-level 301 after
+account cancellation. Website redirects are separate from the three existing
+RSS redirects.
+
+Before repairing existing R2 feed objects, snapshot each current XML and ETag.
+Run `ensureCanonicalFeedLinks` and verify every episode item is unchanged; do
+not re-upload a historical replacement feed over newer studio publications.
+Publish with an ETag condition, then read back the canonical RSS URL and verify
+both its website link and unchanged episode/GUID/media inventory.
 
 ## Cloudflare Storage
 

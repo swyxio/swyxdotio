@@ -1,5 +1,5 @@
 import { error, json } from '@sveltejs/kit';
-import { isPodcastStudioSessionValid, podcastStudioCookieName } from './podcast-admin-auth.js';
+import { getToolsUser } from './server/tools-auth.js';
 
 /**
  * @param {Request} request
@@ -21,12 +21,16 @@ export function requireSameOrigin(request, url) {
  * @returns {Promise<R2Bucket | undefined>}
  */
 export async function requirePodcastStudio({ cookies, platform, request, url }) {
-	const sessionSecret = platform?.env?.PODCAST_ADMIN_SESSION_SECRET;
-	if (!sessionSecret) throw error(404, 'Not found');
+	const user = await getToolsUser({ cookies, platform });
+	if (!user) throw error(401, 'Sign in with Google');
+	if (!user.isOwner) throw error(403, 'Podcast publishing is available only to the site owner.');
+	const expectedUser = request.headers.get('X-Tools-User');
+	if (expectedUser !== null && expectedUser !== user.id)
+		throw error(409, {
+			code: 'account_changed',
+			message: 'Your Google account changed. Reload before continuing.'
+		});
 	requireSameOrigin(request, url);
-	if (!(await isPodcastStudioSessionValid(cookies.get(podcastStudioCookieName()), sessionSecret))) {
-		throw error(401, 'Log in again');
-	}
 	return platform?.env?.PODCAST_MEDIA;
 }
 

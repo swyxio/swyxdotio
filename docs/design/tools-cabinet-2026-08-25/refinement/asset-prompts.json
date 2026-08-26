@@ -1,0 +1,14 @@
+[
+	{
+		"key": "desk-still-life",
+		"prompt": "Use case: stylized-concept. Production website decorative illustration. A narrow vertical antique writer's desktop still-life: a tarnished brass pen cup containing two black fountain pens with gold nibs, an antique drawing compass leaning beside it, and a dark wooden letterpress type block with exactly Aa in large brass serif letters, all resting on two horizontally stacked worn leather books and a small wooden plinth. Composition narrow portrait 2:3, arranged taller on the left and tapering to the right, every object fully in frame with 6% margin. Cutout on genuine transparent background with alpha and a small natural contact shadow. Richly detailed realistic painted materials, warm walnut brown, aged ivory, black ink, restrained brass, soft warm light from top left, straight-on view with very slight view of top surfaces. Like a beautiful literary curiosity cabinet. No room, no desk background, no interface, no watermark, no words other than Aa, no extra drawer labels. Asset must look convincing at 180px wide."
+	},
+	{
+		"key": "brass-pull",
+		"prompt": "Use case: stylized-concept. Production website ornamental hardware asset. A single antique library drawer pull in aged brass, straight-on frontal view. A wide rectangular shaped backplate with softly scalloped corners and a screw at each end, a completely empty dark rectangular label-holder recess in its upper half, and a pronounced projecting curved cup handle below. Beautiful tangible brass, dark tarnish in crevices, worn highlights on rounded handle lip, detailed realism, not a flat icon. Wide landscape 2:1 composition with object occupying 85% width, all hardware visible, genuine transparent background alpha. Soft warm lighting from upper left. No wood, no text or symbols, no surrounding interface, no watermark. Reads at 110px wide."
+	},
+	{
+		"key": "paper-sheet",
+		"prompt": "Use case: stylized-concept. Production website background asset for live HTML text. Single blank rectangular sheet of old warm ivory writing paper, front-on flat view, horizontal 3:2 proportions. Genuine transparent background outside the sheet. Paper occupies 96% of canvas, delicate uneven deckled edges with slightly curled corners, very subtle fine fibers and aged golden edge discoloration, a natural soft small shadow. Center almost uniform pale ivory #fbf4e7 for legible dark text. No text, writing, stains in center, symbols, decorative objects, pins, clips, surrounding desk or watermark. High quality antique stationery scan. Must be practical as a resizable HTML panel backdrop."
+	}
+]

@@ -1,3 +1,7 @@
+import { ToolsAiUsage } from './ai-usage.js';
+import { ToolsActivity } from './activity.js';
+import { CreativeLibrary } from './creative-library.js';
+
 const MAX_SCENE_BYTES = 1_800_000;
 const MAX_PAGE_COUNT = 100;
 const MAX_PAGE_NAME_LENGTH = 120;
@@ -50,9 +54,16 @@ function respond(body, status = 200) {
 }
 
 export class DrawingPages {
-	/** @param {{ storage: { sql: SqlStorage } }} ctx */
+	/** @param {{ storage: { sql: SqlStorage, setAlarm?: (time: number) => Promise<void> } }} ctx */
 	constructor(ctx) {
 		this.sql = ctx.storage.sql;
+		this.storage = ctx.storage;
+		/** @type {ToolsAiUsage | undefined} */
+		this.aiUsage = undefined;
+		/** @type {ToolsActivity | undefined} */
+		this.activity = undefined;
+		/** @type {CreativeLibrary | undefined} */
+		this.creativeLibrary = undefined;
 		this.sql.exec(`
 			CREATE TABLE IF NOT EXISTS drawing_pages (
 				id TEXT PRIMARY KEY,
@@ -201,6 +212,37 @@ export class DrawingPages {
 	/** @param {Request} request */
 	async fetch(request) {
 		const path = new URL(request.url).pathname;
+		if (path.startsWith('/creative/')) {
+			this.creativeLibrary ??= new CreativeLibrary(this.sql);
+			return this.creativeLibrary.fetch(request);
+		}
+		if (path.startsWith('/ai/')) {
+			if (request.method !== 'POST') return respond({ error: 'Method not allowed.' }, 405);
+			const raw = await request.text();
+			if (raw.length > 4096) return respond({ error: 'Usage metadata is too large.' }, 413);
+			let body;
+			try {
+				body = JSON.parse(raw);
+			} catch {
+				return respond({ error: 'Invalid usage metadata.' }, 400);
+			}
+			if (!isObject(body)) return respond({ error: 'Invalid usage metadata.' }, 400);
+			this.aiUsage ??= new ToolsAiUsage(this.sql);
+			this.activity ??= new ToolsActivity(this.sql);
+			if (path.startsWith('/ai/activity-')) this.aiUsage.prune();
+			const response = path.startsWith('/ai/activity-')
+				? this.activity.handle(path, body)
+				: this.aiUsage.handle(path, body);
+			if (response.ok && (path === '/ai/admit' || path === '/ai/activity-record'))
+				this.activity.recordProfile(body.userId, body.profile);
+			const expiry = this.nextUsageExpiry();
+			if (expiry !== null) {
+				if (!this.storage.setAlarm)
+					return respond({ error: 'Usage retention is unavailable.' }, 503);
+				await this.storage.setAlarm(expiry);
+			}
+			return response;
+		}
 		if (path === '/pages') {
 			if (request.method === 'GET') return this.listPages();
 			if (request.method === 'POST') return this.createPage(request);
@@ -220,6 +262,20 @@ export class DrawingPages {
 		if (request.method === 'PUT') return this.updatePage(id, request);
 		if (request.method === 'DELETE') return this.deletePage(id);
 		return respond({ error: 'Method not allowed.' }, 405);
+	}
+	nextUsageExpiry() {
+		const values = [this.aiUsage?.nextExpiry(), this.activity?.nextExpiry()].filter(
+			(value) => typeof value === 'number'
+		);
+		return values.length ? Math.min(.../** @type {number[]} */ (values)) : null;
+	}
+	async alarm() {
+		this.aiUsage ??= new ToolsAiUsage(this.sql);
+		this.activity ??= new ToolsActivity(this.sql);
+		this.aiUsage.prune();
+		this.activity.prune();
+		const expiry = this.nextUsageExpiry();
+		if (expiry !== null && this.storage.setAlarm) await this.storage.setAlarm(expiry);
 	}
 }
 

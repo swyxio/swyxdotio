@@ -10,6 +10,9 @@ test('drawing presets expose the complete named visual-thinking catalog', () => 
 	assert.deepEqual(
 		DRAW_PRESETS.map(({ id }) => id),
 		[
+			'architecture-comparison',
+			'agent-tool-loop',
+			'argument-map',
 			'decision-matrix',
 			'axis-chart',
 			'growth-curves',
@@ -27,6 +30,36 @@ test('drawing presets expose the complete named visual-thinking catalog', () => 
 		assert.ok(preset.description.length > 20, `${preset.id} needs helpful preview text`);
 		assert.equal(typeof preset.createShapes, 'function');
 	}
+});
+
+test('essay starters encode comparisons, feedback and evidence with editable bound relationships', () => {
+	const diagrams = Object.fromEntries(
+		DRAW_PRESETS.slice(0, 3).map((preset) => [preset.id, preset.createShapes()])
+	);
+	for (const shapes of Object.values(diagrams)) {
+		const ids = new Set(shapes.map((shape) => shape.id));
+		for (const edge of shapes.filter((shape) => shape.type === 'arrow')) {
+			assert.ok(ids.has(edge.start?.id));
+			assert.ok(ids.has(edge.end?.id));
+			assert.ok(edge.label?.text);
+		}
+		assert.ok(shapes.every((shape) => shape.roughness === 1));
+	}
+	const labels = (id) =>
+		diagrams[id].map((shape) => shape.text ?? shape.label?.text ?? '').join('\n');
+	assert.equal(
+		diagrams['architecture-comparison'].filter((shape) => shape.label?.text === 'Question').length,
+		2
+	);
+	assert.match(labels('architecture-comparison'), /not a benchmark/);
+	assert.match(labels('agent-tool-loop'), /feedback/);
+	assert.match(labels('agent-tool-loop'), /done \/ budget \/ error/);
+	assert.match(labels('argument-map'), /unknown/);
+	assert.ok(
+		diagrams['argument-map'].some(
+			(shape) => shape.label?.text === 'qualifies' && shape.strokeStyle === 'dashed'
+		)
+	);
 });
 
 test('every preset generates independently editable native Excalidraw element skeletons', () => {

@@ -185,6 +185,89 @@ test('drawing assistant duplicates and aligns shapes with one native undo captur
 	);
 });
 
+test('essay-ready duplication preserves bound labels and internal arrows without touching originals', async () => {
+	const { context, scenes } = drawingContext();
+	const originals = [
+		{
+			id: 'a',
+			type: 'rectangle',
+			x: 0,
+			y: 0,
+			width: 120,
+			height: 80,
+			groupIds: ['group'],
+			boundElements: [
+				{ id: 'label', type: 'text' },
+				{ id: 'edge', type: 'arrow' }
+			]
+		},
+		{
+			id: 'label',
+			type: 'text',
+			text: 'A claim',
+			x: 10,
+			y: 20,
+			width: 100,
+			height: 25,
+			containerId: 'a',
+			groupIds: ['group']
+		},
+		{
+			id: 'b',
+			type: 'rectangle',
+			x: 300,
+			y: 0,
+			width: 120,
+			height: 80,
+			groupIds: ['group'],
+			boundElements: [{ id: 'edge', type: 'arrow' }]
+		},
+		{
+			id: 'edge',
+			type: 'arrow',
+			x: 120,
+			y: 40,
+			width: 180,
+			height: 0,
+			points: [
+				[0, 0],
+				[180, 0]
+			],
+			startBinding: { elementId: 'a', focus: 0, gap: 1 },
+			endBinding: { elementId: 'b', focus: 0, gap: 1 }
+		}
+	];
+	context.editor.updateScene({
+		elements: originals,
+		appState: { selectedElementIds: { a: true, b: true, edge: true } }
+	});
+	const before = structuredClone(originals);
+	const convertElements = context.convertElements;
+	context.convertElements = (shapes) =>
+		convertElements(shapes).map((shape) =>
+			shape.type === 'text'
+				? { ...shape, x: shape.x - shape.width / 2, y: shape.y - shape.height / 2 }
+				: shape
+		);
+	const result = await executeDrawingAgentCommand(['duplicate', '--dx', '600'], context);
+	const all = context.editor.getSceneElements();
+	assert.deepEqual(all.slice(0, 4), before);
+	const [a, label, b, edge] = all.slice(4);
+	assert.equal(result.duplicated.length, 4);
+	assert.equal(label.containerId, a.id);
+	assert.equal(edge.startBinding.elementId, a.id);
+	assert.equal(edge.endBinding.elementId, b.id);
+	assert.ok(a.boundElements.some((bound) => bound.id === label.id));
+	assert.equal(a.groupIds[0], b.groupIds[0]);
+	assert.notEqual(a.groupIds[0], 'group');
+	assert.equal(a.x, 600);
+	assert.equal(label.x, before[1].x + 600);
+	assert.equal(label.y, before[1].y + 24);
+	assert.equal(label.width, before[1].width);
+	assert.equal(label.height, before[1].height);
+	assert.equal(scenes.at(-1).captureUpdate, 'immediately');
+});
+
 test('drawing assistant evenly distributes elements, groups them, and reverses grouping', async () => {
 	const { context, scenes } = drawingContext();
 	await executeDrawingAgentCommand(

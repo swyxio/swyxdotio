@@ -12,6 +12,7 @@ keep_vars = true
 main = ".svelte-kit/cloudflare/_worker.js"
 
 [vars]
+GOOGLE_REDIRECT_URI = "https://swyx.io/tools/auth/google/callback"
 GA4_MEASUREMENT_ID = "G-TW6GTQ9Q4N"
 PRESENCE_ENABLED = "true"
 PUBLIC_PRESENCE_ADMISSION_RATE = "1"
@@ -27,7 +28,7 @@ binding = "AI"
 binding = "CF_VERSION_METADATA"
 
 [secrets]
-required = ["GH_TOKEN", "PODCAST_ADMIN_PASSWORD", "PODCAST_ADMIN_SESSION_SECRET", "GA4_API_SECRET"]
+required = ["GH_TOKEN", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "TOOLS_SESSION_SECRET", "TOOLS_OWNER_GOOGLE_SUB", "GA4_API_SECRET"]
 
 [[kv_namespaces]]
 binding = "CONTENT_MANIFEST"
@@ -79,6 +80,11 @@ script_name = "swyxdotio-draw"
 [[r2_buckets]]
 binding = "PODCAST_MEDIA"
 bucket_name = "swyxdotio-podcast-media"
+
+# Private creative assets: no public R2 URL; all reads require the account session.
+[[r2_buckets]]
+binding = "DRAW_ASSETS"
+bucket_name = "swyxdotio-draw-assets"
 
 # Example bindings for future use (uncomment + configure when needed):
 # [[durable_objects.bindings]]

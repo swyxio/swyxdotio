@@ -1,0 +1,18 @@
+name = "swyxdotio-podcast-redirects"
+account_id = "2d017c943ff16e4c52783635ef05e535"
+main = "workers/podcast-redirects/index.js"
+compatibility_date = "2026-08-25"
+workers_dev = false
+preview_urls = false
+
+[[routes]]
+pattern = "mixtape.swyx.io"
+custom_domain = true
+
+[[routes]]
+pattern = "temporal.swyx.io"
+custom_domain = true
+
+[[routes]]
+pattern = "careerchats.swyx.io"
+custom_domain = true

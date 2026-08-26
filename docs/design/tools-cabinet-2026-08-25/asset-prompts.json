@@ -1,0 +1,30 @@
+[
+	{
+		"asset": "draw",
+		"prompt": "Use case: stylized-concept. Production website illustration for a literary curiosity-cabinet tool launcher. A small stack of warm ivory drafting paper with a simple hand-inked flow diagram of four unlabeled boxes and connecting arrows, and a black fountain pen with brass nib resting diagonally on it. Style: carefully painted antique scientific-catalog object with realistic tactile paper, leather, brass and ink, subtle engraved details, warm neutral lighting, precise silhouette and gentle small contact shadow. The object should be large, centered, fully in view, occupying 78% of a square canvas, all sides with at least 10% safe margin. Genuine transparent background with alpha, no solid backdrop, no cabinet, no shelves, no labels, no UI, no decorations around the object, no watermark. Designed to read clearly as a 100px illustration. Consistent restrained warm walnut/ivory/black/brass palette."
+	},
+	{
+		"asset": "box",
+		"prompt": "Use case: stylized-concept. Production website illustration for a literary curiosity-cabinet tool launcher. A small stack of aged ivory index cards, the top card with the large dark serif typographic sample Aa. Only text allowed is exactly Aa. Style: carefully painted antique scientific-catalog object with realistic tactile paper, leather, brass and ink, subtle engraved details, warm neutral lighting, precise silhouette and gentle small contact shadow. The object should be large, centered, fully in view, occupying 78% of a square canvas, all sides with at least 10% safe margin. Genuine transparent background with alpha, no solid backdrop, no cabinet, no shelves, no labels, no UI, no decorations around the object, no watermark. Designed to read clearly as a 100px illustration. Consistent restrained warm walnut/ivory/black/brass palette."
+	},
+	{
+		"asset": "logs",
+		"prompt": "Use case: stylized-concept. Production website illustration for a literary curiosity-cabinet tool launcher. A small closed black leather ledger notebook, antique brass corner protectors and restrained embossed gold border. A tiny rectangular brass label on the cover is completely blank. No letters or words. Style: carefully painted antique scientific-catalog object with realistic tactile paper, leather, brass and ink, subtle engraved details, warm neutral lighting, precise silhouette and gentle small contact shadow. The object should be large, centered, fully in view, occupying 78% of a square canvas, all sides with at least 10% safe margin. Genuine transparent background with alpha, no solid backdrop, no cabinet, no shelves, no labels, no UI, no decorations around the object, no watermark. Designed to read clearly as a 100px illustration. Consistent restrained warm walnut/ivory/black/brass palette."
+	},
+	{
+		"asset": "podcast",
+		"prompt": "Use case: stylized-concept. Production website illustration for a literary curiosity-cabinet tool launcher. A single vintage silver broadcast microphone on a short black-and-brass desktop pedestal, viewed slightly from the front. Compact, handsome 1940s instrument. Style: carefully painted antique scientific-catalog object with realistic tactile paper, leather, brass and ink, subtle engraved details, warm neutral lighting, precise silhouette and gentle small contact shadow. The object should be large, centered, fully in view, occupying 78% of a square canvas, all sides with at least 10% safe margin. Genuine transparent background with alpha, no solid backdrop, no cabinet, no shelves, no labels, no UI, no decorations around the object, no watermark. Designed to read clearly as a 100px illustration. Consistent restrained warm walnut/ivory/black/brass palette."
+	},
+	{
+		"asset": "reclip",
+		"prompt": "Use case: stylized-concept. Production website illustration for a literary curiosity-cabinet tool launcher. A single vintage metal film reel with five circular openings and a short elegantly curled strip of black photographic film. Compact upright arrangement. Style: carefully painted antique scientific-catalog object with realistic tactile paper, leather, brass and ink, subtle engraved details, warm neutral lighting, precise silhouette and gentle small contact shadow. The object should be large, centered, fully in view, occupying 78% of a square canvas, all sides with at least 10% safe margin. Genuine transparent background with alpha, no solid backdrop, no cabinet, no shelves, no labels, no UI, no decorations around the object, no watermark. Designed to read clearly as a 100px illustration. Consistent restrained warm walnut/ivory/black/brass palette."
+	},
+	{
+		"asset": "wood",
+		"prompt": "Use case: stylized-concept. Production website material asset, square. An edge-to-edge flat material sample of warm dark walnut wood, fine horizontal grain, very subtle natural variation, evenly lit. Seamlessly tileable on every edge. No objects, bevels, frames or lettering. A texture, not a photograph of a room. Palette brown walnut #51361f to #8c623c, mature satin finish, no orange cast. Quiet fine detail and consistent exposure so repeated small tiles will not be distracting. No text, logos, watermark, UI, shadows or border."
+	},
+	{
+		"asset": "paper",
+		"prompt": "Use case: stylized-concept. Production website background texture. An edge-to-edge seamless tile of very light warm ivory archival paper, palette #fcf5e7 with subtle tiny natural paper fibers and faint warm variation. Flat evenly illuminated scan, no stains or big marks. Quiet texture for readable dark HTML text, nearly uniform luminance. No edges, borders, shadows, objects, drawings, writing, letters, watermark. Square, tileable horizontally and vertically. Not a photo of a room or desk."
+	}
+]

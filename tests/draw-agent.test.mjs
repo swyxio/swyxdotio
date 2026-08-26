@@ -1,10 +1,12 @@
+import { createTestAiLedger, ledgerRequest } from './helpers/tools-ai-ledger.mjs';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { createPodcastStudioSession } from '../src/lib/podcast-admin-auth.js';
+import { createToolsSession } from '../src/lib/server/tools-auth.js';
 import {
 	DRAW_AGENT_MODEL,
 	MAX_DRAW_AGENT_REQUEST_BYTES,
+	drawingAgentProviders,
 	runDrawingAgent
 } from '../src/lib/server/draw-agent.js';
 import {
@@ -14,13 +16,14 @@ import {
 	readDrawingAgentBudget
 } from '../src/lib/server/draw-agent-budget.js';
 
-const SESSION_SECRET = 'drawing-agent-test-only-session';
+const SESSION_SECRET = 'drawing-agent-test-only-session-secret';
 const SCREENSHOT = 'data:image/webp;base64,c2FmZS12aWV3cG9ydA==';
 
-/** @param {{ authenticated?: boolean, body?: unknown, ai?: any, origin?: string, contentType?: string, contentLength?: string }} [options] */
+/** @param {{ authenticated?: boolean, owner?: boolean, body?: unknown, ai?: any, origin?: string, contentType?: string, contentLength?: string, ledger?: any, env?: Record<string,unknown> }} [options] */
 async function createEvent(options = {}) {
 	const url = new URL('https://swyx.io/tools/api/draw/agent');
 	const headers = new Headers({
+		'X-Tools-User': options.owner === false ? 'other-google-sub' : 'owner-google-sub',
 		Origin: options.origin ?? url.origin,
 		'Content-Type': options.contentType ?? 'application/json'
 	});
@@ -33,18 +36,31 @@ async function createEvent(options = {}) {
 		)
 	});
 	const session =
-		options.authenticated === false ? undefined : await createPodcastStudioSession(SESSION_SECRET);
+		options.authenticated === false
+			? undefined
+			: await createToolsSession(
+					{
+						id: options.owner === false ? 'other-google-sub' : 'owner-google-sub',
+						email: 'user@example.com',
+						name: 'Test User'
+					},
+					SESSION_SECRET
+				);
 	return /** @type {any} */ ({
 		url,
 		request,
 		cookies: { get: () => session },
 		platform: {
 			env: {
-				PODCAST_ADMIN_SESSION_SECRET: SESSION_SECRET,
+				TOOLS_SESSION_SECRET: SESSION_SECRET,
+				TOOLS_OWNER_GOOGLE_SUB: 'owner-google-sub',
+				DRAW_PAGES:
+					options.ledger === null ? undefined : (options.ledger ?? createTestAiLedger()).namespace,
 				AI:
 					options.ai === undefined
 						? { run: async () => ({ choices: [{ message: { content: 'Done.' } }] }) }
-						: options.ai
+						: options.ai,
+				...options.env
 			}
 		}
 	});
@@ -102,6 +118,14 @@ test('drawing assistant sends only the visible viewport to the selected vision m
 	assert.equal(response.status, 200);
 	assert.equal(calls[0][0], DRAW_AGENT_MODEL);
 	assert.equal(calls[0][1].tools[0].function.name, 'canvas_bash');
+	assert.equal(calls[0][1].reasoning_effort, 'low');
+	assert.equal(calls[0][1].max_completion_tokens, 2_000);
+	const systemPrompt = calls[0][1].messages[0].content;
+	assert.match(systemPrompt, /https:\/\/swyx.io\/why-temporal/);
+	assert.match(systemPrompt, /For explanatory diagrams and essay figures/);
+	assert.match(systemPrompt, /Mark missing evidence as unknown/);
+	assert.match(systemPrompt, /modify only the copies/);
+	assert.match(systemPrompt, /For thumbnail, speaker announcement, article launch banner/);
 	assert.equal(calls[0][1].messages.at(-1).content[1].image_url.url, SCREENSHOT);
 	const raw = await response.text();
 	const body = JSON.parse(raw);
@@ -112,6 +136,102 @@ test('drawing assistant sends only the visible viewport to the selected vision m
 	assert.equal((await readDrawingAgentBudget(body.budget, SESSION_SECRET)).spent, 112);
 	assert.equal(raw.includes(SESSION_SECRET), false);
 	assert.equal(raw.includes(SCREENSHOT), false);
+});
+
+test('provider metadata requires the same signed account and cannot expose server keys', async () => {
+	assert.equal(
+		(await drawingAgentProviders(await createEvent({ authenticated: false }))).status,
+		401
+	);
+	const stale = await createEvent();
+	stale.request.headers.set('X-Tools-User', 'another-account');
+	assert.equal((await drawingAgentProviders(stale)).status, 409);
+	const response = await drawingAgentProviders(
+		await createEvent({ owner: false, env: { OPENAI_API_KEY: 'private-key' } })
+	);
+	assert.equal(response.status, 200);
+	const text = await response.text();
+	assert.match(text, /openai/);
+	assert.doesNotMatch(text, /private-key/);
+});
+
+test('text-only provider drops screenshots, stays in the same funded ledger, and rejects client credentials', async (t) => {
+	let calls = 0;
+	t.mock.method(globalThis, 'fetch', async (url, /** @type {any} */ options) => {
+		calls++;
+		assert.equal(url, 'https://api.deepseek.com/beta/chat/completions');
+		const body = JSON.parse(options.body);
+		assert.doesNotMatch(JSON.stringify(body), /data:image/);
+		assert.match(body.messages[0].content, /text-only/);
+		return Response.json({
+			choices: [{ message: { content: 'Used the native scene data.' } }],
+			usage: { prompt_tokens: 100, completion_tokens: 50 }
+		});
+	});
+	const ledger = createTestAiLedger();
+	const response = await runDrawingAgent(
+		await createEvent({
+			owner: false,
+			ai: null,
+			ledger,
+			env: { DEEPSEEK_API_KEY: 'private-key' },
+			body: {
+				provider: 'deepseek',
+				messages: [{ role: 'user', content: 'Draw' }],
+				screenshot: SCREENSHOT
+			}
+		})
+	);
+	assert.equal(response.status, 200);
+	assert.equal((await response.json()).modelCostUsd, 0.00011);
+	assert.equal(
+		ledger.calls.find((call) => call.path.endsWith('/admit')).body.model,
+		'deepseek/deepseek-v4-flash'
+	);
+	const denied = await runDrawingAgent(
+		await createEvent({
+			body: {
+				provider: 'openai',
+				apiKey: 'client-key',
+				messages: [{ role: 'user', content: 'Draw' }]
+			}
+		})
+	);
+	assert.equal(denied.status, 422);
+	assert.equal(calls, 1);
+	assert.equal(
+		(
+			await runDrawingAgent(
+				await createEvent({
+					body: { provider: 'unknown', messages: [{ role: 'user', content: 'Draw' }] }
+				})
+			)
+		).status,
+		422
+	);
+});
+
+test('truncated model output cannot execute partial commands or claim a completed review', async () => {
+	for (const output of [
+		{ content: '' },
+		{ content: '', tool_calls: [{ function: { name: 'canvas_bash', arguments: '{"command":' } }] }
+	]) {
+		const response = await runDrawingAgent(
+			await createEvent({
+				body: {
+					messages: [
+						{ role: 'user', content: 'Improve this diagram' },
+						{ role: 'tool', tool_call_id: 'completed', content: JSON.stringify({ exitCode: 0 }) }
+					]
+				},
+				ai: { run: async () => ({ choices: [{ finish_reason: 'length', message: output }] }) }
+			})
+		);
+		assert.equal(response.status, 502);
+		const body = await response.json();
+		assert.equal(body.code, 'response_truncated');
+		assert.equal(body.toolCalls, undefined);
+	}
 });
 
 test('drawing assistant signs shared run budgets, tracks model tokens, and rejects tampering or overspending', async () => {
@@ -162,7 +282,7 @@ test('drawing assistant signs shared run budgets, tracks model tokens, and rejec
 			ai: {
 				run: async () => {
 					called = true;
-					return {};
+					return { choices: [{ message: { content: 'Done.' } }] };
 				}
 			}
 		})
@@ -264,4 +384,117 @@ test('drawing assistant rejects oversized requests, untrusted screenshot URLs, a
 		})
 	);
 	assert.equal(invalidTool.status, 502);
+});
+
+test('signed nonowner Google identities receive funded, durably limited AI access', async () => {
+	let called = false;
+	const response = await runDrawingAgent(
+		await createEvent({
+			owner: false,
+			ai: {
+				run: async () => {
+					called = true;
+					return { choices: [{ message: { content: 'Done.' } }] };
+				}
+			}
+		})
+	);
+	assert.equal(response.status, 200);
+	assert.equal(called, true);
+});
+
+test('drawing assistant rejects stale account headers before spending', async () => {
+	let called = false;
+	const event = await createEvent({
+		ai: {
+			run: async () => {
+				called = true;
+				return {};
+			}
+		}
+	});
+	event.request.headers.set('X-Tools-User', 'previous-user');
+	assert.equal((await runDrawingAgent(event)).status, 409);
+	assert.equal(called, false);
+});
+
+test('missing or failed durable usage tracking prevents all funded model calls', async () => {
+	let called = false;
+	for (const ledger of [
+		null,
+		{
+			namespace: {
+				idFromName: (name) => name,
+				get: () => ({
+					fetch: async () => {
+						throw new Error('Offline');
+					}
+				})
+			}
+		}
+	]) {
+		const response = await runDrawingAgent(
+			await createEvent({
+				ledger,
+				ai: {
+					run: async () => {
+						called = true;
+						return {};
+					}
+				}
+			})
+		);
+		assert.equal(response.status, 503);
+	}
+	assert.equal(called, false);
+});
+
+test('replaying a signed per-run budget cannot bypass durable per-account funded limits', async () => {
+	const ledger = createTestAiLedger();
+	const budget = await createDrawingAgentBudget(1, SESSION_SECRET);
+	let calls = 0;
+	const ai = {
+		run: async () => {
+			calls++;
+			return {
+				choices: [{ message: { content: 'Done.' } }],
+				usage: { prompt_tokens: 10, completion_tokens: 10 }
+			};
+		}
+	};
+	for (let index = 0; index < 21; index++) {
+		const response = await runDrawingAgent(
+			await createEvent({
+				ledger,
+				ai,
+				body: { messages: [{ role: 'user', content: 'Continue' }], budget }
+			})
+		);
+		assert.equal(response.status, index < 20 ? 200 : 429);
+	}
+	assert.equal(calls, 20);
+	assert.equal(
+		ledger.database.prepare('SELECT COUNT(*) AS count FROM tools_ai_usage').get().count,
+		20
+	);
+});
+
+test('model failures are metadata-logged without prompts or model errors and keep their reservation', async () => {
+	const ledger = createTestAiLedger();
+	const response = await runDrawingAgent(
+		await createEvent({
+			ledger,
+			body: { messages: [{ role: 'user', content: 'PRIVATE_PROMPT' }] },
+			ai: {
+				run: async () => {
+					throw new Error('PRIVATE_PROVIDER_ERROR');
+				}
+			}
+		})
+	);
+	assert.equal(response.status, 502);
+	const row = ledger.database.prepare('SELECT * FROM tools_ai_usage').get();
+	assert.equal(row.status, 'failed');
+	assert.equal(row.reserved_micros, 50_000);
+	assert.doesNotMatch(JSON.stringify(row), /PRIVATE/);
 });

@@ -1,16 +1,25 @@
 <script>
+	import { blurDrawingInput, canAutofocusDrawingInput } from '$lib/draw-focus.js';
+	import { tick } from 'svelte';
+	import ToolsAiNotice from '$lib/ToolsAiNotice.svelte';
+	import { recordToolActivity } from '$lib/tools-activity-client.js';
 	import { DRAW_IMAGE_TOOLS, processImageTool } from '$lib/draw-image-tools.js';
-	import { prepareDrawingFalImage } from '$lib/draw-fal-image.js';
-	import { runDrawingFalGeneration } from '$lib/draw-fal-queue.js';
+	import {
+		createDrawingGenerationRun,
+		runDrawingGenerationBatch
+	} from '$lib/draw-generation-batch.js';
+	import { estimateToolsMediaReservation } from '$lib/tools-ai-policy.js';
+	import DrawGenerationLibrary from '$lib/DrawGenerationLibrary.svelte';
 	import { optimizeDrawingImageForCloud, replaceDrawingImage } from '$lib/draw-image-scene.js';
 	import {
-		DEFAULT_DRAW_FAL_MODEL,
-		DRAW_FAL_MODELS,
-		estimateDrawFalModelCost,
-		getDrawFalModelOverrides,
-		getDrawFalModelParameters,
-		resolveDrawFalModelSettings
-	} from '$lib/draw-fal-models.js';
+		DEFAULT_DRAW_GENERATION_MODEL,
+		DEFAULT_DRAW_TEXT_TO_IMAGE_MODEL,
+		DRAW_GENERATION_MODELS,
+		estimateDrawGenerationModelCost,
+		getDrawGenerationModelOverrides,
+		getDrawGenerationModelParameters,
+		resolveDrawGenerationModelSettings
+	} from '$lib/draw-generation-models.js';
 
 	/**
 	 * @typedef {import('@excalidraw/excalidraw/types').ExcalidrawImperativeAPI} DrawingEditor
@@ -20,17 +29,23 @@
 
 	/** @type {{
 	 *  editor: DrawingEditor,
-	 *  imageId: string,
-	 *  imageDataUrl: string,
-	 *  action?: ImageAction | 'background' | 'fal' | null,
+	 *  storageKey: string,
+	 *  pageKey: string,
+	 *  historyError?: string,
+	 *  minimized?: boolean,
+	 *  onInsert: (generations: ImageGeneration[], board?: boolean) => Promise<void>,
+	 *  imageId?: string,
+	 *  imageDataUrl?: string,
+	 *  action?: ImageAction | 'background' | 'generate' | null,
 	 *  prompt?: string,
 	 *  operationStatus?: string,
-	 *  selectedFalModelIds?: string[],
+	 *  selectedModelIds?: string[],
 	 *  generationParameters?: Record<string, Record<string, unknown>>,
 	 *  updateElement: typeof import('@excalidraw/excalidraw').newElementWith,
 	 *  captureUpdate: typeof import('@excalidraw/excalidraw').CaptureUpdateAction.IMMEDIATELY,
 	 *  cloudAvailable?: boolean,
 	 *  authenticated?: boolean,
+	 *  userId?: string,
 	 *  onCloudLimit?: () => void,
 	 *  backgroundProcessing?: boolean,
 	 *  backgroundControls?: import('svelte').Snippet,
@@ -41,17 +56,23 @@
 	 * }} */
 	let {
 		editor,
-		imageId,
-		imageDataUrl,
+		storageKey,
+		pageKey,
+		historyError = '',
+		minimized: toolboxMinimized = $bindable(false),
+		onInsert,
+		imageId = '',
+		imageDataUrl = '',
 		action = $bindable(null),
 		prompt = $bindable(''),
 		operationStatus = $bindable(''),
-		selectedFalModelIds = $bindable([DEFAULT_DRAW_FAL_MODEL.id]),
+		selectedModelIds = $bindable([DEFAULT_DRAW_GENERATION_MODEL.id]),
 		generationParameters = $bindable({}),
 		updateElement,
 		captureUpdate,
 		cloudAvailable = false,
 		authenticated = false,
+		userId,
 		onCloudLimit,
 		backgroundProcessing = false,
 		backgroundControls,
@@ -61,7 +82,7 @@
 		onDragStart
 	} = $props();
 
-	const PROMPT_PRESETS = [
+	const IMAGE_EDIT_PROMPT_PRESETS = [
 		{
 			label: 'Remove distractions',
 			prompt:
@@ -85,17 +106,200 @@
 			prompt: 'Turn this image into a polished studio product mockup with professional lighting.'
 		}
 	];
-	const FAL_WORKFLOW_FOLDERS = /** @type {const} */ ([
+	const VIDEO_PROMPT_PRESETS = [
+		{
+			label: 'Animate subject',
+			prompt:
+				'Animate the main subject with subtle, natural movement while preserving their identity, clothing, and surroundings.'
+		},
+		{
+			label: 'Camera orbit',
+			prompt:
+				'Slowly orbit the camera around the subject with cinematic, physically realistic movement and stable composition.'
+		},
+		{
+			label: 'Talking portrait',
+			prompt:
+				'The subject looks into the camera and speaks naturally, with realistic facial expressions and synchronized audio.'
+		},
+		{
+			label: 'Slow motion',
+			prompt:
+				'Bring the scene to life in smooth cinematic slow motion, preserving the subject and original visual style.'
+		},
+		{
+			label: 'Product reveal',
+			prompt:
+				'Reveal the product with a slow premium camera push, elegant lighting changes, and crisp commercial motion.'
+		}
+	];
+	const TEXT_TO_IMAGE_PROMPT_PRESETS = [
+		{
+			label: 'Product hero',
+			prompt:
+				'Create a premium studio product photograph with dramatic lighting, a clean background, and clear negative space.'
+		},
+		{
+			label: 'YouTube thumbnail',
+			prompt:
+				'Create a bold, high-contrast YouTube thumbnail composition with one clear focal point and room for a short headline.'
+		},
+		{
+			label: 'Illustration',
+			prompt:
+				'Create a polished editorial illustration with a distinctive visual style, intentional composition, and rich color.'
+		},
+		{
+			label: 'Cinematic scene',
+			prompt:
+				'Create a cinematic, photorealistic scene with compelling depth, atmospheric lighting, and careful composition.'
+		}
+	];
+	const WORKFLOW_FOLDERS = /** @type {const} */ ([
 		{ kind: 'text-to-image', label: 'Text to image' },
 		{ kind: 'image-edit', label: 'Image editing' },
 		{ kind: 'image-to-video', label: 'Image to video' }
 	]);
-	const FAL_WEIGHT_GROUPS = /** @type {const} */ ([
+	const WEIGHT_GROUPS = /** @type {const} */ ([
 		{ weights: 'open', label: 'Open weights' },
 		{ weights: 'closed', label: 'Closed models' }
 	]);
 
 	let imagePreview = $state('');
+	let previewGenerationId = $state('');
+	let attachedReference = $state(
+		/** @type {{dataURL:string,mimeType:string,generationId?:string}|null} */ (null)
+	);
+	let useCanvasReference = $state(true);
+	let destination = $state('replace');
+	let generationContext = $state(/** @type {Record<string,unknown>|undefined} */ (undefined));
+	let remixParentId = $state(/** @type {string|undefined} */ (undefined));
+	let runLimitUsd = $state(1);
+	let confirmationThreshold = $state(0.25);
+	let generationJobs = $state(
+		/** @type {import('$lib/draw-generation-batch.js').DrawingGenerationJob[]} */ ([])
+	);
+	let lastRun = $state(
+		/** @type {import('$lib/draw-generation-batch.js').DrawingGenerationRun|undefined} */ (
+			undefined
+		)
+	);
+	let comparisonIds = $state(/** @type {string[]} */ ([]));
+	let qualityNote = $state('');
+	let generationConfigured = false;
+	let toolboxRoot = $state(/** @type {HTMLDivElement | undefined} */ (undefined));
+	$effect(() => {
+		if (toolboxMinimized) blurDrawingInput(toolboxRoot);
+	});
+	/** @type {HTMLElement | undefined} */
+	let historySection = $state();
+	$effect(() => {
+		if (action === 'generate') generationConfigured = true;
+	});
+	/** @type {AbortController|undefined} */
+	let generationAbort;
+	const activeReference = $derived(
+		attachedReference ??
+			(useCanvasReference && imageDataUrl
+				? { dataURL: imageDataUrl, mimeType: imageDataUrl.slice(5, imageDataUrl.indexOf(';')) }
+				: null)
+	);
+	const comparisonImages = $derived(
+		generations.filter(
+			(entry) => comparisonIds.includes(entry.id) && entry.mimeType.startsWith('image/')
+		)
+	);
+
+	/** Shared launcher. Options are only applied by an explicit starter/remix action.
+	 * @param {{prompt?:string,modelIds?:string[],referenceImages?:import('$lib/draw-generation-history.js').DrawingGenerationReference[],context?:Record<string,unknown>}} [options]
+	 */
+	export function openGeneration(options) {
+		if (options && (options.referenceImages?.length ?? 0) > 1) {
+			operationError =
+				'This composer currently accepts one reference image. Choose one before opening the recipe.';
+			return false;
+		}
+		if (options && processingGeneration) {
+			operationError = 'Finish or cancel this batch before opening a different recipe.';
+			return false;
+		}
+		if (
+			options &&
+			prompt.trim() &&
+			!confirm('Replace the current generation draft? Existing results and canvas stay unchanged.')
+		)
+			return false;
+		if (options) {
+			prompt = options.prompt ?? '';
+			selectedModelIds = options.modelIds?.length
+				? options.modelIds.filter((id) => DRAW_GENERATION_MODELS.some((model) => model.id === id))
+				: [
+						options.referenceImages?.length
+							? DEFAULT_DRAW_GENERATION_MODEL.id
+							: DEFAULT_DRAW_TEXT_TO_IMAGE_MODEL.id
+					];
+			attachedReference = options.referenceImages?.[0]
+				? structuredClone($state.snapshot(options.referenceImages[0]))
+				: null;
+			generationContext = options.context
+				? structuredClone($state.snapshot(options.context))
+				: undefined;
+			useCanvasReference = false;
+			destination = 'preview';
+		}
+
+		action = 'generate';
+		toolboxMinimized = false;
+		if (
+			!generationConfigured &&
+			!options &&
+			!prompt.trim() &&
+			!attachedReference &&
+			!processingGeneration
+		) {
+			selectedModelIds = [DEFAULT_DRAW_TEXT_TO_IMAGE_MODEL.id];
+			useCanvasReference = false;
+			destination = 'preview';
+		}
+		generationConfigured = true;
+		return true;
+	}
+
+	/** Open the existing history view without submitting or changing a recipe. */
+	export async function openHistory() {
+		action = 'generate';
+		toolboxMinimized = false;
+		await tick();
+		if (historySection) historySection.scrollIntoView({ block: 'start' });
+		else operationStatus = 'No generations on this page yet. Results will appear here after a run.';
+	}
+
+	/** @param {File|undefined} file */
+	async function attachFile(file) {
+		if (!file) return;
+		try {
+			if (!/^image\/(png|jpeg|webp|avif|gif)$/.test(file.type) || file.size > 16_000_000)
+				throw new Error('Choose a PNG, JPEG, WebP, AVIF or GIF under 16 MB.');
+			attachedReference = { dataURL: await readDataUrl(file), mimeType: file.type };
+			useCanvasReference = false;
+			destination = 'preview';
+			operationError = '';
+		} catch (failure) {
+			operationError = failure instanceof Error ? failure.message : 'Could not attach image.';
+		}
+	}
+
+	/** @param {ClipboardEvent} event */
+	function pasteReference(event) {
+		const file = Array.from(event.clipboardData?.files ?? []).find((entry) =>
+			entry.type.startsWith('image/')
+		);
+		if (!file) return;
+		event.preventDefault();
+		event.stopPropagation();
+		void attachFile(file);
+	}
+
 	let targetX = $state(0.5);
 	let targetY = $state(0.5);
 	let targetMarkerX = $state(0.5);
@@ -104,47 +308,93 @@
 	let blurStrength = $state(14);
 	let focusDepth = $state(0.55);
 	let modelPickerOpen = $state(false);
+	let modelSearchQuery = $state('');
+	let expandedModelWorkflowKinds = $state(/** @type {string[]} */ ([]));
+	let modelPickerRoot = $state(/** @type {HTMLDivElement | null} */ (null));
+	let modelPickerButton = $state(/** @type {HTMLButtonElement | null} */ (null));
+	let modelSearchInput = $state(/** @type {HTMLInputElement | null} */ (null));
 	let activeVideoGenerationId = $state('');
 	let operationProgress = $state(0);
 	let operationError = $state('');
 	let processing = $state(false);
-	let processingFal = $state(false);
+	let processingGeneration = $state(false);
 	/** @type {AbortController | undefined} */
 	let operationAbort;
-	/** @type {{ requestId: string, model: string } | undefined} */
-	let activeFalJob;
+
 	const selectedTool = $derived(
-		action && action !== 'background' && action !== 'fal' ? DRAW_IMAGE_TOOLS[action] : undefined
+		action && action !== 'background' && action !== 'generate'
+			? DRAW_IMAGE_TOOLS[action]
+			: undefined
 	);
 	const needsTarget = $derived(action === 'magic-select' || action === 'magic-eraser');
-	const orderedFalModels = $derived(
-		[...DRAW_FAL_MODELS].sort((left, right) => left.priceUsd - right.priceUsd)
+	const orderedModels = $derived(
+		[...DRAW_GENERATION_MODELS].sort((left, right) => left.priceUsd - right.priceUsd)
 	);
-	const falWorkflowFolders = $derived(
-		FAL_WORKFLOW_FOLDERS.map((folder) => {
-			const models = orderedFalModels.filter((model) => model.kind === folder.kind);
+	const visibleModels = $derived.by(() => {
+		const search = modelSearchQuery.trim().toLowerCase();
+		if (!search) return orderedModels;
+		const terms = search.split(/\s+/);
+		return orderedModels.filter((model) => {
+			const workflow = WORKFLOW_FOLDERS.find((folder) => folder.kind === model.kind)?.label;
+			const searchable = [
+				model.label,
+				model.provider,
+				model.workflow,
+				model.description,
+				model.badge,
+				model.weights === 'open' ? 'open weights' : 'closed models',
+				workflow
+			]
+				.join(' ')
+				.toLowerCase();
+			return terms.every((term) => searchable.includes(term));
+		});
+	});
+	const workflowFolders = $derived(
+		WORKFLOW_FOLDERS.map((folder) => {
+			const models = visibleModels.filter((model) => model.kind === folder.kind);
 			return {
 				...folder,
 				models,
-				groups: FAL_WEIGHT_GROUPS.map((group) => ({
+				groups: WEIGHT_GROUPS.map((group) => ({
 					...group,
 					models: models.filter((model) => model.weights === group.weights)
 				})).filter((group) => group.models.length > 0)
 			};
 		}).filter((folder) => folder.models.length > 0)
 	);
-	const selectedFalModels = $derived(
-		orderedFalModels.filter((model) => selectedFalModelIds.includes(model.id))
+	const selectedModels = $derived(
+		orderedModels.filter((model) => selectedModelIds.includes(model.id))
 	);
-	const selectedFalModel = $derived(selectedFalModels[0] ?? DEFAULT_DRAW_FAL_MODEL);
+	const selectedModel = $derived(selectedModels[0] ?? DEFAULT_DRAW_GENERATION_MODEL);
+	const selectedWorkflowKind = $derived(
+		selectedModels.length > 0 &&
+			selectedModels.every((model) => model.kind === selectedModels[0].kind)
+			? selectedModels[0].kind
+			: null
+	);
+	const activePromptPresets = $derived(
+		selectedWorkflowKind === 'image-to-video'
+			? VIDEO_PROMPT_PRESETS
+			: selectedWorkflowKind === 'text-to-image'
+				? TEXT_TO_IMAGE_PROMPT_PRESETS
+				: IMAGE_EDIT_PROMPT_PRESETS
+	);
+	const generationButtonLabel = $derived(
+		selectedWorkflowKind === 'image-to-video'
+			? 'Generate AI video'
+			: selectedWorkflowKind === 'text-to-image'
+				? 'Generate AI image'
+				: 'Generate AI image edit'
+	);
 	const selectedWorkflowParameters = $derived.by(() => {
-		return FAL_WORKFLOW_FOLDERS.flatMap((folder) => {
-			const models = selectedFalModels.filter((model) => model.kind === folder.kind);
+		return WORKFLOW_FOLDERS.flatMap((folder) => {
+			const models = selectedModels.filter((model) => model.kind === folder.kind);
 			if (!models.length) return [];
-			/** @type {Map<string, import('$lib/draw-fal-models.js').DrawingFalParameter>} */
+			/** @type {Map<string, import('$lib/draw-generation-models.js').DrawingGenerationParameter>} */
 			const parameters = new Map();
 			for (const model of models) {
-				for (const parameter of getDrawFalModelParameters(model)) {
+				for (const parameter of getDrawGenerationModelParameters(model)) {
 					const existing = parameters.get(parameter.key);
 					if (!existing) {
 						parameters.set(parameter.key, {
@@ -178,26 +428,47 @@
 			return [{ ...folder, models, parameters: [...parameters.values()] }];
 		});
 	});
-	const estimatedFalCost = $derived(
-		selectedFalModels.reduce(
-			(total, model) => total + estimateDrawFalModelCost(model, effectiveModelSettings(model)),
+	const estimatedCost = $derived(
+		selectedModels.reduce(
+			(total, model) =>
+				total + estimateDrawGenerationModelCost(model, effectiveModelSettings(model)),
+			0
+		)
+	);
+	const reservationTotal = $derived(
+		selectedModels.reduce(
+			(total, model) =>
+				total +
+				estimateToolsMediaReservation(
+					estimateDrawGenerationModelCost(model, effectiveModelSettings(model))
+				),
 			0
 		)
 	);
 	const uploadsSelectedImage = $derived(
-		selectedFalModels.some((model) => model.kind !== 'text-to-image')
+		selectedModels.some((model) => model.kind !== 'text-to-image')
+	);
+	const previewRecords = $derived(
+		lastRun?.pageKey === pageKey
+			? [
+					...generations,
+					...generationJobs.flatMap((job) => (job.generation ? [job.generation] : []))
+				]
+			: generations
 	);
 	const activeVideoGeneration = $derived(
-		generations.find((generation) => generation.id === activeVideoGenerationId)
+		previewRecords.find((generation) => generation.id === activeVideoGenerationId)
 	);
 	const activeGeneration = $derived(
-		activeVideoGeneration ?? generations.find((generation) => generation.dataURL === imagePreview)
+		previewRecords.find((generation) => generation.id === previewGenerationId) ??
+			activeVideoGeneration ??
+			generations.find((generation) => generation.dataURL === imagePreview)
 	);
 	const activeGenerationSettings = $derived.by(() => {
 		if (!activeGeneration?.modelId || !activeGeneration.modelSettings) return [];
-		const model = DRAW_FAL_MODELS.find((entry) => entry.id === activeGeneration.modelId);
+		const model = DRAW_GENERATION_MODELS.find((entry) => entry.id === activeGeneration.modelId);
 		if (!model) return [];
-		return getDrawFalModelParameters(model).flatMap((parameter) => {
+		return getDrawGenerationModelParameters(model).flatMap((parameter) => {
 			const value = activeGeneration.modelSettings?.[parameter.key];
 			if (value === undefined) return [];
 			return [
@@ -232,20 +503,64 @@
 	);
 
 	$effect(() => {
+		if (selectedWorkflowKind !== 'image-edit') destination = 'preview';
+	});
+
+	$effect(() => {
 		imagePreview = imageDataUrl;
 		operationError = '';
 	});
 
 	$effect(() => {
-		return () => operationAbort?.abort();
+		return () => {
+			operationAbort?.abort();
+			generationAbort?.abort();
+		};
 	});
 
-	/** @param {typeof DRAW_FAL_MODELS[number]} model */
+	/** @param {typeof DRAW_GENERATION_MODELS[number]} model */
 	function modelReferenceNote(model) {
 		if (model.referenceImages === 0) return 'Prompt only · no image upload';
 		if (model.referenceImages === 1) return '1 reference image';
 		if (model.referenceImages === null) return 'Multiple reference images';
 		return `Up to ${model.referenceImages} reference images`;
+	}
+
+	/** @param {boolean} open @param {boolean} [restoreFocus] */
+	function setModelPickerOpen(open, restoreFocus = false) {
+		if (open) {
+			expandedModelWorkflowKinds = selectedModels.length
+				? [...new Set(selectedModels.map((model) => model.kind))]
+				: ['image-edit'];
+		}
+		modelPickerOpen = open;
+		if (!open) modelSearchQuery = '';
+		void tick().then(() => {
+			if (open && modelPickerOpen && canAutofocusDrawingInput()) modelSearchInput?.focus();
+			if (!open && restoreFocus) modelPickerButton?.focus();
+		});
+	}
+
+	/** @param {PointerEvent} event */
+	function dismissModelPickerOutside(event) {
+		if (!modelPickerOpen || !(event.target instanceof Node)) return;
+		if (!modelPickerRoot?.contains(event.target)) setModelPickerOpen(false);
+	}
+
+	/** @param {KeyboardEvent} event */
+	function handleModelPickerKeys(event) {
+		if (!modelPickerOpen) return;
+		if (event.key === 'Escape') {
+			event.preventDefault();
+			event.stopPropagation();
+			setModelPickerOpen(false, true);
+			return;
+		}
+		if (event.key === 'Enter' && event.target === modelSearchInput && visibleModels.length === 1) {
+			event.preventDefault();
+			selectedModelIds = [visibleModels[0].id];
+			setModelPickerOpen(false, true);
+		}
 	}
 
 	/** @param {string} key @param {unknown} value */
@@ -254,23 +569,23 @@
 		return String(value).toLowerCase();
 	}
 
-	/** @param {typeof DRAW_FAL_MODELS[number]} model */
+	/** @param {typeof DRAW_GENERATION_MODELS[number]} model */
 	function effectiveModelSettings(model) {
-		return resolveDrawFalModelSettings(
+		return resolveDrawGenerationModelSettings(
 			model,
-			getDrawFalModelOverrides(model, generationParameters[model.kind] ?? {})
+			getDrawGenerationModelOverrides(model, generationParameters[model.kind] ?? {})
 		);
 	}
 
 	/**
-	 * @param {{ kind: string, models: readonly (typeof DRAW_FAL_MODELS)[number][] }} folder
-	 * @param {import('$lib/draw-fal-models.js').DrawingFalParameter} parameter
+	 * @param {{ kind: string, models: readonly (typeof DRAW_GENERATION_MODELS)[number][] }} folder
+	 * @param {import('$lib/draw-generation-models.js').DrawingGenerationParameter} parameter
 	 */
 	function parameterCurrentValue(folder, parameter) {
 		const selected = generationParameters[folder.kind]?.[parameter.key];
 		if (selected !== undefined) return selected;
 		const model = folder.models.find((entry) =>
-			getDrawFalModelParameters(entry).some((candidate) => candidate.key === parameter.key)
+			getDrawGenerationModelParameters(entry).some((candidate) => candidate.key === parameter.key)
 		);
 		const defaults = /** @type {Record<string, unknown>} */ (model?.settings ?? {});
 		return defaults[parameter.key] ?? parameter.options?.[0] ?? '';
@@ -300,38 +615,41 @@
 	}
 
 	/** @param {string} modelId */
-	function toggleFalModel(modelId) {
-		selectedFalModelIds = selectedFalModelIds.includes(modelId)
-			? selectedFalModelIds.filter((id) => id !== modelId)
-			: [...selectedFalModelIds, modelId];
+	function toggleModel(modelId) {
+		selectedModelIds = selectedModelIds.includes(modelId)
+			? selectedModelIds.filter((id) => id !== modelId)
+			: [...selectedModelIds, modelId];
 	}
 
-	/** @param {readonly (typeof DRAW_FAL_MODELS)[number][]} models @param {boolean} selected */
-	function selectFalModels(models, selected) {
+	/** @param {readonly (typeof DRAW_GENERATION_MODELS)[number][]} models @param {boolean} selected */
+	function selectModels(models, selected) {
 		const ids = /** @type {Set<string>} */ (new Set(models.map((model) => model.id)));
-		selectedFalModelIds = selected
-			? [...new Set([...selectedFalModelIds, ...ids])]
-			: selectedFalModelIds.filter((id) => !ids.has(id));
+		selectedModelIds = selected
+			? [...new Set([...selectedModelIds, ...ids])]
+			: selectedModelIds.filter((id) => !ids.has(id));
 	}
 
-	/** @param {MouseEvent} event @param {readonly (typeof DRAW_FAL_MODELS)[number][]} models @param {boolean} selected */
+	/** @param {MouseEvent} event @param {readonly (typeof DRAW_GENERATION_MODELS)[number][]} models @param {boolean} selected */
 	function selectFolderModels(event, models, selected) {
 		event.preventDefault();
 		event.stopPropagation();
-		selectFalModels(models, selected);
+		selectModels(models, selected);
 	}
 
 	/** @param {ImageGeneration} generation */
 	function restoreGenerationSettings(generation) {
 		if (generation.modelLabel === 'Original') return;
 		prompt = generation.prompt;
-		if (generation.modelId && DRAW_FAL_MODELS.some((model) => model.id === generation.modelId)) {
-			selectedFalModelIds = [generation.modelId];
-			const model = DRAW_FAL_MODELS.find((entry) => entry.id === generation.modelId);
+		if (
+			generation.modelId &&
+			DRAW_GENERATION_MODELS.some((model) => model.id === generation.modelId)
+		) {
+			selectedModelIds = [generation.modelId];
+			const model = DRAW_GENERATION_MODELS.find((entry) => entry.id === generation.modelId);
 			if (model && generation.modelSettings) {
 				generationParameters = {
 					...generationParameters,
-					[model.kind]: getDrawFalModelOverrides(model, generation.modelSettings)
+					[model.kind]: getDrawGenerationModelOverrides(model, generation.modelSettings)
 				};
 			}
 		}
@@ -399,8 +717,17 @@
 	 * @param {string} dataURL
 	 * @param {string} mimeType
 	 * @param {string} success
+	 * @param {AbortSignal} [signal]
 	 */
-	async function insertEditedImage(selected, dataURL, mimeType, success) {
+	async function insertEditedImage(
+		selected,
+		dataURL,
+		mimeType,
+		success,
+		signal = operationAbort?.signal
+	) {
+		const originPage = pageKey;
+		const originUser = userId;
 		if (!selected.image.fileId) throw new Error('The selected image is unavailable.');
 		if (cloudAvailable) {
 			const optimized = await optimizeDrawingImageForCloud({
@@ -409,7 +736,7 @@
 				sourceFileId: selected.image.fileId,
 				dataURL,
 				mimeType,
-				signal: operationAbort?.signal,
+				signal,
 				onOptimize: () => {
 					operationStatus = 'Optimizing image for cloud sync';
 				}
@@ -417,7 +744,9 @@
 			dataURL = optimized.dataURL;
 			mimeType = optimized.mimeType;
 		}
-		operationAbort?.signal.throwIfAborted();
+		signal?.throwIfAborted();
+		if (pageKey !== originPage || userId !== originUser)
+			throw new DOMException('The drawing changed before the edit completed.', 'AbortError');
 		const result = replaceDrawingImage({
 			editor,
 			imageId: selected.image.id,
@@ -439,8 +768,9 @@
 	}
 
 	async function applyLocalImageTool() {
-		if (processing || processingFal || !selectedTool) return;
+		if (processing || processingGeneration || !selectedTool) return;
 		const selectedAction = /** @type {ImageAction} */ (action);
+		const activityUser = userId;
 		processing = true;
 		operationProgress = 0;
 		operationStatus = 'Preparing image';
@@ -469,7 +799,13 @@
 				result.type || 'image/png',
 				`${selectedTool?.label ?? 'Image edit'} applied`
 			);
+			void recordToolActivity(activityUser, `draw.image.${selectedAction}`);
 		} catch (error) {
+			void recordToolActivity(
+				activityUser,
+				`draw.image.${selectedAction}`,
+				error instanceof Error && error.name === 'AbortError' ? 'cancelled' : 'failed'
+			);
 			if (error instanceof Error && error.name === 'AbortError') {
 				operationStatus = '';
 			} else {
@@ -482,266 +818,289 @@
 		}
 	}
 
-	async function applyFalEdit() {
-		if (
-			processing ||
-			processingFal ||
-			!authenticated ||
-			!prompt.trim() ||
-			!selectedFalModels.length
-		)
-			return;
-		const generationPrompt = prompt.trim();
-		const generationModels = [...selectedFalModels];
-		processingFal = true;
-		onProcessingChange?.(true);
-		modelPickerOpen = false;
-		operationProgress = 0;
-		operationStatus = `Generating with ${generationModels[0].label}`;
+	/** @param {boolean} [retryFailed] */
+	async function applyGeneration(retryFailed = false) {
+		if (processing || processingGeneration || !authenticated) return;
 		operationError = '';
-		const generationAbort = new AbortController();
-		operationAbort = generationAbort;
 		try {
-			const source = selectedImage();
-			let sourceGeneration = generations.find((entry) => entry.dataURL === source.file.dataURL);
-			/** @type {string[]} */
-			const failures = [];
-			let completed = 0;
-			for (const [index, generationModel] of generationModels.entries()) {
-				generationAbort.signal.throwIfAborted();
-				const prefix =
-					generationModels.length > 1 ? `${index + 1}/${generationModels.length} · ` : '';
-				operationStatus = `${prefix}Generating with ${generationModel.label}`;
-				try {
-					const modelOverrides = getDrawFalModelOverrides(
-						generationModel,
-						generationParameters[generationModel.kind] ?? {}
+			const retry = retryFailed && lastRun ? $state.snapshot(lastRun) : undefined;
+			if (!retry && (!prompt.trim() || !selectedModels.length)) return;
+			const source =
+				!retry && activeReference ? structuredClone($state.snapshot(activeReference)) : null;
+			const sourceGeneration = source
+				? generations.find((entry) => entry.dataURL === source.dataURL)
+				: undefined;
+			const originalId = sourceGeneration?.id ?? (source ? crypto.randomUUID() : undefined);
+			const recipes = retry
+				? retry.jobs.filter((job) => job.status === 'failed').map((job) => job.recipe)
+				: selectedModels.map((model) => ({
+						id: crypto.randomUUID(),
+						prompt: prompt.trim(),
+						modelId: model.id,
+						adapterId: model.adapter,
+						modelSettings: getDrawGenerationModelOverrides(
+							model,
+							generationParameters[model.kind] ?? {}
+						),
+						referenceImages:
+							model.kind === 'text-to-image'
+								? []
+								: source
+									? [{ ...source, generationId: originalId }]
+									: [],
+						context: generationContext ? $state.snapshot(generationContext) : undefined,
+						parentGenerationId:
+							remixParentId ?? (model.kind !== 'text-to-image' ? originalId : undefined)
+					}));
+			if (!recipes.length) return;
+			const run = createDrawingGenerationRun({
+				pageKey,
+				recipes,
+				limitUsd: retry?.limitUsd ?? Number(runLimitUsd),
+				id: retry?.id
+			});
+			const estimate = recipes.reduce((total, recipe) => {
+				const model = DRAW_GENERATION_MODELS.find((entry) => entry.id === recipe.modelId);
+				return (
+					total +
+					(model
+						? estimateDrawGenerationModelCost(
+								model,
+								effectiveSettingsForRecipe(model, recipe.modelSettings)
+							)
+						: 0)
+				);
+			}, 0);
+			if (
+				estimate >= Number(confirmationThreshold) &&
+				!confirm(
+					`Generate ${recipes.length} result(s) for approximately $${estimate.toFixed(3)}? Funded by swyx.io. This is an estimate, not final provider billing. References will be sent to the selected providers.`
+				)
+			)
+				return;
+			const replacement =
+				!retry &&
+				destination === 'replace' &&
+				useCanvasReference &&
+				!attachedReference &&
+				imageId &&
+				selectedWorkflowKind === 'image-edit'
+					? selectedImage()
+					: undefined;
+			if (
+				source &&
+				!sourceGeneration &&
+				!retry &&
+				originalId &&
+				recipes.some((recipe) => recipe.referenceImages.length)
+			)
+				onGeneration?.({
+					id: originalId,
+					dataURL: source.dataURL,
+					mimeType: source.mimeType,
+					prompt: 'Original image',
+					modelLabel: 'Original',
+					createdAt: Date.now()
+				});
+			lastRun = run;
+			generationJobs = run.jobs.map((job) => ({ ...job }));
+			processingGeneration = true;
+			onProcessingChange?.(true);
+			modelPickerOpen = false;
+			operationProgress = 0;
+			operationStatus = 'Preparing generation';
+			const abort = new AbortController();
+			generationAbort = abort;
+			const originPageKey = pageKey;
+			const originUser = userId;
+			let targetFileId = replacement?.image.fileId;
+			await runDrawingGenerationBatch({
+				run,
+				userId,
+				signal: abort.signal,
+				concurrency: replacement ? 1 : 2,
+				onJob(job) {
+					if (pageKey !== originPageKey || userId !== originUser) {
+						abort.abort();
+						return;
+					}
+					generationJobs = generationJobs.map((entry) => (entry.id === job.id ? job : entry));
+					operationStatus = job.message;
+					operationProgress = Math.round(
+						(generationJobs.filter((entry) => entry.status === 'completed').length /
+							generationJobs.length) *
+							100
 					);
-					const modelSettings = resolveDrawFalModelSettings(generationModel, modelOverrides);
-					const prepared =
-						generationModel.kind === 'text-to-image'
-							? undefined
-							: await prepareDrawingFalImage({
-									dataURL: source.file.dataURL,
-									prompt: generationPrompt,
-									model: generationModel,
-									signal: generationAbort.signal,
-									onProgress: (message) => {
-										operationStatus = `${prefix}${message}`;
-									}
-								});
-					const result = await runDrawingFalGeneration({
-						image: prepared?.blob,
-						prompt: generationPrompt,
-						model: generationModel.id,
-						settings: modelOverrides,
-						signal: generationAbort.signal,
-						onProgress: (update) => {
-							if (update.requestId)
-								activeFalJob = { requestId: update.requestId, model: generationModel.id };
-							const elapsedSeconds = Math.floor((update.elapsedMs ?? 0) / 1000);
-							const elapsed = elapsedSeconds >= 5 ? ` · ${elapsedSeconds}s elapsed` : '';
-							if (update.status === 'UPLOADING') {
-								operationStatus =
-									generationModel.kind === 'text-to-image'
-										? `${prefix}Sending prompt to ${generationModel.label}`
-										: `${prefix}Uploading optimized image to ${generationModel.label}`;
-							} else if (update.status === 'IN_QUEUE') {
-								const position = update.queuePosition;
-								operationStatus =
-									typeof position === 'number' && Number.isSafeInteger(position) && position > 0
-										? `${prefix}Waiting for ${generationModel.label} · ${position} ahead${elapsed}`
-										: `${prefix}Waiting for ${generationModel.label}${elapsed}`;
-							} else {
-								operationStatus = `${prefix}${update.message || `Generating with ${generationModel.label}`}${elapsed}`;
+				},
+				async onResult(generation) {
+					if (pageKey !== originPageKey || userId !== originUser || abort.signal.aborted) return;
+					onGeneration?.(generation);
+					previewGenerationId = generation.id;
+					comparisonIds = [...comparisonIds, generation.id];
+					if (generation.mimeType.startsWith('video/')) activeVideoGenerationId = generation.id;
+					else {
+						activeVideoGenerationId = '';
+						imagePreview = generation.dataURL;
+						if (replacement && targetFileId) {
+							try {
+								const current = editor
+									.getSceneElements()
+									.find(
+										(element) => element.id === replacement.image.id && element.type === 'image'
+									);
+								if (!current || current.type !== 'image' || current.fileId !== targetFileId)
+									throw new Error(
+										'Target changed; your result is in history. Add it to the canvas explicitly.'
+									);
+								const replaced = await insertEditedImage(
+									{ image: current },
+									generation.dataURL,
+									generation.mimeType,
+									'AI edit applied',
+									abort.signal
+								);
+								targetFileId = replaced.fileId;
+							} catch (failure) {
+								operationError =
+									failure instanceof Error
+										? failure.message
+										: 'Generated image could not replace the selection.';
 							}
 						}
-					});
-					generationAbort.signal.throwIfAborted();
-					if (!sourceGeneration) {
-						sourceGeneration = {
-							id: crypto.randomUUID(),
-							dataURL: source.file.dataURL,
-							mimeType: source.file.mimeType,
-							prompt: 'Original image',
-							modelLabel: 'Original',
-							createdAt: Date.now()
-						};
-						onGeneration?.(sourceGeneration);
 					}
-					const recipe = {
-						prompt: generationPrompt,
-						modelLabel: generationModel.label,
-						modelId: generationModel.id,
-						modelEndpoint: generationModel.model,
-						modelProvider: generationModel.provider,
-						modelKind: generationModel.kind,
-						modelWorkflow: generationModel.workflow,
-						modelSettings,
-						parentGenerationId: sourceGeneration.id,
-						referenceImages:
-							generationModel.kind === 'text-to-image'
-								? []
-								: [
-										{
-											dataURL: source.file.dataURL,
-											mimeType: source.file.mimeType,
-											generationId: sourceGeneration.id
-										}
-									]
-					};
-					if (generationModel.kind === 'image-to-video') {
-						const id = crypto.randomUUID();
-						onGeneration?.({
-							...recipe,
-							id,
-							dataURL: result.video,
-							mimeType: 'video/mp4',
-							createdAt: Date.now()
-						});
-						activeVideoGenerationId = id;
-						operationStatus = 'Video generated — preview or download below';
-					} else {
-						operationStatus = `${prefix}Preparing your generated image`;
-						const mimeType = result.image.slice(5, result.image.indexOf(';')) || 'image/png';
-						const edited = await insertEditedImage(
-							selectedImage(),
-							result.image,
-							mimeType,
-							'AI edit applied'
-						);
-						onGeneration?.({
-							...recipe,
-							id: crypto.randomUUID(),
-							dataURL: edited.dataURL,
-							mimeType: edited.mimeType,
-							createdAt: Date.now()
-						});
-					}
-					completed += 1;
-					operationProgress = Math.round((completed / generationModels.length) * 100);
-					activeFalJob = undefined;
-				} catch (error) {
-					if (error instanceof Error && error.name === 'AbortError') throw error;
-					failures.push(
-						`${generationModel.label}: ${error instanceof Error ? error.message : 'Generation failed'}`
-					);
 				}
-			}
-			if (failures.length) operationError = failures.join(' · ');
-			if (generationModels.length > 1 && completed)
-				operationStatus = `Generated ${completed} of ${generationModels.length} results`;
-			if (!completed && failures.length) operationStatus = '';
-		} catch (error) {
-			if (error instanceof Error && error.name === 'AbortError') operationStatus = '';
-			else {
-				operationError = error instanceof Error ? error.message : 'Could not edit the image.';
-				operationStatus = '';
-			}
+			});
+			const completed = generationJobs.filter((job) => job.status === 'completed').length;
+			operationStatus = `Generated ${completed} of ${generationJobs.length} results`;
+		} catch (failure) {
+			operationError = failure instanceof Error ? failure.message : 'Could not generate.';
 		} finally {
-			processingFal = false;
+			processingGeneration = false;
+			generationAbort = undefined;
 			onProcessingChange?.(false);
-			operationAbort = undefined;
-			activeFalJob = undefined;
 		}
 	}
 
-	function cancelFalGeneration() {
-		const job = activeFalJob;
-		operationAbort?.abort();
-		if (!job) return;
-		const query = new URLSearchParams(job);
-		void fetch(`/tools/api/draw/edit?${query}`, {
-			method: 'DELETE',
-			credentials: 'same-origin'
-		}).catch(() => {});
+	/** @param {typeof DRAW_GENERATION_MODELS[number]} model @param {Record<string,unknown>} settings */
+	function effectiveSettingsForRecipe(model, settings) {
+		return resolveDrawGenerationModelSettings(model, settings);
+	}
+
+	export function cancelGeneration() {
+		generationAbort?.abort();
+		operationStatus = 'Stopped waiting; submitted jobs may still finish or incur charges.';
+	}
+
+	/** Preview is presentation only, never a canvas mutation. @param {ImageGeneration} generation */
+	function restoreGeneration(generation) {
+		previewGenerationId = generation.id;
+		activeVideoGenerationId = generation.mimeType.startsWith('video/') ? generation.id : '';
+		if (!activeVideoGenerationId) imagePreview = generation.dataURL;
+		qualityNote = generation.qualityNote ?? '';
+		operationError = '';
+	}
+
+	/** Remix snapshots the recipe, never runs or changes the canvas. @param {ImageGeneration} generation */
+	function restoreGenerationRecipe(generation) {
+		if (processingGeneration) return;
+		restoreGenerationSettings(generation);
+		attachedReference = generation.referenceImages?.[0]
+			? structuredClone($state.snapshot(generation.referenceImages[0]))
+			: null;
+		useCanvasReference = false;
+		destination = 'preview';
+		remixParentId = generation.id;
+		generationContext = generation.context
+			? structuredClone($state.snapshot(generation.context))
+			: undefined;
+		action = 'generate';
+		operationStatus = 'Recipe restored — edit it, then generate when ready';
+	}
+
+	/** @param {ImageGeneration[]} images @param {boolean} [board] */
+	async function addGenerations(images, board = false) {
+		if (processing) return;
+		processing = true;
+		operationError = '';
+		try {
+			await onInsert(images, board);
+			operationStatus = board
+				? 'Comparison board added — Undo available'
+				: 'Image added — Undo available';
+		} catch (failure) {
+			operationError = failure instanceof Error ? failure.message : 'Could not insert image.';
+		} finally {
+			processing = false;
+		}
 	}
 
 	/** @param {ImageGeneration} generation */
-	async function restoreGeneration(generation) {
-		if (processing || processingFal || backgroundProcessing) return;
-		restoreGenerationSettings(generation);
-		if (generation.mimeType.startsWith('video/')) {
-			activeVideoGenerationId = generation.id;
-			operationError = '';
-			operationStatus = 'Video ready — preview or download below';
-			return;
-		}
-		activeVideoGenerationId = '';
+	async function replaceWithGeneration(generation) {
+		if (processing || processingGeneration) return;
 		processing = true;
-		operationProgress = 0;
-		operationError = '';
-		operationStatus = 'Restoring generated image';
-		operationAbort = new AbortController();
 		try {
-			const restoredLabel =
-				generation.modelLabel === 'Original' ? 'Original image restored' : 'Generation restored';
 			await insertEditedImage(
 				selectedImage(),
 				generation.dataURL,
 				generation.mimeType,
-				`${restoredLabel} — choose any tool to edit it`
+				'Generation restored — Undo available'
 			);
-		} catch (error) {
-			if (!(error instanceof Error && error.name === 'AbortError')) {
-				operationError = error instanceof Error ? error.message : 'Could not restore the image.';
-			}
+		} catch (failure) {
+			operationError = failure instanceof Error ? failure.message : 'Could not replace image.';
 		} finally {
 			processing = false;
-			operationAbort = undefined;
-		}
-	}
-
-	/** @param {ImageGeneration} generation */
-	async function restoreGenerationRecipe(generation) {
-		if (processing || processingFal || backgroundProcessing) return;
-		restoreGenerationSettings(generation);
-		action = 'fal';
-		const reference = generation.referenceImages?.[0];
-		if (!reference) {
-			operationStatus = 'Prompt and model restored — ready to generate';
-			return;
-		}
-		processing = true;
-		operationProgress = 0;
-		operationError = '';
-		operationAbort = new AbortController();
-		try {
-			await insertEditedImage(
-				selectedImage(),
-				reference.dataURL,
-				reference.mimeType,
-				'Reference image, prompt, and model restored — ready to generate'
-			);
-		} catch (error) {
-			if (!(error instanceof Error && error.name === 'AbortError')) {
-				operationError = error instanceof Error ? error.message : 'Could not restore this setup.';
-			}
-		} finally {
-			processing = false;
-			operationAbort = undefined;
 		}
 	}
 </script>
 
-<div class="image-toolbox" aria-label="AI image toolbox">
-	<button
-		type="button"
-		class="toolbox-heading drag-handle"
-		aria-label="Move image tools"
-		onpointerdown={(event) => onDragStart?.(event)}
-	>
-		<strong>Image tools</strong>
-		<span>
-			{action === 'fal'
-				? uploadsSelectedImage
-					? 'Uploads this image to fal.ai'
-					: 'Prompt only · no image upload'
-				: action
-					? 'Runs privately on your device'
-					: 'Choose a tool'}
-		</span>
-	</button>
+<svelte:window
+	onpointerdown={dismissModelPickerOutside}
+	onkeydown={(event) => {
+		const pickerWasOpen = modelPickerOpen;
+		handleModelPickerKeys(event);
+		if (event.key === 'Escape' && !pickerWasOpen && !event.defaultPrevented) {
+			toolboxMinimized = true;
+		}
+	}}
+/>
+
+<div
+	class="image-toolbox"
+	class:minimized={toolboxMinimized}
+	aria-label="AI image toolbox"
+	bind:this={toolboxRoot}
+>
+	<div class="toolbox-heading">
+		<button
+			type="button"
+			class="drag-handle"
+			aria-label="Move image tools"
+			onpointerdown={(event) => onDragStart?.(event)}
+		>
+			<strong>{imageId ? 'Image tools' : 'Generate'}</strong>
+			<span>
+				{action === 'generate'
+					? uploadsSelectedImage
+						? `Uploads the reference to ${[...new Set(selectedModels.map((model) => model.transportLabel))].join(', ')}`
+						: 'Prompt only · no image upload'
+					: action
+						? 'Runs privately on your device'
+						: 'Choose a tool'}
+			</span>
+		</button>
+		<button
+			type="button"
+			class="toolbox-minimize"
+			aria-label={toolboxMinimized ? 'Expand image tools' : 'Minimize image tools'}
+			aria-expanded={!toolboxMinimized}
+			onclick={() => {
+				toolboxMinimized = !toolboxMinimized;
+				if (toolboxMinimized) setModelPickerOpen(false);
+			}}
+		>
+			{toolboxMinimized ? '+' : '−'}
+		</button>
+	</div>
 
 	<div class="tool-grid" aria-label="Image editing tools">
 		<button
@@ -749,7 +1108,7 @@
 			class="tool-choice"
 			class:active={action === 'background'}
 			aria-pressed={action === 'background'}
-			disabled={processing || processingFal}
+			disabled={processing || !imageId}
 			onclick={() => {
 				action = 'background';
 				operationError = '';
@@ -763,7 +1122,7 @@
 				class="tool-choice"
 				class:active={action === tool.id}
 				aria-pressed={action === tool.id}
-				disabled={processing || processingFal || backgroundProcessing}
+				disabled={processing || backgroundProcessing || !imageId}
 				onclick={() => {
 					action = /** @type {ImageAction} */ (tool.id);
 					operationError = '';
@@ -775,11 +1134,15 @@
 		<button
 			type="button"
 			class="tool-choice cloud-tool"
-			class:active={action === 'fal'}
-			aria-pressed={action === 'fal'}
-			disabled={processing || processingFal || backgroundProcessing}
+			class:active={action === 'generate'}
+			aria-pressed={action === 'generate'}
+			disabled={processing || backgroundProcessing}
 			onclick={() => {
-				action = 'fal';
+				action = 'generate';
+				if (imageId && !attachedReference && !prompt.trim()) {
+					useCanvasReference = true;
+					destination = 'replace';
+				}
 				operationError = '';
 			}}
 		>
@@ -800,7 +1163,7 @@
 					aria-label={action === 'magic-eraser'
 						? 'Choose the area to erase'
 						: 'Choose the subject to select'}
-					disabled={processing || processingFal}
+					disabled={processing || processingGeneration}
 					onclick={chooseTarget}
 				>
 					<img src={imagePreview} alt="Selected canvas artwork" />
@@ -825,7 +1188,7 @@
 						max="0.3"
 						step="0.01"
 						bind:value={eraserRadius}
-						disabled={processing || processingFal}
+						disabled={processing || processingGeneration}
 					/>
 				</label>
 			{:else if action === 'depth-blur'}
@@ -837,7 +1200,7 @@
 						max="30"
 						step="1"
 						bind:value={blurStrength}
-						disabled={processing || processingFal}
+						disabled={processing || processingGeneration}
 					/>
 				</label>
 				<label class="tool-slider">
@@ -848,7 +1211,7 @@
 						max="1"
 						step="0.05"
 						bind:value={focusDepth}
-						disabled={processing || processingFal}
+						disabled={processing || processingGeneration}
 					/>
 				</label>
 			{/if}
@@ -866,7 +1229,7 @@
 						type="button"
 						class="primary-action"
 						aria-label="Apply {selectedTool?.label ?? 'image tool'}"
-						disabled={processingFal}
+						disabled={processingGeneration}
 						onclick={() => void applyLocalImageTool()}
 					>
 						Apply
@@ -874,12 +1237,114 @@
 				{/if}
 			</div>
 		</div>
-	{:else if action === 'fal'}
+	{:else if action === 'generate'}
 		<div class="fal-edit active-tool-panel">
-			{#if processingFal}
+			<textarea
+				aria-label="AI image editing prompt"
+				onpaste={pasteReference}
+				placeholder={selectedWorkflowKind === 'image-to-video'
+					? 'Describe the motion, camera movement, and sound…'
+					: selectedWorkflowKind === 'text-to-image'
+						? 'Describe the image you want to create…'
+						: 'Describe how you want to edit this image…'}
+				rows="3"
+				maxlength="1000"
+				bind:value={prompt}
+				disabled={processing || processingGeneration}
+				onkeydown={(event) => {
+					if (event.key !== 'Enter' || (!event.metaKey && !event.ctrlKey) || event.isComposing) {
+						return;
+					}
+					event.preventDefault();
+					void applyGeneration();
+				}}
+			></textarea>
+			<div
+				class="prompt-presets"
+				aria-label={selectedWorkflowKind === 'image-to-video'
+					? 'Editable video prompt presets'
+					: selectedWorkflowKind === 'text-to-image'
+						? 'Editable image generation prompt presets'
+						: 'Editable image prompt presets'}
+			>
+				{#each activePromptPresets as preset (preset.label)}
+					<button
+						type="button"
+						disabled={processing || processingGeneration}
+						onclick={() => (prompt = preset.prompt)}
+					>
+						{preset.label}
+					</button>
+				{/each}
+			</div>
+			<div class="generation-reference">
+				<div class="reference-actions">
+					<label class="attach-reference"
+						>Attach reference<input
+							type="file"
+							accept="image/png,image/jpeg,image/webp,image/avif,image/gif"
+							aria-label="Attach generation reference"
+							disabled={processingGeneration}
+							onchange={(event) => {
+								void attachFile(event.currentTarget.files?.[0]);
+								event.currentTarget.value = '';
+							}}
+						/></label
+					>
+					<button
+						type="button"
+						disabled={!imageId || processingGeneration}
+						onclick={() => {
+							attachedReference = null;
+							useCanvasReference = true;
+						}}>Use selected image</button
+					>
+					{#if activeReference}<button
+							type="button"
+							disabled={processingGeneration}
+							onclick={() => {
+								attachedReference = null;
+								useCanvasReference = false;
+							}}>Remove reference</button
+						>{/if}
+				</div>
+				{#if activeReference}
+					<img src={activeReference.dataURL} alt="Reference attached to this draft" />
+					<span
+						>{uploadsSelectedImage
+							? 'Reference ready · not uploaded until Generate'
+							: 'Reference retained in draft · not sent to text-to-image models'}</span
+					>
+				{:else}<span>No reference. Text-to-image needs only your prompt.</span>{/if}
+				<label
+					>Image destination <select
+						aria-label="Generation output destination"
+						bind:value={destination}
+						disabled={processingGeneration}
+						><option value="preview">Preview first</option><option
+							value="replace"
+							disabled={!imageId ||
+								!useCanvasReference ||
+								!!attachedReference ||
+								selectedWorkflowKind !== 'image-edit'}
+							>Replace selected image (Undo available)</option
+						></select
+					></label
+				>
+			</div>
+
+			{#if processingGeneration}
 				<div class="fal-generation-progress" role="status" aria-live="polite">
 					<strong>{operationStatus}</strong>
-					<span>Your result will appear on the canvas and in session history.</span>
+					<span>
+						{selectedWorkflowKind === 'image-to-video'
+							? 'Your video will appear below and in device history, not on the canvas.'
+							: selectedWorkflowKind === null
+								? 'Images and videos appear in Preview. Completed results stay in device history.'
+								: destination === 'replace' && selectedWorkflowKind === 'image-edit'
+									? 'Your result will replace the selected image and stay in history.'
+									: 'Your result will appear in Preview and history. Add it to the canvas when ready.'}
+					</span>
 					<progress
 						aria-label="AI generation progress"
 						max="100"
@@ -887,7 +1352,7 @@
 					></progress>
 				</div>
 			{/if}
-			<div class="fal-model-picker">
+			<div class="fal-model-picker" bind:this={modelPickerRoot}>
 				<label for="drawing-ai-workflow">Models and workflows</label>
 				<button
 					id="drawing-ai-workflow"
@@ -896,47 +1361,82 @@
 					aria-label="AI model and workflow selector"
 					aria-expanded={modelPickerOpen}
 					aria-controls="drawing-ai-models"
-					disabled={processing || processingFal}
-					onclick={() => (modelPickerOpen = !modelPickerOpen)}
+					disabled={processing || processingGeneration}
+					bind:this={modelPickerButton}
+					onclick={() => setModelPickerOpen(!modelPickerOpen)}
 				>
 					<span>
-						{selectedFalModels.length === 1
-							? `${selectedFalModels[0].label} · ${selectedFalModels[0].workflow}`
-							: selectedFalModels.length
-								? `${selectedFalModels.length} models selected`
+						{selectedModels.length === 1
+							? `${selectedModels[0].label} · ${selectedModels[0].workflow}`
+							: selectedModels.length
+								? `${selectedModels.length} models selected`
 								: 'Select one or more models'}
 					</span>
 					<span aria-hidden="true">{modelPickerOpen ? '▴' : '▾'}</span>
 				</button>
 				{#if modelPickerOpen}
 					<div id="drawing-ai-models" class="fal-model-menu" aria-label="Available AI models">
+						<div class="fal-model-search">
+							<input
+								type="search"
+								aria-label="Search AI models"
+								placeholder="Search models, providers, or rankings"
+								bind:value={modelSearchQuery}
+								bind:this={modelSearchInput}
+							/>
+							{#if modelSearchQuery}
+								<button
+									type="button"
+									aria-label="Clear AI model search"
+									onclick={() => {
+										modelSearchQuery = '';
+										modelSearchInput?.focus();
+									}}>×</button
+								>
+							{/if}
+						</div>
 						<div class="fal-model-menu-heading">
-							<span>Cheapest first · {selectedFalModels.length} selected</span>
+							<span>
+								{modelSearchQuery.trim()
+									? `${visibleModels.length} matching · ${selectedModels.length} selected`
+									: `Cheapest first · ${selectedModels.length} selected`}
+							</span>
 							<button
 								type="button"
 								class="fal-model-select-all"
-								onclick={() => {
-									selectedFalModelIds =
-										selectedFalModels.length === orderedFalModels.length
-											? []
-											: orderedFalModels.map((model) => model.id);
-								}}
+								disabled={visibleModels.length === 0}
+								onclick={() =>
+									selectModels(
+										visibleModels,
+										!visibleModels.every((model) => selectedModelIds.includes(model.id))
+									)}
 							>
-								{selectedFalModels.length === orderedFalModels.length ? 'Clear all' : 'Select all'}
+								{visibleModels.length > 0 &&
+								visibleModels.every((model) => selectedModelIds.includes(model.id))
+									? modelSearchQuery.trim()
+										? 'Clear results'
+										: 'Clear all'
+									: modelSearchQuery.trim()
+										? 'Select results'
+										: 'Select all'}
 							</button>
 						</div>
 						<div class="fal-model-cards">
-							{#each falWorkflowFolders as folder (folder.kind)}
+							{#if visibleModels.length === 0}
+								<p class="fal-model-empty">No models match “{modelSearchQuery.trim()}”.</p>
+							{/if}
+							{#each workflowFolders as folder (folder.kind)}
 								<details
 									class="fal-model-folder"
 									aria-label="{folder.label} models"
-									open={folder.kind === 'image-edit'}
+									open={Boolean(modelSearchQuery.trim()) ||
+										expandedModelWorkflowKinds.includes(folder.kind)}
 								>
 									<summary class="fal-model-folder-heading">
 										<strong>{folder.label}</strong>
 										<span class="fal-folder-controls">
 											<span>
-												{folder.models.filter((model) => selectedFalModelIds.includes(model.id))
+												{folder.models.filter((model) => selectedModelIds.includes(model.id))
 													.length}
 												/ {folder.models.length}
 											</span>
@@ -966,36 +1466,35 @@
 													<strong>{group.label}</strong>
 													<span class="fal-folder-controls">
 														<span>
-															{group.models.filter((model) =>
-																selectedFalModelIds.includes(model.id)
-															).length}
+															{group.models.filter((model) => selectedModelIds.includes(model.id))
+																.length}
 															/ {group.models.length}
 														</span>
 														<button
 															type="button"
 															class="fal-model-select-all"
 															aria-label="Select all {group.label} {folder.label} models"
-															onclick={() => selectFalModels(group.models, true)}>All</button
+															onclick={() => selectModels(group.models, true)}>All</button
 														>
 														<button
 															type="button"
 															class="fal-model-select-all"
 															aria-label="Select no {group.label} {folder.label} models"
-															onclick={() => selectFalModels(group.models, false)}>None</button
+															onclick={() => selectModels(group.models, false)}>None</button
 														>
 													</span>
 												</div>
 												{#each group.models as model (model.id)}
 													<div
 														class="fal-model-card"
-														class:selected={selectedFalModelIds.includes(model.id)}
+														class:selected={selectedModelIds.includes(model.id)}
 													>
 														<label class="fal-model-option">
 															<input
 																type="checkbox"
 																aria-label="{model.label} · {model.workflow}"
-																checked={selectedFalModelIds.includes(model.id)}
-																onchange={() => toggleFalModel(model.id)}
+																checked={selectedModelIds.includes(model.id)}
+																onchange={() => toggleModel(model.id)}
 															/>
 															<span class="fal-model-copy">
 																<span class="fal-model-card-title">
@@ -1011,8 +1510,8 @@
 															class="fal-model-only"
 															aria-label="Use only {model.label} · {model.workflow}"
 															onclick={() => {
-																selectedFalModelIds = [model.id];
-																modelPickerOpen = false;
+																selectedModelIds = [model.id];
+																setModelPickerOpen(false);
 															}}
 														>
 															Only
@@ -1027,19 +1526,43 @@
 						</div>
 					</div>
 				{/if}
-				{#if selectedFalModels.length === 1}
+				{#if !modelPickerOpen && selectedModels.length > 1}
+					<div class="selected-model-chips" aria-label="Selected AI models">
+						{#each selectedModels.slice(0, 4) as model (model.id)}
+							<button
+								type="button"
+								aria-label="Remove {model.label} from selected models"
+								disabled={processing || processingGeneration}
+								onclick={() => toggleModel(model.id)}
+							>
+								{model.label} <span aria-hidden="true">×</span>
+							</button>
+						{/each}
+						{#if selectedModels.length > 4}
+							<button
+								type="button"
+								aria-label="Show all selected AI models"
+								onclick={() => setModelPickerOpen(true)}
+							>
+								+{selectedModels.length - 4} more
+							</button>
+						{/if}
+					</div>
+				{/if}
+				{#if selectedModels.length === 1}
 					<div class="fal-model-detail">
-						<span>{selectedFalModel.description}</span>
-						<strong>{selectedFalModel.badge}</strong>
+						<span>{selectedModel.description}</span>
+						<strong>{selectedModel.badge}</strong>
 					</div>
 				{/if}
 				<p class="fal-upload-hint">
-					{authenticated ? 'Signed in · ' : 'Sign in required · '}
+					{authenticated ? 'Funded by swyx.io · ' : 'Sign in required · '}
 					{uploadsSelectedImage
 						? 'Large images automatically fit each model’s limits and the secure upload limit.'
-						: 'Text-to-image workflows only send your prompt; the selected image is not uploaded.'}
+						: 'Text-to-image workflows only send your prompt; no reference image is uploaded.'}
 				</p>
 			</div>
+			<ToolsAiNotice />
 			{#each selectedWorkflowParameters as folder (folder.kind)}
 				{#if folder.parameters.length}
 					<section class="fal-parameter-group" aria-label="{folder.label} settings">
@@ -1057,7 +1580,7 @@
 											type="checkbox"
 											aria-label="{folder.label} {parameter.label}"
 											checked={parameterCurrentValue(folder, parameter) === true}
-											disabled={processing || processingFal}
+											disabled={processing || processingGeneration}
 											onchange={(event) =>
 												updateGenerationParameter(
 													folder.kind,
@@ -1078,7 +1601,7 @@
 											step="1"
 											placeholder="Random"
 											value={parameterCurrentValue(folder, parameter)}
-											disabled={processing || processingFal}
+											disabled={processing || processingGeneration}
 											oninput={(event) =>
 												updateGenerationParameter(
 													folder.kind,
@@ -1098,7 +1621,7 @@
 												parameter.key,
 												parameterCurrentValue(folder, parameter)
 											)}
-											disabled={processing || processingFal}
+											disabled={processing || processingGeneration}
 											onchange={(event) =>
 												updateGenerationParameter(
 													folder.kind,
@@ -1122,40 +1645,45 @@
 					</section>
 				{/if}
 			{/each}
-			<textarea
-				aria-label="AI image editing prompt"
-				placeholder="Describe how you want to edit this image…"
-				rows="2"
-				maxlength="1000"
-				bind:value={prompt}
-				disabled={processing || processingFal}
-				onkeydown={(event) => {
-					if (event.key !== 'Enter' || (!event.metaKey && !event.ctrlKey) || event.isComposing) {
-						return;
-					}
-					event.preventDefault();
-					void applyFalEdit();
-				}}
-			></textarea>
-			<div class="prompt-presets" aria-label="Editable image prompt presets">
-				{#each PROMPT_PRESETS as preset (preset.label)}
-					<button
-						type="button"
-						disabled={processing || processingFal}
-						onclick={() => (prompt = preset.prompt)}
-					>
-						{preset.label}
-					</button>
-				{/each}
+			<div class="generation-budget">
+				<label
+					>Run reservation limit ($)<input
+						aria-label="Run spending limit"
+						type="number"
+						min="0.05"
+						max="20"
+						step="0.05"
+						bind:value={runLimitUsd}
+						disabled={processingGeneration}
+					/></label
+				>
+				<label
+					>Confirm estimates above ($)<input
+						aria-label="Generation confirmation threshold"
+						type="number"
+						min="0"
+						max="20"
+						step="0.05"
+						bind:value={confirmationThreshold}
+						disabled={processingGeneration}
+					/></label
+				>
+				<p>
+					Reserves ~${reservationTotal.toFixed(3)} against the run limit. Estimates are not final provider
+					billing. Account/site limits also apply.
+				</p>
+				{#each [...new Set(selectedModels.map((model) => model.disclosure))] as disclosure}<p>
+						{disclosure}
+					</p>{/each}
 			</div>
 			<div class="fal-action-row">
 				<span>
-					{selectedFalModels.length
-						? `~$${estimatedFalCost.toFixed(3).replace(/0+$/, '').replace(/\.$/, '')} total · ${selectedFalModels.length} ${selectedFalModels.length === 1 ? 'generation' : 'generations'}`
+					{selectedModels.length
+						? `~$${estimatedCost.toFixed(3).replace(/0+$/, '').replace(/\.$/, '')} total · ${selectedModels.length} ${selectedModels.length === 1 ? 'generation' : 'generations'}`
 						: 'Select at least one model'}
 				</span>
-				{#if processingFal}
-					<button type="button" class="secondary-action" onclick={cancelFalGeneration}>
+				{#if processingGeneration}
+					<button type="button" class="secondary-action" onclick={cancelGeneration}>
 						Cancel
 					</button>
 				{:else if !authenticated}
@@ -1164,12 +1692,20 @@
 					<button
 						type="button"
 						class="fal-action"
-						aria-label="Generate AI image edit"
+						aria-label={generationButtonLabel}
 						aria-keyshortcuts="Meta+Enter Control+Enter"
-						disabled={processing || !prompt.trim() || !selectedFalModels.length}
-						onclick={() => void applyFalEdit()}
+						disabled={processing ||
+							!prompt.trim() ||
+							!selectedModels.length ||
+							(uploadsSelectedImage && !activeReference) ||
+							reservationTotal > Number(runLimitUsd)}
+						onclick={() => void applyGeneration()}
 					>
-						Generate <kbd aria-hidden="true">⌘↵</kbd>
+						{selectedWorkflowKind === 'image-to-video'
+							? 'Generate video'
+							: selectedWorkflowKind === 'text-to-image'
+								? 'Generate image'
+								: 'Generate'} <kbd aria-hidden="true">⌘↵</kbd>
 					</button>
 				{/if}
 			</div>
@@ -1188,42 +1724,69 @@
 				src={activeVideoGeneration.dataURL}
 				controls
 				playsinline
-				preload="metadata"
+				preload="none"
 				aria-label="Generated video"
 			></video>
 			<p>Video stays outside the canvas and cloud drawing sync.</p>
 		</section>
 	{/if}
 
-	{#if generations.length}
-		<section class="generation-history" aria-label="Generated images from this session">
+	{#if previewRecords.length}
+		<section
+			class="generation-history"
+			aria-label="Generated images from this session"
+			bind:this={historySection}
+		>
 			<div class="history-heading">
-				<strong>Recent generations</strong>
-				<span>Click to restore and edit</span>
+				<strong>Recent generations / Compare</strong>
+				<span>On this device · this page · up to 32 entries</span>
 			</div>
 			<div class="generation-list">
 				{#each generations as generation, index (generation.id)}
-					<button
-						type="button"
-						class="generation-card"
-						class:current={imagePreview === generation.dataURL ||
-							activeVideoGenerationId === generation.id}
-						aria-label="Use generation {index + 1}: {generation.prompt}"
-						aria-pressed={imagePreview === generation.dataURL ||
-							activeVideoGenerationId === generation.id}
-						disabled={processing || processingFal || backgroundProcessing}
-						onclick={() => void restoreGeneration(generation)}
-					>
-						{#if generation.mimeType.startsWith('video/')}
-							<video src={generation.dataURL} muted playsinline preload="metadata"></video>
-						{:else}
-							<img src={generation.dataURL} alt="" />
+					<div class="generation-choice">
+						<button
+							type="button"
+							class="generation-card"
+							class:current={imagePreview === generation.dataURL ||
+								activeVideoGenerationId === generation.id}
+							aria-label="Use generation {index + 1}: {generation.prompt}"
+							aria-pressed={imagePreview === generation.dataURL ||
+								activeVideoGenerationId === generation.id}
+							disabled={processing || processingGeneration || backgroundProcessing}
+							onclick={() => void restoreGeneration(generation)}
+						>
+							{#if generation.mimeType.startsWith('video/')}
+								<span class="video-placeholder">Video · click to preview</span>
+							{:else}
+								<img src={generation.dataURL} alt="" />
+							{/if}
+							<span>{generation.modelLabel}</span>
+						</button>
+						{#if generation.mimeType.startsWith('image/') && generation.modelLabel !== 'Original'}
+							<label class="compare-select"
+								><input
+									type="checkbox"
+									aria-label={`Compare ${generation.modelLabel} ${index + 1}`}
+									checked={comparisonIds.includes(generation.id)}
+									onchange={(event) => {
+										comparisonIds = event.currentTarget.checked
+											? [...comparisonIds, generation.id]
+											: comparisonIds.filter((id) => id !== generation.id);
+									}}
+								/> Compare</label
+							>
 						{/if}
-						<span>{generation.modelLabel}</span>
-					</button>
+					</div>
 				{/each}
 			</div>
-			{#if activeGeneration && activeGeneration.modelLabel !== 'Original'}
+			<button
+				class="generation-recreate"
+				type="button"
+				disabled={processing || !comparisonImages.length}
+				onclick={() => addGenerations(comparisonImages, true)}
+				>Add comparison board ({comparisonImages.length})</button
+			>
+			{#if activeGeneration}
 				<section class="generation-recipe" aria-label="Selected generation details">
 					<div class="generation-recipe-heading">
 						<strong>{activeGeneration.modelLabel}</strong>
@@ -1234,6 +1797,21 @@
 							{activeGeneration.modelProvider} · {activeGeneration.modelWorkflow}
 						</div>
 					{/if}
+					{#if activeGeneration.mimeType.startsWith('image/')}
+						<img
+							class="generation-preview"
+							src={activeGeneration.dataURL}
+							alt="Generated preview"
+						/>
+					{/if}
+					<div class="generation-metrics">
+						{activeGeneration.adapterId ??
+							'Provider recorded in recipe'}{activeGeneration.elapsedMs !== undefined
+							? ` · ${(activeGeneration.elapsedMs / 1000).toFixed(1)}s end-to-end`
+							: ''}{activeGeneration.estimatedUsd !== undefined
+							? ` · ~$${activeGeneration.estimatedUsd.toFixed(3)} estimated`
+							: ''}
+					</div>
 					<div class="generation-prompt" aria-label="Generation prompt">
 						{activeGeneration.prompt}
 					</div>
@@ -1263,47 +1841,244 @@
 							{activeGenerationLineage.map((entry) => entry.modelLabel).join(' → ')}
 						</div>
 					{/if}
-					<button
-						type="button"
-						class="generation-recreate"
-						aria-label="Restore reference image, prompt, and model"
-						disabled={processing || processingFal || backgroundProcessing}
-						onclick={() => void restoreGenerationRecipe(activeGeneration)}
+					{#if activeGeneration.modelLabel !== 'Original'}<button
+							type="button"
+							class="generation-recreate"
+							aria-label="Restore reference image, prompt, and model"
+							disabled={processing || processingGeneration || backgroundProcessing}
+							onclick={() => void restoreGenerationRecipe(activeGeneration)}
+						>
+							Remix prompt, references & settings
+						</button>{/if}
+					{#if activeGeneration.mimeType.startsWith('image/')}
+						<div class="reference-actions">
+							<button
+								type="button"
+								disabled={processing}
+								onclick={() => addGenerations([activeGeneration])}>Add to canvas</button
+							><button
+								type="button"
+								disabled={!imageId || processing || processingGeneration}
+								onclick={() => replaceWithGeneration(activeGeneration)}
+								>Replace selected image</button
+							><a download="generation.png" href={activeGeneration.dataURL}>Download image</a>
+						</div>
+					{/if}
+					<label class="quality-note"
+						>Personal quality note<input
+							aria-label="Generation quality note"
+							maxlength="500"
+							bind:value={qualityNote}
+						/><button
+							type="button"
+							onclick={() => {
+								onGeneration?.({ ...activeGeneration, qualityNote: qualityNote.trim() });
+								operationStatus = 'Quality note saved on this device';
+							}}>Save note</button
+						></label
 					>
-						Restore generation setup
-					</button>
 				</section>
 			{/if}
 		</section>
 	{/if}
 
-	{#if processing && !processingFal}
+	{#if generationJobs.length && lastRun?.pageKey === pageKey}
+		<section class="generation-queue" aria-label="Generation queue" aria-live="polite">
+			<strong
+				>{processingGeneration ? 'Generating' : 'Latest batch'} · {generationJobs.filter(
+					(job) => job.status === 'completed'
+				).length}/{generationJobs.length}</strong
+			>
+			{#each generationJobs as job (job.id)}<div class="queue-job">
+					<strong
+						>{DRAW_GENERATION_MODELS.find((model) => model.id === job.recipe.modelId)?.label ??
+							job.recipe.modelId}</strong
+					><span
+						>{job.message}{job.elapsedMs ? ` · ${(job.elapsedMs / 1000).toFixed(1)}s` : ''}</span
+					>{#if job.generation}<button
+							type="button"
+							onclick={() => job.generation && restoreGeneration(job.generation)}
+							>Preview result</button
+						>{/if}
+				</div>{/each}
+			{#if processingGeneration}<button type="button" onclick={cancelGeneration}
+					>Cancel remaining jobs</button
+				>{:else if generationJobs.some((job) => job.status === 'failed')}<button
+					type="button"
+					onclick={() => applyGeneration(true)}>Retry failed jobs (same run budget)</button
+				>{/if}
+		</section>
+	{/if}
+	{#if action === 'generate'}<div class="saved-generation-panel">
+			<DrawGenerationLibrary
+				{storageKey}
+				{userId}
+				{prompt}
+				reference={activeReference}
+				generation={activeGeneration}
+				onModifier={(text) => {
+					prompt = `${prompt.trim()}\n${text}`.trim().slice(0, 1000);
+				}}
+				onReference={(reference) => {
+					attachedReference = reference;
+					useCanvasReference = false;
+					destination = 'preview';
+					action = 'generate';
+				}}
+				onRemix={restoreGenerationRecipe}
+			/>
+		</div>{/if}
+	{#if historyError}<p class="operation-error" role="alert">{historyError}</p>{/if}
+
+	{#if processing && !processingGeneration}
 		<div class="operation-progress" aria-live="polite">
 			<span>{operationStatus}{operationProgress ? ` · ${operationProgress}%` : ''}</span>
 			<progress aria-label="Image editing progress" max="100" value={operationProgress || undefined}
 			></progress>
 		</div>
-	{:else if !processingFal && operationError}
+	{:else if !processingGeneration && operationError}
 		<p class="operation-error" role="alert">{operationError}</p>
-	{:else if !processingFal && operationStatus}
+	{:else if !processingGeneration && operationStatus}
 		<p class="operation-success" role="status">{operationStatus}</p>
 	{/if}
 </div>
 
 <style>
+	.generation-reference {
+		display: grid;
+		gap: 7px;
+		padding: 9px;
+		border: 1px dashed #cbd5e1;
+		border-radius: 8px;
+		margin: 10px 0;
+		font-size: 11px;
+	}
+	.generation-reference img {
+		max-height: 85px;
+		max-width: 100%;
+		object-fit: contain;
+		justify-self: start;
+	}
+	.reference-actions {
+		display: flex;
+		gap: 5px;
+		flex-wrap: wrap;
+		align-items: center;
+	}
+	.reference-actions button,
+	.attach-reference,
+	.generation-queue button,
+	.quality-note button {
+		padding: 5px 7px;
+		border: 1px solid #cbd5e1;
+		border-radius: 5px;
+		background: white;
+		font-size: 11px;
+		cursor: pointer;
+	}
+	.attach-reference input {
+		width: 1px;
+		height: 1px;
+		position: absolute;
+		opacity: 0;
+	}
+	.attach-reference:focus-within {
+		outline: 2px solid #6366f1;
+	}
+	.generation-reference select {
+		display: block;
+		width: 100%;
+		margin-top: 4px;
+		padding: 5px;
+	}
+	.generation-budget {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 7px;
+		font-size: 11px;
+		margin: 10px 0;
+	}
+	.generation-budget label,
+	.quality-note {
+		display: grid;
+		gap: 4px;
+	}
+	.generation-budget input,
+	.quality-note input {
+		min-width: 0;
+		width: 100%;
+		border: 1px solid #cbd5e1;
+		border-radius: 4px;
+		padding: 5px;
+	}
+	.generation-budget p {
+		grid-column: 1 / -1;
+		margin: 0;
+		color: #64748b;
+		line-height: 1.45;
+	}
+	.generation-choice {
+		min-width: 0;
+	}
+	.generation-preview {
+		width: 100%;
+		max-height: 240px;
+		object-fit: contain;
+		background: #f1f5f9;
+		border-radius: 6px;
+	}
+	.compare-select,
+	.generation-metrics,
+	.video-placeholder {
+		font-size: 10px;
+		color: #64748b;
+	}
+	.generation-queue {
+		margin-top: 12px;
+		padding-top: 10px;
+		border-top: 1px solid #e2e8f0;
+		font-size: 12px;
+	}
+	.queue-job {
+		display: grid;
+		gap: 3px;
+		padding: 7px 0;
+		font-size: 11px;
+	}
+	.queue-job span {
+		color: #64748b;
+		overflow-wrap: anywhere;
+	}
+	.quality-note {
+		font-size: 11px;
+		margin-top: 8px;
+	}
+
 	.image-toolbox {
 		min-width: 0;
 	}
 
+	.image-toolbox.minimized > :not(.toolbox-heading) {
+		display: none;
+	}
+
 	.toolbox-heading {
+		position: sticky;
+		top: 0;
+		z-index: 2;
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
-		gap: 8px;
+		gap: 6px;
+		padding: 2px 0;
+		background: #fff;
 		font-size: 11px;
 	}
 
 	.drag-handle {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
 		width: 100%;
 		padding: 2px 0;
 		border: 0;
@@ -1315,6 +2090,25 @@
 
 	.drag-handle:active {
 		cursor: grabbing;
+	}
+
+	.toolbox-minimize {
+		flex: none;
+		width: 25px;
+		height: 25px;
+		padding: 0;
+		border: 0;
+		border-radius: 6px;
+		background: transparent;
+		color: #71717a;
+		font-size: 16px;
+		cursor: pointer;
+	}
+
+	.toolbox-minimize:hover,
+	.toolbox-minimize:focus-visible {
+		background: #f4f4f5;
+		color: #3f3f46;
 	}
 
 	.toolbox-heading span,
@@ -1601,6 +2395,39 @@
 		background: #fff;
 	}
 
+	.fal-model-search {
+		position: relative;
+		margin-bottom: 7px;
+	}
+
+	.fal-model-search input {
+		box-sizing: border-box;
+		width: 100%;
+		height: 31px;
+		padding: 0 27px 0 8px;
+		border: 1px solid #e3e3e9;
+		border-radius: 6px;
+		background: #fff;
+		color: #27272a;
+		font: inherit;
+		font-size: 10px;
+		outline-color: #7768e5;
+	}
+
+	.fal-model-search button {
+		position: absolute;
+		top: 4px;
+		right: 4px;
+		width: 22px;
+		height: 22px;
+		border: 0;
+		border-radius: 4px;
+		background: transparent;
+		color: #71717a;
+		font-size: 15px;
+		cursor: pointer;
+	}
+
 	.fal-model-menu-heading {
 		display: flex;
 		align-items: center;
@@ -1626,6 +2453,36 @@
 		gap: 4px;
 		max-height: 285px;
 		overflow-y: auto;
+	}
+
+	.fal-model-empty {
+		margin: 0;
+		padding: 14px 5px;
+		color: #71717a;
+		font-size: 10px;
+		text-align: center;
+	}
+
+	.selected-model-chips {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 5px;
+		margin-top: 7px;
+	}
+
+	.selected-model-chips button {
+		max-width: 100%;
+		padding: 4px 7px;
+		border: 1px solid #ded9ff;
+		border-radius: 999px;
+		background: #f7f5ff;
+		color: #5142ab;
+		font-size: 9px;
+		cursor: pointer;
+	}
+
+	.selected-model-chips button span {
+		font-size: 11px;
 	}
 
 	.fal-model-folder {
@@ -1844,8 +2701,7 @@
 		background: #f7f5ff;
 	}
 
-	.generation-card img,
-	.generation-card video {
+	.generation-card img {
 		display: block;
 		width: 100%;
 		height: 49px;

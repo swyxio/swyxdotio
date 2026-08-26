@@ -20,6 +20,8 @@
  *   fontSize?: number,
  *   textAlign?: 'left' | 'center',
  *   label?: { text: string, fontFamily: number, fontSize: number },
+ *   start?: { id: string },
+ *   end?: { id: string },
  *   points?: Array<[number, number]>,
  *   startArrowhead?: null,
  *   endArrowhead?: 'arrow' | null,
@@ -511,8 +513,161 @@ function createComparisonCards() {
 	return shapes;
 }
 
+/**
+ * Native bound connectors keep the relationship attached when a node moves.
+ * @param {PresetShape} from
+ * @param {PresetShape} to
+ * @param {[number, number]} start
+ * @param {[number, number]} end
+ * @param {string} label
+ * @param {ArrowOptions} [options]
+ * @returns {PresetShape}
+ */
+function connect(from, to, start, end, label, options = {}) {
+	return {
+		...arrow(...start, ...end, { size: 's', ...options }),
+		start: { id: from.id },
+		end: { id: to.id },
+		label: { text: label, fontFamily: HAND_DRAWN_FONT, fontSize: FONT_SIZES.s }
+	};
+}
+
+function createArchitectureComparison() {
+	const requestA = card(90, 170, 240, 75, 'Question', { color: 'black', fill: 'none' });
+	const retrieve = card(90, 325, 240, 90, 'Retrieve context', { color: 'blue' });
+	const answerA = card(90, 510, 240, 75, 'Answer', { color: 'black', fill: 'none' });
+	const requestB = card(570, 170, 240, 75, 'Question', { color: 'black', fill: 'none' });
+	const agent = card(570, 325, 240, 90, 'Agent', { color: 'green' });
+	const tool = card(960, 325, 170, 90, 'Tool', { color: 'black', fill: 'none' });
+	const answerB = card(570, 510, 240, 75, 'Answer', { color: 'black', fill: 'none' });
+	return [
+		text(40, 0, 'Same question. Different control flow.', { size: 'xl', width: 1100 }),
+		text(40, 62, 'An illustrative comparison — not a benchmark', {
+			size: 's',
+			color: 'grey',
+			width: 1000
+		}),
+		text(90, 115, '01  RETRIEVAL-FIRST', { size: 's', color: 'blue', width: 300 }),
+		text(570, 115, '02  TOOL-USING AGENT', { size: 's', color: 'green', width: 400 }),
+		requestA,
+		retrieve,
+		answerA,
+		requestB,
+		agent,
+		tool,
+		answerB,
+		connect(requestA, retrieve, [210, 245], [210, 325], 'search'),
+		connect(retrieve, answerA, [210, 415], [210, 510], 'ground a response'),
+		connect(requestB, agent, [690, 245], [690, 325], 'reason'),
+		connect(agent, tool, [810, 345], [960, 345], 'act', { bend: -60 }),
+		connect(tool, agent, [960, 400], [810, 400], 'observe', { bend: -65 }),
+		connect(agent, answerB, [690, 415], [690, 510], 'done / limit'),
+		text(90, 635, 'Context quality is the constraint.', { size: 's', width: 390 }),
+		text(570, 635, 'Action control is the constraint.', { size: 's', width: 540 })
+	];
+}
+
+function createAgentToolLoop() {
+	const user = card(40, 300, 170, 90, 'User', { color: 'black', fill: 'none' });
+	const agent = card(380, 300, 210, 90, 'Agent', { color: 'green' });
+	const tool = card(760, 300, 220, 90, 'Tool', { color: 'black', fill: 'none' });
+	const observation = card(760, 520, 220, 90, 'Observation', { color: 'black', fill: 'none' });
+	const answer = card(380, 120, 210, 90, 'Answer / stop', { color: 'orange', fill: 'none' });
+	return [
+		text(40, 0, 'An agent is a loop, not a chain', { size: 'xl', width: 1200 }),
+		text(40, 62, 'Act → observe → decide whether to continue', {
+			size: 's',
+			color: 'grey',
+			width: 1100
+		}),
+		user,
+		agent,
+		tool,
+		observation,
+		answer,
+		connect(user, agent, [210, 345], [380, 345], 'request'),
+		connect(agent, tool, [590, 345], [760, 345], 'call'),
+		connect(tool, observation, [870, 390], [870, 520], 'result'),
+		connect(observation, agent, [760, 565], [485, 390], 'feedback'),
+		connect(agent, answer, [485, 300], [485, 210], 'done / budget / error'),
+		text(380, 675, 'The loop needs an exit condition.', { size: 'l', width: 820 }),
+		text(380, 727, 'Decide the budget, stopping rule, and failure path before adding tools.', {
+			size: 's',
+			color: 'grey',
+			width: 880
+		})
+	];
+}
+
+function createArgumentMap() {
+	const claim = card(365, 145, 430, 105, 'CLAIM\nWhat should the reader believe?', {
+		color: 'blue',
+		size: 'm'
+	});
+	const reason = card(40, 405, 300, 105, 'REASON\nWhy does it follow?', {
+		color: 'black',
+		fill: 'none'
+	});
+	const evidence = card(435, 405, 300, 105, 'EVIDENCE\nWhat did we observe?', {
+		color: 'black',
+		fill: 'none'
+	});
+	const objection = card(830, 405, 300, 105, 'OBJECTION\nWhen does it break?', {
+		color: 'orange',
+		fill: 'none'
+	});
+	return [
+		text(40, 0, 'Make the argument visible', { size: 'xl', width: 1100 }),
+		text(40, 62, 'A claim is not evidence. A caveat is not a failure.', {
+			size: 's',
+			color: 'grey',
+			width: 1100
+		}),
+		claim,
+		reason,
+		evidence,
+		objection,
+		connect(reason, claim, [190, 405], [420, 250], 'supports'),
+		connect(evidence, claim, [585, 405], [585, 250], 'tests'),
+		connect(objection, claim, [980, 405], [740, 250], 'qualifies', {
+			color: 'orange',
+			dash: 'dashed'
+		}),
+		text(40, 570, 'State the mechanism.', { size: 's', width: 300 }),
+		text(435, 570, 'Add a source or mark “unknown”.', { size: 's', width: 310 }),
+		text(830, 570, 'Name the boundary.', { size: 's', width: 300 })
+	];
+}
+
+/** @param {PresetShape[]} shapes */
+function essayFigure(shapes) {
+	return shapes.map((shape) => ({
+		...shape,
+		roughness: 1,
+		fillStyle: /** @type {const} */ ('solid')
+	}));
+}
+
 /** @type {DrawPreset[]} */
 export const DRAW_PRESETS = [
+	{
+		id: 'architecture-comparison',
+		label: 'Two architectures',
+		description: 'Retrieval vs. an agent: two editable paths, one question, different trade-offs.',
+		createShapes: () => essayFigure(createArchitectureComparison())
+	},
+	{
+		id: 'agent-tool-loop',
+		label: 'Agent / tool loop',
+		description: 'Act, observe, repeat — with an explicit answer, budget, or error exit.',
+		createShapes: () => essayFigure(createAgentToolLoop())
+	},
+	{
+		id: 'argument-map',
+		label: 'Claim, evidence, objection',
+		description: 'Separate the claim, its support, and the conditions where it breaks.',
+		createShapes: () => essayFigure(createArgumentMap())
+	},
 	{
 		id: 'decision-matrix',
 		label: 'Priority quadrants',
