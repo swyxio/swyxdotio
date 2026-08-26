@@ -1069,4 +1069,12 @@
 			height: min(640px, calc(100dvh - 204px - var(--draw-background-inset, 0px)));
 		}
 	}
+	@media (max-height: 550px) {
+		.assistant-window {
+			top: 8px;
+			bottom: auto;
+			z-index: 1004;
+			height: calc(100dvh - 16px - var(--draw-background-inset, 0px));
+		}
+	}
 </style>

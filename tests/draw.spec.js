@@ -697,6 +697,7 @@ for (const fixture of [
 		const drawingCanvas = page.locator('.draw-canvas canvas.excalidraw__canvas.interactive');
 		await expect(drawingCanvas).toBeVisible();
 		await expect(page.getByRole('region', { name: 'Selected image tools' })).toHaveCount(0);
+		await drawingCanvas.click({ position: { x: 80, y: 170 } });
 		await drawingCanvas.click({ position: { x: 360, y: 280 } });
 		await page.evaluate(async (path) => {
 			const source = await fetch(path).then((response) => response.blob());

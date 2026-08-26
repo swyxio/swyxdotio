@@ -61,6 +61,7 @@ test('shared provider picker discloses capabilities, preserves drafts and sends 
 		await pending;
 		await route.fulfill({ json: { content: 'Read the native drawing.', toolCalls: [] } });
 	});
+	await page.getByRole('button', { name: 'Choose drawing mode and tools' }).click();
 	await page.getByRole('button', { name: 'Open drawing assistant' }).click();
 	const assistant = page.getByRole('region', { name: 'Drawing assistant' });
 	const picker = assistant.getByRole('combobox', { name: 'Drawing model' });
@@ -281,7 +282,6 @@ test('essay workflows prepare requests, protect drafts and preserve bound copies
 	await authenticate(page);
 	await page.getByRole('checkbox', { name: 'Library' }).check({ force: true });
 	await page.getByRole('tab', { name: 'Templates, components, and memes' }).click();
-	await page.getByRole('button', { name: 'Insert Claim, evidence, objection preset' }).click();
 	/** @returns {Promise<{ elements: any[] }>} */
 	const readScene = () =>
 		page.evaluate(() => {
@@ -289,8 +289,16 @@ test('essay workflows prepare requests, protect drafts and preserve bound copies
 			if (!key) throw new Error('The drawing account scope is not ready.');
 			return JSON.parse(localStorage.getItem(key) ?? '{"elements":[]}');
 		});
-	await expect.poll(async () => (await readScene()).elements.length).toBeGreaterThan(8);
+	const existingIds = new Set((await readScene()).elements.map((element) => element.id));
+	await page.getByRole('button', { name: 'Insert Claim, evidence, objection preset' }).click();
+	await expect
+		.poll(
+			async () =>
+				(await readScene()).elements.filter((element) => !existingIds.has(element.id)).length
+		)
+		.toBeGreaterThan(8);
 	const before = (await readScene()).elements;
+	const inserted = before.filter((element) => !existingIds.has(element.id));
 	let calls = 0;
 	await page.route('**/tools/api/draw/agent', async (route) => {
 		if (route.request().method() === 'GET') return route.continue();
@@ -336,7 +344,15 @@ test('essay workflows prepare requests, protect drafts and preserve bound copies
 	const originalIds = new Set(before.map((element) => element.id));
 	const copies = after.filter((element) => !originalIds.has(element.id));
 	const copyIds = new Set(copies.map((element) => element.id));
-	expect(copies.length).toBe(before.length);
+	expect(copies.length).toBe(inserted.length);
+	for (const original of inserted) {
+		expect(
+			copies.some(
+				(copy) =>
+					copy.type === original.type && copy.x === original.x + 1300 && copy.y === original.y
+			)
+		).toBe(true);
+	}
 	for (const edge of copies.filter((element) => element.type === 'arrow')) {
 		expect(copyIds.has(edge.startBinding.elementId)).toBe(true);
 		expect(copyIds.has(edge.endBinding.elementId)).toBe(true);
@@ -347,8 +363,12 @@ test('essay workflows prepare requests, protect drafts and preserve bound copies
 	await assistant.getByRole('button', { name: 'Minimize drawing assistant' }).click();
 	await page.getByRole('button', { name: 'Undo', exact: true }).click();
 	await expect
-		.poll(async () => (await readScene()).elements.filter((element) => !element.isDeleted).length)
-		.toBe(before.length);
+		.poll(async () =>
+			(await readScene()).elements
+				.filter((element) => !element.isDeleted)
+				.map((element) => element.id)
+		)
+		.toEqual(before.filter((element) => !element.isDeleted).map((element) => element.id));
 });
 
 test('assistant retries the last request after a temporary authenticated model failure', async ({

@@ -50,6 +50,8 @@ async function pasteSelectedImage(page, generatedSize) {
 	await page.goto('/draw');
 	const drawingCanvas = page.locator('.draw-canvas canvas.excalidraw__canvas.interactive');
 	await expect(drawingCanvas).toBeVisible();
+	// Start drawing through the canvas outside the new starter cards.
+	await drawingCanvas.click({ position: { x: 80, y: 170 } });
 	await drawingCanvas.click({ position: { x: 360, y: 280 } });
 	await page.evaluate(async (size) => {
 		let source;

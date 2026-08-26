@@ -3974,4 +3974,12 @@
 			top: 11vh;
 		}
 	}
+	@media (max-height: 550px) {
+		.image-tools {
+			top: 8px;
+			bottom: auto;
+			z-index: 1004;
+			max-height: calc(100dvh - 16px - var(--draw-background-inset, 0px));
+		}
+	}
 </style>
