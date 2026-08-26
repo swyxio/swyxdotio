@@ -956,3 +956,166 @@ test('stored few-shot/metadata fields enforce their explicit shapes and limits w
 			400
 		);
 });
+
+test('saved generation snapshots preserve 32k prompts and ordered role/label references with bounded custom output settings', async () => {
+	const store = environment();
+	const first = await (await upload(store)).json();
+	const second = await (await upload(store)).json();
+	const references = [
+		{ assetId: first.id, mimeType: 'image/png', role: 'inspiration', label: 'First inspiration' },
+		{
+			assetId: second.id,
+			mimeType: 'image/png',
+			role: 'parent',
+			label: 'Chosen parent',
+			generationId: 'parent-result'
+		}
+	];
+	const generation = {
+		id: 'result',
+		prompt: 'p'.repeat(32_000),
+		modelId: 'gpt-image-2',
+		modelSettings: { image_size: { width: 1280, height: 720 } },
+		referenceImages: references
+	};
+	const saved = await create(store, 'saved', {
+		name: 'Thumbnail candidate',
+		kind: 'generation',
+		assetId: second.id,
+		generation
+	});
+	const restored = await (await request(store, `/records/saved/${saved.id}`)).json();
+	assert.deepEqual(restored.data.generation, generation);
+	for (const invalid of [
+		{ ...generation, prompt: 'p'.repeat(32_001) },
+		{ ...generation, referenceImages: [{ ...references[0], role: 'owner' }] },
+		{ ...generation, referenceImages: [{ ...references[0], label: 'x'.repeat(201) }] },
+		{
+			...generation,
+			modelSettings: {
+				image_size: { width: 1280, height: 720, image_url: 'https://private.example' }
+			}
+		}
+	])
+		assert.equal(
+			(
+				await request(store, '/records/saved', {
+					method: 'POST',
+					body: { data: { name: 'Invalid generation', kind: 'generation', generation: invalid } }
+				})
+			).status,
+			400
+		);
+});
+
+test('real thumbnail direction and refinement recipes save privately without dropping context, Keep manifest or lineage', async () => {
+	const { createThumbnailRecipes } = await import('../src/lib/draw-thumbnail-workflow.js');
+	const store = environment();
+	const asset = await (await upload(store)).json();
+	const dataURL = `data:image/png;base64,${Buffer.from(PNG).toString('base64')}`;
+	const input = {
+		contextText: 'An episode about durable agents.',
+		references: [{ dataURL, mimeType: 'image/png', role: 'keep', label: 'Exact guest identity' }]
+	};
+	const recipes = [
+		...createThumbnailRecipes(input),
+		...createThumbnailRecipes({
+			...input,
+			feedbackText: 'Keep the person, improve hierarchy.',
+			parentGeneration: {
+				id: 'selected-parent',
+				dataURL,
+				mimeType: 'image/png',
+				prompt: 'Earlier prompt',
+				modelLabel: 'GPT Image 2',
+				createdAt: 1
+			}
+		})
+	];
+	for (const recipe of recipes) {
+		const generation = {
+			...recipe,
+			assetId: asset.id,
+			referenceImages: recipe.referenceImages.map(({ dataURL: _bytes, ...ref }) => ({
+				...ref,
+				assetId: asset.id
+			}))
+		};
+		const saved = await create(store, 'saved', {
+			name: recipe.context.thumbnail.label,
+			kind: 'generation',
+			generation
+		});
+		const restored = await (await request(store, `/records/saved/${saved.id}`)).json();
+		assert.deepEqual(restored.data.generation, generation);
+		assert.deepEqual(restored.data.generation.context.thumbnail.keep, [
+			{ referenceIndex: 1, label: 'Exact guest identity' }
+		]);
+		assert.equal((await request(store, `/records/saved/${saved.id}`, { user: BOB })).status, 404);
+	}
+});
+
+test('thumbnail snapshots reject unbounded, forged coverage and inconsistent reference provenance', async () => {
+	const { createThumbnailRecipes } = await import('../src/lib/draw-thumbnail-workflow.js');
+	const store = environment();
+	const asset = await (await upload(store)).json();
+	const [recipe] = createThumbnailRecipes({
+		contextText: 'Private source context.',
+		references: [
+			{
+				dataURL: `data:image/png;base64,${Buffer.from(PNG).toString('base64')}`,
+				mimeType: 'image/png',
+				role: 'keep',
+				label: 'Guest'
+			}
+		]
+	});
+	const generation = {
+		...recipe,
+		referenceImages: [{ assetId: asset.id, mimeType: 'image/png', role: 'keep', label: 'Guest' }]
+	};
+	const current = generation.context.thumbnail;
+	for (const patch of [
+		{ version: 2 },
+		{ directionId: 'unknown-direction' },
+		{ sourceContext: 'x'.repeat(20_001) },
+		{ feedback: 'x'.repeat(4001) },
+		{ label: 'x'.repeat(161) },
+		{ linkCoverage: 'watched' },
+		{ sourceReferenceCount: 16 },
+		{ sourceReferenceCount: 0.5 },
+		{ output: { width: 4096, height: 2160 } },
+		{ output: { width: 1280, height: 720, imageUrl: 'https://private.example' } },
+		{ keep: [{ referenceIndex: 0, label: 'Guest' }] },
+		{ keep: [{ referenceIndex: 2, label: 'Guest' }] },
+		{ keep: [{ referenceIndex: 1, label: 'Someone else' }] },
+		{ keep: [] },
+		{ keep: Array(16).fill({ referenceIndex: 1, label: 'Guest' }) },
+		{ sourceContext: 'data:image/png;base64,AAAA' },
+		{ extra: 'not a declared field' }
+	]) {
+		const invalid = { ...generation, context: { thumbnail: { ...current, ...patch } } };
+		const response = await request(store, '/records/saved', {
+			method: 'POST',
+			body: { data: { name: 'Invalid thumbnail', kind: 'generation', generation: invalid } }
+		});
+		assert.equal(response.status, 400, JSON.stringify(Object.keys(patch)));
+	}
+	const absent = { ...current };
+	delete absent.linkCoverage;
+	assert.equal(
+		(
+			await request(store, '/records/saved', {
+				method: 'POST',
+				body: {
+					data: {
+						name: 'Missing provenance',
+						kind: 'generation',
+						generation: { ...generation, context: { thumbnail: absent } }
+					}
+				}
+			})
+		).status,
+		400
+	);
+});

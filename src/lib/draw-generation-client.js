@@ -1,3 +1,10 @@
+import {
+	getDrawGenerationModel,
+	getDrawGenerationReferenceLimit,
+	MAX_DRAW_GENERATION_PROMPT_LENGTH,
+	MAX_DRAW_GENERATION_REQUEST_BYTES
+} from './draw-generation-models.js';
+
 const POLL_INTERVAL_MS = 900;
 const MAX_GENERATION_MS = 300_000;
 const POLL_REQUEST_TIMEOUT_MS = 20_000;
@@ -40,6 +47,7 @@ async function readResponse(response) {
 /**
  * @param {{
  *  image?: Blob,
+ *  images?: Blob[],
  *  userId?: string,
  *  prompt: string,
  *  model: string,
@@ -50,7 +58,7 @@ async function readResponse(response) {
  *  requestTimeoutMs?: number,
  *  maxGenerationMs?: number
  *  providerSafetyDefaults?: boolean
- *  settings?: Record<string, string | number | boolean>
+ *  settings?: Record<string, unknown>
  *  agentBudget?: string
  *  onBudget?: (budget: string, spendingUsd: number) => void
  *  runId?: string
@@ -71,10 +79,43 @@ export async function runDrawingGeneration(options) {
 		requestTimeoutMs = POLL_REQUEST_TIMEOUT_MS,
 		maxGenerationMs = MAX_GENERATION_MS
 	} = options;
+	if (options.image !== undefined && options.images !== undefined)
+		throw new Error('Provide image or images, not both.');
+	if (
+		typeof prompt !== 'string' ||
+		!prompt.trim() ||
+		prompt.length > MAX_DRAW_GENERATION_PROMPT_LENGTH
+	)
+		throw new Error('Enter a prompt of at most 32,000 characters.');
+	const descriptor = getDrawGenerationModel(model);
+	if (!descriptor) throw new Error('The selected model is unavailable.');
+	const images = options.images ?? (image ? [image] : []);
+	const limit = getDrawGenerationReferenceLimit(descriptor);
+	if (!Array.isArray(images) || images.length > limit || (limit > 0 && !images.length))
+		throw new Error(
+			limit === 0
+				? 'Text-to-image does not send reference images.'
+				: `Attach one to ${limit} reference image${limit === 1 ? '' : 's'} for this model.`
+		);
+	if (
+		images.some(
+			(image) =>
+				!(image instanceof Blob) ||
+				!/^image\/(?:png|jpeg|webp|avif|gif)$/.test(image.type) ||
+				!image.size
+		)
+	)
+		throw new Error('Attach valid image files.');
+	if (images.reduce((size, image) => size + image.size, 0) > MAX_DRAW_GENERATION_REQUEST_BYTES)
+		throw new Error('The combined reference upload exceeds 12 MB.');
 	const form = new FormData();
-	if (image) {
+	for (const [index, image] of images.entries()) {
 		const extension = image.type === 'image/jpeg' ? 'jpg' : image.type.replace('image/', '');
-		form.append('image', image, `drawing-edit.${extension}`);
+		form.append(
+			'image',
+			image,
+			`drawing-edit${images.length > 1 ? `-${index + 1}` : ''}.${extension}`
+		);
 	}
 	form.append('prompt', prompt);
 	form.append('model', model);
@@ -86,6 +127,9 @@ export async function runDrawingGeneration(options) {
 	if (options.runId !== undefined) form.append('runId', options.runId);
 	if (options.runLimitUsd !== undefined) form.append('runLimitUsd', String(options.runLimitUsd));
 	if (options.clientJobId !== undefined) form.append('clientJobId', options.clientJobId);
+	// Measure the complete multipart encoding, not only its image bytes or Content-Length.
+	if ((await new Response(form).blob()).size > MAX_DRAW_GENERATION_REQUEST_BYTES)
+		throw new Error('The combined reference upload exceeds 12 MB.');
 	signal.throwIfAborted();
 	onProgress({ status: 'UPLOADING' });
 	const submitted = await readResponse(

@@ -39,13 +39,13 @@ export const DRAW_STARTING_MODES = Object.freeze(
 			label: 'Thumbnails',
 			description: 'AI Engineer & Latent Space',
 			heading: 'Give your next video a strong first frame.',
-			detail: 'Compose with real assets, editable type, and reusable brand kits.',
+			detail: 'Attach inspiration, add context, and make four directions.',
 			section: 'designs',
 			starters: [
 				{
 					command: 'action-compose-thumbnail',
 					label: 'Create a thumbnail',
-					description: 'Choose a kit, headline, and layout.',
+					description: 'Generate four thumbnails, then iterate with feedback.',
 					symbol: 'thumbnail'
 				},
 				{

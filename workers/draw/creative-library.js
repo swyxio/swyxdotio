@@ -1,3 +1,15 @@
+import { MAX_DRAW_GENERATION_PROMPT_LENGTH } from '../../src/lib/draw-generation-models.js';
+import { isDrawFalCustomImageSize } from '../../src/lib/draw-fal-models.js';
+import {
+	MAX_THUMBNAIL_REFERENCES,
+	MAX_THUMBNAIL_CONTEXT_LENGTH,
+	MAX_THUMBNAIL_FEEDBACK_LENGTH,
+	MAX_THUMBNAIL_LABEL_LENGTH,
+	THUMBNAIL_DIRECTIONS,
+	THUMBNAIL_REFINEMENTS,
+	THUMBNAIL_OUTPUT
+} from '../../src/lib/draw-thumbnail-workflow.js';
+
 /** Account-local creative metadata. Authentication and binary I/O live in the server boundary. */
 export const CREATIVE_RECORD_KINDS = [
 	'kits',
@@ -138,17 +150,58 @@ const generationSettings = (/** @type {any} */ value) =>
 		Object.entries(value).every(
 			([key, setting]) =>
 				/^[a-zA-Z][a-zA-Z0-9_]{0,63}$/.test(key) &&
-				(typeof setting === 'boolean' ||
+				((key === 'image_size' && isDrawFalCustomImageSize(setting)) ||
+					typeof setting === 'boolean' ||
 					(typeof setting === 'number' && Number.isFinite(setting)) ||
 					(typeof setting === 'string' &&
 						setting.length <= 200 &&
 						!/data:|https?:\/\//i.test(setting)))
 		)
 	);
+const thumbnailContext = shape(
+	{
+		version: choice([1]),
+		directionId: choice(
+			[...THUMBNAIL_DIRECTIONS, ...THUMBNAIL_REFINEMENTS].map((direction) => direction.id)
+		),
+		label: text(MAX_THUMBNAIL_LABEL_LENGTH, 1),
+		sourceContext: text(MAX_THUMBNAIL_CONTEXT_LENGTH, 1),
+		feedback: text(MAX_THUMBNAIL_FEEDBACK_LENGTH),
+		keep: list(
+			shape(
+				{
+					referenceIndex: (value) =>
+						Number.isSafeInteger(value) && value >= 1 && value <= MAX_THUMBNAIL_REFERENCES,
+					label: text(MAX_THUMBNAIL_LABEL_LENGTH)
+				},
+				['referenceIndex', 'label']
+			),
+			MAX_THUMBNAIL_REFERENCES
+		),
+		sourceReferenceCount: (value) =>
+			Number.isSafeInteger(value) && value >= 0 && value <= MAX_THUMBNAIL_REFERENCES,
+		linkCoverage: choice(['unread']),
+		output: shape(
+			{ width: choice([THUMBNAIL_OUTPUT.width]), height: choice([THUMBNAIL_OUTPUT.height]) },
+			['width', 'height']
+		)
+	},
+	[
+		'version',
+		'directionId',
+		'label',
+		'sourceContext',
+		'feedback',
+		'keep',
+		'sourceReferenceCount',
+		'linkCoverage',
+		'output'
+	]
+);
 const generation = shape(
 	{
 		id: text(200, 1),
-		prompt: text(40000),
+		prompt: text(MAX_DRAW_GENERATION_PROMPT_LENGTH),
 		modelId: text(200),
 		adapterId: text(200),
 		modelSettings: generationSettings,
@@ -175,7 +228,9 @@ const generation = shape(
 				{
 					assetId: id,
 					mimeType: choice(['image/png', 'image/jpeg', 'image/webp']),
-					generationId: text(200, 1)
+					generationId: text(200, 1),
+					role: choice(['inspiration', 'keep', 'parent']),
+					label: text(200)
 				},
 				['assetId', 'mimeType']
 			),
@@ -183,6 +238,7 @@ const generation = shape(
 		),
 		parentGenerationId: text(200, 1),
 		context: shape({
+			thumbnail: thumbnailContext,
 			briefId: optionalId,
 			briefRevision: positiveInteger,
 			houseKitId: optionalId,
@@ -360,6 +416,30 @@ function validData(data, kind) {
 			(data.kind === 'generation' && !data.generation))
 	)
 		return false;
+	const thumbnail = data.generation?.context?.thumbnail;
+	if (thumbnail) {
+		const refs = data.generation.referenceImages ?? [];
+		const parentId = data.generation.parentGenerationId;
+		if (refs.length !== thumbnail.sourceReferenceCount + (parentId ? 1 : 0)) return false;
+		const sources = refs.slice(0, thumbnail.sourceReferenceCount);
+		if (sources.some((/** @type {any} */ ref) => !['inspiration', 'keep'].includes(ref.role)))
+			return false;
+		if (parentId && (refs.at(-1)?.role !== 'parent' || refs.at(-1)?.generationId !== parentId))
+			return false;
+		if (!parentId && thumbnail.feedback.trim()) return false;
+		const expectedKeep = sources.flatMap((/** @type {any} */ ref, /** @type {number} */ index) =>
+			ref.role === 'keep' ? [{ referenceIndex: index + 1, label: ref.label ?? '' }] : []
+		);
+		if (
+			thumbnail.keep.length !== expectedKeep.length ||
+			thumbnail.keep.some(
+				(/** @type {any} */ kept, /** @type {number} */ index) =>
+					kept.referenceIndex !== expectedKeep[index].referenceIndex ||
+					kept.label !== expectedKeep[index].label
+			)
+		)
+			return false;
+	}
 	if (data.kitRevision && !data.kitId) return false;
 	if (
 		kind === 'briefs' &&
