@@ -1,0 +1,106 @@
+[
+  {
+    "name": "owner-dark-phone",
+    "state": "owner",
+    "theme": "dark",
+    "width": 390,
+    "height": 844,
+    "overflow": 0
+  },
+  {
+    "name": "owner-dark-desktop",
+    "state": "owner",
+    "theme": "dark",
+    "width": 1440,
+    "height": 900,
+    "overflow": 0
+  },
+  {
+    "name": "member-phone",
+    "state": "member",
+    "theme": "light",
+    "width": 390,
+    "height": 844,
+    "overflow": 0
+  },
+  {
+    "name": "guest-phone",
+    "state": "guest",
+    "theme": "light",
+    "width": 390,
+    "height": 844,
+    "overflow": 0
+  },
+  {
+    "name": "account-expanded-phone",
+    "state": "account",
+    "theme": "light",
+    "width": 390,
+    "height": 844,
+    "overflow": 0
+  },
+  {
+    "name": "account-expanded-desktop",
+    "state": "account",
+    "theme": "light",
+    "width": 1440,
+    "height": 900,
+    "overflow": 0
+  },
+  {
+    "name": "policy-expanded-phone",
+    "state": "policy",
+    "theme": "light",
+    "width": 390,
+    "height": 844,
+    "overflow": 0
+  },
+  {
+    "name": "usage-unavailable-phone",
+    "state": "unavailable",
+    "theme": "light",
+    "width": 390,
+    "height": 844,
+    "overflow": 0
+  },
+  {
+    "name": "auth-error-phone",
+    "state": "autherror",
+    "theme": "light",
+    "width": 390,
+    "height": 844,
+    "overflow": 0
+  },
+  {
+    "name": "200-percent-text-phone",
+    "state": "zoom",
+    "theme": "light",
+    "width": 390,
+    "height": 844,
+    "overflow": 101
+  },
+  {
+    "name": "high-contrast-phone",
+    "state": "contrast",
+    "theme": "light",
+    "width": 390,
+    "height": 844,
+    "overflow": 0
+  },
+  {
+    "name": "missing-art-phone",
+    "state": "missing",
+    "theme": "light",
+    "width": 390,
+    "height": 844,
+    "overflow": 0
+  },
+  {
+    "name": "narrow-phone",
+    "state": "owner",
+    "theme": "light",
+    "width": 320,
+    "height": 700,
+    "overflow": 0
+  }
+]
