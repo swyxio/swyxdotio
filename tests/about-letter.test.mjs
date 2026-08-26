@@ -77,5 +77,6 @@ test('/now is a dated standalone public page with a clearly historical update', 
 	assert.match(html, /not taking new advising inquiries/);
 	assert.ok(PUBLIC_PAGE_PATHS.includes('/now'));
 	assert.equal(getPageSocialMeta('now').canonical, 'https://swyx.io/now');
+	assert.doesNotMatch(await read('_redirects'), /^\/now\s/m);
 	assert.doesNotMatch(content, /\/tools|tools\.aieconf/);
 });
