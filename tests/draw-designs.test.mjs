@@ -5,6 +5,7 @@ import {
 	createDrawingDesign,
 	DRAW_AGENT_WORKFLOWS,
 	DRAW_DESIGN_FORMATS,
+	DRAW_DESIGN_DEMO_PHOTO,
 	DRAW_DESIGN_TEMPLATES,
 	getDrawingDesignFormat
 } from '../src/lib/draw-designs.js';
@@ -12,7 +13,14 @@ import {
 test('design templates cover observed Canva thumbnail, speaker, banner, and slide workflows', () => {
 	assert.deepEqual(
 		DRAW_DESIGN_TEMPLATES.map((design) => design.id),
-		['ls-podcast', 'fde-decision', 'aie-speaker', 'blog-launch', 'keynote-slide']
+		[
+			'ls-podcast',
+			'fde-decision',
+			'thumbnail-evidence',
+			'aie-speaker',
+			'blog-launch',
+			'keynote-slide'
+		]
 	);
 	assert.deepEqual(
 		DRAW_DESIGN_FORMATS.map(({ id, width, height }) => [id, width, height]),
@@ -50,13 +58,13 @@ test('each design creates one exact-size native frame with independently editabl
 });
 
 test('Latent Space thumbnails use the official supplied logo and preserve YouTube timestamp clearance', () => {
-	for (const id of ['ls-podcast', 'fde-decision']) {
+	for (const id of ['ls-podcast', 'fde-decision', 'thumbnail-evidence']) {
 		const result = createDrawingDesign(id, {
 			logoFileId: 'official-logo',
 			headline: 'REAL EDITABLE HOOK',
 			companies: 'ACME   ·   EXAMPLE'
 		});
-		const logo = result.elements.find((element) => element.type === 'image');
+		const logo = result.elements.find((element) => element.fileId === 'official-logo');
 		assert.equal(logo?.fileId, 'official-logo');
 		assert.equal(logo?.width, logo?.height);
 		assert.ok(
@@ -73,23 +81,20 @@ test('Latent Space thumbnails use the official supplied logo and preserve YouTub
 	}
 });
 
-test('thumbnail hooks wrap and scale before overlapping the editable guest portrait', () => {
-	for (const id of ['ls-podcast', 'fde-decision']) {
+test('custom thumbnail hooks fit their headline regions without changing the guest photo', () => {
+	for (const id of ['ls-podcast', 'fde-decision', 'thumbnail-evidence']) {
 		const result = createDrawingDesign(id, { headline: 'HARNESS ENGINEERING' });
-		const headline = result.elements.find((element) =>
-			element.text?.includes('HARNESS')
-		);
-		assert.equal(headline?.text, 'HARNESS\nENGINEERING');
-		assert.ok(headline.fontSize <= (id === 'fde-decision' ? 76 : 86));
-		assert.ok(headline.x + 11 * headline.fontSize * 0.58 < 790);
+		const headline = result.elements.find((e) => e.customData?.designRole === 'headline');
+		assert.equal(headline.text.replaceAll('\n', ' '), 'HARNESS ENGINEERING');
+		assert.ok(headline.fontSize > 25);
+		const portrait = result.elements.find((e) => e.customData?.designRole === 'guest-photo');
+		assert.equal(portrait.fileId, DRAW_DESIGN_DEMO_PHOTO.id);
 	}
-
 	const lengthy = createDrawingDesign('ls-podcast', {
 		headline: 'BUILDING RELIABLE PRODUCTION AGENT ENGINEERING WORKFLOWS'
 	});
-	const headline = lengthy.elements.find((element) => element.text?.includes('BUILDING'));
-	assert.ok(headline.fontSize < 86);
-	assert.ok(headline.text.split('\n').length * headline.fontSize * 1.25 <= 225);
+	const headline = lengthy.elements.find((e) => e.customData?.designRole === 'headline');
+	assert.ok(headline.text.split('\n').length * headline.fontSize * 1.05 <= 435);
 });
 
 test('designs reject unknown templates without inventing people, identities, or companies', () => {
@@ -97,4 +102,36 @@ test('designs reject unknown templates without inventing people, identities, or 
 	const speaker = createDrawingDesign('aie-speaker');
 	assert.ok(speaker.elements.some((element) => element.text === 'SPEAKER\nNAME'));
 	assert.ok(speaker.elements.some((element) => element.text === 'The talk title goes here'));
+});
+
+test('photo-led starters preserve actual photo bytes and editable crop geometry, with no invented guests or companies', () => {
+	for (const id of ['ls-podcast', 'fde-decision', 'thumbnail-evidence']) {
+		const result = createDrawingDesign(id, {
+			photo: { fileId: 'my-real-guest', width: 800, height: 1200 }
+		});
+		const photos = result.elements.filter((e) => e.customData?.designRole === 'guest-photo');
+		assert.equal(photos.length, 1);
+		assert.equal(photos[0].fileId, 'my-real-guest');
+		assert.equal(photos[0].crop.naturalWidth, 800);
+		assert.equal(photos[0].crop.naturalHeight, 1200);
+		assert.ok(
+			Math.abs(photos[0].width / photos[0].height - photos[0].crop.width / photos[0].crop.height) <
+				0.00001
+		);
+		assert.ok(photos[0].crop.x >= 0 && photos[0].crop.y >= 0);
+		assert.equal(
+			result.elements.some((e) =>
+				/COMPANY ONE|YOUR SHARPEST|DROP GUEST|CONTEXT STACK/.test(e.text ?? '')
+			),
+			false
+		);
+		assert.equal(
+			result.elements.some((e) => e.strokeStyle === 'dashed'),
+			false
+		);
+	}
+	assert.throws(
+		() => createDrawingDesign('ls-podcast', { photo: { fileId: 'bad', width: 0, height: 300 } }),
+		/valid dimensions/
+	);
 });

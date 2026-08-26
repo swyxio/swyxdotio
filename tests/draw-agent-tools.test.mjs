@@ -389,7 +389,7 @@ test('drawing assistant discovers branded templates and executes bounded design,
 		}
 	};
 	const catalog = /** @type {any} */ (await executeDrawingAgentCommand(['designs'], designContext));
-	assert.equal(catalog.templates.length, 5);
+	assert.equal(catalog.templates.length, 6);
 	assert.equal(catalog.formats.length, 6);
 	await executeDrawingAgentCommand(
 		['design', 'insert', 'ls-podcast', '--headline', 'USEFUL HOOK'],

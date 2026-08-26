@@ -28,6 +28,7 @@
 	} from '$lib/draw-image-scene.js';
 	import {
 		createDrawingDesign,
+		DRAW_DESIGN_DEMO_PHOTO,
 		DRAW_DESIGN_FORMATS,
 		DRAW_DESIGN_TEMPLATES,
 		getDrawingDesignFormat,
@@ -38,6 +39,7 @@
 	import { DRAW_ILLUSTRATION_BRUSHES, applyIllustrationBrush } from '$lib/draw-illustration.js';
 	import DrawImageToolbox from '$lib/DrawImageToolbox.svelte';
 	import DrawWorkspaceNav from '$lib/DrawWorkspaceNav.svelte';
+	import DrawDesignPreview from '$lib/DrawDesignPreview.svelte';
 	import DrawStartingPoints from '$lib/DrawStartingPoints.svelte';
 	import {
 		getDrawingStartingMode,
@@ -176,6 +178,7 @@
 	let legacyCachePageId = '';
 	let isSwitchingPage = $state(false);
 	let isLibraryOpen = $state(false);
+	let useSelectedDesignPhoto = $state(false);
 	let selectedImageId = $state('');
 	let selectedImageDataUrl = $state('');
 	let imageToolAction = $state(
@@ -1403,28 +1406,23 @@
 		});
 	}
 
-	async function loadOfficialBrandLogo() {
-		if (!editor) throw new Error('The drawing editor is unavailable.');
-		const fileId = /** @type {import('@excalidraw/excalidraw/element/types').FileId} */ (
-			'latent-space-official-hex'
-		);
-		if (editor.getFiles()[fileId]) return fileId;
-		const response = await fetch('/assets/latent-space-hex-gradient.png', { cache: 'force-cache' });
-		if (!response.ok) throw new Error('The official Latent Space logo could not be loaded.');
-		const image = await response.blob();
-		const dataURL = /** @type {import('@excalidraw/excalidraw/types').DataURL} */ (
-			await readBlobDataUrl(image)
-		);
-		editor.addFiles([
-			{
-				id: fileId,
-				mimeType: 'image/png',
-				dataURL,
-				created: Date.now(),
-				lastRetrieved: Date.now()
-			}
-		]);
-		return fileId;
+	/** Load public starter assets without modifying the canvas before scope is rechecked.
+	 * @param {string} id @param {string} url @param {'image/png' | 'image/webp'} mimeType */
+	async function loadDesignImageAsset(id, url, mimeType) {
+		const existing = editor?.getFiles()[id];
+		if (existing) return existing;
+		const response = await fetch(url, { cache: 'force-cache' });
+		if (!response.ok)
+			throw new Error('The template image could not be loaded. Try inserting again.');
+		return {
+			id: /** @type {import('@excalidraw/excalidraw/element/types').FileId} */ (id),
+			mimeType,
+			dataURL: /** @type {import('@excalidraw/excalidraw/types').DataURL} */ (
+				await readBlobDataUrl(await response.blob())
+			),
+			created: Date.now(),
+			lastRetrieved: Date.now()
+		};
 	}
 
 	/** @param {readonly import('@excalidraw/excalidraw/element/types').ExcalidrawElement[]} elements */
@@ -1447,22 +1445,82 @@
 		});
 	}
 
-	/** @param {string} templateId @param {Record<string, string>} [options] */
-	async function insertDesign(templateId, options = {}) {
+	/** @param {string} templateId @param {Record<string, string>} [options] @param {boolean} [useSelectedPhoto] */
+	async function insertDesign(templateId, options = {}, useSelectedPhoto = false) {
 		const activityUser = toolsUser?.id;
 		if (!editor || !convertElements || !captureImmediately)
 			throw new Error('The drawing canvas is not ready.');
 		const template = getDrawingDesignTemplate(templateId);
 		if (!template) throw new Error('Choose one of the available design templates.');
+		const insertionPage = activePageId;
+		const insertionAccount = STORAGE_KEY;
+		const insertionEditor = editor;
+		function assertInsertionScope() {
+			if (
+				activePageId !== insertionPage ||
+				STORAGE_KEY !== insertionAccount ||
+				editor !== insertionEditor ||
+				accountChanged
+			)
+				throw new Error('The account or page changed. Nothing was inserted.');
+		}
+		const needsPhoto = template.format === 'youtube' || template.id === 'aie-speaker';
+		const selected = editor
+			.getSceneElements()
+			.find((element) => element.id === selectedImageId && element.type === 'image');
+		const selectedFile =
+			selected?.type === 'image' && selected.fileId
+				? editor.getFiles()[selected.fileId]
+				: undefined;
+		if (needsPhoto && useSelectedPhoto && !selectedFile)
+			throw new Error('Select a canvas image to use as the guest photo.');
+		await Promise.all([
+			document.fonts.load('100px "Lilita One"'),
+			document.fonts.load('32px Cascadia')
+		]);
+		assertInsertionScope();
+		const [logo, demo] = await Promise.all([
+			template.brand === 'latent-space'
+				? loadDesignImageAsset(
+						'latent-space-official-hex',
+						'/assets/latent-space-hex-gradient.png',
+						'image/png'
+					)
+				: undefined,
+			needsPhoto && !useSelectedPhoto
+				? loadDesignImageAsset(DRAW_DESIGN_DEMO_PHOTO.id, DRAW_DESIGN_DEMO_PHOTO.url, 'image/webp')
+				: undefined
+		]);
+		assertInsertionScope();
+		let photo;
+		if (needsPhoto && useSelectedPhoto && selectedFile) {
+			const bitmap = await createImageBitmap(
+				await fetch(selectedFile.dataURL).then((response) => response.blob())
+			);
+			photo = { fileId: selectedFile.id, width: bitmap.width, height: bitmap.height };
+			bitmap.close();
+		} else if (demo)
+			photo = {
+				fileId: demo.id,
+				width: DRAW_DESIGN_DEMO_PHOTO.width,
+				height: DRAW_DESIGN_DEMO_PHOTO.height
+			};
+		assertInsertionScope();
+		// Read after every async step: do not drop drawing edits made while assets were loading.
 		const existing = editor.getSceneElementsIncludingDeleted();
 		const visible = existing.filter((element) => !element.isDeleted);
 		const x = visible.length
 			? Math.max(...visible.map((element) => element.x + element.width)) + 120
 			: 0;
 		const y = visible.length ? Math.min(...visible.map((element) => element.y)) : 0;
-		const logoFileId =
-			template.brand === 'latent-space' ? await loadOfficialBrandLogo() : undefined;
-		const design = createDrawingDesign(templateId, { ...options, x, y, logoFileId });
+		const design = createDrawingDesign(templateId, {
+			...options,
+			x,
+			y,
+			logoFileId: logo?.id,
+			photo
+		});
+
 		const elements = convertElements(
 			/** @type {import('@excalidraw/excalidraw/data/transform').ExcalidrawElementSkeleton[]} */ (
 				design.elements
@@ -1471,6 +1529,11 @@
 		);
 		const frame = elements.find((element) => element.type === 'frame');
 		if (!frame) throw new Error('The design artboard could not be created.');
+		// Excalidraw treats a zero frame coordinate as absent and adds 10px padding.
+		// Restore our explicit origin before committing any new elements.
+		Object.assign(frame, { x, y });
+		const files = [logo, demo].filter((file) => !!file);
+		if (files.length) editor.addFiles(files);
 		editor.updateScene({
 			elements: [...existing, ...elements],
 			appState: { selectedElementIds: { [frame.id]: true } },
@@ -1529,6 +1592,7 @@
 		const copied = convertElements(/** @type {any} */ (skeletons), { regenerateIds: true });
 		const nextFrame = copied.find((element) => element.type === 'frame');
 		if (!nextFrame) throw new Error('The design artboard could not be duplicated.');
+		Object.assign(nextFrame, { x: nextX, y: frame.y });
 		editor.updateScene({
 			elements: [...existing, ...copied],
 			appState: { selectedElementIds: { [nextFrame.id]: true } },
@@ -2996,38 +3060,60 @@
 				aria-label="Branded design templates"
 			>
 				<div class="component-heading">
-					<strong>Create a real design</strong>
-					<span>Editable artboards, brand assets, and exact export sizes.</span>
+					<strong>Make it worth clicking.</strong>
+					<span>Big faces. Specific hooks. Editable 1280 × 720 artwork.</span>
 				</div>
-				{#each DRAW_DESIGN_TEMPLATES as design (design.id)}
+				<label class="design-photo-choice">
+					<input
+						type="checkbox"
+						checked={useSelectedDesignPhoto && !!selectedImageId}
+						disabled={!selectedImageId}
+						onchange={(event) => (useSelectedDesignPhoto = event.currentTarget.checked)}
+					/>
+					Use selected image as guest
+				</label>
+				<p class="design-demo-note">
+					{useSelectedDesignPhoto && selectedImageId
+						? 'Your selected image will be copied; the original stays untouched.'
+						: 'Demo: public photo of swyx + sample copy. Select your own canvas image to use it instead.'}
+				</p>
+				{#snippet designCard(design = DRAW_DESIGN_TEMPLATES[0])}
 					<button
 						type="button"
 						class="design-option"
 						aria-label="Insert {design.label} design"
-						onclick={() => void insertDesign(design.id)}
+						onclick={() =>
+							void insertDesign(design.id, {}, useSelectedDesignPhoto && !!selectedImageId).catch(
+								(error) => editor?.setToast({ message: error.message })
+							)}
 					>
-						<div class="design-preview" style:background={design.background}>
-							<div class="design-preview-copy">
-								<span style:background={design.accent}></span>
-								<strong
-									>{design.brand === 'latent-space'
-										? 'YOUR NEXT\nBIG IDEA'
-										: design.brand === 'ai-engineer'
-											? 'AI ENGINEER'
-											: 'THE IDEA\nTHAT MATTERS'}</strong
-								>
-							</div>
-							<div class="design-preview-portrait" style:border-color={design.accent}></div>
-						</div>
+						<DrawDesignPreview
+							templateId={design.id}
+							photoUrl={useSelectedDesignPhoto && selectedImageDataUrl
+								? selectedImageDataUrl
+								: undefined}
+						/>
 						<strong>{design.label}</strong>
 						<span>{design.description}</span>
 						<span class="design-dimensions"
 							>{getDrawingDesignFormat(design.format)?.width} × {getDrawingDesignFormat(
 								design.format
-							)?.height}</span
+							)?.height} · Editable layers</span
 						>
 					</button>
+				{/snippet}
+				{#each DRAW_DESIGN_TEMPLATES.filter((design) => design.format === 'youtube') as design (design.id)}
+					{@render designCard(design)}
 				{/each}
+				<details class="design-other-formats">
+					<summary>Other formats · speaker cards, articles & slides</summary>
+					<p>
+						Announcement and slide concepts are not approved AI Engineer video-thumbnail styles.
+					</p>
+					{#each DRAW_DESIGN_TEMPLATES.filter((design) => design.format !== 'youtube') as design (design.id)}
+						{@render designCard(design)}
+					{/each}
+				</details>
 			</section>
 		{:else if workspaceSection === 'components'}
 			<section id="drawing-components" class="workspace-content" aria-label="UI components">
@@ -3940,33 +4026,40 @@
 		color: #6252bb;
 		font-weight: 600;
 	}
-	.design-preview {
+	.design-photo-choice {
 		display: flex;
-		justify-content: space-between;
 		align-items: center;
-		min-height: 91px;
-		padding: 12px;
-		border-radius: 6px;
-	}
-	.design-preview-copy {
-		display: grid;
 		gap: 8px;
+		padding: 8px 10px;
+		font-size: 12px;
+		cursor: pointer;
 	}
-	.design-preview-copy > span {
-		width: 22px;
-		height: 3px;
+	.design-photo-choice input {
+		width: 18px;
+		height: 18px;
+		accent-color: #6252bb;
 	}
-	.design-preview-copy > strong {
-		color: #fff;
+	.design-demo-note {
+		margin: 0 10px 12px;
 		font-size: 11px;
-		line-height: 1.14;
-		white-space: pre-line;
+		line-height: 1.5;
+		color: #777080;
 	}
-	.design-preview-portrait {
-		width: 49px;
-		height: 61px;
-		border: 1px dashed;
-		background: #ffffff0b;
+	.design-other-formats {
+		margin-top: 12px;
+		border-top: 1px solid #e4dfec;
+	}
+	.design-other-formats summary {
+		cursor: pointer;
+		padding: 14px 10px;
+		font-size: 11px;
+		line-height: 1.5;
+	}
+	.design-other-formats p {
+		padding: 0 10px 10px;
+		font-size: 11px;
+		line-height: 1.5;
+		color: #777080;
 	}
 
 	.preset-preview {
