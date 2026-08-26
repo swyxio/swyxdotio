@@ -154,10 +154,10 @@ const generation = shape(
 		modelSettings: generationSettings,
 		modelEndpoint: text(200),
 		modelProvider: text(100),
-		modelKind: choice(['image', 'video']),
+		modelKind: choice(['text-to-image', 'image-edit', 'image-to-video']),
 		modelWorkflow: text(100),
 		modelLabel: text(200),
-		createdAt: text(40),
+		createdAt: number(0, Number.MAX_SAFE_INTEGER),
 		mimeType: choice(['image/png', 'image/jpeg', 'image/webp', 'video/mp4', 'video/webm']),
 		recipeId: text(200),
 		runId: text(200),
@@ -165,6 +165,10 @@ const generation = shape(
 		batchId: text(200),
 		elapsedMs: number(0, 1e10),
 		estimatedUsd: number(0, 1e6),
+		reportedUsd: number(0, 1e6),
+		qualityNote: text(2000),
+		width: positiveInteger,
+		height: positiveInteger,
 		assetId: optionalId,
 		referenceImages: list(
 			shape(
@@ -663,9 +667,7 @@ export class CreativeLibrary {
 		const isHouseDraft = kind === 'kits' && active === undefined;
 		const encoded = JSON.stringify(data);
 		const size = bytes(encoded);
-		if (
-			size > (kind === 'briefs' ? CREATIVE_LIMITS.briefBytes : CREATIVE_LIMITS.recordBytes)
-		)
+		if (size > (kind === 'briefs' ? CREATIVE_LIMITS.briefBytes : CREATIVE_LIMITS.recordBytes))
 			return response({ error: 'This record exceeds its byte limit.' }, 413);
 		if (
 			!current &&

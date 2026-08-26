@@ -669,12 +669,39 @@ test('saved modifiers, references and generation snapshots share private assets 
 			prompt: 'A visual',
 			modelId: 'model',
 			adapterId: 'adapter',
+			modelKind: 'text-to-image',
+			createdAt: 1787690000000,
+			qualityNote: 'Mock provider result',
+			reportedUsd: 0.02,
+			width: 1280,
+			height: 720,
 			modelSettings: { seed: 42 },
 			referenceImages: [{ assetId: asset.id, mimeType: 'image/png' }],
 			context: { referenceAssetIds: [asset.id] }
 		}
 	});
 	assert.equal(saved.data.generation.modelSettings.seed, 42);
+	assert.equal(saved.data.generation.modelKind, 'text-to-image');
+	assert.equal(saved.data.generation.createdAt, 1787690000000);
+	for (const invalid of [
+		{ modelKind: 'image' },
+		{ createdAt: '2026-08-25' },
+		{ width: -1 },
+		{ height: 1.5 },
+		{ reportedUsd: -1 }
+	]) {
+		const response = await request(store, '/records/saved', {
+			method: 'POST',
+			body: {
+				data: {
+					name: 'Invalid generation',
+					kind: 'generation',
+					generation: { ...saved.data.generation, ...invalid }
+				}
+			}
+		});
+		assert.equal(response.status, 400);
+	}
 	assert.equal(
 		(await (await request(store, '/library', { user: BOB })).json()).records.saved.length,
 		0
