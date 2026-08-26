@@ -1,5 +1,5 @@
 <script>
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import {
 		PRESENCE_ADMISSION_PREFIX,
 		PRESENCE_REACTIONS,
@@ -48,6 +48,8 @@
 	let destroyed = false;
 	/** @type {HTMLElement | null} */
 	let pill = null;
+	/** @type {HTMLButtonElement | undefined} */
+	let pillButton;
 
 	$: peerList = [...peers.values()].filter((peer) => peer.id !== selfId);
 	$: readerCount = connected ? peerList.length + 1 : 0;
@@ -266,6 +268,32 @@
 		panelOpen = false;
 	}
 
+	/** @param {KeyboardEvent} event */
+	function closePresenceOnEscape(event) {
+		if (!panelOpen || event.defaultPrevented || event.key !== 'Escape') return;
+		if (event.target instanceof Element && event.target.closest('dialog[open]')) return;
+		event.preventDefault();
+		panelOpen = false;
+		pillButton?.focus();
+	}
+
+	async function togglePanel() {
+		panelOpen = !panelOpen;
+		if (panelOpen) {
+			await tick();
+			if (pill && getComputedStyle(pill).position !== 'fixed') {
+				pill.scrollIntoView({ block: 'nearest' });
+			}
+		}
+	}
+
+	/** @param {PointerEvent} event */
+	function closePresenceOutside(event) {
+		if (panelOpen && event.target instanceof Node && !pill?.contains(event.target)) {
+			panelOpen = false;
+		}
+	}
+
 	onMount(() => {
 		const mobileQuery = matchMedia('(pointer: coarse), (max-width: 700px)');
 		const motionQuery = matchMedia('(prefers-reduced-motion: reduce)');
@@ -346,6 +374,8 @@
 	});
 </script>
 
+<svelte:window on:keydown={closePresenceOnEscape} on:pointerdown={closePresenceOutside} />
+
 {#if admitted || hidden}
 	<div class:reduced={reducedMotion} class="live-presence" aria-live="polite">
 		{#if !hidden}
@@ -418,8 +448,19 @@
 					requestShare();
 				}}
 			>
+				<button
+					type="button"
+					class="presence-pill"
+					bind:this={pillButton}
+					aria-expanded={panelOpen}
+					aria-controls="live-reader-panel"
+					on:click={togglePanel}
+				>
+					<span class:online={connected} class="status-dot"></span>
+					{connected ? `${readerCount} here` : 'Live readers'} <span aria-hidden="true">· 👋</span>
+				</button>
 				{#if panelOpen}
-					<div class="presence-panel">
+					<div id="live-reader-panel" class="presence-panel">
 						<div class="reaction-row" aria-label="Wave to live readers">
 							{#each PRESENCE_REACTIONS as reaction}
 								<button
@@ -438,15 +479,6 @@
 						<p>Country is approximate and may reflect a VPN.</p>
 					</div>
 				{/if}
-				<button
-					type="button"
-					class="presence-pill"
-					aria-expanded={panelOpen}
-					on:click={() => (panelOpen = !panelOpen)}
-				>
-					<span class:online={connected} class="status-dot"></span>
-					{connected ? `${readerCount} here` : 'Live readers'} <span aria-hidden="true">· 👋</span>
-				</button>
 			</div>
 		{:else}
 			<button type="button" class="show-presence" on:click={() => setHidden(false)}
@@ -666,17 +698,46 @@
 		animation: none;
 		opacity: 1;
 	}
-	@media (pointer: coarse), (max-width: 700px) {
+	@media (pointer: coarse), (max-width: 960px) {
+		.live-presence {
+			position: relative;
+			inset: auto;
+			z-index: auto;
+			margin-top: 1rem;
+		}
+
 		.reading-rail {
 			display: block;
 		}
 		.presence-dock,
 		.show-presence {
-			right: max(10px, env(safe-area-inset-right));
-			bottom: max(10px, env(safe-area-inset-bottom));
+			position: relative;
+			inset: auto;
 		}
-		.presence-pill {
+
+		.presence-pill,
+		.show-presence {
+			min-height: 44px;
+			box-shadow: none;
 			padding: 10px 13px;
+		}
+
+		.presence-panel {
+			position: static;
+			width: min(100%, 18rem);
+			margin-top: 0.65rem;
+			box-shadow: none;
+			padding: 0.75rem;
+		}
+
+		.reaction-row button {
+			flex: 1;
+			min-width: 0;
+			height: 44px;
+		}
+
+		.text-action {
+			min-height: 44px;
 		}
 	}
 </style>

@@ -1,4 +1,9 @@
-<aside class="book-callout" aria-labelledby="coding-career-handbook-title">
+<script>
+	export let ribbon = false;
+</script>
+
+<aside class="book-callout" class:ribbon aria-labelledby="coding-career-handbook-title">
+	{#if ribbon}<div class="banner-emblem" aria-hidden="true">☼</div>{/if}
 	<div class="book-cover" aria-hidden="true">
 		<span>The Coding</span>
 		<span>Career</span>
@@ -107,5 +112,112 @@
 	.book-actions .primary-action:hover {
 		background: color-mix(in srgb, var(--page-accent) 88%, black);
 		color: var(--page-surface);
+	}
+
+	.ribbon {
+		position: relative;
+		display: block;
+		border: 3px double #b09260;
+		border-radius: 0;
+		background: #723e35;
+		padding: 0.75rem 0.65rem 1rem;
+		color: #f5e7c6;
+		text-align: center;
+		box-shadow:
+			inset 0 0 0 5px #723e35,
+			inset 0 0 0 6px #bc9b5b80,
+			4px 0 8px #30251815;
+	}
+	.ribbon::after {
+		position: absolute;
+		bottom: -19px;
+		left: -3px;
+		width: calc(100% + 6px);
+		height: 20px;
+		background: #723e35;
+		clip-path: polygon(0 0, 100% 0, 50% 100%);
+		content: '';
+	}
+	.ribbon .book-cover {
+		display: none;
+	}
+	.banner-emblem {
+		margin: -0.3rem 0 0.6rem;
+		color: #d3b26f;
+		font-size: 2.5rem;
+		line-height: 1.15;
+	}
+	.ribbon .book-status {
+		margin-bottom: 0.65rem;
+		color: #e0c78f;
+		font-size: 0.49rem;
+		font-weight: 400;
+		line-height: 1.5;
+	}
+	.ribbon h2 {
+		color: #f5e7c6;
+		font-size: 1.42rem;
+		font-weight: 600;
+		line-height: 1.1;
+	}
+	.ribbon .book-copy > p:not(.book-status) {
+		display: none;
+	}
+	.ribbon .book-actions {
+		display: grid;
+		gap: 0.4rem;
+		margin-top: 0.9rem;
+	}
+	.ribbon .book-actions a {
+		border: 1px solid #b89c65;
+		border-radius: 2px;
+		background: transparent;
+		color: #f5e7c6;
+		font-family: Georgia, serif;
+		font-size: 0.7rem;
+		font-weight: 400;
+		padding: 0.35rem 0.25rem;
+	}
+	.ribbon .book-actions .primary-action {
+		background: #e5cc93;
+		color: #402e22;
+	}
+	.ribbon .book-actions a:hover {
+		background: #f5e7c6;
+		color: #402e22;
+	}
+	@media (max-width: 600px) {
+		.ribbon {
+			display: grid;
+			grid-template-columns: 3.7rem minmax(0, 1fr);
+			align-items: center;
+			gap: 0.7rem;
+			padding: 0.65rem 0.85rem;
+			text-align: left;
+		}
+		.ribbon::after {
+			display: none;
+		}
+		.banner-emblem {
+			margin: 0;
+			font-size: 3rem;
+		}
+		.ribbon .book-status {
+			display: none;
+		}
+		.ribbon h2 {
+			font-size: 1.1rem;
+		}
+		.ribbon .book-copy > p:not(.book-status) {
+			display: none;
+		}
+		.ribbon .book-actions {
+			display: flex;
+			gap: 0.45rem;
+			margin-top: 0.5rem;
+		}
+		.ribbon .book-actions a {
+			padding: 0.3rem 0.55rem;
+		}
 	}
 </style>

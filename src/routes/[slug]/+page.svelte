@@ -34,6 +34,7 @@
 			: json;
 	$: canonical = json.canonical ? json.canonical : SITE_URL + $page.url.pathname;
 	$: social = getArticleSocialMeta(socialArticle, canonical);
+	$: hasTranslations = /^\s*<blockquote>\s*<p>Translations welcome!/i.test(json.content ?? '');
 </script>
 
 <SocialMeta {...social} />
@@ -46,40 +47,35 @@
 </svelte:head>
 
 <article
-	class="prose swyxcontent mx-auto mt-8 w-full max-w-none items-start justify-center dark:prose-invert"
+	class="prose reading-prose swyxcontent mx-auto w-full items-start justify-center dark:prose-invert"
+	class:has-translations={hasTranslations}
 >
-	<h1 class="mb-4 text-3xl font-bold">
-		{json.title}
-	</h1>
-	{#if json.subtitle}
-		<p class="mb-4 italic tracking-tight text-black dark:text-white md:text-xl">
-			{json.subtitle}
-		</p>
-	{/if}
-	<div class="plain-muted mt-2 flex w-full flex-wrap justify-between gap-x-4 text-sm">
-		<span>swyx</span>
-		<span class="flex items-center gap-2">
+	<header class="article-header">
+		<a class="article-back" href="/ideas">← All writing</a>
+		<h1>{json.title}</h1>
+		{#if json.subtitle}
+			<p class="article-deck">{json.subtitle}</p>
+		{/if}
+		<div class="article-byline">
+			<span>by <a href="/about">swyx</a></span>
+			{#if isCodingCareerLaunch}
+				<a href="https://learninpublic.org/" rel="external"> Open Sourced August 18, 2026 </a>
+			{:else if json.ghMetadata?.issueUrl}
+				<a href={json.ghMetadata.issueUrl} rel="external noreferrer" target="_blank">
+					<time datetime={new Date(json.date).toISOString()}>
+						{new Date(json.date).toISOString().slice(0, 10)}
+					</time>
+				</a>
+			{:else}
+				<time datetime={new Date(json.date).toISOString()}>
+					{new Date(json.date).toISOString().slice(0, 10)}
+				</time>
+			{/if}
 			{#key data.slug}
 				<ReadCounter pageKey={data.slug} requireDepth />
 			{/key}
-			<span aria-hidden="true">·</span>
-			{#if isCodingCareerLaunch}
-				<a href="https://learninpublic.org/" rel="external" class="no-underline">
-					Open Sourced August 18, 2026
-				</a>
-			{:else}
-				<a
-					href={json.ghMetadata?.issueUrl ?? '#'}
-					rel="external noreferrer"
-					class="no-underline"
-					target="_blank"
-				>
-					{new Date(json.date).toISOString().slice(0, 10)}
-				</a>
-			{/if}
-		</span>
-	</div>
-	<hr class="plain-rule mb-8 mt-2" />
+		</div>
+	</header>
 	{#if isCodingCareerLaunch}
 		<BookLaunchCallout />
 	{/if}
@@ -118,9 +114,9 @@
 	{@html json.content}
 </article>
 
-<div class="site-shell mb-12 max-w-2xl">
+<div class="site-shell article-endmatter mb-12">
 	{#if json?.tags?.length}
-		<p class="!text-slate-400 flex-auto mb-4 italic">
+		<p class="article-tags">
 			Tagged in:
 			{#each json.tags as tag}
 				<span class="px-1">
@@ -178,19 +174,89 @@
 	.swyxcontent {
 		--gap: clamp(1rem, 6vw, 3rem);
 		--full: minmax(var(--gap), 1fr);
-		--content: minmax(0, 56rem);
+		--content: minmax(0, min(72ch, var(--reading-max-width)));
 		--popout: minmax(0, 2rem);
 		--feature: minmax(0, 5rem);
 
+		max-width: none;
+		margin-block: 1.75rem 1.5rem;
 		display: grid;
 		grid-template-columns:
-			[full-start] var(--site-gutter)
-			[feature-start popout-start content-start] minmax(0, 1fr)
-			[content-end popout-end feature-end] var(--site-gutter)
+			[full-start] minmax(var(--site-gutter), 1fr)
+			[feature-start popout-start content-start]
+			minmax(0, min(calc(100% - var(--site-gutter) - var(--site-gutter)), var(--reading-max-width)))
+			[content-end popout-end feature-end] minmax(var(--site-gutter), 1fr)
 			[full-end];
 	}
 
-	@media (min-width: 768px) {
+	.article-header {
+		margin-bottom: 1.5rem;
+		border-bottom: 1px solid var(--page-border);
+		padding-bottom: 1rem;
+	}
+
+	.article-back {
+		display: inline-flex;
+		min-height: 2.75rem;
+		align-items: center;
+		font: 400 0.76rem/1.4 var(--font-mono);
+		text-decoration: none;
+	}
+
+	.article-header h1 {
+		margin: 0.35rem 0 0.65rem;
+		text-wrap: balance;
+	}
+
+	.article-deck {
+		margin: 0 0 0.9rem;
+		color: var(--page-muted);
+		font-size: 1.15rem;
+		font-style: italic;
+		line-height: 1.5;
+	}
+
+	.article-byline {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 0.4rem 1.1rem;
+		color: var(--page-muted);
+		font: 400 0.78rem/1.6 var(--font-body);
+	}
+
+	.article-byline a {
+		color: inherit;
+		text-decoration: none;
+	}
+
+	.article-byline a:hover {
+		color: var(--page-link);
+		text-decoration: underline;
+	}
+
+	.has-translations > :global(blockquote:first-of-type) {
+		margin: 0 0 1.5rem;
+		border-left: 0;
+		padding: 0;
+		font: 400 0.875rem/1.6 var(--font-body);
+	}
+
+	.has-translations > :global(blockquote:first-of-type p) {
+		margin: 0;
+	}
+
+	.article-endmatter {
+		--site-max-width: var(--reading-max-width);
+	}
+
+	.article-tags {
+		margin-bottom: 1rem;
+		color: var(--page-muted);
+		font-size: 0.875rem;
+	}
+
+	@media (min-width: 1040px) {
 		.swyxcontent {
 			grid-template-columns:
 				[full-start] var(--full)
@@ -213,7 +279,7 @@
 		margin-inline: 0;
 	}
 
-	@media (min-width: 768px) {
+	@media (min-width: 1040px) {
 		article :global(pre) {
 			margin-left: -1rem;
 			margin-right: -1rem;

@@ -12,6 +12,7 @@
 
 :root {
 	--font-body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+	--font-reading: Georgia, 'Times New Roman', serif;
 	--font-display: 'Newsreader', Georgia, 'Times New Roman', serif;
 	--font-mono:
 		ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
@@ -25,11 +26,13 @@
 	--page-border: #ddd2c1;
 	--page-accent: #9e4235;
 	--page-accent-soft: #f3e5dc;
-	--page-gold: #907041;
+	--page-gold: #846437;
+	--control-border: #9a876f;
 	--page-paper: #f4eee3;
 	--page-ink: #333a31;
 	--site-gutter: 1.25rem;
 	--site-max-width: 1040px;
+	--reading-max-width: 40.5rem;
 	font-family: var(--font-body);
 	font-size: 16px;
 	line-height: 1.55;
@@ -49,6 +52,7 @@
 	--page-accent: #dfbd78;
 	--page-accent-soft: #342d2b;
 	--page-gold: #e5c684;
+	--control-border: #7c7389;
 	--page-paper: #21222d;
 	--page-ink: #f0e8d9;
 }
@@ -190,6 +194,105 @@ a:hover {
 	padding: clamp(1rem, 2vw, 1.5rem);
 }
 
+.editorial-header {
+	margin-bottom: 1.5rem;
+	border-bottom: 1px solid var(--page-border);
+	padding-block: clamp(1.5rem, 4vw, 2.8rem) 1.4rem;
+}
+
+.editorial-kicker {
+	margin: 0 0 0.6rem;
+	color: var(--page-accent);
+	font: 600 0.68rem/1.5 var(--font-mono);
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+}
+
+.editorial-header h1 {
+	margin: 0;
+}
+
+.editorial-deck {
+	max-width: 44rem;
+	margin-top: 0.65rem;
+	color: var(--page-muted);
+	font: 400 1rem/1.65 var(--font-body);
+}
+
+.reading-prose {
+	max-width: min(72ch, var(--reading-max-width));
+	color: var(--page-text);
+	font: 400 1.125rem/1.75 var(--font-reading);
+}
+
+.reading-prose :where(p) {
+	margin-block: 0 1.15em;
+}
+
+.reading-prose :where(h2, h3, h4) {
+	color: var(--page-text);
+	font-family: var(--font-display);
+	font-weight: 600;
+	line-height: 1.25;
+	text-wrap: balance;
+}
+
+.reading-prose :where(h2) {
+	margin-block: 1.9em 0.65em;
+	font-size: 1.55em;
+}
+
+.reading-prose :where(h3) {
+	margin-block: 1.6em 0.6em;
+	font-size: 1.25em;
+}
+
+.reading-prose :where(ul, ol) {
+	margin-block: 0 1.15em;
+	padding-inline-start: 1.35em;
+}
+
+.reading-prose :where(ul) {
+	list-style-type: disc;
+}
+
+.reading-prose :where(ol) {
+	list-style-type: decimal;
+}
+
+.reading-prose :where(li) {
+	margin-block: 0.2em;
+}
+
+.reading-prose :where(a) {
+	color: var(--page-link);
+	text-underline-offset: 0.16em;
+}
+
+.reading-prose :where(a:hover) {
+	color: var(--page-accent);
+}
+
+.reading-prose :where(pre, code, kbd) {
+	font-family: var(--font-mono);
+}
+
+.reading-prose :where(pre, table) {
+	max-width: 100%;
+	overflow-x: auto;
+}
+
+.reading-prose :where(blockquote) {
+	margin-block: 1.4em;
+	border-left: 2px solid var(--page-accent);
+	padding-left: 1em;
+	font-style: normal;
+}
+
+.reading-prose :where(blockquote p:last-child) {
+	margin-bottom: 0;
+}
+
 .plain-section {
 	margin-block: 2.4rem;
 }
@@ -213,6 +316,7 @@ a:hover {
 }
 
 .plain-input {
+	border-color: var(--control-border);
 	padding: 0.45rem 0.55rem;
 }
 
@@ -231,7 +335,7 @@ a:hover {
 
 .plain-button:hover {
 	background: var(--page-accent);
-	color: #ffffff;
+	color: var(--page-bg);
 }
 
 .accent-text {

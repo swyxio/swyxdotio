@@ -47,30 +47,38 @@
 			<a href={'https://twitter.com/intent/follow?screen_name=' + MY_TWITTER_HANDLE}>Twitter</a> ·
 			<a href={REPO_URL}>GitHub</a> · <a href={MY_YOUTUBE}>YouTube</a>
 		</p>
-		<p class="plain-muted mt-4 text-sm">
-			Based on the <a href="https://swyxkit.netlify.app/">swyxkit</a> template.
-			{#if publicPageKey}
-				·
+		{#if publicPageKey}
+			<p class="plain-muted mt-4 text-sm">
 				{#key publicPageKey}
 					<ReadCounter pageKey={publicPageKey} />
 				{/key}
-			{/if}
-		</p>
+			</p>
+		{/if}
+		{#if presencePageKey}
+			{#key presencePageKey}
+				<LivePresence pageKey={presencePageKey} admissionRate={presenceAdmissionRate} />
+			{/key}
+		{/if}
 		<p class="clacks-tribute"><span aria-hidden="true">✶</span> GNU Terry Pratchett</p>
 	</footer>
 {/if}
 
 {#if presencePageKey}
 	{#key presencePageKey}
-		<LivePresence pageKey={presencePageKey} admissionRate={presenceAdmissionRate} />
 		<SelectionShare />
 	{/key}
 {/if}
 
 <style>
 	.literary-footer {
+		--site-max-width: 1160px;
 		position: relative;
-		border-top: 2px solid var(--page-gold);
+		border: 0;
+		border-top: 1px solid var(--page-gold);
+		border-radius: 0;
+		padding-inline: 0;
+		background: transparent;
+		box-shadow: none;
 	}
 
 	.clacks-tribute {

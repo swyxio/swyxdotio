@@ -14,7 +14,8 @@ export async function GET({ params, platform }) {
 	if (!feed) return new Response('Not found', { status: 404 });
 
 	const headers = new Headers();
-	feed.writeHttpMetadata(headers);
+	// This endpoint owns the RSS headers. Passing Node's Headers into the local
+	// R2 proxy's writeHttpMetadata method fails cross-runtime serialization.
 	if (feed.httpEtag) headers.set('ETag', feed.httpEtag);
 	headers.set('Content-Type', 'application/rss+xml; charset=utf-8');
 	headers.set('Cache-Control', 'public, max-age=0, must-revalidate');

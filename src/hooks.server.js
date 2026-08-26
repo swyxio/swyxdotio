@@ -10,6 +10,9 @@
 // In dev / non-Cloudflare runtimes `caches` is undefined and we no-op.
 import { readContentCacheGeneration } from './lib/content-manifest.js';
 
+// Vite supplies DEV; direct Node tests and production Workers default to false.
+const dev = import.meta.env?.DEV === true;
+
 // Security headers applied to all SSR/dynamic responses. On Cloudflare Workers
 // the `_headers` file only covers static-asset responses (served by the asset
 // handler), NOT responses rendered by this Worker — so we set them here to keep
@@ -64,7 +67,7 @@ export async function handle({ event, resolve }) {
 	const cache = /** @type {any} */ (globalThis.caches)?.default;
 	const cacheUrl = new URL(event.request.url);
 	const privateTools = cacheUrl.pathname === '/tools' || cacheUrl.pathname.startsWith('/tools/');
-	const cacheable = !privateTools && event.request.method === 'GET' && !!cache;
+	const cacheable = !dev && !privateTools && event.request.method === 'GET' && !!cache;
 	const preservePublicCache =
 		isVersionedOgRequest(cacheUrl) ||
 		isPublicReadCountRequest(cacheUrl) ||
@@ -109,6 +112,8 @@ export async function handle({ event, resolve }) {
 	for (const [k, v] of Object.entries(SECURITY_HEADERS)) {
 		response.headers.set(k, v);
 	}
+	// Cached development HTML can outlive its hot-reloaded components and fail hydration.
+	if (dev) response.headers.set('Cache-Control', 'no-store');
 
 	if (cacheable && response.status === 200) {
 		const cc = response.headers.get('cache-control') || '';

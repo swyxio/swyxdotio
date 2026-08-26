@@ -30,6 +30,25 @@ npm run build
 
 The validation will fail the build if any YAML files are malformed, preventing deployment of broken configurations.
 
+## Local podcast preview
+
+Fresh checkouts/worktrees have empty local R2 storage. Before previewing `/podcasts`, run:
+
+```bash
+pnpm podcast:seed-local
+pnpm dev
+```
+
+This downloads and validates the three public swyx.io RSS feeds, then writes them to
+this checkout's local `PODCAST_MEDIA` bucket using Wrangler's `--local` mode.
+It does not write to production, copy credentials, or download audio files. Rerunning
+replaces those local feed snapshots; audio and artwork still use their public media URLs.
+The snapshots persist across dev-server restarts. Reload the page after seeding.
+
+`pnpm dev` uses local binding emulation and does not open remote Cloudflare sessions.
+For features that require remote Workers AI, use the authenticated Wrangler preview
+(`pnpm build && pnpm preview`). Production bindings are unaffected by this Vite setting.
+
 ## Podcast migration
 
 The podcast scripts preserve Transistor RSS metadata, download media into an
