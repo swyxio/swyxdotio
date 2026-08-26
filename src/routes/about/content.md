@@ -1,139 +1,67 @@
-<img class="rounded-full h-28 w-28 float-right" src="/swyx-ski.jpeg" alt="swyx at Niseko" />
+## Current work
 
-## TL;DR
+I work on [Latent Space](https://www.latent.space/), [AI Engineer](https://ai.engineer), and [Cognition](/cognition) in San Francisco.
 
-Hey, I'm swyx! I help foster the Rise of the AI Engineer. I am currently working on <a href="http://latent.space/">Latent Space</a>, <a href="https://ai.engineer">AI Engineer</a>, and <a href="/cognition">Cognition</a> in San Francisco.
+I am also a frequent writer and speaker, best known for [the Rise of the AI Engineer](https://www.latent.space/p/ai-engineer), the [Self Provisioning Runtime](/self-provisioning-runtime), the [Third Age of JS](/js-third-age), and the [End of Localhost](https://dx.tips/the-end-of-localhost). On the nontechnical side, there's the [Learn in Public](/learn-in-public) movement and the now free and open-source [Coding Career Handbook](https://learninpublic.org).
 
-I am also a frequent writer and speaker best known for [the Rise of the AI Engineer](https://www.latent.space/p/ai-engineer) on [Latent Space](https://www.latent.space/), the [Self Provisioning Runtime](https://swyx.io/self-provisioning-runtime) and [Third Age of JS](https://swyx.io/js-third-age), and the [End of Localhost](https://dx.tips/the-end-of-localhost) on DX.Tips, and finally on the nontechnical side, the [Learn in Public](https://swyx.io/LIP) movement and the now free and open-source [Coding Career Handbook](https://learninpublic.org).
+## My story
 
-P.S. "swyx" is the initials of my English and Chinese names and you can use it interchangeably with "Shawn". It is pronounced "swicks".
+I am a [developer](https://github.com/swyxio), [founder](https://freecodecamp.libsyn.com/90-shawn-swyx-wang-from-dev-to-ai-founder), and [angel investor](/portfolio), primarily active in the AI and devtools community. I am a [GitHub Star](https://stars.github.com/) and [Stripe Community Expert](https://twitter.com/swyx/status/1392016498944741376), helped run [the React subreddit for over 200,000 developers](/moderating-rreactjs), and grew [Svelte Society from 0 to over 15,000 developers](https://twitter.com/swyx/status/1411071913548414976) ([writeup](/starting-dev-community-meetup)).
 
-You can find me on [Twitter](https://twitter.com/intent/user?screen_name=swyx), [Github](https://github.com/swyxio) and [YouTube](https://youtube.com/swyxTV?sub_confirmation=1)!
+I grew up in Singapore 🇸🇬, but have worked mostly in the US and UK, working on Developer Experience for [Netlify](/farewell-netlify), [Amazon Web Services](/hello-aws), [Temporal](/why-temporal), and Airbyte.
 
-> Last Updated around 1 Feb 2024
+In a past life, I was a [currency options trader turned TMT hedge fund analyst](https://www.freecodecamp.org/news/shawn-wang-podcast-interview/). I still often approach tech from an investing and risk management angle.
 
-## About
+I was known for being a [#LearnInPublic](/learn-in-public) evangelist and [my speaking and writing on React, JavaScript, and the future of the Web](/ideas?filter=React&show=Essay%2CTalk%2CPodcast). I am also known for my technical and book reviews, from [TypeScript in 50 Lessons](https://twitter.com/swyx/status/1361712610593316866), [Programming TypeScript](https://twitter.com/swyx/status/1135525665971695617), and [Landing Page Hot Tips](https://twitter.com/swyx/status/1303062410157158401) to [The GraphQL Guide](https://media.swyx.io/podcasts/learn-in-podcast/enclosures/6355ee1958f312f4-b2e9c0a7.mp3).
 
-I am a [developer](https://github.com/swyxio)/[founder](https://freecodecamp.libsyn.com/90-shawn-swyx-wang-from-dev-to-ai-founder)/[angel investor](https://github.com/swyxio/devtools-angels/), primarily active in the AI and devtools community. I am a [GitHub Star](https://stars.github.com/), [Stripe Community Expert](https://twitter.com/swyx/status/1392016498944741376), helped run [the React subreddit for over 200,000 developers](https://swyx.io/moderating-rreactjs/) and grew [Svelte Society from 0 to over 15,000 developers](https://twitter.com/swyx/status/1411071913548414976) ([writeup](https://swyx.io/starting-dev-community-meetup)).
-
-I grew up in Singapore 🇸🇬, but have worked mostly in the US and UK, working on Developer Experience for [Netlify](https://swyx.io/farewell-netlify), [Amazon Web Services](https://swyx.io/hello-aws), [Temporal](https://swyx.io/why-temporal), and Airbyte. I am now independently working on [Latent Space](https://latent.space/), the [AI Engineer Summit](https://ai.engineer/) and Foundation, and the Smol AI Company.
+A few of my opinions on building for the web: [Why I Enjoy Svelte](/svelte-why), [Svelte for Sites, React for Apps](/svelte-sites-react-apps), [Why Tailwind CSS](/why-tailwind), and [setting up Svelte with Tailwind](https://dev.to/swyx/how-to-set-up-svelte-with-tailwind-css-4fg5).
 
 <details>
-<summary>
-In a past life:
-</summary>
+<summary>From the notebook: what I was doing in January 2025</summary>
 
-I was a [currency options trader turned TMT hedge fund analyst](https://www.freecodecamp.org/news/shawn-wang-podcast-interview/) as well, and I often do approach tech from an investing and risk management angle.
+This is an archived [Now page](https://nownownow.com/about) update, not a current status report.
 
-I was known for being a [#LearnInPublic](/learn-in-public) evangelist and [my speaking/writing on React, JavaScript and the future of the Web](/ideas?filter=React&show=Essay%2CTalk%2CPodcast). I am also known for my technical/book reviews, from [TypeScript in 50 Lessons](https://twitter.com/swyx/status/1361712610593316866), [Programming TypeScript](https://twitter.com/swyx/status/1135525665971695617), [Landing Page Hot Tips](https://twitter.com/swyx/status/1303062410157158401), and [The GraphQL Guide](https://media.swyx.io/podcasts/learn-in-podcast/enclosures/6355ee1958f312f4-b2e9c0a7.mp3).
-
-</details>
-
-## Now
-
-> Last updated Jan 2025
-
-(aka "What I'm Doing Now" <a href="https://nownownow.com/about"><svg class="inline" xmlns="http://www.w3.org/2000/svg" width="0.75em" height="0.75em" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12" y2="17"></line></svg></a>)
-
-- I am Editor of [the Latent.Space newsletter and podcast](https://www.latent.space/), and co-organizer of [the AI Engineer Summit](https://ai.engineer/)
-- I am also working on the Smol AI Company (unannounced) and [Smol Haus](https://smol.ai/haus) in [the Arena](https://twitter.com/swyx/status/1699971413707571634)
-- I less frequently update [my personal blog](https://swyx.io/ideas) and [magazine DX.tips](https://dx.tips/).
+- I am Editor of [the Latent.Space newsletter and podcast](https://www.latent.space/), and co-organizer of [the AI Engineer Summit](https://ai.engineer/).
+- I am also working on the Smol AI Company (unannounced) and [Smol Haus](https://smol.ai/haus) in [the Arena](https://twitter.com/swyx/status/1699971413707571634).
+- I less frequently update [my personal blog](/ideas) and [magazine DX.tips](https://dx.tips/).
 - You can get more high frequency updates on [my Twitter](https://x.com/swyx).
 
-## Third person bio for Event Organizers
+</details>
 
-> Last updated Jan 2025
+## Speaker bio
 
-swyx (Shawn Wang) is Editor of Latent.Space. As a developer experience leader and angel investor, swyx led developer tooling at [AWS](https://swyx.io/hello-aws), Two Sigma, and three devtool unicorns ([Netlify](https://swyx.io/farewell-netlify), [Temporal](https://swyx.io/why-temporal), [Airbyte](https://airbyte.io/)). He is also the founder of Smol AI, the LLM data pipeline company that produces [AI News](https://smol.ai/news), the widely read AI industry newsletter 99% created by customizable research agents.
+<p class="bio-date">January 2025 version · Please confirm titles before reusing this bio.</p>
 
-swyx has started and run communities for hundreds of thousands of developers, like [the Latent Space Paper Club](https://www.latent.space/p/paperclub), [Svelte Society](https://twitter.com/sveltesociety/), [/r/reactjs](https://swyx.io/moderating-rreactjs), and the [React TypeScript Cheatsheet](https://github.com/typescript-cheatsheets/react). His main platform [Latent Space](https://www.latent.space/) covers [the Rise of the AI Engineer](https://www.latent.space/p/ai-engineer) in podcast, newsletter, and YouTube formats.
+swyx (Shawn Wang) is Editor of Latent.Space. As a developer experience leader and angel investor, swyx led developer tooling at [AWS](/hello-aws), Two Sigma, and three devtool unicorns ([Netlify](/farewell-netlify), [Temporal](/why-temporal), [Airbyte](https://airbyte.io/)). He is also the founder of Smol AI, the LLM data pipeline company that produces [AI News](https://smol.ai/news), the widely read AI industry newsletter 99% created by customizable research agents.
 
-Selected prior talks:
+swyx has started and run communities for hundreds of thousands of developers, like [the Latent Space Paper Club](https://www.latent.space/p/paperclub), [Svelte Society](https://twitter.com/sveltesociety/), [/r/reactjs](/moderating-rreactjs), and the [React TypeScript Cheatsheet](https://github.com/typescript-cheatsheets/react). His main platform [Latent Space](https://www.latent.space/) covers [the Rise of the AI Engineer](https://www.latent.space/p/ai-engineer) in podcast, newsletter, and YouTube formats.
 
-- Engineering AI Agents: https://swyx.io/ai-eng-agents
-- The Hooks talk: https://swyx.io/hooks
-- The Concurrent React talk: https://www.youtube.com/watch?v=nyFHR0dDZo0
-- The Operating System of You: https://www.youtube.com/watch?v=D-Sj6jo4o1I
-- Paradigm Lost (Cascadia JS 2022): https://swyx.io/paradigm-lost
+### Selected talks
 
-Alternative bios:
-
-- Short AI bio: Swyx is Editor of Latent.Space. He is best known for his writing on the Rise of the AI Engineer on the Latent.Space newsletter and podcast, and for curating the AI Engineer Summit, the top conference for AI Engineers. You can find him on Twitter, Github, and YouTube.
-- Long bio: Swyx is Editor of Latent.Space and founder of Smol.ai. After a quantitative finance career he has led developer relations at AWS and three devtools unicorn startups (Netlify, Temporal, Airbyte) and is best known for his work on the Latent Space podcast and the DX.Tips magazine. Swyx is currently working on the Smol AI Company in San Francisco and Singapore, as well as independently working on Latent.Space and the AI Engineer conferences. You can find him on Twitter, Github, and YouTube.
+- [Engineering AI Agents](/ai-eng-agents)
+- [The Hooks talk](/hooks)
+- [The Concurrent React talk](https://www.youtube.com/watch?v=nyFHR0dDZo0)
+- [The Operating System of You](https://www.youtube.com/watch?v=D-Sj6jo4o1I)
+- [Paradigm Lost, Cascadia JS 2022](/paradigm-lost)
 
 <details>
-<summary>
-Feb 2024 version
-</summary>
+<summary>Alternative bios · January 2025</summary>
 
-swyx is Editor of Latent.Space and Founder of the Smol AI Company. He has helped Developer Tools cross the chasm at [AWS](https://swyx.io/hello-aws), Two Sigma, and three devtool unicorns - [Netlify](https://swyx.io/farewell-netlify), [Temporal](https://swyx.io/why-temporal), and most recently as [Airbyte](https://airbyte.io/).
+**Short AI bio:** Swyx is Editor of Latent.Space. He is best known for his writing on the Rise of the AI Engineer on the Latent.Space newsletter and podcast, and for curating the AI Engineer Summit, the top conference for AI Engineers. You can find him on Twitter, Github, and YouTube.
 
-He has started and run communities for hundreds of thousands of developers, like [Svelte Society](https://twitter.com/sveltesociety/), [/r/reactjs](https://swyx.io/moderating-rreactjs), and the [React TypeScript Cheatsheet](https://github.com/typescript-cheatsheets/react). While [Latent Space](https://www.latent.space/) covers [the Rise of the AI Engineer](https://www.latent.space/p/ai-engineer), his personal blog (https://swyx.io/ideas) covers Tech, Careers, and Indie Hacking, and his nontechnical writing was published in [the Coding Career Handbook](https://learninpublic.org/) for developers going from Junior to Senior.
-
-Selected prior talks:
-
-- The Hooks talk: https://swyx.io/hooks
-- The Concurrent React talk: https://www.youtube.com/watch?v=nyFHR0dDZo0
-- The Operating System of You: https://www.youtube.com/watch?v=D-Sj6jo4o1I
-- Paradigm Lost (Cascadia JS 2022): https://swyx.io/paradigm-lost
-
-Alternative bios:
-
-- Short AI bio: Swyx is founder of Smol.ai. He is best known for his writing on the Rise of the AI Engineer on the Latent.Space newsletter and podcast. Swyx was most recently co-founder of the AI Engineer Summit and Foundation. You can find him on Twitter, Github, and YouTube.
-- Long bio: Swyx is founder of Smol.ai and author of The Rise of the AI Engineer. After a quantitative finance career he has led developer relations at AWS and three devtools unicorn startups (Netlify, Temporal, Airbyte) and is best known for his work on the Latent Space podcast and the DX.Tips magazine. Swyx is currently working on the Smol AI Company in San Francisco and Singapore, as well as independently working on Latent.Space, the AI Engineer Summit and Foundation. You can find him on Twitter, Github, and YouTube.
+**Long bio:** Swyx is Editor of Latent.Space and founder of Smol.ai. After a quantitative finance career he has led developer relations at AWS and three devtools unicorn startups (Netlify, Temporal, Airbyte) and is best known for his work on the Latent Space podcast and the DX.Tips magazine. Swyx is currently working on the Smol AI Company in San Francisco and Singapore, as well as independently working on Latent.Space and the AI Engineer conferences. You can find him on Twitter, Github, and YouTube.
 
 </details>
 
-### Socials
+<details>
+<summary>Earlier bio · February 2024</summary>
 
-🔗 [Twitter](https://twitter.com/swyx), [GitHub](https://github.com/swyxio), [The Coding Career Handbook](https://learninpublic.org).
+swyx is Editor of Latent.Space and Founder of the Smol AI Company. He has helped Developer Tools cross the chasm at [AWS](/hello-aws), Two Sigma, and three devtool unicorns — [Netlify](/farewell-netlify), [Temporal](/why-temporal), and most recently [Airbyte](https://airbyte.io/).
 
-### Images
+He has started and run communities for hundreds of thousands of developers, like [Svelte Society](https://twitter.com/sveltesociety/), [/r/reactjs](/moderating-rreactjs), and the [React TypeScript Cheatsheet](https://github.com/typescript-cheatsheets/react). While [Latent Space](https://www.latent.space/) covers [the Rise of the AI Engineer](https://www.latent.space/p/ai-engineer), [his personal blog](/ideas) covers Tech, Careers, and Indie Hacking, and his nontechnical writing was published in [the Coding Career Handbook](https://learninpublic.org/) for developers going from Junior to Senior.
 
-Pictures of me you can use without asking
+**Short AI bio:** Swyx is founder of Smol.ai. He is best known for his writing on the Rise of the AI Engineer on the Latent.Space newsletter and podcast. Swyx was most recently co-founder of the AI Engineer Summit and Foundation. You can find him on Twitter, Github, and YouTube.
 
-- [200x200](https://avatars3.githubusercontent.com/u/6764957?s=200&v=4)
-- [460x460](https://user-images.githubusercontent.com/6764957/103350806-26d9ca80-4adc-11eb-9e53-a8ce9ca3f21f.jpeg)
-  - [transparent background variant](https://user-images.githubusercontent.com/6764957/166125711-7dd63d46-3405-4c66-a6bd-92a34dbf58f6.png)
-- [640x640](https://github.com/swyxio/swyxdotio/assets/6764957/e082b7d4-d6e8-49d3-90a0-6f02e8446327)
-- Speaking photos
-  - [Thursday Nightgs in AI](https://drive.google.com/drive/folders/1FMT8SdOGYMSSN6HYowWqpyk6uRrG-Jj2)
-    - [arms folded](https://pbs.twimg.com/media/GH68dQ0bkAAk7Mi?format=jpg)
-    - [with dog](https://pbs.twimg.com/media/GH7eSt8a0AAhQDy?format=png)
-  - [AI Engineer Summit](https://www.ai.engineer/summit/schedule/the-1000x-ai-engineer)
-    - https://aie-cms-uploads.s3.us-west-1.amazonaws.com/AIE_Summit_2023_Day_1_WEB_199_a6f7f8b2bf.jpg
-    - https://aie-cms-uploads.s3.us-west-1.amazonaws.com/AIE_Summit_2023_Day_1_WEB_190_94e685c67f.jpg
-    - https://aie-cms-uploads.s3.us-west-1.amazonaws.com/AIE_Summit_2023_Day_1_WEB_196_ae10a5d016.jpg
-    - https://aie-cms-uploads.s3.us-west-1.amazonaws.com/AIE_Summit_2023_Day_1_WEB_192_70dd78550d.jpg
-    - https://aie-cms-uploads.s3.us-west-1.amazonaws.com/AIE_Summit_2023_Day_1_WEB_195_c014c99214.jpg
-  - [React Advanced](https://user-images.githubusercontent.com/6764957/182177069-eae41bb1-ec46-4622-9659-ec9392b5add8.png),
-    [more](https://user-images.githubusercontent.com/6764957/182177450-d2cb675e-a1bd-4ee1-83b4-dfd060da17c2.png),
-    [more](https://user-images.githubusercontent.com/6764957/182177069-eae41bb1-ec46-4622-9659-ec9392b5add8.png),
-    [more](https://user-images.githubusercontent.com/6764957/182177157-42249647-c258-4bc7-b252-c75d3400872d.png)
-  - [React Miami](https://user-images.githubusercontent.com/6764957/164554925-e6a2791e-4c75-4d5f-8003-2932193d5b25.png)
-  - [JSConf](https://user-images.githubusercontent.com/6764957/182178083-7f25e5e2-a6f3-4794-8101-57d82b0ce411.png),
-    [workshop](https://user-images.githubusercontent.com/6764957/182178181-6a866b20-a699-43ba-b969-8a3d43ab7622.png),
-    [another angle](https://user-images.githubusercontent.com/6764957/182178431-079e1d0f-e94a-4d4e-8683-83f9625eed06.png)
-  - [CityJS Singapore](https://twitter.com/Thoritie/status/1696941430504304861)
-- Social photos
-  - https://user-images.githubusercontent.com/6764957/179319070-7c223991-e965-4d69-b6d9-f894feb02cf8.png
-  - https://user-images.githubusercontent.com/6764957/179319086-7ec3a384-4d92-4db2-83d5-fad203256601.png
-  - https://pbs.twimg.com/media/FXunDs9VEAAZ7tL?format=jpg&name=large
-- Cartoon Avatars
-  - Autogenerated [one](https://user-images.githubusercontent.com/6764957/182175670-c1b60c51-c44b-4d74-b060-a701e142c56c.png),
-    [two](https://user-images.githubusercontent.com/6764957/182175737-fc1abb06-472e-4bce-bd07-51140586093e.png),
-    [three](https://user-images.githubusercontent.com/6764957/182175756-d075a645-2c73-444e-90a2-912472bb5e09.png)
-  - From React Advanced - [long](https://user-images.githubusercontent.com/6764957/182176400-c117eb59-c702-4c27-be7a-2736c979457f.png),
-    [square](https://user-images.githubusercontent.com/6764957/182176400-c117eb59-c702-4c27-be7a-2736c979457f.png)
-  - From [Airbyte](https://user-images.githubusercontent.com/6764957/182176972-dc94cc81-5b77-4d25-8bc3-7a48c2d90564.jpg)
+**Long bio:** Swyx is founder of Smol.ai and author of The Rise of the AI Engineer. After a quantitative finance career he has led developer relations at AWS and three devtools unicorn startups (Netlify, Temporal, Airbyte) and is best known for his work on the Latent Space podcast and the DX.Tips magazine. Swyx is currently working on the Smol AI Company in San Francisco and Singapore, as well as independently working on Latent.Space, the AI Engineer Summit and Foundation. You can find him on Twitter, Github, and YouTube.
 
-## Tech behind this site
-
-See https://swyxkit.netlify.app/about to clone my boilerplate.
-
-for more on tech opinions, further reading:
-
-- [Why I Enjoy Svelte](https://swyx.io/svelte-why)
-- [Svelte for Sites, React for Apps](https://swyx.io/svelte-sites-react-apps)
-- [Why Tailwind CSS](https://swyx.io/why-tailwind)
-- [How to Setup Svelte with Tailwind](https://dev.to/swyx/how-to-set-up-svelte-with-tailwind-css-4fg5)
+</details>

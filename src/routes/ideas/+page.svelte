@@ -1,11 +1,12 @@
 <script>
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
-	// import { goto } from '$app/navigation';
-	// import { page } from '$app/stores';
-	import { queryParam, ssp } from 'sveltekit-search-params';
+	import { queryParameters } from 'sveltekit-search-params';
 
 	import { POST_CATEGORIES } from '$lib/siteConfig';
+	import { withIdeasYearHeadings } from '$lib/ideas-library-rows';
+	import { IDEAS_QUERY_PARAMETERS, IDEAS_QUERY_OPTIONS } from '$lib/ideas-query-parameters';
+	import { loadOnScroll } from '$lib/load-on-scroll';
 	import {
 		READ_COUNT_BATCH_LIMIT,
 		READ_COUNT_VISIBILITY_EVENT,
@@ -15,7 +16,7 @@
 	import SocialMeta from '../../components/SocialMeta.svelte';
 	import { getPageSocialMeta } from '$lib/social-meta';
 
-	import MostPopular from './MostPopular.svelte';
+	import FeaturedEssayShelf from '../../components/FeaturedEssayShelf.svelte';
 
 	const social = getPageSocialMeta('ideas');
 
@@ -34,10 +35,12 @@
 	 *   ghReactions?: number;
 	 *   ghMetadata?: import('$lib/types').GHMetadata;
 	 *   highlightedResults?: string;
+	 *   searchSnippet?: import('$lib/ideas-search-snippet').SearchSnippetPart[];
 	 *   description?: string;
 	 *   content?: string;
 	 *   instances?: { date?: Date | string; venue?: string; video?: string }[];
 	 * }} ArchiveItem
+	 * @typedef {ArchiveItem & { yearHeading: number | null }} ArchiveRow
 	 */
 
 	/** @type {import('./$types').PageData} */
@@ -45,25 +48,11 @@
 
 	// List metadata stays small; full article bodies are fetched only when search is used.
 	/** @type {ArchiveItem[]} */
-	let items = /** @type {ArchiveItem[]} */ (data.items);
-	/** @type {ArchiveItem[]} */
 	let archiveItems = /** @type {ArchiveItem[]} */ (data.items);
 	/** @type {ArchiveItem[]} */
-	let searchableItems = /** @type {ArchiveItem[]} */ (data.items);
+	let searchableItems = [];
 
-	// https://github.com/paoloricciuti/sveltekit-search-params#how-to-use-it
-	/** @type {import('svelte/store').Writable<string[] | null>} */
-	let selectedCategories = queryParam(
-		'show',
-		{
-			encode: (arr) => arr?.toString(),
-			decode: (str) => str?.split(',')?.filter((e) => e) ?? []
-		},
-		{ debounceHistory: 500 }
-	);
-	let search = queryParam('filter', ssp.string(), {
-		debounceHistory: 500
-	});
+	const filters = queryParameters(IDEAS_QUERY_PARAMETERS, IDEAS_QUERY_OPTIONS);
 
 	/** @type {HTMLInputElement | undefined} */
 	let inputEl;
@@ -76,90 +65,164 @@
 		maximumFractionDigits: 1
 	});
 
-	/** @param {KeyboardEvent} e */
-	function focusSearch(e) {
-		if (e.key === '/' && inputEl) inputEl.select();
+	/** @param {KeyboardEvent} event */
+	function handleSearchKey(event) {
+		if (
+			event.defaultPrevented ||
+			event.isComposing ||
+			event.metaKey ||
+			event.ctrlKey ||
+			event.altKey
+		)
+			return;
+		if (event.key === 'Escape' && event.target === inputEl) {
+			event.preventDefault();
+			if ($filters.filter) $filters.filter = '';
+			else inputEl?.blur();
+			return;
+		}
+		const target = event.target;
+		if (
+			event.key === '/' &&
+			inputEl &&
+			!(
+				target instanceof Element &&
+				target.closest('input, textarea, select, [contenteditable], [role="textbox"]')
+			)
+		) {
+			event.preventDefault();
+			inputEl.focus();
+			inputEl.select();
+		}
 	}
 
-	// https://github.com/leeoniya/uFuzzy#options
-	// we know this has js weight, but we tried lazyloading and it wasnt significant enough for the added complexity
-	// https://github.com/swyxio/swyxkit/pull/171
-	// this will be slow if you have thousands of items, but most people don't
-	let isTruncated = (data.totalCount ?? data.items.length) > data.items.length;
-
-	// we are lazy loading a fuzzy search function
-	// with a fallback to a simple filter function
-	/**
-	 * @param {ArchiveItem[]} _items
-	 * @param {string[] | null} _
-	 * @param {string | null} s
-	 * @returns {Promise<ArchiveItem[]>}
-	 */
-	const filterCategories = async (_items, _, s) => {
-		const categories = $selectedCategories;
-		if (categories?.length) {
-			_items = _items.filter((item) => {
-				return categories
-					.map((element) => {
-						return element.toLowerCase();
-					})
-					.includes(item.category.toLowerCase());
-			});
-		}
-		if (s?.length) {
-			_items = _items.filter((item) =>
-				JSON.stringify(item).toLowerCase().includes(s.toLowerCase())
-			);
-		}
-		return _items;
-	};
-	/** @type {(items: ArchiveItem[], categories: string[] | null, search: string | null) => Promise<ArchiveItem[]>} */
-	$: searchFn = filterCategories;
+	const initialCount = data.totalCount ?? data.items.length;
+	let archiveLoaded = archiveItems.length >= initialCount;
+	/** @type {((items: ArchiveItem[], categories: string[] | null, query: string | null) => Promise<ArchiveItem[]>) | undefined} */
+	let searchFn;
+	/** @type {typeof import('$lib/ideas-search-snippet').createIdeasSearchSnippet | undefined} */
+	let createSnippet;
 	/** @type {Promise<void> | undefined} */
 	let archiveLoad;
 	function loadArchiveItems() {
+		if (archiveLoaded) return Promise.resolve();
 		if (archiveLoad) return archiveLoad;
 		archiveLoad = fetch('/api/listArchive.json')
 			.then(async (res) => {
 				if (!res.ok) throw new Error(`failed to load archive content (${res.status})`);
-				archiveItems = /** @type {ArchiveItem[]} */ (await res.json());
+				const content = await res.json();
+				if (!Array.isArray(content)) throw new Error('Archive content is unavailable');
+				archiveItems = /** @type {ArchiveItem[]} */ (content);
+				archiveLoaded = true;
 			})
-			.catch((err) => console.error('failed to load archive content', err));
+			.catch((error) => {
+				archiveLoad = undefined;
+				throw error;
+			});
 		return archiveLoad;
 	}
 
 	/** @type {Promise<void> | undefined} */
 	let searchLoad;
-	function loadsearchFn() {
+	function loadSearchContent() {
 		if (searchLoad) return searchLoad;
-		searchLoad = Promise.all([import('./fuzzySearch'), fetch('/api/searchContent.json')])
-			.then(async ([fuzzy, res]) => {
-				searchFn =
-					/** @type {(items: ArchiveItem[], categories: string[] | null, search: string | null) => Promise<ArchiveItem[]>} */ (
-						fuzzy.fuzzySearch
-					);
+		searchLoad = Promise.all([
+			import('./fuzzySearch'),
+			import('$lib/ideas-search-snippet'),
+			fetch('/api/searchContent.json')
+		])
+			.then(async ([fuzzy, snippets, res]) => {
 				if (!res.ok) throw new Error(`failed to load search content (${res.status})`);
-				searchableItems = /** @type {ArchiveItem[]} */ (await res.json());
+				const content = await res.json();
+				if (!Array.isArray(content)) throw new Error('Search content is unavailable');
+				searchableItems = /** @type {ArchiveItem[]} */ (content);
+				searchFn = /** @type {NonNullable<typeof searchFn>} */ (fuzzy.fuzzySearch);
+				createSnippet = snippets.createIdeasSearchSnippet;
 			})
-			.catch((err) => console.error('failed to load full-body search content', err));
+			.catch((error) => {
+				searchLoad = undefined;
+				throw error;
+			});
 		return searchLoad;
 	}
-	$: if (browser && $search) loadsearchFn();
-	$: if (browser && !$search && $selectedCategories?.length) loadArchiveItems();
-	$: filteredItems = $search ? searchableItems : archiveItems;
-	/** @type {ArchiveItem[]} */
-	let list = /** @type {ArchiveItem[]} */ (data.items).slice(
-		0,
-		isTruncated ? 80 : data.items.length
-	);
-	$: searchFn(filteredItems, $selectedCategories, $search).then((_items) => {
-		list = _items.slice(0, isTruncated ? 80 : _items.length);
-	});
-	// $: console.log({list})
 
-	async function showAllItems() {
-		await loadArchiveItems();
-		isTruncated = false;
+	/** @type {ArchiveRow[]} */
+	let list = $filters.filter || $filters.show?.length ? [] : withIdeasYearHeadings(archiveItems);
+	let totalResults = initialCount;
+	const pageSize = 80;
+	let visibleCount = pageSize;
+	let isLoading = Boolean($filters.filter || $filters.show?.length);
+	let loadError = '';
+	let requestVersion = 0;
+	let previousFilters = '';
+	$: query = $filters.filter?.trim() ?? '';
+	$: filterKey = JSON.stringify([query, $filters.show]);
+	$: if (filterKey) visibleCount = pageSize;
+	$: if (browser) void updateResults(query, $filters.show ?? [], visibleCount);
+
+	function loadMore() {
+		if (isLoading || loadError || list.length >= totalResults) return;
+		isLoading = true;
+		visibleCount = Math.min(visibleCount + pageSize, totalResults);
+	}
+
+	/**
+	 * Await the complete source before claiming a result count or an empty state.
+	 * A newer query always wins over an older pending request.
+	 * @param {string} searchText
+	 * @param {string[]} categories
+	 * @param {number} limit
+	 */
+	async function updateResults(searchText, categories, limit) {
+		const version = ++requestVersion;
+		const filters = JSON.stringify([searchText, categories]);
+		if (filters !== previousFilters && (searchText || categories.length)) list = [];
+		previousFilters = filters;
+		loadError = '';
+		isLoading = Boolean(searchText || categories.length || limit > archiveItems.length);
+		try {
+			/** @type {ArchiveItem[]} */
+			let results;
+			if (searchText) {
+				await loadSearchContent();
+				if (!searchFn) throw new Error('Search is unavailable');
+				results = await searchFn(searchableItems, categories, searchText);
+			} else {
+				if (categories.length || limit > archiveItems.length) await loadArchiveItems();
+				const categoryNames = categories.map((category) => category.toLowerCase());
+				results = categoryNames.length
+					? archiveItems.filter((item) => categoryNames.includes(item.category.toLowerCase()))
+					: archiveItems;
+			}
+			if (version !== requestVersion) return;
+			totalResults =
+				searchText || categories.length || archiveLoaded ? results.length : initialCount;
+			list = withIdeasYearHeadings(results.slice(0, limit), !searchText).map((item) =>
+				searchText
+					? {
+							...item,
+							searchSnippet: createSnippet?.(item.content || item.description || '', searchText)
+						}
+					: item
+			);
+		} catch (error) {
+			if (version !== requestVersion) return;
+			loadError = searchText
+				? 'Full-text search could not load. Please try again.'
+				: 'The complete library could not load. Please try again.';
+			console.error('Ideas library unavailable', error);
+		} finally {
+			if (version === requestVersion) isLoading = false;
+		}
+	}
+
+	function clearSearch() {
+		$filters.filter = '';
+		inputEl?.focus();
+	}
+
+	function clearFilters() {
+		$filters = { ...$filters, filter: '', show: [] };
 	}
 
 	/** @param {ArchiveItem} item */
@@ -190,30 +253,6 @@
 	/** @param {ArchiveItem} item */
 	function yearOf(item) {
 		return new Date(item.date).getFullYear();
-	}
-
-	/** @param {ArchiveItem} item */
-	function categoryLabel(item) {
-		if (item.venues) return item.venues;
-		if (item.category) return item.category;
-		return item.type ?? 'note';
-	}
-
-	/** @param {ArchiveItem} item */
-	function categoryIcon(item) {
-		if (item.category === 'podcast') return '🎧';
-		if (item.category === 'talk') return '📺';
-		if (item.category === 'tutorial') return '🛠️';
-		if (item.category === 'snippet') return '✂️';
-		return '📰';
-	}
-
-	/** @param {ArchiveItem} item */
-	function reactionCount(item) {
-		return (
-			(item.ghReactions ?? item.ghMetadata?.reactions?.total_count ?? 0) +
-			(item.devToReactions ?? 0)
-		);
 	}
 
 	/** @param {ArchiveItem[]} visibleItems */
@@ -290,438 +329,696 @@
 
 <SocialMeta {...social} />
 
-<svelte:window on:keyup={focusSearch} />
+<svelte:window on:keydown={handleSearchKey} />
 
-<section class="ideas-shell">
-	<header class="ideas-header">
-		<div>
+<div class="ideas-stage">
+	<section class="ideas-shell site-shell">
+		<header class="ideas-header">
 			<h1>Ideas</h1>
-			<p><em>For free: great ideas, lightly used.</em></p>
-		</div>
-		<p class="ideas-count">
-			<strong>{data.totalCount ?? items.length}</strong> essays, snippets, tutorials, podcasts, talks,
-			and notes.
-		</p>
-	</header>
+			<p class="ideas-deck"><em>For free: great ideas, lightly used.</em></p>
+			<p class="ideas-count">
+				<strong>{initialCount.toLocaleString('en-US')}</strong> entries
+			</p>
+		</header>
 
-	<div class="ideas-toolbar" aria-label="Ideas controls">
-		<a class:active={!$selectedCategories?.length} href="/ideas">All</a>
-		{#each POST_CATEGORIES as availableCategory}
-			<label class="ideas-filter" class:active={$selectedCategories?.includes(availableCategory)}>
-				<input
-					id="category-{availableCategory}"
-					class="filter-checkbox"
-					type="checkbox"
-					bind:group={$selectedCategories}
-					value={availableCategory}
-				/>
-				{availableCategory}
-			</label>
-		{/each}
-		<input
-			aria-label="Search articles"
-			type="text"
-			bind:value={$search}
-			bind:this={inputEl}
-			placeholder="Hit / to search"
-			class="ideas-search"
-		/>
-		<button class="views-toggle" type="button" on:click={toggleReadCountVisibility}>
-			{countsHidden ? 'Show views' : 'Hide views'}
-		</button>
-	</div>
-
-	{#if !$search && !$selectedCategories?.length}
-		<div class="ideas-featured">
-			<MostPopular />
-		</div>
-	{/if}
-
-	{#if list?.length}
-		<div class="ideas-table" aria-label="Ideas archive">
-			{#each list as item, index (item.url ?? item.slug)}
-				{#if index === 0 || yearOf(item) !== yearOf(list[index - 1])}
-					<div class="ideas-year">{yearOf(item)}</div>
-				{/if}
-				<a
-					class="ideas-row"
-					href={itemHref(item)}
-					target={isExternalItem(item) ? '_blank' : undefined}
+		<div class="ideas-controls">
+			<div class="search-control">
+				<div class="search-label">
+					<label for="ideas-search">Search the library</label>
+					<span class="search-shortcut">Press <kbd>/</kbd> to search</span>
+				</div>
+				<div class="search-field">
+					<input
+						id="ideas-search"
+						aria-label="Search articles"
+						aria-controls="ideas-results"
+						type="search"
+						autocomplete="off"
+						bind:value={$filters.filter}
+						bind:this={inputEl}
+						placeholder="Titles, topics, and full text"
+						class="ideas-search"
+					/>
+					{#if $filters.filter}
+						<button
+							class="search-clear"
+							type="button"
+							on:click={clearSearch}
+							title="Clear search (Escape)"
+						>
+							Clear
+						</button>
+					{/if}
+				</div>
+			</div>
+			<fieldset class="ideas-filters">
+				<legend class="sr-only">Filter by format</legend>
+				<button
+					type="button"
+					class="ideas-filter"
+					class:active={!$filters.show?.length}
+					aria-pressed={!$filters.show?.length}
+					on:click={() => ($filters.show = [])}
 				>
-					<time datetime={itemDate(item)}>{shortDate(item)}</time>
-					<span class="ideas-title">
-						<span class="type-emoji" aria-hidden="true">{categoryIcon(item)}</span>
-						<span>{item.title}</span>
-					</span>
-					<span class="ideas-meta">
-						{#if item.highlightedResults}
-							<span class="ideas-snippet">{@html item.highlightedResults}</span>
+					All
+				</button>
+				{#each POST_CATEGORIES as availableCategory}
+					<label class="ideas-filter" class:active={$filters.show?.includes(availableCategory)}>
+						<input
+							id="category-{availableCategory}"
+							class="filter-checkbox"
+							type="checkbox"
+							bind:group={$filters.show}
+							value={availableCategory}
+						/>
+						{availableCategory}
+					</label>
+				{/each}
+			</fieldset>
+		</div>
+
+		{#if !query && !$filters.show?.length}
+			<FeaturedEssayShelf />
+		{/if}
+
+		<section
+			id="ideas-results"
+			class="ideas-results"
+			aria-labelledby="library-heading"
+			aria-busy={isLoading}
+		>
+			<div class="results-heading">
+				<div>
+					<h2 id="library-heading">
+						{query || $filters.show?.length ? 'Found in the library' : 'All entries'}
+					</h2>
+					<p class="results-count" role="status" aria-live="polite">
+						{#if isLoading}
+							{query ? 'Searching the full library…' : 'Loading the complete library…'}
+						{:else if loadError}
+							{list.length ? 'Showing the entries already loaded.' : 'Results are unavailable.'}
+						{:else}
+							{`${totalResults > list.length ? `${list.length.toLocaleString('en-US')} of ` : ''}${totalResults.toLocaleString('en-US')} ${totalResults === 1 ? 'entry' : 'entries'}${query ? ` matching “${query}”` : ''}`}
 						{/if}
-						<span class="type-chip" data-category={item.category}>{categoryLabel(item)}</span>
-						{#if item.tags?.length}
-							{#each item.tags.slice(0, 3) as tag}
-								<span class="tag-chip">{tag}</span>
-							{/each}
+					</p>
+				</div>
+				<button
+					class="views-toggle"
+					type="button"
+					aria-pressed={!countsHidden}
+					on:click={toggleReadCountVisibility}
+				>
+					{countsHidden ? 'Show views' : 'Hide views'}
+				</button>
+			</div>
+
+			{#if loadError && !list.length}
+				<div class="ideas-notice" role="alert">
+					<p>{loadError}</p>
+					<button
+						class="library-button"
+						type="button"
+						on:click={() => updateResults(query, $filters.show ?? [], visibleCount)}
+						>Try again</button
+					>
+				</div>
+			{/if}
+
+			{#if list.length}
+				<div class="ideas-table" aria-label="Ideas archive">
+					{#each list as item (item.url ?? item.slug)}
+						{#if item.yearHeading !== null}
+							<h3 class="ideas-year">{item.yearHeading}</h3>
 						{/if}
-						{#if reactionCount(item)}
-							<span class="reaction-chip">{reactionCount(item)} ♥</span>
-						{/if}
-						{#if !countsHidden && Number.isSafeInteger(readCounts[item.slug])}
-							<span
-								class="view-count"
-								title="Approximate lifetime views: historical estimate plus sampled engaged reads"
-								>~{readFormatter.format(readCounts[item.slug])} views</span
+						<a
+							class="ideas-row"
+							href={itemHref(item)}
+							target={isExternalItem(item) ? '_blank' : undefined}
+							rel={isExternalItem(item) ? 'noopener noreferrer' : undefined}
+						>
+							<time datetime={itemDate(item)}>
+								<span>{shortDate(item)}</span>
+								{#if query}<span class="date-year">{yearOf(item)}</span>{/if}
+							</time>
+							<span class="ideas-content">
+								<span class="ideas-title">{item.title}</span>
+								{#if item.searchSnippet?.length}
+									<span class="ideas-snippet">
+										{#each item.searchSnippet as part}{#if part.matched}<mark>{part.text}</mark
+												>{:else}{part.text}{/if}{/each}
+									</span>
+								{/if}
+							</span>
+							<span class="ideas-meta">
+								<span class="entry-category" title={item.venues}>{item.category}</span>
+								{#if !countsHidden && Number.isSafeInteger(readCounts[item.slug])}
+									<span
+										class="view-count"
+										title="Approximate lifetime views: historical estimate plus sampled engaged reads"
+										>~{readFormatter.format(readCounts[item.slug])} views</span
+									>
+								{/if}
+							</span>
+						</a>
+					{/each}
+				</div>
+				{#if totalResults > list.length}
+					<div class="ideas-load-more">
+						{#if loadError}
+							<p class="load-progress" role="alert">{loadError}</p>
+							<button
+								type="button"
+								class="library-button"
+								on:click={() => updateResults(query, $filters.show ?? [], visibleCount)}
+								>Try again</button
+							>
+						{:else}
+							{#if !isLoading}
+								{#key list.length}
+									<div class="scroll-boundary" aria-hidden="true" use:loadOnScroll={loadMore}></div>
+								{/key}
+							{/if}
+							<p class="load-progress">
+								{isLoading
+									? 'Loading more entries…'
+									: `${list.length.toLocaleString('en-US')} of ${totalResults.toLocaleString('en-US')} entries`}
+							</p>
+							<button
+								type="button"
+								class="library-button"
+								disabled={isLoading}
+								aria-controls="ideas-results"
+								on:click={loadMore}>{isLoading ? 'Loading…' : 'Load more'}</button
 							>
 						{/if}
-					</span>
-				</a>
-			{/each}
-		</div>
-		{#if isTruncated}
-			<div class="ideas-load-more">
-				<button on:click={showAllItems} class="plain-button"> Load more posts </button>
-			</div>
-		{/if}
-	{:else if $search}
-		<div class="prose dark:prose-invert">
-			No posts found for
-			<code>{$search}</code>.
-		</div>
-		<button class="plain-button mt-2" on:click={() => ($search = '')}>Clear your search</button>
-	{:else}
-		<div class="prose dark:prose-invert">No content found! Try widening your search again</div>
-	{/if}
-</section>
+					</div>
+				{:else if !isLoading}
+					<p class="library-end">
+						{`All ${totalResults.toLocaleString('en-US')} ${totalResults === 1 ? 'entry' : 'entries'} shown.`}
+					</p>
+				{/if}
+			{:else if isLoading}
+				<div class="ideas-pending" aria-hidden="true">One moment while I check the shelves.</div>
+			{:else if !loadError}
+				<div class="ideas-empty">
+					<h3>No entries found.</h3>
+					<p>
+						{query ? `Nothing matches “${query}”` : 'No entries are available'}{$filters.show
+							?.length
+							? ' in the selected formats'
+							: ''}. Try another phrase or widen your filters.
+					</p>
+					<button class="library-button" type="button" on:click={clearFilters}
+						>Clear search and filters</button
+					>
+				</div>
+			{/if}
+		</section>
+	</section>
+</div>
 
 <style>
-	.ideas-shell {
-		width: min(100% - 1rem, 100rem);
-		margin: 0.5rem auto 3rem;
-		border: 1px solid var(--page-border);
-		border-radius: 0.45rem;
-		background: var(--page-surface, var(--page-bg));
-		box-shadow: 0 1px 1px rgba(0, 0, 0, 0.03);
-		overflow: hidden;
+	.ideas-stage {
+		overflow-x: clip;
 	}
 
-	.ideas-header,
-	.ideas-toolbar,
-	.ideas-year,
-	.ideas-row {
-		padding-inline: clamp(0.9rem, 2vw, 2rem);
+	.ideas-shell {
+		--site-max-width: 1160px;
+		margin-block: 0 4rem;
 	}
 
 	.ideas-header {
-		display: flex;
-		align-items: end;
-		justify-content: space-between;
-		gap: 1rem;
-		padding-block: 1rem 0.85rem;
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr) auto;
+		align-items: baseline;
+		gap: 0.4rem 1rem;
+		padding-block: 1.5rem 0.85rem;
 		border-bottom: 1px solid var(--page-border);
 	}
 
 	.ideas-header h1 {
 		margin: 0;
-		font-size: clamp(1.8rem, 3vw, 2.7rem);
-		line-height: 1;
+		font: 600 2.25rem/1.1 var(--font-display);
 	}
 
-	.ideas-header p {
-		margin: 0.35rem 0 0;
+	.ideas-deck {
+		margin: 0;
 		color: var(--page-muted);
-		font-size: 0.9rem;
-		line-height: 1.35;
+		font: 0.95rem/1.5 var(--font-reading);
 	}
 
 	.ideas-count {
-		max-width: 28rem;
-		text-align: right;
+		margin: 0;
+		color: var(--page-muted);
+		font: 0.78rem/1.5 var(--font-reading);
+		white-space: nowrap;
 	}
 
 	.ideas-count strong {
-		color: var(--page-accent);
+		color: var(--page-text);
+		font-weight: 600;
 	}
 
-	.ideas-toolbar {
-		position: sticky;
-		top: 0;
-		z-index: 2;
+	.ideas-controls {
+		display: grid;
+		grid-template-columns: minmax(16rem, 1fr) auto;
+		align-items: end;
+		gap: 1rem;
+		margin-block: 0.9rem 1.1rem;
+	}
+
+	.search-control {
+		min-width: 0;
+	}
+
+	.search-label {
 		display: flex;
-		align-items: center;
-		gap: 0.45rem;
-		border-bottom: 1px solid var(--page-border);
-		background: color-mix(in srgb, var(--page-surface, var(--page-bg)) 92%, transparent);
-		backdrop-filter: blur(8px);
-		padding-block: 0.45rem;
-		overflow-x: auto;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 1rem;
+		margin-bottom: 0.3rem;
 	}
 
-	.ideas-toolbar a,
-	.ideas-filter {
-		flex: 0 0 auto;
-		border: 1px solid var(--page-border);
-		border-radius: 0.38rem;
-		padding: 0.08rem 0.45rem;
+	.search-label label {
+		font-size: 0.75rem;
+		font-weight: 600;
+	}
+
+	.search-shortcut {
 		color: var(--page-muted);
-		font-size: 0.78rem;
-		line-height: 1.45;
-		text-decoration: none;
-		cursor: pointer;
+		font-size: 0.68rem;
+		white-space: nowrap;
 	}
 
-	.ideas-toolbar a:hover,
-	.ideas-filter:hover,
-	.ideas-toolbar a.active,
-	.ideas-filter.active,
-	.ideas-filter:has(input:focus-visible) {
-		border-color: color-mix(in srgb, var(--page-accent) 55%, var(--page-border));
-		background: var(--page-accent-soft);
-		color: var(--page-accent);
+	.search-shortcut kbd {
+		border: 1px solid var(--page-border);
+		border-radius: 2px;
+		padding: 0.05rem 0.35rem;
+		font-family: var(--font-mono);
 	}
 
-	.ideas-filter:has(input:focus-visible) {
+	.search-field {
+		display: flex;
+		min-height: 44px;
+		border: 1px solid var(--control-border);
+		border-radius: 3px;
+		background: var(--page-surface);
+	}
+
+	.search-field:focus-within {
 		outline: 2px solid var(--page-accent);
-		outline-offset: 1px;
+		outline-offset: 3px;
+		border-color: var(--page-accent);
 	}
 
 	.ideas-search {
-		min-width: 10rem;
-		max-width: 18rem;
-		margin-left: auto;
-		border: 1px solid var(--page-border);
-		border-radius: 0.38rem;
+		width: 100%;
+		min-width: 0;
+		min-height: 44px;
+		padding: 0.45rem 0.75rem;
+		border: 0;
+		outline: 0;
 		background: transparent;
-		padding: 0.12rem 0.5rem;
 		color: var(--page-text);
 		font: inherit;
-		font-size: 0.78rem;
-		line-height: 1.45;
 	}
 
-	.ideas-search:focus {
-		border-color: var(--page-accent);
-		outline: 2px solid var(--page-accent);
-		outline-offset: 1px;
-	}
-
-	.views-toggle {
-		flex: 0 0 auto;
-		border: 0;
-		padding: 0.12rem 0;
-		background: transparent;
+	.ideas-search::placeholder {
 		color: var(--page-muted);
-		font: inherit;
-		font-size: 0.72rem;
-		line-height: 1.45;
+		opacity: 1;
+	}
+
+	.ideas-search::-webkit-search-cancel-button {
+		display: none;
+	}
+
+	.search-clear {
+		min-width: 3.75rem;
+		min-height: 44px;
+		margin: 0.2rem;
+		border-radius: 2px;
+		color: var(--page-link);
+		font-size: 0.85rem;
 		text-decoration: underline;
-		text-underline-offset: 0.16em;
+		text-underline-offset: 0.2em;
+	}
+
+	.ideas-filters {
+		display: flex;
+		flex-wrap: wrap;
+		min-width: 0;
+		gap: 0.15rem;
+		margin: 0;
+		padding: 0;
+		border: 0;
+	}
+
+	.ideas-filter {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 44px;
+		min-height: 44px;
+		padding: 0.45rem 0.65rem;
+		border: 1px solid transparent;
+		color: var(--page-muted);
+		font-size: 0.8rem;
+		line-height: 1.4;
 		cursor: pointer;
 	}
 
-	.views-toggle:hover,
+	.ideas-filter:hover,
+	.search-clear:hover {
+		color: var(--page-accent);
+		background: var(--page-accent-soft);
+	}
+
+	.ideas-filter.active {
+		border-bottom-color: var(--page-accent);
+		box-shadow: inset 0 -1px var(--page-accent);
+		color: var(--page-accent);
+		font-weight: 600;
+	}
+
+	.ideas-filter:has(input:focus-visible),
+	.ideas-row:focus-visible,
+	.search-clear:focus-visible,
+	.library-button:focus-visible,
 	.views-toggle:focus-visible {
-		color: var(--page-text);
+		outline: 2px solid var(--page-accent);
+		outline-offset: 3px;
 	}
 
-	.ideas-featured {
-		padding: 1rem clamp(0.9rem, 2vw, 2rem);
+	.ideas-results {
+		margin-top: 1.1rem;
+	}
+
+	.results-heading {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.6rem;
+		padding-bottom: 0.3rem;
 		border-bottom: 1px solid var(--page-border);
-		font-size: 0.92rem;
 	}
 
-	.ideas-featured :global(.plain-section) {
-		margin-block: 0;
+	.results-heading > div {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 0.2rem 0.75rem;
 	}
 
-	.ideas-featured :global(.plain-rule) {
-		margin-bottom: 1rem;
+	.results-heading h2 {
+		margin: 0;
+		font-family: var(--font-display);
+		font-size: 1.23rem;
+		font-weight: 600;
+		line-height: 1.2;
 	}
 
-	.ideas-featured :global(h2) {
-		font-size: 1.1rem;
+	.results-count {
+		margin: 0;
+		color: var(--page-muted);
+		font-size: 0.72rem;
+		line-height: 1.5;
 	}
 
-	.ideas-featured :global(.feature-description) {
-		display: block;
+	.views-toggle {
+		flex-shrink: 0;
+		min-height: 44px;
+		padding-inline: 0.45rem;
+		color: var(--page-muted);
+		font-size: 0.78rem;
+		text-decoration: underline;
+		text-underline-offset: 0.2em;
 	}
 
-	.ideas-featured :global(.feature-list) {
-		margin-block: 0.5rem;
-	}
-
-	.ideas-table {
-		font-size: 0.92rem;
+	.views-toggle:hover {
+		color: var(--page-text);
 	}
 
 	.ideas-year {
-		position: sticky;
-		top: 2.35rem;
-		z-index: 1;
+		margin: 0.9rem 0 0;
+		padding-block: 0.25rem;
 		border-bottom: 1px solid var(--page-border);
-		background: var(--page-section-bg, rgba(127, 127, 127, 0.08));
-		padding-block: 0.35rem;
-		color: var(--page-text);
-		font-size: 0.82rem;
-		font-weight: 700;
-		line-height: 1.25;
+		color: var(--page-accent);
+		font-family: var(--font-mono);
+		font-size: 0.72rem;
+		font-weight: 400;
+		letter-spacing: 0.06em;
+	}
+
+	.ideas-year:first-child {
+		margin-top: 0.4rem;
 	}
 
 	.ideas-row {
 		display: grid;
-		grid-template-columns: 5.5rem minmax(12rem, 1fr) minmax(12rem, 34rem);
-		gap: 1rem;
-		align-items: center;
-		min-height: 2.55rem;
+		grid-template-columns: 3.4rem minmax(0, 1fr) minmax(5rem, 8rem);
+		align-items: baseline;
+		gap: 0.75rem;
+		min-height: 44px;
+		padding: 0.42rem 0.25rem;
 		border-bottom: 1px solid var(--page-border);
 		color: var(--page-text);
 		text-decoration: none;
 	}
 
 	.ideas-row:hover {
-		background: var(--page-row-hover, rgba(127, 127, 127, 0.06));
+		background: var(--page-row-hover);
 		color: var(--page-text);
+	}
+
+	.ideas-row:hover .ideas-title {
+		color: var(--page-link);
+		text-decoration: underline;
+		text-decoration-thickness: 0.05em;
+		text-underline-offset: 0.16em;
 	}
 
 	.ideas-row time {
 		color: var(--page-muted);
-		font-size: 0.82rem;
+		font-size: 0.72rem;
 		font-variant-numeric: tabular-nums;
 		white-space: nowrap;
 	}
 
-	.ideas-title {
-		display: flex;
-		align-items: center;
-		gap: 0.45rem;
+	.date-year {
+		display: block;
+		font-size: 0.72rem;
+	}
+
+	.ideas-content {
 		min-width: 0;
-		font-size: 0.9rem;
-		font-weight: 600;
-		line-height: 1.25;
 	}
 
-	.ideas-title span:last-child {
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	.type-emoji {
-		width: 1.25rem;
-		text-align: center;
-		font-size: 0.9rem;
+	.ideas-title {
+		display: block;
+		font-family: var(--font-reading);
+		font-size: 0.95rem;
+		font-weight: 400;
+		line-height: 1.35;
+		overflow-wrap: anywhere;
 	}
 
 	.ideas-meta {
 		display: flex;
-		justify-content: flex-end;
-		gap: 0.35rem;
+		align-items: end;
+		flex-direction: column;
+		gap: 0.2rem;
 		min-width: 0;
 		color: var(--page-muted);
-		font-size: 0.76rem;
-		line-height: 1.25;
+		font-size: 0.7rem;
+		line-height: 1.4;
+		text-align: right;
 	}
 
-	.type-chip,
-	.tag-chip,
-	.reaction-chip {
-		flex: 0 0 auto;
-		max-width: 10rem;
-		overflow: hidden;
-		border: 1px solid var(--page-border);
-		border-radius: 0.35rem;
-		padding: 0.08rem 0.38rem;
-		text-overflow: ellipsis;
-		white-space: nowrap;
+	.entry-category {
+		text-transform: capitalize;
 	}
 
 	.view-count {
-		flex: 0 0 auto;
-		min-width: 5.2rem;
-		color: var(--page-muted);
 		font-variant-numeric: tabular-nums;
-		text-align: right;
 		white-space: nowrap;
-	}
-
-	.type-chip {
-		border-color: color-mix(in srgb, var(--page-accent) 45%, var(--page-border));
-		background: var(--page-accent-soft);
-		color: var(--page-accent);
-		font-weight: 700;
-		text-transform: uppercase;
 	}
 
 	.ideas-snippet {
-		flex: 1 1 auto;
+		display: -webkit-box;
+		line-clamp: 2;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
 		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
+		margin-top: 0.25rem;
+		color: var(--page-muted);
+		font-size: 0.82rem;
+		line-height: 1.5;
+		overflow-wrap: anywhere;
 	}
 
-	.ideas-snippet :global(b) {
-		color: var(--page-accent) !important;
-		background: transparent !important;
+	.ideas-snippet mark {
+		background: var(--page-accent-soft);
+		color: var(--page-text);
+		font-weight: 600;
 	}
 
 	.ideas-load-more {
-		padding: 1rem clamp(0.9rem, 2vw, 2rem);
+		position: relative;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem 1rem;
+		margin-top: 1.3rem;
 	}
 
-	@media (max-width: 760px) {
-		.ideas-shell {
-			width: min(100% - 0.75rem, 100rem);
-			margin-top: 0.35rem;
+	.scroll-boundary {
+		position: absolute;
+		top: 0;
+		width: 1px;
+		height: 1px;
+	}
+
+	.load-progress,
+	.library-end {
+		margin: 0;
+		color: var(--page-muted);
+		font-size: 0.82rem;
+		line-height: 1.5;
+	}
+
+	.library-end {
+		margin-top: 1.3rem;
+	}
+
+	.library-button {
+		min-height: 44px;
+		border: 1px solid var(--control-border);
+		border-radius: 2px;
+		padding: 0.55rem 0.9rem;
+		color: var(--page-text);
+		font-size: 0.9rem;
+	}
+
+	.library-button:hover:not(:disabled) {
+		border-color: var(--page-accent);
+		background: var(--page-accent-soft);
+		color: var(--page-accent);
+	}
+
+	.library-button:disabled {
+		cursor: progress;
+	}
+
+	.ideas-notice,
+	.ideas-empty,
+	.ideas-pending {
+		padding-block: 1.8rem;
+		color: var(--page-muted);
+	}
+
+	.ideas-notice p,
+	.ideas-empty p {
+		margin: 0 0 1rem;
+	}
+
+	.ideas-empty h3 {
+		margin: 0 0 0.4rem;
+		color: var(--page-text);
+		font-family: var(--font-display);
+		font-size: 1.5rem;
+	}
+
+	.ideas-pending {
+		min-height: 10rem;
+		font-style: italic;
+	}
+
+	@media (max-width: 960px) {
+		.ideas-controls {
+			grid-template-columns: minmax(0, 1fr);
+			gap: 0.4rem;
+		}
+	}
+
+	@media (max-width: 42rem) {
+		.ideas-header {
+			grid-template-columns: minmax(0, 1fr) auto;
+			gap: 0.2rem 0.75rem;
+			padding-block: 0.9rem 0.6rem;
 		}
 
-		.ideas-header {
-			display: block;
+		.ideas-header h1 {
+			font-size: 1.9rem;
+		}
+
+		.ideas-deck {
+			grid-column: 1 / -1;
+			grid-row: 2;
+			font-size: 0.85rem;
 		}
 
 		.ideas-count {
-			max-width: none;
-			text-align: left;
+			grid-column: 2;
+			grid-row: 1;
 		}
 
-		.ideas-toolbar {
-			top: 0;
-			flex-wrap: wrap;
-			align-items: stretch;
-			overflow-x: visible;
+		.ideas-controls {
+			margin-block: 0.65rem 0.9rem;
 		}
 
-		.ideas-search {
-			order: -1;
-			flex: 1 0 100%;
-			width: 100%;
-			min-width: 8rem;
-			max-width: none;
-			margin-left: 0;
+		.ideas-results {
+			margin-top: 0.9rem;
+		}
+
+		.results-heading {
+			padding-bottom: 0.55rem;
+		}
+
+		.ideas-year {
+			margin-top: 0.6rem;
+		}
+
+		.search-shortcut {
+			display: none;
+		}
+
+		.ideas-filters {
+			flex-wrap: nowrap;
+			overflow-x: auto;
+			overscroll-behavior-inline: contain;
+			scrollbar-width: thin;
+			scrollbar-color: var(--page-gold) transparent;
+		}
+
+		.ideas-filter {
+			flex-shrink: 0;
+			padding-inline: 0.6rem;
 		}
 
 		.ideas-row {
-			grid-template-columns: 4.25rem minmax(0, 1fr);
-			gap: 0.6rem;
-			align-items: start;
-			padding-block: 0.55rem;
-		}
-
-		.ideas-row time {
-			padding-top: 0.08rem;
+			grid-template-columns: 3rem minmax(0, 1fr);
+			gap: 0.1rem 0.6rem;
+			padding-inline: 0;
 		}
 
 		.ideas-title {
-			font-size: 0.95rem;
-		}
-
-		.ideas-title span:last-child {
-			white-space: normal;
+			font-size: 1rem;
 		}
 
 		.ideas-meta {
 			grid-column: 2;
-			justify-content: flex-start;
+			flex-direction: row;
+			align-items: baseline;
 			flex-wrap: wrap;
-			gap: 0.3rem;
+			gap: 0.35rem 0.75rem;
+			text-align: left;
+		}
+
+		.ideas-snippet {
+			line-clamp: 3;
+			-webkit-line-clamp: 3;
 		}
 	}
 </style>

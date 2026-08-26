@@ -1,31 +1,29 @@
 import { expect, test } from '@playwright/test';
 
-test('about page renders markdown headings (marked + prerender)', async ({ page }) => {
-  await page.goto('/about');
-  // about content is rendered from content.md via marked at build time
-  await expect(page.locator('h2#tldr')).toBeVisible();
-  await expect(page.locator('article.prose')).toBeVisible();
+test('About renders the editorial introduction, sections, and press photos', async ({ page }) => {
+	await page.goto('/about');
+	await expect(page.getByRole('heading', { name: 'Shawn Wang (swyx)', exact: true })).toBeVisible();
+	await expect(page.locator('h2#current-work')).toBeVisible();
+	await expect(page.locator('.about-copy')).toBeVisible();
+	await expect(page.locator('.press-photo-grid figure')).toHaveCount(4);
 });
 
-test.describe('test blog page', () => {
-  test('blog page to preserve url params', async ({ page }) => {
-    // Go to http://localhost:5173/
-    await page.goto('/ideas');
+test.describe('Ideas library', () => {
+	test('search and category controls preserve shareable URL parameters', async ({ page }) => {
+		await page.goto('/ideas');
+		await page.getByRole('searchbox', { name: 'Search articles' }).fill('temporal');
+		await expect(page).toHaveURL(/\/ideas\?filter=temporal$/);
+		await page.locator('label.ideas-filter', { hasText: 'Essay' }).click();
+		await expect(page).toHaveURL(/\/ideas\?filter=temporal&show=Essay$/);
+		await expect(page.locator('#ideas-results')).toHaveAttribute('aria-busy', 'false');
+		await expect(page.locator('.ideas-row')).not.toHaveCount(0);
+	});
 
-    // Click [placeholder="Hit \/ to search"]
-    await page.locator('[placeholder="Hit \\/ to search"]').click();
-
-    // Fill [placeholder="Hit \/ to search"]
-    await page.locator('[placeholder="Hit \\/ to search"]').fill('test');
-    await expect(page).toHaveURL('http://localhost:5173/ideas?filter=test');
-
-    // Click label:has-text("Blog")
-    await page.locator('label:has-text("Blog")').click();
-    await expect(page).toHaveURL('http://localhost:5173/ideas?filter=test&show=Blog');
-  });
-
-  test('blog to honour existing params', async ({ page }) => {
-    await page.goto('http://localhost:5173/ideas?filter=test&show=Blog');
-    await expect(page).toHaveURL('http://localhost:5173/ideas?filter=test&show=Blog');
-  });
+	test('search and categories survive a direct visit', async ({ page }) => {
+		await page.goto('/ideas?filter=temporal&show=Essay');
+		await expect(page.getByRole('searchbox', { name: 'Search articles' })).toHaveValue('temporal');
+		await expect(page.getByRole('checkbox', { name: 'Essay', exact: true })).toBeChecked();
+		await expect(page.locator('#ideas-results')).toHaveAttribute('aria-busy', 'false');
+		await expect(page.locator('.ideas-row')).not.toHaveCount(0);
+	});
 });

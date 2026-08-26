@@ -8,6 +8,7 @@
 // Cloudflare Cache API ignores `stale-while-revalidate` on cache.put().
 //
 // In dev / non-Cloudflare runtimes `caches` is undefined and we no-op.
+import { dev } from '$app/environment';
 import { readContentCacheGeneration } from '$lib/content-manifest';
 
 // Security headers applied to all SSR/dynamic responses. On Cloudflare Workers
@@ -63,7 +64,7 @@ export async function handle({ event, resolve }) {
 	// `caches.default` is Cloudflare-specific; undefined in dev / non-CF runtimes.
 	const cache = /** @type {any} */ (globalThis.caches)?.default;
 	const cacheUrl = new URL(event.request.url);
-	const cacheable = event.request.method === 'GET' && !!cache;
+	const cacheable = !dev && event.request.method === 'GET' && !!cache;
 	const preservePublicCache =
 		isVersionedOgRequest(cacheUrl) ||
 		isPublicReadCountRequest(cacheUrl) ||
@@ -103,6 +104,8 @@ export async function handle({ event, resolve }) {
 	for (const [k, v] of Object.entries(SECURITY_HEADERS)) {
 		response.headers.set(k, v);
 	}
+	// Cached development HTML can outlive its hot-reloaded components and fail hydration.
+	if (dev) response.headers.set('Cache-Control', 'no-store');
 
 	if (cacheable && response.status === 200) {
 		const cc = response.headers.get('cache-control') || '';

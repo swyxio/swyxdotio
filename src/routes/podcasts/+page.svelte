@@ -1,25 +1,38 @@
 <script>
 	import SocialMeta from '../../components/SocialMeta.svelte';
 	import { getPageSocialMeta } from '$lib/social-meta';
+	import { FEATURED_PODCAST_EPISODES } from '$lib/featured-podcast-episodes';
 
 	/** @type {import('./$types').PageData} */
 	export let data;
 	const social = getPageSocialMeta('podcasts');
 
+	const youtubePlaylistId = 'PLWEAb1SXhjlfkEF_PxzYHonU_v5LPMI8L';
 	const latentSpace = {
 		siteUrl: 'https://www.latent.space/podcast',
 		feedUrl: 'https://rss.flightcast.com/vgnxzgiwwzwke85ym53fjnzu.xml',
-		appleUrl:
-			'https://podcasts.apple.com/us/podcast/latent-space-the-ai-engineer-podcast/id1674008350',
-		appleEmbedUrl:
-			'https://embed.podcasts.apple.com/us/podcast/latent-space-the-ai-engineer-podcast/id1674008350',
-		spotifyUrl: 'https://open.spotify.com/show/2p7zZVwVF6Yk0Zsb4QmT7t',
-		spotifyEmbedUrl:
-			'https://open.spotify.com/embed/show/2p7zZVwVF6Yk0Zsb4QmT7t?utm_source=generator'
+		youtubeUrl: 'https://www.youtube.com/@LatentSpacePod',
+		playlistUrl: `https://www.youtube.com/playlist?list=${youtubePlaylistId}`
 	};
 
-	let showApplePlayer = false;
-	let showSpotifyPlayer = false;
+	// Selected from latent.space/about; Dharmesh's quote is also in his episode transcript.
+	const praise = [
+		{
+			quote: 'Great episode, good technical discussion on LLM pretraining',
+			author: 'Andrej Karpathy',
+			source: 'https://www.latent.space/about'
+		},
+		{
+			quote: 'A good intro to the tiny corp for people who want to come work here.',
+			author: 'George Hotz',
+			source: 'https://www.latent.space/about'
+		},
+		{
+			quote: 'You guys taught me a lot of what I think I know.',
+			author: 'Dharmesh Shah',
+			source: 'https://www.latent.space/p/dharmesh'
+		}
+	];
 
 	$: episodeCount = data.shows.reduce((total, show) => total + show.episodes.length, 0);
 </script>
@@ -27,75 +40,72 @@
 <SocialMeta {...social} />
 
 <section class="site-shell mb-16">
-	<header class="plain-section">
-		<p class="archive-kicker">Audio home base</p>
-		<h1 class="mb-2 text-3xl font-bold">Podcasts</h1>
-		<p class="plain-muted max-w-3xl">
-			My current work is the Latent Space podcast. The three swyx.io feeds below preserve my earlier
-			audio archive with <strong>{episodeCount}</strong> first-party episodes.
+	<header class="editorial-header podcast-header">
+		<p class="editorial-kicker">Audio home base</p>
+		<h1>Podcasts</h1>
+		<p class="editorial-deck">
+			I host <a href={latentSpace.siteUrl}>Latent Space: The AI Engineer Podcast</a> — technical conversations
+			with the founders, builders, and researchers shaping AI.
+		</p>
+		<p class="podcast-standing">
+			<span aria-hidden="true">✦</span>
+			Has ranked in the <strong>Top 30 for US Technology</strong> on Apple Podcasts.
+			<a href="https://www.latent.space/about" class="standing-source">About the show ↗</a>
+		</p>
+		<p class="feed-actions current-show-actions">
+			<a href={latentSpace.youtubeUrl}>Watch on YouTube ↗</a>
+			<span aria-hidden="true">·</span>
+			<a href={latentSpace.playlistUrl}>Complete episode playlist ↗</a>
+			<span aria-hidden="true">·</span>
+			<a href={latentSpace.siteUrl}>Show notes</a>
+			<span aria-hidden="true">·</span>
+			<a href={latentSpace.feedUrl}>RSS feed</a>
 		</p>
 	</header>
 
-	<article class="latent-space-feature plain-section">
-		<hr class="plain-rule mb-5" />
-		<p class="archive-kicker">Current show</p>
-		<h2 class="mb-1 text-2xl font-bold">
-			<a href={latentSpace.siteUrl}>Latent Space: The AI Engineer Podcast</a>
-		</h2>
-		<p class="plain-muted max-w-3xl">
-			The podcast by and for AI Engineers, co-hosted with Alessio Fanelli. Technical deep dives with
-			the founders, builders, and researchers shaping Software 3.0.
-		</p>
-		<p class="feed-actions mt-2 text-sm">
-			<a href={latentSpace.siteUrl}>Latest episodes and show notes</a>
-			<span aria-hidden="true">·</span>
-			<a href={latentSpace.feedUrl}>RSS feed</a>
-			<span aria-hidden="true">·</span>
-			<a href={latentSpace.appleUrl}>Apple Podcasts</a>
-			<span aria-hidden="true">·</span>
-			<a href={latentSpace.spotifyUrl}>Spotify</a>
-		</p>
-		<div class="platform-embeds">
-			{#if showApplePlayer}
-				<iframe
-					title="Latent Space on Apple Podcasts"
-					src={latentSpace.appleEmbedUrl}
-					height="175"
-					allow="autoplay *; encrypted-media *; fullscreen *"
-				></iframe>
-			{:else}
-				<button
-					class="platform-embed-preview"
-					type="button"
-					style="min-height: 175px"
-					on:click={() => (showApplePlayer = true)}
-				>
-					<span aria-hidden="true">▶</span>
-					<span>Load Apple Podcasts player</span>
-				</button>
-			{/if}
-			{#if showSpotifyPlayer}
-				<iframe
-					title="Latent Space on Spotify"
-					src={latentSpace.spotifyEmbedUrl}
-					height="352"
-					allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-				></iframe>
-			{:else}
-				<button
-					class="platform-embed-preview"
-					type="button"
-					style="min-height: 352px"
-					on:click={() => (showSpotifyPlayer = true)}
-				>
-					<span aria-hidden="true">▶</span>
-					<span>Load Spotify player</span>
-				</button>
-			{/if}
-		</div>
+	<article class="latent-space-feature">
+		<section class="episode-gallery" aria-labelledby="gallery-heading">
+			<h2 id="gallery-heading" class="archive-kicker">A few good conversations</h2>
+			<div class="video-grid">
+				{#each FEATURED_PODCAST_EPISODES as episode, index}
+					<a class="video-card" href={`https://www.youtube.com/watch?v=${episode.id}`}>
+						<div class="video-thumbnail">
+							<img
+								src={`https://i.ytimg.com/vi/${episode.id}/hqdefault.jpg`}
+								alt=""
+								width="480"
+								height="360"
+								loading={index < 3 ? 'eager' : 'lazy'}
+								decoding="async"
+							/>
+							<span class="video-play" aria-hidden="true">▶</span>
+						</div>
+						<h3>{episode.guests}</h3>
+						<p>{episode.title}</p>
+					</a>
+				{/each}
+			</div>
+		</section>
+		<section class="podcast-praise" aria-labelledby="praise-heading">
+			<h2 id="praise-heading" class="archive-kicker">A few kind words</h2>
+			<div class="praise-grid">
+				{#each praise as item}
+					<figure>
+						<blockquote cite={item.source}>“{item.quote}”</blockquote>
+						<figcaption><a href={item.source}>{item.author} ↗</a></figcaption>
+					</figure>
+				{/each}
+			</div>
+		</section>
 	</article>
 
-	<p class="archive-kicker legacy-label">Legacy swyx.io archive</p>
+	<div class="legacy-intro">
+		<h2>From the archive</h2>
+		<p class="plain-muted">
+			Three original swyx.io feeds, <strong>{episodeCount}</strong> episodes. My earlier conversations,
+			career chats, and audio experiments, all still here.
+		</p>
+	</div>
 	<div class="show-grid">
 		{#each data.shows as show}
 			<a class="show-jump" href={`#${show.slug}`}>
@@ -157,6 +167,23 @@
 </section>
 
 <style>
+	.podcast-header {
+		margin-bottom: 1.25rem;
+	}
+
+	.current-show-actions {
+		gap: 0 0.6rem;
+		margin: 0.45rem 0 0;
+		font-size: 0.875rem;
+	}
+
+	.current-show-actions a,
+	.current-show-actions > span {
+		display: inline-flex;
+		align-items: center;
+		min-height: 2.75rem;
+	}
+
 	.archive-kicker {
 		color: var(--page-accent);
 		font-family: var(--font-mono);
@@ -172,40 +199,137 @@
 		grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
 	}
 
-	.legacy-label {
-		margin: 2rem 0 0.75rem;
+	.legacy-intro {
+		margin: 3rem 0 1rem;
+		border-top: 1px solid var(--page-border);
+		padding-top: 1.75rem;
 	}
 
-	.platform-embeds {
+	.legacy-intro h2 {
+		margin: 0 0 0.55rem;
+		font-family: var(--font-display);
+		font-size: 1.8rem;
+	}
+
+	.legacy-intro p {
+		max-width: 42rem;
+		margin: 0;
+		line-height: 1.65;
+	}
+
+	.video-grid {
 		display: grid;
-		gap: 0.75rem;
-		grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
-		margin-top: 1rem;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 1.75rem 1.2rem;
+		margin-top: 0.8rem;
 	}
 
-	.platform-embeds iframe {
-		border: 0;
-		border-radius: 0.75rem;
-		width: 100%;
-	}
-
-	.platform-embed-preview {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.65rem;
-		width: 100%;
-		border: 1px solid var(--page-border);
-		border-radius: 0.75rem;
-		background: var(--page-surface);
+	.video-card {
+		min-width: 0;
 		color: var(--page-text);
-		font-weight: 600;
-		cursor: pointer;
+		text-decoration: none;
 	}
 
-	.platform-embed-preview:hover {
-		border-color: var(--page-accent);
-		background: var(--page-accent-soft);
+	.video-thumbnail {
+		position: relative;
+		aspect-ratio: 16 / 9;
+		overflow: hidden;
+		border: 1px solid var(--page-border);
+		background: var(--page-surface);
+	}
+
+	.video-thumbnail img {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.video-play {
+		position: absolute;
+		right: 0.5rem;
+		bottom: 0.5rem;
+		display: grid;
+		place-items: center;
+		width: 1.8rem;
+		height: 1.8rem;
+		border-radius: 50%;
+		background: rgb(0 0 0 / 80%);
+		color: white;
+		font-size: 0.7rem;
+	}
+
+	.video-card h3 {
+		margin: 0.65rem 0 0.15rem;
+		font-family: var(--font-display);
+		font-size: 1.15rem;
+		line-height: 1.2;
+	}
+
+	.video-card p {
+		margin: 0;
+		color: var(--page-muted);
+		font-size: 0.8rem;
+		line-height: 1.45;
+	}
+
+	.video-card:hover h3 {
+		color: var(--page-accent);
+		text-decoration: underline;
+		text-underline-offset: 0.2em;
+	}
+
+	.video-card:focus-visible {
+		outline: 2px solid var(--page-accent);
+		outline-offset: 5px;
+	}
+
+	.podcast-standing {
+		margin: 0.8rem 0 0;
+		color: var(--page-gold);
+		font-size: 0.9rem;
+	}
+
+	.podcast-standing > span {
+		margin-right: 0.3rem;
+	}
+
+	.standing-source {
+		margin-left: 0.3rem;
+		color: var(--page-muted);
+		font-size: 0.75rem;
+	}
+
+	.podcast-praise {
+		margin-top: 1.75rem;
+	}
+
+	.praise-grid {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 1.5rem;
+		margin-top: 0.8rem;
+	}
+
+	.praise-grid figure {
+		display: flex;
+		flex-direction: column;
+		gap: 0.8rem;
+		margin: 0;
+		border-top: 1px solid var(--page-border);
+		padding-top: 0.8rem;
+	}
+
+	.praise-grid blockquote {
+		margin: 0;
+		font-family: var(--font-display);
+		font-size: 1.1rem;
+		line-height: 1.45;
+	}
+
+	.praise-grid figcaption {
+		margin-top: auto;
+		font-size: 0.8rem;
 	}
 
 	.show-jump {
@@ -302,12 +426,27 @@
 	}
 
 	@media (max-width: 42rem) {
+		.video-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		.praise-grid {
+			grid-template-columns: 1fr;
+			gap: 1rem;
+		}
+
 		.show-header {
 			grid-template-columns: minmax(0, 4rem) minmax(0, 1fr);
 		}
 
 		.episode-list li {
 			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+
+	@media (max-width: 28rem) {
+		.video-grid {
+			grid-template-columns: 1fr;
 		}
 	}
 </style>

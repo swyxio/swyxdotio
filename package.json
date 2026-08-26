@@ -19,6 +19,7 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch",
 		"podcast:migrate": "node scripts/migrate-podcast-feed.mjs",
+		"podcast:seed-local": "node scripts/seed-local-podcast-feeds.mjs",
 		"podcast:test": "node --test scripts/podcast-feed.test.mjs",
 		"podcast:validate": "node scripts/validate-podcast-feed.mjs",
 		"podcast:upload": "node scripts/upload-podcast-r2.mjs",
