@@ -1,10 +1,8 @@
-import { renderMarkdown } from '$lib/markdown';
-import content from './content.md?raw';
+import companies from '$lib/data/portfolio.json';
 
 // Static page: rendered once at build time.
 export const prerender = true;
 
-export async function load() {
-	const html = await renderMarkdown(content);
-	return { html };
+export function load() {
+	return { companies, reviewedAt: '2026-08-26' };
 }

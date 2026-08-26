@@ -1,0 +1,747 @@
+[
+	{
+		"id": "temporal",
+		"name": "Temporal",
+		"website": "https://temporal.io",
+		"description": "Durable execution for reliable workflows and long-running applications.",
+		"category": "Infrastructure",
+		"status": "current",
+		"logo": "/portfolio/temporal.png",
+		"logoSource": "https://temporal.io/apple-touch-icon.png",
+		"valuation": {
+			"amountUsd": 5000000000,
+			"date": "2026-02-17",
+			"sourceUrl": "https://temporal.io/news/temporal-raises-300M-to-make-agentic-ai-real-for-companies",
+			"sourceTitle": "Temporal raises $300M Series D",
+			"qualifier": "Reported valuation"
+		},
+		"relatedUrl": "/why-temporal"
+	},
+	{
+		"id": "cognition",
+		"name": "Cognition",
+		"website": "https://cognition.com",
+		"description": "The team behind Devin, an autonomous software engineer.",
+		"category": "AI coding",
+		"status": "current",
+		"logo": "/portfolio/cognition.png",
+		"logoSource": "https://cognition.com/apple-icon.png?apple-icon.0w.tojn~2x_cp.png?dpl=dpl_7cGgTgKZrpXZGMjQmG7VFfLVbJce",
+		"valuation": {
+			"amountUsd": 26000000000,
+			"date": "2026-05-27",
+			"sourceUrl": "https://cognition.com/blog/series-d",
+			"sourceTitle": "Cognition: More Devins in More Places",
+			"qualifier": "Post-money"
+		},
+		"relatedUrl": "/cognition"
+	},
+	{
+		"id": "supabase",
+		"name": "Supabase",
+		"website": "https://supabase.com",
+		"description": "An open-source Postgres platform with auth, storage, and realtime APIs.",
+		"category": "Data & databases",
+		"status": "current",
+		"logo": "/portfolio/supabase.ico",
+		"logoSource": "https://supabase.com/favicon/favicon.ico",
+		"valuation": {
+			"amountUsd": 10500000000,
+			"date": "2026-06-04",
+			"sourceUrl": "https://www.prnewswire.com/news-releases/supabase-raises-500m-at-10-5b-to-accelerate-lead-in-agentic-infrastructure-302791787.html",
+			"sourceTitle": "Supabase raises $500M at $10.5B",
+			"qualifier": "Post-money"
+		}
+	},
+	{
+		"id": "railway",
+		"name": "Railway",
+		"website": "https://railway.com",
+		"description": "Deploy applications, services, and databases without managing infrastructure.",
+		"category": "Infrastructure",
+		"status": "current",
+		"logo": "/portfolio/railway.png",
+		"logoSource": "https://railway.com/apple-touch-icon.png",
+		"valuation": null
+	},
+	{
+		"id": "workos",
+		"name": "WorkOS",
+		"website": "https://workos.com",
+		"description": "Enterprise-ready authentication, SSO, directory sync, and authorization.",
+		"category": "Security & identity",
+		"status": "current",
+		"logo": "/portfolio/workos.png",
+		"logoSource": "https://cdn.prod.website-files.com/621f54116cab10f6e9215d8b/621f549024eb2947f6f2f7f7_Favicon%20256x256.png",
+		"valuation": {
+			"amountUsd": 2000000000,
+			"date": "2026-03-02",
+			"sourceUrl": "https://workos.com/blog/series-c",
+			"sourceTitle": "WorkOS raises $100M Series C, hits $2B valuation",
+			"qualifier": "Reported valuation"
+		}
+	},
+	{
+		"id": "matx",
+		"name": "MatX",
+		"website": "https://matx.com",
+		"description": "Chips designed for training and running large language models.",
+		"category": "Semiconductors",
+		"status": "current",
+		"logo": "/portfolio/matx.png",
+		"logoSource": "https://matx.com/apple-touch-icon.png",
+		"valuation": {
+			"amountUsd": 300000000,
+			"date": "2024-11-22",
+			"sourceUrl": "https://techcrunch.com/2024/11/22/ai-chip-startup-matx-founded-by-google-alums-raises-series-a-at-300m-valuation-sources-say/",
+			"sourceTitle": "MatX Series A at $300M+ valuation",
+			"qualifier": "Series A · newer mark undisclosed",
+			"prefix": ">"
+		},
+		"relatedUrl": "https://www.youtube.com/watch?v=qvrdCpLPbuQ"
+	},
+	{
+		"id": "artificial-analysis",
+		"name": "Artificial Analysis",
+		"website": "https://artificialanalysis.ai",
+		"description": "Independent benchmarks and analysis of AI models and providers.",
+		"category": "AI infrastructure",
+		"status": "current",
+		"logo": "/portfolio/artificial-analysis.ico",
+		"logoSource": "https://artificialanalysis.ai/favicon.ico",
+		"valuation": null,
+		"note": "“Gartner of AI”"
+	},
+	{
+		"id": "browserbase",
+		"name": "Browserbase",
+		"website": "https://browserbase.com",
+		"description": "Cloud browsers and browser automation infrastructure for AI agents.",
+		"category": "AI infrastructure",
+		"status": "current",
+		"logo": "/portfolio/browserbase.svg",
+		"logoSource": "https://www.browserbase.com/favicon.svg",
+		"valuation": {
+			"amountUsd": 300000000,
+			"date": "2025-06-17",
+			"sourceUrl": "https://www.browserbase.com/blog/introducing-the-stagehand-api",
+			"sourceTitle": "Browserbase raises $40M at a $300M valuation",
+			"qualifier": "Series B"
+		},
+		"relatedUrl": "https://www.latent.space/p/browserbase"
+	},
+	{
+		"id": "fireworks",
+		"name": "Fireworks AI",
+		"website": "https://fireworks.ai",
+		"description": "Inference and fine-tuning infrastructure for generative AI models.",
+		"category": "AI infrastructure",
+		"status": "current",
+		"logo": "/portfolio/fireworks.png",
+		"logoSource": "https://fireworks.ai/apple-icon.png?851b7c333784c47b",
+		"valuation": {
+			"amountUsd": 17500000000,
+			"date": "2026-07-15",
+			"sourceUrl": "https://fireworks.ai/blog/series-d-announcement",
+			"sourceTitle": "Fireworks announces Series D",
+			"qualifier": "Reported valuation"
+		}
+	},
+	{
+		"id": "e2b",
+		"name": "E2B",
+		"website": "https://e2b.dev",
+		"description": "Secure cloud sandboxes where AI agents can run code.",
+		"category": "AI infrastructure",
+		"status": "current",
+		"logo": "/portfolio/e2b.png",
+		"logoSource": "https://cdn.prod.website-files.com/6717bb6618f6a40d53ac2929/6a2a7d8468a4388e03a622aa_Favicon_512x512.png",
+		"valuation": null
+	},
+	{
+		"id": "daytona",
+		"name": "Daytona",
+		"website": "https://daytona.io",
+		"description": "Isolated, programmable sandboxes for running AI-generated code.",
+		"category": "AI infrastructure",
+		"status": "current",
+		"logo": "/portfolio/daytona.png",
+		"logoSource": "https://framerusercontent.com/images/6WPclDLAHHQgPFeA2DRTW1OXVSU.png",
+		"valuation": {
+			"amountUsd": 125000000,
+			"date": "2026-02-05",
+			"sourceUrl": "https://www.theinformation.com/newsletters/ai-agenda/datadog-figma-back-startup-developing-tools-ai-agents",
+			"sourceTitle": "Datadog and Figma back Daytona",
+			"qualifier": "Post-money · newer mark undisclosed"
+		},
+		"note": "Sandboxes for agents… I know, I know."
+	},
+	{
+		"id": "resend",
+		"name": "Resend",
+		"website": "https://resend.com",
+		"description": "Email APIs for developers, from transactional messages to broadcasts.",
+		"category": "Developer tools",
+		"status": "current",
+		"logo": "/portfolio/resend.png",
+		"logoSource": "https://resend.com/static/favicons/favicon-marketing@57x57.png?v=1",
+		"valuation": null
+	},
+	{
+		"id": "modal",
+		"name": "Modal",
+		"website": "https://modal.com",
+		"description": "Serverless compute for Python, AI workloads, and GPU applications.",
+		"category": "Infrastructure",
+		"status": "current",
+		"logo": "/portfolio/modal.svg",
+		"logoSource": "https://modal.com/assets/favicon.svg",
+		"valuation": {
+			"amountUsd": 4650000000,
+			"date": "2026-05-21",
+			"sourceUrl": "https://modal.com/blog/modal-series-c",
+			"sourceTitle": "Modal's $355M Series C at a $4.65B valuation",
+			"qualifier": "Post-money"
+		}
+	},
+	{
+		"id": "conductor",
+		"name": "Conductor",
+		"website": "https://conductor.build",
+		"description": "A workspace for running and coordinating multiple coding agents.",
+		"category": "AI coding",
+		"status": "current",
+		"logo": "/portfolio/conductor.png",
+		"logoSource": "https://www.conductor.build/apple-icon.png?apple-icon.7d575655.png",
+		"valuation": null,
+		"relatedUrl": "https://x.com/charlieholtz/status/2039027121901957349"
+	},
+	{
+		"id": "chroma",
+		"name": "Chroma",
+		"website": "https://trychroma.com",
+		"description": "Open-source retrieval infrastructure and a vector database for AI.",
+		"category": "Data & databases",
+		"status": "current",
+		"logo": "/portfolio/chroma.png",
+		"logoSource": "https://www.trychroma.com/img/favicon.ico",
+		"valuation": null,
+		"relatedUrl": "https://www.latent.space/p/chroma"
+	},
+	{
+		"id": "restate",
+		"name": "Restate",
+		"website": "https://restate.dev",
+		"description": "Durable execution for resilient services, workflows, and agents.",
+		"category": "Infrastructure",
+		"status": "current",
+		"logo": "/portfolio/restate.ico",
+		"logoSource": "https://restate.dev/favicon.ico",
+		"valuation": null
+	},
+	{
+		"id": "logan-kilpatrick",
+		"name": "Logan Kilpatrick",
+		"website": null,
+		"description": "Individual backing; company details are not listed.",
+		"category": "Individuals",
+		"status": "individual",
+		"logo": null,
+		"logoSource": null,
+		"valuation": null
+	},
+	{
+		"id": "matthew-berman",
+		"name": "Matthew Berman",
+		"website": null,
+		"description": "Individual backing; company details are not listed.",
+		"category": "Individuals",
+		"status": "individual",
+		"logo": null,
+		"logoSource": null,
+		"valuation": null
+	},
+	{
+		"id": "datalab",
+		"name": "Datalab",
+		"website": "https://datalab.to",
+		"description": "Document parsing and extraction that turns PDFs into structured data.",
+		"category": "Data & databases",
+		"status": "current",
+		"logo": "/portfolio/datalab.svg",
+		"logoSource": "https://www.datalab.to/images/datalab-icon.svg",
+		"valuation": null
+	},
+	{
+		"id": "viktor",
+		"name": "Zeta AI / Viktor",
+		"website": "https://viktor.com",
+		"description": "An AI coworker that works with your team and tools in Slack and Teams.",
+		"category": "AI applications",
+		"status": "current",
+		"logo": "/portfolio/viktor.png",
+		"logoSource": "https://viktor.com/webclip.png?v=2",
+		"valuation": {
+			"amountUsd": 450000000,
+			"date": "2026-07-06",
+			"sourceUrl": "https://www.forbes.pl/biznes/agent-ai-viktor-podbija-firmy-sam-podpowiada-co-moze-zrobic/ey02s0p",
+			"sourceTitle": "Forbes Polska profile of Viktor",
+			"qualifier": "Reported valuation",
+			"dateLabel": "May 2026 · reported Jul 2026"
+		}
+	},
+	{
+		"id": "brightwave",
+		"name": "Brightwave",
+		"website": "https://brightwave.io",
+		"description": "Compliance-ready infrastructure for AI agents, from the financial research team.",
+		"category": "AI infrastructure",
+		"status": "current",
+		"logo": "/portfolio/brightwave.svg",
+		"logoSource": "https://www.brightwave.io/favicon.svg",
+		"valuation": null
+	},
+	{
+		"id": "quadratic",
+		"name": "Quadratic",
+		"website": "https://quadratichq.com",
+		"description": "A spreadsheet that brings together AI, code, and connected data.",
+		"category": "AI applications",
+		"status": "current",
+		"logo": "/portfolio/quadratic.png",
+		"logoSource": "https://www.quadratichq.com/apple-icon.png?3f818aa4b7854e48",
+		"valuation": null
+	},
+	{
+		"id": "flutterflow",
+		"name": "FlutterFlow",
+		"website": "https://flutterflow.io",
+		"description": "A visual development platform for building Flutter applications.",
+		"category": "Developer tools",
+		"status": "current",
+		"logo": "/portfolio/flutterflow.png",
+		"logoSource": "https://flutterflow.io/apple-touch-icon.png",
+		"valuation": {
+			"amountUsd": 170000000,
+			"date": "2024-01-11",
+			"sourceUrl": "https://techcrunch.com/2024/01/11/flutterflow-attracts-cash-for-its-low-code-mobile-app-dev-platform/",
+			"sourceTitle": "FlutterFlow raises Series A",
+			"qualifier": "Reported valuation",
+			"prefix": "≈"
+		}
+	},
+	{
+		"id": "circle",
+		"name": "Circle",
+		"website": "https://circle.so",
+		"description": "Community software for creators, courses, events, and memberships.",
+		"category": "Community",
+		"status": "current",
+		"logo": "/portfolio/circle.png",
+		"logoSource": "https://circle.so/apple-icon.png?apple-icon.0d04-7phws2pv.png",
+		"valuation": {
+			"amountUsd": 250000000,
+			"date": "2024-01-15",
+			"sourceUrl": "https://www.thespl.it/p/immigrant-to-250m-ceo-how-circle",
+			"sourceTitle": "The Split: Circle CEO Sid Yadav interview",
+			"qualifier": "Reported valuation",
+			"dateLabel": "2023 · reported Jan 2024"
+		}
+	},
+	{
+		"id": "airbyte",
+		"name": "Airbyte",
+		"website": "https://airbyte.com",
+		"description": "Open-source data integration and connectors for moving and syncing data.",
+		"category": "Data & databases",
+		"status": "current",
+		"logo": "/portfolio/airbyte.png",
+		"logoSource": "https://airbyte.com/apple-touch-icon.png?v=20260618",
+		"valuation": {
+			"amountUsd": 1500000000,
+			"date": "2021-12-20",
+			"sourceUrl": "https://airbyte.com/blog/a-150m-series-b-to-power-the-movement-of-data",
+			"sourceTitle": "Airbyte raises $150M Series B",
+			"qualifier": "Reported valuation"
+		}
+	},
+	{
+		"id": "sphere",
+		"name": "Sphere Semiconductor",
+		"website": null,
+		"description": "Semiconductor company; more details to be announced.",
+		"category": "Semiconductors",
+		"status": "current",
+		"logo": null,
+		"logoSource": null,
+		"valuation": null
+	},
+	{
+		"id": "val-town",
+		"name": "Val Town",
+		"website": "https://val.town",
+		"description": "Write and deploy small TypeScript apps, APIs, and scheduled functions.",
+		"category": "Developer tools",
+		"status": "current",
+		"logo": "/portfolio/val-town.svg",
+		"logoSource": "https://www.val.town/favicon.svg?dot=false",
+		"valuation": null
+	},
+	{
+		"id": "stackblitz",
+		"name": "StackBlitz / Bolt",
+		"website": "https://stackblitz.com",
+		"description": "Browser-based development and AI app building, powered by WebContainers.",
+		"category": "AI coding",
+		"status": "current",
+		"logo": "/portfolio/stackblitz.svg",
+		"logoSource": "https://stackblitz.com/_astro/favicon.svg",
+		"valuation": {
+			"amountUsd": 700000000,
+			"date": "2025-01-23",
+			"sourceUrl": "https://research.contrary.com/company/bolt",
+			"sourceTitle": "Contrary Research: Bolt business breakdown",
+			"qualifier": "Post-money; January 2025 Series B"
+		}
+	},
+	{
+		"id": "preference-model",
+		"name": "Preference Model",
+		"website": "https://preferencemodel.com",
+		"description": "Reinforcement-learning environments for automated ML research.",
+		"category": "AI infrastructure",
+		"status": "current",
+		"logo": "/portfolio/preference-model.ico",
+		"logoSource": "https://preferencemodel.com/favicon.ico?favicon.1d4fa6c9.ico",
+		"valuation": null
+	},
+	{
+		"id": "littlebird",
+		"name": "Littlebird",
+		"website": "https://littlebird.ai",
+		"description": "A personal AI assistant that uses the context of your work.",
+		"category": "AI applications",
+		"status": "current",
+		"logo": "/portfolio/littlebird.png",
+		"logoSource": "https://cdn.prod.website-files.com/694043d273dceabab479f631/6a55a1a906eabfade48dce1e_69603245cff328dc64a18f61_Base%20Icon%20%5BDO%20NOT%20EDIT%5D%206.png",
+		"valuation": null
+	},
+	{
+		"id": "clarify",
+		"name": "Clarify",
+		"website": "https://clarify.ai",
+		"description": "An AI-native CRM that keeps customer relationships and activity up to date.",
+		"category": "AI applications",
+		"status": "current",
+		"logo": "/portfolio/clarify.png",
+		"logoSource": "https://www.clarify.ai/_next/static/media/favicon.0mmn2nasvvrs8.png",
+		"valuation": null
+	},
+	{
+		"id": "phonic",
+		"name": "Phonic",
+		"website": "https://phonic.ai",
+		"description": "Voice AI agents for natural, real-time conversations.",
+		"category": "Voice & video",
+		"status": "current",
+		"logo": "/portfolio/phonic.svg",
+		"logoSource": "https://phonic.ai/icon.svg?icon.0rsnuu632fkn7.svg",
+		"valuation": null
+	},
+	{
+		"id": "keycard",
+		"name": "Keycard",
+		"website": "https://www.keycard.ai",
+		"description": "Identity and access controls for AI agents, users, and tools.",
+		"category": "Security & identity",
+		"status": "current",
+		"logo": "/portfolio/keycard.svg",
+		"logoSource": "https://www.keycard.ai/favicon.svg",
+		"valuation": null
+	},
+	{
+		"id": "confident-security",
+		"name": "Confident Security",
+		"website": "https://confident.security",
+		"description": "Confidential inference infrastructure that protects AI data.",
+		"category": "Security & identity",
+		"status": "current",
+		"logo": "/portfolio/confident-security.svg",
+		"logoSource": "https://confident.security/favicon.svg",
+		"valuation": null
+	},
+	{
+		"id": "lightweight-labs",
+		"name": "Lightweight Labs",
+		"website": "https://instabooks.io",
+		"description": "Accounting software, including Instabooks for QuickBooks Online.",
+		"category": "AI applications",
+		"status": "current",
+		"logo": "/portfolio/lightweight-labs.png",
+		"logoSource": "https://instabooks.io/img/apple-touch-icon.png",
+		"valuation": null
+	},
+	{
+		"id": "wordware",
+		"name": "Wordware",
+		"website": "https://wordware.ai",
+		"description": "The team behind Sauna, an AI assistant built around the context of your work.",
+		"category": "AI applications",
+		"status": "current",
+		"logo": "/portfolio/wordware.png",
+		"logoSource": "https://www.wordware.ai/Wordware%20Favicon.png",
+		"valuation": null
+	},
+	{
+		"id": "polyhive",
+		"name": "Polyhive",
+		"website": null,
+		"description": "Generative AI tools for creating and texturing 3D assets.",
+		"category": "AI applications",
+		"status": "current",
+		"logo": null,
+		"logoSource": null,
+		"valuation": null
+	},
+	{
+		"id": "sailplane",
+		"name": "Sailplane",
+		"website": "https://sailplane.ai",
+		"description": "Research into hierarchical planning for reliable AI agents.",
+		"category": "AI infrastructure",
+		"status": "current",
+		"logo": "/portfolio/sailplane.png",
+		"logoSource": "https://www.sailplane.ai/apple-icon.png?2aa3577447c0af88",
+		"valuation": null
+	},
+	{
+		"id": "morph",
+		"name": "Morph",
+		"website": "https://morph.so",
+		"description": "Cloud sandboxes with instant environment branching for AI agents.",
+		"category": "AI infrastructure",
+		"status": "current",
+		"logo": "/portfolio/morph.png",
+		"logoSource": "https://www.morph.so/logo.png",
+		"valuation": null
+	},
+	{
+		"id": "fireproof",
+		"name": "Fireproof",
+		"website": "https://fireproof.storage",
+		"description": "An embedded, local-first database with realtime synchronization.",
+		"category": "Data & databases",
+		"status": "current",
+		"logo": "/portfolio/fireproof.ico",
+		"logoSource": "https://fireproof.storage/favicon.ico",
+		"valuation": null
+	},
+	{
+		"id": "arcjet",
+		"name": "Arcjet",
+		"website": "https://arcjet.com",
+		"description": "Application security with bot protection, rate limiting, and attack detection.",
+		"category": "Security & identity",
+		"status": "current",
+		"logo": "/portfolio/arcjet.png",
+		"logoSource": "https://arcjet.com/favicon.png",
+		"valuation": null
+	},
+	{
+		"id": "cosine",
+		"name": "Cosine",
+		"website": "https://cosine.sh",
+		"description": "AI software engineering agents for complex coding tasks.",
+		"category": "AI coding",
+		"status": "current",
+		"logo": "/portfolio/cosine.png",
+		"logoSource": "https://cosine.sh/manifest/apple-touch-icon-57x57.png",
+		"valuation": null
+	},
+	{
+		"id": "responsive",
+		"name": "Responsive",
+		"website": "https://responsive.dev",
+		"description": "Open-source, object-store-native databases, including SlateDB and OpenData.",
+		"category": "Data & databases",
+		"status": "current",
+		"logo": "/portfolio/responsive.svg",
+		"logoSource": "https://www.responsive.dev/favicon.svg",
+		"valuation": null
+	},
+	{
+		"id": "budibase",
+		"name": "Budibase",
+		"website": "https://budibase.com",
+		"description": "An open-source platform for building internal apps and automations.",
+		"category": "Developer tools",
+		"status": "current",
+		"logo": "/portfolio/budibase.png",
+		"logoSource": "https://budibase.com/apple-touch-icon.png",
+		"valuation": null
+	},
+	{
+		"id": "100ms",
+		"name": "100ms",
+		"website": "https://100ms.live",
+		"description": "Infrastructure and SDKs for live audio and video experiences.",
+		"category": "Voice & video",
+		"status": "current",
+		"logo": "/portfolio/100ms.png",
+		"logoSource": "https://www.100ms.live/favicons/apple-touch-icon.png",
+		"valuation": null
+	},
+	{
+		"id": "expand",
+		"name": "Expand.ai",
+		"website": "https://expand.ai",
+		"description": "Turn websites into structured data and type-safe APIs.",
+		"category": "Data & databases",
+		"status": "current",
+		"logo": "/portfolio/expand.ico",
+		"logoSource": "https://expand.ai/favicon.ico",
+		"valuation": null
+	},
+	{
+		"id": "catamaran",
+		"name": "Catamaran Research",
+		"website": null,
+		"description": "Derek Zaw’s company; further details are not yet listed.",
+		"category": "Not announced",
+		"status": "current",
+		"logo": null,
+		"logoSource": null,
+		"valuation": null
+	},
+	{
+		"id": "replay",
+		"name": "Replay",
+		"website": "https://replay.io",
+		"description": "Application replay and AI-powered testing that traces bugs to their root cause.",
+		"category": "Developer tools",
+		"status": "current",
+		"logo": "/portfolio/replay.ico",
+		"logoSource": "https://www.replay.io/favicon.ico",
+		"valuation": null,
+		"note": "Still alive!"
+	},
+	{
+		"id": "astral",
+		"name": "Astral",
+		"website": "https://astral.sh",
+		"description": "Fast Python tooling, including Ruff and uv.",
+		"category": "Developer tools",
+		"status": "exited",
+		"logo": "/portfolio/astral.png",
+		"logoSource": "https://astral.sh/static/apple-touch-icon.png",
+		"valuation": null,
+		"acquirer": "OpenAI"
+	},
+	{
+		"id": "promptfoo",
+		"name": "Promptfoo",
+		"website": "https://promptfoo.dev",
+		"description": "Open-source tools for testing, evaluating, and red-teaming AI applications.",
+		"category": "AI infrastructure",
+		"status": "exited",
+		"logo": "/portfolio/promptfoo.ico",
+		"logoSource": "https://www.promptfoo.dev/favicon.ico",
+		"valuation": {
+			"amountUsd": 86000000,
+			"date": "2025-07-29",
+			"sourceUrl": "https://techcrunch.com/2026/03/09/openai-acquires-promptfoo-to-secure-its-ai-agents/",
+			"sourceTitle": "TechCrunch: OpenAI acquires Promptfoo to secure its AI agents",
+			"qualifier": "Post-money · before exit",
+			"prefix": "≈"
+		},
+		"acquirer": "OpenAI"
+	},
+	{
+		"id": "gabber",
+		"name": "Gabber",
+		"website": "https://gabber.dev",
+		"description": "Infrastructure for building real-time voice AI applications.",
+		"category": "Voice & video",
+		"status": "exited",
+		"logo": "/portfolio/gabber.png",
+		"logoSource": "https://gabber.dev/favicon.ico",
+		"valuation": null,
+		"acquirer": "LiveKit"
+	},
+	{
+		"id": "codegen",
+		"name": "Codegen",
+		"website": "https://codegen.com",
+		"description": "AI agents that automate software engineering work.",
+		"category": "AI coding",
+		"status": "exited",
+		"logo": "/portfolio/codegen.webp",
+		"logoSource": "https://codegen.com/wp-content/uploads/2025/07/cropped-Codegen-Favicon-512h-180x180.webp",
+		"valuation": {
+			"amountUsd": 60000000,
+			"date": "2023-11-16",
+			"sourceUrl": "https://techcrunch.com/2023/11/16/codegen-raises-new-capital-llm-automation-for-software-dev/",
+			"sourceTitle": "Codegen raises new cash to automate software engineering tasks",
+			"qualifier": "Post-money · before exit"
+		},
+		"acquirer": "ClickUp"
+	},
+	{
+		"id": "brev",
+		"name": "Brev",
+		"website": "https://brev.nvidia.com",
+		"description": "Cloud GPU development environments for AI and machine learning.",
+		"category": "Infrastructure",
+		"status": "exited",
+		"logo": "/portfolio/brev.ico",
+		"logoSource": "https://brev.nvidia.com/favicon.ico",
+		"valuation": null,
+		"acquirer": "NVIDIA"
+	},
+	{
+		"id": "gel",
+		"name": "Gel",
+		"website": "https://geldata.com",
+		"description": "The database formerly known as EdgeDB, built on Postgres.",
+		"category": "Data & databases",
+		"status": "exited",
+		"logo": "/portfolio/gel.png",
+		"logoSource": "https://www.geldata.com/apple-touch-icon.png",
+		"valuation": null,
+		"acquirer": "Vercel"
+	},
+	{
+		"id": "dynamic",
+		"name": "Dynamic",
+		"website": "https://dynamic.xyz",
+		"description": "Wallet infrastructure and authentication for crypto applications.",
+		"category": "Security & identity",
+		"status": "exited",
+		"logo": "/portfolio/dynamic.jpg",
+		"logoSource": "https://cdn.prod.website-files.com/626692727bba3f384e008e8a/6939931f0bc7313794dc74c8_Webclip.jpg",
+		"valuation": null,
+		"acquirer": "Fireblocks"
+	},
+	{
+		"id": "begin",
+		"name": "Begin",
+		"website": null,
+		"description": "Serverless app development tooling; the team joined Sanity in 2024.",
+		"category": "Developer tools",
+		"status": "closed",
+		"logo": null,
+		"logoSource": null,
+		"valuation": null,
+		"relatedUrl": "https://www.sanity.io/blog/welcoming-the-begin-team-to-sanity"
+	},
+	{
+		"id": "dimension",
+		"name": "Dimension",
+		"website": null,
+		"description": "A collaborative workspace for software development teams.",
+		"category": "Developer tools",
+		"status": "closed",
+		"logo": null,
+		"logoSource": null,
+		"valuation": null
+	}
+]
