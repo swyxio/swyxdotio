@@ -183,11 +183,12 @@
 		)
 	);
 	let isGenerationOpen = $state(false);
+	let generationPresentation = $state('general');
 	let generationRunning = $state(false);
 	let imageToolMinimized = $state(false);
 	let generationHistoryError = $state('');
 	let generationPanel = $state(
-		/** @type {{openGeneration:(options?:{prompt?:string,modelIds?:string[],referenceImages?:import('$lib/draw-generation-history.js').DrawingGenerationReference[],context?:Record<string,unknown>})=>boolean,openHistory:()=>Promise<void>,cancelGeneration:()=>void}|undefined} */ (
+		/** @type {{openGeneration:(options?:{prompt?:string,modelIds?:string[],referenceImages?:import('$lib/draw-generation-history.js').DrawingGenerationReference[],context?:Record<string,unknown>})=>Promise<boolean>,openHistory:()=>Promise<void>,openThumbnails:(options?:{prompt?:string,referenceImages?:import('$lib/draw-generation-history.js').DrawingGenerationReference[],context?:Record<string,unknown>})=>Promise<boolean>,cancelGeneration:()=>void}|undefined} */ (
 			undefined
 		)
 	);
@@ -245,9 +246,9 @@
 	const workspaceActions = $derived([
 		{
 			id: 'sources',
-			label: 'Sources & examples',
-			ariaLabel: 'Open show onboarding, sources and examples',
-			active: creativeOpen
+			label: 'Make thumbnails',
+			ariaLabel: 'Make thumbnails',
+			active: isGenerationOpen && !imageToolMinimized && generationPresentation === 'thumbnail'
 		},
 		{
 			id: 'templates',
@@ -266,7 +267,7 @@
 			label: 'Generate',
 			busyLabel: 'Generating…',
 			ariaLabel: 'Open image and video generation',
-			active: isGenerationOpen && !imageToolMinimized,
+			active: isGenerationOpen && !imageToolMinimized && generationPresentation === 'general',
 			busy: generationRunning
 		},
 		{
@@ -279,6 +280,10 @@
 		},
 		{ id: 'export', label: 'Export', ariaLabel: 'Open drawing export options' }
 	]);
+	const navigationMenuOpen = $derived(isPageMenuOpen || workspaceMenuOpen);
+	const thumbnailNavigationCovered = $derived(
+		navigationMenuOpen && generationPresentation === 'thumbnail'
+	);
 	const mediaSurfaceCovered = $derived(
 		isLibraryOpen || creativeOpen || (assistantOpen && !assistantMinimized)
 	);
@@ -350,7 +355,7 @@
 		if (action === 'templates') openWorkspaceSection(workspaceSection);
 		if (action === 'assistant') drawingAssistant?.showAssistant();
 		if (action === 'assets') void openCreativeWorkspace('assets');
-		if (action === 'sources') void openCreativeWorkspace('start');
+		if (action === 'sources') void openThumbnailComposer();
 		if (action === 'generate') void openGenerationComposer();
 		if (action === 'export') void openCreativeWorkspace('export');
 	}
@@ -366,10 +371,8 @@
 	async function openCreativeGeneration(
 		/** @type {{ prompt: string, referenceAssetIds: string[], context: Record<string, unknown> }} */ request
 	) {
-		if (request.referenceAssetIds.length > 1)
-			throw new Error(
-				'Generate currently accepts one reference image. Choose one reference in your brief, then save a new composition. Nothing was uploaded to a model.'
-			);
+		if (request.referenceAssetIds.length > 15)
+			throw new Error('Choose at most 15 source references. Nothing was uploaded to a model.');
 		if (generationRunning)
 			throw new Error(
 				'Finish or cancel the current generation batch before opening this composition.'
@@ -382,11 +385,17 @@
 		if (request.referenceAssetIds.length) {
 			if (!userId || accountChanged)
 				throw new Error('Sign in again to use your private reference.');
-			const assetId = request.referenceAssetIds[0];
-			const blob = await new CreativeClient(userId, signal).asset(assetId);
-			if (!/^image\/(png|jpeg|webp|avif|gif)$/.test(blob.type))
-				throw new Error('Choose a PNG, JPEG, WebP, AVIF or GIF reference for Generate.');
-			references.push({ dataURL: await readBlobDataUrl(blob), mimeType: blob.type, assetId });
+			for (const assetId of request.referenceAssetIds) {
+				const blob = await new CreativeClient(userId, signal).asset(assetId);
+				if (!/^image\/(png|jpeg|webp|avif|gif)$/.test(blob.type))
+					throw new Error('Choose a PNG, JPEG, WebP, AVIF or GIF reference for Generate.');
+				references.push({
+					dataURL: await readBlobDataUrl(blob),
+					mimeType: blob.type,
+					assetId,
+					role: 'inspiration'
+				});
+			}
 		}
 		if (signal.aborted || accountChanged || toolsUser?.id !== userId || activePageId !== pageId)
 			throw new Error('The account or page changed. Open the composition again.');
@@ -470,10 +479,7 @@
 		const history = [generation, ...imageGenerations.filter((entry) => entry.id !== generation.id)];
 		const originals = history.filter((image) => image.modelLabel === 'Original');
 		const generated = history.filter((image) => image.modelLabel !== 'Original');
-		imageGenerations = [
-			...generated.slice(0, Math.max(1, 32 - originals.length)),
-			...originals
-		].slice(0, 32);
+		imageGenerations = [...generated, ...originals];
 		void saveDrawingGenerationHistory(
 			`${STORAGE_KEY}:${activePageId}`,
 			$state.snapshot(imageGenerations)
@@ -496,7 +502,7 @@
 				imageGenerations = [
 					...pending,
 					...history.filter((generation) => !pendingIds.has(generation.id))
-				].slice(0, 32);
+				];
 			})
 			.catch((error) => {
 				generationHistoryError = 'Generation history could not be loaded from this device.';
@@ -514,7 +520,19 @@
 	/** @param {Parameters<NonNullable<typeof generationPanel>['openGeneration']>[0]} [options] */
 	async function openGenerationComposer(options) {
 		await tick();
-		if (generationPanel?.openGeneration(options) === false) return;
+		if ((await generationPanel?.openGeneration(options)) === false) return;
+		prepareWorkspaceSurface('generate');
+		isGenerationOpen = true;
+		imageToolMinimized = false;
+	}
+
+	async function openThumbnailComposer() {
+		await tick();
+		const opened = await generationPanel?.openThumbnails();
+		if (opened === false) return;
+		// The navigation can render before the dynamically loaded toolbox. Bind its requested presentation.
+		generationPresentation = 'thumbnail';
+		imageToolAction = 'generate';
 		prepareWorkspaceSurface('generate');
 		isGenerationOpen = true;
 		imageToolMinimized = false;
@@ -601,10 +619,10 @@
 			{
 				id: 'action-compose-thumbnail',
 				label: 'Create a thumbnail',
-				description: 'Start a show brief with source metadata, curated examples and editable layouts',
+				description: 'Attach inspiration, add context and generate four thumbnails',
 				category: 'Actions',
 				keywords: ['thumbnail', 'aie', 'latent space', 'compose'],
-				run: () => openCreativeWorkspace('start')
+				run: () => openThumbnailComposer()
 			},
 			{
 				id: 'action-generation-history',
@@ -2515,8 +2533,12 @@
 {#if editor && updateElement && captureImmediately}
 	<section
 		class="image-tools"
+		class:thumbnail-workspace={generationPresentation === 'thumbnail' &&
+			imageToolAction === 'generate' &&
+			!imageToolMinimized}
 		style:--draw-background-inset={`${backgroundInset}px`}
 		hidden={mediaSurfaceCovered ||
+			thumbnailNavigationCovered ||
 			(!isGenerationOpen && !activeImageToolId && !isRemovingBackground && !generationRunning)}
 		aria-label="Selected image tools"
 		style:left={imageToolsPosition ? `${imageToolsPosition.x}px` : undefined}
@@ -2533,6 +2555,7 @@
 	>
 		<DrawImageToolbox
 			bind:this={generationPanel}
+			bind:presentation={generationPresentation}
 			storageKey={STORAGE_KEY}
 			pageKey={`${STORAGE_KEY}:${activePageId}`}
 			historyError={generationHistoryError}
@@ -3320,6 +3343,26 @@
 		overflow-y: auto;
 	}
 
+	.image-tools.thumbnail-workspace {
+		top: 132px !important;
+		bottom: 18px !important;
+		left: 50% !important;
+		right: auto !important;
+		transform: translateX(-50%) !important;
+		width: min(1120px, calc(100vw - 24px));
+		max-height: calc(100dvh - 150px) !important;
+		padding: 20px;
+		z-index: 1003;
+	}
+	@media (max-width: 650px) {
+		.image-tools.thumbnail-workspace {
+			top: 122px !important;
+			bottom: 8px !important;
+			width: calc(100vw - 12px);
+			padding: 12px;
+			max-height: calc(100dvh - 130px) !important;
+		}
+	}
 	.artboard-toolbar {
 		position: fixed;
 		left: 50%;

@@ -1,6 +1,20 @@
 <script>
 	import { blurDrawingInput, canAutofocusDrawingInput } from '$lib/draw-focus.js';
-	import { tick } from 'svelte';
+	import { tick, onDestroy } from 'svelte';
+	import DrawThumbnailComposer from '$lib/DrawThumbnailComposer.svelte';
+	import DrawThumbnailLibrary from '$lib/DrawThumbnailLibrary.svelte';
+	import {
+		createThumbnailRecipes,
+		restoreThumbnailRecipe,
+		getThumbnailModelSettings,
+		DEFAULT_THUMBNAIL_MODEL_ID
+	} from '$lib/draw-thumbnail-workflow.js';
+	import {
+		loadDrawingGenerationDraft,
+		saveDrawingGenerationDraft
+	} from '$lib/draw-generation-history.js';
+	import { exportThumbnailImage } from '$lib/draw-thumbnail-export.js';
+	import { downloadCreativeBlob } from '$lib/draw-creative-client';
 	import ToolsAiNotice from '$lib/ToolsAiNotice.svelte';
 	import { recordToolActivity } from '$lib/tools-activity-client.js';
 	import { DRAW_IMAGE_TOOLS, processImageTool } from '$lib/draw-image-tools.js';
@@ -13,6 +27,7 @@
 	import { optimizeDrawingImageForCloud, replaceDrawingImage } from '$lib/draw-image-scene.js';
 	import {
 		DEFAULT_DRAW_GENERATION_MODEL,
+		MAX_DRAW_GENERATION_PROMPT_LENGTH,
 		DEFAULT_DRAW_TEXT_TO_IMAGE_MODEL,
 		DRAW_GENERATION_MODELS,
 		estimateDrawGenerationModelCost,
@@ -33,6 +48,7 @@
 	 *  pageKey: string,
 	 *  historyError?: string,
 	 *  minimized?: boolean,
+	 *  presentation?: string,
 	 *  onInsert: (generations: ImageGeneration[], board?: boolean) => Promise<void>,
 	 *  imageId?: string,
 	 *  imageDataUrl?: string,
@@ -61,6 +77,7 @@
 		pageKey,
 		historyError = '',
 		minimized: toolboxMinimized = $bindable(false),
+		presentation = $bindable('general'),
 		onInsert,
 		imageId = '',
 		imageDataUrl = '',
@@ -167,6 +184,195 @@
 		{ weights: 'closed', label: 'Closed models' }
 	]);
 
+	/** @typedef {import('$lib/draw-generation-history.js').DrawingGenerationReference} GenerationReference */
+	let thumbnailContext = $state('');
+	let thumbnailFeedback = $state('');
+	let thumbnailReferences = $state(/** @type {GenerationReference[]} */ ([]));
+	let thumbnailModelId = $state(/** @type {string} */ (DEFAULT_THUMBNAIL_MODEL_ID));
+	let thumbnailRunLimit = $state(5);
+	let thumbnailParentId = $state('');
+	let thumbnailReplayParent = $state(/** @type {ImageGeneration|null} */ (null));
+	let thumbnailModelSettings = $state(/** @type {Record<string,unknown>} */ ({}));
+	let thumbnailRecipeContext = $state(/** @type {Record<string,unknown>} */ ({}));
+	let thumbnailDraftReady = $state('');
+	let thumbnailDraftError = $state('');
+	let thumbnailLibraryOpen = $state(false);
+	let thumbnailLibraryRoot = $state(/** @type {HTMLDivElement|undefined} */ (undefined));
+	/** @type {HTMLElement|null} */ let thumbnailLibraryTrigger = null;
+	async function showThumbnailLibrary(/** @type {ImageGeneration|null} */ generation = null) {
+		thumbnailLibraryTrigger =
+			document.activeElement instanceof HTMLElement ? document.activeElement : null;
+		thumbnailSaveResult = generation;
+		thumbnailLibraryOpen = true;
+		await tick();
+		thumbnailLibraryRoot?.scrollIntoView({ block: 'start' });
+	}
+	async function closeThumbnailLibrary() {
+		thumbnailLibraryOpen = false;
+		thumbnailSaveResult = null;
+		await tick();
+		thumbnailLibraryTrigger?.focus();
+	}
+	let thumbnailSaveResult = $state(/** @type {ImageGeneration|null} */ (null));
+	let thumbnailHydration = Promise.resolve();
+	const thumbnailResults = $derived(
+		generations.filter((item) => item.context?.thumbnail && item.mimeType.startsWith('image/'))
+	);
+	const thumbnailParent = $derived(
+		generations.find((item) => item.id === thumbnailParentId) ?? thumbnailReplayParent
+	);
+	const thumbnailParentReady = $derived(!thumbnailParentId || !!thumbnailParent);
+	const thumbnailEstimate = $derived.by(() => {
+		try {
+			const model = DRAW_GENERATION_MODELS.find((item) => item.id === thumbnailModelId);
+			return model
+				? 4 *
+						estimateToolsMediaReservation(
+							estimateDrawGenerationModelCost(
+								model,
+								getThumbnailModelSettings(model, thumbnailModelSettings)
+							)
+						)
+				: 0;
+		} catch {
+			return 0;
+		}
+	});
+	$effect(() => {
+		const key = pageKey;
+		thumbnailDraftReady = '';
+		thumbnailContext = '';
+		thumbnailFeedback = '';
+		thumbnailReferences = [];
+		thumbnailParentId = '';
+		thumbnailReplayParent = null;
+		thumbnailModelSettings = {};
+		thumbnailRecipeContext = {};
+		thumbnailModelId = DEFAULT_THUMBNAIL_MODEL_ID;
+		thumbnailLibraryOpen = false;
+		thumbnailSaveResult = null;
+		thumbnailDraftError = '';
+		let cancelled = false;
+		generationAbort?.abort();
+		thumbnailHydration = loadDrawingGenerationDraft(key)
+			.then((draft) => {
+				if (cancelled) return;
+				if (draft?.thumbnail) {
+					const value = draft.thumbnail;
+					thumbnailContext = typeof value.contextText === 'string' ? value.contextText : '';
+					thumbnailFeedback = typeof value.feedbackText === 'string' ? value.feedbackText : '';
+					thumbnailReferences = Array.isArray(value.references) ? value.references : [];
+					thumbnailParentId = typeof value.parentId === 'string' ? value.parentId : '';
+					thumbnailReplayParent = value.replayParent ?? null;
+					thumbnailModelSettings = value.modelSettings ?? {};
+					thumbnailRecipeContext = value.context ?? {};
+					thumbnailModelId =
+						typeof value.modelId === 'string' ? value.modelId : DEFAULT_THUMBNAIL_MODEL_ID;
+				}
+			})
+			.catch(() => {
+				if (!cancelled)
+					thumbnailDraftError =
+						'The saved draft could not be loaded. Your previous device data has not been overwritten.';
+			})
+			.finally(() => {
+				if (!cancelled && !thumbnailDraftError) thumbnailDraftReady = key;
+			});
+		return () => {
+			cancelled = true;
+		};
+	});
+	$effect(() => {
+		const key = pageKey;
+		if (thumbnailDraftReady !== key) return;
+		const draft = {
+			thumbnail: {
+				contextText: thumbnailContext,
+				feedbackText: thumbnailFeedback,
+				references: $state.snapshot(thumbnailReferences),
+				parentId: thumbnailParentId,
+				replayParent: $state.snapshot(thumbnailReplayParent),
+				modelSettings: $state.snapshot(thumbnailModelSettings),
+				context: $state.snapshot(thumbnailRecipeContext),
+				modelId: thumbnailModelId
+			}
+		};
+		void saveDrawingGenerationDraft(key, draft).catch(() => {
+			if (pageKey === key)
+				thumbnailDraftError =
+					'Draft not saved to this device. Keep this tab open or download results before leaving.';
+		});
+	});
+	onDestroy(() => generationAbort?.abort());
+
+	/** One shared generation controller; entering this presentation never submits work.
+	 * @param {{prompt?:string,referenceImages?:GenerationReference[],context?:Record<string,unknown>}} [options]
+	 */
+	export async function openThumbnails(options) {
+		const openingPage = pageKey;
+		await thumbnailHydration;
+		if (options && openingPage !== pageKey) return false;
+		if (options && processingGeneration) {
+			operationError = 'Finish or cancel this batch before opening another recipe.';
+			return false;
+		}
+		const hasThumbnailDraft = thumbnailContext.trim() || thumbnailReferences.length;
+		if (
+			options &&
+			hasThumbnailDraft &&
+			!confirm('Replace the current thumbnail draft? Earlier results stay unchanged.')
+		)
+			return false;
+		if (options) {
+			thumbnailContext = options.prompt ?? '';
+			thumbnailReferences = structuredClone(options.referenceImages ?? []).map((item) => ({
+				...item,
+				role: item.role ?? 'inspiration'
+			}));
+			thumbnailFeedback = '';
+			thumbnailParentId = '';
+			thumbnailReplayParent = null;
+			thumbnailModelSettings = {};
+			thumbnailRecipeContext = structuredClone(options.context ?? {});
+			thumbnailModelId = DEFAULT_THUMBNAIL_MODEL_ID;
+		}
+		presentation = 'thumbnail';
+		action = 'generate';
+		toolboxMinimized = false;
+		return true;
+	}
+	function selectThumbnail(/** @type {ImageGeneration|null} */ generation) {
+		if (processingGeneration) return;
+		if (generation) {
+			if (
+				thumbnailFeedback.trim() &&
+				!confirm('Change the selected thumbnail and clear unsent feedback?')
+			)
+				return;
+			const metadata = /** @type {Record<string,any>} */ (generation.context?.thumbnail ?? {});
+			thumbnailContext = metadata.sourceContext ?? thumbnailContext;
+			thumbnailReferences = structuredClone(
+				$state.snapshot(generation.referenceImages ?? [])
+			).filter((item) => item.role !== 'parent');
+			thumbnailModelId = generation.modelId ?? DEFAULT_THUMBNAIL_MODEL_ID;
+			thumbnailModelSettings = structuredClone($state.snapshot(generation.modelSettings ?? {}));
+			thumbnailRecipeContext = structuredClone($state.snapshot(generation.context ?? {}));
+		}
+		thumbnailParentId = generation?.id ?? '';
+		thumbnailReplayParent = null;
+		thumbnailFeedback = '';
+	}
+	async function downloadThumbnail(/** @type {ImageGeneration} */ generation) {
+		try {
+			downloadCreativeBlob(
+				/** @type {Blob} */ (await exportThumbnailImage(generation.dataURL)),
+				`thumbnail-${generation.id}.jpg`
+			);
+		} catch (error) {
+			operationError = error instanceof Error ? error.message : 'Download failed.';
+		}
+	}
+
 	let imagePreview = $state('');
 	let previewGenerationId = $state('');
 	let attachedReference = $state(
@@ -215,12 +421,12 @@
 	/** Shared launcher. Options are only applied by an explicit starter/remix action.
 	 * @param {{prompt?:string,modelIds?:string[],referenceImages?:import('$lib/draw-generation-history.js').DrawingGenerationReference[],context?:Record<string,unknown>}} [options]
 	 */
-	export function openGeneration(options) {
-		if (options && (options.referenceImages?.length ?? 0) > 1) {
-			operationError =
-				'This composer currently accepts one reference image. Choose one before opening the recipe.';
-			return false;
+	export async function openGeneration(options) {
+		const referenceCount = options?.referenceImages?.length ?? 0;
+		if (options && referenceCount > 1) {
+			return openThumbnails(options);
 		}
+		presentation = 'general';
 		if (options && processingGeneration) {
 			operationError = 'Finish or cancel this batch before opening a different recipe.';
 			return false;
@@ -269,6 +475,7 @@
 
 	/** Open the existing history view without submitting or changing a recipe. */
 	export async function openHistory() {
+		presentation = 'general';
 		action = 'generate';
 		toolboxMinimized = false;
 		await tick();
@@ -820,45 +1027,60 @@
 		}
 	}
 
-	/** @param {boolean} [retryFailed] */
-	async function applyGeneration(retryFailed = false) {
+	/** @param {boolean} [retryFailed] @param {boolean} [thumbnail] */
+	async function applyGeneration(retryFailed = false, thumbnail = false) {
 		if (processing || processingGeneration || !authenticated) return;
 		operationError = '';
 		try {
 			const retry = retryFailed && lastRun ? $state.snapshot(lastRun) : undefined;
-			if (!retry && (!prompt.trim() || !selectedModels.length)) return;
+			const invalidGeneralDraft = !prompt.trim() || !selectedModels.length;
+			if (!retry && !thumbnail && invalidGeneralDraft) return;
 			const source =
-				!retry && activeReference ? structuredClone($state.snapshot(activeReference)) : null;
+				!retry && !thumbnail && activeReference
+					? structuredClone($state.snapshot(activeReference))
+					: null;
 			const sourceGeneration = source
 				? generations.find((entry) => entry.dataURL === source.dataURL)
 				: undefined;
 			const originalId = sourceGeneration?.id ?? (source ? crypto.randomUUID() : undefined);
 			const recipes = retry
 				? retry.jobs.filter((job) => job.status === 'failed').map((job) => job.recipe)
-				: selectedModels.map((model) => ({
-						id: crypto.randomUUID(),
-						prompt: prompt.trim(),
-						modelId: model.id,
-						adapterId: model.adapter,
-						modelSettings: getDrawGenerationModelOverrides(
-							model,
-							generationParameters[model.kind] ?? {}
-						),
-						referenceImages:
-							model.kind === 'text-to-image'
-								? []
-								: source
-									? [{ ...source, generationId: originalId }]
-									: [],
-						context: generationContext ? $state.snapshot(generationContext) : undefined,
-						parentGenerationId:
-							remixParentId ?? (model.kind !== 'text-to-image' ? originalId : undefined)
-					}));
+				: thumbnail
+					? createThumbnailRecipes({
+							contextText: thumbnailContext,
+							feedbackText: thumbnailFeedback,
+							references: $state.snapshot(thumbnailReferences),
+							parentGeneration: thumbnailParent ? $state.snapshot(thumbnailParent) : undefined,
+							modelId: thumbnailModelId,
+							modelSettings: $state.snapshot(thumbnailModelSettings),
+							context: $state.snapshot(thumbnailRecipeContext)
+						})
+					: selectedModels.map((model) => ({
+							id: crypto.randomUUID(),
+							prompt: prompt.trim(),
+							modelId: model.id,
+							adapterId: model.adapter,
+							modelSettings: getDrawGenerationModelOverrides(
+								model,
+								generationParameters[model.kind] ?? {}
+							),
+							referenceImages:
+								model.kind === 'text-to-image'
+									? []
+									: source
+										? [{ ...source, generationId: originalId }]
+										: [],
+							context: generationContext ? $state.snapshot(generationContext) : undefined,
+							parentGenerationId:
+								remixParentId ?? (model.kind !== 'text-to-image' ? originalId : undefined)
+						}));
 			if (!recipes.length) return;
 			const run = createDrawingGenerationRun({
 				pageKey,
 				recipes,
-				limitUsd: isOwner ? null : (retry?.limitUsd ?? Number(runLimitUsd)),
+				limitUsd: isOwner
+					? null
+					: (retry?.limitUsd ?? Number(thumbnail ? thumbnailRunLimit : runLimitUsd)),
 				id: retry?.id
 			});
 			const estimate = recipes.reduce((total, recipe) => {
@@ -883,6 +1105,7 @@
 				return;
 			const replacement =
 				!retry &&
+				!thumbnail &&
 				destination === 'replace' &&
 				useCanvasReference &&
 				!attachedReference &&
@@ -1004,20 +1227,52 @@
 	}
 
 	/** Remix snapshots the recipe, never runs or changes the canvas. @param {ImageGeneration} generation */
-	function restoreGenerationRecipe(generation) {
+	async function restoreGenerationRecipe(generation) {
 		if (processingGeneration) return;
-		restoreGenerationSettings(generation);
-		attachedReference = generation.referenceImages?.[0]
-			? structuredClone($state.snapshot(generation.referenceImages[0]))
-			: null;
-		useCanvasReference = false;
-		destination = 'preview';
-		remixParentId = generation.id;
-		generationContext = generation.context
-			? structuredClone($state.snapshot(generation.context))
-			: undefined;
-		action = 'generate';
-		operationStatus = 'Recipe restored — edit it, then generate when ready';
+		try {
+			if (generation.context?.thumbnail && generation.dataURL) {
+				selectThumbnail(generation);
+				void openThumbnails();
+				return;
+			}
+			if (generation.context?.thumbnail) {
+				const draft = restoreThumbnailRecipe(generation);
+				if (
+					!(await openThumbnails({ prompt: draft.contextText, referenceImages: draft.references }))
+				)
+					return;
+				thumbnailFeedback = draft.feedbackText ?? '';
+				thumbnailModelId = draft.modelId ?? DEFAULT_THUMBNAIL_MODEL_ID;
+				thumbnailModelSettings = draft.modelSettings ?? {};
+				thumbnailRecipeContext = draft.context ?? {};
+				thumbnailReplayParent = draft.parentGeneration ?? null;
+				thumbnailParentId = draft.parentGeneration?.id ?? '';
+				return;
+			}
+			const referenceCount = generation.referenceImages?.length ?? 0;
+			if (referenceCount > 1) {
+				void openThumbnails({
+					prompt: generation.prompt,
+					referenceImages: generation.referenceImages,
+					context: generation.context
+				});
+				return;
+			}
+			restoreGenerationSettings(generation);
+			attachedReference = generation.referenceImages?.[0]
+				? structuredClone($state.snapshot(generation.referenceImages[0]))
+				: null;
+			useCanvasReference = false;
+			destination = 'preview';
+			remixParentId = generation.id;
+			generationContext = generation.context
+				? structuredClone($state.snapshot(generation.context))
+				: undefined;
+			action = 'generate';
+			operationStatus = 'Recipe restored — edit it, then generate when ready';
+		} catch (error) {
+			operationError = error instanceof Error ? error.message : 'Could not restore the recipe.';
+		}
 	}
 
 	/** @param {ImageGeneration[]} images @param {boolean} [board] */
@@ -1073,879 +1328,963 @@
 	aria-label="AI image toolbox"
 	bind:this={toolboxRoot}
 >
-	<div class="toolbox-heading">
+	{#if presentation === 'thumbnail' && action === 'generate' && !toolboxMinimized}
+		{#key pageKey}
+			<DrawThumbnailComposer
+				contextText={thumbnailContext}
+				feedbackText={thumbnailFeedback}
+				references={thumbnailReferences}
+				parentGeneration={thumbnailParent}
+				results={thumbnailResults}
+				run={lastRun?.pageKey === pageKey ? { ...lastRun, jobs: generationJobs } : null}
+				busy={processingGeneration || processing || thumbnailDraftReady !== pageKey}
+				error={operationError || thumbnailDraftError || historyError}
+				modelId={thumbnailModelId}
+				models={DRAW_GENERATION_MODELS.filter((model) => model.kind !== 'image-to-video')}
+				limitUsd={isOwner ? null : Number(thumbnailRunLimit)}
+				estimatedUsd={thumbnailEstimate}
+				{authenticated}
+				{isOwner}
+				canGenerate={authenticated && thumbnailDraftReady === pageKey && thumbnailParentReady}
+				onContext={(text) => {
+					thumbnailContext = text;
+				}}
+				onFeedback={(text) => {
+					thumbnailFeedback = text;
+				}}
+				onReferences={(refs) => {
+					thumbnailReferences = refs;
+				}}
+				onModel={(id) => {
+					thumbnailModelId = id;
+					thumbnailModelSettings = {};
+				}}
+				onLimit={(value) => {
+					if (value !== null) thumbnailRunLimit = value;
+				}}
+				onGenerate={() => void applyGeneration(false, true)}
+				onSelectResult={selectThumbnail}
+				onDownload={(generation) => void downloadThumbnail(generation)}
+				onInsert={(generation) => void addGenerations([generation])}
+				onSaveStyle={(generation) => void showThumbnailLibrary(generation)}
+				onBrowseLibrary={() =>
+					void (thumbnailLibraryOpen ? closeThumbnailLibrary() : showThumbnailLibrary())}
+				onClose={() => {
+					toolboxMinimized = true;
+				}}
+				onCancel={cancelGeneration}
+				onRetry={() => void applyGeneration(true, true)}
+			/>
+			{#if thumbnailLibraryOpen}<div bind:this={thumbnailLibraryRoot}>
+					<DrawThumbnailLibrary
+						{userId}
+						{pageKey}
+						busy={processingGeneration}
+						saveResult={thumbnailSaveResult}
+						onReference={(reference) => {
+							if (thumbnailReferences.length >= 15)
+								throw new Error(
+									'Keep at most 15 source images; the selected parent needs one slot.'
+								);
+							thumbnailReferences = [...thumbnailReferences, reference];
+						}}
+						onStyle={(text, refs) => {
+							if (thumbnailReferences.length + refs.length > 15)
+								throw new Error(
+									'This style exceeds 15 source references. Remove images before attaching it.'
+								);
+							thumbnailContext = [thumbnailContext, text].filter(Boolean).join('\n');
+							thumbnailReferences = [...thumbnailReferences, ...refs];
+						}}
+						onClose={() => void closeThumbnailLibrary()}
+					/>
+				</div>{/if}
+		{/key}
 		<button
-			type="button"
-			class="drag-handle"
-			aria-label="Move image tools"
-			onpointerdown={(event) => onDragStart?.(event)}
-		>
-			<strong>{imageId ? 'Image tools' : 'Generate'}</strong>
-			<span>
-				{action === 'generate'
-					? isOwner
-						? 'Image and video generation'
-						: uploadsSelectedImage
-							? `Uploads the reference to ${[...new Set(selectedModels.map((model) => model.transportLabel))].join(', ')}`
-							: 'Prompt only · no image upload'
-					: action
-						? 'Runs privately on your device'
-						: 'Choose a tool'}
-			</span>
-		</button>
-		<button
-			type="button"
-			class="toolbox-minimize"
-			aria-label={toolboxMinimized ? 'Expand image tools' : 'Minimize image tools'}
-			aria-expanded={!toolboxMinimized}
+			class="secondary-action"
 			onclick={() => {
-				toolboxMinimized = !toolboxMinimized;
-				if (toolboxMinimized) setModelPickerOpen(false);
-			}}
+				presentation = 'general';
+			}}>All image and video tools</button
 		>
-			{toolboxMinimized ? '+' : '−'}
-		</button>
-	</div>
+	{:else}
+		<div class="toolbox-heading">
+			<button
+				type="button"
+				class="drag-handle"
+				aria-label="Move image tools"
+				onpointerdown={(event) => onDragStart?.(event)}
+			>
+				<strong>{imageId ? 'Image tools' : 'Generate'}</strong>
+				<span>
+					{action === 'generate'
+						? isOwner
+							? 'Image and video generation'
+							: uploadsSelectedImage
+								? `Uploads the reference to ${[...new Set(selectedModels.map((model) => model.transportLabel))].join(', ')}`
+								: 'Prompt only · no image upload'
+						: action
+							? 'Runs privately on your device'
+							: 'Choose a tool'}
+				</span>
+			</button>
+			<button
+				type="button"
+				class="toolbox-minimize"
+				aria-label={toolboxMinimized ? 'Expand image tools' : 'Minimize image tools'}
+				aria-expanded={!toolboxMinimized}
+				onclick={() => {
+					toolboxMinimized = !toolboxMinimized;
+					if (toolboxMinimized) setModelPickerOpen(false);
+				}}
+			>
+				{toolboxMinimized ? '+' : '−'}
+			</button>
+		</div>
 
-	<div class="tool-grid" aria-label="Image editing tools">
-		<button
-			type="button"
-			class="tool-choice"
-			class:active={action === 'background'}
-			aria-pressed={action === 'background'}
-			disabled={processing || !imageId}
-			onclick={() => {
-				action = 'background';
-				operationError = '';
-			}}
-		>
-			Background
-		</button>
-		{#each Object.values(DRAW_IMAGE_TOOLS) as tool (tool.id)}
+		<div class="tool-grid" aria-label="Image editing tools">
 			<button
 				type="button"
 				class="tool-choice"
-				class:active={action === tool.id}
-				aria-pressed={action === tool.id}
-				disabled={processing || backgroundProcessing || !imageId}
+				class:active={action === 'background'}
+				aria-pressed={action === 'background'}
+				disabled={processing || !imageId}
 				onclick={() => {
-					action = /** @type {ImageAction} */ (tool.id);
+					action = 'background';
 					operationError = '';
 				}}
 			>
-				{tool.label}
+				Background
 			</button>
-		{/each}
-		<button
-			type="button"
-			class="tool-choice cloud-tool"
-			class:active={action === 'generate'}
-			aria-pressed={action === 'generate'}
-			disabled={processing || backgroundProcessing}
-			onclick={() => {
-				action = 'generate';
-				if (imageId && !attachedReference && !prompt.trim()) {
-					useCanvasReference = true;
-					destination = 'replace';
-				}
-				operationError = '';
-			}}
-		>
-			AI prompt
-		</button>
-	</div>
-
-	{#if action === 'background'}
-		<div class="active-tool-panel">
-			{@render backgroundControls?.()}
-		</div>
-	{:else if selectedTool}
-		<div class="active-tool-panel">
-			{#if needsTarget && imagePreview}
+			{#each Object.values(DRAW_IMAGE_TOOLS) as tool (tool.id)}
 				<button
 					type="button"
-					class="image-target"
-					aria-label={action === 'magic-eraser'
-						? 'Choose the area to erase'
-						: 'Choose the subject to select'}
-					disabled={processing || processingGeneration}
-					onclick={chooseTarget}
+					class="tool-choice"
+					class:active={action === tool.id}
+					aria-pressed={action === tool.id}
+					disabled={processing || backgroundProcessing || !imageId}
+					onclick={() => {
+						action = /** @type {ImageAction} */ (tool.id);
+						operationError = '';
+					}}
 				>
-					<img src={imagePreview} alt="Selected canvas artwork" />
-					<span
-						class="target-marker"
-						style="left: {targetMarkerX * 100}%; top: {targetMarkerY * 100}%"
-					></span>
+					{tool.label}
 				</button>
-				<p class="tool-hint">
-					{action === 'magic-eraser'
-						? 'Click the image to choose what to erase.'
-						: 'Click the subject you want to isolate.'}
-				</p>
-			{/if}
-
-			{#if action === 'magic-eraser'}
-				<label class="tool-slider">
-					<span>Eraser size</span>
-					<input
-						type="range"
-						min="0.03"
-						max="0.3"
-						step="0.01"
-						bind:value={eraserRadius}
-						disabled={processing || processingGeneration}
-					/>
-				</label>
-			{:else if action === 'depth-blur'}
-				<label class="tool-slider">
-					<span>Blur strength</span>
-					<input
-						type="range"
-						min="2"
-						max="30"
-						step="1"
-						bind:value={blurStrength}
-						disabled={processing || processingGeneration}
-					/>
-				</label>
-				<label class="tool-slider">
-					<span>Focus depth</span>
-					<input
-						type="range"
-						min="0"
-						max="1"
-						step="0.05"
-						bind:value={focusDepth}
-						disabled={processing || processingGeneration}
-					/>
-				</label>
-			{/if}
-
-			<div class="local-action-row">
-				<span class="download-size">
-					{downloadSize ? `First use downloads ${downloadSize}.` : 'No model download required.'}
-				</span>
-				{#if processing}
-					<button type="button" class="secondary-action" onclick={() => operationAbort?.abort()}>
-						Cancel
-					</button>
-				{:else}
-					<button
-						type="button"
-						class="primary-action"
-						aria-label="Apply {selectedTool?.label ?? 'image tool'}"
-						disabled={processingGeneration}
-						onclick={() => void applyLocalImageTool()}
-					>
-						Apply
-					</button>
-				{/if}
-			</div>
-		</div>
-	{:else if action === 'generate'}
-		<div class="fal-edit active-tool-panel">
-			<textarea
-				aria-label="AI image editing prompt"
-				onpaste={pasteReference}
-				placeholder={selectedWorkflowKind === 'image-to-video'
-					? 'Describe the motion, camera movement, and sound…'
-					: selectedWorkflowKind === 'text-to-image'
-						? 'Describe the image you want to create…'
-						: 'Describe how you want to edit this image…'}
-				rows="3"
-				maxlength="1000"
-				bind:value={prompt}
-				disabled={processing || processingGeneration}
-				onkeydown={(event) => {
-					if (event.key !== 'Enter' || (!event.metaKey && !event.ctrlKey) || event.isComposing) {
-						return;
-					}
-					event.preventDefault();
-					void applyGeneration();
-				}}
-			></textarea>
-			<div
-				class="prompt-presets"
-				aria-label={selectedWorkflowKind === 'image-to-video'
-					? 'Editable video prompt presets'
-					: selectedWorkflowKind === 'text-to-image'
-						? 'Editable image generation prompt presets'
-						: 'Editable image prompt presets'}
-			>
-				{#each activePromptPresets as preset (preset.label)}
-					<button
-						type="button"
-						disabled={processing || processingGeneration}
-						onclick={() => (prompt = preset.prompt)}
-					>
-						{preset.label}
-					</button>
-				{/each}
-			</div>
-			<div class="generation-reference">
-				<div class="reference-actions">
-					<label class="attach-reference"
-						>Attach reference<input
-							type="file"
-							accept="image/png,image/jpeg,image/webp,image/avif,image/gif"
-							aria-label="Attach generation reference"
-							disabled={processingGeneration}
-							onchange={(event) => {
-								void attachFile(event.currentTarget.files?.[0]);
-								event.currentTarget.value = '';
-							}}
-						/></label
-					>
-					<button
-						type="button"
-						disabled={!imageId || processingGeneration}
-						onclick={() => {
-							attachedReference = null;
-							useCanvasReference = true;
-						}}>Use selected image</button
-					>
-					{#if activeReference}<button
-							type="button"
-							disabled={processingGeneration}
-							onclick={() => {
-								attachedReference = null;
-								useCanvasReference = false;
-							}}>Remove reference</button
-						>{/if}
-				</div>
-				{#if activeReference}
-					<img src={activeReference.dataURL} alt="Reference attached to this draft" />
-					<span
-						>{uploadsSelectedImage
-							? 'Reference ready · not uploaded until Generate'
-							: 'Reference retained in draft · not sent to text-to-image models'}</span
-					>
-				{:else}<span>No reference. Text-to-image needs only your prompt.</span>{/if}
-				<label
-					>Image destination <select
-						aria-label="Generation output destination"
-						bind:value={destination}
-						disabled={processingGeneration}
-						><option value="preview">Preview first</option><option
-							value="replace"
-							disabled={!imageId ||
-								!useCanvasReference ||
-								!!attachedReference ||
-								selectedWorkflowKind !== 'image-edit'}
-							>Replace selected image (Undo available)</option
-						></select
-					></label
-				>
-			</div>
-
-			{#if processingGeneration}
-				<div class="fal-generation-progress" role="status" aria-live="polite">
-					<strong>{operationStatus}</strong>
-					<span>
-						{selectedWorkflowKind === 'image-to-video'
-							? 'Your video will appear below and in device history, not on the canvas.'
-							: selectedWorkflowKind === null
-								? 'Images and videos appear in Preview. Completed results stay in device history.'
-								: destination === 'replace' && selectedWorkflowKind === 'image-edit'
-									? 'Your result will replace the selected image and stay in history.'
-									: 'Your result will appear in Preview and history. Add it to the canvas when ready.'}
-					</span>
-					<progress
-						aria-label="AI generation progress"
-						max="100"
-						value={operationProgress || undefined}
-					></progress>
-				</div>
-			{/if}
-			<div class="fal-model-picker" bind:this={modelPickerRoot}>
-				<label for="drawing-ai-workflow">Models and workflows</label>
-				<button
-					id="drawing-ai-workflow"
-					type="button"
-					class="fal-model-toggle"
-					aria-label="AI model and workflow selector"
-					aria-expanded={modelPickerOpen}
-					aria-controls="drawing-ai-models"
-					disabled={processing || processingGeneration}
-					bind:this={modelPickerButton}
-					onclick={() => setModelPickerOpen(!modelPickerOpen)}
-				>
-					<span>
-						{selectedModels.length === 1
-							? `${selectedModels[0].label} · ${selectedModels[0].workflow}`
-							: selectedModels.length
-								? `${selectedModels.length} models selected`
-								: 'Select one or more models'}
-					</span>
-					<span aria-hidden="true">{modelPickerOpen ? '▴' : '▾'}</span>
-				</button>
-				{#if modelPickerOpen}
-					<div id="drawing-ai-models" class="fal-model-menu" aria-label="Available AI models">
-						<div class="fal-model-search">
-							<input
-								type="search"
-								aria-label="Search AI models"
-								placeholder="Search models, providers, or rankings"
-								bind:value={modelSearchQuery}
-								bind:this={modelSearchInput}
-							/>
-							{#if modelSearchQuery}
-								<button
-									type="button"
-									aria-label="Clear AI model search"
-									onclick={() => {
-										modelSearchQuery = '';
-										modelSearchInput?.focus();
-									}}>×</button
-								>
-							{/if}
-						</div>
-						<div class="fal-model-menu-heading">
-							<span>
-								{modelSearchQuery.trim()
-									? `${visibleModels.length} matching · ${selectedModels.length} selected`
-									: `Cheapest first · ${selectedModels.length} selected`}
-							</span>
-							<button
-								type="button"
-								class="fal-model-select-all"
-								disabled={visibleModels.length === 0}
-								onclick={() =>
-									selectModels(
-										visibleModels,
-										!visibleModels.every((model) => selectedModelIds.includes(model.id))
-									)}
-							>
-								{visibleModels.length > 0 &&
-								visibleModels.every((model) => selectedModelIds.includes(model.id))
-									? modelSearchQuery.trim()
-										? 'Clear results'
-										: 'Clear all'
-									: modelSearchQuery.trim()
-										? 'Select results'
-										: 'Select all'}
-							</button>
-						</div>
-						<div class="fal-model-cards">
-							{#if visibleModels.length === 0}
-								<p class="fal-model-empty">No models match “{modelSearchQuery.trim()}”.</p>
-							{/if}
-							{#each workflowFolders as folder (folder.kind)}
-								<details
-									class="fal-model-folder"
-									aria-label="{folder.label} models"
-									open={Boolean(modelSearchQuery.trim()) ||
-										expandedModelWorkflowKinds.includes(folder.kind)}
-								>
-									<summary class="fal-model-folder-heading">
-										<strong>{folder.label}</strong>
-										<span class="fal-folder-controls">
-											<span>
-												{folder.models.filter((model) => selectedModelIds.includes(model.id))
-													.length}
-												/ {folder.models.length}
-											</span>
-											<button
-												type="button"
-												class="fal-model-select-all"
-												aria-label="Select all {folder.label} models"
-												onclick={(event) => selectFolderModels(event, folder.models, true)}
-												>All</button
-											>
-											<button
-												type="button"
-												class="fal-model-select-all"
-												aria-label="Select no {folder.label} models"
-												onclick={(event) => selectFolderModels(event, folder.models, false)}
-												>None</button
-											>
-										</span>
-									</summary>
-									<div class="fal-model-folder-cards">
-										{#each folder.groups as group (group.weights)}
-											<section
-												class="fal-model-weight-group"
-												aria-label="{group.label} {folder.label} models"
-											>
-												<div class="fal-model-weight-heading">
-													<strong>{group.label}</strong>
-													<span class="fal-folder-controls">
-														<span>
-															{group.models.filter((model) => selectedModelIds.includes(model.id))
-																.length}
-															/ {group.models.length}
-														</span>
-														<button
-															type="button"
-															class="fal-model-select-all"
-															aria-label="Select all {group.label} {folder.label} models"
-															onclick={() => selectModels(group.models, true)}>All</button
-														>
-														<button
-															type="button"
-															class="fal-model-select-all"
-															aria-label="Select no {group.label} {folder.label} models"
-															onclick={() => selectModels(group.models, false)}>None</button
-														>
-													</span>
-												</div>
-												{#each group.models as model (model.id)}
-													<div
-														class="fal-model-card"
-														class:selected={selectedModelIds.includes(model.id)}
-													>
-														<label class="fal-model-option">
-															<input
-																type="checkbox"
-																aria-label="{model.label} · {model.workflow}"
-																checked={selectedModelIds.includes(model.id)}
-																onchange={() => toggleModel(model.id)}
-															/>
-															<span class="fal-model-copy">
-																<span class="fal-model-card-title">
-																	<strong>{model.label}</strong>
-																	<span>{model.price}</span>
-																</span>
-																<span>{model.workflow}</span>
-																<span>{modelReferenceNote(model)} · {model.badge}</span>
-															</span>
-														</label>
-														<button
-															type="button"
-															class="fal-model-only"
-															aria-label="Use only {model.label} · {model.workflow}"
-															onclick={() => {
-																selectedModelIds = [model.id];
-																setModelPickerOpen(false);
-															}}
-														>
-															Only
-														</button>
-													</div>
-												{/each}
-											</section>
-										{/each}
-									</div>
-								</details>
-							{/each}
-						</div>
-					</div>
-				{/if}
-				{#if !modelPickerOpen && selectedModels.length > 1}
-					<div class="selected-model-chips" aria-label="Selected AI models">
-						{#each selectedModels.slice(0, 4) as model (model.id)}
-							<button
-								type="button"
-								aria-label="Remove {model.label} from selected models"
-								disabled={processing || processingGeneration}
-								onclick={() => toggleModel(model.id)}
-							>
-								{model.label} <span aria-hidden="true">×</span>
-							</button>
-						{/each}
-						{#if selectedModels.length > 4}
-							<button
-								type="button"
-								aria-label="Show all selected AI models"
-								onclick={() => setModelPickerOpen(true)}
-							>
-								+{selectedModels.length - 4} more
-							</button>
-						{/if}
-					</div>
-				{/if}
-				{#if selectedModels.length === 1}
-					<div class="fal-model-detail">
-						<span>{selectedModel.description}</span>
-						<strong>{selectedModel.badge}</strong>
-					</div>
-				{/if}
-				{#if !isOwner}<p class="fal-upload-hint">
-						{authenticated ? 'Funded by swyx.io · ' : 'Sign in required · '}
-						{uploadsSelectedImage
-							? 'Large images automatically fit each model’s limits and the secure upload limit.'
-							: 'Text-to-image workflows only send your prompt; no reference image is uploaded.'}
-					</p>{/if}
-			</div>
-			<ToolsAiNotice {isOwner} />
-			{#each selectedWorkflowParameters as folder (folder.kind)}
-				{#if folder.parameters.length}
-					<section class="fal-parameter-group" aria-label="{folder.label} settings">
-						<div class="fal-parameter-heading">
-							<strong>{folder.label} settings</strong>
-							{#if folder.models.length > 1}
-								<span>Compatible models only</span>
-							{/if}
-						</div>
-						<div class="fal-parameter-grid">
-							{#each folder.parameters as parameter (parameter.key)}
-								{#if parameter.type === 'boolean'}
-									<label class="fal-parameter-toggle">
-										<input
-											type="checkbox"
-											aria-label="{folder.label} {parameter.label}"
-											checked={parameterCurrentValue(folder, parameter) === true}
-											disabled={processing || processingGeneration}
-											onchange={(event) =>
-												updateGenerationParameter(
-													folder.kind,
-													parameter.key,
-													event.currentTarget.checked
-												)}
-										/>
-										<span>{parameter.label}</span>
-									</label>
-								{:else if parameter.type === 'seed'}
-									<label class="fal-parameter-field">
-										<span>{parameter.label}</span>
-										<input
-											type="number"
-											aria-label="{folder.label} {parameter.label}"
-											min="0"
-											max="2147483647"
-											step="1"
-											placeholder="Random"
-											value={parameterCurrentValue(folder, parameter)}
-											disabled={processing || processingGeneration}
-											oninput={(event) =>
-												updateGenerationParameter(
-													folder.kind,
-													parameter.key,
-													event.currentTarget.value === ''
-														? undefined
-														: Number(event.currentTarget.value)
-												)}
-										/>
-									</label>
-								{:else}
-									<label class="fal-parameter-field">
-										<span>{parameter.label}</span>
-										<select
-											aria-label="{folder.label} {parameter.label}"
-											value={parameterChoice(
-												parameter.key,
-												parameterCurrentValue(folder, parameter)
-											)}
-											disabled={processing || processingGeneration}
-											onchange={(event) =>
-												updateGenerationParameter(
-													folder.kind,
-													parameter.key,
-													parameter.options?.find(
-														(option) =>
-															parameterChoice(parameter.key, option) === event.currentTarget.value
-													)
-												)}
-										>
-											{#each parameter.options ?? [] as option (parameterChoice(parameter.key, option))}
-												<option value={parameterChoice(parameter.key, option)}>
-													{parameterOptionLabel(parameter.key, option)}
-												</option>
-											{/each}
-										</select>
-									</label>
-								{/if}
-							{/each}
-						</div>
-					</section>
-				{/if}
 			{/each}
-			{#if !isOwner}<div class="generation-budget">
-					<label
-						>Run reservation limit ($)<input
-							aria-label="Run spending limit"
-							type="number"
-							min="0.05"
-							max="20"
-							step="0.05"
-							bind:value={runLimitUsd}
-							disabled={processingGeneration}
-						/></label
-					>
-					<label
-						>Confirm estimates above ($)<input
-							aria-label="Generation confirmation threshold"
-							type="number"
-							min="0"
-							max="20"
-							step="0.05"
-							bind:value={confirmationThreshold}
-							disabled={processingGeneration}
-						/></label
-					>
-					<p>
-						Reserves ~${reservationTotal.toFixed(3)} against the run limit. Estimates are not final provider
-						billing. Account/site limits also apply.
-					</p>
-					{#each [...new Set(selectedModels.map((model) => model.disclosure))] as disclosure}<p>
-							{disclosure}
-						</p>{/each}
-				</div>{/if}
-			<div class="fal-action-row">
-				<span>
-					{selectedModels.length
-						? `~$${estimatedCost.toFixed(3).replace(/0+$/, '').replace(/\.$/, '')} total · ${selectedModels.length} ${selectedModels.length === 1 ? 'generation' : 'generations'}`
-						: 'Select at least one model'}
-				</span>
-				{#if processingGeneration}
-					<button type="button" class="secondary-action" onclick={cancelGeneration}>
-						Cancel
-					</button>
-				{:else if !authenticated}
-					<a class="fal-action fal-sign-in" href="/tools?next=/tools/draw">Sign in to generate</a>
-				{:else}
+			<button
+				type="button"
+				class="tool-choice cloud-tool"
+				class:active={action === 'generate'}
+				aria-pressed={action === 'generate'}
+				disabled={processing || backgroundProcessing}
+				onclick={() => {
+					action = 'generate';
+					if (imageId && !attachedReference && !prompt.trim()) {
+						useCanvasReference = true;
+						destination = 'replace';
+					}
+					operationError = '';
+				}}
+			>
+				AI prompt
+			</button>
+		</div>
+
+		{#if action === 'background'}
+			<div class="active-tool-panel">
+				{@render backgroundControls?.()}
+			</div>
+		{:else if selectedTool}
+			<div class="active-tool-panel">
+				{#if needsTarget && imagePreview}
 					<button
 						type="button"
-						class="fal-action"
-						aria-label={generationButtonLabel}
-						aria-keyshortcuts="Meta+Enter Control+Enter"
-						disabled={processing ||
-							!prompt.trim() ||
-							!selectedModels.length ||
-							(uploadsSelectedImage && !activeReference) ||
-							(!isOwner && reservationTotal > Number(runLimitUsd))}
-						onclick={() => void applyGeneration()}
+						class="image-target"
+						aria-label={action === 'magic-eraser'
+							? 'Choose the area to erase'
+							: 'Choose the subject to select'}
+						disabled={processing || processingGeneration}
+						onclick={chooseTarget}
 					>
-						{selectedWorkflowKind === 'image-to-video'
-							? 'Generate video'
-							: selectedWorkflowKind === 'text-to-image'
-								? 'Generate image'
-								: 'Generate'} <kbd aria-hidden="true">⌘↵</kbd>
+						<img src={imagePreview} alt="Selected canvas artwork" />
+						<span
+							class="target-marker"
+							style="left: {targetMarkerX * 100}%; top: {targetMarkerY * 100}%"
+						></span>
 					</button>
+					<p class="tool-hint">
+						{action === 'magic-eraser'
+							? 'Click the image to choose what to erase.'
+							: 'Click the subject you want to isolate.'}
+					</p>
 				{/if}
-			</div>
-		</div>
-	{/if}
 
-	{#if activeVideoGeneration}
-		<section class="video-generation" aria-label="Generated video preview">
-			<div class="history-heading">
-				<strong>{activeVideoGeneration.modelLabel}</strong>
-				<a href={activeVideoGeneration.dataURL} target="_blank" rel="noreferrer">Download video</a>
-			</div>
-			<!-- svelte-ignore a11y_media_has_caption (generated clips do not include transcript tracks) -->
-			<!-- svelte-ignore a11y_media_has_caption (Generated video providers do not supply caption tracks.) -->
-			<video
-				src={activeVideoGeneration.dataURL}
-				controls
-				playsinline
-				preload="none"
-				aria-label="Generated video"
-			></video>
-			<p>Video stays outside the canvas and cloud drawing sync.</p>
-		</section>
-	{/if}
+				{#if action === 'magic-eraser'}
+					<label class="tool-slider">
+						<span>Eraser size</span>
+						<input
+							type="range"
+							min="0.03"
+							max="0.3"
+							step="0.01"
+							bind:value={eraserRadius}
+							disabled={processing || processingGeneration}
+						/>
+					</label>
+				{:else if action === 'depth-blur'}
+					<label class="tool-slider">
+						<span>Blur strength</span>
+						<input
+							type="range"
+							min="2"
+							max="30"
+							step="1"
+							bind:value={blurStrength}
+							disabled={processing || processingGeneration}
+						/>
+					</label>
+					<label class="tool-slider">
+						<span>Focus depth</span>
+						<input
+							type="range"
+							min="0"
+							max="1"
+							step="0.05"
+							bind:value={focusDepth}
+							disabled={processing || processingGeneration}
+						/>
+					</label>
+				{/if}
 
-	{#if previewRecords.length}
-		<section
-			class="generation-history"
-			aria-label="Generated images from this session"
-			bind:this={historySection}
-		>
-			<div class="history-heading">
-				<strong>Recent generations / Compare</strong>
-				<span>On this device · this page · up to 32 entries</span>
-			</div>
-			<div class="generation-list">
-				{#each generations as generation, index (generation.id)}
-					<div class="generation-choice">
+				<div class="local-action-row">
+					<span class="download-size">
+						{downloadSize ? `First use downloads ${downloadSize}.` : 'No model download required.'}
+					</span>
+					{#if processing}
+						<button type="button" class="secondary-action" onclick={() => operationAbort?.abort()}>
+							Cancel
+						</button>
+					{:else}
 						<button
 							type="button"
-							class="generation-card"
-							class:current={imagePreview === generation.dataURL ||
-								activeVideoGenerationId === generation.id}
-							aria-label="Use generation {index + 1}: {generation.prompt}"
-							aria-pressed={imagePreview === generation.dataURL ||
-								activeVideoGenerationId === generation.id}
-							disabled={processing || processingGeneration || backgroundProcessing}
-							onclick={() => void restoreGeneration(generation)}
+							class="primary-action"
+							aria-label="Apply {selectedTool?.label ?? 'image tool'}"
+							disabled={processingGeneration}
+							onclick={() => void applyLocalImageTool()}
 						>
-							{#if generation.mimeType.startsWith('video/')}
-								<span class="video-placeholder">Video · click to preview</span>
-							{:else}
-								<img src={generation.dataURL} alt="" />
-							{/if}
-							<span>{generation.modelLabel}</span>
+							Apply
 						</button>
-						{#if generation.mimeType.startsWith('image/') && generation.modelLabel !== 'Original'}
-							<label class="compare-select"
-								><input
-									type="checkbox"
-									aria-label={`Compare ${generation.modelLabel} ${index + 1}`}
-									checked={comparisonIds.includes(generation.id)}
-									onchange={(event) => {
-										comparisonIds = event.currentTarget.checked
-											? [...comparisonIds, generation.id]
-											: comparisonIds.filter((id) => id !== generation.id);
-									}}
-								/> Compare</label
-							>
-						{/if}
-					</div>
-				{/each}
+					{/if}
+				</div>
 			</div>
-			<button
-				class="generation-recreate"
-				type="button"
-				disabled={processing || !comparisonImages.length}
-				onclick={() => addGenerations(comparisonImages, true)}
-				>Add comparison board ({comparisonImages.length})</button
-			>
-			{#if activeGeneration}
-				<section class="generation-recipe" aria-label="Selected generation details">
-					<div class="generation-recipe-heading">
-						<strong>{activeGeneration.modelLabel}</strong>
-						<span>{new Date(activeGeneration.createdAt).toLocaleString()}</span>
-					</div>
-					{#if activeGeneration.modelWorkflow}
-						<div class="generation-recipe-meta">
-							{activeGeneration.modelProvider} · {activeGeneration.modelWorkflow}
-						</div>
-					{/if}
-					{#if activeGeneration.mimeType.startsWith('image/')}
-						<img
-							class="generation-preview"
-							src={activeGeneration.dataURL}
-							alt="Generated preview"
-						/>
-					{/if}
-					<div class="generation-metrics">
-						{activeGeneration.adapterId ??
-							'Provider recorded in recipe'}{activeGeneration.elapsedMs !== undefined
-							? ` · ${(activeGeneration.elapsedMs / 1000).toFixed(1)}s end-to-end`
-							: ''}{activeGeneration.estimatedUsd !== undefined
-							? ` · ~$${activeGeneration.estimatedUsd.toFixed(3)} estimated`
-							: ''}
-					</div>
-					<div class="generation-prompt" aria-label="Generation prompt">
-						{activeGeneration.prompt}
-					</div>
-					{#if activeGenerationSettings.length}
-						<div class="generation-settings" aria-label="Generation model settings">
-							{#each activeGenerationSettings as setting (setting)}
-								<span>{setting}</span>
-							{/each}
-						</div>
-					{/if}
-					{#if activeGeneration.referenceImages?.length}
-						<div class="generation-references" aria-label="Generation reference images">
-							<strong
-								>Reference {activeGeneration.referenceImages.length === 1
-									? 'image'
-									: 'images'}</strong
-							>
-							{#each activeGeneration.referenceImages as reference, index (reference.dataURL)}
-								<img src={reference.dataURL} alt="Reference image {index + 1}" />
-							{/each}
-						</div>
-					{:else if activeGeneration.modelKind === 'text-to-image'}
-						<div class="generation-recipe-meta">Prompt only · no reference image</div>
-					{/if}
-					{#if activeGenerationLineage.length > 1}
-						<div class="generation-lineage" aria-label="Generation history">
-							{activeGenerationLineage.map((entry) => entry.modelLabel).join(' → ')}
-						</div>
-					{/if}
-					{#if activeGeneration.modelLabel !== 'Original'}<button
+		{:else if action === 'generate'}
+			<div class="fal-edit active-tool-panel">
+				<textarea
+					aria-label="AI image editing prompt"
+					onpaste={pasteReference}
+					placeholder={selectedWorkflowKind === 'image-to-video'
+						? 'Describe the motion, camera movement, and sound…'
+						: selectedWorkflowKind === 'text-to-image'
+							? 'Describe the image you want to create…'
+							: 'Describe how you want to edit this image…'}
+					rows="3"
+					maxlength={MAX_DRAW_GENERATION_PROMPT_LENGTH}
+					bind:value={prompt}
+					disabled={processing || processingGeneration}
+					onkeydown={(event) => {
+						if (event.key !== 'Enter' || (!event.metaKey && !event.ctrlKey) || event.isComposing) {
+							return;
+						}
+						event.preventDefault();
+						void applyGeneration();
+					}}
+				></textarea>
+				<div
+					class="prompt-presets"
+					aria-label={selectedWorkflowKind === 'image-to-video'
+						? 'Editable video prompt presets'
+						: selectedWorkflowKind === 'text-to-image'
+							? 'Editable image generation prompt presets'
+							: 'Editable image prompt presets'}
+				>
+					{#each activePromptPresets as preset (preset.label)}
+						<button
 							type="button"
-							class="generation-recreate"
-							aria-label="Restore reference image, prompt, and model"
-							disabled={processing || processingGeneration || backgroundProcessing}
-							onclick={() => void restoreGenerationRecipe(activeGeneration)}
+							disabled={processing || processingGeneration}
+							onclick={() => (prompt = preset.prompt)}
 						>
-							Remix prompt, references & settings
-						</button>{/if}
-					{#if activeGeneration.mimeType.startsWith('image/')}
-						<div class="reference-actions">
-							<button
-								type="button"
-								disabled={processing}
-								onclick={() => addGenerations([activeGeneration])}>Add to canvas</button
-							><button
-								type="button"
-								disabled={!imageId || processing || processingGeneration}
-								onclick={() => replaceWithGeneration(activeGeneration)}
-								>Replace selected image</button
-							><a download="generation.png" href={activeGeneration.dataURL}>Download image</a>
-						</div>
-					{/if}
-					<label class="quality-note"
-						>Personal quality note<input
-							aria-label="Generation quality note"
-							maxlength="500"
-							bind:value={qualityNote}
-						/><button
+							{preset.label}
+						</button>
+					{/each}
+				</div>
+				<div class="generation-reference">
+					<div class="reference-actions">
+						<label class="attach-reference"
+							>Attach reference<input
+								type="file"
+								accept="image/png,image/jpeg,image/webp,image/avif,image/gif"
+								aria-label="Attach generation reference"
+								disabled={processingGeneration}
+								onchange={(event) => {
+									void attachFile(event.currentTarget.files?.[0]);
+									event.currentTarget.value = '';
+								}}
+							/></label
+						>
+						<button
 							type="button"
+							disabled={!imageId || processingGeneration}
 							onclick={() => {
-								onGeneration?.({ ...activeGeneration, qualityNote: qualityNote.trim() });
-								operationStatus = 'Quality note saved on this device';
-							}}>Save note</button
+								attachedReference = null;
+								useCanvasReference = true;
+							}}>Use selected image</button
+						>
+						{#if activeReference}<button
+								type="button"
+								disabled={processingGeneration}
+								onclick={() => {
+									attachedReference = null;
+									useCanvasReference = false;
+								}}>Remove reference</button
+							>{/if}
+					</div>
+					{#if activeReference}
+						<img src={activeReference.dataURL} alt="Reference attached to this draft" />
+						<span
+							>{uploadsSelectedImage
+								? 'Reference ready · not uploaded until Generate'
+								: 'Reference retained in draft · not sent to text-to-image models'}</span
+						>
+					{:else}<span>No reference. Text-to-image needs only your prompt.</span>{/if}
+					<label
+						>Image destination <select
+							aria-label="Generation output destination"
+							bind:value={destination}
+							disabled={processingGeneration}
+							><option value="preview">Preview first</option><option
+								value="replace"
+								disabled={!imageId ||
+									!useCanvasReference ||
+									!!attachedReference ||
+									selectedWorkflowKind !== 'image-edit'}
+								>Replace selected image (Undo available)</option
+							></select
 						></label
 					>
-				</section>
-			{/if}
-		</section>
-	{/if}
+				</div>
 
-	{#if generationJobs.length && lastRun?.pageKey === pageKey}
-		<section class="generation-queue" aria-label="Generation queue" aria-live="polite">
-			<strong
-				>{processingGeneration ? 'Generating' : 'Latest batch'} · {generationJobs.filter(
-					(job) => job.status === 'completed'
-				).length}/{generationJobs.length}</strong
-			>
-			{#each generationJobs as job (job.id)}<div class="queue-job">
-					<strong
-						>{DRAW_GENERATION_MODELS.find((model) => model.id === job.recipe.modelId)?.label ??
-							job.recipe.modelId}</strong
-					><span
-						>{job.message}{job.elapsedMs ? ` · ${(job.elapsedMs / 1000).toFixed(1)}s` : ''}</span
-					>{#if job.generation}<button
+				{#if processingGeneration}
+					<div class="fal-generation-progress" role="status" aria-live="polite">
+						<strong>{operationStatus}</strong>
+						<span>
+							{selectedWorkflowKind === 'image-to-video'
+								? 'Your video will appear below and in device history, not on the canvas.'
+								: selectedWorkflowKind === null
+									? 'Images and videos appear in Preview. Completed results stay in device history.'
+									: destination === 'replace' && selectedWorkflowKind === 'image-edit'
+										? 'Your result will replace the selected image and stay in history.'
+										: 'Your result will appear in Preview and history. Add it to the canvas when ready.'}
+						</span>
+						<progress
+							aria-label="AI generation progress"
+							max="100"
+							value={operationProgress || undefined}
+						></progress>
+					</div>
+				{/if}
+				<div class="fal-model-picker" bind:this={modelPickerRoot}>
+					<label for="drawing-ai-workflow">Models and workflows</label>
+					<button
+						id="drawing-ai-workflow"
+						type="button"
+						class="fal-model-toggle"
+						aria-label="AI model and workflow selector"
+						aria-expanded={modelPickerOpen}
+						aria-controls="drawing-ai-models"
+						disabled={processing || processingGeneration}
+						bind:this={modelPickerButton}
+						onclick={() => setModelPickerOpen(!modelPickerOpen)}
+					>
+						<span>
+							{selectedModels.length === 1
+								? `${selectedModels[0].label} · ${selectedModels[0].workflow}`
+								: selectedModels.length
+									? `${selectedModels.length} models selected`
+									: 'Select one or more models'}
+						</span>
+						<span aria-hidden="true">{modelPickerOpen ? '▴' : '▾'}</span>
+					</button>
+					{#if modelPickerOpen}
+						<div id="drawing-ai-models" class="fal-model-menu" aria-label="Available AI models">
+							<div class="fal-model-search">
+								<input
+									type="search"
+									aria-label="Search AI models"
+									placeholder="Search models, providers, or rankings"
+									bind:value={modelSearchQuery}
+									bind:this={modelSearchInput}
+								/>
+								{#if modelSearchQuery}
+									<button
+										type="button"
+										aria-label="Clear AI model search"
+										onclick={() => {
+											modelSearchQuery = '';
+											modelSearchInput?.focus();
+										}}>×</button
+									>
+								{/if}
+							</div>
+							<div class="fal-model-menu-heading">
+								<span>
+									{modelSearchQuery.trim()
+										? `${visibleModels.length} matching · ${selectedModels.length} selected`
+										: `Cheapest first · ${selectedModels.length} selected`}
+								</span>
+								<button
+									type="button"
+									class="fal-model-select-all"
+									disabled={visibleModels.length === 0}
+									onclick={() =>
+										selectModels(
+											visibleModels,
+											!visibleModels.every((model) => selectedModelIds.includes(model.id))
+										)}
+								>
+									{visibleModels.length > 0 &&
+									visibleModels.every((model) => selectedModelIds.includes(model.id))
+										? modelSearchQuery.trim()
+											? 'Clear results'
+											: 'Clear all'
+										: modelSearchQuery.trim()
+											? 'Select results'
+											: 'Select all'}
+								</button>
+							</div>
+							<div class="fal-model-cards">
+								{#if visibleModels.length === 0}
+									<p class="fal-model-empty">No models match “{modelSearchQuery.trim()}”.</p>
+								{/if}
+								{#each workflowFolders as folder (folder.kind)}
+									<details
+										class="fal-model-folder"
+										aria-label="{folder.label} models"
+										open={Boolean(modelSearchQuery.trim()) ||
+											expandedModelWorkflowKinds.includes(folder.kind)}
+									>
+										<summary class="fal-model-folder-heading">
+											<strong>{folder.label}</strong>
+											<span class="fal-folder-controls">
+												<span>
+													{folder.models.filter((model) => selectedModelIds.includes(model.id))
+														.length}
+													/ {folder.models.length}
+												</span>
+												<button
+													type="button"
+													class="fal-model-select-all"
+													aria-label="Select all {folder.label} models"
+													onclick={(event) => selectFolderModels(event, folder.models, true)}
+													>All</button
+												>
+												<button
+													type="button"
+													class="fal-model-select-all"
+													aria-label="Select no {folder.label} models"
+													onclick={(event) => selectFolderModels(event, folder.models, false)}
+													>None</button
+												>
+											</span>
+										</summary>
+										<div class="fal-model-folder-cards">
+											{#each folder.groups as group (group.weights)}
+												<section
+													class="fal-model-weight-group"
+													aria-label="{group.label} {folder.label} models"
+												>
+													<div class="fal-model-weight-heading">
+														<strong>{group.label}</strong>
+														<span class="fal-folder-controls">
+															<span>
+																{group.models.filter((model) => selectedModelIds.includes(model.id))
+																	.length}
+																/ {group.models.length}
+															</span>
+															<button
+																type="button"
+																class="fal-model-select-all"
+																aria-label="Select all {group.label} {folder.label} models"
+																onclick={() => selectModels(group.models, true)}>All</button
+															>
+															<button
+																type="button"
+																class="fal-model-select-all"
+																aria-label="Select no {group.label} {folder.label} models"
+																onclick={() => selectModels(group.models, false)}>None</button
+															>
+														</span>
+													</div>
+													{#each group.models as model (model.id)}
+														<div
+															class="fal-model-card"
+															class:selected={selectedModelIds.includes(model.id)}
+														>
+															<label class="fal-model-option">
+																<input
+																	type="checkbox"
+																	aria-label="{model.label} · {model.workflow}"
+																	checked={selectedModelIds.includes(model.id)}
+																	onchange={() => toggleModel(model.id)}
+																/>
+																<span class="fal-model-copy">
+																	<span class="fal-model-card-title">
+																		<strong>{model.label}</strong>
+																		<span>{model.price}</span>
+																	</span>
+																	<span>{model.workflow}</span>
+																	<span>{modelReferenceNote(model)} · {model.badge}</span>
+																</span>
+															</label>
+															<button
+																type="button"
+																class="fal-model-only"
+																aria-label="Use only {model.label} · {model.workflow}"
+																onclick={() => {
+																	selectedModelIds = [model.id];
+																	setModelPickerOpen(false);
+																}}
+															>
+																Only
+															</button>
+														</div>
+													{/each}
+												</section>
+											{/each}
+										</div>
+									</details>
+								{/each}
+							</div>
+						</div>
+					{/if}
+					{#if !modelPickerOpen && selectedModels.length > 1}
+						<div class="selected-model-chips" aria-label="Selected AI models">
+							{#each selectedModels.slice(0, 4) as model (model.id)}
+								<button
+									type="button"
+									aria-label="Remove {model.label} from selected models"
+									disabled={processing || processingGeneration}
+									onclick={() => toggleModel(model.id)}
+								>
+									{model.label} <span aria-hidden="true">×</span>
+								</button>
+							{/each}
+							{#if selectedModels.length > 4}
+								<button
+									type="button"
+									aria-label="Show all selected AI models"
+									onclick={() => setModelPickerOpen(true)}
+								>
+									+{selectedModels.length - 4} more
+								</button>
+							{/if}
+						</div>
+					{/if}
+					{#if selectedModels.length === 1}
+						<div class="fal-model-detail">
+							<span>{selectedModel.description}</span>
+							<strong>{selectedModel.badge}</strong>
+						</div>
+					{/if}
+					{#if !isOwner}<p class="fal-upload-hint">
+							{authenticated ? 'Funded by swyx.io · ' : 'Sign in required · '}
+							{uploadsSelectedImage
+								? 'Large images automatically fit each model’s limits and the secure upload limit.'
+								: 'Text-to-image workflows only send your prompt; no reference image is uploaded.'}
+						</p>{/if}
+				</div>
+				<ToolsAiNotice {isOwner} />
+				{#each selectedWorkflowParameters as folder (folder.kind)}
+					{#if folder.parameters.length}
+						<section class="fal-parameter-group" aria-label="{folder.label} settings">
+							<div class="fal-parameter-heading">
+								<strong>{folder.label} settings</strong>
+								{#if folder.models.length > 1}
+									<span>Compatible models only</span>
+								{/if}
+							</div>
+							<div class="fal-parameter-grid">
+								{#each folder.parameters as parameter (parameter.key)}
+									{#if parameter.type === 'boolean'}
+										<label class="fal-parameter-toggle">
+											<input
+												type="checkbox"
+												aria-label="{folder.label} {parameter.label}"
+												checked={parameterCurrentValue(folder, parameter) === true}
+												disabled={processing || processingGeneration}
+												onchange={(event) =>
+													updateGenerationParameter(
+														folder.kind,
+														parameter.key,
+														event.currentTarget.checked
+													)}
+											/>
+											<span>{parameter.label}</span>
+										</label>
+									{:else if parameter.type === 'seed'}
+										<label class="fal-parameter-field">
+											<span>{parameter.label}</span>
+											<input
+												type="number"
+												aria-label="{folder.label} {parameter.label}"
+												min="0"
+												max="2147483647"
+												step="1"
+												placeholder="Random"
+												value={parameterCurrentValue(folder, parameter)}
+												disabled={processing || processingGeneration}
+												oninput={(event) =>
+													updateGenerationParameter(
+														folder.kind,
+														parameter.key,
+														event.currentTarget.value === ''
+															? undefined
+															: Number(event.currentTarget.value)
+													)}
+											/>
+										</label>
+									{:else}
+										<label class="fal-parameter-field">
+											<span>{parameter.label}</span>
+											<select
+												aria-label="{folder.label} {parameter.label}"
+												value={parameterChoice(
+													parameter.key,
+													parameterCurrentValue(folder, parameter)
+												)}
+												disabled={processing || processingGeneration}
+												onchange={(event) =>
+													updateGenerationParameter(
+														folder.kind,
+														parameter.key,
+														parameter.options?.find(
+															(option) =>
+																parameterChoice(parameter.key, option) === event.currentTarget.value
+														)
+													)}
+											>
+												{#each parameter.options ?? [] as option (parameterChoice(parameter.key, option))}
+													<option value={parameterChoice(parameter.key, option)}>
+														{parameterOptionLabel(parameter.key, option)}
+													</option>
+												{/each}
+											</select>
+										</label>
+									{/if}
+								{/each}
+							</div>
+						</section>
+					{/if}
+				{/each}
+				{#if !isOwner}<div class="generation-budget">
+						<label
+							>Run reservation limit ($)<input
+								aria-label="Run spending limit"
+								type="number"
+								min="0.05"
+								max="20"
+								step="0.05"
+								bind:value={runLimitUsd}
+								disabled={processingGeneration}
+							/></label
+						>
+						<label
+							>Confirm estimates above ($)<input
+								aria-label="Generation confirmation threshold"
+								type="number"
+								min="0"
+								max="20"
+								step="0.05"
+								bind:value={confirmationThreshold}
+								disabled={processingGeneration}
+							/></label
+						>
+						<p>
+							Reserves ~${reservationTotal.toFixed(3)} against the run limit. Estimates are not final
+							provider billing. Account/site limits also apply.
+						</p>
+						{#each [...new Set(selectedModels.map((model) => model.disclosure))] as disclosure}<p>
+								{disclosure}
+							</p>{/each}
+					</div>{/if}
+				<div class="fal-action-row">
+					<span>
+						{selectedModels.length
+							? `~$${estimatedCost.toFixed(3).replace(/0+$/, '').replace(/\.$/, '')} total · ${selectedModels.length} ${selectedModels.length === 1 ? 'generation' : 'generations'}`
+							: 'Select at least one model'}
+					</span>
+					{#if processingGeneration}
+						<button type="button" class="secondary-action" onclick={cancelGeneration}>
+							Cancel
+						</button>
+					{:else if !authenticated}
+						<a class="fal-action fal-sign-in" href="/tools?next=/tools/draw">Sign in to generate</a>
+					{:else}
+						<button
 							type="button"
-							onclick={() => job.generation && restoreGeneration(job.generation)}
-							>Preview result</button
-						>{/if}
-				</div>{/each}
-			{#if processingGeneration}<button type="button" onclick={cancelGeneration}
-					>Cancel remaining jobs</button
-				>{:else if generationJobs.some((job) => job.status === 'failed')}<button
-					type="button"
-					onclick={() => applyGeneration(true)}
-					>{isOwner ? 'Retry failed jobs' : 'Retry failed jobs (same run budget)'}</button
-				>{/if}
-		</section>
-	{/if}
-	{#if action === 'generate'}<div class="saved-generation-panel">
-			<DrawGenerationLibrary
-				{storageKey}
-				{userId}
-				{prompt}
-				reference={activeReference}
-				generation={activeGeneration}
-				onModifier={(text) => {
-					prompt = `${prompt.trim()}\n${text}`.trim().slice(0, 1000);
-				}}
-				onReference={(reference) => {
-					attachedReference = reference;
-					useCanvasReference = false;
-					destination = 'preview';
-					action = 'generate';
-				}}
-				onRemix={restoreGenerationRecipe}
-			/>
-		</div>{/if}
-	{#if historyError}<p class="operation-error" role="alert">{historyError}</p>{/if}
+							class="fal-action"
+							aria-label={generationButtonLabel}
+							aria-keyshortcuts="Meta+Enter Control+Enter"
+							disabled={processing ||
+								!prompt.trim() ||
+								!selectedModels.length ||
+								(uploadsSelectedImage && !activeReference) ||
+								(!isOwner && reservationTotal > Number(runLimitUsd))}
+							onclick={() => void applyGeneration()}
+						>
+							{selectedWorkflowKind === 'image-to-video'
+								? 'Generate video'
+								: selectedWorkflowKind === 'text-to-image'
+									? 'Generate image'
+									: 'Generate'} <kbd aria-hidden="true">⌘↵</kbd>
+						</button>
+					{/if}
+				</div>
+			</div>
+		{/if}
 
-	{#if processing && !processingGeneration}
-		<div class="operation-progress" aria-live="polite">
-			<span>{operationStatus}{operationProgress ? ` · ${operationProgress}%` : ''}</span>
-			<progress aria-label="Image editing progress" max="100" value={operationProgress || undefined}
-			></progress>
-		</div>
-	{:else if !processingGeneration && operationError}
-		<p class="operation-error" role="alert">{operationError}</p>
-	{:else if !processingGeneration && operationStatus}
-		<p class="operation-success" role="status">{operationStatus}</p>
+		{#if activeVideoGeneration}
+			<section class="video-generation" aria-label="Generated video preview">
+				<div class="history-heading">
+					<strong>{activeVideoGeneration.modelLabel}</strong>
+					<a href={activeVideoGeneration.dataURL} target="_blank" rel="noreferrer">Download video</a
+					>
+				</div>
+				<!-- svelte-ignore a11y_media_has_caption (generated clips do not include transcript tracks) -->
+				<!-- svelte-ignore a11y_media_has_caption (Generated video providers do not supply caption tracks.) -->
+				<video
+					src={activeVideoGeneration.dataURL}
+					controls
+					playsinline
+					preload="none"
+					aria-label="Generated video"
+				></video>
+				<p>Video stays outside the canvas and cloud drawing sync.</p>
+			</section>
+		{/if}
+
+		{#if previewRecords.length}
+			<section
+				class="generation-history"
+				aria-label="Generated images from this session"
+				bind:this={historySection}
+			>
+				<div class="history-heading">
+					<strong>Recent generations / Compare</strong>
+					<span>On this device · this page</span>
+				</div>
+				<div class="generation-list">
+					{#each generations as generation, index (generation.id)}
+						<div class="generation-choice">
+							<button
+								type="button"
+								class="generation-card"
+								class:current={imagePreview === generation.dataURL ||
+									activeVideoGenerationId === generation.id}
+								aria-label="Use generation {index + 1}: {generation.prompt}"
+								aria-pressed={imagePreview === generation.dataURL ||
+									activeVideoGenerationId === generation.id}
+								disabled={processing || processingGeneration || backgroundProcessing}
+								onclick={() => void restoreGeneration(generation)}
+							>
+								{#if generation.mimeType.startsWith('video/')}
+									<span class="video-placeholder">Video · click to preview</span>
+								{:else}
+									<img src={generation.dataURL} alt="" />
+								{/if}
+								<span>{generation.modelLabel}</span>
+							</button>
+							{#if generation.mimeType.startsWith('image/') && generation.modelLabel !== 'Original'}
+								<label class="compare-select"
+									><input
+										type="checkbox"
+										aria-label={`Compare ${generation.modelLabel} ${index + 1}`}
+										checked={comparisonIds.includes(generation.id)}
+										onchange={(event) => {
+											comparisonIds = event.currentTarget.checked
+												? [...comparisonIds, generation.id]
+												: comparisonIds.filter((id) => id !== generation.id);
+										}}
+									/> Compare</label
+								>
+							{/if}
+						</div>
+					{/each}
+				</div>
+				<button
+					class="generation-recreate"
+					type="button"
+					disabled={processing || !comparisonImages.length}
+					onclick={() => addGenerations(comparisonImages, true)}
+					>Add comparison board ({comparisonImages.length})</button
+				>
+				{#if activeGeneration}
+					<section class="generation-recipe" aria-label="Selected generation details">
+						<div class="generation-recipe-heading">
+							<strong>{activeGeneration.modelLabel}</strong>
+							<span>{new Date(activeGeneration.createdAt).toLocaleString()}</span>
+						</div>
+						{#if activeGeneration.modelWorkflow}
+							<div class="generation-recipe-meta">
+								{activeGeneration.modelProvider} · {activeGeneration.modelWorkflow}
+							</div>
+						{/if}
+						{#if activeGeneration.mimeType.startsWith('image/')}
+							<img
+								class="generation-preview"
+								src={activeGeneration.dataURL}
+								alt="Generated preview"
+							/>
+						{/if}
+						<div class="generation-metrics">
+							{activeGeneration.adapterId ??
+								'Provider recorded in recipe'}{activeGeneration.elapsedMs !== undefined
+								? ` · ${(activeGeneration.elapsedMs / 1000).toFixed(1)}s end-to-end`
+								: ''}{activeGeneration.estimatedUsd !== undefined
+								? ` · ~$${activeGeneration.estimatedUsd.toFixed(3)} estimated`
+								: ''}
+						</div>
+						<div class="generation-prompt" aria-label="Generation prompt">
+							{activeGeneration.prompt}
+						</div>
+						{#if activeGenerationSettings.length}
+							<div class="generation-settings" aria-label="Generation model settings">
+								{#each activeGenerationSettings as setting (setting)}
+									<span>{setting}</span>
+								{/each}
+							</div>
+						{/if}
+						{#if activeGeneration.referenceImages?.length}
+							<div class="generation-references" aria-label="Generation reference images">
+								<strong
+									>Reference {activeGeneration.referenceImages.length === 1
+										? 'image'
+										: 'images'}</strong
+								>
+								{#each activeGeneration.referenceImages as reference, index (reference.dataURL)}
+									<img src={reference.dataURL} alt="Reference image {index + 1}" />
+								{/each}
+							</div>
+						{:else if activeGeneration.modelKind === 'text-to-image'}
+							<div class="generation-recipe-meta">Prompt only · no reference image</div>
+						{/if}
+						{#if activeGenerationLineage.length > 1}
+							<div class="generation-lineage" aria-label="Generation history">
+								{activeGenerationLineage.map((entry) => entry.modelLabel).join(' → ')}
+							</div>
+						{/if}
+						{#if activeGeneration.modelLabel !== 'Original'}<button
+								type="button"
+								class="generation-recreate"
+								aria-label="Restore reference image, prompt, and model"
+								disabled={processing || processingGeneration || backgroundProcessing}
+								onclick={() => void restoreGenerationRecipe(activeGeneration)}
+							>
+								Remix prompt, references & settings
+							</button>{/if}
+						{#if activeGeneration.mimeType.startsWith('image/')}
+							<div class="reference-actions">
+								<button
+									type="button"
+									disabled={processing}
+									onclick={() => addGenerations([activeGeneration])}>Add to canvas</button
+								><button
+									type="button"
+									disabled={!imageId || processing || processingGeneration}
+									onclick={() => replaceWithGeneration(activeGeneration)}
+									>Replace selected image</button
+								><a download="generation.png" href={activeGeneration.dataURL}>Download image</a>
+							</div>
+						{/if}
+						<label class="quality-note"
+							>Personal quality note<input
+								aria-label="Generation quality note"
+								maxlength="500"
+								bind:value={qualityNote}
+							/><button
+								type="button"
+								onclick={() => {
+									onGeneration?.({ ...activeGeneration, qualityNote: qualityNote.trim() });
+									operationStatus = 'Quality note saved on this device';
+								}}>Save note</button
+							></label
+						>
+					</section>
+				{/if}
+			</section>
+		{/if}
+
+		{#if generationJobs.length && lastRun?.pageKey === pageKey}
+			<section class="generation-queue" aria-label="Generation queue" aria-live="polite">
+				<strong
+					>{processingGeneration ? 'Generating' : 'Latest batch'} · {generationJobs.filter(
+						(job) => job.status === 'completed'
+					).length}/{generationJobs.length}</strong
+				>
+				{#each generationJobs as job (job.id)}<div class="queue-job">
+						<strong
+							>{DRAW_GENERATION_MODELS.find((model) => model.id === job.recipe.modelId)?.label ??
+								job.recipe.modelId}</strong
+						><span
+							>{job.message}{job.elapsedMs ? ` · ${(job.elapsedMs / 1000).toFixed(1)}s` : ''}</span
+						>{#if job.generation}<button
+								type="button"
+								onclick={() => job.generation && restoreGeneration(job.generation)}
+								>Preview result</button
+							>{/if}
+					</div>{/each}
+				{#if processingGeneration}<button type="button" onclick={cancelGeneration}
+						>Cancel remaining jobs</button
+					>{:else if generationJobs.some((job) => job.status === 'failed')}<button
+						type="button"
+						onclick={() => applyGeneration(true)}
+						>{isOwner ? 'Retry failed jobs' : 'Retry failed jobs (same run budget)'}</button
+					>{/if}
+			</section>
+		{/if}
+		{#if action === 'generate'}<div class="saved-generation-panel">
+				<DrawGenerationLibrary
+					{storageKey}
+					{userId}
+					{prompt}
+					reference={activeReference}
+					generation={activeGeneration}
+					onModifier={(text) => {
+						prompt = `${prompt.trim()}\n${text}`.trim();
+					}}
+					onReference={(reference) => {
+						attachedReference = reference;
+						useCanvasReference = false;
+						destination = 'preview';
+						action = 'generate';
+					}}
+					onRemix={restoreGenerationRecipe}
+				/>
+			</div>{/if}
+		{#if historyError}<p class="operation-error" role="alert">{historyError}</p>{/if}
+
+		{#if processing && !processingGeneration}
+			<div class="operation-progress" aria-live="polite">
+				<span>{operationStatus}{operationProgress ? ` · ${operationProgress}%` : ''}</span>
+				<progress
+					aria-label="Image editing progress"
+					max="100"
+					value={operationProgress || undefined}
+				></progress>
+			</div>
+		{:else if !processingGeneration && operationError}
+			<p class="operation-error" role="alert">{operationError}</p>
+		{:else if !processingGeneration && operationStatus}
+			<p class="operation-success" role="status">{operationStatus}</p>
+		{/if}
 	{/if}
 </div>
 

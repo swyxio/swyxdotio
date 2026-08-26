@@ -131,7 +131,9 @@ export async function saveDrawingGenerationLibraryEntry(userId, input, fetcher =
 				...(reference.assetId
 					? { assetId: reference.assetId, mimeType: reference.mimeType }
 					: await saveImage(userId, reference.dataURL, `${data.name} reference`, fetcher)),
-				...(reference.generationId ? { generationId: reference.generationId } : {})
+				...(reference.generationId ? { generationId: reference.generationId } : {}),
+				...(reference.role ? { role: reference.role } : {}),
+				...(reference.label ? { label: reference.label } : {})
 			});
 		data.generation = { ...metadata, ...output, referenceImages: references };
 	} else throw new Error('Choose an item to save.');
@@ -169,7 +171,7 @@ export async function removeDrawingGenerationLibraryEntry(userId, entry, fetcher
 	);
 }
 
-/** @param {string|undefined} userId @param {{assetId?:string,mimeType?:string,generationId?:string}} reference @param {typeof fetch} [fetcher] */
+/** @param {string|undefined} userId @param {{assetId?:string,mimeType?:string,generationId?:string,role?:string,label?:string}} reference @param {typeof fetch} [fetcher] */
 export async function readDrawingLibraryReference(userId, reference, fetcher = fetch) {
 	if (!reference.assetId) throw new Error('The saved reference has no asset.');
 	const blob = await (
@@ -179,7 +181,9 @@ export async function readDrawingLibraryReference(userId, reference, fetcher = f
 		dataURL: await asDataURL(blob),
 		mimeType: blob.type,
 		assetId: reference.assetId,
-		...(reference.generationId ? { generationId: reference.generationId } : {})
+		...(reference.generationId ? { generationId: reference.generationId } : {}),
+		...(reference.role ? { role: reference.role } : {}),
+		...(reference.label ? { label: reference.label } : {})
 	};
 }
 

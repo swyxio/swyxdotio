@@ -1,7 +1,7 @@
 const DATABASE_NAME = 'swyx-draw-generation-history';
 const STORE_NAME = 'drawing-pages';
 
-/** @typedef {{ dataURL: string, mimeType: string, generationId?: string, assetId?: string }} DrawingGenerationReference */
+/** @typedef {{ dataURL: string, mimeType: string, generationId?: string, assetId?: string, role?: 'inspiration'|'keep'|'parent', label?: string }} DrawingGenerationReference */
 /**
  * @typedef {{
  *   id: string,
@@ -74,11 +74,43 @@ export async function saveDrawingGenerationHistory(pageId, generations) {
 	const storage = await openGenerationHistory();
 	return new Promise((resolve, reject) => {
 		const transaction = storage.transaction(STORE_NAME, 'readwrite');
-		transaction.objectStore(STORE_NAME).put({ pageId, generations });
+		const store = transaction.objectStore(STORE_NAME);
+		const current = store.get(pageId);
+		current.onsuccess = () => store.put({ ...current.result, pageId, generations });
 		transaction.oncomplete = () => resolve(undefined);
 		transaction.onerror = () =>
 			reject(transaction.error ?? new Error('Image history could not be saved.'));
 		transaction.onabort = () =>
 			reject(transaction.error ?? new Error('Image history could not be saved.'));
+	});
+}
+
+/** Same account/page record as result history; draft updates never replace generations.
+ * @param {string} pageId @param {Record<string,unknown>} draft
+ */
+export async function saveDrawingGenerationDraft(pageId, draft) {
+	if (!pageId || typeof indexedDB === 'undefined') return;
+	const storage = await openGenerationHistory();
+	return new Promise((resolve, reject) => {
+		const transaction = storage.transaction(STORE_NAME, 'readwrite');
+		const store = transaction.objectStore(STORE_NAME);
+		const current = store.get(pageId);
+		current.onsuccess = () => store.put({ ...current.result, pageId, draft });
+		transaction.oncomplete = () => resolve(undefined);
+		transaction.onerror = () =>
+			reject(transaction.error ?? new Error('Generation draft could not be saved.'));
+		transaction.onabort = () =>
+			reject(transaction.error ?? new Error('Generation draft could not be saved.'));
+	});
+}
+/** @param {string} pageId @returns {Promise<Record<string,any>|undefined>} */
+export async function loadDrawingGenerationDraft(pageId) {
+	if (!pageId || typeof indexedDB === 'undefined') return;
+	const storage = await openGenerationHistory();
+	return new Promise((resolve, reject) => {
+		const request = storage.transaction(STORE_NAME).objectStore(STORE_NAME).get(pageId);
+		request.onsuccess = () => resolve(request.result?.draft);
+		request.onerror = () =>
+			reject(request.error ?? new Error('Generation draft could not be loaded.'));
 	});
 }

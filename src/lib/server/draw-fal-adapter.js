@@ -1,5 +1,10 @@
 import { getDrawFalModel, MAX_DRAW_FAL_REQUEST_BYTES } from '../draw-fal-models.js';
 import { DrawingGenerationError } from './draw-generation-error.js';
+import {
+	getDrawGenerationModel,
+	getDrawGenerationReferenceLimit,
+	MAX_DRAW_GENERATION_PROMPT_LENGTH
+} from '../draw-generation-models.js';
 
 const REQUEST_ID = /^[A-Za-z0-9_-]{1,128}$/;
 const IMAGE_DATA_URL = /^data:image\/(?:png|jpeg|webp|avif|gif);base64,[A-Za-z0-9+/]+={0,2}$/;
@@ -87,15 +92,43 @@ export const drawingFalAdapter = {
 	configured: (env) => typeof env.FAL_KEY === 'string' && env.FAL_KEY.length > 0,
 	async submit(input, { env, fetcher }) {
 		const model = modelFor(input.model.id);
+		if (input.image !== undefined && input.images !== undefined)
+			throw new DrawingGenerationError('Provide image or images, not both.', 422, 'input_rejected');
+		const images = input.images ?? (input.image ? [input.image] : []);
+		const descriptor = getDrawGenerationModel(model.id);
+		const limit = descriptor ? getDrawGenerationReferenceLimit(descriptor) : 0;
+		if (
+			!Array.isArray(images) ||
+			images.length > limit ||
+			(limit > 0 && !images.length) ||
+			images.some((image) => !(image instanceof Blob))
+		)
+			throw new DrawingGenerationError(
+				'The selected model does not support this number of reference images.',
+				422,
+				'input_rejected'
+			);
+		if (images.reduce((size, image) => size + image.size, 0) > MAX_DRAW_FAL_REQUEST_BYTES)
+			throw new DrawingGenerationError(
+				'The combined reference upload exceeds 12 MB.',
+				413,
+				'input_rejected'
+			);
+		if (!input.prompt.trim() || input.prompt.length > MAX_DRAW_GENERATION_PROMPT_LENGTH)
+			throw new DrawingGenerationError(
+				'Enter a prompt of at most 32,000 characters.',
+				422,
+				'input_rejected'
+			);
 		/** @type {Record<string, unknown>} */
 		const payload = { prompt: input.prompt, ...input.settings };
 		// Safeguards always use the provider defaults, including manual submissions.
 		delete payload.enable_safety_checker;
 		delete payload.safety_tolerance;
-		if (input.image) {
-			const image = await imageDataUrl(input.image);
+		if (images.length) {
+			const encodedImages = await Promise.all(images.map(imageDataUrl));
 			const key = 'imageInput' in model ? model.imageInput : 'image_urls';
-			payload[key] = key === 'image_url' ? image : [image];
+			payload[key] = key === 'image_url' ? encodedImages[0] : encodedImages;
 		}
 		if (model.kind !== 'image-to-video') Object.assign(payload, { sync_mode: true, num_images: 1 });
 		let response;
