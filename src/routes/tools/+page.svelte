@@ -1,131 +1,249 @@
 <script>
-	/** @type {{ authenticated: boolean, next: string }} */
+	import { onMount } from 'svelte';
+	import ToolsAiNotice from '$lib/ToolsAiNotice.svelte';
+	import { TOOLS_AI_POLICY } from '$lib/tools-ai-policy.js';
+	/** @type {import('./$types').PageData} */
 	export let data;
-
-	let password = '';
-	let loginError = '';
-	let loggingIn = false;
-
-	/** @param {SubmitEvent} event */
-	async function login(event) {
-		event.preventDefault();
-		loginError = '';
-		loggingIn = true;
+	let signingOut = false;
+	let error = '';
+	/** @type {{assistantTurnsThisHour:number,mediaJobsThisHour:number,estimatedReservedTodayUsd:number}|null} */
+	let aiUsage = null;
+	let usageUnavailable = false;
+	onMount(() => {
 		try {
-			const response = await fetch('/tools/api/session', {
-				method: 'POST',
-				credentials: 'same-origin',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ password })
-			});
-			if (!response.ok) {
-				loginError = response.status === 401 ? 'Incorrect password' : 'Could not unlock tools';
-				return;
-			}
-			location.href = data.next;
-		} finally {
-			loggingIn = false;
+			localStorage.setItem('swyx-tools:account', data.user?.id ?? 'guest');
+		} catch {}
+		const abort = new AbortController();
+		if (data.user) {
+			void fetch('/tools/api/ai/usage', {
+				cache: 'no-store',
+				headers: { 'X-Tools-User': data.user.id },
+				signal: abort.signal
+			})
+				.then(async (response) => {
+					if (!response.ok) throw new Error('Usage unavailable');
+					const result = await response.json();
+					aiUsage = result.usage;
+				})
+				.catch(() => {
+					if (!abort.signal.aborted) usageUnavailable = true;
+				});
+		}
+		return () => abort.abort();
+	});
+	async function logout() {
+		signingOut = true;
+		error = '';
+		try {
+			const response = await fetch('/tools/api/session', { method: 'DELETE' });
+			if (!response.ok) throw new Error('Could not sign out. Please try again.');
+			try {
+				localStorage.setItem('swyx-tools:account', 'guest');
+			} catch {}
+			location.assign('/tools');
+		} catch (failure) {
+			error = failure instanceof Error ? failure.message : 'Could not sign out.';
+			signingOut = false;
 		}
 	}
 </script>
 
 <svelte:head>
-	<title>Personal tools</title>
+	<title>Your tools · swyx.io</title>
 	<meta name="robots" content="noindex, nofollow, noarchive" />
 	<meta name="referrer" content="no-referrer" />
 </svelte:head>
-
 <section class="site-shell tools py-8">
-	<p class="eyebrow">Private utility</p>
-	<h1>Personal tools</h1>
-
-	{#if !data.authenticated}
-		<p class="plain-muted">Enter the tools password to continue.</p>
-		<form on:submit={login}>
-			<label>
-				<span>Password</span>
-				<input
-					name="password"
-					type="password"
-					autocomplete="current-password"
-					required
-					bind:value={password}
-				/>
-			</label>
-			{#if loginError}<p class="error">{loginError}</p>{/if}
-			<button class="plain-button" type="submit" disabled={loggingIn}
-				>{loggingIn ? 'Unlocking...' : 'Unlock tools'}</button
+	<p class="eyebrow">swyx.io / tools</p>
+	<h1>Your tools. Your workspace.</h1>
+	{#if data.authError}<p class="error" role="alert">{data.authError}</p>{/if}
+	{#if error}<p class="error" role="alert">{error}</p>{/if}
+	{#if data.user}
+		<div class="account">
+			<div><strong>{data.user.name || data.user.email}</strong><span>{data.user.email}</span></div>
+			<button class="plain-button" on:click={logout} disabled={signingOut}
+				>{signingOut ? 'Signing out…' : 'Sign out'}</button
 			>
-		</form>
+		</div>
+		<p class="plain-muted">
+			Your drawings sync to your Google account’s workspace. Other accounts have their own.
+		</p>
+		<details class="account-identity">
+			<summary>Account identity</summary>
+			<p>Google account ID: <code>{data.user.id}</code></p>
+			<p>
+				{data.user.isOwner ? 'Site owner' : 'Personal account'} · permissions are checked on the server.
+			</p>
+		</details>
+		{#if data.next !== '/tools'}<a class="plain-button continue" href={data.next}
+				>Continue to your tool →</a
+			>{/if}
 	{:else}
-		<p class="plain-muted">Small private utilities for maintaining swyx.io.</p>
-		<ul class="tool-list">
-			<li>
-				<a href="/box">
-					<strong>Big text box</strong>
-					<span>A distraction-free, oversized text box for quick notes.</span>
-				</a>
-			</li>
-			<li>
-				<a href="/draw">
-					<strong>Draw</strong>
-					<span>A multipage whiteboard that syncs your drawings securely.</span>
-				</a>
-			</li>
-			<li>
-				<a href="/tools/podcast">
-					<strong>Podcast studio</strong>
-					<span>Upload MP3s and prepend episodes to an R2-backed RSS feed.</span>
-				</a>
-			</li>
-			<li>
-				<a href="/tools/reclip">
-					<strong>Reclip</strong>
-					<span>Open the private self-hosted media downloader.</span>
-				</a>
-			</li>
-		</ul>
+		<p class="plain-muted">
+			Sign in to save and sync your drawings across devices. Everyone gets a separate workspace.
+		</p>
+		{#if data.googleConfigured}
+			<a
+				class="google-signin"
+				href="/tools/auth/google?next={encodeURIComponent(data.next)}"
+				data-sveltekit-reload
+			>
+				<svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"
+					><path
+						fill="#4285F4"
+						d="M43.61 24.46c0-1.36-.12-2.66-.35-3.92H24v7.42h11a9.4 9.4 0 0 1-4.08 6.18v5.14h6.61c3.87-3.56 6.08-8.82 6.08-14.82Z"
+					/><path
+						fill="#34A853"
+						d="M24 44c5.52 0 10.15-1.83 13.53-4.95l-6.61-5.14c-1.84 1.24-4.19 1.99-6.92 1.99-5.32 0-9.84-3.59-11.45-8.43H5.73v5.3A20 20 0 0 0 24 44Z"
+					/><path
+						fill="#FBBC05"
+						d="M12.55 27.47a12 12 0 0 1 0-6.94v-5.3H5.73a20 20 0 0 0 0 17.54l6.82-5.3Z"
+					/><path
+						fill="#EA4335"
+						d="M24 12.1c3.01 0 5.69 1.04 7.82 3.1l5.87-5.87A19.66 19.66 0 0 0 24 4 20 20 0 0 0 5.73 15.23l6.82 5.3C14.16 15.69 18.68 12.1 24 12.1Z"
+					/></svg
+				>
+				Sign in with Google
+			</a>
+		{:else}<p role="status">
+				Google sign-in is being configured. Browser-only tools still work below.
+			</p>{/if}
+		<p class="privacy">
+			Basic profile and email only. No access to Gmail or Drive. <a href="/tools/privacy">Privacy</a
+			>
+		</p>
 	{/if}
+	<ToolsAiNotice />
+	{#if data.user}
+		<section class="usage" aria-label="Your AI usage">
+			<strong>Your AI usage</strong>
+			{#if aiUsage}
+				<p>
+					{aiUsage.assistantTurnsThisHour}/{TOOLS_AI_POLICY.assistantTurnsPerHour} assistant turns · {aiUsage.mediaJobsThisHour}/{TOOLS_AI_POLICY.mediaJobsPerHour}
+					generations this hour
+				</p>
+				<p>
+					${aiUsage.estimatedReservedTodayUsd.toFixed(2)} / ${TOOLS_AI_POLICY.userEstimatedDailyUsd.toFixed(
+						2
+					)} estimated allowance reserved today. Resets at midnight UTC.
+				</p>
+			{:else if usageUnavailable}<p>
+					Usage is temporarily unavailable. Paid requests remain protected by the server’s limits.
+				</p>
+			{:else}<p>Loading your usage…</p>{/if}
+		</section>
+	{/if}
+	<ul class="tool-list">
+		<li>
+			<a href="/tools/logs"
+				><strong>Tool logs</strong><span
+					>Your AI requests, tool activity, and estimated usage.{#if data.user?.isOwner}
+						Includes everyone’s activity for you as site owner.{/if}</span
+				></a
+			>
+		</li>
+		<li>
+			<a href="/draw"
+				><strong>Draw</strong><span>A multipage whiteboard with your own drawings and library.</span
+				></a
+			>
+		</li>
+		<li>
+			<a href="/box"
+				><strong>Big text box</strong><span
+					>A distraction-free text box. Text stays on your device.</span
+				></a
+			>
+		</li>
+		{#if data.user?.isOwner}
+			<li>
+				<a href="/tools/podcast"
+					><strong>Podcast studio <small>Site owner</small></strong><span
+						>Publish episodes to your existing swyx.io feeds.</span
+					></a
+				>
+			</li>
+			<li>
+				<a href="/tools/reclip"
+					><strong>Reclip <small>Site owner</small></strong><span
+						>Open the separately hosted media downloader.</span
+					></a
+				>
+			</li>
+		{/if}
+	</ul>
 </section>
 
 <style>
-	.tools {
-		max-width: 42rem;
+	.usage {
+		font-size: 0.85rem;
+		color: var(--page-muted);
+		margin: 1rem 0;
 	}
-
+	.usage p {
+		margin: 0.25rem 0;
+	}
+	.tools {
+		max-width: 44rem;
+	}
 	.eyebrow {
 		color: var(--page-accent);
 		font-weight: 700;
 	}
-
-	label span {
-		color: var(--page-accent);
-		font-weight: 700;
-	}
-
-	form {
-		display: grid;
+	.account {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
 		gap: 1rem;
-		margin-top: 1.5rem;
-	}
-
-	label {
-		display: grid;
-		gap: 0.35rem;
-	}
-
-	input {
-		width: 100%;
 		border: 1px solid var(--page-border);
-		background: var(--page-bg);
-		color: var(--page-text);
-		padding: 0.7rem;
+		padding: 1rem;
+		margin: 1.5rem 0;
 	}
-
+	.account span {
+		display: block;
+		font-size: 0.875rem;
+		color: var(--page-muted);
+		overflow-wrap: anywhere;
+	}
+	.account-identity {
+		font-size: 0.8rem;
+		overflow-wrap: anywhere;
+		color: var(--page-muted);
+	}
+	.account-identity summary {
+		cursor: pointer;
+	}
+	.google-signin {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.75rem 1.25rem;
+		border: 1px solid #747775;
+		border-radius: 0.3rem;
+		color: #1f1f1f;
+		background: #fff;
+		font-weight: 600;
+		text-decoration: none;
+		margin-top: 0.75rem;
+	}
+	.google-signin:hover {
+		background: #f2f2f2;
+	}
+	.google-signin:focus-visible {
+		outline: 3px solid var(--page-accent);
+		outline-offset: 3px;
+	}
+	.privacy {
+		font-size: 0.85rem;
+		color: var(--page-muted);
+	}
 	.error {
 		color: var(--page-accent);
 	}
-
+	.continue {
+		display: inline-block;
+		margin-top: 0.75rem;
+	}
 	.tool-list {
 		display: grid;
 		gap: 0.75rem;
@@ -133,7 +251,6 @@
 		padding: 0;
 		list-style: none;
 	}
-
 	.tool-list a {
 		display: grid;
 		gap: 0.25rem;
@@ -141,8 +258,13 @@
 		padding: 1rem;
 		text-decoration: none;
 	}
-
-	.tool-list span {
+	.tool-list span,
+	small {
 		color: var(--page-muted);
+	}
+	small {
+		font-size: 0.75rem;
+		font-weight: 400;
+		margin-left: 0.5rem;
 	}
 </style>

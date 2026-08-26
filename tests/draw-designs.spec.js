@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
+import { authenticateTools, TEST_TOOLS_OWNER, TEST_TOOLS_MEMBER } from './helpers/tools-auth.js';
 
 /** @param {import('@playwright/test').Page} page */
 async function openDesignLibrary(page) {
@@ -12,7 +13,12 @@ async function openDesignLibrary(page) {
 async function scene(page) {
 	return /** @type {{ elements: any[], files: Record<string, any> }} */ (
 		await page.evaluate(() =>
-			JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[],"files":{}}')
+			JSON.parse(
+				localStorage.getItem(
+					document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+						'swyx-excalidraw:guest'
+				) ?? '{"elements":[],"files":{}}'
+			)
 		)
 	);
 }
@@ -125,11 +131,7 @@ test('authenticated assistant offers grounded Canva-style tasks and creates bran
 }) => {
 	await page.goto('/draw');
 	const origin = new URL(page.url()).origin;
-	const login = await page.request.post(`${origin}/tools/api/session`, {
-		headers: { Origin: origin },
-		data: { password: 'draw-test-password' }
-	});
-	expect(login.ok()).toBe(true);
+	await authenticateTools(page);
 	await page.reload();
 	let round = 0;
 	await page.route('**/tools/api/draw/agent', async (route) => {

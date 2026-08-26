@@ -1,7 +1,8 @@
+import { createTestAiLedger, ledgerRequest, seedTestJob } from './helpers/tools-ai-ledger.mjs';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { createPodcastStudioSession } from '../src/lib/podcast-admin-auth.js';
+import { createToolsSession } from '../src/lib/server/tools-auth.js';
 import {
 	cancelDrawingImage,
 	drawingFalTasks,
@@ -23,7 +24,7 @@ import {
 	resolveDrawFalModelSettings
 } from '../src/lib/draw-fal-models.js';
 
-const SESSION_SECRET = 'test-only-session-secret';
+const SESSION_SECRET = 'drawing-fal-test-only-session-secret';
 const FAL_KEY = 'test-only-provider-secret';
 const SOURCE_IMAGE = 'data:image/png;base64,c291cmNl';
 const EDITED_IMAGE = 'data:image/png;base64,ZWRpdGVk';
@@ -31,7 +32,7 @@ const REQUEST_ID = 'queued-job-123';
 
 /**
  * @param {{
- *   authenticated?: boolean,
+ *   authenticated?: boolean, owner?: boolean,
  *   form?: FormData,
  *   contentLength?: string,
  *   contentType?: string,
@@ -39,13 +40,17 @@ const REQUEST_ID = 'queued-job-123';
  *   falKey?: string,
  *   origin?: string,
  *   method?: 'POST' | 'GET' | 'DELETE',
+ *   ledger?: any,
+ *   seedJob?: boolean,
  *   query?: string
  * }} [options]
  */
 async function createEvent(options = {}) {
 	const url = new URL(`https://swyx.io/tools/api/draw/edit${options.query ?? ''}`);
 	const method = options.method ?? 'POST';
-	const headers = new Headers();
+	const headers = new Headers({
+		'X-Tools-User': options.owner === false ? 'other-google-sub' : 'owner-google-sub'
+	});
 	if (method !== 'GET' || options.origin) headers.set('Origin', options.origin ?? url.origin);
 	if (options.contentType) headers.set('Content-Type', options.contentType);
 	if (options.contentLength) headers.set('Content-Length', options.contentLength);
@@ -61,14 +66,42 @@ async function createEvent(options = {}) {
 		...(method === 'POST' ? { body: options.body ?? form } : {})
 	});
 	const session =
-		options.authenticated === false ? undefined : await createPodcastStudioSession(SESSION_SECRET);
+		options.authenticated === false
+			? undefined
+			: await createToolsSession(
+					{
+						id: options.owner === false ? 'other-google-sub' : 'owner-google-sub',
+						email: 'user@example.com',
+						name: 'Test User'
+					},
+					SESSION_SECRET
+				);
+	const ledger = options.ledger ?? createTestAiLedger();
+	const model = getDrawFalModel(url.searchParams.get('model'));
+	const requestId = url.searchParams.get('requestId');
+	if (
+		method !== 'POST' &&
+		options.seedJob !== false &&
+		model &&
+		requestId &&
+		/^[A-Za-z0-9_-]{1,128}$/.test(requestId)
+	) {
+		await seedTestJob(
+			ledger,
+			options.owner === false ? 'other-google-sub' : 'owner-google-sub',
+			model.id,
+			requestId
+		);
+	}
 	return /** @type {any} */ ({
 		request,
 		url,
 		cookies: { get: () => session },
 		platform: {
 			env: {
-				PODCAST_ADMIN_SESSION_SECRET: SESSION_SECRET,
+				TOOLS_SESSION_SECRET: SESSION_SECRET,
+				TOOLS_OWNER_GOOGLE_SUB: 'owner-google-sub',
+				DRAW_PAGES: options.ledger === null ? undefined : ledger.namespace,
 				FAL_KEY: options.falKey === undefined ? FAL_KEY : options.falKey
 			}
 		}
@@ -828,4 +861,112 @@ test('provider network failures never disclose the Worker secret', async () => {
 	});
 	assert.equal(response.status, 502);
 	assert.equal((await response.text()).includes(FAL_KEY), false);
+});
+
+test('signed nonowner Google identities can submit, read, and cancel their own funded provider jobs', async () => {
+	let called = false;
+	for (const [handler, method] of [
+		[editDrawingImage, 'POST'],
+		[pollDrawingImage, 'GET'],
+		[cancelDrawingImage, 'DELETE']
+	]) {
+		const response = await handler(
+			await createEvent({ owner: false, method, query: `?requestId=${REQUEST_ID}&model=flux-2` }),
+			async () => {
+				called = true;
+				return providerResponse(
+					method === 'POST' ? { request_id: REQUEST_ID } : { status: 'IN_QUEUE' }
+				);
+			}
+		);
+		assert.equal(response.status, method === 'POST' ? 202 : 200);
+	}
+	assert.equal(called, true);
+});
+
+test('paid image submission rejects stale account headers before calling the provider', async () => {
+	let called = false;
+	const event = await createEvent();
+	event.request.headers.set('X-Tools-User', 'previous-user');
+	assert.equal(
+		(
+			await editDrawingImage(event, async () => {
+				called = true;
+				return providerResponse({});
+			})
+		).status,
+		409
+	);
+	assert.equal(called, false);
+});
+
+test('provider status, results and cancellation reject unknown or another Google account jobs before network access', async () => {
+	const ledger = createTestAiLedger();
+	await seedTestJob(ledger, 'owner-google-sub', 'flux-2', REQUEST_ID);
+	let called = false;
+	for (const [handler, method] of [
+		[pollDrawingImage, 'GET'],
+		[cancelDrawingImage, 'DELETE']
+	]) {
+		for (const requestId of [REQUEST_ID, 'unknown-job']) {
+			const response = await handler(
+				await createEvent({
+					owner: false,
+					ledger,
+					seedJob: false,
+					method,
+					query: `?requestId=${requestId}&model=flux-2`
+				}),
+				async () => {
+					called = true;
+					return providerResponse({});
+				}
+			);
+			assert.equal(response.status, 404);
+		}
+	}
+	assert.equal(called, false);
+});
+
+test('media submission fails closed without a ledger or after durable funded quota exhaustion', async () => {
+	let called = false;
+	const ledger = createTestAiLedger();
+	for (let index = 0; index < 5; index++)
+		await ledgerRequest(ledger, 'admit', {
+			userId: 'owner-google-sub',
+			kind: 'media',
+			model: 'flux-2',
+			estimatedReservedUsd: 0.05
+		});
+	for (const [value, expected] of [
+		[null, 503],
+		[ledger, 429]
+	]) {
+		const response = await editDrawingImage(await createEvent({ ledger: value }), async () => {
+			called = true;
+			return providerResponse({ request_id: REQUEST_ID });
+		});
+		assert.equal(response.status, expected);
+	}
+	assert.equal(called, false);
+});
+
+test('accepted media jobs are withheld if ownership registration fails, while the estimated reservation remains charged', async () => {
+	const ledger = createTestAiLedger();
+	const realGet = ledger.namespace.get;
+	ledger.namespace.get = (id) => ({
+		fetch: async (request) =>
+			new URL(request.url).pathname === '/ai/register'
+				? new Response('Unavailable', { status: 503 })
+				: realGet(id).fetch(request)
+	});
+	const response = await editDrawingImage(await createEvent({ ledger }), async () =>
+		providerResponse({ request_id: REQUEST_ID })
+	);
+	assert.equal(response.status, 503);
+	assert.equal((await response.text()).includes(REQUEST_ID), false);
+	const row = ledger.database.prepare('SELECT * FROM tools_ai_usage').get();
+	assert.equal(row.status, 'reserved');
+	assert.ok(row.reserved_micros > 0);
+	assert.equal(row.provider_request_id, null);
 });

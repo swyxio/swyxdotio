@@ -1,24 +1,18 @@
-import {
-	clearPersonalToolsSession,
-	createPersonalToolsSession,
-	isPersonalToolsSessionAuthenticated
-} from '$lib/personal-tools-auth';
+import { clearPersonalToolsSession } from '$lib/personal-tools-auth';
+import { getToolsSession, googleAuthConfig } from '$lib/server/tools-auth.js';
 import { privateJson } from '$lib/podcast-admin-route';
 
 /** @type {import('./$types').RequestHandler} */
 export async function GET(event) {
-	return privateJson({ authenticated: await isPersonalToolsSessionAuthenticated(event) });
-}
-
-/** @type {import('./$types').RequestHandler} */
-export async function POST(event) {
-	const body = await event.request.json().catch(() => ({}));
-	await createPersonalToolsSession(event, body.password);
-	return privateJson({ authenticated: true });
+	return privateJson(await getToolsSession(event));
 }
 
 /** @type {import('./$types').RequestHandler} */
 export async function DELETE(event) {
 	clearPersonalToolsSession(event);
-	return privateJson({ authenticated: false });
+	return privateJson({
+		authenticated: false,
+		user: null,
+		googleConfigured: Boolean(googleAuthConfig(event.platform))
+	});
 }

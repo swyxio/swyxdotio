@@ -1,5 +1,7 @@
 <script>
 	import { tick } from 'svelte';
+	import ToolsAiNotice from '$lib/ToolsAiNotice.svelte';
+	import { recordToolActivity } from '$lib/tools-activity-client.js';
 	import { DRAW_IMAGE_TOOLS, processImageTool } from '$lib/draw-image-tools.js';
 	import { prepareDrawingFalImage } from '$lib/draw-fal-image.js';
 	import { runDrawingFalGeneration } from '$lib/draw-fal-queue.js';
@@ -32,6 +34,7 @@
 	 *  captureUpdate: typeof import('@excalidraw/excalidraw').CaptureUpdateAction.IMMEDIATELY,
 	 *  cloudAvailable?: boolean,
 	 *  authenticated?: boolean,
+	 *  userId?: string,
 	 *  onCloudLimit?: () => void,
 	 *  backgroundProcessing?: boolean,
 	 *  backgroundControls?: import('svelte').Snippet,
@@ -53,6 +56,7 @@
 		captureUpdate,
 		cloudAvailable = false,
 		authenticated = false,
+		userId,
 		onCloudLimit,
 		backgroundProcessing = false,
 		backgroundControls,
@@ -578,6 +582,7 @@
 	async function applyLocalImageTool() {
 		if (processing || processingFal || !selectedTool) return;
 		const selectedAction = /** @type {ImageAction} */ (action);
+		const activityUser = userId;
 		processing = true;
 		operationProgress = 0;
 		operationStatus = 'Preparing image';
@@ -606,7 +611,13 @@
 				result.type || 'image/png',
 				`${selectedTool?.label ?? 'Image edit'} applied`
 			);
+			void recordToolActivity(activityUser, `draw.image.${selectedAction}`);
 		} catch (error) {
+			void recordToolActivity(
+				activityUser,
+				`draw.image.${selectedAction}`,
+				error instanceof Error && error.name === 'AbortError' ? 'cancelled' : 'failed'
+			);
 			if (error instanceof Error && error.name === 'AbortError') {
 				operationStatus = '';
 			} else {
@@ -668,6 +679,7 @@
 									}
 								});
 					const result = await runDrawingFalGeneration({
+						userId,
 						image: prepared?.blob,
 						prompt: generationPrompt,
 						model: generationModel.id,
@@ -1252,12 +1264,13 @@
 					</div>
 				{/if}
 				<p class="fal-upload-hint">
-					{authenticated ? 'Signed in · ' : 'Sign in required · '}
+					{authenticated ? 'Funded by swyx.io · ' : 'Sign in required · '}
 					{uploadsSelectedImage
 						? 'Large images automatically fit each model’s limits and the secure upload limit.'
 						: 'Text-to-image workflows only send your prompt; the selected image is not uploaded.'}
 				</p>
 			</div>
+			<ToolsAiNotice />
 			{#each selectedWorkflowParameters as folder (folder.kind)}
 				{#if folder.parameters.length}
 					<section class="fal-parameter-group" aria-label="{folder.label} settings">

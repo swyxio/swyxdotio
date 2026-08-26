@@ -1,7 +1,8 @@
+import { createTestAiLedger, ledgerRequest } from './helpers/tools-ai-ledger.mjs';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { createPodcastStudioSession } from '../src/lib/podcast-admin-auth.js';
+import { createToolsSession } from '../src/lib/server/tools-auth.js';
 import {
 	DRAW_AGENT_MODEL,
 	MAX_DRAW_AGENT_REQUEST_BYTES,
@@ -14,13 +15,14 @@ import {
 	readDrawingAgentBudget
 } from '../src/lib/server/draw-agent-budget.js';
 
-const SESSION_SECRET = 'drawing-agent-test-only-session';
+const SESSION_SECRET = 'drawing-agent-test-only-session-secret';
 const SCREENSHOT = 'data:image/webp;base64,c2FmZS12aWV3cG9ydA==';
 
-/** @param {{ authenticated?: boolean, body?: unknown, ai?: any, origin?: string, contentType?: string, contentLength?: string }} [options] */
+/** @param {{ authenticated?: boolean, owner?: boolean, body?: unknown, ai?: any, origin?: string, contentType?: string, contentLength?: string, ledger?: any }} [options] */
 async function createEvent(options = {}) {
 	const url = new URL('https://swyx.io/tools/api/draw/agent');
 	const headers = new Headers({
+		'X-Tools-User': options.owner === false ? 'other-google-sub' : 'owner-google-sub',
 		Origin: options.origin ?? url.origin,
 		'Content-Type': options.contentType ?? 'application/json'
 	});
@@ -33,14 +35,26 @@ async function createEvent(options = {}) {
 		)
 	});
 	const session =
-		options.authenticated === false ? undefined : await createPodcastStudioSession(SESSION_SECRET);
+		options.authenticated === false
+			? undefined
+			: await createToolsSession(
+					{
+						id: options.owner === false ? 'other-google-sub' : 'owner-google-sub',
+						email: 'user@example.com',
+						name: 'Test User'
+					},
+					SESSION_SECRET
+				);
 	return /** @type {any} */ ({
 		url,
 		request,
 		cookies: { get: () => session },
 		platform: {
 			env: {
-				PODCAST_ADMIN_SESSION_SECRET: SESSION_SECRET,
+				TOOLS_SESSION_SECRET: SESSION_SECRET,
+				TOOLS_OWNER_GOOGLE_SUB: 'owner-google-sub',
+				DRAW_PAGES:
+					options.ledger === null ? undefined : (options.ledger ?? createTestAiLedger()).namespace,
 				AI:
 					options.ai === undefined
 						? { run: async () => ({ choices: [{ message: { content: 'Done.' } }] }) }
@@ -162,7 +176,7 @@ test('drawing assistant signs shared run budgets, tracks model tokens, and rejec
 			ai: {
 				run: async () => {
 					called = true;
-					return {};
+					return { choices: [{ message: { content: 'Done.' } }] };
 				}
 			}
 		})
@@ -264,4 +278,117 @@ test('drawing assistant rejects oversized requests, untrusted screenshot URLs, a
 		})
 	);
 	assert.equal(invalidTool.status, 502);
+});
+
+test('signed nonowner Google identities receive funded, durably limited AI access', async () => {
+	let called = false;
+	const response = await runDrawingAgent(
+		await createEvent({
+			owner: false,
+			ai: {
+				run: async () => {
+					called = true;
+					return { choices: [{ message: { content: 'Done.' } }] };
+				}
+			}
+		})
+	);
+	assert.equal(response.status, 200);
+	assert.equal(called, true);
+});
+
+test('drawing assistant rejects stale account headers before spending', async () => {
+	let called = false;
+	const event = await createEvent({
+		ai: {
+			run: async () => {
+				called = true;
+				return {};
+			}
+		}
+	});
+	event.request.headers.set('X-Tools-User', 'previous-user');
+	assert.equal((await runDrawingAgent(event)).status, 409);
+	assert.equal(called, false);
+});
+
+test('missing or failed durable usage tracking prevents all funded model calls', async () => {
+	let called = false;
+	for (const ledger of [
+		null,
+		{
+			namespace: {
+				idFromName: (name) => name,
+				get: () => ({
+					fetch: async () => {
+						throw new Error('Offline');
+					}
+				})
+			}
+		}
+	]) {
+		const response = await runDrawingAgent(
+			await createEvent({
+				ledger,
+				ai: {
+					run: async () => {
+						called = true;
+						return {};
+					}
+				}
+			})
+		);
+		assert.equal(response.status, 503);
+	}
+	assert.equal(called, false);
+});
+
+test('replaying a signed per-run budget cannot bypass durable per-account funded limits', async () => {
+	const ledger = createTestAiLedger();
+	const budget = await createDrawingAgentBudget(1, SESSION_SECRET);
+	let calls = 0;
+	const ai = {
+		run: async () => {
+			calls++;
+			return {
+				choices: [{ message: { content: 'Done.' } }],
+				usage: { prompt_tokens: 10, completion_tokens: 10 }
+			};
+		}
+	};
+	for (let index = 0; index < 21; index++) {
+		const response = await runDrawingAgent(
+			await createEvent({
+				ledger,
+				ai,
+				body: { messages: [{ role: 'user', content: 'Continue' }], budget }
+			})
+		);
+		assert.equal(response.status, index < 20 ? 200 : 429);
+	}
+	assert.equal(calls, 20);
+	assert.equal(
+		ledger.database.prepare('SELECT COUNT(*) AS count FROM tools_ai_usage').get().count,
+		20
+	);
+});
+
+test('model failures are metadata-logged without prompts or model errors and keep their reservation', async () => {
+	const ledger = createTestAiLedger();
+	const response = await runDrawingAgent(
+		await createEvent({
+			ledger,
+			body: { messages: [{ role: 'user', content: 'PRIVATE_PROMPT' }] },
+			ai: {
+				run: async () => {
+					throw new Error('PRIVATE_PROVIDER_ERROR');
+				}
+			}
+		})
+	);
+	assert.equal(response.status, 502);
+	const row = ledger.database.prepare('SELECT * FROM tools_ai_usage').get();
+	assert.equal(row.status, 'failed');
+	assert.equal(row.reserved_micros, 50_000);
+	assert.doesNotMatch(JSON.stringify(row), /PRIVATE/);
 });

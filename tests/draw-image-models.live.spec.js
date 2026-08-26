@@ -45,7 +45,12 @@ test.describe('real private image-model inference', () => {
 			await expect(toolbox.getByRole('button', { name: tool.label, exact: true })).toBeVisible();
 			const original = await page.evaluate(() => {
 				const scene = /** @type {{ elements: { type: string, fileId: string }[] }} */ (
-					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+					JSON.parse(
+						localStorage.getItem(
+							document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+								'swyx-excalidraw:guest'
+						) ?? '{"elements":[]}'
+					)
 				);
 				return scene.elements.find((element) => element.type === 'image')?.fileId;
 			});
@@ -58,7 +63,12 @@ test.describe('real private image-model inference', () => {
 					.waitForFunction(
 						(sourceFileId) => {
 							const scene = /** @type {{ elements: { type: string, fileId: string }[] }} */ (
-								JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+								JSON.parse(
+									localStorage.getItem(
+										document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+											'swyx-excalidraw:guest'
+									) ?? '{"elements":[]}'
+								)
 							);
 							const image = scene.elements.find((element) => element.type === 'image');
 							return image?.fileId && image.fileId !== sourceFileId ? image.fileId : undefined;

@@ -1,5 +1,7 @@
 <script>
 	import { onMount, tick } from 'svelte';
+	import { recordToolActivity } from '$lib/tools-activity-client.js';
+	import { drawingStorageKey, TOOLS_ACCOUNT_EVENT_KEY } from '$lib/draw-account.js';
 	import '@excalidraw/excalidraw/index.css';
 	import { DRAW_MEME_TEMPLATES, fetchMemeTemplates, searchMemeTemplates } from '$lib/draw-memes.js';
 	import { orderRecentDrawingPages, searchWorkspaceCommands } from '$lib/draw-workspace.js';
@@ -26,11 +28,12 @@
 	import DrawAgent from '$lib/DrawAgent.svelte';
 	import DrawImageToolbox from '$lib/DrawImageToolbox.svelte';
 
-	const STORAGE_KEY = 'swyx-excalidraw';
-	const PAGE_STORAGE_KEY = `${STORAGE_KEY}:pages`;
-	const LIBRARY_STORAGE_KEY = `${STORAGE_KEY}:library`;
-	const INSTALLED_LIBRARY_STORAGE_KEY = `${LIBRARY_STORAGE_KEY}:installed-defaults`;
-	const BACKGROUND_MODE_STORAGE_KEY = `${STORAGE_KEY}:background-mode`;
+	// Set once after the server identifies the account, before reading any drawing data.
+	let STORAGE_KEY = $state('');
+	let PAGE_STORAGE_KEY = '';
+	let LIBRARY_STORAGE_KEY = '';
+	let INSTALLED_LIBRARY_STORAGE_KEY = '';
+	let BACKGROUND_MODE_STORAGE_KEY = '';
 	const PAGE_API = '/tools/api/draw/pages';
 	const SAVE_DELAY = 800;
 	const MAX_CLOUD_SCENE_BYTES = 1_800_000;
@@ -96,6 +99,10 @@
 	let pageNameDraft = $state('');
 	let cloudAvailable = $state(false);
 	let toolsAuthenticated = $state(false);
+	/** @type {{ id: string, email: string, name: string, isOwner: boolean } | null} */
+	let toolsUser = $state(null);
+	let accountError = $state('');
+	let accountChanged = false;
 	let needsSignIn = $state(false);
 	/** @type {'local' | 'saving' | 'saved' | 'error'} */
 	let saveStatus = $state('local');
@@ -188,11 +195,12 @@
 			...generated.slice(0, Math.max(1, 32 - originals.length)),
 			...originals
 		].slice(0, 32);
-		void saveDrawingGenerationHistory(activePageId, $state.snapshot(imageGenerations)).catch(
-			(error) => {
-				console.warn('Generation history could not be saved on this device.', error);
-			}
-		);
+		void saveDrawingGenerationHistory(
+			`${STORAGE_KEY}:${activePageId}`,
+			$state.snapshot(imageGenerations)
+		).catch((error) => {
+			console.warn('Generation history could not be saved on this device.', error);
+		});
 	}
 
 	$effect(() => {
@@ -200,7 +208,7 @@
 		if (!pageId) return;
 		imageGenerations = [];
 		let cancelled = false;
-		void loadDrawingGenerationHistory(pageId)
+		void loadDrawingGenerationHistory(`${STORAGE_KEY}:${pageId}`)
 			.then((history) => {
 				if (cancelled || activePageId !== pageId) return;
 				const pending = imageGenerations;
@@ -411,8 +419,26 @@
 		const response = await fetch(`${PAGE_API}${path}`, {
 			...options,
 			cache: 'no-store',
-			headers: { 'Content-Type': 'application/json', ...options.headers }
+			headers: {
+				'Content-Type': 'application/json',
+				'X-Tools-User': toolsUser?.id ?? 'guest',
+				...options.headers
+			}
 		});
+		if (
+			response.status === 409 &&
+			(
+				await response
+					.clone()
+					.json()
+					.catch(() => ({}))
+			).code === 'account_changed'
+		) {
+			accountChanged = true;
+			pendingSave = undefined;
+			location.reload();
+			throw new Error('Your account changed. Reloading your workspace.');
+		}
 		if (
 			response.status === 401 ||
 			response.status === 403 ||
@@ -482,7 +508,7 @@
 		if (saveTimer) clearTimeout(saveTimer);
 		const saving = pendingSave;
 		pendingSave = undefined;
-		if (!cloudAvailable || !saving) return;
+		if (accountChanged || !cloudAvailable || !saving) return;
 
 		saveStatus = 'saving';
 		try {
@@ -646,6 +672,29 @@
 	 * @param {{ signal: AbortSignal, onProgress: (message: string) => void, reserveSpending: (amount: number, label: string) => void, getBudget: () => string | undefined, updateBudget: (token: string, spendingUsd: number) => void }} operation
 	 */
 	async function applyAgentImageTool(action, options, operation) {
+		const activityUser = toolsUser?.id;
+		try {
+			const result = await performAgentImageTool(action, options, operation);
+			if (action !== 'fal' && action !== 'background')
+				void recordToolActivity(activityUser, `draw.image.${action}`);
+			return result;
+		} catch (error) {
+			if (action !== 'fal' && action !== 'background')
+				void recordToolActivity(
+					activityUser,
+					`draw.image.${action}`,
+					error instanceof Error && error.name === 'AbortError' ? 'cancelled' : 'failed'
+				);
+			throw error;
+		}
+	}
+
+	/**
+	 * @param {string} action
+	 * @param {Record<string, string | number>} options
+	 * @param {{ signal: AbortSignal, onProgress: (message: string) => void, reserveSpending: (amount: number, label: string) => void, getBudget: () => string | undefined, updateBudget: (token: string, spendingUsd: number) => void }} operation
+	 */
+	async function performAgentImageTool(action, options, operation) {
 		if (!editor || !updateElement || !captureImmediately)
 			throw new Error('The drawing editor is unavailable.');
 		const requestedId = typeof options.id === 'string' ? options.id : selectedImageId;
@@ -712,6 +761,7 @@
 			const agentBudget = operation.getBudget();
 			if (!agentBudget) throw new Error('The assistant spending authorization is unavailable.');
 			const generated = await runDrawingFalGeneration({
+				userId: toolsUser?.id,
 				image: prepared?.blob,
 				prompt: imagePrompt,
 				model: model.id,
@@ -921,6 +971,7 @@
 
 	/** @param {string} templateId @param {Record<string, string>} [options] */
 	async function insertDesign(templateId, options = {}) {
+		const activityUser = toolsUser?.id;
 		if (!editor || !convertElements || !captureImmediately)
 			throw new Error('The drawing canvas is not ready.');
 		const template = getDrawingDesignTemplate(templateId);
@@ -949,6 +1000,7 @@
 		});
 		selectedArtboardId = frame.id;
 		designStatus = `${design.format.width} × ${design.format.height} artboard created`;
+		void recordToolActivity(activityUser, 'draw.design.insert');
 		focusDesignArtboard(elements);
 		return {
 			frameId: frame.id,
@@ -1070,6 +1122,7 @@
 
 	/** @param {string} frameId @param {'png' | 'jpg' | 'svg'} format @param {number} [scale] */
 	async function exportDesign(frameId, format, scale = 1) {
+		const activityUser = toolsUser?.id;
 		if (!editor || !exportToBlob || !exportToSvg)
 			throw new Error('The drawing export is not ready.');
 		const frame = editor
@@ -1117,6 +1170,7 @@
 			download.remove();
 			setTimeout(() => URL.revokeObjectURL(url), 60_000);
 			designStatus = `Downloaded ${format.toUpperCase()} · ${frame.width * scale} × ${frame.height * scale}`;
+			void recordToolActivity(activityUser, 'draw.design.export');
 			return {
 				exported: true,
 				format,
@@ -1235,12 +1289,15 @@
 	/** @param {typeof DRAW_MEME_TEMPLATES[number]} template */
 	async function insertMemeTemplate(template) {
 		if (!editor || !convertElements || !captureImmediately || isInsertingMeme) return;
+		const activityUser = toolsUser?.id;
 		isInsertingMeme = true;
 		memeError = '';
 		try {
 			const { insertMemeImage } = await import('$lib/draw-meme-image.js');
 			await insertMemeImage(editor, template, { convertElements, captureImmediately });
+			void recordToolActivity(activityUser, 'draw.meme.insert');
 		} catch (error) {
+			void recordToolActivity(activityUser, 'draw.meme.insert', 'failed');
 			memeError = error instanceof Error ? error.message : 'The meme image could not be added.';
 		} finally {
 			isInsertingMeme = false;
@@ -1360,6 +1417,7 @@
 
 	async function removeSelectedImageBackground() {
 		if (!editor || !updateElement || !captureImmediately || !selectedImageId) return;
+		const activityUser = toolsUser?.id;
 		const image = editor
 			.getSceneElements()
 			.find((element) => element.id === selectedImageId && element.type === 'image');
@@ -1436,6 +1494,7 @@
 				captureUpdate: captureImmediately
 			});
 			backgroundStatus = 'Background removed';
+			void recordToolActivity(activityUser, 'draw.image.background-remove');
 			backgroundProgress = 100;
 			if (exceedsCloudLimit) {
 				saveStatus = 'error';
@@ -1444,7 +1503,9 @@
 		} catch (error) {
 			if (error instanceof Error && error.name === 'AbortError') {
 				backgroundStatus = '';
+				void recordToolActivity(activityUser, 'draw.image.background-remove', 'cancelled');
 			} else {
+				void recordToolActivity(activityUser, 'draw.image.background-remove', 'failed');
 				backgroundError =
 					error instanceof Error ? error.message : 'Could not remove the background.';
 				backgroundStatus = '';
@@ -1549,14 +1610,31 @@
 		/** @type {ReturnType<typeof import('react-dom/client').createRoot> | undefined} */
 		let root;
 		let destroyed = false;
-		void fetch('/tools/api/session', { credentials: 'same-origin', cache: 'no-store' })
-			.then((response) => (response.ok ? response.json() : undefined))
-			.then((session) => {
-				if (!destroyed) toolsAuthenticated = session?.authenticated === true;
-			})
-			.catch(() => {});
 
 		async function mountEditor() {
+			try {
+				const response = await fetch('/tools/api/session', {
+					credentials: 'same-origin',
+					cache: 'no-store'
+				});
+				if (!response.ok) throw new Error('Could not verify your account. Reload to try again.');
+				const session = await response.json();
+				if (destroyed) return;
+				toolsUser = session.user ?? null;
+				toolsAuthenticated = session.authenticated === true;
+				void recordToolActivity(toolsUser?.id, 'draw.open');
+				STORAGE_KEY = drawingStorageKey(toolsUser);
+				PAGE_STORAGE_KEY = `${STORAGE_KEY}:pages`;
+				LIBRARY_STORAGE_KEY = `${STORAGE_KEY}:library`;
+				INSTALLED_LIBRARY_STORAGE_KEY = `${LIBRARY_STORAGE_KEY}:installed-defaults`;
+				BACKGROUND_MODE_STORAGE_KEY = `${STORAGE_KEY}:background-mode`;
+				try {
+					localStorage.setItem(TOOLS_ACCOUNT_EVENT_KEY, toolsUser?.id ?? 'guest');
+				} catch {}
+			} catch {
+				accountError = 'Could not verify your account. Reload to try again.';
+				return;
+			}
 			const [
 				{ createElement, useState },
 				{ createRoot },
@@ -1679,6 +1757,36 @@
 		}
 
 		void mountEditor();
+		const accountUpdated = () => {
+			accountChanged = true;
+			pendingSave = undefined;
+			if (saveTimer) clearTimeout(saveTimer);
+			backgroundAbort?.abort();
+			location.reload();
+		};
+		/** @param {StorageEvent} event */
+		const accountStorageChanged = (event) => {
+			if (
+				STORAGE_KEY &&
+				event.key === TOOLS_ACCOUNT_EVENT_KEY &&
+				event.newValue !== (toolsUser?.id ?? 'guest')
+			)
+				accountUpdated();
+		};
+		const verifyAccount = async () => {
+			if (destroyed || !STORAGE_KEY || document.visibilityState === 'hidden') return;
+			try {
+				const response = await fetch('/tools/api/session', {
+					credentials: 'same-origin',
+					cache: 'no-store'
+				});
+				if (!response.ok) return;
+				const session = await response.json();
+				if (!destroyed && (session.user?.id ?? null) !== (toolsUser?.id ?? null)) accountUpdated();
+			} catch {}
+		};
+		window.addEventListener('storage', accountStorageChanged);
+		window.addEventListener('focus', verifyAccount);
 		const saveWhenHidden = () => {
 			if (document.visibilityState === 'hidden') void flushPendingSave();
 		};
@@ -1696,6 +1804,8 @@
 
 		return () => {
 			destroyed = true;
+			window.removeEventListener('storage', accountStorageChanged);
+			window.removeEventListener('focus', verifyAccount);
 			backgroundAbort?.abort();
 			document.removeEventListener('visibilitychange', saveWhenHidden);
 			window.removeEventListener('keydown', openCommandsFromKeyboard, { capture: true });
@@ -1714,12 +1824,24 @@
 	/>
 </svelte:head>
 
-<div class="draw-canvas" role="application" aria-label="Drawing canvas" bind:this={canvas}></div>
+{#if accountError}<div class="account-error" role="alert">
+		<p>{accountError}</p>
+		<button onclick={() => location.reload()}>Reload workspace</button>
+	</div>{/if}
+
+<div
+	class="draw-canvas"
+	data-storage-key={STORAGE_KEY}
+	role="application"
+	aria-label="Drawing canvas"
+	bind:this={canvas}
+></div>
 
 {#if editor && activePageId}
 	<DrawAgent
 		authenticated={toolsAuthenticated}
-		pageId={activePageId}
+		userId={toolsUser?.id}
+		pageId={`${STORAGE_KEY}:${activePageId}`}
 		executeCommand={executeAgentCommand}
 		captureViewport={() => captureVisibleDrawingViewport(canvas)}
 	/>
@@ -1809,6 +1931,7 @@
 				captureUpdate={captureImmediately}
 				{cloudAvailable}
 				authenticated={toolsAuthenticated}
+				userId={toolsUser?.id}
 				backgroundProcessing={isRemovingBackground}
 				generations={imageGenerations}
 				onGeneration={rememberImageGeneration}
@@ -1914,6 +2037,11 @@
 					</span>
 				</div>
 
+				{#if toolsAuthenticated}<p class="page-logging">
+						<a href="/tools/logs">Tool activity is logged</a> · visible to you and swyx; drawing contents
+						stay private.
+					</p>{/if}
+
 				{#each recentPages as page (page.id)}
 					<div class="page-row" class:active={page.id === activePageId}>
 						{#if renamingPageId === page.id}
@@ -2004,6 +2132,7 @@
 					New page
 				</button>
 
+				{#if toolsUser}<a class="sync-link" href="/tools">{toolsUser.email} · Account</a>{/if}
 				{#if needsSignIn}
 					<a class="sync-link" href="/tools?next=/draw">Sign in to sync across devices</a>
 				{/if}
@@ -2300,6 +2429,12 @@
 {/if}
 
 <style>
+	.account-error {
+		position: fixed;
+		inset: 30% 1rem auto;
+		z-index: 20;
+		text-align: center;
+	}
 	.draw-canvas {
 		position: fixed;
 		inset: 0;
@@ -2637,6 +2772,12 @@
 
 	.save-status[data-status='saved'] {
 		color: #328357;
+	}
+	.page-logging {
+		margin: 0.4rem 0;
+		font-size: 0.7rem;
+		color: #64748b;
+		line-height: 1.4;
 	}
 
 	.save-status[data-status='saving'] {
