@@ -1,4 +1,4 @@
-import { isPodcastStudioSessionValid, podcastStudioCookieName } from '../podcast-admin-auth.js';
+import { getToolsUser } from './tools-auth.js';
 import { privateJson, requireSameOrigin } from '../podcast-admin-route.js';
 import {
 	DEFAULT_DRAW_FAL_MODEL,
@@ -75,16 +75,19 @@ function upstreamError(status) {
  * @param {Pick<import('@sveltejs/kit').RequestEvent, 'cookies' | 'platform' | 'request' | 'url'>} event
  */
 async function authenticate(event) {
-	const sessionSecret = event.platform?.env?.PODCAST_ADMIN_SESSION_SECRET;
-	if (
-		!sessionSecret ||
-		!(await isPodcastStudioSessionValid(
-			event.cookies.get(podcastStudioCookieName()),
-			sessionSecret
-		))
-	) {
-		return privateJson({ error: 'Sign in to edit images with AI.' }, { status: 401 });
-	}
+	const user = await getToolsUser(event);
+	if (!user) return privateJson({ error: 'Sign in to edit images with AI.' }, { status: 401 });
+	if (!user.isOwner)
+		return privateJson(
+			{ error: 'Hosted AI image editing is available only to the site owner.' },
+			{ status: 403 }
+		);
+	const expectedUser = event.request.headers.get('X-Tools-User');
+	if (expectedUser !== null && expectedUser !== user.id)
+		return privateJson(
+			{ code: 'account_changed', error: 'Your Google account changed. Reload before continuing.' },
+			{ status: 409 }
+		);
 	if (event.request.method !== 'GET') requireSameOrigin(event.request, event.url);
 	const falKey = event.platform?.env?.FAL_KEY;
 	if (!falKey)
@@ -215,7 +218,7 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 			chargedBudget = await chargeDrawingAgentBudget(
 				agentBudget,
 				estimateDrawFalModelCost(model, modelSettings),
-				/** @type {string} */ (event.platform?.env?.PODCAST_ADMIN_SESSION_SECRET)
+				/** @type {string} */ (event.platform?.env?.TOOLS_SESSION_SECRET)
 			);
 		} catch (error) {
 			return privateJson(

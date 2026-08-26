@@ -1,19 +1,16 @@
 import { expect, test } from '@playwright/test';
+import { authenticateTools, TEST_TOOLS_OWNER, TEST_TOOLS_MEMBER } from './helpers/tools-auth.js';
 
 const pagesPath = '/tools/api/draw/pages';
 
 /** @param {import('@playwright/test').Page} page */
 async function unlockDrawingPages(page) {
 	const origin = new URL(page.url()).origin;
-	const response = await page.request.post(`${origin}/tools/api/session`, {
-		headers: { Origin: origin },
-		data: { password: 'draw-test-password' }
-	});
-	expect(response.ok()).toBe(true);
+	await authenticateTools(page);
 	return origin;
 }
 
-test('cloud drawing pages require the existing private tools session', async ({ page }) => {
+test('cloud drawing pages require the Google tools session', async ({ page }) => {
 	await page.goto('/draw');
 	const origin = new URL(page.url()).origin;
 
@@ -22,11 +19,11 @@ test('cloud drawing pages require the existing private tools session', async ({ 
 	expect(response.headers()['cache-control']).toContain('no-store');
 	const session = await page.request.get(`${origin}/tools/api/session`);
 	expect(session.ok()).toBe(true);
-	expect(await session.json()).toEqual({ authenticated: false });
+	expect(await session.json()).toMatchObject({ authenticated: false, user: null });
 	expect(session.headers()['cache-control']).toContain('no-store');
 
 	const mutation = await page.request.post(`${origin}${pagesPath}`, {
-		headers: { Origin: origin },
+		headers: { Origin: origin, 'X-Tools-User': TEST_TOOLS_OWNER.id },
 		data: { name: 'Unauthorized drawing' }
 	});
 	expect(mutation.status()).toBe(401);
@@ -54,7 +51,12 @@ test('drawing pages can be created, switched, renamed, and deleted locally', asy
 		.poll(() =>
 			page.evaluate(() => {
 				const scene = /** @type {{ elements: { text?: string }[] }} */ (
-					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+					JSON.parse(
+						localStorage.getItem(
+							document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+								'swyx-excalidraw:guest'
+						) ?? '{"elements":[]}'
+					)
 				);
 				return scene.elements.some((element) => element.text?.includes('Act now'));
 			})
@@ -67,7 +69,12 @@ test('drawing pages can be created, switched, renamed, and deleted locally', asy
 		.poll(() =>
 			page.evaluate(() => {
 				const scene = /** @type {{ elements: { text?: string }[] }} */ (
-					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+					JSON.parse(
+						localStorage.getItem(
+							document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+								'swyx-excalidraw:guest'
+						) ?? '{"elements":[]}'
+					)
 				);
 				return scene.elements.some((element) => element.text?.includes('Act now'));
 			})
@@ -79,7 +86,12 @@ test('drawing pages can be created, switched, renamed, and deleted locally', asy
 		.poll(() =>
 			page.evaluate(() => {
 				const scene = /** @type {{ elements: { text?: string }[] }} */ (
-					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+					JSON.parse(
+						localStorage.getItem(
+							document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+								'swyx-excalidraw:guest'
+						) ?? '{"elements":[]}'
+					)
 				);
 				return scene.elements.some((element) => element.text?.includes('Act now'));
 			})
@@ -104,8 +116,12 @@ test('drawing pages can be created, switched, renamed, and deleted locally', asy
 test('unlocking cloud drawing sync returns directly to the drawing canvas', async ({ page }) => {
 	await page.goto('/tools?next=/draw');
 	await page.waitForLoadState('networkidle');
-	await page.getByLabel('Password').fill('draw-test-password');
-	await page.getByRole('button', { name: 'Unlock tools' }).click();
+	await expect(page.getByRole('link', { name: 'Sign in with Google' })).toHaveAttribute(
+		'href',
+		'/tools/auth/google?next=%2Fdraw'
+	);
+	await authenticateTools(page);
+	await page.goto('/draw');
 	await expect(page).toHaveURL(/\/draw$/);
 	await expect(page.getByRole('button', { name: 'Manage drawing pages' })).toBeVisible();
 });
@@ -117,14 +133,14 @@ test('drawing pages persist through the Durable Object across independent sessio
 	await page.goto('/draw');
 	const origin = await unlockDrawingPages(page);
 	const crossOrigin = await page.request.post(`${origin}${pagesPath}`, {
-		headers: { Origin: 'https://untrusted.example' },
+		headers: { Origin: 'https://untrusted.example', 'X-Tools-User': TEST_TOOLS_OWNER.id },
 		data: { name: 'Cross-origin drawing' }
 	});
 	expect(crossOrigin.status()).toBe(403);
 
 	const pageName = `Drawing smoke ${Date.now()}`;
 	const create = await page.request.post(`${origin}${pagesPath}`, {
-		headers: { Origin: origin },
+		headers: { Origin: origin, 'X-Tools-User': TEST_TOOLS_OWNER.id },
 		data: { name: pageName }
 	});
 	expect(create.ok()).toBe(true);
@@ -138,7 +154,7 @@ test('drawing pages persist through the Durable Object across independent sessio
 			files: {}
 		};
 		const save = await page.request.put(pageUrl, {
-			headers: { Origin: origin },
+			headers: { Origin: origin, 'X-Tools-User': TEST_TOOLS_OWNER.id },
 			data: { scene }
 		});
 		expect(save.ok()).toBe(true);
@@ -159,13 +175,126 @@ test('drawing pages persist through the Durable Object across independent sessio
 		}
 
 		const rename = await page.request.put(pageUrl, {
-			headers: { Origin: origin },
+			headers: { Origin: origin, 'X-Tools-User': TEST_TOOLS_OWNER.id },
 			data: { name: 'Renamed cloud drawing' }
 		});
 		expect(rename.ok()).toBe(true);
 		expect((await rename.json()).name).toBe('Renamed cloud drawing');
 	} finally {
-		const remove = await page.request.delete(pageUrl, { headers: { Origin: origin } });
+		const remove = await page.request.delete(pageUrl, {
+			headers: { Origin: origin, 'X-Tools-User': TEST_TOOLS_OWNER.id }
+		});
 		expect(remove.ok()).toBe(true);
 	}
+});
+
+test('two Google accounts cannot read or change each other’s cloud drawings', async ({
+	page,
+	browser
+}) => {
+	await page.goto('/tools');
+	const origin = await authenticateTools(page);
+	const create = await page.request.post(`${origin}${pagesPath}`, {
+		headers: { Origin: origin, 'X-Tools-User': TEST_TOOLS_OWNER.id },
+		data: { name: 'Owner-only account isolation test' }
+	});
+	expect(create.status()).toBe(201);
+	const owned = await create.json();
+	const otherContext = await browser.newContext();
+	try {
+		const other = await otherContext.newPage();
+		await other.goto(`${origin}/tools`);
+		await authenticateTools(other, TEST_TOOLS_MEMBER);
+		const url = `${origin}${pagesPath}/${owned.id}`;
+		expect((await other.request.get(url)).status()).toBe(404);
+		for (const method of ['PUT', 'DELETE']) {
+			const response = await other.request.fetch(url, {
+				method,
+				headers: { Origin: origin, 'X-Tools-User': TEST_TOOLS_MEMBER.id },
+				...(method === 'PUT' ? { data: { name: 'Stolen' } } : {})
+			});
+			expect(response.status()).toBe(404);
+		}
+		const stale = await other.request.post(`${origin}${pagesPath}`, {
+			headers: { Origin: origin, 'X-Tools-User': TEST_TOOLS_OWNER.id },
+			data: { name: 'Stale tab' }
+		});
+		expect(stale.status()).toBe(409);
+		expect((await other.request.get(`${origin}/tools/podcast`)).status()).toBe(403);
+		expect(
+			(
+				await other.request.post(`${origin}/tools/api/draw/agent`, {
+					headers: { Origin: origin },
+					data: {}
+				})
+			).status()
+		).toBe(403);
+		expect(
+			(
+				await other.request.post(`${origin}/tools/podcast/api/uploads`, {
+					headers: { Origin: origin },
+					data: {}
+				})
+			).status()
+		).toBe(403);
+	} finally {
+		await otherContext.close();
+		await page.request.delete(`${origin}${pagesPath}/${owned.id}`, {
+			headers: { Origin: origin, 'X-Tools-User': TEST_TOOLS_OWNER.id }
+		});
+	}
+});
+
+test('account switching keeps browser caches separate and removes owner-only tools', async ({
+	page
+}) => {
+	await page.goto('/tools');
+	await authenticateTools(page);
+	await page.goto('/draw');
+	await expect(page.getByRole('button', { name: 'Manage drawing pages' })).toBeVisible();
+	const ownerKey = `swyx-excalidraw:google:${TEST_TOOLS_OWNER.id}`;
+	await expect(page.locator('.draw-canvas')).toHaveAttribute('data-storage-key', ownerKey);
+	await page.goto('/tools');
+	await expect(page.getByRole('link', { name: /Podcast studio/ })).toBeVisible();
+	await page.evaluate(
+		(key) =>
+			localStorage.setItem(`${key}:library`, JSON.stringify([{ id: 'private-owner-library' }])),
+		ownerKey
+	);
+	const openDrawing = await page.context().newPage();
+	await openDrawing.goto('/draw');
+	await expect(openDrawing.locator('.draw-canvas')).toHaveAttribute('data-storage-key', ownerKey);
+	await authenticateTools(page, TEST_TOOLS_MEMBER);
+	await page.reload();
+	await expect(openDrawing.locator('.draw-canvas')).toHaveAttribute(
+		'data-storage-key',
+		`swyx-excalidraw:google:${TEST_TOOLS_MEMBER.id}`
+	);
+	await expect(page.getByRole('link', { name: /Podcast studio/ })).toHaveCount(0);
+	await expect(page.getByText(TEST_TOOLS_MEMBER.email, { exact: true })).toBeVisible();
+	await page.goto('/draw');
+	await expect(page.getByRole('button', { name: 'Manage drawing pages' })).toBeVisible();
+	await expect(page.locator('.draw-canvas')).toHaveAttribute(
+		'data-storage-key',
+		`swyx-excalidraw:google:${TEST_TOOLS_MEMBER.id}`
+	);
+	const memberLibrary = await page.evaluate(
+		(id) => localStorage.getItem(`swyx-excalidraw:google:${id}:library`),
+		TEST_TOOLS_MEMBER.id
+	);
+	expect(memberLibrary).not.toContain('private-owner-library');
+	await page.goto('/tools');
+	await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+	await expect(page.getByRole('link', { name: 'Sign in with Google' })).toBeVisible();
+	expect((await page.request.get('/tools/api/draw/pages')).status()).toBe(401);
+	await expect(openDrawing.locator('.draw-canvas')).toHaveAttribute(
+		'data-storage-key',
+		'swyx-excalidraw:guest'
+	);
+	await openDrawing.close();
+	await page.goto('/draw');
+	await expect(page.locator('.draw-canvas')).toHaveAttribute(
+		'data-storage-key',
+		'swyx-excalidraw:guest'
+	);
 });

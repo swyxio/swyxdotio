@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { authenticateTools, TEST_TOOLS_OWNER, TEST_TOOLS_MEMBER } from './helpers/tools-auth.js';
 
 /** @param {import('@playwright/test').Request} request */
 async function uploadedFalForm(request) {
@@ -28,7 +29,13 @@ async function uploadedFalForm(request) {
 async function mockSignedInPersonalTools(page) {
 	await page.route('**/tools/api/session', async (route) => {
 		if (route.request().method() === 'GET') {
-			await route.fulfill({ json: { authenticated: true } });
+			await route.fulfill({
+				json: {
+					authenticated: true,
+					user: { ...TEST_TOOLS_OWNER, isOwner: true },
+					googleConfigured: true
+				}
+			});
 			return;
 		}
 		await route.continue();
@@ -88,7 +95,12 @@ async function pasteSelectedImage(page, generatedSize) {
 			page.evaluate(() => {
 				const scene =
 					/** @type {{elements:{type:string,fileId?:string}[],files:Record<string,unknown>}} */ (
-						JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[],"files":{}}')
+						JSON.parse(
+							localStorage.getItem(
+								document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+									'swyx-excalidraw:guest'
+							) ?? '{"elements":[],"files":{}}'
+						)
 					);
 				const image = scene.elements.find((element) => element.type === 'image');
 				return Boolean(image?.fileId && scene.files[image.fileId]);
@@ -110,7 +122,12 @@ async function selectedSceneImage(page) {
 	return page.evaluate(() => {
 		const scene =
 			/** @type {{elements:{type:string,id:string,fileId:string,x:number,y:number,width:number,height:number}[],files:Record<string,{mimeType:string,dataURL:string}>}} */ (
-				JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[],"files":{}}')
+				JSON.parse(
+					localStorage.getItem(
+						document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+							'swyx-excalidraw:guest'
+					) ?? '{"elements":[],"files":{}}'
+				)
 			);
 		const image = scene.elements.find((element) => element.type === 'image');
 		if (!image) throw new Error('The selected scene image is missing.');
@@ -482,7 +499,12 @@ test('the active drawing is persisted once without exhausting storage on a dupli
 	await page.addInitScript(() => {
 		const originalSetItem = Storage.prototype.setItem;
 		Storage.prototype.setItem = function (/** @type {string} */ key, /** @type {string} */ value) {
-			if (key === 'swyx-excalidraw:default') {
+			if (
+				key ===
+				(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+					'swyx-excalidraw:guest') +
+					':default'
+			) {
 				throw new DOMException('The storage quota has been exceeded.', 'QuotaExceededError');
 			}
 			return originalSetItem.call(this, key, value);
@@ -491,13 +513,25 @@ test('the active drawing is persisted once without exhausting storage on a dupli
 
 	await pasteSelectedImage(page);
 	const persisted = await page.evaluate(() => {
-		const metadata = JSON.parse(localStorage.getItem('swyx-excalidraw:pages') ?? '{}');
-		const scene = JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}');
+		const metadata = JSON.parse(
+			localStorage.getItem(
+				(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+					'swyx-excalidraw:guest') + ':pages'
+			) ?? '{}'
+		);
+		const scene = JSON.parse(
+			localStorage.getItem(
+				document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+					'swyx-excalidraw:guest'
+			) ?? '{"elements":[]}'
+		);
 		return {
 			imageCount: scene.elements.filter(
 				(/** @type {{type:string}} */ element) => element.type === 'image'
 			).length,
-			duplicate: localStorage.getItem(`swyx-excalidraw:${metadata.activePageId}`)
+			duplicate: localStorage.getItem(
+				`${document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') || 'swyx-excalidraw:guest'}:${metadata.activePageId}`
+			)
 		};
 	});
 
@@ -595,7 +629,12 @@ test('the real local vectorization worker generates compact SVG without model do
 	const vector = await page.evaluate(async () => {
 		const scene =
 			/** @type {{elements:{type:string,fileId:string}[],files:Record<string,{mimeType:string,dataURL:string}>}} */ (
-				JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[],"files":{}}')
+				JSON.parse(
+					localStorage.getItem(
+						document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+							'swyx-excalidraw:guest'
+					) ?? '{"elements":[],"files":{}}'
+				)
 			);
 		const image = scene.elements.find((element) => element.type === 'image');
 		if (!image) throw new Error('Vector image is missing.');
@@ -658,20 +697,22 @@ test('large transparent image edits preserve dimensions and synchronize under th
 	});
 	await page.goto('/draw');
 	const origin = new URL(page.url()).origin;
-	const login = await page.request.post(`${origin}/tools/api/session`, {
-		headers: { Origin: origin },
-		data: { password: 'draw-test-password' }
-	});
-	expect(login.ok()).toBe(true);
+	await authenticateTools(page);
 	const create = await page.request.post(`${origin}/tools/api/draw/pages`, {
-		headers: { Origin: origin },
+		headers: { Origin: origin, 'X-Tools-User': TEST_TOOLS_OWNER.id },
 		data: { name: `Image optimization ${Date.now()}` }
 	});
 	expect(create.ok()).toBe(true);
 	const cloudPage = await create.json();
+	await page.reload();
+	await expect(page.locator('.draw-canvas')).toHaveAttribute(
+		'data-storage-key',
+		`swyx-excalidraw:google:${TEST_TOOLS_OWNER.id}`
+	);
 	await page.evaluate((drawingPage) => {
 		localStorage.setItem(
-			'swyx-excalidraw:pages',
+			(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+				'swyx-excalidraw:guest') + ':pages',
 			JSON.stringify({ pages: [drawingPage], activePageId: drawingPage.id })
 		);
 	}, cloudPage);
@@ -730,7 +771,7 @@ test('large transparent image edits preserve dimensions and synchronize under th
 		expect(dimensions).toEqual({ width: 1200, height: 1000, firstPixelAlpha: 0 });
 	} finally {
 		const remove = await page.request.delete(`${origin}/tools/api/draw/pages/${cloudPage.id}`, {
-			headers: { Origin: origin }
+			headers: { Origin: origin, 'X-Tools-User': TEST_TOOLS_OWNER.id }
 		});
 		expect(remove.ok()).toBe(true);
 	}
@@ -857,9 +898,14 @@ test('text-to-image never uploads the selected image and generated video stays o
 	);
 	expect(requests[1]).toEqual({ model: 'grok-imagine-video', hasImage: true });
 	expect((await selectedSceneImage(page)).fileId).toBe(beforeVideo.fileId);
-	expect(await page.evaluate(() => localStorage.getItem('swyx-excalidraw'))).not.toContain(
-		videoUrl
-	);
+	expect(
+		await page.evaluate(() =>
+			localStorage.getItem(
+				document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+					'swyx-excalidraw:guest'
+			)
+		)
+	).not.toContain(videoUrl);
 });
 
 test('each selected modality exposes supported model settings, accurate pricing, and reproducible video history', async ({
@@ -968,7 +1014,10 @@ test('each selected modality exposes supported model settings, accurate pricing,
 					const request = /** @type {IDBDatabase} */ (database)
 						.transaction('drawing-pages')
 						.objectStore('drawing-pages')
-						.get('default');
+						.get(
+							(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+								'swyx-excalidraw:guest') + ':default'
+						);
 					request.onsuccess = () => resolve(request.result);
 					request.onerror = () => reject(request.error);
 				});
@@ -1045,7 +1094,12 @@ test('prompt editing shows progress, retains session generations, and restores t
 	const originalDataURL = await page.evaluate(() => {
 		const scene =
 			/** @type {{elements:{type:string,fileId:string}[],files:Record<string,{dataURL:string}>}} */ (
-				JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[],"files":{}}')
+				JSON.parse(
+					localStorage.getItem(
+						document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+							'swyx-excalidraw:guest'
+					) ?? '{"elements":[],"files":{}}'
+				)
 			);
 		const image = scene.elements.find((element) => element.type === 'image');
 		return image ? scene.files[image.fileId].dataURL : '';
@@ -1121,7 +1175,10 @@ test('prompt editing shows progress, retains session generations, and restores t
 					const request = /** @type {IDBDatabase} */ (database)
 						.transaction('drawing-pages')
 						.objectStore('drawing-pages')
-						.get('default');
+						.get(
+							(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+								'swyx-excalidraw:guest') + ':default'
+						);
 					request.onsuccess = () => resolve(request.result);
 					request.onerror = () => reject(request.error);
 				});
@@ -1143,9 +1200,14 @@ test('prompt editing shows progress, retains session generations, and restores t
 				}
 			]
 		});
-	expect(await page.evaluate(() => localStorage.getItem('swyx-excalidraw'))).not.toContain(
-		'bytedance/seedream/v5/pro/edit'
-	);
+	expect(
+		await page.evaluate(() =>
+			localStorage.getItem(
+				document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+					'swyx-excalidraw:guest'
+			)
+		)
+	).not.toContain('bytedance/seedream/v5/pro/edit');
 
 	await promptInput.fill('A second variation');
 	await promptInput.press('Control+Enter');
@@ -1160,7 +1222,12 @@ test('prompt editing shows progress, retains session generations, and restores t
 	const restoredOriginal = await page.evaluate(() => {
 		const scene =
 			/** @type {{elements:{type:string,fileId:string}[],files:Record<string,{dataURL:string}>}} */ (
-				JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[],"files":{}}')
+				JSON.parse(
+					localStorage.getItem(
+						document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+							'swyx-excalidraw:guest'
+					) ?? '{"elements":[],"files":{}}'
+				)
 			);
 		const image = scene.elements.find((element) => element.type === 'image');
 		return image ? scene.files[image.fileId].dataURL : '';
@@ -1174,7 +1241,12 @@ test('prompt editing shows progress, retains session generations, and restores t
 	const restored = await page.evaluate(() => {
 		const scene =
 			/** @type {{elements:{type:string,fileId:string}[],files:Record<string,{dataURL:string}>}} */ (
-				JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[],"files":{}}')
+				JSON.parse(
+					localStorage.getItem(
+						document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+							'swyx-excalidraw:guest'
+					) ?? '{"elements":[],"files":{}}'
+				)
 			);
 		const image = scene.elements.find((element) => element.type === 'image');
 		return image ? scene.files[image.fileId].dataURL : '';
@@ -1189,7 +1261,12 @@ test('prompt editing shows progress, retains session generations, and restores t
 	expect(
 		await page.evaluate(() => {
 			const scene = /** @type {any} */ (
-				JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{}')
+				JSON.parse(
+					localStorage.getItem(
+						document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+							'swyx-excalidraw:guest'
+					) ?? '{}'
+				)
 			);
 			const image = scene.elements.find((/** @type {any} */ element) => element.type === 'image');
 			return scene.files[image.fileId].dataURL;
@@ -1270,7 +1347,12 @@ for (const model of [
 		const originalBytes = await page.evaluate(() => {
 			const scene =
 				/** @type {{elements:{type:string,fileId:string}[],files:Record<string,{dataURL:string}>}} */ (
-					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[],"files":{}}')
+					JSON.parse(
+						localStorage.getItem(
+							document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+								'swyx-excalidraw:guest'
+						) ?? '{"elements":[],"files":{}}'
+					)
 				);
 			const image = scene.elements.find((element) => element.type === 'image');
 			return image ? new TextEncoder().encode(scene.files[image.fileId].dataURL).byteLength : 0;
@@ -1308,9 +1390,7 @@ for (const model of [
 	});
 }
 
-test('the drawing AI action shares the existing password-protected tools session', async ({
-	page
-}) => {
+test('the drawing AI action shares the Google owner session', async ({ page }) => {
 	let toolbox = await pasteSelectedImage(page);
 	await toolbox.getByRole('button', { name: 'AI prompt', exact: true }).click();
 	const signIn = toolbox.getByRole('link', { name: 'Sign in to generate' });
@@ -1319,18 +1399,25 @@ test('the drawing AI action shares the existing password-protected tools session
 
 	await signIn.click();
 	await expect(page).toHaveURL(/\/tools\?next=(?:%2F|\/)draw$/);
-	await page.getByLabel('Password').fill('draw-test-password');
-	await page.getByRole('button', { name: 'Unlock tools' }).click();
+	await expect(page.getByRole('link', { name: 'Sign in with Google' })).toHaveAttribute(
+		'href',
+		'/tools/auth/google?next=%2Fdraw'
+	);
+	await authenticateTools(page);
+	await page.goto('/draw');
 	await expect(page).toHaveURL(/\/draw$/);
 
 	const status = await page.request.get(`${new URL(page.url()).origin}/tools/api/session`);
 	expect(status.ok()).toBe(true);
-	expect(await status.json()).toEqual({ authenticated: true });
+	expect(await status.json()).toMatchObject({
+		authenticated: true,
+		user: { id: TEST_TOOLS_OWNER.id, isOwner: true }
+	});
 	expect(status.headers()['cache-control']).toContain('no-store');
 
 	toolbox = await pasteSelectedImage(page);
 	await toolbox.getByRole('button', { name: 'AI prompt', exact: true }).click();
-	await expect(toolbox.getByText(/Signed in/)).toBeVisible();
+	await expect(toolbox.getByText(/Owner account/)).toBeVisible();
 	await expect(toolbox.getByRole('button', { name: 'Generate AI image edit' })).toBeVisible();
 	await expect(toolbox.getByRole('link', { name: 'Sign in to generate' })).toHaveCount(0);
 });

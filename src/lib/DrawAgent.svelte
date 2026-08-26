@@ -14,11 +14,20 @@
 
 	/** @type {{
 	 *  authenticated?: boolean,
+	 *  canUseCloudAI?: boolean,
+	 *  userId?: string,
 	 *  pageId: string,
 	 *  executeCommand: (args: string[], options: CommandOptions) => Promise<unknown>,
 	 *  captureViewport: () => Promise<string | undefined>
 	 * }} */
-	let { authenticated = false, pageId, executeCommand, captureViewport } = $props();
+	let {
+		authenticated = false,
+		canUseCloudAI = false,
+		userId,
+		pageId,
+		executeCommand,
+		captureViewport
+	} = $props();
 
 	const HISTORY_PREFIX = 'swyx-excalidraw:assistant:';
 	const MAX_HISTORY_MESSAGES = 36;
@@ -191,7 +200,7 @@
 
 	async function sendMessage() {
 		const request = prompt.trim();
-		if (!request || running || !authenticated) return;
+		if (!request || running || !canUseCloudAI) return;
 		const prior = messages
 			.filter((message) => message.role !== 'step')
 			.slice(-10)
@@ -222,7 +231,7 @@
 				const response = await fetch('/tools/api/draw/agent', {
 					method: 'POST',
 					credentials: 'same-origin',
-					headers: { 'Content-Type': 'application/json' },
+					headers: { 'Content-Type': 'application/json', 'X-Tools-User': userId ?? 'guest' },
 					body: JSON.stringify({
 						messages: conversation,
 						...(screenshot ? { screenshot } : {}),
@@ -404,7 +413,7 @@
 				<span>Sees your visible canvas</span>
 			</div>
 			<div class="header-actions">
-				{#if authenticated}
+				{#if canUseCloudAI}
 					<button
 						type="button"
 						class="icon-button"
@@ -424,7 +433,7 @@
 						>
 					</button>
 				{/if}
-				{#if authenticated && messages.length}
+				{#if canUseCloudAI && messages.length}
 					<button
 						type="button"
 						class="icon-button"
@@ -469,6 +478,13 @@
 			<div class="assistant-signin">
 				<p>Sign in to let your private assistant inspect and edit this drawing.</p>
 				<a href="/tools?next=/draw">Sign in to use the assistant</a>
+			</div>
+		{:else if !canUseCloudAI}
+			<div class="assistant-signin">
+				<p>
+					Cloud AI currently uses the site owner’s paid account and is available only to that
+					account. Your drawings and local image tools work independently.
+				</p>
 			</div>
 		{:else}
 			<div class="assistant-disclosure">

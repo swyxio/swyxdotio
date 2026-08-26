@@ -115,7 +115,12 @@ test('drawing canvas is public, fullscreen, and persists drawings in the browser
 		.poll(() =>
 			page.evaluate(() => {
 				const scene = /** @type {{ elements: DrawingElement[] }} */ (
-					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+					JSON.parse(
+						localStorage.getItem(
+							document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+								'swyx-excalidraw:guest'
+						) ?? '{"elements":[]}'
+					)
 				);
 				return scene.elements.filter((element) => !element.isDeleted).length;
 			})
@@ -128,7 +133,12 @@ test('drawing canvas is public, fullscreen, and persists drawings in the browser
 		.poll(() =>
 			page.evaluate(() => {
 				const scene = /** @type {{ elements: DrawingElement[] }} */ (
-					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+					JSON.parse(
+						localStorage.getItem(
+							document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+								'swyx-excalidraw:guest'
+						) ?? '{"elements":[]}'
+					)
 				);
 				return scene.elements.filter((element) => !element.isDeleted).length;
 			})
@@ -151,7 +161,12 @@ test('visual presets insert labeled editable diagrams without replacing existing
 		.poll(() =>
 			page.evaluate(() => {
 				const scene = /** @type {{ elements: DrawingElement[] }} */ (
-					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+					JSON.parse(
+						localStorage.getItem(
+							document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+								'swyx-excalidraw:guest'
+						) ?? '{"elements":[]}'
+					)
 				);
 				return scene.elements.some((element) => element.text?.includes('Act now'));
 			})
@@ -160,7 +175,12 @@ test('visual presets insert labeled editable diagrams without replacing existing
 	const initialScene = await page.evaluate(
 		() =>
 			/** @type {{ elements: DrawingElement[] }} */ (
-				JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+				JSON.parse(
+					localStorage.getItem(
+						document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+							'swyx-excalidraw:guest'
+					) ?? '{"elements":[]}'
+				)
 			)
 	);
 	const initialShapeCount = initialScene.elements.filter((element) => !element.isDeleted).length;
@@ -173,7 +193,12 @@ test('visual presets insert labeled editable diagrams without replacing existing
 		.poll(() =>
 			page.evaluate(() => {
 				const scene = /** @type {{ elements: DrawingElement[] }} */ (
-					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+					JSON.parse(
+						localStorage.getItem(
+							document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+								'swyx-excalidraw:guest'
+						) ?? '{"elements":[]}'
+					)
 				);
 				return scene.elements.filter((element) => !element.isDeleted).length;
 			})
@@ -182,7 +207,12 @@ test('visual presets insert labeled editable diagrams without replacing existing
 	const combinedScene = await page.evaluate(
 		() =>
 			/** @type {{ elements: DrawingElement[] }} */ (
-				JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+				JSON.parse(
+					localStorage.getItem(
+						document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+							'swyx-excalidraw:guest'
+					) ?? '{"elements":[]}'
+				)
 			)
 	);
 	expect(combinedScene.elements.some((element) => element.text === 'Strategic fit')).toBe(true);
@@ -195,7 +225,12 @@ test('visual presets insert labeled editable diagrams without replacing existing
 		.poll(() =>
 			page.evaluate(() => {
 				const scene = /** @type {{ elements: DrawingElement[] }} */ (
-					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+					JSON.parse(
+						localStorage.getItem(
+							document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+								'swyx-excalidraw:guest'
+						) ?? '{"elements":[]}'
+					)
 				);
 				return scene.elements.some((element) => element.text === 'Strategic fit');
 			})
@@ -226,14 +261,25 @@ test('hand-drawn UI components are searchable, editable, and preserve existing d
 		.poll(() =>
 			page.evaluate(() => {
 				const scene = /** @type {{ elements: DrawingElement[] }} */ (
-					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+					JSON.parse(
+						localStorage.getItem(
+							document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+								'swyx-excalidraw:guest'
+						) ?? '{"elements":[]}'
+					)
 				);
 				return scene.elements.filter((element) => !element.isDeleted);
 			})
 		)
 		.toEqual(expect.arrayContaining([expect.objectContaining({ roughness: expect.any(Number) })]));
 	const initialCount = await page.evaluate(
-		() => JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}').elements.length
+		() =>
+			JSON.parse(
+				localStorage.getItem(
+					document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+						'swyx-excalidraw:guest'
+				) ?? '{"elements":[]}'
+			).elements.length
 	);
 
 	await componentMenu.getByRole('textbox', { name: 'Search UI components' }).fill('table');
@@ -242,7 +288,12 @@ test('hand-drawn UI components are searchable, editable, and preserve existing d
 		.poll(() =>
 			page.evaluate(
 				() =>
-					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}').elements.length
+					JSON.parse(
+						localStorage.getItem(
+							document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+								'swyx-excalidraw:guest'
+						) ?? '{"elements":[]}'
+					).elements.length
 			)
 		)
 		.toBeGreaterThan(initialCount);
@@ -253,7 +304,12 @@ test('hand-drawn UI components are searchable, editable, and preserve existing d
 		.poll(() =>
 			page.evaluate(
 				() =>
-					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}').elements.length
+					JSON.parse(
+						localStorage.getItem(
+							document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+								'swyx-excalidraw:guest'
+						) ?? '{"elements":[]}'
+					).elements.length
 			)
 		)
 		.toBeGreaterThan(initialCount);
@@ -310,7 +366,12 @@ test('meme templates live in the native library, search current memes, and inser
 			page.evaluate(() => {
 				const scene =
 					/** @type {{ elements: Array<{ type: string, fileId?: string, isDeleted?: boolean }>, files: Record<string, { dataURL: string }> }} */ (
-						JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[],"files":{}}')
+						JSON.parse(
+							localStorage.getItem(
+								document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+									'swyx-excalidraw:guest'
+							) ?? '{"elements":[],"files":{}}'
+						)
 					);
 				const image = scene.elements.find(
 					(element) => element.type === 'image' && !element.isDeleted
@@ -324,7 +385,12 @@ test('meme templates live in the native library, search current memes, and inser
 		.poll(() =>
 			page.evaluate(() => {
 				const scene = /** @type {{ elements: Array<{ type: string, isDeleted?: boolean }> }} */ (
-					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+					JSON.parse(
+						localStorage.getItem(
+							document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+								'swyx-excalidraw:guest'
+						) ?? '{"elements":[]}'
+					)
 				);
 				return scene.elements.filter((element) => element.type === 'image' && !element.isDeleted)
 					.length;
@@ -359,7 +425,12 @@ test('command palette searches components, presets, pages, and actions with keyb
 		.poll(() =>
 			page.evaluate(
 				() =>
-					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}').elements.length
+					JSON.parse(
+						localStorage.getItem(
+							document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+								'swyx-excalidraw:guest'
+						) ?? '{"elements":[]}'
+					).elements.length
 			)
 		)
 		.toBeGreaterThan(0);
@@ -373,7 +444,12 @@ test('command palette searches components, presets, pages, and actions with keyb
 		.poll(() =>
 			page.evaluate(() => {
 				const scene = /** @type {{ elements: DrawingElement[] }} */ (
-					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+					JSON.parse(
+						localStorage.getItem(
+							document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+								'swyx-excalidraw:guest'
+						) ?? '{"elements":[]}'
+					)
 				);
 				return scene.elements.some((element) => element.text?.includes('Act now'));
 			})
@@ -409,7 +485,12 @@ test('software architecture libraries preload and preserve personally added comp
 		.poll(() =>
 			page.evaluate(() => {
 				const items = /** @type {{ id: string }[]} */ (
-					JSON.parse(localStorage.getItem('swyx-excalidraw:library') ?? '[]')
+					JSON.parse(
+						localStorage.getItem(
+							(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+								'swyx-excalidraw:guest') + ':library'
+						) ?? '[]'
+					)
 				);
 				return items.length;
 			})
@@ -419,7 +500,12 @@ test('software architecture libraries preload and preserve personally added comp
 	const items = await page.evaluate(
 		() =>
 			/** @type {{ id: string }[]} */ (
-				JSON.parse(localStorage.getItem('swyx-excalidraw:library') ?? '[]')
+				JSON.parse(
+					localStorage.getItem(
+						(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+							'swyx-excalidraw:guest') + ':library'
+					) ?? '[]'
+				)
 			)
 	);
 	expect(items.filter((item) => item.id.startsWith('software-architecture-'))).toHaveLength(7);
@@ -432,7 +518,12 @@ test('software architecture libraries preload and preserve personally added comp
 		.poll(() =>
 			page.evaluate(() => {
 				const scene = /** @type {{ elements: unknown[] }} */ (
-					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+					JSON.parse(
+						localStorage.getItem(
+							document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+								'swyx-excalidraw:guest'
+						) ?? '{"elements":[]}'
+					)
 				);
 				return scene.elements.length;
 			})
@@ -441,17 +532,31 @@ test('software architecture libraries preload and preserve personally added comp
 
 	await page.evaluate(() => {
 		const storedItems = /** @type {{ id: string }[]} */ (
-			JSON.parse(localStorage.getItem('swyx-excalidraw:library') ?? '[]')
+			JSON.parse(
+				localStorage.getItem(
+					(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+						'swyx-excalidraw:guest') + ':library'
+				) ?? '[]'
+			)
 		);
 		storedItems.push({ ...storedItems[0], id: 'my-personal-component' });
-		localStorage.setItem('swyx-excalidraw:library', JSON.stringify(storedItems));
+		localStorage.setItem(
+			(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+				'swyx-excalidraw:guest') + ':library',
+			JSON.stringify(storedItems)
+		);
 	});
 	await page.reload();
 	await expect
 		.poll(() =>
 			page.evaluate(() => {
 				const storedItems = /** @type {{ id: string }[]} */ (
-					JSON.parse(localStorage.getItem('swyx-excalidraw:library') ?? '[]')
+					JSON.parse(
+						localStorage.getItem(
+							(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+								'swyx-excalidraw:guest') + ':library'
+						) ?? '[]'
+					)
 				);
 				return storedItems.some((item) => item.id === 'my-personal-component');
 			})
@@ -510,7 +615,12 @@ for (const fixture of [
 				page.evaluate(() => {
 					const scene =
 						/** @type {{ elements: { type: string, width: number, fileId?: string }[], files: Record<string, unknown> }} */ (
-							JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[],"files":{}}')
+							JSON.parse(
+								localStorage.getItem(
+									document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+										'swyx-excalidraw:guest'
+								) ?? '{"elements":[],"files":{}}'
+							)
 						);
 					const image = scene.elements.find((element) => element.type === 'image');
 					return image?.fileId && scene.files[image.fileId] ? image.width : 0;
@@ -539,7 +649,12 @@ for (const fixture of [
 		const original = await page.evaluate(() => {
 			const scene =
 				/** @type {{ elements: { type: string, id: string, fileId: string, x: number, y: number, width: number, height: number }[] }} */ (
-					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+					JSON.parse(
+						localStorage.getItem(
+							document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+								'swyx-excalidraw:guest'
+						) ?? '{"elements":[]}'
+					)
 				);
 			return scene.elements.find((element) => element.type === 'image');
 		});
@@ -551,7 +666,12 @@ for (const fixture of [
 			.poll(() =>
 				page.evaluate(() => {
 					const scene = /** @type {{ elements: { type: string, fileId: string }[] }} */ (
-						JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+						JSON.parse(
+							localStorage.getItem(
+								document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+									'swyx-excalidraw:guest'
+							) ?? '{"elements":[]}'
+						)
 					);
 					return scene.elements.find((element) => element.type === 'image')?.fileId;
 				})
@@ -561,7 +681,12 @@ for (const fixture of [
 		const processed = await page.evaluate(async () => {
 			const scene =
 				/** @type {{ elements: { type: string, id: string, fileId: string, x: number, y: number, width: number, height: number }[], files: Record<string, { dataURL: string, mimeType: string }> }} */ (
-					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[],"files":{}}')
+					JSON.parse(
+						localStorage.getItem(
+							document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+								'swyx-excalidraw:guest'
+						) ?? '{"elements":[],"files":{}}'
+					)
 				);
 			const image = scene.elements.find((element) => element.type === 'image');
 			if (!image) throw new Error('Processed image missing.');
@@ -581,7 +706,10 @@ for (const fixture of [
 				imageWidth: bitmap.width,
 				imageHeight: bitmap.height,
 				rememberedMode: JSON.parse(
-					localStorage.getItem('swyx-excalidraw:background-mode') ?? 'null'
+					localStorage.getItem(
+						(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+							'swyx-excalidraw:guest') + ':background-mode'
+					) ?? 'null'
 				)
 			};
 		});
@@ -600,7 +728,12 @@ for (const fixture of [
 			.poll(() =>
 				page.evaluate(() => {
 					const scene = /** @type {{ elements: { type: string, fileId: string }[] }} */ (
-						JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+						JSON.parse(
+							localStorage.getItem(
+								document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+									'swyx-excalidraw:guest'
+							) ?? '{"elements":[]}'
+						)
 					);
 					return scene.elements.find((element) => element.type === 'image')?.fileId;
 				})

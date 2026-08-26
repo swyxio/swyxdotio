@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { createPodcastStudioSession } from '../src/lib/podcast-admin-auth.js';
+import { createToolsSession } from '../src/lib/server/tools-auth.js';
 import {
 	DRAW_AGENT_MODEL,
 	MAX_DRAW_AGENT_REQUEST_BYTES,
@@ -14,10 +14,10 @@ import {
 	readDrawingAgentBudget
 } from '../src/lib/server/draw-agent-budget.js';
 
-const SESSION_SECRET = 'drawing-agent-test-only-session';
+const SESSION_SECRET = 'drawing-agent-test-only-session-secret';
 const SCREENSHOT = 'data:image/webp;base64,c2FmZS12aWV3cG9ydA==';
 
-/** @param {{ authenticated?: boolean, body?: unknown, ai?: any, origin?: string, contentType?: string, contentLength?: string }} [options] */
+/** @param {{ authenticated?: boolean, owner?: boolean, body?: unknown, ai?: any, origin?: string, contentType?: string, contentLength?: string }} [options] */
 async function createEvent(options = {}) {
 	const url = new URL('https://swyx.io/tools/api/draw/agent');
 	const headers = new Headers({
@@ -33,14 +33,24 @@ async function createEvent(options = {}) {
 		)
 	});
 	const session =
-		options.authenticated === false ? undefined : await createPodcastStudioSession(SESSION_SECRET);
+		options.authenticated === false
+			? undefined
+			: await createToolsSession(
+					{
+						id: options.owner === false ? 'other-google-sub' : 'owner-google-sub',
+						email: 'user@example.com',
+						name: 'Test User'
+					},
+					SESSION_SECRET
+				);
 	return /** @type {any} */ ({
 		url,
 		request,
 		cookies: { get: () => session },
 		platform: {
 			env: {
-				PODCAST_ADMIN_SESSION_SECRET: SESSION_SECRET,
+				TOOLS_SESSION_SECRET: SESSION_SECRET,
+				TOOLS_OWNER_GOOGLE_SUB: 'owner-google-sub',
 				AI:
 					options.ai === undefined
 						? { run: async () => ({ choices: [{ message: { content: 'Done.' } }] }) }
@@ -264,4 +274,36 @@ test('drawing assistant rejects oversized requests, untrusted screenshot URLs, a
 		})
 	);
 	assert.equal(invalidTool.status, 502);
+});
+
+test('signed nonowner Google identities cannot spend the site owner AI binding', async () => {
+	let called = false;
+	const response = await runDrawingAgent(
+		await createEvent({
+			owner: false,
+			ai: {
+				run: async () => {
+					called = true;
+					return {};
+				}
+			}
+		})
+	);
+	assert.equal(response.status, 403);
+	assert.equal(called, false);
+});
+
+test('drawing assistant rejects stale account headers before spending', async () => {
+	let called = false;
+	const event = await createEvent({
+		ai: {
+			run: async () => {
+				called = true;
+				return {};
+			}
+		}
+	});
+	event.request.headers.set('X-Tools-User', 'previous-user');
+	assert.equal((await runDrawingAgent(event)).status, 409);
+	assert.equal(called, false);
 });

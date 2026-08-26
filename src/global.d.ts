@@ -83,7 +83,9 @@ interface DurableObjectNamespace {
 }
 
 declare namespace App {
-	// interface Error {}
+	interface Error {
+		code?: 'account_changed';
+	}
 	// interface Locals {}
 	// interface PageData {}
 	interface Platform {
@@ -96,8 +98,11 @@ declare namespace App {
 			FAL_KEY?: string;
 			GH_TOKEN?: string;
 			GH_WEBHOOK_SECRET?: string;
-			PODCAST_ADMIN_PASSWORD?: string;
-			PODCAST_ADMIN_SESSION_SECRET?: string;
+			GOOGLE_CLIENT_ID?: string;
+			GOOGLE_CLIENT_SECRET?: string;
+			GOOGLE_REDIRECT_URI?: string;
+			TOOLS_SESSION_SECRET?: string;
+			TOOLS_OWNER_GOOGLE_SUB?: string;
 			RECLIP_URL?: string;
 			CF_VERSION_METADATA?: {
 				id: string;

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { createPodcastStudioSession } from '../src/lib/podcast-admin-auth.js';
+import { createToolsSession } from '../src/lib/server/tools-auth.js';
 import {
 	cancelDrawingImage,
 	drawingFalTasks,
@@ -23,7 +23,7 @@ import {
 	resolveDrawFalModelSettings
 } from '../src/lib/draw-fal-models.js';
 
-const SESSION_SECRET = 'test-only-session-secret';
+const SESSION_SECRET = 'drawing-fal-test-only-session-secret';
 const FAL_KEY = 'test-only-provider-secret';
 const SOURCE_IMAGE = 'data:image/png;base64,c291cmNl';
 const EDITED_IMAGE = 'data:image/png;base64,ZWRpdGVk';
@@ -31,7 +31,7 @@ const REQUEST_ID = 'queued-job-123';
 
 /**
  * @param {{
- *   authenticated?: boolean,
+ *   authenticated?: boolean, owner?: boolean,
  *   form?: FormData,
  *   contentLength?: string,
  *   contentType?: string,
@@ -61,14 +61,24 @@ async function createEvent(options = {}) {
 		...(method === 'POST' ? { body: options.body ?? form } : {})
 	});
 	const session =
-		options.authenticated === false ? undefined : await createPodcastStudioSession(SESSION_SECRET);
+		options.authenticated === false
+			? undefined
+			: await createToolsSession(
+					{
+						id: options.owner === false ? 'other-google-sub' : 'owner-google-sub',
+						email: 'user@example.com',
+						name: 'Test User'
+					},
+					SESSION_SECRET
+				);
 	return /** @type {any} */ ({
 		request,
 		url,
 		cookies: { get: () => session },
 		platform: {
 			env: {
-				PODCAST_ADMIN_SESSION_SECRET: SESSION_SECRET,
+				TOOLS_SESSION_SECRET: SESSION_SECRET,
+				TOOLS_OWNER_GOOGLE_SUB: 'owner-google-sub',
 				FAL_KEY: options.falKey === undefined ? FAL_KEY : options.falKey
 			}
 		}
@@ -828,4 +838,39 @@ test('provider network failures never disclose the Worker secret', async () => {
 	});
 	assert.equal(response.status, 502);
 	assert.equal((await response.text()).includes(FAL_KEY), false);
+});
+
+test('signed nonowner Google identities cannot submit, read, or cancel the owner paid provider jobs', async () => {
+	let called = false;
+	for (const [handler, method] of [
+		[editDrawingImage, 'POST'],
+		[pollDrawingImage, 'GET'],
+		[cancelDrawingImage, 'DELETE']
+	]) {
+		const response = await handler(
+			await createEvent({ owner: false, method, query: `?requestId=${REQUEST_ID}&model=flux-2` }),
+			async () => {
+				called = true;
+				return providerResponse({});
+			}
+		);
+		assert.equal(response.status, 403);
+	}
+	assert.equal(called, false);
+});
+
+test('paid image submission rejects stale account headers before calling the provider', async () => {
+	let called = false;
+	const event = await createEvent();
+	event.request.headers.set('X-Tools-User', 'previous-user');
+	assert.equal(
+		(
+			await editDrawingImage(event, async () => {
+				called = true;
+				return providerResponse({});
+			})
+		).status,
+		409
+	);
+	assert.equal(called, false);
 });

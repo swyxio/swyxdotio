@@ -32,6 +32,8 @@
 	 *  captureUpdate: typeof import('@excalidraw/excalidraw').CaptureUpdateAction.IMMEDIATELY,
 	 *  cloudAvailable?: boolean,
 	 *  authenticated?: boolean,
+	 *  canUseCloudAI?: boolean,
+	 *  userId?: string,
 	 *  onCloudLimit?: () => void,
 	 *  backgroundProcessing?: boolean,
 	 *  backgroundControls?: import('svelte').Snippet,
@@ -53,6 +55,8 @@
 		captureUpdate,
 		cloudAvailable = false,
 		authenticated = false,
+		canUseCloudAI = false,
+		userId,
 		onCloudLimit,
 		backgroundProcessing = false,
 		backgroundControls,
@@ -623,7 +627,7 @@
 		if (
 			processing ||
 			processingFal ||
-			!authenticated ||
+			!canUseCloudAI ||
 			!prompt.trim() ||
 			!selectedFalModels.length
 		)
@@ -668,6 +672,7 @@
 									}
 								});
 					const result = await runDrawingFalGeneration({
+						userId,
 						image: prepared?.blob,
 						prompt: generationPrompt,
 						model: generationModel.id,
@@ -1252,7 +1257,11 @@
 					</div>
 				{/if}
 				<p class="fal-upload-hint">
-					{authenticated ? 'Signed in · ' : 'Sign in required · '}
+					{canUseCloudAI
+						? 'Owner account · '
+						: authenticated
+							? 'Owner access required · '
+							: 'Sign in required · '}
 					{uploadsSelectedImage
 						? 'Large images automatically fit each model’s limits and the secure upload limit.'
 						: 'Text-to-image workflows only send your prompt; the selected image is not uploaded.'}
@@ -1389,6 +1398,11 @@
 					</button>
 				{:else if !authenticated}
 					<a class="fal-action fal-sign-in" href="/tools?next=/draw">Sign in to generate</a>
+				{:else if !canUseCloudAI}
+					<span
+						>Cloud generation uses the site owner’s paid account. Local image tools remain
+						available.</span
+					>
 				{:else}
 					<button
 						type="button"

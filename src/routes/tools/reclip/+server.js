@@ -1,9 +1,9 @@
 import { error, redirect } from '@sveltejs/kit';
-import { requirePersonalToolsSession } from '$lib/personal-tools-auth';
+import { requirePersonalToolsOwner } from '$lib/personal-tools-auth';
 
 /** @type {import('./$types').RequestHandler} */
 export async function GET(event) {
-	await requirePersonalToolsSession(event, '/tools/reclip');
+	await requirePersonalToolsOwner(event, '/tools/reclip');
 	const target = event.platform?.env?.RECLIP_URL;
 	if (!target) throw error(503, 'Reclip URL is not configured');
 	const url = new URL(target);

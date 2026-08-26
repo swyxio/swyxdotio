@@ -1,4 +1,4 @@
-import { isPodcastStudioSessionValid, podcastStudioCookieName } from '../podcast-admin-auth.js';
+import { getToolsUser } from './tools-auth.js';
 import { privateJson, requireSameOrigin } from '../podcast-admin-route.js';
 import {
 	chargeDrawingAgentBudget,
@@ -186,16 +186,21 @@ function hasCompletedToolReview(messages) {
  * @param {Pick<import('@sveltejs/kit').RequestEvent, 'cookies' | 'platform' | 'request' | 'url'>} event
  */
 export async function runDrawingAgent(event) {
-	const sessionSecret = event.platform?.env?.PODCAST_ADMIN_SESSION_SECRET;
-	if (
-		!sessionSecret ||
-		!(await isPodcastStudioSessionValid(
-			event.cookies.get(podcastStudioCookieName()),
-			sessionSecret
-		))
-	) {
+	const user = await getToolsUser(event);
+	if (!user)
 		return privateJson({ error: 'Sign in to use the drawing assistant.' }, { status: 401 });
-	}
+	if (!user.isOwner)
+		return privateJson(
+			{ error: 'The hosted drawing assistant is available only to the site owner.' },
+			{ status: 403 }
+		);
+	const expectedUser = event.request.headers.get('X-Tools-User');
+	if (expectedUser !== null && expectedUser !== user.id)
+		return privateJson(
+			{ code: 'account_changed', error: 'Your Google account changed. Reload before continuing.' },
+			{ status: 409 }
+		);
+	const sessionSecret = /** @type {string} */ (event.platform?.env?.TOOLS_SESSION_SECRET);
 	requireSameOrigin(event.request, event.url);
 	const ai = event.platform?.env?.AI;
 	if (!ai) {

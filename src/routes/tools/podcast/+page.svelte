@@ -1,14 +1,11 @@
 <script>
 	/** @typedef {{ slug: string, label: string, summary: string }} PodcastShow */
 	/** @typedef {{ authenticated: boolean, defaultPublishDate: string, shows: PodcastShow[] }} PodcastStudioData */
-	/** @typedef {{ loginError?: string } | null | undefined} PodcastStudioForm */
 	/** @typedef {{ slug: string, episodeId: string, objectKey: string, uploadId: string, partBytes: number }} PodcastUploadStart */
 	/** @typedef {{ title: string, mediaUrl: string }} PodcastUploadResult */
 
 	/** @type {PodcastStudioData} */
 	export let data;
-	/** @type {PodcastStudioForm} */
-	export let form;
 
 	let slug = data.shows[0].slug;
 	let title = '';
@@ -19,9 +16,6 @@
 	let mp3 = null;
 	let status = '';
 	let error = '';
-	let password = '';
-	let loginError = form?.loginError ?? '';
-	let loggingIn = false;
 	let uploading = false;
 	/** @type {PodcastUploadResult | null} */
 	let result = null;
@@ -57,37 +51,20 @@
 		return /** @type {T} */ (body);
 	}
 
-	/**
-	 * @param {SubmitEvent} event
-	 */
-	async function login(event) {
-		event.preventDefault();
-		loginError = '';
-		loggingIn = true;
-		try {
-			const response = await fetch('/tools/api/session', {
-				method: 'POST',
-				credentials: 'same-origin',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ password })
-			});
-			if (!response.ok) {
-				loginError = response.status === 401 ? 'Incorrect password' : 'Could not unlock tools';
-				return;
-			}
-			location.reload();
-		} finally {
-			loggingIn = false;
-		}
-	}
-
 	async function logout() {
-		await fetch('/tools/api/session', {
+		const response = await fetch('/tools/api/session', {
 			method: 'DELETE',
 			credentials: 'same-origin',
 			headers: { 'Content-Type': 'application/json' }
 		});
-		location.reload();
+		if (!response.ok) {
+			error = 'Could not sign out. Please try again.';
+			return;
+		}
+		try {
+			localStorage.setItem('swyx-tools:account', 'guest');
+		} catch {}
+		location.assign('/tools');
 	}
 
 	async function upload() {
@@ -168,81 +145,61 @@
 </svelte:head>
 
 <section class="site-shell studio py-8">
-	<p><a href="../">Personal tools</a> / Podcast studio</p>
+	<p><a href="../">Your tools</a> / Podcast studio</p>
 	<h1>Podcast studio</h1>
 
-	{#if !data.authenticated}
-		<p class="plain-muted">Enter the tools password to continue.</p>
-		<form on:submit={login}>
+	<p class="plain-muted">
+		Upload a new MP3 and prepend it to an existing R2-backed feed. Initial archive feeds must
+		already be uploaded.
+	</p>
+	<form on:submit|preventDefault={upload}>
+		<label>
+			<span>Show</span>
+			<select bind:value={slug} required>
+				{#each data.shows as show}
+					<option value={show.slug}>{show.label}</option>
+				{/each}
+			</select>
+		</label>
+		<label>
+			<span>Episode title</span>
+			<input bind:value={title} autocomplete="off" required maxlength="240" />
+		</label>
+		<label>
+			<span>Description</span>
+			<textarea bind:value={description} rows="7" required maxlength="8000"></textarea>
+		</label>
+		<div class="form-grid">
 			<label>
-				<span>Password</span>
-				<input
-					name="password"
-					type="password"
-					autocomplete="current-password"
-					required
-					bind:value={password}
-				/>
-			</label>
-			{#if loginError}<p class="error">{loginError}</p>{/if}
-			<button class="plain-button" type="submit" disabled={loggingIn}
-				>{loggingIn ? 'Unlocking...' : 'Unlock tools'}</button
-			>
-		</form>
-	{:else}
-		<p class="plain-muted">
-			Upload a new MP3 and prepend it to an existing R2-backed feed. Initial archive feeds must
-			already be uploaded.
-		</p>
-		<form on:submit|preventDefault={upload}>
-			<label>
-				<span>Show</span>
-				<select bind:value={slug} required>
-					{#each data.shows as show}
-						<option value={show.slug}>{show.label}</option>
-					{/each}
-				</select>
+				<span>Publish date</span>
+				<input bind:value={publishedAt} type="date" required />
 			</label>
 			<label>
-				<span>Episode title</span>
-				<input bind:value={title} autocomplete="off" required maxlength="240" />
+				<span>Duration <small>(optional)</small></span>
+				<input bind:value={duration} placeholder="01:23:45" pattern="(?:\d+:)?[0-5]?\d:[0-5]\d" />
 			</label>
-			<label>
-				<span>Description</span>
-				<textarea bind:value={description} rows="7" required maxlength="8000"></textarea>
-			</label>
-			<div class="form-grid">
-				<label>
-					<span>Publish date</span>
-					<input bind:value={publishedAt} type="date" required />
-				</label>
-				<label>
-					<span>Duration <small>(optional)</small></span>
-					<input bind:value={duration} placeholder="01:23:45" pattern="(?:\d+:)?[0-5]?\d:[0-5]\d" />
-				</label>
-			</div>
-			<label>
-				<span>MP3 file</span>
-				<input
-					type="file"
-					accept=".mp3,audio/mpeg"
-					required
-					on:change={(event) => (mp3 = event.currentTarget.files?.[0] ?? null)}
-				/>
-			</label>
-			{#if status}<p>{status}</p>{/if}
-			{#if error}<p class="error">{error}</p>{/if}
-			{#if result}
-				<p class="success">
-					Published <strong>{result.title}</strong>. <a href={result.mediaUrl}>Open MP3</a>.
-				</p>
-			{/if}
-			<button class="plain-button" type="submit" disabled={uploading}
-				>{uploading ? 'Uploading...' : 'Upload and publish'}</button
-			>
-		</form>
-		<button class="logout" type="button" on:click={logout}>Lock tools</button>
-	{/if}
+		</div>
+		<label>
+			<span>MP3 file</span>
+			<input
+				type="file"
+				accept=".mp3,audio/mpeg"
+				required
+				on:change={(event) => (mp3 = event.currentTarget.files?.[0] ?? null)}
+			/>
+		</label>
+		{#if status}<p>{status}</p>{/if}
+		{#if error}<p class="error">{error}</p>{/if}
+		{#if result}
+			<p class="success">
+				Published <strong>{result.title}</strong>. <a href={result.mediaUrl}>Open MP3</a>.
+			</p>
+		{/if}
+		<button class="plain-button" type="submit" disabled={uploading}
+			>{uploading ? 'Uploading...' : 'Upload and publish'}</button
+		>
+	</form>
+	<button class="logout" type="button" on:click={logout}>Sign out</button>
 </section>
 
 <style>
