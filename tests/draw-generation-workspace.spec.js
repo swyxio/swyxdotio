@@ -176,6 +176,38 @@ test('guest desktop and phone retain prompt/model controls without paid requests
 	expect(mock.calls).toHaveLength(0);
 });
 
+test('a running batch survives panel switches and remains cancellable from the shared shell', async ({
+	page
+}) => {
+	const mock = await mockGeneration(page, { pending: true });
+	const panel = await openComposer(page);
+	await panel.getByRole('textbox', { name: 'AI image editing prompt' }).fill('A paper kite');
+	await panel.getByRole('button', { name: 'Generate AI image', exact: true }).click();
+	await expect(panel.getByRole('region', { name: 'Generation queue' })).toContainText('Generating');
+	await page.getByRole('button', { name: 'Open drawing templates and library' }).click();
+	await expect(panel).toBeHidden();
+	const background = page.getByRole('status', { name: 'Background drawing jobs' });
+	await expect(background).toContainText('Generating media…');
+	await background.getByRole('button', { name: 'Show generation' }).click();
+	await expect(panel.getByRole('textbox', { name: 'AI image editing prompt' })).toHaveValue(
+		'A paper kite'
+	);
+	await page.getByRole('button', { name: 'Open drawing assistant' }).click();
+	await expect(panel).toBeHidden();
+	await page.screenshot({ path: '/tmp/draw-shell-background-desktop.png' });
+	await page.setViewportSize({ width: 390, height: 844 });
+	await page.screenshot({ path: '/tmp/draw-shell-background-phone.png' });
+	await background.getByRole('button', { name: 'Cancel generation', exact: true }).click();
+	await expect(background).toHaveCount(0);
+	await page.setViewportSize({ width: 1280, height: 720 });
+	await page.getByRole('button', { name: 'Open image and video generation' }).click();
+	await expect(panel.getByRole('region', { name: 'Generation queue' })).toContainText(
+		'not confirmed'
+	);
+	expect(mock.calls).toHaveLength(1);
+	expect(await scene(page)).toEqual([]);
+});
+
 test('two models share one batch and comparison board insertion is one native undo', async ({
 	page
 }) => {
@@ -301,13 +333,11 @@ test('saved image recipe remixes its private reference after reload without reru
 	let panel = await openComposer(page);
 	const output = await images(page);
 	mock.setOutput(output);
-	await panel
-		.getByLabel('Attach generation reference')
-		.setInputFiles({
-			name: 'reference.png',
-			mimeType: 'image/png',
-			buffer: Buffer.from(output[0].split(',')[1], 'base64')
-		});
+	await panel.getByLabel('Attach generation reference').setInputFiles({
+		name: 'reference.png',
+		mimeType: 'image/png',
+		buffer: Buffer.from(output[0].split(',')[1], 'base64')
+	});
 	await panel.getByRole('button', { name: 'AI model and workflow selector' }).click();
 	await panel.locator('.fal-model-folder[aria-label="Image editing models"] summary').click();
 	await panel.getByRole('button', { name: 'Use only Nano Banana 2 · Balanced 1K edit' }).click();

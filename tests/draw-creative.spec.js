@@ -85,6 +85,7 @@ async function preventAi(page) {
 	/** @type {string[]} */
 	const requests = [];
 	await page.route(/\/tools\/api\/draw\/(agent|edit|creative-source)(?:[/?]|$)/, async (route) => {
+		if (route.request().method() === 'GET') return route.continue();
 		requests.push(new URL(route.request().url()).pathname);
 		await route.abort('blockedbyclient');
 	});
@@ -357,6 +358,68 @@ test('private kits and real assets produce saved variants only on request, then 
 		await expect.poll(async () => content(await scene(page))).toEqual(baseline);
 		expect(aiRequests).toEqual([]);
 	});
+});
+
+test('saved thumbnail versions open the shared composer with only explicitly selected references', async ({
+	page
+}) => {
+	const paid = await preventAi(page);
+	await signIn(page);
+	const workspace = await openWorkspace(page);
+	await workspace.getByLabel('Save asset', { exact: true }).setInputFiles(logoPath);
+	await expect(workspace.getByRole('img', { name: logoName, exact: true })).toBeVisible();
+	await workspace.getByRole('button', { name: 'Compose', exact: true }).click();
+	await workspace.getByLabel('Brief name', { exact: true }).fill('Shared generation handoff');
+	await workspace.getByLabel('Thumbnail hook', { exact: true }).fill('ONE CLEAR IDEA');
+	await workspace
+		.getByRole('button', { name: 'Create 4 editable layouts · no AI cost', exact: true })
+		.click();
+	await workspace.getByRole('button', { name: 'Open in shared Generate', exact: true }).click();
+	const panel = page.getByRole('region', { name: 'Selected image tools' });
+	const prompt = panel.getByRole('textbox', { name: 'AI image editing prompt' });
+	await expect(workspace).not.toBeVisible();
+	await expect(prompt).toHaveValue(/ONE CLEAR IDEA/);
+	await expect(panel.getByRole('img', { name: 'Reference attached to this draft' })).toHaveCount(0);
+	expect(paid).toEqual([]);
+	expect((await scene(page)).elements).toEqual([]);
+
+	await page.getByRole('button', { name: 'Open assets and creative workspace' }).click();
+	await workspace.getByRole('button', { name: 'Compose', exact: true }).click();
+	await workspace
+		.getByRole('group', { name: 'References selected for a future model run' })
+		.getByLabel(logoName, { exact: true })
+		.check();
+	await workspace
+		.getByRole('button', { name: 'Create 4 editable layouts · no AI cost', exact: true })
+		.click();
+	page.once('dialog', (dialog) => dialog.accept());
+	await workspace.getByRole('button', { name: 'Open in shared Generate', exact: true }).click();
+	await expect(panel.getByRole('img', { name: 'Reference attached to this draft' })).toBeVisible();
+	await expect(panel).toContainText('not uploaded until Generate');
+	expect(paid).toEqual([]);
+	expect((await scene(page)).elements).toEqual([]);
+
+	await page.getByRole('button', { name: 'Open assets and creative workspace' }).click();
+	await workspace.getByLabel('Save asset', { exact: true }).setInputFiles({
+		name: 'second-reference.png',
+		mimeType: 'image/png',
+		buffer: await readFile(logoPath)
+	});
+	await expect(
+		workspace.getByRole('img', { name: 'second-reference.png', exact: true })
+	).toBeVisible();
+	await workspace.getByRole('button', { name: 'Compose', exact: true }).click();
+	await workspace
+		.getByRole('group', { name: 'References selected for a future model run' })
+		.getByLabel('second-reference.png', { exact: true })
+		.check();
+	await workspace
+		.getByRole('button', { name: 'Create 4 editable layouts · no AI cost', exact: true })
+		.click();
+	await workspace.getByRole('button', { name: 'Open in shared Generate', exact: true }).click();
+	await expect(workspace.getByRole('alert')).toContainText('currently accepts one reference image');
+	await expect(workspace).toBeVisible();
+	expect(paid).toEqual([]);
 });
 
 test('guest workspace does not request an account library and blank insertion is explicit and undoable', async ({

@@ -1,5 +1,6 @@
 <script>
 	import { onMount, tick } from 'svelte';
+	import { canAutofocusDrawingInput } from '$lib/draw-focus.js';
 	import ToolsAiNotice from '$lib/ToolsAiNotice.svelte';
 	import {
 		DEFAULT_DRAW_AGENT_BUDGET_USD,
@@ -23,6 +24,7 @@
 	 *  minimized?: boolean,
 	 *  running?: boolean,
 	 *  showLauncher?: boolean,
+	 *  backgroundInset?: number,
 	 *  onOpen?: () => void,
 	 *  executeCommand: (args: string[], options: CommandOptions) => Promise<unknown>,
 	 *  captureViewport: () => Promise<string | undefined>
@@ -37,6 +39,7 @@
 		minimized = $bindable(false),
 		running = $bindable(false),
 		showLauncher = true,
+		backgroundInset = 0,
 		onOpen = () => {}
 	} = $props();
 
@@ -111,7 +114,7 @@
 		onOpen();
 		open = true;
 		minimized = false;
-		void tick().then(() => composer?.focus());
+		if (canAutofocusDrawingInput()) void tick().then(() => composer?.focus());
 	}
 
 	/** @param {number} amount @param {string} label */
@@ -293,7 +296,7 @@
 		}
 	}
 
-	function stop() {
+	export function stop() {
 		operation?.abort();
 		worker?.postMessage({ type: 'abort' });
 	}
@@ -381,7 +384,10 @@
 				if ((!event.metaKey && !event.ctrlKey) || event.shiftKey || event.altKey) return;
 				event.preventDefault();
 				if (open && !minimized) minimized = true;
-				else showAssistant();
+				else {
+					showAssistant();
+					void tick().then(() => composer?.focus());
+				}
 				return;
 			}
 			if (event.key === 'Escape' && open && !minimized && !running) {
@@ -423,6 +429,7 @@
 	<section
 		class="assistant-window"
 		aria-label="Drawing assistant"
+		style:--draw-background-inset={`${backgroundInset}px`}
 		style:left={position ? `${position.x}px` : undefined}
 		style:top={position ? `${position.y}px` : undefined}
 		style:right={position ? 'auto' : undefined}
@@ -688,7 +695,7 @@
 		display: flex;
 		flex-direction: column;
 		width: min(410px, calc(100vw - 24px));
-		height: min(640px, calc(100dvh - 195px));
+		height: min(640px, calc(100dvh - 195px - var(--draw-background-inset, 0px)));
 		overflow: hidden;
 		border: 1px solid #e6e5eb;
 		border-radius: 17px;
@@ -933,6 +940,9 @@
 		}
 	}
 	@media (max-width: 600px) {
+		.assistant-window :is(input, textarea, select) {
+			font-size: 16px;
+		}
 		.assistant-launcher {
 			right: 12px;
 			bottom: 58px;
@@ -941,8 +951,8 @@
 			top: auto;
 			right: 10px;
 			width: calc(100vw - 20px);
-			bottom: 68px;
-			height: min(640px, calc(100dvh - 204px));
+			bottom: calc(68px + var(--draw-background-inset, 0px));
+			height: min(640px, calc(100dvh - 204px - var(--draw-background-inset, 0px)));
 		}
 	}
 </style>

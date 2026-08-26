@@ -1,7 +1,15 @@
 <script lang="ts">
 	import { tick } from 'svelte';
+	import { canAutofocusDrawingInput } from '$lib/draw-focus.js';
 	import { DRAW_STARTING_MODES, type DrawingStartingMode } from '$lib/draw-starting-modes.js';
-	type Action = { id: string; label: string; ariaLabel: string; active?: boolean; busy?: boolean };
+	type Action = {
+		id: string;
+		label: string;
+		ariaLabel: string;
+		active?: boolean;
+		busy?: boolean;
+		busyLabel?: string;
+	};
 	let {
 		mode,
 		actions,
@@ -27,11 +35,11 @@
 		menuOpen = false;
 		if (restoreFocus) trigger?.focus();
 	}
-	async function toggle() {
+	async function toggle(event: MouseEvent) {
 		menuOpen = !menuOpen;
 		if (menuOpen) {
 			await tick();
-			modeSelect?.focus();
+			if (event.detail === 0 || canAutofocusDrawingInput()) modeSelect?.focus();
 		}
 	}
 	function run(id: string) {
@@ -74,7 +82,8 @@
 					aria-label={action.ariaLabel}
 					aria-pressed={action.active ?? false}
 					class:busy={action.busy}
-					onclick={() => run(action.id)}>{action.busy ? `${action.label}…` : action.label}</button
+					onclick={() => run(action.id)}
+					>{action.busy ? (action.busyLabel ?? `${action.label}…`) : action.label}</button
 				>
 			{/each}
 		</div>
@@ -102,7 +111,7 @@
 						aria-pressed={action.active ?? false}
 						class:busy={action.busy}
 						onclick={() => run(action.id)}
-						>{action.busy ? `${action.label} working…` : action.label}</button
+						>{action.busy ? (action.busyLabel ?? `${action.label}…`) : action.label}</button
 					>
 				{/each}
 			</div>
@@ -123,7 +132,8 @@
 		position: fixed;
 		z-index: 1002;
 		top: 72px;
-		left: 66px;
+		left: 50%;
+		transform: translateX(-50%);
 		color: #403c4c;
 		font-family: system-ui, sans-serif;
 	}
@@ -245,7 +255,10 @@
 		outline: 2px solid #8c7ddd;
 		outline-offset: 2px;
 	}
-	@media (max-width: 960px) {
+	@media (max-width: 1100px) {
+		.workspace-menu select {
+			font-size: 16px;
+		}
 		.library-open {
 			display: none;
 		}
@@ -253,6 +266,7 @@
 			top: 70px;
 			left: auto;
 			right: 59px;
+			transform: none;
 		}
 		.workspace-bar {
 			padding: 0;

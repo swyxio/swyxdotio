@@ -1,5 +1,9 @@
 import { expect, test } from '@playwright/test';
 import { authenticateTools, TEST_TOOLS_MEMBER, TEST_TOOLS_OWNER } from './helpers/tools-auth.js';
+import {
+	DRAW_GENERATION_MODELS,
+	DEFAULT_DRAW_TEXT_TO_IMAGE_MODEL
+} from '../src/lib/draw-generation-models.js';
 
 /** @param {import('@playwright/test').Page} page */
 async function scene(page) {
@@ -46,6 +50,7 @@ test('mode changes preserve artwork, native undo, and account-scoped defaults wi
 }) => {
 	let paidRequests = 0;
 	await page.route(/\/tools\/api\/draw\/(edit|agent)(?:[/?]|$)/, async (route) => {
+		if (route.request().method() === 'GET') return route.continue();
 		paidRequests += 1;
 		await route.fulfill({
 			status: 500,
@@ -122,6 +127,7 @@ test('mode and library navigation preserve an assistant draft and Escape dismiss
 	await expect(page.getByRole('button', { name: 'Choose drawing mode and tools' })).toBeFocused();
 	await page.getByRole('button', { name: 'Open drawing templates and library' }).click();
 	await expect(assistant).toHaveCount(0);
+	await expect(page.getByRole('status', { name: 'Background drawing jobs' })).toHaveCount(0);
 	await expect(page.getByRole('tab', { name: 'Design', exact: true })).toHaveAttribute(
 		'aria-selected',
 		'true'
@@ -129,6 +135,9 @@ test('mode and library navigation preserve an assistant draft and Escape dismiss
 	await page.getByRole('button', { name: 'Open drawing assistant' }).click();
 	await expect(page.getByRole('tab', { name: 'Design', exact: true })).toHaveCount(0);
 	await expect(prompt).toHaveValue('A local draft that must survive changing starting experience.');
+	await page.getByRole('button', { name: 'Open image and video generation' }).click();
+	await expect(assistant).toHaveCount(0);
+	await expect(page.getByRole('status', { name: 'Background drawing jobs' })).toHaveCount(0);
 });
 
 test('phone menus and Library have one foreground surface, with no controls covering the category row', async ({
@@ -146,7 +155,7 @@ test('phone menus and Library have one foreground surface, with no controls cove
 	await expect(pages).toBeHidden();
 	await expect(page.getByRole('tab', { name: 'Presets', exact: true })).toBeVisible();
 	const scrollableAncestors = await page
-		.getByRole('button', { name: 'Insert Argument map preset' })
+		.getByRole('button', { name: 'Insert Claim, evidence, objection preset' })
 		.evaluate((element) => {
 			let count = 0;
 			for (let parent = element.parentElement; parent; parent = parent.parentElement) {
@@ -167,4 +176,43 @@ test('phone menus and Library have one foreground surface, with no controls cove
 	await expect(mode).toBeFocused();
 	const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth);
 	expect(overflow).toBe(false);
+});
+
+test('blank Experiment opens one idle composer and preserves model choices even before a prompt is typed', async ({
+	page
+}) => {
+	let paidRequests = 0;
+	await page.route(/\/tools\/api\/draw\/(edit|agent|creative-source)(?:[/?]|$)/, (route) => {
+		if (route.request().method() === 'GET') return route.continue();
+		paidRequests++;
+		return route.abort('blockedbyclient');
+	});
+	await page.goto('/draw');
+	await page
+		.getByRole('region', { name: 'Drawing starting points' })
+		.getByRole('button', { name: 'Experiment', exact: true })
+		.click();
+	const panel = page.getByRole('region', { name: 'Selected image tools' });
+	const prompt = panel.getByRole('textbox', { name: 'AI image editing prompt' });
+	const models = panel.getByRole('button', { name: 'AI model and workflow selector' });
+	await expect(prompt).toHaveValue('');
+	await expect(models).toContainText(DEFAULT_DRAW_TEXT_TO_IMAGE_MODEL.label);
+	const alternative = DRAW_GENERATION_MODELS.find(
+		(model) => model.kind === 'text-to-image' && model.id !== DEFAULT_DRAW_TEXT_TO_IMAGE_MODEL.id
+	);
+	if (!alternative) throw new Error('Expected another text-to-image model in the shared catalog.');
+	await models.click();
+	await panel.getByRole('searchbox', { name: 'Search AI models' }).fill(alternative.label);
+	await panel
+		.getByRole('button', { name: `Use only ${alternative.label} · ${alternative.workflow}` })
+		.click();
+	await page.getByRole('button', { name: 'Open drawing templates and library' }).click();
+	await expect(panel).toBeHidden();
+	await page.getByRole('button', { name: 'Open image and video generation' }).click();
+	await selectMode(page, 'thinking');
+	await expect(prompt).toHaveValue('');
+	await expect(models).toContainText(alternative.label);
+	await expect(page.getByRole('status', { name: 'Background drawing jobs' })).toHaveCount(0);
+	expect((await scene(page)).elements).toEqual([]);
+	expect(paidRequests).toBe(0);
 });

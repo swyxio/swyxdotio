@@ -1,4 +1,5 @@
 <script>
+	import { blurDrawingInput, canAutofocusDrawingInput } from '$lib/draw-focus.js';
 	import { tick } from 'svelte';
 	import ToolsAiNotice from '$lib/ToolsAiNotice.svelte';
 	import { recordToolActivity } from '$lib/tools-activity-client.js';
@@ -185,6 +186,16 @@
 	);
 	let comparisonIds = $state(/** @type {string[]} */ ([]));
 	let qualityNote = $state('');
+	let generationConfigured = false;
+	let toolboxRoot = $state(/** @type {HTMLDivElement | undefined} */ (undefined));
+	$effect(() => {
+		if (toolboxMinimized) blurDrawingInput(toolboxRoot);
+	});
+	/** @type {HTMLElement | undefined} */
+	let historySection = $state();
+	$effect(() => {
+		if (action === 'generate') generationConfigured = true;
+	});
 	/** @type {AbortController|undefined} */
 	let generationAbort;
 	const activeReference = $derived(
@@ -206,18 +217,18 @@
 		if (options && (options.referenceImages?.length ?? 0) > 1) {
 			operationError =
 				'This composer currently accepts one reference image. Choose one before opening the recipe.';
-			return;
+			return false;
 		}
 		if (options && processingGeneration) {
 			operationError = 'Finish or cancel this batch before opening a different recipe.';
-			return;
+			return false;
 		}
 		if (
 			options &&
 			prompt.trim() &&
 			!confirm('Replace the current generation draft? Existing results and canvas stay unchanged.')
 		)
-			return;
+			return false;
 		if (options) {
 			prompt = options.prompt ?? '';
 			selectedModelIds = options.modelIds?.length
@@ -239,11 +250,28 @@
 
 		action = 'generate';
 		toolboxMinimized = false;
-		if (!options && !prompt.trim() && !attachedReference && !processingGeneration) {
+		if (
+			!generationConfigured &&
+			!options &&
+			!prompt.trim() &&
+			!attachedReference &&
+			!processingGeneration
+		) {
 			selectedModelIds = [DEFAULT_DRAW_TEXT_TO_IMAGE_MODEL.id];
 			useCanvasReference = false;
 			destination = 'preview';
 		}
+		generationConfigured = true;
+		return true;
+	}
+
+	/** Open the existing history view without submitting or changing a recipe. */
+	export async function openHistory() {
+		action = 'generate';
+		toolboxMinimized = false;
+		await tick();
+		if (historySection) historySection.scrollIntoView({ block: 'start' });
+		else operationStatus = 'No generations on this page yet. Results will appear here after a run.';
 	}
 
 	/** @param {File|undefined} file */
@@ -508,7 +536,7 @@
 		modelPickerOpen = open;
 		if (!open) modelSearchQuery = '';
 		void tick().then(() => {
-			if (open && modelPickerOpen) modelSearchInput?.focus();
+			if (open && modelPickerOpen && canAutofocusDrawingInput()) modelSearchInput?.focus();
 			if (!open && restoreFocus) modelPickerButton?.focus();
 		});
 	}
@@ -958,7 +986,7 @@
 		return resolveDrawGenerationModelSettings(model, settings);
 	}
 
-	function cancelGeneration() {
+	export function cancelGeneration() {
 		generationAbort?.abort();
 		operationStatus = 'Stopped waiting; submitted jobs may still finish or incur charges.';
 	}
@@ -1036,7 +1064,12 @@
 	}}
 />
 
-<div class="image-toolbox" class:minimized={toolboxMinimized} aria-label="AI image toolbox">
+<div
+	class="image-toolbox"
+	class:minimized={toolboxMinimized}
+	aria-label="AI image toolbox"
+	bind:this={toolboxRoot}
+>
 	<div class="toolbox-heading">
 		<button
 			type="button"
@@ -1699,7 +1732,11 @@
 	{/if}
 
 	{#if previewRecords.length}
-		<section class="generation-history" aria-label="Generated images from this session">
+		<section
+			class="generation-history"
+			aria-label="Generated images from this session"
+			bind:this={historySection}
+		>
 			<div class="history-heading">
 				<strong>Recent generations / Compare</strong>
 				<span>On this device · this page · up to 32 entries</span>

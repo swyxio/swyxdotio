@@ -49,7 +49,7 @@
 			prompt: string;
 			referenceAssetIds: string[];
 			context: Record<string, unknown>;
-		}) => void;
+		}) => void | Promise<void>;
 	}>();
 	let open = $state(false);
 	let view = $state<View>('assets');
@@ -1513,17 +1513,19 @@
 						{#if onGenerate}<button
 								disabled={busy}
 								onclick={() =>
-									onGenerate?.({
-										prompt: selectedComposition.data.prompt,
-										referenceAssetIds: selectedComposition.data.referenceAssetIds ?? [],
-										context: {
-											briefId: selectedComposition.data.briefId,
-											briefRevision: selectedComposition.data.briefRevision,
-											houseKitId: selectedComposition.data.kitId,
-											houseRevision: selectedComposition.data.kitRevision,
-											directionId: selectedComposition.data.direction,
-											parentResultIds: [selectedComposition.id]
-										}
+									void perform(async () => {
+										await onGenerate?.({
+											prompt: selectedComposition.data.prompt,
+											referenceAssetIds: selectedComposition.data.referenceAssetIds ?? [],
+											context: {
+												briefId: selectedComposition.data.briefId,
+												briefRevision: selectedComposition.data.briefRevision,
+												houseKitId: selectedComposition.data.kitId,
+												houseRevision: selectedComposition.data.kitRevision,
+												directionId: selectedComposition.data.direction,
+												parentResultIds: [selectedComposition.id]
+											}
+										});
 									})}>Open in shared Generate</button
 							>{/if}
 						<label
@@ -2074,6 +2076,9 @@
 		margin: 24px 0;
 	}
 	@media (max-width: 650px) {
+		.creative-workspace :is(input, textarea, select) {
+			font-size: 16px;
+		}
 		.creative-workspace {
 			width: calc(100vw - 12px);
 			height: calc(100dvh - 12px);
