@@ -3,7 +3,10 @@
 	import ToolsAiNotice from '$lib/ToolsAiNotice.svelte';
 	import { recordToolActivity } from '$lib/tools-activity-client.js';
 	import { DRAW_IMAGE_TOOLS, processImageTool } from '$lib/draw-image-tools.js';
-	import { createDrawingGenerationRun, runDrawingGenerationBatch } from '$lib/draw-generation-batch.js';
+	import {
+		createDrawingGenerationRun,
+		runDrawingGenerationBatch
+	} from '$lib/draw-generation-batch.js';
 	import { estimateToolsMediaReservation } from '$lib/tools-ai-policy.js';
 	import DrawGenerationLibrary from '$lib/DrawGenerationLibrary.svelte';
 	import { optimizeDrawingImageForCloud, replaceDrawingImage } from '$lib/draw-image-scene.js';
@@ -163,26 +166,80 @@
 
 	let imagePreview = $state('');
 	let previewGenerationId = $state('');
-	let attachedReference = $state(/** @type {{dataURL:string,mimeType:string,generationId?:string}|null} */ (null));
+	let attachedReference = $state(
+		/** @type {{dataURL:string,mimeType:string,generationId?:string}|null} */ (null)
+	);
 	let useCanvasReference = $state(true);
 	let destination = $state('replace');
+	let generationContext = $state(/** @type {Record<string,unknown>|undefined} */ (undefined));
 	let remixParentId = $state(/** @type {string|undefined} */ (undefined));
 	let runLimitUsd = $state(1);
 	let confirmationThreshold = $state(0.25);
-	let generationJobs = $state(/** @type {import('$lib/draw-generation-batch.js').DrawingGenerationJob[]} */ ([]));
-	let lastRun = $state(/** @type {import('$lib/draw-generation-batch.js').DrawingGenerationRun|undefined} */ (undefined));
+	let generationJobs = $state(
+		/** @type {import('$lib/draw-generation-batch.js').DrawingGenerationJob[]} */ ([])
+	);
+	let lastRun = $state(
+		/** @type {import('$lib/draw-generation-batch.js').DrawingGenerationRun|undefined} */ (
+			undefined
+		)
+	);
 	let comparisonIds = $state(/** @type {string[]} */ ([]));
 	let qualityNote = $state('');
 	/** @type {AbortController|undefined} */
 	let generationAbort;
-	const activeReference = $derived(attachedReference ?? (useCanvasReference && imageDataUrl ? {dataURL:imageDataUrl,mimeType:imageDataUrl.slice(5,imageDataUrl.indexOf(';'))} : null));
-	const comparisonImages = $derived(generations.filter((entry) => comparisonIds.includes(entry.id) && entry.mimeType.startsWith('image/')));
+	const activeReference = $derived(
+		attachedReference ??
+			(useCanvasReference && imageDataUrl
+				? { dataURL: imageDataUrl, mimeType: imageDataUrl.slice(5, imageDataUrl.indexOf(';')) }
+				: null)
+	);
+	const comparisonImages = $derived(
+		generations.filter(
+			(entry) => comparisonIds.includes(entry.id) && entry.mimeType.startsWith('image/')
+		)
+	);
 
-	/** Shared launcher used by every mode; never resets an existing draft. */
-	export function openGeneration() {
+	/** Shared launcher. Options are only applied by an explicit starter/remix action.
+	 * @param {{prompt?:string,modelIds?:string[],referenceImages?:import('$lib/draw-generation-history.js').DrawingGenerationReference[],context?:Record<string,unknown>}} [options]
+	 */
+	export function openGeneration(options) {
+		if (options && (options.referenceImages?.length ?? 0) > 1) {
+			operationError =
+				'This composer currently accepts one reference image. Choose one before opening the recipe.';
+			return;
+		}
+		if (options && processingGeneration) {
+			operationError = 'Finish or cancel this batch before opening a different recipe.';
+			return;
+		}
+		if (
+			options &&
+			prompt.trim() &&
+			!confirm('Replace the current generation draft? Existing results and canvas stay unchanged.')
+		)
+			return;
+		if (options) {
+			prompt = options.prompt ?? '';
+			selectedModelIds = options.modelIds?.length
+				? options.modelIds.filter((id) => DRAW_GENERATION_MODELS.some((model) => model.id === id))
+				: [
+						options.referenceImages?.length
+							? DEFAULT_DRAW_GENERATION_MODEL.id
+							: DEFAULT_DRAW_TEXT_TO_IMAGE_MODEL.id
+					];
+			attachedReference = options.referenceImages?.[0]
+				? structuredClone($state.snapshot(options.referenceImages[0]))
+				: null;
+			generationContext = options.context
+				? structuredClone($state.snapshot(options.context))
+				: undefined;
+			useCanvasReference = false;
+			destination = 'preview';
+		}
+
 		action = 'generate';
 		toolboxMinimized = false;
-		if (!prompt.trim() && !attachedReference && !processingGeneration) {
+		if (!options && !prompt.trim() && !attachedReference && !processingGeneration) {
 			selectedModelIds = [DEFAULT_DRAW_TEXT_TO_IMAGE_MODEL.id];
 			useCanvasReference = false;
 			destination = 'preview';
@@ -193,17 +250,22 @@
 	async function attachFile(file) {
 		if (!file) return;
 		try {
-			if (!/^image\/(png|jpeg|webp|avif|gif)$/.test(file.type) || file.size > 16_000_000) throw new Error('Choose a PNG, JPEG, WebP, AVIF or GIF under 16 MB.');
+			if (!/^image\/(png|jpeg|webp|avif|gif)$/.test(file.type) || file.size > 16_000_000)
+				throw new Error('Choose a PNG, JPEG, WebP, AVIF or GIF under 16 MB.');
 			attachedReference = { dataURL: await readDataUrl(file), mimeType: file.type };
 			useCanvasReference = false;
 			destination = 'preview';
 			operationError = '';
-		} catch (failure) { operationError = failure instanceof Error ? failure.message : 'Could not attach image.'; }
+		} catch (failure) {
+			operationError = failure instanceof Error ? failure.message : 'Could not attach image.';
+		}
 	}
 
 	/** @param {ClipboardEvent} event */
 	function pasteReference(event) {
-		const file = Array.from(event.clipboardData?.files ?? []).find((entry) => entry.type.startsWith('image/'));
+		const file = Array.from(event.clipboardData?.files ?? []).find((entry) =>
+			entry.type.startsWith('image/')
+		);
 		if (!file) return;
 		event.preventDefault();
 		event.stopPropagation();
@@ -232,7 +294,9 @@
 	let operationAbort;
 
 	const selectedTool = $derived(
-		action && action !== 'background' && action !== 'generate' ? DRAW_IMAGE_TOOLS[action] : undefined
+		action && action !== 'background' && action !== 'generate'
+			? DRAW_IMAGE_TOOLS[action]
+			: undefined
 	);
 	const needsTarget = $derived(action === 'magic-select' || action === 'magic-eraser');
 	const orderedModels = $derived(
@@ -338,18 +402,40 @@
 	});
 	const estimatedCost = $derived(
 		selectedModels.reduce(
-			(total, model) => total + estimateDrawGenerationModelCost(model, effectiveModelSettings(model)),
+			(total, model) =>
+				total + estimateDrawGenerationModelCost(model, effectiveModelSettings(model)),
 			0
 		)
 	);
-	const reservationTotal = $derived(selectedModels.reduce((total, model) => total + estimateToolsMediaReservation(estimateDrawGenerationModelCost(model, effectiveModelSettings(model))), 0));
+	const reservationTotal = $derived(
+		selectedModels.reduce(
+			(total, model) =>
+				total +
+				estimateToolsMediaReservation(
+					estimateDrawGenerationModelCost(model, effectiveModelSettings(model))
+				),
+			0
+		)
+	);
 	const uploadsSelectedImage = $derived(
 		selectedModels.some((model) => model.kind !== 'text-to-image')
 	);
-	const activeVideoGeneration = $derived(
-		generations.find((generation) => generation.id === activeVideoGenerationId)
+	const previewRecords = $derived(
+		lastRun?.pageKey === pageKey
+			? [
+					...generations,
+					...generationJobs.flatMap((job) => (job.generation ? [job.generation] : []))
+				]
+			: generations
 	);
-	const activeGeneration = $derived(generations.find((generation) => generation.id === previewGenerationId) ?? activeVideoGeneration ?? generations.find((generation) => generation.dataURL === imagePreview));
+	const activeVideoGeneration = $derived(
+		previewRecords.find((generation) => generation.id === activeVideoGenerationId)
+	);
+	const activeGeneration = $derived(
+		previewRecords.find((generation) => generation.id === previewGenerationId) ??
+			activeVideoGeneration ??
+			generations.find((generation) => generation.dataURL === imagePreview)
+	);
 	const activeGenerationSettings = $derived.by(() => {
 		if (!activeGeneration?.modelId || !activeGeneration.modelSettings) return [];
 		const model = DRAW_GENERATION_MODELS.find((entry) => entry.id === activeGeneration.modelId);
@@ -389,12 +475,19 @@
 	);
 
 	$effect(() => {
+		if (selectedWorkflowKind !== 'image-edit') destination = 'preview';
+	});
+
+	$effect(() => {
 		imagePreview = imageDataUrl;
 		operationError = '';
 	});
 
 	$effect(() => {
-		return () => { operationAbort?.abort(); generationAbort?.abort(); };
+		return () => {
+			operationAbort?.abort();
+			generationAbort?.abort();
+		};
 	});
 
 	/** @param {typeof DRAW_GENERATION_MODELS[number]} model */
@@ -435,11 +528,7 @@
 			setModelPickerOpen(false, true);
 			return;
 		}
-		if (
-			event.key === 'Enter' &&
-			event.target === modelSearchInput &&
-			visibleModels.length === 1
-		) {
+		if (event.key === 'Enter' && event.target === modelSearchInput && visibleModels.length === 1) {
 			event.preventDefault();
 			selectedModelIds = [visibleModels[0].id];
 			setModelPickerOpen(false, true);
@@ -523,7 +612,10 @@
 	function restoreGenerationSettings(generation) {
 		if (generation.modelLabel === 'Original') return;
 		prompt = generation.prompt;
-		if (generation.modelId && DRAW_GENERATION_MODELS.some((model) => model.id === generation.modelId)) {
+		if (
+			generation.modelId &&
+			DRAW_GENERATION_MODELS.some((model) => model.id === generation.modelId)
+		) {
 			selectedModelIds = [generation.modelId];
 			const model = DRAW_GENERATION_MODELS.find((entry) => entry.id === generation.modelId);
 			if (model && generation.modelSettings) {
@@ -597,8 +689,17 @@
 	 * @param {string} dataURL
 	 * @param {string} mimeType
 	 * @param {string} success
+	 * @param {AbortSignal} [signal]
 	 */
-	async function insertEditedImage(selected, dataURL, mimeType, success) {
+	async function insertEditedImage(
+		selected,
+		dataURL,
+		mimeType,
+		success,
+		signal = operationAbort?.signal
+	) {
+		const originPage = pageKey;
+		const originUser = userId;
 		if (!selected.image.fileId) throw new Error('The selected image is unavailable.');
 		if (cloudAvailable) {
 			const optimized = await optimizeDrawingImageForCloud({
@@ -607,7 +708,7 @@
 				sourceFileId: selected.image.fileId,
 				dataURL,
 				mimeType,
-				signal: operationAbort?.signal,
+				signal,
 				onOptimize: () => {
 					operationStatus = 'Optimizing image for cloud sync';
 				}
@@ -615,7 +716,9 @@
 			dataURL = optimized.dataURL;
 			mimeType = optimized.mimeType;
 		}
-		operationAbort?.signal.throwIfAborted();
+		signal?.throwIfAborted();
+		if (pageKey !== originPage || userId !== originUser)
+			throw new DOMException('The drawing changed before the edit completed.', 'AbortError');
 		const result = replaceDrawingImage({
 			editor,
 			imageId: selected.image.id,
@@ -692,30 +795,87 @@
 		if (processing || processingGeneration || !authenticated) return;
 		operationError = '';
 		try {
-			const retry = retryFailed ? lastRun : undefined;
+			const retry = retryFailed && lastRun ? $state.snapshot(lastRun) : undefined;
 			if (!retry && (!prompt.trim() || !selectedModels.length)) return;
-			const source = !retry && activeReference ? structuredClone($state.snapshot(activeReference)) : null;
-			const sourceGeneration = source ? generations.find((entry) => entry.dataURL === source.dataURL) : undefined;
+			const source =
+				!retry && activeReference ? structuredClone($state.snapshot(activeReference)) : null;
+			const sourceGeneration = source
+				? generations.find((entry) => entry.dataURL === source.dataURL)
+				: undefined;
 			const originalId = sourceGeneration?.id ?? (source ? crypto.randomUUID() : undefined);
 			const recipes = retry
 				? retry.jobs.filter((job) => job.status === 'failed').map((job) => job.recipe)
 				: selectedModels.map((model) => ({
-					id: crypto.randomUUID(), prompt: prompt.trim(), modelId: model.id, adapterId: model.adapter,
-					modelSettings: getDrawGenerationModelOverrides(model, generationParameters[model.kind] ?? {}),
-					referenceImages: model.kind === 'text-to-image' ? [] : source ? [{...source, generationId: originalId}] : [],
-					parentGenerationId: remixParentId ?? (model.kind !== 'text-to-image' ? originalId : undefined)
-				}));
+						id: crypto.randomUUID(),
+						prompt: prompt.trim(),
+						modelId: model.id,
+						adapterId: model.adapter,
+						modelSettings: getDrawGenerationModelOverrides(
+							model,
+							generationParameters[model.kind] ?? {}
+						),
+						referenceImages:
+							model.kind === 'text-to-image'
+								? []
+								: source
+									? [{ ...source, generationId: originalId }]
+									: [],
+						context: generationContext ? $state.snapshot(generationContext) : undefined,
+						parentGenerationId:
+							remixParentId ?? (model.kind !== 'text-to-image' ? originalId : undefined)
+					}));
 			if (!recipes.length) return;
-			const run = createDrawingGenerationRun({pageKey,recipes,limitUsd:retry?.limitUsd ?? Number(runLimitUsd),id:retry?.id});
+			const run = createDrawingGenerationRun({
+				pageKey,
+				recipes,
+				limitUsd: retry?.limitUsd ?? Number(runLimitUsd),
+				id: retry?.id
+			});
 			const estimate = recipes.reduce((total, recipe) => {
 				const model = DRAW_GENERATION_MODELS.find((entry) => entry.id === recipe.modelId);
-				return total + (model ? estimateDrawGenerationModelCost(model, effectiveSettingsForRecipe(model, recipe.modelSettings)) : 0);
+				return (
+					total +
+					(model
+						? estimateDrawGenerationModelCost(
+								model,
+								effectiveSettingsForRecipe(model, recipe.modelSettings)
+							)
+						: 0)
+				);
 			}, 0);
-			if (estimate >= Number(confirmationThreshold) && !confirm(`Generate ${recipes.length} result(s) for approximately $${estimate.toFixed(3)}? Funded by swyx.io. This is an estimate, not final provider billing. References will be sent to the selected providers.`)) return;
-			const replacement = !retry && destination === 'replace' && useCanvasReference && !attachedReference && imageId && selectedWorkflowKind === 'image-edit' ? selectedImage() : undefined;
-			if (source && !sourceGeneration && !retry && originalId && recipes.some((recipe) => recipe.referenceImages.length)) onGeneration?.({id:originalId,dataURL:source.dataURL,mimeType:source.mimeType,prompt:'Original image',modelLabel:'Original',createdAt:Date.now()});
+			if (
+				estimate >= Number(confirmationThreshold) &&
+				!confirm(
+					`Generate ${recipes.length} result(s) for approximately $${estimate.toFixed(3)}? Funded by swyx.io. This is an estimate, not final provider billing. References will be sent to the selected providers.`
+				)
+			)
+				return;
+			const replacement =
+				!retry &&
+				destination === 'replace' &&
+				useCanvasReference &&
+				!attachedReference &&
+				imageId &&
+				selectedWorkflowKind === 'image-edit'
+					? selectedImage()
+					: undefined;
+			if (
+				source &&
+				!sourceGeneration &&
+				!retry &&
+				originalId &&
+				recipes.some((recipe) => recipe.referenceImages.length)
+			)
+				onGeneration?.({
+					id: originalId,
+					dataURL: source.dataURL,
+					mimeType: source.mimeType,
+					prompt: 'Original image',
+					modelLabel: 'Original',
+					createdAt: Date.now()
+				});
 			lastRun = run;
-			generationJobs = run.jobs.map((job) => ({...job}));
+			generationJobs = run.jobs.map((job) => ({ ...job }));
 			processingGeneration = true;
 			onProcessingChange?.(true);
 			modelPickerOpen = false;
@@ -727,12 +887,22 @@
 			const originUser = userId;
 			let targetFileId = replacement?.image.fileId;
 			await runDrawingGenerationBatch({
-				run, userId, signal:abort.signal, concurrency:replacement ? 1 : 2,
+				run,
+				userId,
+				signal: abort.signal,
+				concurrency: replacement ? 1 : 2,
 				onJob(job) {
-					if (pageKey !== originPageKey || userId !== originUser) { abort.abort(); return; }
-					generationJobs = generationJobs.map((entry) => entry.id === job.id ? job : entry);
+					if (pageKey !== originPageKey || userId !== originUser) {
+						abort.abort();
+						return;
+					}
+					generationJobs = generationJobs.map((entry) => (entry.id === job.id ? job : entry));
 					operationStatus = job.message;
-					operationProgress = Math.round(generationJobs.filter((entry) => entry.status === 'completed').length / generationJobs.length * 100);
+					operationProgress = Math.round(
+						(generationJobs.filter((entry) => entry.status === 'completed').length /
+							generationJobs.length) *
+							100
+					);
 				},
 				async onResult(generation) {
 					if (pageKey !== originPageKey || userId !== originUser || abort.signal.aborted) return;
@@ -745,25 +915,53 @@
 						imagePreview = generation.dataURL;
 						if (replacement && targetFileId) {
 							try {
-								const current = editor.getSceneElements().find((element) => element.id === replacement.image.id && element.type === 'image');
-								if (!current || current.type !== 'image' || current.fileId !== targetFileId) throw new Error('Target changed; your result is in history. Add it to the canvas explicitly.');
-								const replaced = await insertEditedImage({image:current},generation.dataURL,generation.mimeType,'AI edit applied');
+								const current = editor
+									.getSceneElements()
+									.find(
+										(element) => element.id === replacement.image.id && element.type === 'image'
+									);
+								if (!current || current.type !== 'image' || current.fileId !== targetFileId)
+									throw new Error(
+										'Target changed; your result is in history. Add it to the canvas explicitly.'
+									);
+								const replaced = await insertEditedImage(
+									{ image: current },
+									generation.dataURL,
+									generation.mimeType,
+									'AI edit applied',
+									abort.signal
+								);
 								targetFileId = replaced.fileId;
-							} catch (failure) { operationError = failure instanceof Error ? failure.message : 'Generated image could not replace the selection.'; }
+							} catch (failure) {
+								operationError =
+									failure instanceof Error
+										? failure.message
+										: 'Generated image could not replace the selection.';
+							}
 						}
 					}
 				}
 			});
 			const completed = generationJobs.filter((job) => job.status === 'completed').length;
 			operationStatus = `Generated ${completed} of ${generationJobs.length} results`;
-		} catch (failure) { operationError = failure instanceof Error ? failure.message : 'Could not generate.'; }
-		finally { processingGeneration = false; generationAbort = undefined; onProcessingChange?.(false); }
+		} catch (failure) {
+			operationError = failure instanceof Error ? failure.message : 'Could not generate.';
+		} finally {
+			processingGeneration = false;
+			generationAbort = undefined;
+			onProcessingChange?.(false);
+		}
 	}
 
 	/** @param {typeof DRAW_GENERATION_MODELS[number]} model @param {Record<string,unknown>} settings */
-	function effectiveSettingsForRecipe(model, settings) { return resolveDrawGenerationModelSettings(model, settings); }
+	function effectiveSettingsForRecipe(model, settings) {
+		return resolveDrawGenerationModelSettings(model, settings);
+	}
 
-	function cancelGeneration() { generationAbort?.abort(); operationStatus = 'Stopped waiting; submitted jobs may still finish or incur charges.'; }
+	function cancelGeneration() {
+		generationAbort?.abort();
+		operationStatus = 'Stopped waiting; submitted jobs may still finish or incur charges.';
+	}
 
 	/** Preview is presentation only, never a canvas mutation. @param {ImageGeneration} generation */
 	function restoreGeneration(generation) {
@@ -778,10 +976,15 @@
 	function restoreGenerationRecipe(generation) {
 		if (processingGeneration) return;
 		restoreGenerationSettings(generation);
-		attachedReference = generation.referenceImages?.[0] ? structuredClone($state.snapshot(generation.referenceImages[0])) : null;
+		attachedReference = generation.referenceImages?.[0]
+			? structuredClone($state.snapshot(generation.referenceImages[0]))
+			: null;
 		useCanvasReference = false;
 		destination = 'preview';
 		remixParentId = generation.id;
+		generationContext = generation.context
+			? structuredClone($state.snapshot(generation.context))
+			: undefined;
 		action = 'generate';
 		operationStatus = 'Recipe restored — edit it, then generate when ready';
 	}
@@ -791,23 +994,47 @@
 		if (processing) return;
 		processing = true;
 		operationError = '';
-		try { await onInsert(images, board); operationStatus = board ? 'Comparison board added — Undo available' : 'Image added — Undo available'; }
-		catch (failure) { operationError = failure instanceof Error ? failure.message : 'Could not insert image.'; }
-		finally { processing = false; }
+		try {
+			await onInsert(images, board);
+			operationStatus = board
+				? 'Comparison board added — Undo available'
+				: 'Image added — Undo available';
+		} catch (failure) {
+			operationError = failure instanceof Error ? failure.message : 'Could not insert image.';
+		} finally {
+			processing = false;
+		}
 	}
 
 	/** @param {ImageGeneration} generation */
 	async function replaceWithGeneration(generation) {
 		if (processing || processingGeneration) return;
 		processing = true;
-		try { await insertEditedImage(selectedImage(),generation.dataURL,generation.mimeType,'Generation restored — Undo available'); }
-		catch (failure) { operationError = failure instanceof Error ? failure.message : 'Could not replace image.'; }
-		finally { processing = false; }
+		try {
+			await insertEditedImage(
+				selectedImage(),
+				generation.dataURL,
+				generation.mimeType,
+				'Generation restored — Undo available'
+			);
+		} catch (failure) {
+			operationError = failure instanceof Error ? failure.message : 'Could not replace image.';
+		} finally {
+			processing = false;
+		}
 	}
-
 </script>
 
-<svelte:window onpointerdown={dismissModelPickerOutside} onkeydown={handleModelPickerKeys} />
+<svelte:window
+	onpointerdown={dismissModelPickerOutside}
+	onkeydown={(event) => {
+		const pickerWasOpen = modelPickerOpen;
+		handleModelPickerKeys(event);
+		if (event.key === 'Escape' && !pickerWasOpen && !event.defaultPrevented) {
+			toolboxMinimized = true;
+		}
+	}}
+/>
 
 <div class="image-toolbox" class:minimized={toolboxMinimized} aria-label="AI image toolbox">
 	<div class="toolbox-heading">
@@ -879,7 +1106,10 @@
 			disabled={processing || backgroundProcessing}
 			onclick={() => {
 				action = 'generate';
-				if (imageId && !attachedReference && !prompt.trim()) { useCanvasReference = true; destination = 'replace'; }
+				if (imageId && !attachedReference && !prompt.trim()) {
+					useCanvasReference = true;
+					destination = 'replace';
+				}
 				operationError = '';
 			}}
 		>
@@ -1016,15 +1246,58 @@
 			</div>
 			<div class="generation-reference">
 				<div class="reference-actions">
-					<label class="attach-reference">Attach reference<input type="file" accept="image/png,image/jpeg,image/webp,image/avif,image/gif" aria-label="Attach generation reference" disabled={processingGeneration} onchange={(event) => { void attachFile(event.currentTarget.files?.[0]); event.currentTarget.value = ''; }} /></label>
-					<button type="button" disabled={!imageId || processingGeneration} onclick={() => { attachedReference = null; useCanvasReference = true; }}>Use selected image</button>
-					{#if activeReference}<button type="button" disabled={processingGeneration} onclick={() => { attachedReference = null; useCanvasReference = false; }}>Remove reference</button>{/if}
+					<label class="attach-reference"
+						>Attach reference<input
+							type="file"
+							accept="image/png,image/jpeg,image/webp,image/avif,image/gif"
+							aria-label="Attach generation reference"
+							disabled={processingGeneration}
+							onchange={(event) => {
+								void attachFile(event.currentTarget.files?.[0]);
+								event.currentTarget.value = '';
+							}}
+						/></label
+					>
+					<button
+						type="button"
+						disabled={!imageId || processingGeneration}
+						onclick={() => {
+							attachedReference = null;
+							useCanvasReference = true;
+						}}>Use selected image</button
+					>
+					{#if activeReference}<button
+							type="button"
+							disabled={processingGeneration}
+							onclick={() => {
+								attachedReference = null;
+								useCanvasReference = false;
+							}}>Remove reference</button
+						>{/if}
 				</div>
 				{#if activeReference}
 					<img src={activeReference.dataURL} alt="Reference attached to this draft" />
-					<span>{uploadsSelectedImage ? 'Reference ready · not uploaded until Generate' : 'Reference retained in draft · not sent to text-to-image models'}</span>
+					<span
+						>{uploadsSelectedImage
+							? 'Reference ready · not uploaded until Generate'
+							: 'Reference retained in draft · not sent to text-to-image models'}</span
+					>
 				{:else}<span>No reference. Text-to-image needs only your prompt.</span>{/if}
-				<label>Image destination <select aria-label="Generation output destination" bind:value={destination} disabled={processingGeneration}><option value="preview">Preview first</option><option value="replace" disabled={!imageId || !useCanvasReference || !!attachedReference || selectedWorkflowKind !== 'image-edit'}>Replace selected image (Undo available)</option></select></label>
+				<label
+					>Image destination <select
+						aria-label="Generation output destination"
+						bind:value={destination}
+						disabled={processingGeneration}
+						><option value="preview">Preview first</option><option
+							value="replace"
+							disabled={!imageId ||
+								!useCanvasReference ||
+								!!attachedReference ||
+								selectedWorkflowKind !== 'image-edit'}
+							>Replace selected image (Undo available)</option
+						></select
+					></label
+				>
 			</div>
 
 			{#if processingGeneration}
@@ -1035,7 +1308,9 @@
 							? 'Your video will appear below and in device history, not on the canvas.'
 							: selectedWorkflowKind === null
 								? 'Images and videos appear in Preview. Completed results stay in device history.'
-								: destination === 'replace' && selectedWorkflowKind === 'image-edit' ? 'Your result will replace the selected image and stay in history.' : 'Your result will appear in Preview and history. Add it to the canvas when ready.'}
+								: destination === 'replace' && selectedWorkflowKind === 'image-edit'
+									? 'Your result will replace the selected image and stay in history.'
+									: 'Your result will appear in Preview and history. Add it to the canvas when ready.'}
 					</span>
 					<progress
 						aria-label="AI generation progress"
@@ -1158,9 +1433,8 @@
 													<strong>{group.label}</strong>
 													<span class="fal-folder-controls">
 														<span>
-															{group.models.filter((model) =>
-																selectedModelIds.includes(model.id)
-															).length}
+															{group.models.filter((model) => selectedModelIds.includes(model.id))
+																.length}
 															/ {group.models.length}
 														</span>
 														<button
@@ -1339,10 +1613,35 @@
 				{/if}
 			{/each}
 			<div class="generation-budget">
-				<label>Run reservation limit ($)<input aria-label="Run spending limit" type="number" min="0.05" max="20" step="0.05" bind:value={runLimitUsd} disabled={processingGeneration} /></label>
-				<label>Confirm estimates above ($)<input aria-label="Generation confirmation threshold" type="number" min="0" max="20" step="0.05" bind:value={confirmationThreshold} disabled={processingGeneration} /></label>
-				<p>Reserves ~${reservationTotal.toFixed(3)} against the run limit. Estimates are not final provider billing. Account/site limits also apply.</p>
-				{#each [...new Set(selectedModels.map((model) => model.disclosure))] as disclosure}<p>{disclosure}</p>{/each}
+				<label
+					>Run reservation limit ($)<input
+						aria-label="Run spending limit"
+						type="number"
+						min="0.05"
+						max="20"
+						step="0.05"
+						bind:value={runLimitUsd}
+						disabled={processingGeneration}
+					/></label
+				>
+				<label
+					>Confirm estimates above ($)<input
+						aria-label="Generation confirmation threshold"
+						type="number"
+						min="0"
+						max="20"
+						step="0.05"
+						bind:value={confirmationThreshold}
+						disabled={processingGeneration}
+					/></label
+				>
+				<p>
+					Reserves ~${reservationTotal.toFixed(3)} against the run limit. Estimates are not final provider
+					billing. Account/site limits also apply.
+				</p>
+				{#each [...new Set(selectedModels.map((model) => model.disclosure))] as disclosure}<p>
+						{disclosure}
+					</p>{/each}
 			</div>
 			<div class="fal-action-row">
 				<span>
@@ -1362,7 +1661,11 @@
 						class="fal-action"
 						aria-label={generationButtonLabel}
 						aria-keyshortcuts="Meta+Enter Control+Enter"
-						disabled={processing || !prompt.trim() || !selectedModels.length || (uploadsSelectedImage && !activeReference) || reservationTotal > Number(runLimitUsd)}
+						disabled={processing ||
+							!prompt.trim() ||
+							!selectedModels.length ||
+							(uploadsSelectedImage && !activeReference) ||
+							reservationTotal > Number(runLimitUsd)}
 						onclick={() => void applyGeneration()}
 					>
 						{selectedWorkflowKind === 'image-to-video'
@@ -1395,7 +1698,7 @@
 		</section>
 	{/if}
 
-	{#if generations.length}
+	{#if previewRecords.length}
 		<section class="generation-history" aria-label="Generated images from this session">
 			<div class="history-heading">
 				<strong>Recent generations / Compare</strong>
@@ -1404,32 +1707,49 @@
 			<div class="generation-list">
 				{#each generations as generation, index (generation.id)}
 					<div class="generation-choice">
-					<button
-						type="button"
-						class="generation-card"
-						class:current={imagePreview === generation.dataURL ||
-							activeVideoGenerationId === generation.id}
-						aria-label="Use generation {index + 1}: {generation.prompt}"
-						aria-pressed={imagePreview === generation.dataURL ||
-							activeVideoGenerationId === generation.id}
-						disabled={processing || processingGeneration || backgroundProcessing}
-						onclick={() => void restoreGeneration(generation)}
-					>
-						{#if generation.mimeType.startsWith('video/')}
-							<span class="video-placeholder">Video · click to preview</span>
-						{:else}
-							<img src={generation.dataURL} alt="" />
+						<button
+							type="button"
+							class="generation-card"
+							class:current={imagePreview === generation.dataURL ||
+								activeVideoGenerationId === generation.id}
+							aria-label="Use generation {index + 1}: {generation.prompt}"
+							aria-pressed={imagePreview === generation.dataURL ||
+								activeVideoGenerationId === generation.id}
+							disabled={processing || processingGeneration || backgroundProcessing}
+							onclick={() => void restoreGeneration(generation)}
+						>
+							{#if generation.mimeType.startsWith('video/')}
+								<span class="video-placeholder">Video · click to preview</span>
+							{:else}
+								<img src={generation.dataURL} alt="" />
+							{/if}
+							<span>{generation.modelLabel}</span>
+						</button>
+						{#if generation.mimeType.startsWith('image/') && generation.modelLabel !== 'Original'}
+							<label class="compare-select"
+								><input
+									type="checkbox"
+									aria-label={`Compare ${generation.modelLabel} ${index + 1}`}
+									checked={comparisonIds.includes(generation.id)}
+									onchange={(event) => {
+										comparisonIds = event.currentTarget.checked
+											? [...comparisonIds, generation.id]
+											: comparisonIds.filter((id) => id !== generation.id);
+									}}
+								/> Compare</label
+							>
 						{/if}
-						<span>{generation.modelLabel}</span>
-					</button>
-					{#if generation.mimeType.startsWith('image/') && generation.modelLabel !== 'Original'}
-						<label class="compare-select"><input type="checkbox" aria-label={`Compare ${generation.modelLabel} ${index + 1}`} checked={comparisonIds.includes(generation.id)} onchange={(event) => { comparisonIds = event.currentTarget.checked ? [...comparisonIds, generation.id] : comparisonIds.filter((id) => id !== generation.id); }} /> Compare</label>
-					{/if}
 					</div>
 				{/each}
 			</div>
-			<button class="generation-recreate" type="button" disabled={processing || !comparisonImages.length} onclick={() => addGenerations(comparisonImages, true)}>Add comparison board ({comparisonImages.length})</button>
-			{#if activeGeneration && activeGeneration.modelLabel !== 'Original'}
+			<button
+				class="generation-recreate"
+				type="button"
+				disabled={processing || !comparisonImages.length}
+				onclick={() => addGenerations(comparisonImages, true)}
+				>Add comparison board ({comparisonImages.length})</button
+			>
+			{#if activeGeneration}
 				<section class="generation-recipe" aria-label="Selected generation details">
 					<div class="generation-recipe-heading">
 						<strong>{activeGeneration.modelLabel}</strong>
@@ -1441,9 +1761,20 @@
 						</div>
 					{/if}
 					{#if activeGeneration.mimeType.startsWith('image/')}
-						<img class="generation-preview" src={activeGeneration.dataURL} alt="Generated preview" />
+						<img
+							class="generation-preview"
+							src={activeGeneration.dataURL}
+							alt="Generated preview"
+						/>
 					{/if}
-					<div class="generation-metrics">{activeGeneration.adapterId ?? 'Provider recorded in recipe'}{activeGeneration.elapsedMs !== undefined ? ` · ${(activeGeneration.elapsedMs / 1000).toFixed(1)}s end-to-end` : ''}{activeGeneration.estimatedUsd !== undefined ? ` · ~$${activeGeneration.estimatedUsd.toFixed(3)} estimated` : ''}</div>
+					<div class="generation-metrics">
+						{activeGeneration.adapterId ??
+							'Provider recorded in recipe'}{activeGeneration.elapsedMs !== undefined
+							? ` · ${(activeGeneration.elapsedMs / 1000).toFixed(1)}s end-to-end`
+							: ''}{activeGeneration.estimatedUsd !== undefined
+							? ` · ~$${activeGeneration.estimatedUsd.toFixed(3)} estimated`
+							: ''}
+					</div>
 					<div class="generation-prompt" aria-label="Generation prompt">
 						{activeGeneration.prompt}
 					</div>
@@ -1473,32 +1804,93 @@
 							{activeGenerationLineage.map((entry) => entry.modelLabel).join(' → ')}
 						</div>
 					{/if}
-					<button
-						type="button"
-						class="generation-recreate"
-						aria-label="Restore reference image, prompt, and model"
-						disabled={processing || processingGeneration || backgroundProcessing}
-						onclick={() => void restoreGenerationRecipe(activeGeneration)}
-					>
-						Remix prompt, references & settings
-					</button>
+					{#if activeGeneration.modelLabel !== 'Original'}<button
+							type="button"
+							class="generation-recreate"
+							aria-label="Restore reference image, prompt, and model"
+							disabled={processing || processingGeneration || backgroundProcessing}
+							onclick={() => void restoreGenerationRecipe(activeGeneration)}
+						>
+							Remix prompt, references & settings
+						</button>{/if}
 					{#if activeGeneration.mimeType.startsWith('image/')}
-						<div class="reference-actions"><button type="button" disabled={processing} onclick={() => addGenerations([activeGeneration])}>Add to canvas</button><button type="button" disabled={!imageId || processing || processingGeneration} onclick={() => replaceWithGeneration(activeGeneration)}>Replace selected image</button><a download="generation.png" href={activeGeneration.dataURL}>Download image</a></div>
+						<div class="reference-actions">
+							<button
+								type="button"
+								disabled={processing}
+								onclick={() => addGenerations([activeGeneration])}>Add to canvas</button
+							><button
+								type="button"
+								disabled={!imageId || processing || processingGeneration}
+								onclick={() => replaceWithGeneration(activeGeneration)}
+								>Replace selected image</button
+							><a download="generation.png" href={activeGeneration.dataURL}>Download image</a>
+						</div>
 					{/if}
-					<label class="quality-note">Personal quality note<input aria-label="Generation quality note" maxlength="500" bind:value={qualityNote} /><button type="button" onclick={() => { onGeneration?.({...activeGeneration,qualityNote:qualityNote.trim()}); operationStatus = 'Quality note saved on this device'; }}>Save note</button></label>
+					<label class="quality-note"
+						>Personal quality note<input
+							aria-label="Generation quality note"
+							maxlength="500"
+							bind:value={qualityNote}
+						/><button
+							type="button"
+							onclick={() => {
+								onGeneration?.({ ...activeGeneration, qualityNote: qualityNote.trim() });
+								operationStatus = 'Quality note saved on this device';
+							}}>Save note</button
+						></label
+					>
 				</section>
 			{/if}
 		</section>
 	{/if}
 
-	{#if generationJobs.length}
+	{#if generationJobs.length && lastRun?.pageKey === pageKey}
 		<section class="generation-queue" aria-label="Generation queue" aria-live="polite">
-			<strong>{processingGeneration ? 'Generating' : 'Latest batch'} · {generationJobs.filter((job) => job.status === 'completed').length}/{generationJobs.length}</strong>
-			{#each generationJobs as job (job.id)}<div class="queue-job"><strong>{DRAW_GENERATION_MODELS.find((model) => model.id === job.recipe.modelId)?.label ?? job.recipe.modelId}</strong><span>{job.message}{job.elapsedMs ? ` · ${(job.elapsedMs / 1000).toFixed(1)}s` : ''}</span>{#if job.generation}<button type="button" onclick={() => job.generation && restoreGeneration(job.generation)}>Preview result</button>{/if}</div>{/each}
-			{#if processingGeneration}<button type="button" onclick={cancelGeneration}>Cancel remaining jobs</button>{:else if generationJobs.some((job) => job.status === 'failed')}<button type="button" onclick={() => applyGeneration(true)}>Retry failed jobs (same run budget)</button>{/if}
+			<strong
+				>{processingGeneration ? 'Generating' : 'Latest batch'} · {generationJobs.filter(
+					(job) => job.status === 'completed'
+				).length}/{generationJobs.length}</strong
+			>
+			{#each generationJobs as job (job.id)}<div class="queue-job">
+					<strong
+						>{DRAW_GENERATION_MODELS.find((model) => model.id === job.recipe.modelId)?.label ??
+							job.recipe.modelId}</strong
+					><span
+						>{job.message}{job.elapsedMs ? ` · ${(job.elapsedMs / 1000).toFixed(1)}s` : ''}</span
+					>{#if job.generation}<button
+							type="button"
+							onclick={() => job.generation && restoreGeneration(job.generation)}
+							>Preview result</button
+						>{/if}
+				</div>{/each}
+			{#if processingGeneration}<button type="button" onclick={cancelGeneration}
+					>Cancel remaining jobs</button
+				>{:else if generationJobs.some((job) => job.status === 'failed')}<button
+					type="button"
+					onclick={() => applyGeneration(true)}>Retry failed jobs (same run budget)</button
+				>{/if}
 		</section>
 	{/if}
-	<DrawGenerationLibrary {storageKey} {userId} {prompt} reference={activeReference} generation={activeGeneration} onModifier={(text) => { prompt = `${prompt.trim()}\n${text}`.trim().slice(0,1000); }} onReference={(reference) => { attachedReference = reference; useCanvasReference = false; destination = 'preview'; action = 'generate'; }} onRemix={restoreGenerationRecipe} />
+	{#if action === 'generate'}<div class="saved-generation-panel">
+			<DrawGenerationLibrary
+				{storageKey}
+				{userId}
+				{prompt}
+				reference={activeReference}
+				generation={activeGeneration}
+				onModifier={(text) => {
+					prompt = `${prompt.trim()}\n${text}`.trim().slice(0, 1000);
+				}}
+				onReference={(reference) => {
+					attachedReference = reference;
+					useCanvasReference = false;
+					destination = 'preview';
+					action = 'generate';
+				}}
+				onRemix={restoreGenerationRecipe}
+			/>
+		</div>{/if}
 	{#if historyError}<p class="operation-error" role="alert">{historyError}</p>{/if}
 
 	{#if processing && !processingGeneration}
@@ -1515,24 +1907,115 @@
 </div>
 
 <style>
-	.generation-reference { display: grid; gap: 7px; padding: 9px; border: 1px dashed #cbd5e1; border-radius: 8px; margin: 10px 0; font-size: 11px; }
-	.generation-reference img { max-height: 85px; max-width: 100%; object-fit: contain; justify-self: start; }
-	.reference-actions { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
-	.reference-actions button, .attach-reference, .generation-queue button, .quality-note button { padding: 5px 7px; border: 1px solid #cbd5e1; border-radius: 5px; background: white; font-size: 11px; cursor: pointer; }
-	.attach-reference input { width: 1px; height: 1px; position: absolute; opacity: 0; }
-	.attach-reference:focus-within { outline: 2px solid #6366f1; }
-	.generation-reference select { display: block; width: 100%; margin-top: 4px; padding: 5px; }
-	.generation-budget { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; font-size: 11px; margin: 10px 0; }
-	.generation-budget label, .quality-note { display: grid; gap: 4px; }
-	.generation-budget input, .quality-note input { min-width: 0; width: 100%; border: 1px solid #cbd5e1; border-radius: 4px; padding: 5px; }
-	.generation-budget p { grid-column: 1 / -1; margin: 0; color: #64748b; line-height: 1.45; }
-	.generation-choice { min-width: 0; }
-	.generation-preview { width: 100%; max-height: 240px; object-fit: contain; background: #f1f5f9; border-radius: 6px; }
-	.compare-select, .generation-metrics, .video-placeholder { font-size: 10px; color: #64748b; }
-	.generation-queue { margin-top: 12px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 12px; }
-	.queue-job { display: grid; gap: 3px; padding: 7px 0; font-size: 11px; }
-	.queue-job span { color: #64748b; overflow-wrap: anywhere; }
-	.quality-note { font-size: 11px; margin-top: 8px; }
+	.generation-reference {
+		display: grid;
+		gap: 7px;
+		padding: 9px;
+		border: 1px dashed #cbd5e1;
+		border-radius: 8px;
+		margin: 10px 0;
+		font-size: 11px;
+	}
+	.generation-reference img {
+		max-height: 85px;
+		max-width: 100%;
+		object-fit: contain;
+		justify-self: start;
+	}
+	.reference-actions {
+		display: flex;
+		gap: 5px;
+		flex-wrap: wrap;
+		align-items: center;
+	}
+	.reference-actions button,
+	.attach-reference,
+	.generation-queue button,
+	.quality-note button {
+		padding: 5px 7px;
+		border: 1px solid #cbd5e1;
+		border-radius: 5px;
+		background: white;
+		font-size: 11px;
+		cursor: pointer;
+	}
+	.attach-reference input {
+		width: 1px;
+		height: 1px;
+		position: absolute;
+		opacity: 0;
+	}
+	.attach-reference:focus-within {
+		outline: 2px solid #6366f1;
+	}
+	.generation-reference select {
+		display: block;
+		width: 100%;
+		margin-top: 4px;
+		padding: 5px;
+	}
+	.generation-budget {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 7px;
+		font-size: 11px;
+		margin: 10px 0;
+	}
+	.generation-budget label,
+	.quality-note {
+		display: grid;
+		gap: 4px;
+	}
+	.generation-budget input,
+	.quality-note input {
+		min-width: 0;
+		width: 100%;
+		border: 1px solid #cbd5e1;
+		border-radius: 4px;
+		padding: 5px;
+	}
+	.generation-budget p {
+		grid-column: 1 / -1;
+		margin: 0;
+		color: #64748b;
+		line-height: 1.45;
+	}
+	.generation-choice {
+		min-width: 0;
+	}
+	.generation-preview {
+		width: 100%;
+		max-height: 240px;
+		object-fit: contain;
+		background: #f1f5f9;
+		border-radius: 6px;
+	}
+	.compare-select,
+	.generation-metrics,
+	.video-placeholder {
+		font-size: 10px;
+		color: #64748b;
+	}
+	.generation-queue {
+		margin-top: 12px;
+		padding-top: 10px;
+		border-top: 1px solid #e2e8f0;
+		font-size: 12px;
+	}
+	.queue-job {
+		display: grid;
+		gap: 3px;
+		padding: 7px 0;
+		font-size: 11px;
+	}
+	.queue-job span {
+		color: #64748b;
+		overflow-wrap: anywhere;
+	}
+	.quality-note {
+		font-size: 11px;
+		margin-top: 8px;
+	}
 
 	.image-toolbox {
 		min-width: 0;

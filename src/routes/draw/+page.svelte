@@ -123,8 +123,15 @@
 	let generationRunning = $state(false);
 	let imageToolMinimized = $state(false);
 	let generationHistoryError = $state('');
-	let generationPanel = $state(/** @type {{openGeneration:()=>void}|undefined} */ (undefined));
-	const generationCanvasAbort = new AbortController();
+	let generationPanel = $state(/** @type {{openGeneration:(options?:{prompt?:string,modelIds?:string[],referenceImages?:import('$lib/draw-generation-history.js').DrawingGenerationReference[],context?:Record<string,unknown>})=>void}|undefined} */ (undefined));
+	let generationCanvasAbort = new AbortController();
+	let generationInsertionRunning = $state(false);
+	$effect(() => {
+		const pageId = activePageId;
+		generationCanvasAbort.abort();
+		generationCanvasAbort = new AbortController();
+		return () => generationCanvasAbort.abort();
+	});
 	let imageToolPrompt = $state('');
 	let imageToolStatus = $state('');
 	let imageToolModelIds = $state([DEFAULT_DRAW_GENERATION_MODEL.id]);
@@ -238,27 +245,31 @@
 		generationRunning = active;
 		processingImage = active ? { id: selectedImageId, dataURL: selectedImageDataUrl } : null;
 	}
-	async function openGenerationComposer() {
+	/** @param {Parameters<NonNullable<typeof generationPanel>['openGeneration']>[0]} [options] */
+	async function openGenerationComposer(options) {
 		isGenerationOpen = true;
 		imageToolMinimized = false;
 		await tick();
-		generationPanel?.openGeneration();
+		generationPanel?.openGeneration(options);
 	}
 
 	/** @param {DrawingImageGeneration[]} generations @param {boolean} [board] */
 	async function insertGeneratedImages(generations, board = false) {
 		if (accountChanged || !editor || !convertElements || !captureImmediately) throw new Error('The drawing is unavailable.');
+		generationInsertionRunning = true;
+		try {
 		const result = await insertDrawingGenerations({editor,generations,board,convertElements,captureUpdate:captureImmediately,cloudAvailable,signal:generationCanvasAbort.signal});
 		if (result.exceedsCloudLimit) {
 			saveStatus = 'error';
 			generationHistoryError = 'Added on this device only: the drawing exceeds the 1.8 MB cloud limit.';
 		}
+		} finally { generationInsertionRunning = false; }
 	}
 
 	function canNavigateDrawing() {
-		if (!generationRunning) return true;
+		if (!generationRunning && !generationInsertionRunning) return true;
 		imageToolMinimized = false;
-		imageToolStatus = 'Finish or cancel the generation queue before switching pages.';
+		imageToolStatus = generationInsertionRunning ? 'Finish adding the result before switching pages.' : 'Finish or cancel the generation queue before switching pages.';
 		return false;
 	}
 	const recentPages = $derived(orderRecentDrawingPages(pages, activePageId));
@@ -278,7 +289,7 @@
 	const workspaceCommands = $derived.by(() => {
 		/** @type {WorkspaceCommand[]} */
 		const commands = [
-			{id:'action-generate-media',label:'Generate image or video',description:'Prompt, compare models, remix and open generation history',category:'Actions',keywords:['ai','image','video','generate','history','experiment'],run:openGenerationComposer},
+			{id:'action-generate-media',label:'Generate image or video',description:'Prompt, compare models, remix and open generation history',category:'Actions',keywords:['ai','image','video','generate','history','experiment'],run:() => openGenerationComposer()},
 			{
 				id: 'action-new-page',
 				label: 'Create new page',
@@ -2036,7 +2047,7 @@
 	</section>
 {/if}
 
-{#if editor}<button class="generation-launcher" type="button" aria-label="Open image and video generation" onclick={openGenerationComposer}>{generationRunning ? 'Generating…' : 'Generate'}</button>{/if}
+{#if editor}<button class="generation-launcher" type="button" aria-label="Open image and video generation" onclick={() => openGenerationComposer()}>{generationRunning ? 'Generating…' : 'Generate'}</button>{/if}
 
 {#if pages.length > 0}
 	<div class="page-picker">
@@ -2474,7 +2485,7 @@
 {/if}
 
 <style>
-	.generation-launcher { position: fixed; right: 16px; bottom: 72px; z-index: 33; padding: 9px 13px; border: 1px solid #d8d7e0; border-radius: 9px; background: white; box-shadow: 0 3px 12px #0001; color: #373065; font: 600 12px system-ui; }
+	.generation-launcher { position: fixed; right: 16px; bottom: 120px; z-index: 33; padding: 9px 13px; border: 1px solid #d8d7e0; border-radius: 9px; background: white; box-shadow: 0 3px 12px #0001; color: #373065; font: 600 12px system-ui; }
 	.generation-launcher:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
 	.image-tools[hidden] { display: none; }
 

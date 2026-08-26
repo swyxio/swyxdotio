@@ -267,7 +267,8 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 		userId: user.id,
 		id: reservation.id,
 		model: model.id,
-		requestId: submitted.requestId
+		requestId: submitted.requestId,
+		adapter: model.adapter
 	});
 	if (!registered.ok) {
 		await adapter.cancel({ model, requestId: submitted.requestId }, context).catch(() => {});
@@ -315,7 +316,21 @@ export async function pollDrawingImage(event, fetchProvider = fetch) {
 	});
 	if (!owned.ok) return owned;
 	const job = await owned.json();
-	const adapter = getDrawingGenerationAdapter(model);
+	if (typeof job.adapter !== 'string')
+		return privateJson(
+			{
+				code: 'provider_unavailable',
+				error: 'This job has no provider binding and cannot be rerouted.'
+			},
+			{ status: 503 }
+		);
+	const boundModel = { ...model, adapter: job.adapter };
+	let adapter;
+	try {
+		adapter = getDrawingGenerationAdapter(boundModel);
+	} catch (error) {
+		return generationError(error, 'The generation provider is unavailable.');
+	}
 	const context = { env: event.platform?.env ?? {}, fetcher: fetchProvider };
 	if (!adapter.configured(context.env))
 		return privateJson(
@@ -323,7 +338,7 @@ export async function pollDrawingImage(event, fetchProvider = fetch) {
 			{ status: 503 }
 		);
 	try {
-		const progress = await adapter.status({ model, requestId }, context);
+		const progress = await adapter.status({ model: boundModel, requestId }, context);
 		if (['COMPLETED', 'FAILED', 'CANCELLED'].includes(progress.status)) {
 			const recorded = await finishToolsAiUsage(
 				event,
@@ -367,7 +382,22 @@ export async function cancelDrawingImage(event, fetchProvider = fetch) {
 		requestId
 	});
 	if (!owned.ok) return owned;
-	const adapter = getDrawingGenerationAdapter(model);
+	const job = await owned.json();
+	if (typeof job.adapter !== 'string')
+		return privateJson(
+			{
+				code: 'provider_unavailable',
+				error: 'This job has no provider binding and cannot be rerouted.'
+			},
+			{ status: 503 }
+		);
+	const boundModel = { ...model, adapter: job.adapter };
+	let adapter;
+	try {
+		adapter = getDrawingGenerationAdapter(boundModel);
+	} catch (error) {
+		return generationError(error, 'The generation provider is unavailable.');
+	}
 	const context = { env: event.platform?.env ?? {}, fetcher: fetchProvider };
 	if (!adapter.configured(context.env))
 		return privateJson(
@@ -375,9 +405,8 @@ export async function cancelDrawingImage(event, fetchProvider = fetch) {
 			{ status: 503 }
 		);
 	try {
-		const cancelled = await adapter.cancel({ model, requestId }, context);
+		const cancelled = await adapter.cancel({ model: boundModel, requestId }, context);
 		if (cancelled.cancellation === 'confirmed') {
-			const job = await owned.json();
 			const recorded = await finishToolsAiUsage(event, user.id, job.id, 'cancelled');
 			if (!recorded.ok) return recorded;
 		}

@@ -1,181 +1,196 @@
-const DATABASE_NAME = 'swyx-draw-generation-library';
-const STORE_NAME = 'accounts';
+/** Saved items use the shared creative library. This module never creates another asset store. */
+const API = '/tools/api/draw/creative';
+/** @typedef {import('./draw-generation-history.js').DrawingImageGeneration} Generation */
+/** @typedef {{id:string,revision:number,name:string,createdAt:number,kind:'modifier'|'reference'|'generation',text?:string,assetId?:string,mimeType?:string,generation?:Record<string,any>}} DrawingGenerationLibraryEntry */
 
-// Saved assets are explicit pins, not a rolling history. Never evict them silently.
-export const MAX_DRAWING_LIBRARY_ENTRIES = 128;
-export const MAX_DRAWING_LIBRARY_ITEM_BYTES = 16_000_000;
-export const MAX_DRAWING_LIBRARY_BYTES = 64_000_000;
-
-/** @typedef {{ id: string, name: string, createdAt: number }} LibraryIdentity */
-/** @typedef {LibraryIdentity & { kind: 'modifier', text: string }} DrawingModifierEntry */
-/** @typedef {LibraryIdentity & { kind: 'reference', dataURL: string, mimeType: string }} DrawingReferenceEntry */
-/** @typedef {LibraryIdentity & { kind: 'generation', generation: import('./draw-generation-history.js').DrawingImageGeneration }} DrawingGenerationEntry */
-/** @typedef {DrawingModifierEntry | DrawingReferenceEntry | DrawingGenerationEntry} DrawingLibraryEntry */
-/** @typedef {DrawingLibraryEntry} DrawingGenerationLibraryEntry */
-
-/** @type {Promise<IDBDatabase> | undefined} */
-let database;
-
-/** @param {string} storageKey */
-function requireStorageKey(storageKey) {
-	if (typeof storageKey !== 'string' || !storageKey.trim()) {
-		throw new Error('Choose an account before opening the saved library.');
+/** @param {string|undefined} userId @param {string} path @param {RequestInit} [options] @param {typeof fetch} [fetcher] */
+async function request(userId, path, options = {}, fetcher = fetch) {
+	if (!userId) throw new Error('Sign in to use your private saved library.');
+	const response = await fetcher(`${API}${path}`, {
+		...options,
+		credentials: 'same-origin',
+		cache: 'no-store',
+		headers: { 'X-Tools-User': userId, ...options.headers }
+	});
+	if (!response.ok) {
+		const body = await response.json().catch(() => ({}));
+		throw new Error(body.error ?? 'The private saved library is unavailable.');
 	}
+	return response;
 }
 
-/** @param {unknown} dataURL @param {unknown} mimeType */
-function validReference(dataURL, mimeType) {
-	return (
-		typeof dataURL === 'string' &&
-		typeof mimeType === 'string' &&
-		/^image\/(png|jpeg|webp|gif|avif|svg\+xml)$/.test(mimeType) &&
-		dataURL.startsWith(`data:${mimeType};base64,`) &&
-		dataURL.length > `data:${mimeType};base64,`.length
+/** @param {string|undefined} userId @param {typeof fetch} [fetcher] @returns {Promise<DrawingGenerationLibraryEntry[]>} */
+export async function loadDrawingGenerationLibrary(userId, fetcher = fetch) {
+	if (!userId) return [];
+	const data = await (await request(userId, '/library', {}, fetcher)).json();
+	return (data.records?.saved ?? []).map((/** @type {any} */ record) => ({
+		...record.data,
+		id: record.id,
+		revision: record.revision,
+		createdAt: record.createdAt
+	}));
+}
+
+/** @param {Blob} blob @returns {Promise<string>} */
+function asDataURL(blob) {
+	return new Promise((resolve, reject) => {
+		const reader = new FileReader();
+		reader.onload = () => resolve(String(reader.result));
+		reader.onerror = () => reject(new Error('Could not read saved reference.'));
+		reader.readAsDataURL(blob);
+	});
+}
+
+/** Upload only on an explicit Save action, with no provider call. @param {string} userId @param {string} dataURL @param {string} name @param {typeof fetch} fetcher */
+async function saveImage(userId, dataURL, name, fetcher) {
+	if (!/^data:image\/(png|jpeg|webp|avif|gif);base64,/.test(dataURL))
+		throw new Error('Save a raster image reference, not a remote URL or video.');
+	let blob = await (await fetch(dataURL)).blob();
+	if (!['image/png', 'image/jpeg', 'image/webp'].includes(blob.type)) {
+		const bitmap = await createImageBitmap(blob);
+		try {
+			const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+			const ctx = canvas.getContext('2d');
+			if (!ctx) throw new Error('Image conversion is unavailable.');
+			ctx.drawImage(bitmap, 0, 0);
+			blob = await canvas.convertToBlob({ type: 'image/webp', quality: 0.94 });
+		} finally {
+			bitmap.close();
+		}
+	}
+	const asset = await (
+		await request(
+			userId,
+			'/assets',
+			{
+				method: 'POST',
+				headers: {
+					'Content-Type': blob.type,
+					'X-Asset-Name': encodeURIComponent(name),
+					'X-Asset-Role': 'reference'
+				},
+				body: blob
+			},
+			fetcher
+		)
+	).json();
+	if (typeof asset.id !== 'string') throw new Error('The image upload did not return an asset ID.');
+	return { assetId: asset.id, mimeType: blob.type };
+}
+
+/** @param {string|undefined} userId @param {{kind:'modifier'|'reference'|'generation',name:string,text?:string,reference?:{dataURL:string,mimeType:string},generation?:Generation}} input @param {typeof fetch} [fetcher] */
+export async function saveDrawingGenerationLibraryEntry(userId, input, fetcher = fetch) {
+	if (!userId) throw new Error('Sign in to save to your private library.');
+	const snapshot = structuredClone(input);
+	/** @type {Record<string,any>} */
+	const data = { kind: snapshot.kind, name: snapshot.name.trim().slice(0, 120) };
+	if (snapshot.kind === 'modifier') data.text = snapshot.text;
+	else if (snapshot.kind === 'reference' && snapshot.reference)
+		data.assetId = (
+			await saveImage(userId, snapshot.reference.dataURL, data.name, fetcher)
+		).assetId;
+	else if (snapshot.kind === 'generation' && snapshot.generation) {
+		const { dataURL, referenceImages } = snapshot.generation;
+		const fields = [
+			'id',
+			'prompt',
+			'modelId',
+			'adapterId',
+			'modelSettings',
+			'modelProvider',
+			'modelKind',
+			'modelWorkflow',
+			'modelLabel',
+			'createdAt',
+			'mimeType',
+			'recipeId',
+			'runId',
+			'jobId',
+			'batchId',
+			'elapsedMs',
+			'estimatedUsd',
+			'reportedUsd',
+			'qualityNote',
+			'width',
+			'height',
+			'parentGenerationId',
+			'context'
+		];
+		const metadata = Object.fromEntries(
+			fields.flatMap((key) => {
+				const value = /** @type {Record<string,any>} */ (snapshot.generation)[key];
+				return value === undefined ? [] : [[key, value]];
+			})
+		);
+		const output = snapshot.generation.mimeType.startsWith('video/')
+			? {}
+			: { assetId: (await saveImage(userId, dataURL, data.name, fetcher)).assetId };
+		const references = [];
+		for (const reference of referenceImages ?? [])
+			references.push({
+				...(reference.assetId
+					? { assetId: reference.assetId, mimeType: reference.mimeType }
+					: await saveImage(userId, reference.dataURL, `${data.name} reference`, fetcher)),
+				...(reference.generationId ? { generationId: reference.generationId } : {})
+			});
+		data.generation = { ...metadata, ...output, referenceImages: references };
+	} else throw new Error('Choose an item to save.');
+	const record = await (
+		await request(
+			userId,
+			'/records/saved',
+			{
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ data })
+			},
+			fetcher
+		)
+	).json();
+	return /** @type {DrawingGenerationLibraryEntry} */ ({
+		...record.data,
+		id: record.id,
+		revision: record.revision,
+		createdAt: record.createdAt
+	});
+}
+
+/** @param {string|undefined} userId @param {DrawingGenerationLibraryEntry} entry @param {typeof fetch} [fetcher] */
+export async function removeDrawingGenerationLibraryEntry(userId, entry, fetcher = fetch) {
+	await request(
+		userId,
+		`/records/saved/${encodeURIComponent(entry.id)}`,
+		{
+			method: 'DELETE',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ revision: entry.revision })
+		},
+		fetcher
 	);
 }
 
-/** @param {import('./draw-generation-history.js').DrawingImageGeneration} generation */
-function validateGeneration(generation) {
-	if (
-		!generation ||
-		typeof generation.id !== 'string' ||
-		!generation.id ||
-		typeof generation.prompt !== 'string' ||
-		typeof generation.modelLabel !== 'string' ||
-		!Number.isFinite(generation.createdAt)
-	) {
-		throw new Error('This saved recipe is incomplete.');
-	}
-	if (generation.mimeType?.startsWith('video/')) {
-		// Only pin the provider URL and recipe. Do not fetch or persist video bytes.
-		let url;
-		try {
-			url = new URL(generation.dataURL);
-		} catch {
-			throw new Error('Save videos as HTTPS links; video bytes are not stored in the library.');
-		}
-		if (url.protocol !== 'https:' || url.username || url.password) {
-			throw new Error('Save videos as HTTPS links; video bytes are not stored in the library.');
-		}
-	} else if (!validReference(generation.dataURL, generation.mimeType)) {
-		throw new Error('A saved image recipe needs its local image bytes.');
-	}
-	if (
-		generation.referenceImages &&
-		(!Array.isArray(generation.referenceImages) ||
-			generation.referenceImages.some((reference) =>
-				!validReference(reference?.dataURL, reference?.mimeType)
-			))
-	) {
-		throw new Error('Saved recipe references must contain local image bytes.');
-	}
+/** @param {string|undefined} userId @param {{assetId?:string,mimeType?:string,generationId?:string}} reference @param {typeof fetch} [fetcher] */
+export async function readDrawingLibraryReference(userId, reference, fetcher = fetch) {
+	if (!reference.assetId) throw new Error('The saved reference has no asset.');
+	const blob = await (
+		await request(userId, `/assets/${encodeURIComponent(reference.assetId)}`, {}, fetcher)
+	).blob();
+	return {
+		dataURL: await asDataURL(blob),
+		mimeType: blob.type,
+		assetId: reference.assetId,
+		...(reference.generationId ? { generationId: reference.generationId } : {})
+	};
 }
 
-/**
- * Clone before the first asynchronous operation so edits to a live draft cannot
- * rewrite a pinned recipe, its references, modifier text, or lineage.
- * @param {DrawingLibraryEntry[]} entries
- * @returns {DrawingLibraryEntry[]}
- */
-function snapshotLibrary(entries) {
-	if (!Array.isArray(entries)) throw new Error('The saved library is invalid.');
-	if (entries.length > MAX_DRAWING_LIBRARY_ENTRIES) {
-		throw new Error(`The saved library holds up to ${MAX_DRAWING_LIBRARY_ENTRIES} items. Remove an item before saving another.`);
-	}
-	const ids = new Set();
-	const encoder = new TextEncoder();
-	for (const entry of entries) {
-		if (
-			!entry || typeof entry.id !== 'string' || !entry.id || ids.has(entry.id) ||
-			typeof entry.name !== 'string' || !entry.name.trim() || entry.name.length > 120 ||
-			!Number.isFinite(entry.createdAt)
-		) {
-			throw new Error('Saved items need a unique ID, a name of up to 120 characters, and a creation date.');
-		}
-		ids.add(entry.id);
-		if (entry.kind === 'modifier') {
-			if (typeof entry.text !== 'string' || !entry.text.trim()) {
-				throw new Error('Add some text before saving a prompt modifier.');
-			}
-		} else if (entry.kind === 'reference') {
-			if (!validReference(entry.dataURL, entry.mimeType)) {
-				throw new Error('A saved reference must contain local image bytes.');
-			}
-		} else if (entry.kind === 'generation') {
-			validateGeneration(entry.generation);
-		} else {
-			throw new Error('This saved item type is not supported.');
-		}
-		if (encoder.encode(JSON.stringify(entry)).byteLength > MAX_DRAWING_LIBRARY_ITEM_BYTES) {
-			throw new Error('This item exceeds the 16 MB saved-item limit. Use a smaller image or fewer references.');
-		}
-	}
-	const serialized = JSON.stringify(entries);
-	if (encoder.encode(serialized).byteLength > MAX_DRAWING_LIBRARY_BYTES) {
-		throw new Error('The saved library exceeds its 64 MB limit. Remove items before saving more.');
-	}
-	return JSON.parse(serialized);
-}
-
-function openLibrary() {
-	if (typeof indexedDB === 'undefined') {
-		throw new Error('The saved library needs browser storage, which is unavailable on this device.');
-	}
-	if (!database) {
-		database = new Promise((resolve, reject) => {
-			const request = indexedDB.open(DATABASE_NAME, 1);
-			request.onupgradeneeded = () => request.result.createObjectStore(STORE_NAME, { keyPath: 'storageKey' });
-			request.onsuccess = () => {
-				request.result.onversionchange = () => {
-					request.result.close();
-					database = undefined;
-				};
-				resolve(request.result);
-			};
-			request.onerror = () => reject(request.error ?? new Error('The saved library could not be opened.'));
-		}).catch((error) => {
-			database = undefined;
-			throw error;
-		});
-	}
-	return database;
-}
-
-/** @param {string} storageKey @returns {Promise<DrawingLibraryEntry[]>} */
-export async function loadDrawingGenerationLibrary(storageKey) {
-	requireStorageKey(storageKey);
-	const storage = await openLibrary();
-	return new Promise((resolve, reject) => {
-		const transaction = storage.transaction(STORE_NAME);
-		const request = transaction.objectStore(STORE_NAME).get(storageKey);
-		request.onsuccess = () => {
-			try {
-				resolve(snapshotLibrary(request.result?.entries ?? []));
-			} catch (error) {
-				reject(error);
-			}
-		};
-		request.onerror = () => reject(request.error ?? new Error('The saved library could not load.'));
-		transaction.onabort = () => reject(transaction.error ?? new Error('The saved library could not load.'));
-	});
-}
-
-/** @param {string} storageKey @param {DrawingLibraryEntry[]} entries */
-export async function saveDrawingGenerationLibrary(storageKey, entries) {
-	requireStorageKey(storageKey);
-	const snapshot = snapshotLibrary(entries);
-	const storage = await openLibrary();
-	return new Promise((resolve, reject) => {
-		const transaction = storage.transaction(STORE_NAME, 'readwrite');
-		transaction.objectStore(STORE_NAME).put({ storageKey, entries: snapshot });
-		transaction.oncomplete = () => resolve(undefined);
-		const failed = () => reject(new Error(
-			transaction.error?.name === 'QuotaExceededError'
-				? 'Browser storage is full. This item was not saved; free space and try again.'
-				: 'The saved library could not be stored on this device. Your previous saved items are unchanged.',
-			{ cause: transaction.error }
-		));
-		transaction.onerror = failed;
-		transaction.onabort = failed;
-	});
+/** Loading saved bytes is explicit; ordinary library listing never fetches media. @param {string|undefined} userId @param {DrawingGenerationLibraryEntry} entry */
+export async function readDrawingLibraryGeneration(userId, entry) {
+	const generation = entry.generation;
+	if (!generation) throw new Error('The saved recipe is unavailable.');
+	// Remix needs references, not a download of the saved output. Video outputs are not persisted.
+	const output = { dataURL: '', mimeType: generation.mimeType };
+	const referenceImages = [];
+	for (const reference of generation.referenceImages ?? [])
+		referenceImages.push(await readDrawingLibraryReference(userId, reference));
+	return /** @type {Generation} */ ({ ...generation, ...output, referenceImages });
 }

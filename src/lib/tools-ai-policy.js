@@ -15,11 +15,14 @@ export const TOOLS_AI_LOGGING = Object.freeze({
 	retentionDays: TOOLS_AI_POLICY.retentionDays,
 	fields: [
 		'Google account ID',
-		'request ID',
+		'request and reservation IDs',
+		'generation run and client job IDs',
+		'hosting adapter',
 		'model',
 		'timestamp',
 		'status',
-		'estimated reserved cost'
+		'estimated reserved cost',
+		'authorized run spending limit'
 	],
 	excludes: ['prompts', 'images', 'generated content', 'tokens', 'provider keys']
 });

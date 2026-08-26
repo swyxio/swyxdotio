@@ -36,8 +36,8 @@ export async function toolsAiLedger(event, path, body) {
 	}
 }
 
-/** @param {UsageEvent & Pick<import('@sveltejs/kit').RequestEvent, 'cookies'>} event @param {string} userId @param {'assistant'|'media'} kind @param {string} model @param {number} estimatedReservedUsd */
-export async function reserveToolsAiUsage(event, userId, kind, model, estimatedReservedUsd) {
+/** @param {UsageEvent & Pick<import('@sveltejs/kit').RequestEvent, 'cookies'>} event @param {string} userId @param {'assistant'|'media'} kind @param {string} model @param {number} estimatedReservedUsd @param {{id: string, clientJobId: string, limitUsd: number}} [run] */
+export async function reserveToolsAiUsage(event, userId, kind, model, estimatedReservedUsd, run) {
 	const user = await getToolsUser(event);
 	const profile =
 		user?.id === userId ? { id: user.id, email: user.email, name: user.name } : undefined;
@@ -46,7 +46,8 @@ export async function reserveToolsAiUsage(event, userId, kind, model, estimatedR
 		kind,
 		model,
 		estimatedReservedUsd,
-		profile
+		profile,
+		...(run ? { run } : {})
 	});
 	if (!result.ok) return result;
 	const reservation = await result.json();
