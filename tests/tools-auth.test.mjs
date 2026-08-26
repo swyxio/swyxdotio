@@ -30,7 +30,7 @@ const env = {
 	GOOGLE_REDIRECT_URI: 'https://swyx.io/tools/auth/google/callback'
 };
 
-function createEvent(path = '/tools/auth/google?next=/draw', overrides = {}) {
+function createEvent(path = '/tools/auth/google?next=/tools/draw', overrides = {}) {
 	const values = new Map();
 	const operations = [];
 	const url = new URL(path, 'https://swyx.io');
@@ -161,13 +161,19 @@ test('roles use the current configured Google subject, never email, name, or sig
 });
 
 test('Google configuration and return targets fail closed, while alternate hosts redirect to the registered host', async () => {
+	for (const tool of ['draw', 'box']) {
+		assert.equal(safeToolsNext(`/tools/${tool}`), `/tools/${tool}`);
+		assert.equal(safeToolsNext(`/${tool}`), `/tools/${tool}`);
+	}
 	for (const path of [
 		'https://evil.example',
 		'//evil.example',
 		'/tools/auth/google',
 		'/tools/api/session',
 		'/tools/../evil',
-		'/draw?next=evil'
+		'/draw?next=evil',
+		'/tools/draw?next=evil',
+		'/tools/box/../auth/google'
 	])
 		assert.equal(safeToolsNext(path), '/tools');
 	for (const uri of [
@@ -182,11 +188,14 @@ test('Google configuration and return targets fail closed, while alternate hosts
 			env: { ...env, GOOGLE_REDIRECT_URI: 'http://localhost:4173/tools/auth/google/callback' }
 		})
 	);
-	const event = createEvent('https://preview.workers.dev/tools/auth/google?next=/draw');
+	const event = createEvent('https://preview.workers.dev/tools/auth/google?next=/tools/draw');
 	const response = await startGoogleSignIn(event, () => {
 		throw new Error('No discovery on alternate hosts');
 	});
-	assert.equal(response.headers.get('location'), 'https://swyx.io/tools/auth/google?next=%2Fdraw');
+	assert.equal(
+		response.headers.get('location'),
+		'https://swyx.io/tools/auth/google?next=%2Ftools%2Fdraw'
+	);
 	assert.equal(event.values.size, 0);
 });
 
@@ -201,7 +210,7 @@ test('Google OIDC flow binds state, nonce, PKCE and verified identity and stores
 	assert.equal(event.operations[0].options.sameSite, 'lax');
 	const transaction = decodeJwt(event.values.get('swyx_tools_google_oauth'));
 	const result = await finishGoogleSignIn(event, google.fetchProvider);
-	assert.equal(result.headers.get('location'), '/draw');
+	assert.equal(result.headers.get('location'), '/tools/draw');
 	assert.equal(result.headers.get('Cache-Control'), 'private, no-store');
 	assert.deepEqual(
 		await readToolsSession(event.values.get(toolsSessionCookieName()), SECRET),
@@ -271,7 +280,7 @@ test('expired and tampered OAuth transactions never reach Google', async () => {
 			state: 'a'.repeat(43),
 			verifier: 'b'.repeat(43),
 			nonce: 'c'.repeat(43),
-			next: '/draw'
+			next: '/tools/draw'
 		})
 			.setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
 			.setIssuer('swyx-tools')
@@ -327,6 +336,8 @@ test('tools pages, API responses, and auth redirects bypass shared edge cache an
 		};
 		for (const path of [
 			'/tools',
+			'/tools/draw',
+			'/tools/box',
 			'/tools/api/session',
 			'/tools/auth/google/callback?code=private'
 		]) {
@@ -336,7 +347,7 @@ test('tools pages, API responses, and auth redirects bypass shared edge cache an
 				resolve: async () =>
 					new Response(null, {
 						status: 303,
-						headers: { Location: '/draw', 'Cache-Control': 's-maxage=3600' }
+						headers: { Location: '/tools/draw', 'Cache-Control': 's-maxage=3600' }
 					})
 			});
 			assert.equal(result.headers.get('Cache-Control'), 'private, no-store');

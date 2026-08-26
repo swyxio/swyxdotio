@@ -2741,7 +2741,7 @@
 
 				{#if toolsUser}<a class="sync-link" href="/tools">{toolsUser.email} · Account</a>{/if}
 				{#if needsSignIn}
-					<a class="sync-link" href="/tools?next=/draw">Sign in to sync across devices</a>
+					<a class="sync-link" href="/tools?next=/tools/draw">Sign in to sync across devices</a>
 				{/if}
 			</section>
 		{/if}

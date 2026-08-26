@@ -137,7 +137,7 @@ test('signed-in box opens appear in the dashboard without its text', async ({ pa
 		(response) =>
 			response.url().endsWith('/tools/api/logs') && response.request().method() === 'POST'
 	);
-	await page.goto('/box');
+	await page.goto('/tools/box');
 	await page.getByRole('textbox', { name: 'Write anything' }).fill('PRIVATE-TEXT-NEVER-IN-LOGS');
 	expect((await recorded).ok()).toBe(true);
 	await expect(page.getByRole('link', { name: /Tool opens are logged/ })).toBeVisible();

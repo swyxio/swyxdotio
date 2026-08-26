@@ -24,7 +24,7 @@ test.describe('real private image-model inference', () => {
 				}
 			});
 			await page.route('**/tools/api/draw/edit', (route) => route.abort());
-			await page.goto('/draw');
+			await page.goto('/tools/draw');
 			const canvas = page.locator('.draw-canvas canvas.excalidraw__canvas.interactive');
 			await expect(canvas).toBeVisible();
 			await canvas.click({ position: { x: 360, y: 280 } });

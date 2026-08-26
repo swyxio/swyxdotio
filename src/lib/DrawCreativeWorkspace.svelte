@@ -911,7 +911,7 @@
 						drawing canvas and create an editable blank artboard.
 					</p>
 					<div class="actions">
-						<a class="primary" href="/tools?next=/draw">Sign in with Google</a><button
+						<a class="primary" href="/tools?next=/tools/draw">Sign in with Google</a><button
 							onclick={() => {
 								onBlank();
 								close();

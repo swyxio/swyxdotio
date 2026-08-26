@@ -108,7 +108,7 @@ test('real drawing agent produces three source-grounded essay figures', async ({
 			}
 		});
 		try {
-			await page.goto(`${origin}/draw`);
+			await page.goto(`${origin}/tools/draw`);
 			await authenticateTools(page);
 			await page.reload();
 			await page.getByRole('button', { name: 'Manage drawing pages', exact: true }).click();
