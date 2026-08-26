@@ -216,3 +216,171 @@ test('blank Experiment opens one idle composer and preserves model choices even 
 	expect((await scene(page)).elements).toEqual([]);
 	expect(paidRequests).toBe(0);
 });
+
+for (const viewport of [
+	{ width: 390, height: 844 },
+	{ width: 390, height: 420 },
+	{ width: 625, height: 844 },
+	{ width: 844, height: 390 }
+]) {
+	test.describe(`touch text entry ${viewport.width}x${viewport.height}`, () => {
+		test.use({ viewport, isMobile: true, hasTouch: true });
+		test('opening tools does not summon the keyboard; fields are zoom-safe and explicit keyboard focus remains', async ({
+			page
+		}) => {
+			let paid = 0;
+			await page.route(/\/tools\/api\/draw\/(agent|edit)(?:[/?]|$)/, (route) => {
+				if (route.request().method() === 'GET') return route.continue();
+				paid++;
+				return route.abort('blockedbyclient');
+			});
+			await page.goto('/draw');
+			await authenticateTools(page);
+			await page.reload();
+			const menu = page.getByRole('button', { name: 'Choose drawing mode and tools' });
+			await menu.click();
+			await page.getByRole('button', { name: 'Open drawing assistant' }).click();
+			const assistant = page.getByRole('region', { name: 'Drawing assistant' });
+			const composer = assistant.getByRole('textbox', { name: 'Message drawing assistant' });
+			await expect(composer).toBeVisible();
+			await expect(composer).not.toBeFocused();
+			await expect(composer).toHaveCSS('font-size', '16px');
+			await assistant.getByRole('button', { name: 'Try Notes → diagram workflow' }).click();
+			await expect(composer).not.toBeFocused();
+			await expect(composer).toHaveValue(/Turn my notes below/);
+			await assistant.getByRole('button', { name: 'Try Make this essay-ready workflow' }).click();
+			await assistant.getByRole('button', { name: 'Use suggestion instead' }).click();
+			await expect(composer).not.toBeFocused();
+			await expect(composer).toHaveValue(/Make the selected diagram essay-ready/);
+			await composer.fill('A draft stays here after minimizing.');
+			await assistant.getByRole('button', { name: 'Minimize drawing assistant' }).click();
+			await expect(assistant).toHaveCount(0);
+			await page.keyboard.press('Control+j');
+			await expect(composer).toBeFocused();
+			await expect(composer).toHaveValue('A draft stays here after minimizing.');
+			await assistant.getByRole('button', { name: 'Minimize drawing assistant' }).click();
+			await menu.click();
+			await page.getByRole('button', { name: 'Open image and video generation' }).click();
+			const media = page.getByRole('region', { name: 'Selected image tools' });
+			const prompt = media.getByRole('textbox', { name: 'AI image editing prompt' });
+			await expect(prompt).not.toBeFocused();
+			await expect(prompt).toHaveCSS('font-size', '16px');
+			await media.getByRole('button', { name: 'AI model and workflow selector' }).click();
+			const search = media.getByRole('searchbox', { name: 'Search AI models' });
+			await expect(search).toBeVisible();
+			await expect(search).not.toBeFocused();
+			await expect(search).toHaveCSS('font-size', '16px');
+			await media.getByRole('button', { name: 'AI model and workflow selector' }).click();
+			await prompt.fill('A deliberately typed draft');
+			await media.getByRole('button', { name: 'Minimize image tools' }).click();
+			expect(
+				await page.evaluate(() => document.activeElement?.matches('input,textarea,select'))
+			).toBe(false);
+			await page.getByRole('button', { name: 'Manage drawing pages' }).click();
+			await page
+				.getByRole('button', { name: /^Rename / })
+				.first()
+				.click();
+			const name = page.getByRole('textbox', { name: 'Page name' });
+			await expect(name).toBeFocused();
+			await expect(name).toHaveCSS('font-size', '16px');
+			await name.press('Escape');
+			await page.keyboard.press('Control+k');
+			const command = page.getByRole('textbox', {
+				name: 'Search components, presets, pages, and actions'
+			});
+			await expect(command).toBeFocused();
+			await expect(command).toHaveCSS('font-size', '16px');
+			await page.keyboard.press('Escape');
+			expect(await page.locator('meta[name="viewport"]').getAttribute('content')).not.toMatch(
+				/user-scalable\s*=\s*no|maximum-scale\s*=\s*1(?:\D|$)/
+			);
+			expect(paid).toBe(0);
+		});
+
+		test('Send and Stop stay reachable with a mocked request on short and narrow touch screens', async ({
+			page
+		}) => {
+			let requests = 0;
+			let release = () => {};
+			const pending = new Promise((resolve) => {
+				release = () => resolve(undefined);
+			});
+			await page.route('**/tools/api/draw/agent', async (route) => {
+				if (route.request().method() === 'GET')
+					return route.fulfill({
+						json: {
+							providers: [
+								{
+									id: 'cloudflare',
+									label: 'Fixture provider',
+									model: 'Fixture',
+									vision: false,
+									configured: true
+								}
+							]
+						}
+					});
+				requests++;
+				await pending;
+				await route
+					.fulfill({ json: { content: 'Fixture response', toolCalls: [] } })
+					.catch(() => {});
+			});
+			await page.goto('/draw');
+			await authenticateTools(page);
+			await page.reload();
+			await page.getByRole('button', { name: 'Choose drawing mode and tools' }).click();
+			await page.getByRole('button', { name: 'Open drawing assistant' }).click();
+			const assistant = page.getByRole('region', { name: 'Drawing assistant' });
+			const composer = assistant.getByRole('textbox', { name: 'Message drawing assistant' });
+			await composer.fill('Describe the visible native shapes.');
+			const send = assistant.getByRole('button', { name: 'Send', exact: true });
+			await expect(send).toBeEnabled();
+			await send.scrollIntoViewIfNeeded();
+			await expect(send).toBeInViewport();
+			await expect
+				.poll(() =>
+					send.evaluate((element) => {
+						const r = element.getBoundingClientRect();
+						return element.contains(
+							document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2)
+						);
+					})
+				)
+				.toBe(true);
+			await page.screenshot({
+				path: `/tmp/draw-mobile-send-${viewport.width}x${viewport.height}.png`
+			});
+			try {
+				await send.click();
+				await expect.poll(() => requests).toBe(1);
+				const stop = assistant.getByRole('button', { name: 'Stop', exact: true });
+				await stop.scrollIntoViewIfNeeded();
+				await expect(stop).toBeInViewport();
+				await expect
+					.poll(() =>
+						stop.evaluate((element) => {
+							const r = element.getBoundingClientRect();
+							return element.contains(
+								document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2)
+							);
+						})
+					)
+					.toBe(true);
+				await page.screenshot({
+					path: `/tmp/draw-mobile-stop-${viewport.width}x${viewport.height}.png`
+				});
+				await stop.click();
+				await expect(stop).toHaveCount(0);
+				await expect(assistant).toContainText('Stopped');
+				page.once('dialog', (dialog) => dialog.accept());
+				await assistant.getByRole('button', { name: 'Clear assistant conversation' }).click();
+				await expect(composer).not.toBeFocused();
+				expect(requests).toBe(1);
+			} finally {
+				release();
+			}
+		});
+	});
+}
