@@ -1,10 +1,12 @@
+import { DRAW_REFERENCE_PRESETS } from './draw-reference-presets.js';
+
 /** @typedef {'black' | 'grey' | 'blue' | 'light-blue' | 'green' | 'light-green' | 'orange' | 'light-red' | 'yellow' | 'violet'} PresetColor */
 /** @typedef {'s' | 'm' | 'l' | 'xl'} PresetSize */
 
 /**
  * @typedef {{
  *   id: string,
- *   type: 'rectangle' | 'ellipse' | 'text' | 'arrow',
+ *   type: 'rectangle' | 'ellipse' | 'text' | 'arrow' | 'line',
  *   x: number,
  *   y: number,
  *   width?: number,
@@ -23,8 +25,10 @@
  *   start?: { id: string },
  *   end?: { id: string },
  *   points?: Array<[number, number]>,
- *   startArrowhead?: null,
- *   endArrowhead?: 'arrow' | null,
+ *   startArrowhead?: 'arrow' | null,
+ *   endArrowhead?: 'arrow' | 'triangle' | null,
+ *   groupIds?: string[],
+ *   link?: string,
  *   roundness?: { type: number } | null
  * }} PresetShape
  */
@@ -90,6 +94,8 @@ function createShapeId() {
  *   id: string,
  *   label: string,
  *   description: string,
+ *   source?: { author: string, url: string, note: string },
+ *   preview?: string,
  *   createShapes: () => PresetShape[]
  * }} DrawPreset
  */
@@ -721,5 +727,6 @@ export const DRAW_PRESETS = [
 		label: 'Comparison cards',
 		description: 'Three side-by-side options with strengths, trade-offs, and fit.',
 		createShapes: createComparisonCards
-	}
+	},
+	...DRAW_REFERENCE_PRESETS
 ];
