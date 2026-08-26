@@ -50,6 +50,9 @@
 			generations / hour<br />${TOOLS_AI_POLICY.userEstimatedDailyUsd} estimated daily allowance
 		</p>
 	{/if}
+	<a class="logs-link" href="/tools/logs"
+		>Tool logs &amp; analytics <span aria-hidden="true">→</span></a
+	>
 	{#if !isOwner}<div class="disclosure">
 			<strong>AI is funded by swyx.io, rate limited, and logged.</strong>
 			<p>
@@ -60,6 +63,23 @@
 </aside>
 
 <style>
+	.logs-link {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 10px;
+		min-height: 44px;
+		margin-top: 8px;
+		border-top: 1px solid #baa47b;
+		color: #87432f;
+		font-size: 0.78rem;
+		text-underline-offset: 3px;
+	}
+	.logs-link:focus-visible {
+		outline: 3px solid #87432f;
+		outline-offset: 3px;
+	}
+
 	.receipt {
 		container-type: inline-size;
 		position: relative;

@@ -41,22 +41,23 @@ async function signIn(page, user = TEST_TOOLS_OWNER) {
 	await page.reload();
 }
 
-test('guest has three working direct links, honest disclosure, and a safe Google continuation', async ({
+test('guest has workspace and independently authorized team links, honest disclosure, and a safe Google continuation', async ({
 	page
 }) => {
 	await page.goto('/tools?next=%2Ftools%2Fdraw&authError=1');
 	await expect(page.getByRole('alert')).toContainText('Google sign-in did not finish');
 	const cabinet = page.getByRole('navigation', { name: 'Your tools' });
-	await expect(cabinet.getByRole('link')).toHaveCount(3);
+	await expect(cabinet.getByRole('link')).toHaveCount(4);
 	await expect(cabinet.getByRole('link', { name: /^Draw/ })).toHaveAttribute('href', '/tools/draw');
 	await expect(cabinet.getByRole('link', { name: /^Big text box/ })).toHaveAttribute(
 		'href',
 		'/tools/box'
 	);
-	await expect(cabinet.getByRole('link', { name: /^Tool logs/ })).toHaveAttribute(
-		'href',
-		'/tools/logs'
-	);
+	await expect(
+		page
+			.getByRole('complementary', { name: 'Usage allowance' })
+			.getByRole('link', { name: /^Tool logs/ })
+	).toHaveAttribute('href', '/tools/logs');
 	await expect(page.getByRole('link', { name: 'Sign in with Google' })).toHaveAttribute(
 		'href',
 		'/tools/auth/google?next=%2Ftools%2Fdraw'
@@ -65,8 +66,25 @@ test('guest has three working direct links, honest disclosure, and a safe Google
 		'site owner can review usage metadata and account identity'
 	);
 	await expect(page.getByRole('region', { name: 'Your AI usage' })).toHaveCount(0);
+	await expect(cabinet.getByRole('link', { name: /^Tool logs/ })).toHaveCount(0);
+	await expect(cabinet.getByRole('link', { name: /^Cal / })).toHaveAttribute('href', '/tools/cal');
+	await expect(cabinet.getByRole('link', { name: /^Cap / })).toHaveAttribute(
+		'data-sveltekit-reload',
+		'true'
+	);
 	await cabinet.getByRole('link', { name: /^Big text box/ }).click();
 	await expect(page.getByRole('textbox', { name: 'Write anything' })).toBeVisible();
+});
+
+test('Cal shortcut leads through the tools namespace without an owner-only gate', async ({
+	page
+}) => {
+	const shortcut = await page.request.get('/cal?from=bookmark', { maxRedirects: 0 });
+	expect(shortcut.status()).toBe(308);
+	expect(shortcut.headers().location).toBe('/tools/cal?from=bookmark');
+	const tool = await page.request.get('/tools/cal?from=bookmark', { maxRedirects: 0 });
+	expect(tool.status()).toBe(302);
+	expect(tool.headers().location).toBe('https://cal.swyx.io/app?from=bookmark');
 });
 
 test('public calendar disclosures distinguish Tools login and preserve existing privacy details', async ({
@@ -77,7 +95,7 @@ test('public calendar disclosures distinguish Tools login and preserve existing 
 	await expect(disclosure).toContainText('ordinary Tools sign-in does not grant calendar access');
 	await expect(disclosure).toContainText('new bookings are paused');
 	await expect(page.getByRole('navigation', { name: 'Your tools' }).getByRole('link')).toHaveCount(
-		3
+		4
 	);
 	await disclosure.getByRole('link', { name: 'Calendar access and privacy' }).click();
 	await expect(page).toHaveURL(/\/tools\/privacy#swyxcal$/);
@@ -131,10 +149,16 @@ test('account disclosure retains identity, dismisses conventionally, and adapts 
 	await authenticateTools(page, TEST_TOOLS_MEMBER);
 	await page.reload();
 	await expect(page.getByRole('navigation', { name: 'Your tools' }).getByRole('link')).toHaveCount(
-		3
+		4
 	);
 	await expect(page.getByRole('link', { name: /Podcast studio/ })).toHaveCount(0);
-	await expect(page.getByRole('link', { name: /^Cap / })).toHaveCount(0);
+	await expect(page.getByRole('link', { name: /^Cap / })).toBeVisible();
+	await expect(
+		page.getByRole('region', { name: 'Team swyx', exact: true }).getByRole('link')
+	).toHaveCount(2);
+	await expect(page.getByRole('link', { name: /^Reclip/ })).toHaveCount(0);
+	await expect((await page.request.get('/tools/podcast')).status()).toBe(403);
+	await expect((await page.request.get('/tools/reclip')).status()).toBe(403);
 	await account.click();
 	await expect(page.getByText(TEST_TOOLS_MEMBER.email, { exact: true })).toBeVisible();
 	await page.getByRole('button', { name: 'Sign out', exact: true }).click();
@@ -223,7 +247,8 @@ for (const [name, width, height] of viewports) {
 		const first = await cabinet.getByRole('link').first().boundingBox();
 		if (!first) throw new Error('First drawer is missing');
 		expect(first.y).toBeLessThan(height - 120);
-		if (width === 390) expect(first.y).toBeLessThan(420);
+		if (width === 390) expect(first.y).toBeLessThan(490);
+		await page.screenshot({ path: `/tmp/tools-team-${name}.png`, fullPage: true });
 		if (width === 1440) {
 			const headingLines = await page
 				.getByRole('heading', { level: 1 })

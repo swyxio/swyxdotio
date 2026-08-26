@@ -187,7 +187,7 @@
 	{/if}
 	<div class="workshop-scene"><ToolsCabinet isOwner={!!data.user?.isOwner} /></div>
 	<p class="calendar-disclosure">
-		The separately hosted <a href="https://cal.swyx.io/about">swyxcal</a> scheduler uses this Google
+		The separately hosted <a href="https://cal.swyx.io/about">Cal</a> scheduler uses this Google
 		app’s consent configuration. Its invited team connects Google calendars in a separate flow;
 		ordinary Tools sign-in does not grant calendar access. Scheduler setup is in progress and new
 		bookings are paused. <a href="/tools/privacy#swyxcal">Calendar access and privacy →</a>
@@ -548,19 +548,6 @@
 		color: #403326;
 	}
 	@media (min-width: 1050px) {
-		.workshop-scene {
-			padding-left: 165px;
-		}
-		.workshop-scene::before {
-			content: '';
-			position: absolute;
-			pointer-events: none;
-			bottom: -4px;
-			left: -15px;
-			width: 225px;
-			height: 340px;
-			background: url('/assets/tools-cabinet/desk-still-life.webp') left bottom / contain no-repeat;
-		}
 		.intro-description {
 			max-width: 52ch;
 		}
