@@ -115,6 +115,9 @@
 	let imageToolPrompt = $state('');
 	let imageToolStatus = $state('');
 	let imageToolModelIds = $state([DEFAULT_DRAW_FAL_MODEL.id]);
+	let imageToolGenerationParameters = $state(
+		/** @type {Record<string, Record<string, unknown>>} */ ({})
+	);
 	let processingImage = $state(/** @type {{ id: string, dataURL: string } | null} */ (null));
 	let imageGenerations = $state(/** @type {DrawingImageGeneration[]} */ ([]));
 	let imageToolsPosition = $state(/** @type {{ x: number, y: number } | null} */ (null));
@@ -1801,6 +1804,7 @@
 				bind:prompt={imageToolPrompt}
 				bind:operationStatus={imageToolStatus}
 				bind:selectedFalModelIds={imageToolModelIds}
+				bind:generationParameters={imageToolGenerationParameters}
 				{updateElement}
 				captureUpdate={captureImmediately}
 				{cloudAvailable}
@@ -3113,6 +3117,7 @@
 		}
 		.image-tools {
 			top: 124px;
+			max-height: min(420px, calc(100dvh - 150px));
 		}
 
 		.page-picker {

@@ -15,7 +15,12 @@ import {
 import {
 	DEFAULT_DRAW_FAL_MODEL,
 	DRAW_FAL_MODELS,
-	MAX_DRAW_FAL_REQUEST_BYTES
+	MAX_DRAW_FAL_REQUEST_BYTES,
+	estimateDrawFalModelCost,
+	getDrawFalModel,
+	getDrawFalModelOverrides,
+	getDrawFalModelParameters,
+	resolveDrawFalModelSettings
 } from '../src/lib/draw-fal-models.js';
 
 const SESSION_SECRET = 'test-only-session-secret';
@@ -278,8 +283,9 @@ test('image-to-video models use documented queue inputs and return only trusted 
 			assert.equal(url, `https://queue.fal.run/${model.model}`);
 			const payload = JSON.parse(/** @type {string} */ (init?.body));
 			assert.equal(payload.image_url, SOURCE_IMAGE);
-			assert.equal(payload.duration, 5);
-			assert.equal(payload.resolution, '480p');
+			for (const [setting, value] of Object.entries(model.settings)) {
+				assert.equal(payload[setting], value, `${model.id}.${setting}`);
+			}
 			assert.equal('sync_mode' in payload, false);
 			assert.equal('num_images' in payload, false);
 			return providerResponse({ request_id: REQUEST_ID }, 202);
@@ -318,7 +324,31 @@ test('image-to-video models use documented queue inputs and return only trusted 
 });
 
 test('all workflow cards expose sortable estimates and honest reference-image capabilities', () => {
-	assert.equal(DRAW_FAL_MODELS.length, 16);
+	assert.equal(DRAW_FAL_MODELS.length, 26);
+	assert.deepEqual(
+		DRAW_FAL_MODELS.filter((model) => model.kind === 'image-to-video').map((model) => model.id),
+		[
+			'grok-imagine-video',
+			'grok-imagine-video-1-5',
+			'minimax-h3-video',
+			'seedance-2-5-video',
+			'seedance-2-video',
+			'happy-horse-1-1-video',
+			'happy-horse-video',
+			'wan-2-7-video',
+			'veo-3-1-video',
+			'veo-3-1-fast-video',
+			'gemini-omni-flash-video',
+			'flux-3-video'
+		]
+	);
+	assert.deepEqual(
+		DRAW_FAL_MODELS.filter((model) => model.kind === 'image-to-video' && model.arenaRank)
+			.map((model) => model.arenaRank)
+			.filter((rank) => rank <= 10)
+			.sort((left, right) => left - right),
+		[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+	);
 	for (const model of DRAW_FAL_MODELS) {
 		assert.equal(typeof model.priceUsd, 'number', model.id);
 		assert.ok(model.priceUsd > 0, model.id);
@@ -330,7 +360,7 @@ test('all workflow cards expose sortable estimates and honest reference-image ca
 	}
 	const sorted = [...DRAW_FAL_MODELS].sort((left, right) => left.priceUsd - right.priceUsd);
 	assert.equal(sorted[0].id, 'flux-klein-9b-generate');
-	assert.equal(sorted.at(-1)?.id, 'grok-imagine-video-1-5');
+	assert.equal(sorted.at(-1)?.id, 'veo-3-1-video');
 	assert.deepEqual(
 		DRAW_FAL_MODELS.filter((model) => model.weights === 'open').map((model) => model.id),
 		[
@@ -339,10 +369,182 @@ test('all workflow cards expose sortable estimates and honest reference-image ca
 			'qwen-image-edit-2511',
 			'flux-klein-9b',
 			'flux-2',
-			'flux-klein-9b-generate'
+			'flux-klein-9b-generate',
+			'minimax-h3-video'
 		]
 	);
 	assert.deepEqual(Object.keys(drawingFalTasks), ['image-edit', 'text-to-image', 'image-to-video']);
+});
+
+test('each endpoint exposes only officially documented modality parameters and exact provider types', () => {
+	const seedance = getDrawFalModel('seedance-2-video');
+	const veo = getDrawFalModel('veo-3-1-video');
+	const minimax = getDrawFalModel('minimax-h3-video');
+	const grok = getDrawFalModel('grok-imagine-video-1-5');
+	assert.ok(seedance && veo && minimax && grok);
+	assert.deepEqual(
+		getDrawFalModelParameters(seedance).map((parameter) => parameter.key),
+		['duration', 'resolution', 'aspect_ratio', 'generate_audio']
+	);
+	assert.deepEqual(
+		getDrawFalModelOverrides(seedance, {
+			duration: 6,
+			resolution: '720P',
+			generate_audio: false,
+			seed: 42
+		}),
+		{ duration: '6', resolution: '720p', generate_audio: false }
+	);
+	assert.deepEqual(getDrawFalModelOverrides(veo, { duration: '6', resolution: '4K', seed: 42 }), {
+		duration: '6s',
+		resolution: '4k',
+		seed: 42
+	});
+	assert.deepEqual(getDrawFalModelOverrides(minimax, { duration: '8s', resolution: '768p' }), {
+		duration: 8,
+		resolution: '768P'
+	});
+	assert.deepEqual(getDrawFalModelOverrides(grok, { generate_audio: false, duration: 8 }), {
+		duration: 8
+	});
+	assert.throws(
+		() => resolveDrawFalModelSettings(veo, { duration: 6 }),
+		/not available for this model/i
+	);
+	assert.throws(
+		() => resolveDrawFalModelSettings(veo, { enable_safety_checker: false }),
+		/does not support/i
+	);
+	assert.throws(
+		() => resolveDrawFalModelSettings(veo, { image_url: 'https://evil.example' }),
+		/does not support/i
+	);
+	assert.throws(() => resolveDrawFalModelSettings(veo, { seed: -1 }), /seed must be an integer/i);
+});
+
+test('video duration, output resolution, audio, image quality, and reference fees update estimates', () => {
+	const expectations = [
+		['grok-imagine-video', { duration: 10, resolution: '720p' }, 0.702],
+		['grok-imagine-video-1-5', { duration: 5, resolution: '1080p' }, 1.26],
+		['minimax-h3-video', { duration: 10, resolution: '768P' }, 0.8],
+		['minimax-h3-video', { duration: 10, resolution: '4K' }, 1.6],
+		['gemini-omni-flash-video', { duration: 10, aspect_ratio: '9:16' }, 1.3],
+		['flux-3-video', { duration: 10, resolution: '1080p' }, 2.9],
+		['seedance-2-5-video', { duration: '10', resolution: '720p' }, 4.73],
+		['happy-horse-1-1-video', { duration: 8, resolution: '1080p' }, 1.44],
+		['happy-horse-video', { duration: 8, resolution: '1080p' }, 2.24],
+		['wan-2-7-video', { duration: 10, resolution: '1080p' }, 1.5],
+		['veo-3-1-video', { duration: '4s', resolution: '720p', generate_audio: false }, 0.8],
+		['veo-3-1-video', { duration: '6s', resolution: '4k', generate_audio: true }, 3.6],
+		['veo-3-1-fast-video', { duration: '8s', resolution: '4k', generate_audio: true }, 2.8],
+		['nano-banana-2', { resolution: '2K' }, 0.12],
+		['nano-banana-pro', { resolution: '4K' }, 0.3],
+		['gpt-image-2', { quality: 'low' }, 0.015],
+		['grok-imagine-2', { quality: 'medium', resolution: '2k' }, 0.09]
+	];
+	for (const [id, settings, expected] of expectations) {
+		const model = getDrawFalModel(id);
+		assert.ok(model);
+		assert.equal(
+			estimateDrawFalModelCost(model, /** @type {Record<string, unknown>} */ (settings)),
+			expected,
+			String(id)
+		);
+	}
+});
+
+test('authenticated model overrides preserve exact API schemas and reject unsafe settings before fal', async () => {
+	let calls = 0;
+	const provider = async (_url, init) => {
+		calls++;
+		const payload = JSON.parse(/** @type {string} */ (init?.body));
+		assert.equal(payload.duration, '6s');
+		assert.equal(payload.resolution, '1080p');
+		assert.equal(payload.generate_audio, false);
+		assert.equal(payload.seed, 42);
+		return providerResponse({ request_id: REQUEST_ID }, 202);
+	};
+	const base = {
+		image: new File(['source'], 'source.png', { type: 'image/png' }),
+		prompt: 'Cinematic portrait',
+		model: 'veo-3-1-video'
+	};
+	const accepted = await editDrawingImage(
+		await createEvent({
+			form: createForm({
+				...base,
+				settings: JSON.stringify({
+					duration: '6s',
+					resolution: '1080p',
+					generate_audio: false,
+					seed: 42
+				})
+			})
+		}),
+		provider
+	);
+	assert.equal(accepted.status, 202);
+	for (const settings of [
+		'{',
+		'null',
+		'[]',
+		JSON.stringify({ duration: 6 }),
+		JSON.stringify({ resolution: '8k' }),
+		JSON.stringify({ generate_audio: 'false' }),
+		JSON.stringify({ seed: 2_147_483_648 }),
+		JSON.stringify({ enable_safety_checker: false }),
+		JSON.stringify({ safety_tolerance: '6' }),
+		JSON.stringify({ image_url: 'https://attacker.example/image' }),
+		JSON.stringify({ model: 'attacker/expensive-model' })
+	]) {
+		const rejected = await editDrawingImage(
+			await createEvent({ form: createForm({ ...base, settings }) }),
+			provider
+		);
+		assert.equal(rejected.status, 422, settings);
+	}
+	assert.equal(calls, 1);
+});
+
+test('agent spending limits use parameter-adjusted provider prices before paid submission', async () => {
+	let calls = 0;
+	const form = createForm({
+		image: new File(['source'], 'source.png', { type: 'image/png' }),
+		prompt: 'Animate the scene',
+		model: 'veo-3-1-video',
+		settings: JSON.stringify({ duration: '4s', generate_audio: false }),
+		providerSafetyDefaults: '1',
+		agentBudget: await createDrawingAgentBudget(1, SESSION_SECRET)
+	});
+	const accepted = await editDrawingImage(await createEvent({ form }), async () => {
+		calls++;
+		return providerResponse({ request_id: REQUEST_ID }, 202);
+	});
+	assert.equal(accepted.status, 202);
+	assert.equal((await accepted.json()).spendingUsd, 0.8);
+	form.set('settings', JSON.stringify({ duration: '4s', generate_audio: true }));
+	const rejected = await editDrawingImage(await createEvent({ form }), async () => {
+		calls++;
+		return providerResponse({ request_id: REQUEST_ID }, 202);
+	});
+	assert.equal(rejected.status, 402);
+	assert.equal(calls, 1);
+});
+
+test('provider videos accept only fal-owned CDN or falserverless Google Storage objects', async () => {
+	const query = `?requestId=${REQUEST_ID}&model=veo-3-1-video`;
+	for (const [video, status] of [
+		['https://storage.googleapis.com/falserverless/model_tests/example.mp4', 200],
+		['https://storage.googleapis.com/attacker/example.mp4', 502],
+		['https://storage.googleapis.com/falserverless-attacker/example.mp4', 502],
+		['https://storage.googleapis.com.evil.example/falserverless/example.mp4', 502]
+	]) {
+		let calls = 0;
+		const response = await pollDrawingImage(await createEvent({ method: 'GET', query }), async () =>
+			providerResponse(calls++ === 0 ? { status: 'COMPLETED' } : { video: { url: video } })
+		);
+		assert.equal(response.status, status, String(video));
+	}
 });
 
 test('the authenticated status proxy exposes queue positions and sanitized progress logs', async () => {

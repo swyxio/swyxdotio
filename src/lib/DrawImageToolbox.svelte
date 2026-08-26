@@ -3,7 +3,14 @@
 	import { prepareDrawingFalImage } from '$lib/draw-fal-image.js';
 	import { runDrawingFalGeneration } from '$lib/draw-fal-queue.js';
 	import { optimizeDrawingImageForCloud, replaceDrawingImage } from '$lib/draw-image-scene.js';
-	import { DEFAULT_DRAW_FAL_MODEL, DRAW_FAL_MODELS } from '$lib/draw-fal-models.js';
+	import {
+		DEFAULT_DRAW_FAL_MODEL,
+		DRAW_FAL_MODELS,
+		estimateDrawFalModelCost,
+		getDrawFalModelOverrides,
+		getDrawFalModelParameters,
+		resolveDrawFalModelSettings
+	} from '$lib/draw-fal-models.js';
 
 	/**
 	 * @typedef {import('@excalidraw/excalidraw/types').ExcalidrawImperativeAPI} DrawingEditor
@@ -19,6 +26,7 @@
 	 *  prompt?: string,
 	 *  operationStatus?: string,
 	 *  selectedFalModelIds?: string[],
+	 *  generationParameters?: Record<string, Record<string, unknown>>,
 	 *  updateElement: typeof import('@excalidraw/excalidraw').newElementWith,
 	 *  captureUpdate: typeof import('@excalidraw/excalidraw').CaptureUpdateAction.IMMEDIATELY,
 	 *  cloudAvailable?: boolean,
@@ -39,6 +47,7 @@
 		prompt = $bindable(''),
 		operationStatus = $bindable(''),
 		selectedFalModelIds = $bindable([DEFAULT_DRAW_FAL_MODEL.id]),
+		generationParameters = $bindable({}),
 		updateElement,
 		captureUpdate,
 		cloudAvailable = false,
@@ -128,8 +137,52 @@
 		orderedFalModels.filter((model) => selectedFalModelIds.includes(model.id))
 	);
 	const selectedFalModel = $derived(selectedFalModels[0] ?? DEFAULT_DRAW_FAL_MODEL);
+	const selectedWorkflowParameters = $derived.by(() => {
+		return FAL_WORKFLOW_FOLDERS.flatMap((folder) => {
+			const models = selectedFalModels.filter((model) => model.kind === folder.kind);
+			if (!models.length) return [];
+			/** @type {Map<string, import('$lib/draw-fal-models.js').DrawingFalParameter>} */
+			const parameters = new Map();
+			for (const model of models) {
+				for (const parameter of getDrawFalModelParameters(model)) {
+					const existing = parameters.get(parameter.key);
+					if (!existing) {
+						parameters.set(parameter.key, {
+							...parameter,
+							options: [...(parameter.options ?? [])]
+						});
+						continue;
+					}
+					if (!parameter.options || !existing.options) continue;
+					const options = [...existing.options];
+					for (const option of parameter.options) {
+						if (
+							!options.some(
+								(candidate) =>
+									parameterChoice(parameter.key, candidate) ===
+									parameterChoice(parameter.key, option)
+							)
+						) {
+							options.push(option);
+						}
+					}
+					if (parameter.key === 'duration') {
+						options.sort(
+							(left, right) =>
+								Number.parseInt(String(left), 10) - Number.parseInt(String(right), 10)
+						);
+					}
+					parameters.set(parameter.key, { ...existing, options });
+				}
+			}
+			return [{ ...folder, models, parameters: [...parameters.values()] }];
+		});
+	});
 	const estimatedFalCost = $derived(
-		selectedFalModels.reduce((total, model) => total + model.priceUsd, 0)
+		selectedFalModels.reduce(
+			(total, model) => total + estimateDrawFalModelCost(model, effectiveModelSettings(model)),
+			0
+		)
 	);
 	const uploadsSelectedImage = $derived(
 		selectedFalModels.some((model) => model.kind !== 'text-to-image')
@@ -140,6 +193,24 @@
 	const activeGeneration = $derived(
 		activeVideoGeneration ?? generations.find((generation) => generation.dataURL === imagePreview)
 	);
+	const activeGenerationSettings = $derived.by(() => {
+		if (!activeGeneration?.modelId || !activeGeneration.modelSettings) return [];
+		const model = DRAW_FAL_MODELS.find((entry) => entry.id === activeGeneration.modelId);
+		if (!model) return [];
+		return getDrawFalModelParameters(model).flatMap((parameter) => {
+			const value = activeGeneration.modelSettings?.[parameter.key];
+			if (value === undefined) return [];
+			return [
+				`${parameter.label}: ${
+					typeof value === 'boolean'
+						? value
+							? 'On'
+							: 'Off'
+						: parameterOptionLabel(parameter.key, /** @type {string | number} */ (value))
+				}`
+			];
+		});
+	});
 	const activeGenerationLineage = $derived.by(() => {
 		if (!activeGeneration) return [];
 		/** @type {ImageGeneration[]} */
@@ -177,6 +248,57 @@
 		return `Up to ${model.referenceImages} reference images`;
 	}
 
+	/** @param {string} key @param {unknown} value */
+	function parameterChoice(key, value) {
+		if (key === 'duration') return String(value).replace(/s$/i, '');
+		return String(value).toLowerCase();
+	}
+
+	/** @param {typeof DRAW_FAL_MODELS[number]} model */
+	function effectiveModelSettings(model) {
+		return resolveDrawFalModelSettings(
+			model,
+			getDrawFalModelOverrides(model, generationParameters[model.kind] ?? {})
+		);
+	}
+
+	/**
+	 * @param {{ kind: string, models: readonly (typeof DRAW_FAL_MODELS)[number][] }} folder
+	 * @param {import('$lib/draw-fal-models.js').DrawingFalParameter} parameter
+	 */
+	function parameterCurrentValue(folder, parameter) {
+		const selected = generationParameters[folder.kind]?.[parameter.key];
+		if (selected !== undefined) return selected;
+		const model = folder.models.find((entry) =>
+			getDrawFalModelParameters(entry).some((candidate) => candidate.key === parameter.key)
+		);
+		const defaults = /** @type {Record<string, unknown>} */ (model?.settings ?? {});
+		return defaults[parameter.key] ?? parameter.options?.[0] ?? '';
+	}
+
+	/** @param {string} kind @param {string} key @param {string | number | boolean | undefined} value */
+	function updateGenerationParameter(kind, key, value) {
+		const next = { ...(generationParameters[kind] ?? {}) };
+		if (value === undefined) delete next[key];
+		else next[key] = value;
+		generationParameters = { ...generationParameters, [kind]: next };
+	}
+
+	/** @param {string} key @param {string | number} value */
+	function parameterOptionLabel(key, value) {
+		if (key === 'duration') return `${String(value).replace(/s$/i, '')} seconds`;
+		if (key === 'aspect_ratio' && value === 'auto') return 'Match image';
+		if (key === 'image_size') {
+			return String(value)
+				.replace(/^auto$/, 'Match image')
+				.replace(/^auto_/, 'Auto ')
+				.replace(/_/g, ' ')
+				.replace(/\b\w/g, (letter) => letter.toUpperCase());
+		}
+		if (key === 'output_format') return String(value).toUpperCase();
+		return String(value);
+	}
+
 	/** @param {string} modelId */
 	function toggleFalModel(modelId) {
 		selectedFalModelIds = selectedFalModelIds.includes(modelId)
@@ -205,6 +327,13 @@
 		prompt = generation.prompt;
 		if (generation.modelId && DRAW_FAL_MODELS.some((model) => model.id === generation.modelId)) {
 			selectedFalModelIds = [generation.modelId];
+			const model = DRAW_FAL_MODELS.find((entry) => entry.id === generation.modelId);
+			if (model && generation.modelSettings) {
+				generationParameters = {
+					...generationParameters,
+					[model.kind]: getDrawFalModelOverrides(model, generation.modelSettings)
+				};
+			}
 		}
 	}
 
@@ -384,6 +513,11 @@
 					generationModels.length > 1 ? `${index + 1}/${generationModels.length} · ` : '';
 				operationStatus = `${prefix}Generating with ${generationModel.label}`;
 				try {
+					const modelOverrides = getDrawFalModelOverrides(
+						generationModel,
+						generationParameters[generationModel.kind] ?? {}
+					);
+					const modelSettings = resolveDrawFalModelSettings(generationModel, modelOverrides);
 					const prepared =
 						generationModel.kind === 'text-to-image'
 							? undefined
@@ -400,6 +534,7 @@
 						image: prepared?.blob,
 						prompt: generationPrompt,
 						model: generationModel.id,
+						settings: modelOverrides,
 						signal: generationAbort.signal,
 						onProgress: (update) => {
 							if (update.requestId)
@@ -442,7 +577,7 @@
 						modelProvider: generationModel.provider,
 						modelKind: generationModel.kind,
 						modelWorkflow: generationModel.workflow,
-						modelSettings: { ...generationModel.settings },
+						modelSettings,
 						parentGenerationId: sourceGeneration.id,
 						referenceImages:
 							generationModel.kind === 'text-to-image'
@@ -809,13 +944,15 @@
 												type="button"
 												class="fal-model-select-all"
 												aria-label="Select all {folder.label} models"
-												onclick={(event) => selectFolderModels(event, folder.models, true)}>All</button
+												onclick={(event) => selectFolderModels(event, folder.models, true)}
+												>All</button
 											>
 											<button
 												type="button"
 												class="fal-model-select-all"
 												aria-label="Select no {folder.label} models"
-												onclick={(event) => selectFolderModels(event, folder.models, false)}>None</button
+												onclick={(event) => selectFolderModels(event, folder.models, false)}
+												>None</button
 											>
 										</span>
 									</summary>
@@ -829,8 +966,9 @@
 													<strong>{group.label}</strong>
 													<span class="fal-folder-controls">
 														<span>
-															{group.models.filter((model) => selectedFalModelIds.includes(model.id))
-																.length}
+															{group.models.filter((model) =>
+																selectedFalModelIds.includes(model.id)
+															).length}
 															/ {group.models.length}
 														</span>
 														<button
@@ -849,36 +987,36 @@
 												</div>
 												{#each group.models as model (model.id)}
 													<div
-												class="fal-model-card"
-												class:selected={selectedFalModelIds.includes(model.id)}
-											>
-												<label class="fal-model-option">
-													<input
-														type="checkbox"
-														aria-label="{model.label} · {model.workflow}"
-														checked={selectedFalModelIds.includes(model.id)}
-														onchange={() => toggleFalModel(model.id)}
-													/>
-													<span class="fal-model-copy">
-														<span class="fal-model-card-title">
-															<strong>{model.label}</strong>
-															<span>{model.price}</span>
-														</span>
-														<span>{model.workflow}</span>
-														<span>{modelReferenceNote(model)} · {model.badge}</span>
-													</span>
-												</label>
-												<button
-													type="button"
-													class="fal-model-only"
-													aria-label="Use only {model.label} · {model.workflow}"
-													onclick={() => {
-														selectedFalModelIds = [model.id];
-														modelPickerOpen = false;
-													}}
-												>
-													Only
-												</button>
+														class="fal-model-card"
+														class:selected={selectedFalModelIds.includes(model.id)}
+													>
+														<label class="fal-model-option">
+															<input
+																type="checkbox"
+																aria-label="{model.label} · {model.workflow}"
+																checked={selectedFalModelIds.includes(model.id)}
+																onchange={() => toggleFalModel(model.id)}
+															/>
+															<span class="fal-model-copy">
+																<span class="fal-model-card-title">
+																	<strong>{model.label}</strong>
+																	<span>{model.price}</span>
+																</span>
+																<span>{model.workflow}</span>
+																<span>{modelReferenceNote(model)} · {model.badge}</span>
+															</span>
+														</label>
+														<button
+															type="button"
+															class="fal-model-only"
+															aria-label="Use only {model.label} · {model.workflow}"
+															onclick={() => {
+																selectedFalModelIds = [model.id];
+																modelPickerOpen = false;
+															}}
+														>
+															Only
+														</button>
 													</div>
 												{/each}
 											</section>
@@ -902,6 +1040,88 @@
 						: 'Text-to-image workflows only send your prompt; the selected image is not uploaded.'}
 				</p>
 			</div>
+			{#each selectedWorkflowParameters as folder (folder.kind)}
+				{#if folder.parameters.length}
+					<section class="fal-parameter-group" aria-label="{folder.label} settings">
+						<div class="fal-parameter-heading">
+							<strong>{folder.label} settings</strong>
+							{#if folder.models.length > 1}
+								<span>Compatible models only</span>
+							{/if}
+						</div>
+						<div class="fal-parameter-grid">
+							{#each folder.parameters as parameter (parameter.key)}
+								{#if parameter.type === 'boolean'}
+									<label class="fal-parameter-toggle">
+										<input
+											type="checkbox"
+											aria-label="{folder.label} {parameter.label}"
+											checked={parameterCurrentValue(folder, parameter) === true}
+											disabled={processing || processingFal}
+											onchange={(event) =>
+												updateGenerationParameter(
+													folder.kind,
+													parameter.key,
+													event.currentTarget.checked
+												)}
+										/>
+										<span>{parameter.label}</span>
+									</label>
+								{:else if parameter.type === 'seed'}
+									<label class="fal-parameter-field">
+										<span>{parameter.label}</span>
+										<input
+											type="number"
+											aria-label="{folder.label} {parameter.label}"
+											min="0"
+											max="2147483647"
+											step="1"
+											placeholder="Random"
+											value={parameterCurrentValue(folder, parameter)}
+											disabled={processing || processingFal}
+											oninput={(event) =>
+												updateGenerationParameter(
+													folder.kind,
+													parameter.key,
+													event.currentTarget.value === ''
+														? undefined
+														: Number(event.currentTarget.value)
+												)}
+										/>
+									</label>
+								{:else}
+									<label class="fal-parameter-field">
+										<span>{parameter.label}</span>
+										<select
+											aria-label="{folder.label} {parameter.label}"
+											value={parameterChoice(
+												parameter.key,
+												parameterCurrentValue(folder, parameter)
+											)}
+											disabled={processing || processingFal}
+											onchange={(event) =>
+												updateGenerationParameter(
+													folder.kind,
+													parameter.key,
+													parameter.options?.find(
+														(option) =>
+															parameterChoice(parameter.key, option) === event.currentTarget.value
+													)
+												)}
+										>
+											{#each parameter.options ?? [] as option (parameterChoice(parameter.key, option))}
+												<option value={parameterChoice(parameter.key, option)}>
+													{parameterOptionLabel(parameter.key, option)}
+												</option>
+											{/each}
+										</select>
+									</label>
+								{/if}
+							{/each}
+						</div>
+					</section>
+				{/if}
+			{/each}
 			<textarea
 				aria-label="AI image editing prompt"
 				placeholder="Describe how you want to edit this image…"
@@ -1017,9 +1237,20 @@
 					<div class="generation-prompt" aria-label="Generation prompt">
 						{activeGeneration.prompt}
 					</div>
+					{#if activeGenerationSettings.length}
+						<div class="generation-settings" aria-label="Generation model settings">
+							{#each activeGenerationSettings as setting (setting)}
+								<span>{setting}</span>
+							{/each}
+						</div>
+					{/if}
 					{#if activeGeneration.referenceImages?.length}
 						<div class="generation-references" aria-label="Generation reference images">
-							<strong>Reference {activeGeneration.referenceImages.length === 1 ? 'image' : 'images'}</strong>
+							<strong
+								>Reference {activeGeneration.referenceImages.length === 1
+									? 'image'
+									: 'images'}</strong
+							>
 							{#each activeGeneration.referenceImages as reference, index (reference.dataURL)}
 								<img src={reference.dataURL} alt="Reference image {index + 1}" />
 							{/each}
@@ -1231,6 +1462,88 @@
 		color: #52525b;
 		font-size: 10px;
 		font-weight: 550;
+	}
+
+	.fal-parameter-group {
+		margin: 8px 0;
+		padding: 8px;
+		border: 1px solid #ededf1;
+		border-radius: 8px;
+		background: #fcfcfd;
+	}
+
+	.fal-parameter-heading {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		margin-bottom: 7px;
+		font-size: 9px;
+	}
+
+	.fal-parameter-heading strong {
+		color: #3f3f46;
+		font-weight: 550;
+	}
+
+	.fal-parameter-heading > span {
+		color: #71717a;
+	}
+
+	.fal-parameter-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(108px, 1fr));
+		gap: 7px;
+	}
+
+	.fal-parameter-field {
+		display: grid;
+		gap: 3px;
+		min-width: 0;
+		color: #52525b;
+		font-size: 9px;
+	}
+
+	.fal-parameter-field select,
+	.fal-parameter-field input {
+		width: 100%;
+		min-width: 0;
+		height: 28px;
+		padding: 0 6px;
+		border: 1px solid #dedee6;
+		border-radius: 6px;
+		background: #fff;
+		color: #27272a;
+		font: inherit;
+	}
+
+	.fal-parameter-toggle {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		min-height: 28px;
+		align-self: end;
+		color: #52525b;
+		font-size: 9px;
+	}
+
+	.fal-parameter-toggle input {
+		accent-color: #6554c0;
+	}
+
+	.generation-settings {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px;
+	}
+
+	.generation-settings span {
+		padding: 3px 6px;
+		border: 1px solid #e8e8ed;
+		border-radius: 999px;
+		background: #fafafa;
+		color: #52525b;
+		font-size: 9px;
 	}
 
 	.fal-generation-progress {

@@ -44,6 +44,7 @@ async function readResponse(response) {
  *  requestTimeoutMs?: number,
  *  maxGenerationMs?: number
  *  providerSafetyDefaults?: boolean
+ *  settings?: Record<string, string | number | boolean>
  *  agentBudget?: string
  *  onBudget?: (budget: string, spendingUsd: number) => void
  *  cancelOnAbort?: boolean
@@ -68,6 +69,9 @@ export async function runDrawingFalGeneration(options) {
 	}
 	form.append('prompt', prompt);
 	form.append('model', model);
+	if (options.settings && Object.keys(options.settings).length > 0) {
+		form.append('settings', JSON.stringify(options.settings));
+	}
 	if (options.providerSafetyDefaults) form.append('providerSafetyDefaults', '1');
 	if (options.agentBudget) form.append('agentBudget', options.agentBudget);
 	onProgress({ status: 'UPLOADING' });

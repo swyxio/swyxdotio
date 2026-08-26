@@ -4,7 +4,9 @@ import {
 	DEFAULT_DRAW_FAL_MODEL,
 	DRAW_FAL_MODELS,
 	MAX_DRAW_FAL_REQUEST_BYTES,
-	getDrawFalModel
+	estimateDrawFalModelCost,
+	getDrawFalModel,
+	resolveDrawFalModelSettings
 } from '../draw-fal-models.js';
 import { chargeDrawingAgentBudget } from './draw-agent-budget.js';
 
@@ -43,7 +45,9 @@ function isFalVideoUrl(value) {
 			url.protocol === 'https:' &&
 			!url.username &&
 			!url.password &&
-			(url.hostname === 'fal.media' || url.hostname.endsWith('.fal.media'))
+			(url.hostname === 'fal.media' ||
+				url.hostname.endsWith('.fal.media') ||
+				(url.hostname === 'storage.googleapis.com' && url.pathname.startsWith('/falserverless/')))
 		);
 	} catch {
 		return false;
@@ -147,7 +151,9 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 	if (
 		fields.some(
 			(field) =>
-				!['image', 'prompt', 'model', 'providerSafetyDefaults', 'agentBudget'].includes(field)
+				!['image', 'prompt', 'model', 'settings', 'providerSafetyDefaults', 'agentBudget'].includes(
+					field
+				)
 		) ||
 		new Set(fields).size !== fields.length
 	) {
@@ -173,6 +179,28 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 			{ status: 422 }
 		);
 	}
+	const rawSettings = form.get('settings');
+	/** @type {Record<string, unknown>} */
+	let modelSettings;
+	try {
+		if (rawSettings !== null && (typeof rawSettings !== 'string' || rawSettings.length > 2_000)) {
+			throw new Error('The selected model settings are invalid.');
+		}
+		modelSettings = resolveDrawFalModelSettings(
+			model,
+			rawSettings === null ? {} : JSON.parse(rawSettings)
+		);
+	} catch (error) {
+		return privateJson(
+			{
+				error:
+					error instanceof Error && !(error instanceof SyntaxError)
+						? error.message
+						: 'The selected model settings are invalid.'
+			},
+			{ status: 422 }
+		);
+	}
 	const agentBudget = form.get('agentBudget');
 	if ((providerSafetyDefaults === '1') !== (typeof agentBudget === 'string')) {
 		return privateJson(
@@ -186,7 +214,7 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 		try {
 			chargedBudget = await chargeDrawingAgentBudget(
 				agentBudget,
-				model.priceUsd,
+				estimateDrawFalModelCost(model, modelSettings),
 				/** @type {string} */ (event.platform?.env?.PODCAST_ADMIN_SESSION_SECRET)
 			);
 		} catch (error) {
@@ -235,7 +263,6 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 		providerInput.sync_mode = true;
 		providerInput.num_images = 1;
 	}
-	const modelSettings = { ...model.settings };
 	if (providerSafetyDefaults === '1') {
 		delete (/** @type {Record<string, unknown>} */ (modelSettings).enable_safety_checker);
 		delete (/** @type {Record<string, unknown>} */ (modelSettings).safety_tolerance);

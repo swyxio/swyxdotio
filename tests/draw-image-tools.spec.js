@@ -19,6 +19,7 @@ async function uploadedFalForm(request) {
 		imageMimeType: image.type,
 		prompt: String(form.get('prompt')),
 		model: String(form.get('model')),
+		settings: form.has('settings') ? JSON.parse(String(form.get('settings'))) : {},
 		requestBytes: body.byteLength
 	};
 }
@@ -138,13 +139,16 @@ async function chooseOnlyModel(toolbox, modelId) {
 		'nano-banana-pro': 'Nano Banana Pro · Premium 1K edit',
 		'flux-2': 'FLUX.2 [dev] · Budget 1 MP edit',
 		'flux-klein-9b-generate': 'FLUX.2 [klein] 9B · Fast open-weight text to image',
-		'grok-imagine-video': 'Grok Imagine Video · Budget 5-second image to video'
+		'grok-imagine-video': 'Grok Imagine Video · Budget 5-second image to video',
+		'minimax-h3-video': 'MiniMax H3 · Open-weight 5-second 2K video',
+		'seedance-2-video': 'Seedance 2.0 · Top-ranked 5-second 720p video',
+		'veo-3-1-video': 'Veo 3.1 · Premium 4-second 720p video'
 	});
 	await toolbox.getByRole('button', { name: 'AI model and workflow selector' }).click();
 	const folderLabel =
 		modelId === 'flux-klein-9b-generate'
 			? 'Text to image'
-			: modelId === 'grok-imagine-video'
+			: modelId === 'grok-imagine-video' || modelId.endsWith('-video')
 				? 'Image to video'
 				: 'Image editing';
 	const folder = toolbox.locator(`.fal-model-folder[aria-label="${folderLabel} models"]`);
@@ -204,7 +208,7 @@ test('selected images expose private tools, exact model sizes, and disclosed fal
 	await expect(workflowFolders.nth(1).locator('summary')).toContainText('1 / 12');
 	await expect(workflowFolders.nth(1)).toHaveAttribute('open', '');
 	await expect(workflowFolders.nth(2).locator('summary')).toContainText('Image to video');
-	await expect(workflowFolders.nth(2).locator('summary')).toContainText('0 / 2');
+	await expect(workflowFolders.nth(2).locator('summary')).toContainText('0 / 12');
 	await expect(toolbox.getByRole('checkbox')).toHaveCount(12);
 	const imageEditing = workflowFolders.nth(1);
 	const openEditors = imageEditing.getByRole('region', {
@@ -246,15 +250,26 @@ test('selected images expose private tools, exact model sizes, and disclosed fal
 	await expect(imageEditing.locator('summary')).toContainText('12 / 12');
 	await workflowFolders.nth(0).locator('summary').click();
 	await workflowFolders.nth(2).locator('summary').click();
-	await expect(toolbox.getByRole('checkbox')).toHaveCount(16);
+	const videoModels = workflowFolders.nth(2);
+	await expect(
+		videoModels
+			.getByRole('region', { name: 'Open weights Image to video models' })
+			.getByRole('checkbox')
+	).toHaveCount(1);
+	await expect(
+		videoModels
+			.getByRole('region', { name: 'Closed models Image to video models' })
+			.getByRole('checkbox')
+	).toHaveCount(11);
+	await expect(toolbox.getByRole('checkbox')).toHaveCount(26);
 	await expect(toolbox.locator('.fal-model-card').first()).toContainText('~$0.006');
-	await expect(toolbox.locator('.fal-model-card').last()).toContainText('~$0.41');
+	await expect(toolbox.locator('.fal-model-card').last()).toContainText('$1.60');
 	await expect(toolbox.getByText('Up to 16 reference images')).toBeVisible();
 	await toolbox.getByRole('button', { name: 'Select all', exact: true }).click();
-	await expect(toolbox.getByText('Cheapest first · 16 selected')).toBeVisible();
+	await expect(toolbox.getByText('Cheapest first · 26 selected')).toBeVisible();
 	await expect(workflowFolders.nth(0).locator('summary')).toContainText('2 / 2');
 	await expect(workflowFolders.nth(1).locator('summary')).toContainText('12 / 12');
-	await expect(workflowFolders.nth(2).locator('summary')).toContainText('2 / 2');
+	await expect(workflowFolders.nth(2).locator('summary')).toContainText('12 / 12');
 	await toolbox.getByRole('button', { name: 'Use only Nano Banana 2 · Balanced 1K edit' }).click();
 	await expect(toolbox.getByText('fal top pick')).toBeVisible();
 	await chooseOnlyModel(toolbox, 'gpt-image-2');
@@ -739,6 +754,129 @@ test('text-to-image never uploads the selected image and generated video stays o
 	);
 });
 
+test('each selected modality exposes supported model settings, accurate pricing, and reproducible video history', async ({
+	page
+}) => {
+	await mockSignedInPersonalTools(page);
+	/** @type {Awaited<ReturnType<typeof uploadedFalForm>> | undefined} */
+	let uploaded;
+	const videoUrl = 'https://storage.googleapis.com/falserverless/model_tests/generated.mp4';
+	await page.route('https://storage.googleapis.com/falserverless/**', (route) =>
+		route.fulfill({ status: 200, contentType: 'video/mp4', body: Buffer.alloc(0) })
+	);
+	await page.route('**/tools/api/draw/edit**', async (route) => {
+		if (route.request().method() === 'POST') {
+			uploaded = await uploadedFalForm(route.request());
+			await route.fulfill({
+				status: 202,
+				json: { requestId: 'configured-veo', model: uploaded.model }
+			});
+			return;
+		}
+		await route.fulfill({ json: { status: 'COMPLETED', video: videoUrl } });
+	});
+	const toolbox = await pasteSelectedImage(page);
+	await toolbox.getByRole('button', { name: 'AI prompt', exact: true }).click();
+	const imageSettings = toolbox.getByRole('region', { name: 'Image editing settings' });
+	await expect(imageSettings.getByLabel('Image editing Resolution')).toHaveValue('1k');
+	await expect(imageSettings.getByLabel('Image editing Aspect ratio')).toHaveValue('auto');
+	await expect(imageSettings.getByLabel('Image editing Output format')).toHaveValue('webp');
+	await expect(imageSettings.getByLabel('Image editing Seed')).toHaveAttribute(
+		'placeholder',
+		'Random'
+	);
+	await imageSettings.getByLabel('Image editing Resolution').selectOption('2k');
+	await expect(toolbox.getByText('~$0.12 total · 1 generation')).toBeVisible();
+
+	await chooseOnlyModel(toolbox, 'gpt-image-2');
+	await expect(imageSettings.getByLabel('Image editing Quality')).toHaveValue('high');
+	await imageSettings.getByLabel('Image editing Quality').selectOption('low');
+	await expect(toolbox.getByText('~$0.015 total · 1 generation')).toBeVisible();
+	await expect(imageSettings.getByLabel('Image editing Seed')).toHaveCount(0);
+
+	await chooseOnlyModel(toolbox, 'minimax-h3-video');
+	const videoSettings = toolbox.getByRole('region', { name: 'Image to video settings' });
+	await expect(videoSettings.getByLabel('Image to video Resolution')).toHaveValue('2k');
+	await expect(videoSettings.getByLabel('Image to video Prompt expansion')).toHaveValue('balanced');
+	await expect(videoSettings.getByLabel('Image to video Generate audio')).toHaveCount(0);
+	await expect(toolbox.getByText('Arena #1 · AA #2', { exact: true })).toBeVisible();
+
+	await chooseOnlyModel(toolbox, 'seedance-2-video');
+	await expect(videoSettings.getByLabel('Image to video Generate audio')).toBeChecked();
+	await expect(videoSettings.getByLabel('Image to video Seed')).toHaveCount(0);
+	await expect(toolbox.getByText('AA #1 · Arena #3', { exact: true })).toBeVisible();
+
+	await chooseOnlyModel(toolbox, 'veo-3-1-video');
+	await expect(videoSettings.getByLabel('Image to video Duration')).toHaveValue('4');
+	await expect(videoSettings.getByLabel('Image to video Resolution')).toHaveValue('720p');
+	await expect(videoSettings.getByLabel('Image to video Generate audio')).toBeChecked();
+	await videoSettings.getByLabel('Image to video Duration').selectOption('6');
+	await videoSettings.getByLabel('Image to video Resolution').selectOption('1080p');
+	await videoSettings.getByLabel('Image to video Generate audio').uncheck();
+	await videoSettings.getByLabel('Image to video Seed').fill('42');
+	await expect(toolbox.getByText('~$1.2 total · 1 generation')).toBeVisible();
+	await toolbox
+		.getByRole('textbox', { name: 'AI image editing prompt' })
+		.fill('Slow cinematic camera orbit');
+	await toolbox.getByRole('button', { name: 'Generate AI image edit' }).click();
+	await expect(toolbox.getByRole('region', { name: 'Generated video preview' })).toBeVisible();
+	expect(uploaded?.model).toBe('veo-3-1-video');
+	expect(uploaded?.settings).toEqual({
+		duration: '6s',
+		resolution: '1080p',
+		generate_audio: false,
+		seed: 42
+	});
+	const history = toolbox.getByRole('region', { name: 'Generated images from this session' });
+	await expect(history.locator('.generation-card')).toHaveCount(2);
+	await expect(history.getByRole('region', { name: 'Selected generation details' })).toContainText(
+		'Slow cinematic camera orbit'
+	);
+	for (const setting of [
+		'Duration: 6 seconds',
+		'Resolution: 1080p',
+		'Generate audio: Off',
+		'Seed: 42'
+	]) {
+		await expect(history.getByLabel('Generation model settings')).toContainText(setting);
+	}
+	await videoSettings.getByLabel('Image to video Duration').selectOption('8');
+	await videoSettings.getByLabel('Image to video Generate audio').check();
+	await history
+		.getByRole('button', { name: /Use generation \d+: Slow cinematic camera orbit/ })
+		.click();
+	await expect(videoSettings.getByLabel('Image to video Duration')).toHaveValue('6');
+	await expect(videoSettings.getByLabel('Image to video Generate audio')).not.toBeChecked();
+	await expect(videoSettings.getByLabel('Image to video Seed')).toHaveValue('42');
+	await expect
+		.poll(() =>
+			page.evaluate(async () => {
+				const database = await new Promise((resolve, reject) => {
+					const request = indexedDB.open('swyx-draw-generation-history');
+					request.onsuccess = () => resolve(request.result);
+					request.onerror = () => reject(request.error);
+				});
+				const record = await new Promise((resolve, reject) => {
+					const request = /** @type {IDBDatabase} */ (database)
+						.transaction('drawing-pages')
+						.objectStore('drawing-pages')
+						.get('default');
+					request.onsuccess = () => resolve(request.result);
+					request.onerror = () => reject(request.error);
+				});
+				return /** @type {any} */ (record)?.generations?.find(
+					(/** @type {any} */ generation) => generation.modelId === 'veo-3-1-video'
+				)?.modelSettings;
+			})
+		)
+		.toMatchObject({
+			duration: '6s',
+			resolution: '1080p',
+			generate_audio: false,
+			seed: 42
+		});
+});
+
 test('prompt editing shows progress, retains session generations, and restores them for local tools', async ({
 	page
 }) => {
@@ -950,9 +1088,9 @@ test('prompt editing shows progress, retains session generations, and restores t
 		})
 	).toBe(originalDataURL);
 	await expect(promptInput).toHaveValue(/studio product mockup/i);
-	await expect(toolbox.getByRole('button', { name: 'AI model and workflow selector' })).toContainText(
-		'Seedream 5.0 Pro'
-	);
+	await expect(
+		toolbox.getByRole('button', { name: 'AI model and workflow selector' })
+	).toContainText('Seedream 5.0 Pro');
 	expect(captured).toHaveLength(generationsBeforeRecipe);
 	await history.getByRole('button', { name: /Use generation 2:.*studio product mockup/i }).click();
 	await toolbox.getByRole('button', { name: 'Magic Select', exact: true }).click();

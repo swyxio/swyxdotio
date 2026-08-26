@@ -59,6 +59,34 @@ test('generation uploads raw multipart bytes once and reports queue position and
 	assert.equal(result.image, 'data:image/png;base64,ZWRpdGVk');
 });
 
+test('generation sends only selected endpoint settings as a bounded multipart JSON field', async () => {
+	let call = 0;
+	await runDrawingFalGeneration({
+		image: new Blob(['image'], { type: 'image/jpeg' }),
+		prompt: 'Animate the portrait',
+		model: 'veo-3-1-video',
+		settings: { duration: '6s', resolution: '1080p', generate_audio: false, seed: 42 },
+		signal: new AbortController().signal,
+		onProgress: () => {},
+		fetcher: async (_url, init) => {
+			if (call++ === 0) {
+				const form = /** @type {FormData} */ (init?.body);
+				assert.deepEqual(JSON.parse(String(form.get('settings'))), {
+					duration: '6s',
+					resolution: '1080p',
+					generate_audio: false,
+					seed: 42
+				});
+				return response({ requestId: 'job', model: 'veo-3-1-video' }, 202);
+			}
+			return response({
+				status: 'COMPLETED',
+				video: 'https://storage.googleapis.com/falserverless/example.mp4'
+			});
+		}
+	});
+});
+
 test('generation rejects invalid jobs, invalid images, and private endpoint failures', async () => {
 	for (const { replies, pattern } of [
 		{ replies: [{ requestId: '', model: 'flux-2' }], pattern: /invalid generation job/i },
