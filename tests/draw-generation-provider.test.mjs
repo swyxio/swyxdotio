@@ -1,3 +1,8 @@
+import {
+	generationLogMetadata,
+	generationLogError
+} from '../src/lib/server/tools-generation-observation.js';
+import { validGenerationMetadata } from '../src/lib/tools-generation-telemetry.js';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
@@ -171,4 +176,50 @@ test('owner runs bypass their previous cap but keep replay claims and fail close
 	assert.equal((await replay.json()).code, 'job_already_submitted');
 	assert.equal(runs.prepare('owner', { ...run, clientJobId: 'three' }, 125_000).status, 409);
 	assert.equal(runs.prepare('member', { ...run, limitUsd: null }, 125_000).status, 422);
+});
+
+test('generation telemetry selects bounded catalog/settings metadata and never copies prompts, weight URLs or safety settings', () => {
+	for (const model of DRAW_GENERATION_MODELS) {
+		const settings = resolveDrawGenerationModelSettings(model);
+		const data = generationLogMetadata(
+			model,
+			{
+				...settings,
+				prompt: 'PRIVATE',
+				checkpoint: 'https://private/weights',
+				seed: 12345,
+				enable_safety_checker: false
+			},
+			model.kind === 'text-to-image' ? 0 : 1
+		);
+		assert.equal(validGenerationMetadata(data), true, model.id);
+		assert.equal(data.adapter, model.adapter);
+		assert.equal(data.modelMaker, model.provider);
+		assert.equal(data.modality, model.kind);
+		assert.equal(data.estimatedCostUsd, estimateDrawGenerationModelCost(model, settings));
+		assert.doesNotMatch(JSON.stringify(data), /PRIVATE|weights|checkpoint|safety|seed/);
+	}
+	const video = getDrawGenerationModel('veo-3-1-video');
+	assert.equal(
+		generationLogMetadata(video, resolveDrawGenerationModelSettings(video), 1).durationSeconds,
+		4
+	);
+});
+
+test('generation telemetry error classification never stores provider error text', () => {
+	assert.equal(
+		generationLogError(new Error('PRIVATE provider response'), 'submission_uncertain'),
+		'submission_uncertain'
+	);
+	assert.equal(
+		generationLogError({ code: 'PRIVATE', message: 'private URL' }, 'progress_unavailable'),
+		'progress_unavailable'
+	);
+	assert.equal(
+		generationLogError(
+			{ code: 'input_rejected', message: 'private prompt' },
+			'submission_uncertain'
+		),
+		'input_rejected'
+	);
 });

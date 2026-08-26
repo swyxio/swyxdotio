@@ -328,3 +328,318 @@ test('export failures are explicit and a changed filter cancels an in-flight dow
 	expect(downloads).toBe(0);
 	await expect(page.getByRole('status')).toHaveCount(0);
 });
+
+/** Synthetic metadata only: validates presentation without invoking any provider.
+ * @returns {import('../src/lib/tools-logs-view.js').ToolLogs}
+ */
+function generationLogsFixture() {
+	/** @type {import('../src/lib/tools-logs-view.js').ToolLogGeneration} */
+	const observed = {
+		adapter: 'fal',
+		modelMaker: 'Black Forest Labs',
+		modality: 'text-to-image',
+		runId: 'shared-run',
+		clientJobId: 'client-image-job',
+		providerRequestId: 'fal-request-image',
+		estimatedCostUsd: 0.04,
+		requestedOutputs: 2,
+		referenceCount: 0,
+		width: 1024,
+		height: 768,
+		resolution: null,
+		durationSeconds: null,
+		submittedAt: '2026-08-26T10:00:00.000Z',
+		startedObservedAt: '2026-08-26T10:00:01.200Z',
+		finishedObservedAt: '2026-08-26T10:00:06.200Z',
+		lastObservedAt: '2026-08-26T10:00:06.200Z',
+		providerStatus: 'completed',
+		cancellation: null,
+		cancellationRequestedAt: null,
+		errorCode: null,
+		observedElapsedMs: 6200,
+		observedQueueMs: 1200
+	};
+	const other = {
+		id: 'other-generation-account',
+		name: 'Other generator',
+		email: 'generator@example.com'
+	};
+	/** @type {import('../src/lib/tools-logs-view.js').ToolLogEntry[]} */
+	const entries = [
+		{
+			id: 'generation-image',
+			createdAt: '2026-08-26T10:00:00.000Z',
+			kind: 'ai',
+			tool: 'draw',
+			action: 'draw.ai.media',
+			status: 'succeeded',
+			source: 'server',
+			model: 'fal-ai/flux-2',
+			estimatedReservedUsd: 0.08,
+			account: TEST_TOOLS_OWNER,
+			generation: observed
+		},
+		{
+			id: 'generation-video',
+			createdAt: '2026-08-26T10:01:00.000Z',
+			kind: 'ai',
+			tool: 'draw',
+			action: 'draw.ai.media',
+			status: 'submitted',
+			source: 'server',
+			model: 'fal-ai/veo3',
+			estimatedReservedUsd: 0.8,
+			account: other,
+			generation: {
+				...observed,
+				modelMaker: 'Google',
+				modality: 'image-to-video',
+				estimatedCostUsd: null,
+				clientJobId: 'client-video-job',
+				providerRequestId: 'fal-request-video',
+				requestedOutputs: 1,
+				referenceCount: 1,
+				width: null,
+				height: null,
+				resolution: '720p',
+				durationSeconds: 6,
+				submittedAt: '2026-08-26T10:01:00.000Z',
+				lastObservedAt: '2026-08-26T10:01:05.000Z',
+				startedObservedAt: null,
+				finishedObservedAt: null,
+				providerStatus: 'queued',
+				cancellation: 'requested',
+				cancellationRequestedAt: '2026-08-26T10:01:05.000Z',
+				observedElapsedMs: null,
+				observedQueueMs: null
+			}
+		},
+		{
+			id: 'generation-historical',
+			createdAt: '2026-08-26T09:50:00.000Z',
+			kind: 'ai',
+			tool: 'draw',
+			action: 'draw.ai.media',
+			status: 'failed',
+			source: 'server',
+			model: 'historical-model',
+			estimatedReservedUsd: 0.1,
+			account: TEST_TOOLS_OWNER
+		},
+		{
+			id: 'assistant-only',
+			createdAt: '2026-08-26T09:40:00.000Z',
+			kind: 'ai',
+			tool: 'draw',
+			action: 'draw.ai.assistant',
+			status: 'succeeded',
+			source: 'server',
+			model: 'assistant-model',
+			estimatedReservedUsd: 0.01,
+			account: TEST_TOOLS_OWNER
+		}
+	];
+	const totals = {
+		aiRequests: 4,
+		toolActions: 0,
+		estimatedReservedUsd: 0.99,
+		failedRequests: 1,
+		pendingRequests: 1,
+		succeededRequests: 2,
+		cancelledRequests: 0,
+		activeAccounts: 2
+	};
+	return {
+		entries,
+		nextCursor: null,
+		summary: totals,
+		daily: [
+			{
+				date: '2026-08-26',
+				aiRequests: 4,
+				toolActions: 0,
+				estimatedReservedUsd: 0.99,
+				failedRequests: 1,
+				pendingRequests: 1
+			}
+		],
+		breakdowns: {
+			tools: [],
+			models: [],
+			actions: [],
+			accounts: [],
+			adapters: [
+				{
+					key: 'fal',
+					count: 2,
+					aiRequests: 2,
+					toolActions: 0,
+					failedRequests: 0,
+					pendingRequests: 1,
+					estimatedReservedUsd: 0.88
+				}
+			],
+			modalities: [
+				{
+					key: 'text-to-image',
+					count: 1,
+					aiRequests: 1,
+					toolActions: 0,
+					failedRequests: 0,
+					pendingRequests: 0,
+					estimatedReservedUsd: 0.08
+				},
+				{
+					key: 'image-to-video',
+					count: 1,
+					aiRequests: 1,
+					toolActions: 0,
+					failedRequests: 0,
+					pendingRequests: 1,
+					estimatedReservedUsd: 0.8
+				}
+			]
+		},
+		breakdownLimit: 20,
+		retentionDays: 30,
+		range: { from: '2026-08-19T10:10:00.000Z', to: '2026-08-26T10:10:00.000Z' },
+		generationRuns: [
+			{
+				id: 'shared-run',
+				jobs: 1,
+				succeeded: 1,
+				failed: 0,
+				cancelled: 0,
+				pending: 0,
+				estimatedCostUsd: 0.04,
+				estimatedReservedUsd: 0.08,
+				estimateCoverage: 1,
+				timingCoverage: 1,
+				firstAdmittedAt: '2026-08-26T10:00:00.000Z',
+				lastOutcomeAt: '2026-08-26T10:00:06.200Z',
+				observedElapsedMs: 6200,
+				account: TEST_TOOLS_OWNER
+			},
+			{
+				id: 'shared-run',
+				jobs: 1,
+				succeeded: 0,
+				failed: 0,
+				cancelled: 0,
+				pending: 1,
+				estimatedCostUsd: null,
+				estimatedReservedUsd: 0.8,
+				estimateCoverage: 0,
+				timingCoverage: 0,
+				firstAdmittedAt: '2026-08-26T10:01:00.000Z',
+				lastOutcomeAt: null,
+				observedElapsedMs: null,
+				account: other
+			}
+		]
+	};
+}
+
+test('media filters and account-scoped runs preserve correlation without implying GPU billing', async ({
+	page
+}) => {
+	await page.goto('/tools');
+	await authenticateTools(page, TEST_TOOLS_OWNER);
+	const fixture = generationLogsFixture();
+	await page.route('**/tools/api/logs?*', (route) => route.fulfill({ json: fixture }));
+	await page.goto('/tools/logs?scope=all');
+	await expect(page.getByRole('heading', { name: 'Runs · matching admitted jobs' })).toBeVisible();
+	await expect(
+		page.getByRole('button', { name: 'Inspect run shared-run for owner@example.com', exact: true })
+	).toContainText('1/1 jobs estimated');
+	await expect(
+		page.getByRole('button', {
+			name: 'Inspect run shared-run for generator@example.com',
+			exact: true
+		})
+	).toContainText('Unavailable');
+	await page.getByRole('button', { name: 'Media', exact: true }).click();
+	await expect(page).toHaveURL(/action=draw.ai.media/);
+	await page.getByRole('button', { name: 'More filters', exact: true }).click();
+	await page.getByRole('combobox', { name: 'Hosting provider', exact: true }).selectOption('fal');
+	await page
+		.getByRole('combobox', { name: 'Generation mode', exact: true })
+		.selectOption('image-to-video');
+	await expect(page).toHaveURL(/adapter=fal/);
+	await expect(page).toHaveURL(/modality=image-to-video/);
+	await page.reload();
+	await expect(page.getByRole('combobox', { name: 'Hosting provider', exact: true })).toHaveValue(
+		'fal'
+	);
+	await expect(page.getByRole('combobox', { name: 'Generation mode', exact: true })).toHaveValue(
+		'image-to-video'
+	);
+	await page
+		.getByRole('button', { name: 'Inspect run shared-run for owner@example.com', exact: true })
+		.click();
+	await expect(page).toHaveURL(new RegExp(`account=${TEST_TOOLS_OWNER.id}`));
+	const query = new URL(page.url()).searchParams;
+	expect(query.get('run')).toBe('shared-run');
+	expect(query.has('modality')).toBe(false);
+	expect(query.has('adapter')).toBe(false);
+	await page.getByRole('button', { name: 'Providers', exact: true }).click();
+	await page.getByRole('button', { name: 'Filter fal: 2 events', exact: true }).click();
+	await expect(page).toHaveURL(/adapter=fal/);
+	await page.getByRole('button', { name: 'Modes', exact: true }).click();
+	await page.getByRole('button', { name: 'Filter image-to-video: 1 events', exact: true }).click();
+	await expect(page).toHaveURL(/modality=image-to-video/);
+	await page.getByRole('textbox', { name: 'Run ID', exact: true }).fill('another-run');
+	await page.getByRole('textbox', { name: 'Run ID', exact: true }).press('Tab');
+	await expect(page).toHaveURL(/run=another-run/);
+});
+
+test('generation quick view distinguishes estimates, observations, unknowns, and cancellation requests', async ({
+	page
+}) => {
+	await page.goto('/tools');
+	await authenticateTools(page, TEST_TOOLS_OWNER);
+	await page.route('**/tools/api/logs?*', (route) =>
+		route.fulfill({ json: generationLogsFixture() })
+	);
+	await page.goto('/tools/logs?scope=all&action=draw.ai.media');
+	await page.locator('tbody tr').filter({ hasText: 'fal-ai/flux-2' }).getByRole('button').click();
+	const detail = page.getByRole('region', { name: 'Generation metadata', exact: true });
+	await expect(detail).toContainText('Black Forest Labs');
+	await expect(detail).toContainText('fal-request-image');
+	await expect(detail).toContainText('client-image-job');
+	await expect(detail).toContainText('6.2 s');
+	await expect(detail).toContainText('1.2 s');
+	await expect(
+		detail.locator('dl > div').filter({ hasText: 'Catalog cost estimate' })
+	).toContainText('$0.04');
+	await expect(detail.locator('dl > div').filter({ hasText: 'Reference count' })).toContainText(
+		'0'
+	);
+	await expect(detail).toContainText('not GPU execution time');
+	await page.getByRole('button', { name: 'Close quick view' }).click();
+	await page.locator('tbody tr').filter({ hasText: 'fal-ai/veo3' }).getByRole('button').click();
+	await expect(detail).toContainText('Requested · not confirmed');
+	await expect(
+		detail.locator('dl > div').filter({ hasText: 'Observed elapsed wall time' })
+	).toContainText('Unavailable');
+	await expect(
+		detail.locator('dl > div').filter({ hasText: 'Catalog cost estimate' })
+	).toContainText('Unavailable');
+	await page.setViewportSize({ width: 390, height: 844 });
+	expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+	await page.screenshot({ path: '/tmp/tools-generation-logs-mobile.png', fullPage: true });
+	await page.getByRole('button', { name: 'Close quick view' }).click();
+	await page
+		.locator('tbody tr')
+		.filter({ hasText: 'historical-model' })
+		.getByRole('button')
+		.click();
+	await expect(detail).toContainText('Historical settings and timings are unavailable');
+	await expect(detail).toContainText('does not establish a provider-confirmed failure');
+	await expect(detail.locator('dl > div').filter({ hasText: 'Observed queue wait' })).toContainText(
+		'Unavailable'
+	);
+	await page.getByRole('button', { name: 'Close quick view' }).click();
+	await page.locator('tbody tr').filter({ hasText: 'assistant-model' }).getByRole('button').click();
+	await expect(detail).toHaveCount(0);
+});

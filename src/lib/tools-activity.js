@@ -79,7 +79,7 @@ export function validToolsActivityInput(value, source) {
 	);
 }
 
-/** @typedef {'days'|'kind'|'tool'|'scope'|'status'|'source'|'model'|'action'|'account'|'q'|'day'|'opens'} ToolsLogFilterKey */
+/** @typedef {'days'|'kind'|'tool'|'scope'|'status'|'source'|'model'|'action'|'account'|'q'|'day'|'opens'|'adapter'|'modality'|'run'} ToolsLogFilterKey */
 /** Bookmarkable metadata-only filters. Account names/emails and private content are never searched.
  * @type {Readonly<Record<ToolsLogFilterKey,string>>} */
 export const TOOLS_LOG_FILTER_DEFAULTS = Object.freeze({
@@ -94,7 +94,10 @@ export const TOOLS_LOG_FILTER_DEFAULTS = Object.freeze({
 	account: 'all',
 	q: '',
 	day: '',
-	opens: 'all'
+	opens: 'all',
+	adapter: 'all',
+	modality: 'all',
+	run: 'all'
 });
 export const TOOLS_LOG_EXPORT_LIMIT = 10_000;
 
@@ -124,6 +127,9 @@ export function parseToolsActivityFilters(params) {
 		!['all', 'succeeded', 'failed', 'cancelled', 'pending'].includes(f.status) ||
 		!['all', 'server', 'browser'].includes(f.source) ||
 		!['all', 'hide'].includes(f.opens) ||
+		!/^[A-Za-z0-9_-]{1,128}$/.test(f.adapter) ||
+		!/^[A-Za-z0-9_-]{1,128}$/.test(f.run) ||
+		!['all', 'text-to-image', 'image-edit', 'image-to-video'].includes(f.modality) ||
 		!['all', ...Object.keys(TOOLS_ACTIVITY_ACTIONS)].includes(f.action) ||
 		!f.model ||
 		f.model.length > 200 ||

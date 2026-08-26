@@ -61,6 +61,15 @@
 		these logs.
 	</p>
 	<p>
+		Generation logs also link admitted jobs to their batch/run and hosting adapter. They record the
+		model maker, media type, requested output/reference counts, dimensions/resolution/video
+		duration, catalog cost estimate, and server-observed status/timing, cancellation state, and
+		bounded error codes. They do not contain prompts, reference roles or names, custom-weight URLs,
+		output URLs, or provider error text. Observed wall time includes queueing and polling; it is not
+		GPU execution time. Provider bills, GPU time, cold starts, and idle time are unavailable unless
+		separately connected and verified.
+	</p>
+	<p>
 		Rate-limit errors show when to retry. Generation jobs and results are accessible only to the
 		account that created them. Local image-processing tools do not spend cloud quota.
 	</p>
