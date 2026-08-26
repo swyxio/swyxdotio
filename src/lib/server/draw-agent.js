@@ -291,7 +291,9 @@ export async function runDrawingAgent(event) {
 			tools: DRAW_AGENT_TOOLS,
 			tool_choice: 'auto',
 			parallel_tool_calls: false,
-			max_completion_tokens: 1_200,
+			// Keep interactive tool turns bounded without exhausting the response on reasoning.
+			reasoning_effort: 'low',
+			max_completion_tokens: 2_000,
 			stream: false
 		});
 	} catch (error) {
@@ -306,6 +308,16 @@ export async function runDrawingAgent(event) {
 		}
 		return privateJson(
 			{ error: 'The drawing assistant could not complete this step.' },
+			{ status: 502 }
+		);
+	}
+	if (result?.choices?.[0]?.finish_reason === 'length') {
+		await finishToolsAiUsage(event, user.id, reservation.id, 'failed');
+		return privateJson(
+			{
+				code: 'response_truncated',
+				error: 'The drawing assistant reached its response limit. Try a smaller drawing change.'
+			},
 			{ status: 502 }
 		);
 	}

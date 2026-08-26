@@ -116,6 +116,8 @@ test('drawing assistant sends only the visible viewport to the selected vision m
 	assert.equal(response.status, 200);
 	assert.equal(calls[0][0], DRAW_AGENT_MODEL);
 	assert.equal(calls[0][1].tools[0].function.name, 'canvas_bash');
+	assert.equal(calls[0][1].reasoning_effort, 'low');
+	assert.equal(calls[0][1].max_completion_tokens, 2_000);
 	const systemPrompt = calls[0][1].messages[0].content;
 	assert.match(systemPrompt, /https:\/\/swyx.io\/why-temporal/);
 	assert.match(systemPrompt, /For explanatory diagrams and essay figures/);
@@ -132,6 +134,29 @@ test('drawing assistant sends only the visible viewport to the selected vision m
 	assert.equal((await readDrawingAgentBudget(body.budget, SESSION_SECRET)).spent, 112);
 	assert.equal(raw.includes(SESSION_SECRET), false);
 	assert.equal(raw.includes(SCREENSHOT), false);
+});
+
+test('truncated model output cannot execute partial commands or claim a completed review', async () => {
+	for (const output of [
+		{ content: '' },
+		{ content: '', tool_calls: [{ function: { name: 'canvas_bash', arguments: '{"command":' } }] }
+	]) {
+		const response = await runDrawingAgent(
+			await createEvent({
+				body: {
+					messages: [
+						{ role: 'user', content: 'Improve this diagram' },
+						{ role: 'tool', tool_call_id: 'completed', content: JSON.stringify({ exitCode: 0 }) }
+					]
+				},
+				ai: { run: async () => ({ choices: [{ finish_reason: 'length', message: output }] }) }
+			})
+		);
+		assert.equal(response.status, 502);
+		const body = await response.json();
+		assert.equal(body.code, 'response_truncated');
+		assert.equal(body.toolCalls, undefined);
+	}
 });
 
 test('drawing assistant signs shared run budgets, tracks model tokens, and rejects tampering or overspending', async () => {
