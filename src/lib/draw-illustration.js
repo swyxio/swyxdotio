@@ -309,6 +309,37 @@ export const DRAW_ILLUSTRATION_COMPONENTS = [
 
 export const DRAW_ILLUSTRATION_BRUSHES = /** @type {const} */ ([
 	{
+		id: 'illustration-bold-ink',
+		label: 'Bold ink',
+		description: 'A heavier dark freehand stroke for silhouettes and emphasis.',
+		tool: 'freedraw',
+		color: INK,
+		fill: 'transparent',
+		width: 5,
+		opacity: 100
+	},
+	{
+		id: 'illustration-title-marker',
+		label: 'Title marker',
+		description: 'An opaque blue band. Put white title text above it.',
+		tool: 'freedraw',
+		color: '#2687ee',
+		fill: 'transparent',
+		width: 14,
+		opacity: 100
+	},
+	{
+		id: 'illustration-flow-arrow',
+		label: 'Flow arrow',
+		description: 'A heavier arrow with a filled head for the main path.',
+		tool: 'arrow',
+		color: INK,
+		fill: 'transparent',
+		width: 3,
+		opacity: 100,
+		arrowhead: 'triangle'
+	},
+	{
 		id: 'illustration-ink',
 		label: 'Ink pen',
 		description: 'Fine dark freehand ink, fully opaque.',
@@ -373,10 +404,13 @@ export function applyIllustrationBrush(editor, brushId) {
 			currentItemFontSize: 24,
 			currentItemRoundness: 'round',
 			currentItemStartArrowhead: null,
-			currentItemEndArrowhead: 'arrow',
+			currentItemEndArrowhead: 'arrowhead' in brush ? brush.arrowhead : 'arrow',
 			currentItemArrowType: 'sharp'
 		}
 	});
 	editor.setActiveTool({ type: brush.tool });
 	return brush;
 }
+
+// Shared by the second small study; one set of native geometry builders.
+export { shape, rect, oval, path, label, move, group, component };

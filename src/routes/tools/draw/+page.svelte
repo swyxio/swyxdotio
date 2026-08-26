@@ -658,14 +658,6 @@
 		];
 
 		commands.push(
-			...DRAW_ILLUSTRATION_BRUSHES.map((brush) => ({
-				id: `brush-${brush.id}`,
-				label: `Use ${brush.label.toLowerCase()}`,
-				description: `${brush.description} Only affects new strokes.`,
-				category: 'Illustration tools',
-				keywords: ['brush', 'illustration', 'ink', 'pastel', brush.id],
-				run: () => chooseIllustrationBrush(brush.id)
-			})),
 			...DRAW_THINKING_WORKFLOWS.map((workflow) => ({
 				id: `workflow-${workflow.id}`,
 				label: workflow.label,
@@ -699,6 +691,14 @@
 				category: 'Components',
 				keywords: [component.category, ...(component.keywords ?? [])],
 				run: () => insertUiComponent(component.id)
+			})),
+			...DRAW_ILLUSTRATION_BRUSHES.map((brush) => ({
+				id: `brush-${brush.id}`,
+				label: `Use ${brush.label.toLowerCase()}`,
+				description: `${brush.description} Only affects new strokes.`,
+				category: 'Illustration tools',
+				keywords: ['brush', 'illustration', brush.id],
+				run: () => chooseIllustrationBrush(brush.id)
 			})),
 			...presets.map((preset) => ({
 				id: `preset-${preset.id}`,
@@ -1733,7 +1733,8 @@
 			},
 			...(captureImmediately ? { captureUpdate: captureImmediately } : {})
 		});
-		if (componentId === 'illustration-sampler') focusDesignArtboard(shapes);
+		if (['illustration-sampler', 'illustration-marks-sampler'].includes(componentId))
+			focusDesignArtboard(shapes);
 		else editor.scrollToContent(shapes, { fitToContent: false, animate: true, duration: 180 });
 	}
 
@@ -2960,7 +2961,7 @@
 										d="M4 11h34m-5-5 5 5-5 5"
 										fill="none"
 										stroke={brush.color}
-										stroke-width="1.5"
+										stroke-width={brush.width}
 									/>
 								{:else}
 									<path
@@ -3098,7 +3099,7 @@
 						type="button"
 						class="command-option"
 						class:highlighted={highlightedCommandIndex === index}
-						onmouseenter={() => (highlightedCommandIndex = index)}
+						onpointermove={() => (highlightedCommandIndex = index)}
 						onclick={() => runWorkspaceCommand(command)}
 					>
 						<strong>{command.label}</strong>

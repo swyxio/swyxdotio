@@ -4,6 +4,7 @@ import {
 	DRAW_ILLUSTRATION_COMPONENTS,
 	applyIllustrationBrush
 } from '../src/lib/draw-illustration.js';
+import { DRAW_ILLUSTRATION_MARK_COMPONENTS } from '../src/lib/draw-illustration-marks.js';
 
 import {
 	createDrawUiComponent,
@@ -71,11 +72,11 @@ test('every wireframe component creates editable hand-drawn native Excalidraw sk
 });
 
 test('illustration pieces remain native, independently grouped and freshly editable on each insertion', () => {
-	for (const component of DRAW_ILLUSTRATION_COMPONENTS) {
+	for (const component of [...DRAW_ILLUSTRATION_COMPONENTS, ...DRAW_ILLUSTRATION_MARK_COMPONENTS]) {
 		const first = component.createShapes();
 		const second = component.createShapes();
 		assert.ok(first.some((item) => item.type === 'text'));
-		assert.ok(first.some((item) => item.type === 'line'));
+		assert.ok(first.some((item) => item.type === 'line' || item.type === 'arrow'));
 		assert.equal(new Set(first.map((item) => item.id)).size, first.length);
 		const oldGroups = new Set(first.flatMap((item) => item.groupIds ?? []));
 		assert.ok(oldGroups.size > 0);
@@ -88,6 +89,22 @@ test('illustration pieces remain native, independently grouped and freshly edita
 			if (item.points) assert.deepEqual(item.points[0], [0, 0]);
 		}
 	}
+});
+
+test('broad drawing tools preserve distinct weights and reset the filled arrowhead', () => {
+	const scenes = [];
+	const editor = { updateScene: (scene) => scenes.push(scene), setActiveTool: () => {} };
+	applyIllustrationBrush(editor, 'illustration-bold-ink');
+	applyIllustrationBrush(editor, 'illustration-title-marker');
+	applyIllustrationBrush(editor, 'illustration-flow-arrow');
+	applyIllustrationBrush(editor, 'illustration-connector');
+	assert.equal(scenes[0].appState.currentItemStrokeWidth, 5);
+	assert.equal(scenes[1].appState.currentItemStrokeWidth, 14);
+	assert.equal(scenes[1].appState.currentItemOpacity, 100);
+	assert.equal(scenes[2].appState.currentItemEndArrowhead, 'triangle');
+	assert.equal(scenes[3].appState.currentItemEndArrowhead, 'arrow');
+	assert.equal(scenes[3].appState.currentItemStrokeWidth, 1);
+	assert.ok(scenes.every((scene) => !('elements' in scene)));
 });
 
 test('brush selection changes only future drawing defaults and resets marker opacity', () => {

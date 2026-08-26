@@ -47,10 +47,20 @@ The prototype uses the existing `/tools/draw` route, account boundary, shared sh
 
 This demonstrates the attainable flat-color icon vocabulary. It does not yet reproduce the reference's entire illustrated language, animated icons, hand-ink taper/pressure controls, or dense full-page composition. Native sans-serif text is also not a complete editorial typography system. Next visual work should be another small comparison—such as a lock or user/server pair—before adding a large catalog or custom brush renderer.
 
+## Second pass: broader marks and structure
+
+The follow-up studies the [API-testing headline band](https://www.linkedin.com/feed/update/urn:li:activity:7492969330666729490/) and [watermark explainer's section tabs, token tiles and state bar](https://www.linkedin.com/feed/update/urn:li:activity:7496229648171839489/). Another Chrome screenshot was captured. Broad title marks are opaque filled regions; thin connecting lines still provide contrast rather than making every stroke heavy.
+
+Added native `illustration-line-weights`, `illustration-marker-title`, `illustration-section-frame`, `illustration-feedback-path`, `illustration-token-strip`, and `illustration-outcome-bar` pieces, plus `illustration-marks-sampler`. Shape builders live in `draw-illustration-marks.js` and reuse the first study's primitives. The outcome bar is explicitly qualitative, with no invented numerical score. The feedback card is an editable visual stencil, not a new automatic routing or graph-layout tool.
+
+Added `brush-illustration-bold-ink`, `brush-illustration-title-marker`, and `brush-illustration-flow-arrow` (filled triangle head). They use the same new-strokes-only handler. The original fine connector resets the head and weight when switching back. The Library now has seven presets total.
+
+Kept brushes after the initial component commands so the palette's bounded default results still expose components. Palette hover selection now responds to real pointer movement: a stationary cursor over newly filtered results must not steal the keyboard's highlighted choice.
+
 ## Verification
 
-- 234 drawing unit tests passed.
-- Nine focused browser checks passed: native insertion/grouping, undo/redo, unchanged geometry after reload, PNG/SVG exports, marker-to-shape switching without modifying original elements, access from all three modes at 390px, and existing component/palette/responsive behavior.
+- 235 drawing unit tests passed.
+- Ten focused browser checks passed: both native samplers' insertion/grouping, undo/redo, unchanged geometry after reload, PNG/SVG exports, actual marker/pastel/bold-ink/filled-arrow drawing without modifying original elements, access from all three modes at 390px, and existing component/palette/responsive behavior.
 - Svelte check: zero errors/warnings. Production build passed.
 - Captured real Chrome screenshots and inspected the native PNG export. A local comparison sheet places enlarged reference details beside the native rebuilds; no reference images ship in the application.
 - No inference, key activation, push, merge or deploy. This checkpoint is a visual prototype for review.

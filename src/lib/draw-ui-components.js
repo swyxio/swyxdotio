@@ -1,4 +1,5 @@
 import { DRAW_ILLUSTRATION_COMPONENTS } from './draw-illustration.js';
+import { DRAW_ILLUSTRATION_MARK_COMPONENTS } from './draw-illustration-marks.js';
 
 /**
  * @typedef {{
@@ -21,7 +22,7 @@ import { DRAW_ILLUSTRATION_COMPONENTS } from './draw-illustration.js';
  *   textAlign?: 'left' | 'center',
  *   points?: Array<[number, number]>,
  *   startArrowhead?: null,
- *   endArrowhead?: 'arrow' | null,
+ *   endArrowhead?: 'arrow' | 'triangle' | null,
  *   groupIds?: string[]
  * }} UiComponentShape
  */
@@ -535,6 +536,7 @@ function component({ build, ...entry }) {
 /** @type {DrawUiComponent[]} */
 export const DRAW_UI_COMPONENTS = [
 	...DRAW_ILLUSTRATION_COMPONENTS,
+	...DRAW_ILLUSTRATION_MARK_COMPONENTS,
 	component({
 		id: 'primary-button',
 		title: 'Primary button',

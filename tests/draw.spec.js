@@ -23,83 +23,105 @@ async function illustrationElements(page) {
 	});
 }
 
-test('illustration sampler is native, grouped, undoable and survives reload', async ({
-	page
-}, testInfo) => {
-	await page.goto('/tools/draw');
-	await openDrawingTemplates(page, 'Components');
-	await page.getByRole('button', { name: 'Insert Illustration sampler component' }).click();
-	await expect.poll(async () => (await illustrationElements(page)).length).toBeGreaterThan(40);
-	const elements = await illustrationElements(page);
-	expect(elements.every((/** @type {any} */ item) => item.type !== 'image')).toBe(true);
-	expect(
-		elements.some((/** @type {any} */ item) => item.text === 'Small pieces, clear ideas')
-	).toBe(true);
-	expect(new Set(elements.flatMap((/** @type {any} */ item) => item.groupIds)).size).toBe(4);
-	expect(elements.filter((/** @type {any} */ item) => item.type === 'line').length).toBeGreaterThan(
-		10
-	);
-	await expect(page.getByRole('button', { name: 'Undo', exact: true })).toBeEnabled();
-	await page.getByRole('button', { name: 'Undo', exact: true }).click();
-	await expect.poll(async () => (await illustrationElements(page)).length).toBe(0);
-	await page.getByRole('button', { name: 'Redo', exact: true }).click();
-	await expect.poll(async () => (await illustrationElements(page)).length).toBe(elements.length);
-	await page.reload();
-	await expect.poll(async () => (await illustrationElements(page)).length).toBe(elements.length);
-	const restored = await illustrationElements(page);
-	expect(
-		restored.map((/** @type {any} */ item) => [
-			item.id,
-			item.x,
-			item.y,
-			item.width,
-			item.height,
-			item.groupIds,
-			item.text
-		])
-	).toEqual(
-		elements.map((/** @type {any} */ item) => [
-			item.id,
-			item.x,
-			item.y,
-			item.width,
-			item.height,
-			item.groupIds,
-			item.text
-		])
-	);
-	await page.getByRole('radio', { name: 'Selection', exact: true }).press('ControlOrMeta+a');
-	await expect(page.getByRole('button', { name: 'Ungroup selection', exact: true })).toBeVisible();
-	await page.getByRole('button', { name: 'Open drawing export options', exact: true }).click();
-	const exporter = page.getByRole('dialog', { name: 'Creative workspace' });
-	await exporter
-		.getByRole('combobox', { name: 'Scope', exact: true })
-		.selectOption({ label: 'Selected elements' });
-	for (const format of ['PNG', 'SVG']) {
-		await exporter
-			.getByRole('combobox', { name: 'Format', exact: true })
-			.selectOption({ label: format });
-		const downloading = page.waitForEvent('download', { timeout: 10000 });
-		await exporter.getByRole('button', { name: 'Download', exact: true }).click();
-		const download = await downloading;
-		await download.saveAs(testInfo.outputPath(`illustration-study.${format.toLowerCase()}`));
+for (const study of [
+	{
+		name: 'icons',
+		button: 'Illustration sampler',
+		title: 'Small pieces, clear ideas',
+		groups: 4,
+		lines: 10,
+		labels: ['Document', 'Request queue'],
+		stem: 'illustration-study'
+	},
+	{
+		name: 'marks',
+		button: 'Marks and structure sampler',
+		title: 'Give the eye a path',
+		groups: 6,
+		lines: 3,
+		labels: ['Show the mechanism', 'HOW IT WORKS'],
+		stem: 'illustration-marks-study'
 	}
-	const svg = await readFile(testInfo.outputPath('illustration-study.svg'), 'utf8');
-	expect(svg).toContain('Document');
-	expect(svg).toContain('Request queue');
-	expect(svg).not.toContain('<image');
-	await writeFile(
-		testInfo.outputPath('illustration-study.excalidraw'),
-		JSON.stringify({
-			type: 'excalidraw',
-			version: 2,
-			source: 'https://swyx.io/tools/draw',
-			elements: restored,
-			appState: { viewBackgroundColor: '#ffffff', gridSize: null },
-			files: {}
-		})
-	);
-});
+]) {
+	test(`illustration ${study.name} sampler is native, grouped, undoable and survives reload`, async ({
+		page
+	}, testInfo) => {
+		await page.goto('/tools/draw');
+		await openDrawingTemplates(page, 'Components');
+		await page.getByRole('button', { name: `Insert ${study.button} component` }).click();
+		await expect.poll(async () => (await illustrationElements(page)).length).toBeGreaterThan(40);
+		const elements = await illustrationElements(page);
+		expect(elements.every((/** @type {any} */ item) => item.type !== 'image')).toBe(true);
+		expect(elements.some((/** @type {any} */ item) => item.text === study.title)).toBe(true);
+		expect(new Set(elements.flatMap((/** @type {any} */ item) => item.groupIds)).size).toBe(
+			study.groups
+		);
+		expect(
+			elements.filter((/** @type {any} */ item) => item.type === 'line').length
+		).toBeGreaterThan(study.lines);
+		await expect(page.getByRole('button', { name: 'Undo', exact: true })).toBeEnabled();
+		await page.getByRole('button', { name: 'Undo', exact: true }).click();
+		await expect.poll(async () => (await illustrationElements(page)).length).toBe(0);
+		await page.getByRole('button', { name: 'Redo', exact: true }).click();
+		await expect.poll(async () => (await illustrationElements(page)).length).toBe(elements.length);
+		await page.reload();
+		await expect.poll(async () => (await illustrationElements(page)).length).toBe(elements.length);
+		const restored = await illustrationElements(page);
+		expect(
+			restored.map((/** @type {any} */ item) => [
+				item.id,
+				item.x,
+				item.y,
+				item.width,
+				item.height,
+				item.groupIds,
+				item.text
+			])
+		).toEqual(
+			elements.map((/** @type {any} */ item) => [
+				item.id,
+				item.x,
+				item.y,
+				item.width,
+				item.height,
+				item.groupIds,
+				item.text
+			])
+		);
+		await page.getByRole('radio', { name: 'Selection', exact: true }).press('ControlOrMeta+a');
+		await expect(
+			page.getByRole('button', { name: 'Ungroup selection', exact: true })
+		).toBeVisible();
+		await page.getByRole('button', { name: 'Open drawing export options', exact: true }).click();
+		const exporter = page.getByRole('dialog', { name: 'Creative workspace' });
+		await exporter
+			.getByRole('combobox', { name: 'Scope', exact: true })
+			.selectOption({ label: 'Selected elements' });
+		for (const format of ['PNG', 'SVG']) {
+			await exporter
+				.getByRole('combobox', { name: 'Format', exact: true })
+				.selectOption({ label: format });
+			const downloading = page.waitForEvent('download', { timeout: 10000 });
+			await exporter.getByRole('button', { name: 'Download', exact: true }).click();
+			const download = await downloading;
+			await download.saveAs(testInfo.outputPath(`${study.stem}.${format.toLowerCase()}`));
+		}
+		const svg = await readFile(testInfo.outputPath(`${study.stem}.svg`), 'utf8');
+		for (const text of study.labels) expect(svg).toContain(text);
+		expect(svg).not.toContain('<image');
+		await writeFile(
+			testInfo.outputPath(`${study.stem}.excalidraw`),
+			JSON.stringify({
+				type: 'excalidraw',
+				version: 2,
+				source: 'https://swyx.io/tools/draw',
+				elements: restored,
+				appState: { viewBackgroundColor: '#ffffff', gridSize: null },
+				files: {}
+			})
+		);
+	});
+}
 
 test('illustration brushes draw new styles without recoloring existing artwork or calling AI', async ({
 	page
@@ -154,6 +176,40 @@ test('illustration brushes draw new styles without recoloring existing artwork o
 		roughness: 0,
 		strokeWidth: 2
 	});
+	await page.keyboard.press('Control+k');
+	await search.fill('Use flow arrow');
+	await expect(
+		page.getByRole('dialog', { name: 'Workspace commands' }).getByRole('button').first()
+	).toContainText('Use flow arrow');
+	await search.press('Enter');
+	await page.mouse.move(550, 480);
+	await page.mouse.down();
+	await page.mouse.move(680, 480, { steps: 5 });
+	await page.mouse.up();
+	await expect
+		.poll(async () => (await illustrationElements(page)).length)
+		.toBe(original.length + 3);
+	const flow = (await illustrationElements(page)).find(
+		(/** @type {any} */ item) => item.type === 'arrow'
+	);
+	expect(flow).toMatchObject({ strokeWidth: 3, endArrowhead: 'triangle', opacity: 100 });
+	await page.keyboard.press('Control+k');
+	await search.fill('Use bold ink');
+	await expect(
+		page.getByRole('dialog', { name: 'Workspace commands' }).getByRole('button').first()
+	).toContainText('Use bold ink');
+	await search.press('Enter');
+	await page.mouse.move(330, 500);
+	await page.mouse.down();
+	await page.mouse.move(470, 520, { steps: 12 });
+	await page.mouse.up();
+	await expect
+		.poll(async () => (await illustrationElements(page)).length)
+		.toBe(original.length + 4);
+	current = await illustrationElements(page);
+	expect(
+		current.find((/** @type {any} */ item) => item.type === 'freedraw' && item.id !== marker.id)
+	).toMatchObject({ strokeWidth: 5, opacity: 100, strokeColor: '#20232b' });
 	expect(
 		current.filter((/** @type {any} */ item) =>
 			original.some((/** @type {any} */ old) => old.id === item.id)
