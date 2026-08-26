@@ -255,10 +255,12 @@
 		outline: 2px solid #8c7ddd;
 		outline-offset: 2px;
 	}
-	@media (max-width: 1100px) {
+	@media (max-width: 650px), (pointer: coarse) {
 		.workspace-menu select {
 			font-size: 16px;
 		}
+	}
+	@media (max-width: 1100px) {
 		.library-open {
 			display: none;
 		}

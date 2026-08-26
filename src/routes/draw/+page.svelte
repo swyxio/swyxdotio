@@ -3922,13 +3922,15 @@
 		}
 	}
 
-	@media (max-width: 600px) {
+	@media (max-width: 650px), (pointer: coarse) {
 		.page-picker input,
 		.command-palette input,
-		.workspace-content :is(input, textarea, select),
+		.workspace-content :global(:is(input, textarea, select)),
 		.image-tools :global(:is(input, textarea, select)) {
 			font-size: 16px;
 		}
+	}
+	@media (max-width: 600px) {
 		.artboard-toolbar {
 			right: 10px;
 			left: 10px;

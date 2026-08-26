@@ -6,7 +6,7 @@ The user approved central implementation after approving the three feature track
 
 One `/draw` route, one native Excalidraw editor, one command catalog, one Generate controller, and one private creative library. The starting experiences are **Thinking**, **Thumbnails**, and **Experiment**. Every capability remains available in every mode; modes are not document types, permissions, separate controllers, or scene metadata.
 
-The originating task owns mode defaults, welcome UI, navigation/panel coordination, cross-track integration, save recovery, and the combined release. Children stopped shared-page changes and delivered isolated checkpoints. The subsequent `/tools` visual redesign and new assistant provider adapters remain separately owned; do not replace their work with this branch's snapshots.
+The originating task owns mode defaults, welcome UI, navigation/panel coordination, cross-track integration, save recovery, and the combined release. Children stopped shared-page changes and delivered isolated checkpoints. The subsequent `/tools` visual redesign remains separately owned; do not replace its work with this branch's snapshots. The Thinking task's later provider checkpoint `2fa0d4a` is also integrated: server-only Cloudflare/OpenAI/DeepSeek/Featherless selection, sanitized availability, and one scrollable assistant body with a fixed composer. Provider activation still requires configuration; no new paid canary ran.
 
 | Track             | Integrated checkpoint                                                  | Shared entry points                                                                                                            |
 | ----------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
@@ -29,6 +29,8 @@ Root reconciles the latest `origin/master` before release, including independent
 ## Panel and generation contracts
 
 Controllers stay mounted when changing mode, selecting another tool, or opening Library. Only the foreground surface changes. Desktop media/assistant windows start on the right; phones use a bounded bottom panel with a single scrolling surface. Existing drag, minimize, keyboard submission, draft protection, and native shortcuts remain.
+
+Background job controls reserve their own space instead of covering the active composer. Custom mobile form controls are at least 16px; opening the assistant/model picker on touch or narrow screens does not autofocus a text field. Explicit Rename and keyboard shortcuts still focus deliberately, and pinch zoom is not disabled. Browser tests verify these contracts; physical iPhone keyboard/focus-zoom behavior is not claimed as tested.
 
 The shell binds the assistant's `open`, `minimized`, and `running` presentation state and uses its `showAssistant()` / `stop()` methods. Generate exposes `openGeneration()`, `openHistory()`, and `cancelGeneration()`. Running work remains visible and cancellable when covered/minimized. Opening the same composer never starts another job.
 

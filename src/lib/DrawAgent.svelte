@@ -360,7 +360,7 @@
 		} catch {
 			// The current conversation is still cleared if browser storage is unavailable.
 		}
-		void tick().then(() => composer?.focus());
+		if (canAutofocusDrawingInput()) void tick().then(() => composer?.focus());
 	}
 
 	function retryLastMessage() {
@@ -381,7 +381,7 @@
 		prompt = task;
 		pendingWorkflow = '';
 		showWorkflowPicker = false;
-		void tick().then(() => composer?.focus());
+		if (canAutofocusDrawingInput()) void tick().then(() => composer?.focus());
 	}
 
 	/** Open a shared workflow without submitting it or overwriting an existing draft. */
@@ -674,7 +674,7 @@
 						onclick={() => {
 							prompt = pendingWorkflow;
 							pendingWorkflow = '';
-							void tick().then(() => composer?.focus());
+							if (canAutofocusDrawingInput()) void tick().then(() => composer?.focus());
 						}}>Use suggestion instead</button
 					>
 				</div>
@@ -1051,10 +1051,12 @@
 			transform: rotate(360deg);
 		}
 	}
-	@media (max-width: 600px) {
-		.assistant-window :is(input, textarea, select) {
+	@media (max-width: 650px), (pointer: coarse) {
+		.assistant-window :global(:is(input, textarea, select)) {
 			font-size: 16px;
 		}
+	}
+	@media (max-width: 600px) {
 		.assistant-launcher {
 			right: 12px;
 			bottom: 58px;

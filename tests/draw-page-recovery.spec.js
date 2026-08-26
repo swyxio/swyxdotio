@@ -7,8 +7,19 @@ const sourceId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const destinationId = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
 const otherPageId = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
 
-/** A real native element; Excalidraw restores and edits this fixture normally. */
-function nativeScene(id, color = '#ffc9c9') {
+/**
+ * @typedef {import('@excalidraw/excalidraw/element/types').ExcalidrawElement} DrawingElement
+ * @typedef {{ elements: DrawingElement[], appState: Record<string, unknown>, files: import('@excalidraw/excalidraw/types').BinaryFiles }} DrawingScene
+ */
+
+/**
+ * A real native element; Excalidraw restores and edits this fixture normally.
+ * @param {string} id
+ * @param {string} [color]
+ * @param {Record<string, unknown>} [customData]
+ * @returns {DrawingScene}
+ */
+function nativeScene(id, color = '#ffc9c9', customData) {
 	return {
 		elements: [
 			{
@@ -18,7 +29,7 @@ function nativeScene(id, color = '#ffc9c9') {
 				y: 300,
 				width: 160,
 				height: 100,
-				angle: 0,
+				angle: /** @type {DrawingElement['angle']} */ (0),
 				strokeColor: '#1e1e1e',
 				backgroundColor: color,
 				fillStyle: 'solid',
@@ -32,11 +43,13 @@ function nativeScene(id, color = '#ffc9c9') {
 				seed: 1,
 				version: 1,
 				versionNonce: 1,
+				index: null,
 				isDeleted: false,
 				boundElements: null,
 				updated: 1,
 				link: null,
-				locked: false
+				locked: false,
+				customData
 			}
 		],
 		appState: { viewBackgroundColor: '#ffffff', scrollX: 0, scrollY: 0, zoom: { value: 1 } },
@@ -61,6 +74,7 @@ async function cloudFixture(page) {
 	]);
 	/** @type {{id:string, scene:ReturnType<typeof nativeScene>}[]} */
 	const puts = [];
+	/** @type {string[]} */
 	const deletes = [];
 	let deleteAllowed = true;
 	let paidRequests = 0;
@@ -81,7 +95,7 @@ async function cloudFixture(page) {
 	);
 	await page.route('**/tools/api/draw/pages**', async (route) => {
 		const request = route.request();
-		const id = new URL(request.url()).pathname.split('/').at(-1);
+		const id = new URL(request.url()).pathname.split('/').at(-1) ?? '';
 		if (id === 'pages') {
 			return route.fulfill({
 				json: {
@@ -113,18 +127,18 @@ async function cloudFixture(page) {
 	return {
 		puts,
 		deletes,
-		scene: (id) => records.get(id)?.scene,
-		allowDelete: (allowed) => {
+		scene: (/** @type {string} */ id) => records.get(id)?.scene,
+		allowDelete: (/** @type {boolean} */ allowed) => {
 			deleteAllowed = allowed;
 		},
 		paidRequests: () => paidRequests
 	};
 }
 
-/** @param {import('@playwright/test').Page} page */
+/** @param {import('@playwright/test').Page} page @returns {Promise<DrawingScene>} */
 async function cachedScene(page) {
 	return page.evaluate(
-		(key) => JSON.parse(localStorage.getItem(key) ?? '{"elements":[]}'),
+		(key) => JSON.parse(localStorage.getItem(key) ?? '{"elements":[],"appState":{},"files":{}}'),
 		storageKey
 	);
 }
@@ -133,8 +147,9 @@ test('successful page deletion removes only its recovery journal, preserving oth
 	page
 }) => {
 	const cloud = await cloudFixture(page);
-	const oversizedScene = nativeScene('deleted-unsynced-shape');
-	oversizedScene.elements[0].customData = { localRecovery: 'x'.repeat(1_800_001) };
+	const oversizedScene = nativeScene('deleted-unsynced-shape', '#ffc9c9', {
+		localRecovery: 'x'.repeat(1_800_001)
+	});
 	const deleted = createDrawingPendingSave(storageKey, destinationId, oversizedScene);
 	const otherPage = createDrawingPendingSave(storageKey, otherPageId, nativeScene('keep-unsynced'));
 	const otherAccount = createDrawingPendingSave(
@@ -186,7 +201,10 @@ test('a failed destination cache write keeps the source page and native scene ac
 	await expect.poll(async () => (await cachedScene(page)).elements[0]?.id).toBe('source-shape');
 	await page.evaluate((key) => {
 		const setItem = Storage.prototype.setItem;
-		Storage.prototype.setItem = function (itemKey, value) {
+		Storage.prototype.setItem = function (
+			/** @type {string} */ itemKey,
+			/** @type {string} */ value
+		) {
 			if (this === localStorage && itemKey === key && value.includes('destination-shape')) {
 				document.documentElement.dataset.failedDrawingCacheWrite = 'true';
 				throw new DOMException('Test destination cache is full.', 'QuotaExceededError');
@@ -204,7 +222,7 @@ test('a failed destination cache write keeps the source page and native scene ac
 	);
 	expect(
 		await page.evaluate(
-			(key) => JSON.parse(localStorage.getItem(`${key}:pages`)).activePageId,
+			(key) => JSON.parse(localStorage.getItem(`${key}:pages`) ?? '{}').activePageId,
 			storageKey
 		)
 	).toBe(sourceId);

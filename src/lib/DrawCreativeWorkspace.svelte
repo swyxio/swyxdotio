@@ -2075,10 +2075,12 @@
 		border-top: 1px solid #ded7e8;
 		margin: 24px 0;
 	}
-	@media (max-width: 650px) {
+	@media (max-width: 650px), (pointer: coarse) {
 		.creative-workspace :is(input, textarea, select) {
 			font-size: 16px;
 		}
+	}
+	@media (max-width: 650px) {
 		.creative-workspace {
 			width: calc(100vw - 12px);
 			height: calc(100dvh - 12px);
