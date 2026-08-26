@@ -57,17 +57,28 @@ test('sponsorship replaces speaking navigation with sourced audience milestones 
 	assert.match(page, /<LetterSection id="sponsor" title="Sponsor my work"/);
 	assert.doesNotMatch(page, /Invite me to speak|href="#speaking"/);
 	for (const contact of ['sponsorships@ai.engineer', 'business@latent.space']) {
-		assert.ok(page.includes(`href="mailto:${contact}"`));
+		assert.ok(page.includes(`contact="${contact}"`));
 	}
 	for (const source of ['https://ai.engineer/about', 'https://www.latent.space/about']) {
-		assert.ok(page.includes(`href="${source}"`));
+		assert.ok(page.includes(`source="${source}"`));
 	}
-	assert.match(page, /15,000\+ in-person AI engineers/);
-	assert.match(page, /100,000\+ newsletter subscribers/);
-	assert.match(page, /10M\+ talk &amp; workshop views in 2025/);
-	assert.match(page, /200,000 subscribers/);
-	assert.match(page, /10M viewers across all channels/);
-	assert.match(page, /Top 30 for US Technology on Apple Podcasts/);
+	assert.match(page, /value: '15,000\+', label: 'In-person AI engineers'/);
+	assert.match(page, /value: '100,000\+', label: 'Newsletter subscribers'/);
+	assert.match(page, /value: '10M\+', label: 'Talk & workshop views in 2025'/);
+	assert.match(page, /value: '200,000\+', label: 'Subscribers across all channels'/);
+	assert.match(page, /value: '10M\+', label: 'Viewers across all channels'/);
+	assert.match(page, /US Technology on Apple Podcasts \(historical ranking\)/);
+	for (const logo of ['ai-engineer-logo.svg', 'latent-space-hex-gradient.png']) {
+		assert.ok(page.includes(`logo="/assets/${logo}"`));
+	}
+	const component = await read('src/lib/about/SponsorshipOption.svelte');
+	assert.match(component, /<dl aria-label=/);
+	assert.match(component, /<dt>\{stat.label\}<\/dt>/);
+	assert.match(component, /<dd>\{stat.value\}<\/dd>/);
+	assert.match(component, /href=\{`mailto:\$\{contact\}`\}/);
+	assert.match(component, /@media \(max-width: 600px\)/);
+	assert.match(component, /white-space: nowrap/);
+	assert.match(component, /grid-template-columns: 8rem minmax\(0, 1fr\)/);
 	assert.match(page, /Selected talks &amp; conversations/);
 	assert.match(page, /href="\/ai-eng-agents"/);
 });
