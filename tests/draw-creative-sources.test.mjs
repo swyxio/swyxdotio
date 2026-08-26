@@ -19,6 +19,11 @@ import {
 } from '../src/lib/server/draw-creative-sources.js';
 import { createToolsSession } from '../src/lib/server/tools-auth.js';
 import { createTestAiLedger } from './helpers/tools-ai-ledger.mjs';
+import {
+	referenceCatalog,
+	emptyFewShot,
+	fewShotPrompt
+} from '../src/lib/draw-creative-examples.js';
 
 const SECRET = 'creative-source-test-secret-never-production';
 const USER = { id: 'member-google-sub', email: 'member@example.com', name: 'Test Member' };
@@ -671,5 +676,475 @@ test('YouTube provider failures stay unavailable, never empty success or leaked 
 		const raw = await response.text();
 		assert.ok(!raw.includes('private-key'));
 		assert.equal(JSON.parse(raw).videos, undefined);
+	}
+});
+
+test('exact video URL or ID resolves official metadata without AI, discovery, media retrieval or persistence', async () => {
+	for (const input of [
+		VIDEO,
+		`https://youtu.be/${VIDEO}?si=private-share-token`,
+		`https://www.youtube.com/watch?v=${VIDEO}&t=30`
+	]) {
+		const calls = [];
+		const ledger = createTestAiLedger();
+		const response = await runCreativeSource(
+			await event({ action: 'video', video: input }, { youtubeKey: 'private-api-key', ledger }),
+			{
+				fetcher: async (url, options) => {
+					calls.push(new URL(url));
+					assert.equal(options.redirect, 'error');
+					return Response.json({
+						items: [
+							{
+								id: VIDEO,
+								snippet: {
+									title: 'Unlisted episode',
+									description: 'Exact supplied video description.',
+									channelId: CHANNEL,
+									channelTitle: 'Channel',
+									publishedAt: '2026-08-25T12:00:00Z',
+									thumbnails: { high: { url: `https://i.ytimg.com/vi/${VIDEO}/hqdefault.jpg` } }
+								},
+								contentDetails: { duration: 'PT1H2M3S' },
+								status: { privacyStatus: 'unlisted', uploadStatus: 'processed' },
+								privateField: 'provider-private'
+							}
+						]
+					});
+				}
+			}
+		);
+		assert.equal(response.status, 200);
+		const result = await response.json();
+		assert.deepEqual(result.video, {
+			id: VIDEO,
+			url: `https://www.youtube.com/watch?v=${VIDEO}`,
+			title: 'Unlisted episode',
+			description: 'Exact supplied video description.',
+			channelId: CHANNEL,
+			channelTitle: 'Channel',
+			publishedAt: '2026-08-25T12:00:00Z',
+			thumbnailUrl: `https://i.ytimg.com/vi/${VIDEO}/hqdefault.jpg`,
+			duration: 'PT1H2M3S',
+			privacyStatus: 'unlisted'
+		});
+		assert.equal(result.provenance, 'youtube-data-api');
+		assert.ok(Number.isFinite(Date.parse(result.retrievedAt)));
+		assert.deepEqual(result.warnings, []);
+		assert.equal(response.headers.get('cache-control'), 'private, no-store');
+		assert.equal(calls.length, 1);
+		assert.equal(
+			calls[0].origin + calls[0].pathname,
+			'https://www.googleapis.com/youtube/v3/videos'
+		);
+		assert.equal(calls[0].searchParams.get('id'), VIDEO);
+		assert.equal(calls[0].searchParams.get('part'), 'snippet,contentDetails,status');
+		assert.equal(calls[0].searchParams.has('maxResults'), false);
+		assert.deepEqual(ledger.calls, []);
+		for (const secret of [
+			'private-api-key',
+			'private-share-token',
+			'provider-private',
+			'uploadStatus'
+		])
+			assert.equal(JSON.stringify(result).includes(secret), false);
+	}
+});
+
+test('missing optional video metadata is omitted with honest warnings, never defaulted or inferred', async () => {
+	const response = await runCreativeSource(
+		await event({ action: 'video', video: VIDEO }, { youtubeKey: 'key' }),
+		{
+			fetcher: async () =>
+				Response.json({
+					items: [
+						{
+							id: VIDEO,
+							snippet: {
+								title: 'Title only',
+								thumbnails: { high: { url: 'https://evil.example/private-tracker' } }
+							},
+							contentDetails: { duration: 'unknown' }
+						}
+					]
+				})
+		}
+	);
+	assert.equal(response.status, 200);
+	const result = await response.json();
+	assert.deepEqual(result.video, {
+		id: VIDEO,
+		url: `https://www.youtube.com/watch?v=${VIDEO}`,
+		title: 'Title only'
+	});
+	assert.equal(result.warnings.length, 7);
+	assert.ok(result.warnings.some((warning) => warning.includes('Description')));
+	assert.ok(result.warnings.some((warning) => warning.includes('Duration')));
+	assert.ok(result.warnings.some((warning) => warning.includes('not inferred')));
+	assert.equal(JSON.stringify(result).includes('evil.example'), false);
+});
+
+test('video lookup rejects authentication/account/origin errors and unsafe inputs before the provider', async () => {
+	let calls = 0;
+	const fetcher = async () => {
+		calls++;
+		throw new Error('Must not reach provider');
+	};
+	const body = { action: 'video', video: VIDEO };
+	assert.equal(
+		(
+			await runCreativeSource(await event(body, { authenticated: false, youtubeKey: 'key' }), {
+				fetcher
+			})
+		).status,
+		401
+	);
+	assert.equal(
+		(
+			await runCreativeSource(
+				await event(body, { expectedUser: 'other-account', youtubeKey: 'key' }),
+				{ fetcher }
+			)
+		).status,
+		409
+	);
+	await assert.rejects(
+		() =>
+			event(body, { origin: 'https://evil.example', youtubeKey: 'key' }).then((request) =>
+				runCreativeSource(request, { fetcher })
+			),
+		(error) => error.status === 403
+	);
+	for (const video of [
+		'https://evil.example/watch?v=' + VIDEO,
+		'https://youtube.com.evil.example/watch?v=' + VIDEO,
+		'http://youtube.com/watch?v=' + VIDEO,
+		'https://user:secret@youtube.com/watch?v=' + VIDEO,
+		'https://youtube.com:8443/watch?v=' + VIDEO,
+		'https://youtube.com/@LatentSpace',
+		VIDEO + ',aaaaaaaaaaa',
+		'../secret',
+		'',
+		null
+	]) {
+		assert.equal(
+			(
+				await runCreativeSource(await event({ action: 'video', video }, { youtubeKey: 'key' }), {
+					fetcher
+				})
+			).status,
+			422
+		);
+	}
+	assert.equal(
+		(
+			await runCreativeSource(
+				await event({ ...body, userId: 'other-account' }, { youtubeKey: 'key' }),
+				{ fetcher }
+			)
+		).status,
+		422
+	);
+	assert.equal(calls, 0);
+});
+
+test('configured video lookup unavailable items and provider failures do not leak sources or keys', async () => {
+	const body = { action: 'video', video: VIDEO };
+	for (const [provider, status, code] of [
+		[async () => Response.json({ items: [] }), 404, 'video_unavailable'],
+		[
+			async () =>
+				Response.json({ items: [{ id: 'aaaaaaaaaaa', snippet: { title: 'Wrong video' } }] }),
+			502,
+			'invalid_video_metadata'
+		],
+		[
+			async () => Response.json({ items: [{ id: VIDEO, snippet: { title: '' } }] }),
+			502,
+			'invalid_video_metadata'
+		],
+		[async () => Response.json({ items: {} }), 502, 'invalid_video_metadata'],
+		[
+			async () => new Response('private-api-key private-source', { status: 403 }),
+			503,
+			'youtube_unavailable'
+		],
+		[
+			async () => {
+				throw new Error('private-api-key private-source');
+			},
+			503,
+			'youtube_unavailable'
+		],
+		[async () => new Response('x'.repeat(1_000_001)), 503, 'youtube_unavailable']
+	]) {
+		const response = await runCreativeSource(await event(body, { youtubeKey: 'private-api-key' }), {
+			fetcher: provider
+		});
+		assert.equal(response.status, status);
+		const result = await response.json();
+		assert.equal(result.code, code);
+		assert.equal(result.video, undefined);
+		assert.equal(JSON.stringify(result).includes('private-api-key'), false);
+		assert.equal(JSON.stringify(result).includes('private-source'), false);
+		assert.equal(JSON.stringify(result).includes(VIDEO), false);
+	}
+});
+
+const oembedResult = () => ({
+	type: 'video',
+	provider_name: 'YouTube',
+	provider_url: 'https://www.youtube.com/',
+	title: 'Prepublish episode',
+	author_name: 'Latent Space',
+	author_url: 'https://www.youtube.com/@LatentSpace',
+	thumbnail_url: `https://i.ytimg.com/vi/${VIDEO}/hqdefault.jpg`,
+	html: '<iframe src="https://private.example/never-load"></iframe>',
+	description: 'Not an oEmbed field',
+	duration: 'PT10M',
+	privacyStatus: 'unlisted'
+});
+
+test('no-key video lookup uses fixed official oEmbed and returns explicitly limited metadata', async () => {
+	const calls = [];
+	const ledger = createTestAiLedger();
+	const response = await runCreativeSource(
+		await event(
+			{ action: 'video', video: `https://youtu.be/${VIDEO}?si=private-token` },
+			{ ledger }
+		),
+		{
+			fetcher: async (url, options) => {
+				calls.push(new URL(url));
+				assert.equal(options.redirect, 'error');
+				assert.ok(options.signal instanceof AbortSignal);
+				return Response.json(oembedResult());
+			}
+		}
+	);
+	assert.equal(response.status, 200);
+	const result = await response.json();
+	assert.deepEqual(result.video, {
+		id: VIDEO,
+		url: `https://www.youtube.com/watch?v=${VIDEO}`,
+		title: 'Prepublish episode',
+		channelTitle: 'Latent Space',
+		thumbnailUrl: `https://i.ytimg.com/vi/${VIDEO}/hqdefault.jpg`
+	});
+	assert.equal(result.provenance, 'youtube-oembed');
+	assert.deepEqual(result.warnings, [
+		'Only title/channel/thumbnail available; description, duration and privacy were not retrieved.'
+	]);
+	assert.equal(response.headers.get('cache-control'), 'private, no-store');
+	assert.equal(calls.length, 1);
+	assert.equal(calls[0].origin + calls[0].pathname, 'https://www.youtube.com/oembed');
+	assert.equal(calls[0].searchParams.get('format'), 'json');
+	assert.equal(calls[0].searchParams.get('url'), `https://www.youtube.com/watch?v=${VIDEO}`);
+	assert.equal(calls[0].searchParams.has('key'), false);
+	assert.equal(JSON.stringify(result).includes('private.example'), false);
+	assert.equal(JSON.stringify(result).includes('private-token'), false);
+	assert.deepEqual(ledger.calls, []);
+});
+
+test('oEmbed does not follow redirects, expose private failures, accept unsafe identity URLs or unbounded bodies', async () => {
+	for (const [provider, expected] of [
+		[() => new Response('private-details', { status: 401 }), 404],
+		[() => new Response('private-details', { status: 403 }), 404],
+		[() => new Response('private-details', { status: 404 }), 404],
+		[
+			() => new Response(null, { status: 302, headers: { Location: 'https://private.example' } }),
+			503
+		],
+		[() => new Response('x'.repeat(64_001)), 503],
+		[
+			() =>
+				Response.json({
+					...oembedResult(),
+					author_url: 'https://youtube.com.evil.example/@author'
+				}),
+			502
+		],
+		[() => Response.json({ ...oembedResult(), provider_url: 'https://private.example' }), 502],
+		[() => Response.json({ ...oembedResult(), title: '' }), 502],
+		[
+			() => {
+				throw new Error('private-details');
+			},
+			503
+		]
+	]) {
+		let calls = 0;
+		const response = await runCreativeSource(await event({ action: 'video', video: VIDEO }), {
+			fetcher: async (_url, options) => {
+				calls++;
+				assert.equal(options.redirect, 'error');
+				return provider();
+			}
+		});
+		assert.equal(response.status, expected);
+		const raw = await response.text();
+		assert.equal(raw.includes('private-details'), false);
+		assert.equal(raw.includes('private.example'), false);
+		assert.equal(raw.includes(VIDEO), false);
+		assert.equal(calls, 1);
+	}
+	const badThumbnail = await runCreativeSource(await event({ action: 'video', video: VIDEO }), {
+		fetcher: async () =>
+			Response.json({ ...oembedResult(), thumbnail_url: 'https://i.ytimg.com:8443/private-image' })
+	});
+	const result = await badThumbnail.json();
+	assert.equal(result.video.thumbnailUrl, undefined);
+	assert.ok(result.warnings.includes('Thumbnail is unavailable.'));
+});
+
+test('a configured Data API denial never triggers oEmbed or hides authorization errors', async () => {
+	let calls = 0;
+	const response = await runCreativeSource(
+		await event({ action: 'video', video: VIDEO }, { youtubeKey: 'configured-key' }),
+		{
+			fetcher: async (url) => {
+				calls++;
+				assert.equal(new URL(url).hostname, 'www.googleapis.com');
+				return new Response('restricted', { status: 403 });
+			}
+		}
+	);
+	assert.equal(response.status, 503);
+	assert.equal((await response.json()).code, 'youtube_unavailable');
+	assert.equal(calls, 1);
+});
+
+test('title generation receives exact selected few-shot text separately from source evidence and metadata-only usage', async () => {
+	const example = referenceCatalog.examples.find((item) => item.thumbnailText);
+	const visualOnly = referenceCatalog.examples.find((item) => item.id !== example.id);
+	const fewShot = {
+		...emptyFewShot(),
+		examples: [
+			{ id: example.id, fields: ['title', 'hook'], note: 'Use the tension, not the facts.' },
+			{ id: visualOnly.id, fields: ['visual'] }
+		]
+	};
+	const source = parseCreativeTranscript(SOURCE);
+	const evidence = validateCreativeQuotes(
+		quoteOutput().response.quotes,
+		source,
+		chunkCreativeTranscript(source)
+	);
+	const ledger = createTestAiLedger();
+	let captured;
+	const response = await runCreativeSource(
+		await event(
+			{ action: 'titles', sourceText: SOURCE, evidence, fewShot },
+			{
+				ledger,
+				ai: {
+					run: async (_, input) => {
+						captured = input;
+						return {
+							response: {
+								titles: [
+									{
+										title: 'Reliable agents need checkpoints',
+										hook: 'Inspect Every Step',
+										evidenceIds: [evidence[0].id]
+									}
+								]
+							}
+						};
+					}
+				}
+			}
+		)
+	);
+	assert.equal(response.status, 200);
+	const payload = JSON.parse(captured.messages[1].content);
+	assert.equal(payload.styleExamples, fewShotPrompt(fewShot, ['title', 'hook']));
+	assert.ok(payload.styleExamples.includes(example.title));
+	assert.ok(payload.styleExamples.includes(example.thumbnailText));
+	assert.equal(payload.styleExamples.includes(visualOnly.title), false);
+	assert.deepEqual(payload.evidence, evidence);
+	assert.match(captured.messages[0].content, /Do not cite examples as evidence/);
+	assert.equal(JSON.stringify(captured).includes(example.thumbnailUrl), false);
+	assert.equal(/data:image|image_url/.test(JSON.stringify(captured)), false);
+	assert.equal(JSON.stringify(ledger.calls).includes(example.title), false);
+	assert.equal(JSON.stringify(ledger.calls).includes('Use the tension'), false);
+});
+
+test('example IDs cannot replace source evidence IDs in model-generated titles', async () => {
+	const example = referenceCatalog.examples[0];
+	const source = parseCreativeTranscript(SOURCE);
+	const evidence = validateCreativeQuotes(
+		quoteOutput().response.quotes,
+		source,
+		chunkCreativeTranscript(source)
+	);
+	const ledger = createTestAiLedger();
+	const response = await runCreativeSource(
+		await event(
+			{
+				action: 'titles',
+				sourceText: SOURCE,
+				evidence,
+				fewShot: { ...emptyFewShot(), examples: [{ id: example.id, fields: ['title'] }] }
+			},
+			{
+				ledger,
+				ai: {
+					run: async () => ({
+						response: {
+							titles: [
+								{
+									title: 'Unsupported borrowed title',
+									hook: 'Not Source Evidence',
+									evidenceIds: [example.id]
+								}
+							]
+						}
+					})
+				}
+			}
+		)
+	);
+	assert.equal(response.status, 502);
+	assert.equal((await response.json()).titles, undefined);
+	assert.equal(ledger.calls.at(-1).body.status, 'failed');
+});
+
+test('unavailable, stale and excessive few-shot selections are rejected before quota admission or AI', async () => {
+	const source = parseCreativeTranscript(SOURCE);
+	const evidence = validateCreativeQuotes(
+		quoteOutput().response.quotes,
+		source,
+		chunkCreativeTranscript(source)
+	);
+	for (const fewShot of [
+		{ ...emptyFewShot(), examples: [{ id: 'missing-example', fields: ['title'] }] },
+		{ ...emptyFewShot(), catalogVersion: 'stale-catalog' },
+		{
+			...emptyFewShot(),
+			examples: referenceCatalog.examples
+				.slice(0, 7)
+				.map((example) => ({ id: example.id, fields: ['title'] }))
+		}
+	]) {
+		const ledger = createTestAiLedger();
+		let runs = 0;
+		const response = await runCreativeSource(
+			await event(
+				{ action: 'titles', sourceText: SOURCE, evidence, fewShot },
+				{
+					ledger,
+					ai: {
+						run: async () => {
+							runs++;
+							assert.fail('Invalid selection reached provider');
+						}
+					}
+				}
+			)
+		);
+		assert.equal(response.status, 422);
+		assert.deepEqual(ledger.calls, []);
+		assert.equal(runs, 0);
 	}
 });

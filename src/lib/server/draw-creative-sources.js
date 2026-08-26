@@ -2,6 +2,7 @@ import { getToolsUser } from './tools-auth.js';
 import { privateJson, requireSameOrigin } from '../podcast-admin-route.js';
 import { reserveToolsAiUsage, finishToolsAiUsage } from './tools-ai-usage.js';
 import { TOOLS_AI_POLICY } from '../tools-ai-policy.js';
+import { fewShotPrompt } from '../draw-creative-examples.js';
 import { validateCreativeAsset } from './draw-creative-store.js';
 import { readCreativeBody } from '../../../workers/draw/creative-library.js';
 import {
@@ -126,7 +127,7 @@ function validateTitles(output, evidence) {
 
 /**
  * Fixed YouTube endpoint and allowlisted params only; never fetch a user-supplied URL.
- * @param {string} key @param {'channels'|'playlistItems'} path @param {Record<string,string>} params @param {typeof fetch} fetcher
+ * @param {string} key @param {'channels'|'playlistItems'|'videos'} path @param {Record<string,string>} params @param {typeof fetch} fetcher
  */
 async function youtubeRequest(key, path, params, fetcher) {
 	const url = new URL(`https://www.googleapis.com/youtube/v3/${path}`);
@@ -145,11 +146,11 @@ async function youtubeRequest(key, path, params, fetcher) {
 					error:
 						response.status === 403 || response.status === 429
 							? 'YouTube access or quota is unavailable. Saved references are unchanged.'
-							: 'YouTube could not return this public resource. Saved references are unchanged.'
+							: 'YouTube could not return this resource. Saved references are unchanged.'
 				},
 				{ status: response.status === 404 ? 404 : 503 }
 			);
-		return await response.json();
+		return JSON.parse(new TextDecoder().decode(await readCreativeBody(response, 1_000_000)));
 	} catch {
 		return privateJson(
 			{
@@ -159,6 +160,208 @@ async function youtubeRequest(key, path, params, fetcher) {
 			{ status: 503 }
 		);
 	}
+}
+
+/**
+ * No-key metadata path on YouTube's registered oEmbed endpoint (https://oembed.com/providers.json).
+ * Never follow returned HTML/author URLs or use this path after a configured Data API failure.
+ * @param {{videoId:string,url:string}} source @param {typeof fetch} fetcher
+ */
+async function videoOEmbed(source, fetcher) {
+	const url = new URL('https://www.youtube.com/oembed');
+	url.searchParams.set('format', 'json');
+	url.searchParams.set('url', source.url);
+	let result;
+	try {
+		const response = await fetcher(url, {
+			redirect: 'error',
+			signal: AbortSignal.timeout(15_000),
+			headers: { Accept: 'application/json' }
+		});
+		if ([401, 403, 404].includes(response.status))
+			return privateJson(
+				{
+					code: 'video_unavailable',
+					error:
+						'This video is unavailable through YouTube oEmbed. The link may be inaccessible or embedding disabled. Add metadata manually; no captions or video were retrieved.'
+				},
+				{ status: 404 }
+			);
+		if (!response.ok) throw new Error('Metadata unavailable');
+		result = JSON.parse(new TextDecoder().decode(await readCreativeBody(response, 64_000)));
+	} catch {
+		return privateJson(
+			{
+				code: 'youtube_unavailable',
+				error:
+					'YouTube limited metadata could not be retrieved. Add metadata manually; nothing was saved.'
+			},
+			{ status: 503 }
+		);
+	}
+	/** @param {unknown} value */
+	const youtubeUrl = (value) => {
+		if (typeof value !== 'string' || value.length > 1000) return false;
+		try {
+			const valueUrl = new URL(value);
+			return (
+				valueUrl.protocol === 'https:' &&
+				['www.youtube.com', 'youtube.com'].includes(valueUrl.hostname) &&
+				!valueUrl.username &&
+				!valueUrl.password &&
+				!valueUrl.port
+			);
+		} catch {
+			return false;
+		}
+	};
+	if (
+		result?.type !== 'video' ||
+		result?.provider_name !== 'YouTube' ||
+		!youtubeUrl(result?.provider_url) ||
+		typeof result?.title !== 'string' ||
+		!result.title.trim() ||
+		result.title.length > 1000 ||
+		(result.author_url !== undefined && !youtubeUrl(result.author_url))
+	)
+		return privateJson(
+			{
+				code: 'invalid_video_metadata',
+				error: 'YouTube returned invalid limited video metadata. Nothing was saved.'
+			},
+			{ status: 502 }
+		);
+	/** @type {{id:string,url:string,title:string,channelTitle?:string,thumbnailUrl?:string}} */
+	const video = { id: source.videoId, url: source.url, title: result.title };
+	const warnings = [
+		'Only title/channel/thumbnail available; description, duration and privacy were not retrieved.'
+	];
+	if (
+		typeof result.author_name === 'string' &&
+		result.author_name.trim() &&
+		result.author_name.length <= 1000
+	)
+		video.channelTitle = result.author_name;
+	else warnings.push('Channel name is unavailable.');
+	const thumbnail = thumbnailUrl({ high: { url: result.thumbnail_url } });
+	if (thumbnail) video.thumbnailUrl = thumbnail;
+	else warnings.push('Thumbnail is unavailable.');
+	return privateJson({
+		video,
+		provenance: 'youtube-oembed',
+		retrievedAt: new Date().toISOString(),
+		warnings
+	});
+}
+
+/**
+ * Exact-ID metadata lookup, including an unlisted link when the API makes it accessible.
+ * No channel discovery, captions, downloads, persistence, OAuth, or AI submission.
+ * @param {any} event @param {any} body @param {typeof fetch} fetcher
+ */
+async function videoLookup(event, body, fetcher) {
+	let source;
+	try {
+		if (!exactKeys(body, ['action', 'video']) || typeof body.video !== 'string')
+			throw new Error('Provide one exact YouTube video URL or video ID.');
+		const value = body.video.trim();
+		source = normalizeYouTubeVideo(
+			/^[A-Za-z0-9_-]{11}$/.test(value) ? `https://www.youtube.com/watch?v=${value}` : value
+		);
+	} catch {
+		return privateJson(
+			{
+				code: 'invalid_video',
+				error: 'Provide one valid HTTPS YouTube video URL or 11-character video ID.'
+			},
+			{ status: 422 }
+		);
+	}
+	const key = event.platform?.env?.YOUTUBE_API_KEY;
+	if (typeof key !== 'string' || !key.trim()) return videoOEmbed(source, fetcher);
+	const result = await youtubeRequest(
+		key,
+		'videos',
+		{
+			part: 'snippet,contentDetails,status',
+			id: source.videoId,
+			fields:
+				'items(id,snippet(title,description,channelId,channelTitle,thumbnails,publishedAt),contentDetails(duration),status(privacyStatus))'
+		},
+		fetcher
+	);
+	if (result instanceof Response) return result;
+	if (!Array.isArray(result?.items) || result.items.length > 1)
+		return privateJson(
+			{
+				code: 'invalid_video_metadata',
+				error: 'YouTube returned invalid video metadata. Nothing was saved.'
+			},
+			{ status: 502 }
+		);
+	const item = result.items[0];
+	if (!item)
+		return privateJson(
+			{
+				code: 'video_unavailable',
+				error:
+					'This video is unavailable to the metadata lookup. Check the exact link and its visibility; no captions or video were retrieved.'
+			},
+			{ status: 404 }
+		);
+	if (
+		item.id !== source.videoId ||
+		typeof item.snippet?.title !== 'string' ||
+		!item.snippet.title.trim() ||
+		item.snippet.title.length > 1000
+	)
+		return privateJson(
+			{
+				code: 'invalid_video_metadata',
+				error: 'YouTube did not return valid metadata for the requested video. Nothing was saved.'
+			},
+			{ status: 502 }
+		);
+	/** @type {{id:string,url:string,title:string,description?:string,channelId?:string,channelTitle?:string,thumbnailUrl?:string,duration?:string,publishedAt?:string,privacyStatus?:string}} */
+	const video = { id: source.videoId, url: source.url, title: item.snippet.title };
+	const warnings = [];
+	if (typeof item.snippet.description === 'string' && item.snippet.description.length <= 20000)
+		video.description = item.snippet.description;
+	else warnings.push('Description is unavailable.');
+	if (typeof item.snippet.channelId === 'string' && CHANNEL_ID.test(item.snippet.channelId))
+		video.channelId = item.snippet.channelId;
+	else warnings.push('Channel ID is unavailable.');
+	if (typeof item.snippet.channelTitle === 'string' && item.snippet.channelTitle.length <= 1000)
+		video.channelTitle = item.snippet.channelTitle;
+	else warnings.push('Channel name is unavailable.');
+	const thumbnail = thumbnailUrl(item.snippet.thumbnails);
+	if (thumbnail) video.thumbnailUrl = thumbnail;
+	else warnings.push('Thumbnail is unavailable.');
+	const duration = item.contentDetails?.duration;
+	if (
+		typeof duration === 'string' &&
+		duration.length <= 80 &&
+		/^P(?=\d|T\d)(?:\d+D)?(?:T(?=\d)(?:\d+H)?(?:\d+M)?(?:\d+(?:\.\d+)?S)?)?$/.test(duration)
+	)
+		video.duration = duration;
+	else warnings.push('Duration is unavailable.');
+	const publishedAt = item.snippet.publishedAt;
+	if (
+		typeof publishedAt === 'string' &&
+		/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/.test(publishedAt) &&
+		Number.isFinite(Date.parse(publishedAt))
+	)
+		video.publishedAt = publishedAt;
+	else warnings.push('Publication date is unavailable.');
+	if (['public', 'unlisted', 'private'].includes(item.status?.privacyStatus))
+		video.privacyStatus = item.status.privacyStatus;
+	else warnings.push('Privacy status is unavailable; visibility was not inferred.');
+	return privateJson({
+		video,
+		provenance: 'youtube-data-api',
+		retrievedAt: new Date().toISOString(),
+		warnings
+	});
 }
 
 /** Explicit image retrieval, never a generic URL proxy or a library write. @param {any} body @param {typeof fetch} fetcher */
@@ -201,6 +404,7 @@ function thumbnailUrl(thumbnails) {
 		return url.protocol === 'https:' &&
 			!url.username &&
 			!url.password &&
+			!url.port &&
 			(url.hostname === 'i.ytimg.com' ||
 				url.hostname === 'yt3.ggpht.com' ||
 				url.hostname === 'yt3.googleusercontent.com')
@@ -391,18 +595,20 @@ export async function runCreativeSource(event, { fetcher = fetch } = {}) {
 	if (
 		!body ||
 		typeof body !== 'object' ||
-		!['analyze', 'titles', 'channel', 'videos', 'thumbnail'].includes(body.action)
+		!['analyze', 'titles', 'channel', 'videos', 'video', 'thumbnail'].includes(body.action)
 	)
 		return privateJson(
-			{ error: 'Choose analyze, titles, channel, videos or thumbnail.' },
+			{ error: 'Choose analyze, titles, channel, videos, video or thumbnail.' },
 			{ status: 422 }
 		);
 	if (body.action === 'thumbnail') return referenceThumbnail(body, fetcher);
+	if (body.action === 'video') return videoLookup(event, body, fetcher);
 	if (body.action === 'channel' || body.action === 'videos')
 		return channelLookup(event, body, fetcher);
 	let source, chunks, chunk, sourceUrl;
 	/** @type {import('../draw-creative-sources.js').CreativeQuote[]} */
 	let evidence = [];
+	let examples = '';
 	try {
 		if (body.sourceUrl) sourceUrl = normalizeYouTubeVideo(body.sourceUrl).url;
 		if ((typeof body.sourceText !== 'string' || !body.sourceText.trim()) && sourceUrl)
@@ -427,6 +633,7 @@ export async function runCreativeSource(event, { fetcher = fetch } = {}) {
 				throw new Error('Choose a valid transcript chunk.');
 			chunk = chunks[body.chunkIndex];
 		} else {
+			examples = fewShotPrompt(body.fewShot, ['title', 'hook']);
 			evidence = validateCreativeQuotes(body.evidence, source, chunks);
 			if (!evidence.length)
 				throw new Error('Select exact transcript quotations before drafting titles.');
@@ -462,10 +669,10 @@ export async function runCreativeSource(event, { fetcher = fetch } = {}) {
 	try {
 		const payload = chunk
 			? { segments: chunk.segments.map(({ id, text }) => ({ id, text })), hints: body.hints ?? '' }
-			: { evidence, hints: body.hints ?? '' };
+			: { evidence, hints: body.hints ?? '', styleExamples: examples };
 		const instruction = chunk
 			? 'Extract zero to six short, useful quotations from the supplied segments. Copy exact contiguous text within one segment. Return its segmentId and text only. Do not combine sentences across segments. Empty quotes is correct if no useful quotation exists.'
-			: 'Draft four to eight diverse accurate episode titles and complementary 2–6 word thumbnail hooks from the selected evidence only. Each title must cite one to six supplied evidenceIds. Titles and hooks are generated editorial suggestions, not verbatim quotations. Do not add claims not supported by the cited evidence. Avoid quotation marks unless the quoted wording is exact.';
+			: 'Draft four to eight diverse accurate episode titles and complementary 2–6 word thumbnail hooks from the selected evidence only. Each title must cite one to six supplied evidenceIds. Titles and hooks are generated editorial suggestions, not verbatim quotations. Do not add claims not supported by the cited evidence. Avoid quotation marks unless the quoted wording is exact. styleExamples are few-shot demonstrations of wording and structure, never facts, guest identities, numbers or quotations for the new episode. Do not cite examples as evidence. Their reference images are not attached.';
 		const result = await ai.run(CREATIVE_SOURCE_MODEL, {
 			messages: [
 				{ role: 'system', content: `${SYSTEM}\n${instruction}` },
