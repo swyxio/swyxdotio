@@ -1,21 +1,29 @@
 <script>
 	import SocialMeta from '../../components/SocialMeta.svelte';
 	import { getPageSocialMeta } from '$lib/social-meta';
-	import { filterPortfolio, formatValuation, formatValuationDate } from '$lib/portfolio';
+	import {
+		PORTFOLIO_TIERS,
+		filterPortfolio,
+		formatValuation,
+		formatPortfolioValuation,
+		formatValuationDate
+	} from '$lib/portfolio';
 
 	/** @type {{ companies: import('$lib/portfolio').PortfolioCompany[], reviewedAt: string }} */
 	export let data;
 	const social = getPageSocialMeta('portfolio');
 	let query = '';
 	let category = '';
+	let tier = '';
 	let status = '';
 	let sort = '';
 	$: categories = [...new Set(data.companies.map((company) => company.category))].sort();
-	$: companies = filterPortfolio(data.companies, { query, category, status, sort });
-	$: hasFilters = Boolean(query || category || status || sort);
+	$: companies = filterPortfolio(data.companies, { query, category, tier, status, sort });
+	$: hasFilters = Boolean(query || category || tier || status || sort);
 	function resetFilters() {
 		query = '';
 		category = '';
+		tier = '';
 		status = '';
 		sort = '';
 	}
@@ -63,6 +71,13 @@
 				</select>
 			</label>
 			<label>
+				<span>Original tier</span>
+				<select bind:value={tier}>
+					<option value="">All tiers</option>
+					{#each PORTFOLIO_TIERS as option}<option value={option}>{option}</option>{/each}
+				</select>
+			</label>
+			<label>
 				<span>Status</span>
 				<select bind:value={status}>
 					<option value="">All entries</option>
@@ -102,6 +117,7 @@
 					<th role="columnheader" scope="col">Company / person</th>
 					<th role="columnheader" scope="col">What they do</th>
 					<th role="columnheader" scope="col">Category</th>
+					<th role="columnheader" scope="col">Status / tier</th>
 					<th role="columnheader" scope="col" class="valuation-column">Last public valuation</th>
 				</tr>
 			</thead>
@@ -137,13 +153,6 @@
 											>{company.name}</a
 										>
 									{:else}<span class="company-name">{company.name}</span>{/if}
-									{#if company.acquirer}<span class="company-status"
-											>Exited → {company.acquirer}</span
-										>
-									{:else if company.status === 'closed'}<span class="company-status">Closed</span>
-									{:else if company.status === 'individual'}<span class="company-status"
-											>Individual backing</span
-										>{/if}
 								</div>
 							</div>
 						</th>
@@ -159,6 +168,14 @@
 						<td role="cell" class="category-cell"
 							><span class="category-label">{company.category}</span></td
 						>
+						<td role="cell" class="tier-cell">
+							<span class="tier-label">{company.tier}</span>
+							{#if company.acquirer}<span class="company-status">Exited → {company.acquirer}</span>
+							{:else if company.status === 'closed'}<span class="company-status">Closed</span>
+							{:else if company.status === 'individual'}<span class="company-status"
+									>Individual backing</span
+								>{/if}
+						</td>
 						<td role="cell" class="valuation-cell">
 							<span class="mobile-label" aria-hidden="true">Last public valuation</span>
 							{#if company.valuation}
@@ -166,9 +183,9 @@
 									class="valuation-value"
 									href={company.valuation.sourceUrl}
 									title={company.valuation.sourceTitle}
-									aria-label={`${company.name}: ${company.valuation.prefix ?? ''}${formatValuation(company.valuation.amountUsd)}. ${company.valuation.sourceTitle}`}
+									aria-label={`${company.name}: ${formatPortfolioValuation(company.valuation)}. ${company.valuation.sourceTitle}`}
 								>
-									{company.valuation.prefix ?? ''}{formatValuation(company.valuation.amountUsd)}
+									{formatPortfolioValuation(company.valuation)}
 									<span aria-hidden="true">↗</span>
 								</a>
 								<time datetime={company.valuation.date}
@@ -178,8 +195,29 @@
 								{#if company.valuation.qualifier}<small>{company.valuation.qualifier}</small>{/if}
 							{:else}
 								<span class="unavailable"
-									>{company.status === 'individual' ? 'Not applicable' : 'Not available'}</span
+									>{company.status === 'individual'
+										? 'Not applicable'
+										: 'No public figure found'}</span
 								>
+								{#if company.funding}
+									<a
+										class="funding-link"
+										href={company.funding.sourceUrl}
+										title={company.funding.sourceTitle}
+									>
+										{#if company.funding.amountUsd !== null}
+											{formatValuation(company.funding.amountUsd)}
+											{company.funding.kind === 'total' ? 'total raised' : 'raised'} ↗
+										{:else}Funding announced ↗{/if}
+									</a>
+									<small
+										>{company.funding.stage} ·
+										<time datetime={company.funding.date}
+											>{company.funding.dateLabel ??
+												formatValuationDate(company.funding.date)}</time
+										></small
+									>
+								{/if}
 							{/if}
 						</td>
 					</tr>
@@ -197,10 +235,12 @@
 			</div>
 		{/if}
 		<p id="valuation-note" class="valuation-note">
-			Valuations are the latest public figures I could verify, in USD, with dates and sources—not
-			the value of my holdings or the amount raised. “Not available” means no public valuation was
-			verified. Figures may be out of date; acquisition prices are not treated as funding
-			valuations. Initials stand in where a public logo isn’t available.
+			Valuations are dated public company marks in USD, not the value of my holdings. Filing-derived
+			estimates are labeled; older rounds stay dated and may not reflect today’s value. Where no
+			valuation was found, a linked funding round is shown when available—“raised” is funding, not
+			valuation. Acquisition prices are not treated as funding valuations. Tiers preserve my
+			original groups, not a financial ranking. Initials stand in where a public logo isn’t
+			available.
 		</p>
 	</section>
 
@@ -229,6 +269,7 @@
 
 <style>
 	.portfolio-page {
+		--site-max-width: 1160px;
 		margin-block: 2.5rem 4rem;
 	}
 	.portfolio-intro {
@@ -277,7 +318,7 @@
 	}
 	.portfolio-controls {
 		display: grid;
-		grid-template-columns: minmax(200px, 1fr) 180px 140px 175px;
+		grid-template-columns: minmax(200px, 1fr) 170px 175px 130px 175px;
 		gap: 0.75rem;
 	}
 	.portfolio-controls label {
@@ -350,16 +391,19 @@
 		border-block: 1px solid var(--page-border);
 	}
 	thead th:nth-child(1) {
-		width: 24%;
+		width: 22%;
 	}
 	thead th:nth-child(2) {
-		width: 37%;
+		width: 30%;
 	}
 	thead th:nth-child(3) {
-		width: 20%;
+		width: 15%;
 	}
 	thead th:nth-child(4) {
-		width: 19%;
+		width: 16%;
+	}
+	thead th:nth-child(5) {
+		width: 17%;
 	}
 	tbody tr {
 		border-bottom: 1px solid var(--page-border);
@@ -419,6 +463,20 @@
 		font-size: 0.7rem;
 		line-height: 1.4;
 		margin-top: 0.25rem;
+	}
+	.tier-label {
+		display: inline-block;
+		color: var(--page-gold);
+		font-size: 0.75rem;
+		font-weight: 600;
+	}
+	.funding-link {
+		display: block;
+		margin-top: 0.35rem;
+		font-size: 0.75rem;
+	}
+	.valuation-cell small time {
+		display: inline;
 	}
 	.description-cell {
 		line-height: 1.6;
@@ -509,9 +567,12 @@
 		font-size: 0.85rem;
 		line-height: 1.7;
 	}
-	@media (max-width: 850px) {
+	@media (max-width: 980px) {
 		.portfolio-controls {
 			grid-template-columns: 1fr 1fr;
+		}
+		.search-field {
+			grid-column: 1 / -1;
 		}
 		.portfolio-notes {
 			gap: 1.5rem;
@@ -535,9 +596,6 @@
 			font-size: 1rem;
 		}
 		.search-field {
-			grid-column: 1 / -1;
-		}
-		.portfolio-controls label:last-child {
 			grid-column: 1 / -1;
 		}
 		.review-date {
@@ -581,7 +639,16 @@
 			margin-block: 0.8rem;
 		}
 		.category-cell {
+			grid-area: 3 / 1;
 			padding-top: 0.15rem;
+		}
+		.tier-cell {
+			grid-area: 4 / 1;
+			padding-top: 0.5rem;
+		}
+		.valuation-cell {
+			grid-area: 3 / 2 / 5 / 3;
+			max-width: 10rem;
 		}
 		.mobile-label {
 			display: block;

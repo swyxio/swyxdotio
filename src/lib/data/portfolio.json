@@ -15,7 +15,8 @@
 			"sourceTitle": "Temporal raises $300M Series D",
 			"qualifier": "Reported valuation"
 		},
-		"relatedUrl": "/why-temporal"
+		"relatedUrl": "/why-temporal",
+		"tier": "Well known names"
 	},
 	{
 		"id": "cognition",
@@ -33,7 +34,8 @@
 			"sourceTitle": "Cognition: More Devins in More Places",
 			"qualifier": "Post-money"
 		},
-		"relatedUrl": "/cognition"
+		"relatedUrl": "/cognition",
+		"tier": "Well known names"
 	},
 	{
 		"id": "supabase",
@@ -50,7 +52,8 @@
 			"sourceUrl": "https://www.prnewswire.com/news-releases/supabase-raises-500m-at-10-5b-to-accelerate-lead-in-agentic-infrastructure-302791787.html",
 			"sourceTitle": "Supabase raises $500M at $10.5B",
 			"qualifier": "Post-money"
-		}
+		},
+		"tier": "Well known names"
 	},
 	{
 		"id": "railway",
@@ -61,7 +64,25 @@
 		"status": "current",
 		"logo": "/portfolio/railway.png",
 		"logoSource": "https://railway.com/apple-touch-icon.png",
-		"valuation": null
+		"valuation": {
+			"amountUsd": 409010000,
+			"date": "2026-01-22",
+			"stage": "Series B",
+			"kind": "filing-derived",
+			"prefix": "≈",
+			"qualifier": "Filing-derived estimate",
+			"sourceUrl": "https://forgeglobal.com/railway_stock/",
+			"sourceTitle": "Forge: Railway funding rounds and valuation"
+		},
+		"tier": "Well known names",
+		"funding": {
+			"amountUsd": 100000000,
+			"date": "2026-01-22",
+			"stage": "Series B",
+			"kind": "round",
+			"sourceUrl": "https://blog.railway.com/p/series-b",
+			"sourceTitle": "Railway raises $100M Series B"
+		}
 	},
 	{
 		"id": "workos",
@@ -78,7 +99,8 @@
 			"sourceUrl": "https://workos.com/blog/series-c",
 			"sourceTitle": "WorkOS raises $100M Series C, hits $2B valuation",
 			"qualifier": "Reported valuation"
-		}
+		},
+		"tier": "Well known names"
 	},
 	{
 		"id": "matx",
@@ -97,7 +119,8 @@
 			"qualifier": "Series A · newer mark undisclosed",
 			"prefix": ">"
 		},
-		"relatedUrl": "https://www.youtube.com/watch?v=qvrdCpLPbuQ"
+		"relatedUrl": "https://www.youtube.com/watch?v=qvrdCpLPbuQ",
+		"tier": "Well known names"
 	},
 	{
 		"id": "artificial-analysis",
@@ -109,7 +132,17 @@
 		"logo": "/portfolio/artificial-analysis.ico",
 		"logoSource": "https://artificialanalysis.ai/favicon.ico",
 		"valuation": null,
-		"note": "“Gartner of AI”"
+		"note": "“Gartner of AI”",
+		"tier": "Well known names",
+		"funding": {
+			"amountUsd": null,
+			"date": "2026-01-08",
+			"stage": "Seed · amount undisclosed",
+			"kind": "round",
+			"dateLabel": "Reported Jan 2026",
+			"sourceUrl": "https://www.latent.space/p/artificialanalysis",
+			"sourceTitle": "Latent Space: Artificial Analysis"
+		}
 	},
 	{
 		"id": "browserbase",
@@ -127,7 +160,8 @@
 			"sourceTitle": "Browserbase raises $40M at a $300M valuation",
 			"qualifier": "Series B"
 		},
-		"relatedUrl": "https://www.latent.space/p/browserbase"
+		"relatedUrl": "https://www.latent.space/p/browserbase",
+		"tier": "Well known names"
 	},
 	{
 		"id": "fireworks",
@@ -144,7 +178,8 @@
 			"sourceUrl": "https://fireworks.ai/blog/series-d-announcement",
 			"sourceTitle": "Fireworks announces Series D",
 			"qualifier": "Reported valuation"
-		}
+		},
+		"tier": "Well known names"
 	},
 	{
 		"id": "e2b",
@@ -155,7 +190,24 @@
 		"status": "current",
 		"logo": "/portfolio/e2b.png",
 		"logoSource": "https://cdn.prod.website-files.com/6717bb6618f6a40d53ac2929/6a2a7d8468a4388e03a622aa_Favicon_512x512.png",
-		"valuation": null
+		"valuation": {
+			"amountUsd": 106000000,
+			"date": "2025-07-28",
+			"stage": "Series A",
+			"kind": "reported",
+			"qualifier": "Reported by PostRound",
+			"sourceUrl": "https://postround.substack.com/p/series-a-activity-week-of-july-28",
+			"sourceTitle": "Aaron Harris: Series A activity, week of July 28, 2025"
+		},
+		"tier": "Well known names",
+		"funding": {
+			"amountUsd": 21000000,
+			"date": "2025-07-28",
+			"stage": "Series A",
+			"kind": "round",
+			"sourceUrl": "https://changelog.e2b.dev/blog/series-a",
+			"sourceTitle": "E2B: We raised $21M to give Fortune 100 cloud for AI agents"
+		}
 	},
 	{
 		"id": "daytona",
@@ -173,7 +225,8 @@
 			"sourceTitle": "Datadog and Figma back Daytona",
 			"qualifier": "Post-money · newer mark undisclosed"
 		},
-		"note": "Sandboxes for agents… I know, I know."
+		"note": "Sandboxes for agents… I know, I know.",
+		"tier": "Well known names"
 	},
 	{
 		"id": "resend",
@@ -184,7 +237,24 @@
 		"status": "current",
 		"logo": "/portfolio/resend.png",
 		"logoSource": "https://resend.com/static/favicons/favicon-marketing@57x57.png?v=1",
-		"valuation": null
+		"valuation": {
+			"amountUsd": 25000000,
+			"date": "2023-04-20",
+			"stage": "Angel",
+			"kind": "database-reported",
+			"qualifier": "Angel · database-reported",
+			"sourceUrl": "https://www.cbinsights.com/company/resend/financials",
+			"sourceTitle": "CB Insights: Resend financials"
+		},
+		"tier": "Well known names",
+		"funding": {
+			"amountUsd": 18000000,
+			"date": "2024-12-04",
+			"stage": "Series A",
+			"kind": "round",
+			"sourceUrl": "https://resend.com/blog/series-a",
+			"sourceTitle": "Resend raises $18M Series A"
+		}
 	},
 	{
 		"id": "modal",
@@ -201,7 +271,8 @@
 			"sourceUrl": "https://modal.com/blog/modal-series-c",
 			"sourceTitle": "Modal's $355M Series C at a $4.65B valuation",
 			"qualifier": "Post-money"
-		}
+		},
+		"tier": "Well known names"
 	},
 	{
 		"id": "conductor",
@@ -213,7 +284,16 @@
 		"logo": "/portfolio/conductor.png",
 		"logoSource": "https://www.conductor.build/apple-icon.png?apple-icon.7d575655.png",
 		"valuation": null,
-		"relatedUrl": "https://x.com/charlieholtz/status/2039027121901957349"
+		"relatedUrl": "https://x.com/charlieholtz/status/2039027121901957349",
+		"tier": "Well known names",
+		"funding": {
+			"amountUsd": 22000000,
+			"date": "2026-03-30",
+			"stage": "Series A",
+			"kind": "round",
+			"sourceUrl": "https://www.conductor.build/blog/series-a",
+			"sourceTitle": "Conductor’s Series A"
+		}
 	},
 	{
 		"id": "chroma",
@@ -224,8 +304,16 @@
 		"status": "current",
 		"logo": "/portfolio/chroma.png",
 		"logoSource": "https://www.trychroma.com/img/favicon.ico",
-		"valuation": null,
-		"relatedUrl": "https://www.latent.space/p/chroma"
+		"valuation": {
+			"amountUsd": 75000000,
+			"date": "2023-04-06",
+			"sourceUrl": "https://www.cbinsights.com/company/chroma-6/financials",
+			"sourceTitle": "CB Insights: Chroma April 2023 valuation",
+			"qualifier": "Seed · database-reported",
+			"kind": "reported"
+		},
+		"relatedUrl": "https://www.latent.space/p/chroma",
+		"tier": "Well known names"
 	},
 	{
 		"id": "restate",
@@ -236,7 +324,16 @@
 		"status": "current",
 		"logo": "/portfolio/restate.ico",
 		"logoSource": "https://restate.dev/favicon.ico",
-		"valuation": null
+		"valuation": null,
+		"tier": "Well known names",
+		"funding": {
+			"amountUsd": 7000000,
+			"date": "2024-06-10",
+			"stage": "Seed",
+			"kind": "round",
+			"sourceUrl": "https://restate.dev/blog/announcing-restate-1.0-restate-cloud-and-our-seed-funding-round",
+			"sourceTitle": "Announcing Restate 1.0, Restate Cloud, and our seed funding round"
+		}
 	},
 	{
 		"id": "logan-kilpatrick",
@@ -247,7 +344,8 @@
 		"status": "individual",
 		"logo": null,
 		"logoSource": null,
-		"valuation": null
+		"valuation": null,
+		"tier": "Well known names"
 	},
 	{
 		"id": "matthew-berman",
@@ -258,7 +356,8 @@
 		"status": "individual",
 		"logo": null,
 		"logoSource": null,
-		"valuation": null
+		"valuation": null,
+		"tier": "Well known names"
 	},
 	{
 		"id": "datalab",
@@ -269,7 +368,16 @@
 		"status": "current",
 		"logo": "/portfolio/datalab.svg",
 		"logoSource": "https://www.datalab.to/images/datalab-icon.svg",
-		"valuation": null
+		"valuation": null,
+		"tier": "You should know",
+		"funding": {
+			"amountUsd": 3500000,
+			"date": "2025-06-17",
+			"stage": "Seed",
+			"kind": "round",
+			"sourceUrl": "https://www.forkable.io/p/datalab-develops-small-ai-models",
+			"sourceTitle": "Paul Sawers: Datalab develops small AI models to power document intelligence in the enterprise"
+		}
 	},
 	{
 		"id": "viktor",
@@ -287,7 +395,8 @@
 			"sourceTitle": "Forbes Polska profile of Viktor",
 			"qualifier": "Reported valuation",
 			"dateLabel": "May 2026 · reported Jul 2026"
-		}
+		},
+		"tier": "You should know"
 	},
 	{
 		"id": "brightwave",
@@ -298,7 +407,16 @@
 		"status": "current",
 		"logo": "/portfolio/brightwave.svg",
 		"logoSource": "https://www.brightwave.io/favicon.svg",
-		"valuation": null
+		"valuation": null,
+		"tier": "You should know",
+		"funding": {
+			"amountUsd": 15000000,
+			"date": "2024-10-29",
+			"stage": "Series A",
+			"kind": "round",
+			"sourceUrl": "https://markets.financialcontent.com/stocks/article/bizwire-2024-10-29-brightwave-secures-15m-series-a-to-scale-ai-powered-financial-research-platform",
+			"sourceTitle": "Brightwave secures $15M Series A to scale AI-powered financial research platform"
+		}
 	},
 	{
 		"id": "quadratic",
@@ -309,7 +427,16 @@
 		"status": "current",
 		"logo": "/portfolio/quadratic.png",
 		"logoSource": "https://www.quadratichq.com/apple-icon.png?3f818aa4b7854e48",
-		"valuation": null
+		"valuation": null,
+		"tier": "You should know",
+		"funding": {
+			"amountUsd": 5600000,
+			"date": "2024-04-02",
+			"stage": "Seed",
+			"kind": "round",
+			"sourceUrl": "https://www.quadratichq.com/blog/announcing-our-seed-round-funding-and-quadratic-teams",
+			"sourceTitle": "Announcing our $5.6M seed round and Quadratic Teams"
+		}
 	},
 	{
 		"id": "flutterflow",
@@ -327,7 +454,8 @@
 			"sourceTitle": "FlutterFlow raises Series A",
 			"qualifier": "Reported valuation",
 			"prefix": "≈"
-		}
+		},
+		"tier": "You should know"
 	},
 	{
 		"id": "circle",
@@ -345,7 +473,8 @@
 			"sourceTitle": "The Split: Circle CEO Sid Yadav interview",
 			"qualifier": "Reported valuation",
 			"dateLabel": "2023 · reported Jan 2024"
-		}
+		},
+		"tier": "You should know"
 	},
 	{
 		"id": "airbyte",
@@ -362,7 +491,8 @@
 			"sourceUrl": "https://airbyte.com/blog/a-150m-series-b-to-power-the-movement-of-data",
 			"sourceTitle": "Airbyte raises $150M Series B",
 			"qualifier": "Reported valuation"
-		}
+		},
+		"tier": "You should know"
 	},
 	{
 		"id": "sphere",
@@ -373,7 +503,16 @@
 		"status": "current",
 		"logo": null,
 		"logoSource": null,
-		"valuation": null
+		"valuation": null,
+		"tier": "You should know",
+		"funding": {
+			"amountUsd": 12500000,
+			"date": "2025-09-22",
+			"stage": "Financing",
+			"kind": "round",
+			"sourceUrl": "https://www.constructcap.com/articles/investing-in-sphere-semi-reinventing-analog-chip-design-for-the-ai-era",
+			"sourceTitle": "Investing in Sphere Semi: Reinventing Analog Chip Design for the AI Era"
+		}
 	},
 	{
 		"id": "val-town",
@@ -384,7 +523,16 @@
 		"status": "current",
 		"logo": "/portfolio/val-town.svg",
 		"logoSource": "https://www.val.town/favicon.svg?dot=false",
-		"valuation": null
+		"valuation": null,
+		"tier": "You should know",
+		"funding": {
+			"amountUsd": 5500000,
+			"date": "2024-04-09",
+			"stage": "Seed",
+			"kind": "round",
+			"sourceUrl": "https://blog.val.town/blog/seed/",
+			"sourceTitle": "Val Town’s seed round"
+		}
 	},
 	{
 		"id": "stackblitz",
@@ -401,7 +549,8 @@
 			"sourceUrl": "https://research.contrary.com/company/bolt",
 			"sourceTitle": "Contrary Research: Bolt business breakdown",
 			"qualifier": "Post-money; January 2025 Series B"
-		}
+		},
+		"tier": "You should know"
 	},
 	{
 		"id": "preference-model",
@@ -412,7 +561,8 @@
 		"status": "current",
 		"logo": "/portfolio/preference-model.ico",
 		"logoSource": "https://preferencemodel.com/favicon.ico?favicon.1d4fa6c9.ico",
-		"valuation": null
+		"valuation": null,
+		"tier": "Smaller names"
 	},
 	{
 		"id": "littlebird",
@@ -423,7 +573,16 @@
 		"status": "current",
 		"logo": "/portfolio/littlebird.png",
 		"logoSource": "https://cdn.prod.website-files.com/694043d273dceabab479f631/6a55a1a906eabfade48dce1e_69603245cff328dc64a18f61_Base%20Icon%20%5BDO%20NOT%20EDIT%5D%206.png",
-		"valuation": null
+		"valuation": null,
+		"tier": "Smaller names",
+		"funding": {
+			"amountUsd": 11000000,
+			"date": "2026-03-22",
+			"stage": "Seed",
+			"kind": "round",
+			"sourceUrl": "https://littlebird.ai/blog/littlebird-raises-11m-to-build-the-first-full-context-ai",
+			"sourceTitle": "Littlebird raises $11M to build the first full-context AI"
+		}
 	},
 	{
 		"id": "clarify",
@@ -434,7 +593,16 @@
 		"status": "current",
 		"logo": "/portfolio/clarify.png",
 		"logoSource": "https://www.clarify.ai/_next/static/media/favicon.0mmn2nasvvrs8.png",
-		"valuation": null
+		"valuation": null,
+		"tier": "Smaller names",
+		"funding": {
+			"amountUsd": 15000000,
+			"date": "2025-06-25",
+			"stage": "Series A · newer round undisclosed",
+			"kind": "round",
+			"sourceUrl": "https://www.cbinsights.com/company/clarify-4/financials",
+			"sourceTitle": "CB Insights: Clarify financials"
+		}
 	},
 	{
 		"id": "phonic",
@@ -445,7 +613,16 @@
 		"status": "current",
 		"logo": "/portfolio/phonic.svg",
 		"logoSource": "https://phonic.ai/icon.svg?icon.0rsnuu632fkn7.svg",
-		"valuation": null
+		"valuation": null,
+		"tier": "Smaller names",
+		"funding": {
+			"amountUsd": 4000000,
+			"date": "2025-04-03",
+			"stage": "Seed",
+			"kind": "round",
+			"sourceUrl": "https://www.prnewswire.com/news-releases/phonic-launches-end-to-end-speech-to-speech-platform-for-building-reliable-voice-agents-announces-4m-funding-raise-302419143.html",
+			"sourceTitle": "Phonic launches speech-to-speech platform and announces $4M funding"
+		}
 	},
 	{
 		"id": "keycard",
@@ -456,7 +633,16 @@
 		"status": "current",
 		"logo": "/portfolio/keycard.svg",
 		"logoSource": "https://www.keycard.ai/favicon.svg",
-		"valuation": null
+		"valuation": null,
+		"tier": "Smaller names",
+		"funding": {
+			"amountUsd": 30000000,
+			"date": "2025-10-21",
+			"stage": "Series A",
+			"kind": "round",
+			"sourceUrl": "https://boldstart.vc/news/keycard-solving-the-ai-agent-identity-and-access-problem-welcome-to-boldstart/",
+			"sourceTitle": "Keycard: Solving the AI agent identity and access problem"
+		}
 	},
 	{
 		"id": "confident-security",
@@ -467,7 +653,16 @@
 		"status": "current",
 		"logo": "/portfolio/confident-security.svg",
 		"logoSource": "https://confident.security/favicon.svg",
-		"valuation": null
+		"valuation": null,
+		"tier": "Smaller names",
+		"funding": {
+			"amountUsd": 4200000,
+			"date": "2025-07-17",
+			"stage": "Seed",
+			"kind": "round",
+			"sourceUrl": "https://techcrunch.com/2025/07/17/confident-security-the-signal-for-ai-comes-out-of-stealth-with-4-2m/",
+			"sourceTitle": "Confident Security, the Signal for AI, comes out of stealth with $4.2M"
+		}
 	},
 	{
 		"id": "lightweight-labs",
@@ -478,7 +673,8 @@
 		"status": "current",
 		"logo": "/portfolio/lightweight-labs.png",
 		"logoSource": "https://instabooks.io/img/apple-touch-icon.png",
-		"valuation": null
+		"valuation": null,
+		"tier": "Smaller names"
 	},
 	{
 		"id": "wordware",
@@ -489,7 +685,16 @@
 		"status": "current",
 		"logo": "/portfolio/wordware.png",
 		"logoSource": "https://www.wordware.ai/Wordware%20Favicon.png",
-		"valuation": null
+		"valuation": null,
+		"tier": "Smaller names",
+		"funding": {
+			"amountUsd": 30000000,
+			"date": "2024-11-25",
+			"stage": "Seed",
+			"kind": "round",
+			"sourceUrl": "https://blog.wordware.ai/seed-round",
+			"sourceTitle": "Wordware raises $30M seed round"
+		}
 	},
 	{
 		"id": "polyhive",
@@ -500,7 +705,8 @@
 		"status": "current",
 		"logo": null,
 		"logoSource": null,
-		"valuation": null
+		"valuation": null,
+		"tier": "Smaller names"
 	},
 	{
 		"id": "sailplane",
@@ -511,7 +717,8 @@
 		"status": "current",
 		"logo": "/portfolio/sailplane.png",
 		"logoSource": "https://www.sailplane.ai/apple-icon.png?2aa3577447c0af88",
-		"valuation": null
+		"valuation": null,
+		"tier": "Smaller names"
 	},
 	{
 		"id": "morph",
@@ -522,7 +729,8 @@
 		"status": "current",
 		"logo": "/portfolio/morph.png",
 		"logoSource": "https://www.morph.so/logo.png",
-		"valuation": null
+		"valuation": null,
+		"tier": "Smaller names"
 	},
 	{
 		"id": "fireproof",
@@ -533,7 +741,16 @@
 		"status": "current",
 		"logo": "/portfolio/fireproof.ico",
 		"logoSource": "https://fireproof.storage/favicon.ico",
-		"valuation": null
+		"valuation": null,
+		"tier": "Smaller names",
+		"funding": {
+			"amountUsd": 1710000,
+			"date": "2024-07-31",
+			"stage": "Pre-seed",
+			"kind": "round",
+			"sourceUrl": "https://www.cbinsights.com/company/fireproof-storage",
+			"sourceTitle": "Fireproof Storage — CBInsights"
+		}
 	},
 	{
 		"id": "arcjet",
@@ -544,7 +761,16 @@
 		"status": "current",
 		"logo": "/portfolio/arcjet.png",
 		"logoSource": "https://arcjet.com/favicon.png",
-		"valuation": null
+		"valuation": null,
+		"tier": "Smaller names",
+		"funding": {
+			"amountUsd": 8300000,
+			"date": "2025-10-08",
+			"stage": "Series A",
+			"kind": "round",
+			"sourceUrl": "https://blog.arcjet.com/introducing-arcjets-local-ai-security-model-announcing-series-a-funding/",
+			"sourceTitle": "Introducing Arcjet's local AI security model + announcing Series A funding"
+		}
 	},
 	{
 		"id": "cosine",
@@ -555,7 +781,24 @@
 		"status": "current",
 		"logo": "/portfolio/cosine.png",
 		"logoSource": "https://cosine.sh/manifest/apple-touch-icon-57x57.png",
-		"valuation": null
+		"valuation": {
+			"amountUsd": 15000000,
+			"date": "2023-04",
+			"dateLabel": "Apr 2023",
+			"kind": "database-reported",
+			"qualifier": "Seed · database-reported",
+			"sourceUrl": "https://www.cbinsights.com/company/buildt/financials",
+			"sourceTitle": "Cosine Stock Price, Funding, Valuation — CBInsights"
+		},
+		"tier": "Smaller names",
+		"funding": {
+			"amountUsd": 8000000,
+			"date": "2026-06-08",
+			"stage": "Total funding disclosed",
+			"kind": "total",
+			"sourceUrl": "https://pathfounders.com/p/cosine-ai-recruits-corporate-heavyweights-to-build-sovereign",
+			"sourceTitle": "Cosine AI recruits corporate heavyweights to build sovereign UK frontier AI model"
+		}
 	},
 	{
 		"id": "responsive",
@@ -566,7 +809,8 @@
 		"status": "current",
 		"logo": "/portfolio/responsive.svg",
 		"logoSource": "https://www.responsive.dev/favicon.svg",
-		"valuation": null
+		"valuation": null,
+		"tier": "Smaller names"
 	},
 	{
 		"id": "budibase",
@@ -577,7 +821,16 @@
 		"status": "current",
 		"logo": "/portfolio/budibase.png",
 		"logoSource": "https://budibase.com/apple-touch-icon.png",
-		"valuation": null
+		"valuation": null,
+		"tier": "Smaller names",
+		"funding": {
+			"amountUsd": 7000000,
+			"date": "2022-11-04",
+			"stage": "Seed II",
+			"kind": "round",
+			"sourceUrl": "https://budibase.com/blog/updates/budibase-raises-7m-to-help-every-company-on-the-planet-build-their-own-tools/",
+			"sourceTitle": "Budibase raises $7M to help every company build their own tools"
+		}
 	},
 	{
 		"id": "100ms",
@@ -588,7 +841,16 @@
 		"status": "current",
 		"logo": "/portfolio/100ms.png",
 		"logoSource": "https://www.100ms.live/favicons/apple-touch-icon.png",
-		"valuation": null
+		"valuation": null,
+		"tier": "Smaller names",
+		"funding": {
+			"amountUsd": 20000000,
+			"date": "2022-03-10",
+			"stage": "Series A",
+			"kind": "round",
+			"sourceUrl": "https://techcrunch.com/2022/03/10/100ms-secures-20m-to-power-next-generation-of-live-video-apps/",
+			"sourceTitle": "100ms secures $20M to power live video apps"
+		}
 	},
 	{
 		"id": "expand",
@@ -599,7 +861,8 @@
 		"status": "current",
 		"logo": "/portfolio/expand.ico",
 		"logoSource": "https://expand.ai/favicon.ico",
-		"valuation": null
+		"valuation": null,
+		"tier": "Smaller names"
 	},
 	{
 		"id": "catamaran",
@@ -610,7 +873,8 @@
 		"status": "current",
 		"logo": null,
 		"logoSource": null,
-		"valuation": null
+		"valuation": null,
+		"tier": "Smaller names"
 	},
 	{
 		"id": "replay",
@@ -622,7 +886,16 @@
 		"logo": "/portfolio/replay.ico",
 		"logoSource": "https://www.replay.io/favicon.ico",
 		"valuation": null,
-		"note": "Still alive!"
+		"note": "Still alive!",
+		"tier": "Smaller names",
+		"funding": {
+			"amountUsd": 13000000,
+			"date": "2023-06-13",
+			"stage": "Series A",
+			"kind": "round",
+			"sourceUrl": "https://www.replay.io/blog/replay-for-test-suites",
+			"sourceTitle": "Replay for Test Suites: $13M Series A announcement"
+		}
 	},
 	{
 		"id": "astral",
@@ -634,7 +907,16 @@
 		"logo": "/portfolio/astral.png",
 		"logoSource": "https://astral.sh/static/apple-touch-icon.png",
 		"valuation": null,
-		"acquirer": "OpenAI"
+		"acquirer": "OpenAI",
+		"tier": "Done",
+		"funding": {
+			"amountUsd": 4000000,
+			"date": "2023-04-18",
+			"stage": "Seed; later rounds undisclosed",
+			"kind": "round",
+			"sourceUrl": "https://astral.sh/blog/announcing-astral-the-company-behind-ruff",
+			"sourceTitle": "Announcing Astral, the company behind Ruff"
+		}
 	},
 	{
 		"id": "promptfoo",
@@ -653,7 +935,8 @@
 			"qualifier": "Post-money · before exit",
 			"prefix": "≈"
 		},
-		"acquirer": "OpenAI"
+		"acquirer": "OpenAI",
+		"tier": "Done"
 	},
 	{
 		"id": "gabber",
@@ -665,7 +948,8 @@
 		"logo": "/portfolio/gabber.png",
 		"logoSource": "https://gabber.dev/favicon.ico",
 		"valuation": null,
-		"acquirer": "LiveKit"
+		"acquirer": "LiveKit",
+		"tier": "Done"
 	},
 	{
 		"id": "codegen",
@@ -683,7 +967,8 @@
 			"sourceTitle": "Codegen raises new cash to automate software engineering tasks",
 			"qualifier": "Post-money · before exit"
 		},
-		"acquirer": "ClickUp"
+		"acquirer": "ClickUp",
+		"tier": "Done"
 	},
 	{
 		"id": "brev",
@@ -694,8 +979,17 @@
 		"status": "exited",
 		"logo": "/portfolio/brev.ico",
 		"logoSource": "https://brev.nvidia.com/favicon.ico",
-		"valuation": null,
-		"acquirer": "NVIDIA"
+		"valuation": {
+			"amountUsd": 8500000,
+			"maxAmountUsd": 10000000,
+			"date": "2021-08-24",
+			"kind": "database-reported",
+			"qualifier": "Database range · before exit",
+			"sourceUrl": "https://www.cbinsights.com/company/brevdev/financials",
+			"sourceTitle": "Brev Stock Price, Funding, Valuation — CBInsights"
+		},
+		"acquirer": "NVIDIA",
+		"tier": "Done"
 	},
 	{
 		"id": "gel",
@@ -707,7 +1001,16 @@
 		"logo": "/portfolio/gel.png",
 		"logoSource": "https://www.geldata.com/apple-touch-icon.png",
 		"valuation": null,
-		"acquirer": "Vercel"
+		"acquirer": "Vercel",
+		"tier": "Done",
+		"funding": {
+			"amountUsd": 15000000,
+			"date": "2022-11-07",
+			"stage": "Series A",
+			"kind": "round",
+			"sourceUrl": "https://www.prnewswire.com/news-releases/edgedb-raises-15m-series-a-round-to-bring-its-modernized-relational-database-for-cutting-edge-apps-to-the-cloud-301669752.html",
+			"sourceTitle": "EdgeDB Raises $15M Series A Round"
+		}
 	},
 	{
 		"id": "dynamic",
@@ -718,8 +1021,17 @@
 		"status": "exited",
 		"logo": "/portfolio/dynamic.jpg",
 		"logoSource": "https://cdn.prod.website-files.com/626692727bba3f384e008e8a/6939931f0bc7313794dc74c8_Webclip.jpg",
-		"valuation": null,
-		"acquirer": "Fireblocks"
+		"valuation": {
+			"amountUsd": 64300000,
+			"dateLabel": "Q4 2023 · reported Mar 2024",
+			"kind": "database-reported",
+			"qualifier": "Post-money · PitchBook",
+			"sourceUrl": "https://files.pitchbook.com/website/files/pdf/Q4_2023_Emerging_Tech_Indicator.pdf#page=22",
+			"sourceTitle": "PitchBook Q4 2023 Emerging Tech Indicator, page22",
+			"date": "2024-03-13"
+		},
+		"acquirer": "Fireblocks",
+		"tier": "Done"
 	},
 	{
 		"id": "begin",
@@ -731,7 +1043,8 @@
 		"logo": null,
 		"logoSource": null,
 		"valuation": null,
-		"relatedUrl": "https://www.sanity.io/blog/welcoming-the-begin-team-to-sanity"
+		"relatedUrl": "https://www.sanity.io/blog/welcoming-the-begin-team-to-sanity",
+		"tier": "Done"
 	},
 	{
 		"id": "dimension",
@@ -742,6 +1055,16 @@
 		"status": "closed",
 		"logo": null,
 		"logoSource": null,
-		"valuation": null
+		"valuation": null,
+		"tier": "Done",
+		"funding": {
+			"amountUsd": 350000,
+			"dateLabel": "Jan 2025 profile",
+			"date": "2025-01-01",
+			"stage": "Total disclosed funding",
+			"kind": "total",
+			"sourceUrl": "https://techcrunch.com/startup-battlefield/company/dimension/",
+			"sourceTitle": "Dimension — TechCrunch Startup Battlefield"
+		}
 	}
 ]
