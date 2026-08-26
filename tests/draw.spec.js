@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
 
 /** @typedef {{ isDeleted?: boolean, text?: string, roughness?: number }} DrawingElement */
 
@@ -247,6 +248,11 @@ for (const label of ['Two architectures', 'Agent / tool loop', 'Claim, evidence,
 		page.on('request', (request) => {
 			if (/\/draw\/(agent|fal)|huggingface\.co/.test(request.url())) inference.push(request.url());
 		});
+		// Exercise Excalidraw's browser-download path, not the OS-native save picker.
+		await page.addInitScript(() => {
+			Reflect.deleteProperty(window, 'showOpenFilePicker');
+			Reflect.deleteProperty(window, 'showSaveFilePicker');
+		});
 		await page.goto('/draw');
 		await openDrawingTemplates(page, 'Presets');
 		await page.getByRole('button', { name: `Insert ${label} preset`, exact: true }).click();
@@ -300,6 +306,31 @@ for (const label of ['Two architectures', 'Agent / tool loop', 'Claim, evidence,
 			contentType: 'application/json'
 		});
 		await testInfo.attach('figure', { body: await page.screenshot(), contentType: 'image/png' });
+		await page.getByTestId('main-menu-trigger').click();
+		await page.getByRole('button', { name: 'Export image...', exact: true }).click();
+		for (const format of ['PNG', 'SVG']) {
+			const downloadEvent = page.waitForEvent('download');
+			await page.getByRole('button', { name: `Export to ${format}`, exact: true }).click();
+			const download = await downloadEvent;
+			const path = testInfo.outputPath(`figure.${format.toLowerCase()}`);
+			await download.saveAs(path);
+			const bytes = await readFile(path);
+			if (format === 'PNG') {
+				expect(bytes.subarray(1, 4).toString()).toBe('PNG');
+				expect(bytes.readUInt32BE(16)).toBeGreaterThan(900);
+				expect(bytes.readUInt32BE(20)).toBeGreaterThan(400);
+			} else {
+				expect(bytes.toString()).toContain('<svg');
+				for (const element of inserted.elements.filter((element) => element.type === 'text')) {
+					for (const line of element.text.split('\n')) expect(bytes.toString()).toContain(line);
+				}
+			}
+			await testInfo.attach(`export-${format.toLowerCase()}`, {
+				path,
+				contentType: format === 'PNG' ? 'image/png' : 'image/svg+xml'
+			});
+		}
+		expect(inference).toEqual([]);
 	});
 }
 
