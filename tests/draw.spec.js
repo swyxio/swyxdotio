@@ -144,7 +144,7 @@ test('visual presets insert labeled editable diagrams without replacing existing
 	await openDrawingTemplates(page, 'Presets');
 
 	const presetOptions = page.getByRole('button', { name: /^insert .+ preset$/i });
-	await expect(presetOptions).toHaveCount(9);
+	await expect(presetOptions).toHaveCount(12);
 
 	await page.getByRole('button', { name: /insert priority quadrants preset/i }).click();
 	await expect
@@ -202,6 +202,67 @@ test('visual presets insert labeled editable diagrams without replacing existing
 		)
 		.toBe(true);
 });
+
+for (const label of ['Two architectures', 'Agent / tool loop', 'Claim, evidence, objection']) {
+	test(`${label} starter inserts bound editable shapes with one native undo and no inference`, async ({
+		page
+	}, testInfo) => {
+		/** @type {string[]} */
+		const inference = [];
+		page.on('request', (request) => {
+			if (/\/draw\/(agent|fal)|huggingface\.co/.test(request.url())) inference.push(request.url());
+		});
+		await page.goto('/draw');
+		await openDrawingTemplates(page, 'Presets');
+		await page.getByRole('button', { name: `Insert ${label} preset`, exact: true }).click();
+		/** @returns {Promise<{ elements: any[] }>} */
+		const getScene = () =>
+			page.evaluate(() => JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}'));
+		await expect.poll(async () => (await getScene()).elements.length).toBeGreaterThan(8);
+		const inserted = await getScene();
+		const clippedLabels = await page.evaluate((elements) => {
+			const measure = document.createElement('canvas').getContext('2d');
+			return elements
+				.filter((element) => {
+					if (element.type !== 'text' || !measure) return false;
+					measure.font = `${element.fontSize}px Excalifont`;
+					return element.text
+						.split('\n')
+						.some(
+							(/** @type {string} */ line) => measure.measureText(line).width > element.width + 2
+						);
+				})
+				.map((element) => element.text);
+		}, inserted.elements);
+		expect(clippedLabels).toEqual([]);
+		const ids = new Set(inserted.elements.map((element) => element.id));
+		const arrows = inserted.elements.filter((element) => element.type === 'arrow');
+		expect(arrows.length).toBeGreaterThanOrEqual(3);
+		for (const edge of arrows) {
+			expect(ids.has(edge.startBinding?.elementId)).toBe(true);
+			expect(ids.has(edge.endBinding?.elementId)).toBe(true);
+			expect(edge.boundElements.some((/** @type {any} */ bound) => bound.type === 'text')).toBe(
+				true
+			);
+		}
+		await page.getByRole('button', { name: 'Undo', exact: true }).click();
+		await expect
+			.poll(async () => (await getScene()).elements.filter((element) => !element.isDeleted).length)
+			.toBe(0);
+		await page.getByRole('button', { name: 'Redo', exact: true }).click();
+		await expect
+			.poll(async () => (await getScene()).elements.filter((element) => !element.isDeleted).length)
+			.toBe(inserted.elements.length);
+		expect(inference).toEqual([]);
+		await page.getByRole('checkbox', { name: 'Library', exact: true }).uncheck({ force: true });
+		await page.mouse.click(900, 660);
+		await testInfo.attach('editable-scene', {
+			body: JSON.stringify(inserted),
+			contentType: 'application/json'
+		});
+		await testInfo.attach('figure', { body: await page.screenshot(), contentType: 'image/png' });
+	});
+}
 
 test('hand-drawn UI components are searchable, editable, and preserve existing drawings', async ({
 	page

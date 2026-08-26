@@ -6,6 +6,8 @@
 		MAX_DRAW_AGENT_TOOL_CALLS
 	} from '$lib/draw-agent-tools.js';
 	import { DRAW_AGENT_WORKFLOWS } from '$lib/draw-designs.js';
+	import { DRAW_THINKING_WORKFLOWS } from '$lib/draw-thinking.js';
+	const workflows = [...DRAW_THINKING_WORKFLOWS, ...DRAW_AGENT_WORKFLOWS];
 
 	/**
 	 * @typedef {{ role: 'user' | 'assistant' | 'step', content: string, createdAt: number }} AgentMessage
@@ -35,6 +37,7 @@
 	let spending = $state(0);
 	let spendingCap = $state(DEFAULT_DRAW_AGENT_BUDGET_USD);
 	let showWorkflowPicker = $state(false);
+	let pendingWorkflow = $state('');
 	/** @type {string | undefined} */
 	let budgetToken;
 	/** @type {{ x: number, y: number } | null} */
@@ -303,9 +306,23 @@
 
 	/** @param {string} task */
 	function useWorkflow(task) {
+		if (running) return;
+		if (prompt.trim() && prompt !== task) {
+			pendingWorkflow = task;
+			return;
+		}
 		prompt = task;
+		pendingWorkflow = '';
 		showWorkflowPicker = false;
 		void tick().then(() => composer?.focus());
+	}
+
+	/** Open a shared workflow without submitting it or overwriting an existing draft. */
+	export function prepareWorkflow(/** @type {string} */ id) {
+		const workflow = workflows.find((entry) => entry.id === id);
+		if (!workflow) return;
+		showAssistant();
+		useWorkflow(workflow.prompt);
 	}
 
 	/** @param {PointerEvent} event */
@@ -477,10 +494,11 @@
 			</div>
 			{#if showWorkflowPicker && messages.length}
 				<div class="workflow-picker" aria-label="Suggested design tasks">
-					{#each DRAW_AGENT_WORKFLOWS as workflow (workflow.id)}
+					{#each workflows as workflow (workflow.id)}
 						<button
 							type="button"
 							class="workflow-chip"
+							disabled={running}
 							aria-label="Try {workflow.label} workflow"
 							onclick={() => useWorkflow(workflow.prompt)}>{workflow.label}</button
 						>
@@ -496,10 +514,11 @@
 							images, and review the result.</span
 						>
 						<div class="assistant-workflows" aria-label="Suggested design tasks">
-							{#each DRAW_AGENT_WORKFLOWS as workflow (workflow.id)}
+							{#each workflows as workflow (workflow.id)}
 								<button
 									type="button"
 									class="workflow-chip"
+									disabled={running}
 									aria-label="Try {workflow.label} workflow"
 									onclick={() => useWorkflow(workflow.prompt)}>{workflow.label}</button
 								>
@@ -533,6 +552,20 @@
 				</div>
 			{/if}
 
+			{#if pendingWorkflow}
+				<div class="draft-choice" role="group" aria-label="Keep or replace assistant draft">
+					<span>You already have a draft.</span>
+					<button type="button" onclick={() => (pendingWorkflow = '')}>Keep draft</button>
+					<button
+						type="button"
+						onclick={() => {
+							prompt = pendingWorkflow;
+							pendingWorkflow = '';
+							void tick().then(() => composer?.focus());
+						}}>Use suggestion instead</button
+					>
+				</div>
+			{/if}
 			<form
 				class="assistant-composer"
 				onsubmit={(event) => {
@@ -584,6 +617,20 @@
 {/if}
 
 <style>
+	.draft-choice {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+		padding: 10px 14px;
+		font-size: 12px;
+		background: #fff8e6;
+	}
+	.draft-choice span {
+		width: 100%;
+	}
+	.draft-choice button {
+		min-height: 36px;
+	}
 	.assistant-launcher,
 	.assistant-window {
 		position: fixed;

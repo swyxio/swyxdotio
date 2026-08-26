@@ -160,7 +160,7 @@ test('authenticated assistant offers grounded Canva-style tasks and creates bran
 	});
 	await page.getByRole('button', { name: 'Open drawing assistant' }).click();
 	const assistant = page.getByRole('region', { name: 'Drawing assistant' });
-	await expect(assistant.getByRole('button', { name: /try .+ workflow/i })).toHaveCount(6);
+	await expect(assistant.getByRole('button', { name: /try .+ workflow/i })).toHaveCount(8);
 	await assistant.getByRole('button', { name: 'Try Podcast thumbnail workflow' }).click();
 	await expect(assistant.getByRole('textbox', { name: 'Message drawing assistant' })).toHaveValue(
 		/timestamp zone/
@@ -170,7 +170,7 @@ test('authenticated assistant offers grounded Canva-style tasks and creates bran
 		timeout: 20_000
 	});
 	await assistant.getByRole('button', { name: 'Browse assistant design workflows' }).click();
-	await expect(assistant.getByRole('button', { name: /try .+ workflow/i })).toHaveCount(6);
+	await expect(assistant.getByRole('button', { name: /try .+ workflow/i })).toHaveCount(8);
 	await assistant.getByRole('button', { name: 'Try Speaker announcement workflow' }).click();
 	await expect(assistant.getByRole('textbox', { name: 'Message drawing assistant' })).toHaveValue(
 		/1080 × 1350/

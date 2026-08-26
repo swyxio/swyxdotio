@@ -102,6 +102,12 @@ test('drawing assistant sends only the visible viewport to the selected vision m
 	assert.equal(response.status, 200);
 	assert.equal(calls[0][0], DRAW_AGENT_MODEL);
 	assert.equal(calls[0][1].tools[0].function.name, 'canvas_bash');
+	const systemPrompt = calls[0][1].messages[0].content;
+	assert.match(systemPrompt, /https:\/\/swyx.io\/why-temporal/);
+	assert.match(systemPrompt, /For explanatory diagrams and essay figures/);
+	assert.match(systemPrompt, /Mark missing evidence as unknown/);
+	assert.match(systemPrompt, /modify only the copies/);
+	assert.match(systemPrompt, /For thumbnail, speaker announcement, article launch banner/);
 	assert.equal(calls[0][1].messages.at(-1).content[1].image_url.url, SCREENSHOT);
 	const raw = await response.text();
 	const body = JSON.parse(raw);

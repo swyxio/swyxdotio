@@ -24,6 +24,7 @@
 		getDrawingDesignTemplate
 	} from '$lib/draw-designs.js';
 	import DrawAgent from '$lib/DrawAgent.svelte';
+	import { DRAW_THINKING_WORKFLOWS } from '$lib/draw-thinking.js';
 	import DrawImageToolbox from '$lib/DrawImageToolbox.svelte';
 
 	const STORAGE_KEY = 'swyx-excalidraw';
@@ -52,6 +53,8 @@
 	let canvas;
 	/** @type {import('@excalidraw/excalidraw/types').ExcalidrawImperativeAPI | null} */
 	let editor = $state.raw(null);
+	/** @type {{ prepareWorkflow: (id: string) => void } | undefined} */
+	let drawingAssistant = $state();
 	/** @type {typeof import('@excalidraw/excalidraw').convertToExcalidrawElements | null} */
 	let convertElements = null;
 	/** @type {typeof import('@excalidraw/excalidraw').newElementWith | null} */
@@ -290,6 +293,14 @@
 		];
 
 		commands.push(
+			...DRAW_THINKING_WORKFLOWS.map((workflow) => ({
+				id: `workflow-${workflow.id}`,
+				label: workflow.label,
+				description: workflow.description,
+				category: 'Assistant',
+				keywords: ['essay', 'argument', 'diagram', 'writing', 'thinking'],
+				run: () => prepareThinkingWorkflow(workflow.id)
+			})),
 			...DRAW_DESIGN_TEMPLATES.map((design) => ({
 				id: `design-${design.id}`,
 				label: design.label,
@@ -322,7 +333,9 @@
 				description: preset.description,
 				category: 'Presets',
 				keywords: ['framework', 'diagram', 'template'],
-				run: () => insertPreset(preset)
+				run: async () => {
+					await insertPreset(preset);
+				}
 			})),
 			...recentPages.map((page) => ({
 				id: `page-${page.id}`,
@@ -852,6 +865,10 @@
 	 */
 	async function executeAgentCommand(args, operation) {
 		operation.signal.throwIfAborted();
+		if (['add', 'update', 'connect', 'duplicate'].includes(args[0])) {
+			await document.fonts.load('23px Excalifont');
+			operation.signal.throwIfAborted();
+		}
 		return executeDrawingAgentCommand(args, {
 			editor,
 			convertElements,
@@ -1150,8 +1167,18 @@
 	}
 
 	/** @param {typeof presets[number]} preset */
-	function insertPreset(preset) {
-		if (!editor || !convertElements) return;
+	async function insertPreset(preset) {
+		if (!editor || !convertElements) return false;
+		const insertionPage = activePageId;
+		// Excalidraw measures text synchronously: wait for its registered font so
+		// first-use diagrams don't retain fallback-font widths and clipped labels.
+		try {
+			await document.fonts.load('23px Excalifont');
+		} catch {
+			editor.setToast({ message: 'The drawing font could not load. Please try again.' });
+			return false;
+		}
+		if (activePageId !== insertionPage || !editor) return false;
 
 		const existingElements = editor.getSceneElements();
 		const offsetX =
@@ -1173,12 +1200,21 @@
 		);
 
 		editor.updateScene({
-			elements: [...existingElements, ...shapes],
+			elements: [...editor.getSceneElementsIncludingDeleted(), ...shapes],
 			appState: {
 				selectedElementIds: Object.fromEntries(shapes.map((shape) => [shape.id, true]))
-			}
+			},
+			...(captureImmediately ? { captureUpdate: captureImmediately } : {})
 		});
-		editor.scrollToContent(shapes, { fitToContent: true, animate: true, duration: 260 });
+		focusDesignArtboard(shapes);
+		return true;
+	}
+
+	/** @param {string} id */
+	function prepareThinkingWorkflow(id) {
+		// A navigation action only: no inference, page switch, or scene mutation.
+		if (window.innerWidth <= 960) editor?.toggleSidebar({ name: 'default', force: false });
+		drawingAssistant?.prepareWorkflow(id);
 	}
 
 	/** @param {string} componentId */
@@ -1718,6 +1754,7 @@
 
 {#if editor && activePageId}
 	<DrawAgent
+		bind:this={drawingAssistant}
 		authenticated={toolsAuthenticated}
 		pageId={activePageId}
 		executeCommand={executeAgentCommand}
@@ -2060,8 +2097,18 @@
 		{#if workspaceSection === 'presets'}
 			<section id="drawing-presets" class="workspace-content" aria-label="Drawing presets">
 				<div class="preset-heading">
-					<strong>Start with a framework</strong>
-					<span>Every shape stays editable.</span>
+					<strong>Make an idea clear</strong>
+					<span>Editable diagrams. No AI needed to start.</span>
+				</div>
+				<div class="thinking-actions" aria-label="Essay diagram assistant actions">
+					{#each DRAW_THINKING_WORKFLOWS as workflow (workflow.id)}
+						<button
+							type="button"
+							title={workflow.description}
+							onclick={() => prepareThinkingWorkflow(workflow.id)}>{workflow.label}</button
+						>
+					{/each}
+					<span>Assistant actions prepare a request. Review before sending.</span>
 				</div>
 				{#each presets as preset (preset.id)}
 					<button
@@ -2071,7 +2118,19 @@
 						onclick={() => insertPreset(preset)}
 					>
 						<svg class="preset-preview" aria-hidden="true" viewBox="0 0 56 42" fill="none">
-							{#if preset.id.includes('quadrant') || preset.id.includes('matrix')}
+							{#if preset.id === 'argument-map'}
+								<path d="m12 30 16-18 16 18M28 30V12" stroke="#10243b" />
+								<rect x="20" y="4" width="16" height="10" rx="2" fill="#dbeafa" stroke="#155f9b" />
+								<path
+									d="M5 30h14v8H5zM23 30h10v8H23zM38 30h14v8H38z"
+									fill="white"
+									stroke="#10243b"
+								/>
+							{:else if preset.id === 'agent-tool-loop'}
+								<path d="m20 21 14-12v24L20 21Zm0 0h30" stroke="#10243b" />
+								<rect x="5" y="16" width="16" height="10" rx="2" fill="#ddf0e3" stroke="#346b4e" />
+								<path d="M30 4h10v9H30zM30 29h10v9H30z" fill="white" stroke="#10243b" />
+							{:else if preset.id.includes('quadrant') || preset.id.includes('matrix')}
 								<rect x="8" y="5" width="19" height="15" rx="2" fill="#e14d2a" opacity=".8" />
 								<rect x="29" y="5" width="19" height="15" rx="2" fill="#f7c845" />
 								<rect x="8" y="22" width="19" height="15" rx="2" fill="#155f9b" opacity=".8" />
@@ -2300,6 +2359,26 @@
 {/if}
 
 <style>
+	.thinking-actions {
+		display: grid;
+		gap: 6px;
+		margin-bottom: 12px;
+	}
+	.thinking-actions button {
+		min-height: 44px;
+		text-align: left;
+		padding: 8px 12px;
+		border: 1px solid #deddf3;
+		border-radius: 8px;
+		background: white;
+		color: #4f46a4;
+		cursor: pointer;
+	}
+	.thinking-actions span {
+		font-size: 11px;
+		color: #71717a;
+		line-height: 1.5;
+	}
 	.draw-canvas {
 		position: fixed;
 		inset: 0;

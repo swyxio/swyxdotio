@@ -153,6 +153,78 @@ test('authenticated floating assistant uses viewport vision, sandboxed commands,
 	).toBe(false);
 });
 
+test('essay workflows prepare requests, protect drafts and preserve bound copies through the real command bridge', async ({
+	page
+}) => {
+	await page.goto('/draw');
+	await authenticate(page);
+	await page.getByRole('checkbox', { name: 'Library' }).check({ force: true });
+	await page.getByRole('tab', { name: 'Templates, components, and memes' }).click();
+	await page.getByRole('button', { name: 'Insert Claim, evidence, objection preset' }).click();
+	/** @returns {Promise<{ elements: any[] }>} */
+	const readScene = () =>
+		page.evaluate(() => JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}'));
+	await expect.poll(async () => (await readScene()).elements.length).toBeGreaterThan(8);
+	const before = (await readScene()).elements;
+	let calls = 0;
+	await page.route('**/tools/api/draw/agent', async (route) => {
+		calls++;
+		await route.fulfill({
+			json:
+				calls === 1
+					? {
+							content: '',
+							toolCalls: [
+								{
+									id: 'duplicate_figure',
+									type: 'function',
+									function: {
+										name: 'canvas_bash',
+										arguments: JSON.stringify({ command: 'draw duplicate --dx 1300 --dy 0' })
+									}
+								}
+							]
+						}
+					: { content: 'The editable copy is ready for review.', toolCalls: [] }
+		});
+	});
+	await page.getByRole('button', { name: 'Notes → diagram', exact: true }).click();
+	const assistant = page.getByRole('region', { name: 'Drawing assistant' });
+	const composer = assistant.getByRole('textbox', { name: 'Message drawing assistant' });
+	await expect(composer).toHaveValue(/My notes:/);
+	await composer.fill('My original essay notes must remain intact.');
+	await assistant.getByRole('button', { name: 'Try Make this essay-ready workflow' }).click();
+	await expect(composer).toHaveValue('My original essay notes must remain intact.');
+	await assistant.getByRole('button', { name: 'Keep draft', exact: true }).click();
+	await assistant.getByRole('button', { name: 'Try Make this essay-ready workflow' }).click();
+	await assistant.getByRole('button', { name: 'Use suggestion instead' }).click();
+	await expect(composer).toHaveValue(/Duplicate the selected figure/);
+	expect(calls).toBe(0);
+	await assistant.getByRole('button', { name: 'Send', exact: true }).click();
+	await expect(assistant).toContainText('The editable copy is ready for review.', {
+		timeout: 20000
+	});
+	const after = (await readScene()).elements;
+	for (const original of before)
+		expect(after.find((element) => element.id === original.id)).toEqual(original);
+	const originalIds = new Set(before.map((element) => element.id));
+	const copies = after.filter((element) => !originalIds.has(element.id));
+	const copyIds = new Set(copies.map((element) => element.id));
+	expect(copies.length).toBe(before.length);
+	for (const edge of copies.filter((element) => element.type === 'arrow')) {
+		expect(copyIds.has(edge.startBinding.elementId)).toBe(true);
+		expect(copyIds.has(edge.endBinding.elementId)).toBe(true);
+	}
+	for (const label of copies.filter((element) => element.type === 'text' && element.containerId)) {
+		expect(copyIds.has(label.containerId)).toBe(true);
+	}
+	await assistant.getByRole('button', { name: 'Minimize drawing assistant' }).click();
+	await page.getByRole('button', { name: 'Undo', exact: true }).click();
+	await expect
+		.poll(async () => (await readScene()).elements.filter((element) => !element.isDeleted).length)
+		.toBe(before.length);
+});
+
 test('assistant retries the last request after a temporary authenticated model failure', async ({
 	page
 }) => {
