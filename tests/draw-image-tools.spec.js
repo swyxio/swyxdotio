@@ -1417,7 +1417,7 @@ test('the drawing AI action shares the Google owner session', async ({ page }) =
 
 	toolbox = await pasteSelectedImage(page);
 	await toolbox.getByRole('button', { name: 'AI prompt', exact: true }).click();
-	await expect(toolbox.getByText(/Owner account/)).toBeVisible();
+	await expect(toolbox.getByText(/Funded by swyx.io/)).toBeVisible();
 	await expect(toolbox.getByRole('button', { name: 'Generate AI image edit' })).toBeVisible();
 	await expect(toolbox.getByRole('link', { name: 'Sign in to generate' })).toHaveCount(0);
 });

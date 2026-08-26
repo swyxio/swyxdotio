@@ -448,10 +448,19 @@ There is no password-login endpoint or legacy session fallback.
 - Drawing writes require `X-Tools-User` matching the signed session, so an old tab
   cannot write into another account after a session switch.
 - `/box` has no server persistence. Public articles and podcast feeds remain public.
-- Podcast publishing, archive migration, the separately hosted Reclip redirect, and
-  server-funded AI remain **owner-only**. This is not yet multi-tenant podcast
-  hosting, Reclip tenancy, BYOK or billing. Those require their own product/data
-  boundaries before opening them to all accounts.
+- Cloud AI is **site-funded for every signed-in account**, with durable admission
+  limits enforced before provider calls: 20 assistant turns/hour, 5 media jobs/hour,
+  $2/day per account and $20/day site-wide in conservative estimated reservations.
+  These estimates are not exact provider billing caps. Failed attempts retain their
+  reservations. Provider job IDs are bound to their originating Google account.
+- AI admission/status logs contain account ID, request ID, model, timestamp, status
+  and estimated reserved cost only. Retention is 30 days with durable alarm cleanup;
+  prompts/images/tokens/provider keys are never stored in operational logs. Limits
+  and this disclosure are shown before use. `GET /tools/api/ai/usage` returns only
+  the current account's counters and policy. No ledger means no paid request.
+- Podcast publishing, archive migration and the separately hosted Reclip redirect
+  remain **owner-only**. Multi-tenant podcast hosting and the external Reclip service
+  still need their own product/data boundaries before opening them to all accounts.
 
 ### Production setup
 
@@ -477,3 +486,12 @@ Auth pages/APIs bypass shared caches, use `no-store`, and suppress referrer data
 Local tests use signed fixture identities only on localhost, never a production
 login bypass. Provider-token validation is covered separately with mocked Google
 responses and real test RSA signatures.
+
+### Google project
+
+The auth-only project is `swyx-io-tools` (project number `31511070245`), owned by
+`shawnthe1@gmail.com`; no billing account is linked. Google branding is **swyx.io
+Tools**, audience **External**, client **swyx.io Tools Web**. Registered callbacks
+are production and `http://localhost:4188/tools/auth/google/callback` for verification.
+Deploy the drawing companion first whenever the AI ledger protocol changes, then
+the main Worker. The companion has no public data endpoint.

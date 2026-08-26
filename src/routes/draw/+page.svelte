@@ -1804,7 +1804,6 @@
 {#if editor && activePageId}
 	<DrawAgent
 		authenticated={toolsAuthenticated}
-		canUseCloudAI={toolsUser?.isOwner === true}
 		userId={toolsUser?.id}
 		pageId={`${STORAGE_KEY}:${activePageId}`}
 		executeCommand={executeAgentCommand}
@@ -1896,7 +1895,6 @@
 				captureUpdate={captureImmediately}
 				{cloudAvailable}
 				authenticated={toolsAuthenticated}
-				canUseCloudAI={toolsUser?.isOwner === true}
 				userId={toolsUser?.id}
 				backgroundProcessing={isRemovingBackground}
 				generations={imageGenerations}

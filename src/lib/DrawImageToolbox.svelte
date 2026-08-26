@@ -1,5 +1,6 @@
 <script>
 	import { tick } from 'svelte';
+	import ToolsAiNotice from '$lib/ToolsAiNotice.svelte';
 	import { DRAW_IMAGE_TOOLS, processImageTool } from '$lib/draw-image-tools.js';
 	import { prepareDrawingFalImage } from '$lib/draw-fal-image.js';
 	import { runDrawingFalGeneration } from '$lib/draw-fal-queue.js';
@@ -32,7 +33,6 @@
 	 *  captureUpdate: typeof import('@excalidraw/excalidraw').CaptureUpdateAction.IMMEDIATELY,
 	 *  cloudAvailable?: boolean,
 	 *  authenticated?: boolean,
-	 *  canUseCloudAI?: boolean,
 	 *  userId?: string,
 	 *  onCloudLimit?: () => void,
 	 *  backgroundProcessing?: boolean,
@@ -55,7 +55,6 @@
 		captureUpdate,
 		cloudAvailable = false,
 		authenticated = false,
-		canUseCloudAI = false,
 		userId,
 		onCloudLimit,
 		backgroundProcessing = false,
@@ -627,7 +626,7 @@
 		if (
 			processing ||
 			processingFal ||
-			!canUseCloudAI ||
+			!authenticated ||
 			!prompt.trim() ||
 			!selectedFalModels.length
 		)
@@ -1257,16 +1256,13 @@
 					</div>
 				{/if}
 				<p class="fal-upload-hint">
-					{canUseCloudAI
-						? 'Owner account · '
-						: authenticated
-							? 'Owner access required · '
-							: 'Sign in required · '}
+					{authenticated ? 'Funded by swyx.io · ' : 'Sign in required · '}
 					{uploadsSelectedImage
 						? 'Large images automatically fit each model’s limits and the secure upload limit.'
 						: 'Text-to-image workflows only send your prompt; the selected image is not uploaded.'}
 				</p>
 			</div>
+			<ToolsAiNotice />
 			{#each selectedWorkflowParameters as folder (folder.kind)}
 				{#if folder.parameters.length}
 					<section class="fal-parameter-group" aria-label="{folder.label} settings">
@@ -1398,11 +1394,6 @@
 					</button>
 				{:else if !authenticated}
 					<a class="fal-action fal-sign-in" href="/tools?next=/draw">Sign in to generate</a>
-				{:else if !canUseCloudAI}
-					<span
-						>Cloud generation uses the site owner’s paid account. Local image tools remain
-						available.</span
-					>
 				{:else}
 					<button
 						type="button"

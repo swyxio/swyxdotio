@@ -1,3 +1,5 @@
+import { TOOLS_AI_POLICY } from '../tools-ai-policy.js';
+import { reserveToolsAiUsage, finishToolsAiUsage } from './tools-ai-usage.js';
 import { getToolsUser } from './tools-auth.js';
 import { privateJson, requireSameOrigin } from '../podcast-admin-route.js';
 import {
@@ -182,20 +184,15 @@ function hasCompletedToolReview(messages) {
 
 /**
  * One bounded model turn. Browser-side tools remain outside the Worker and its
- * secrets; only an authenticated owner can invoke the server-owned AI binding.
+ * secrets; every signed-in account uses the same durable funded-usage limits.
  * @param {Pick<import('@sveltejs/kit').RequestEvent, 'cookies' | 'platform' | 'request' | 'url'>} event
  */
 export async function runDrawingAgent(event) {
 	const user = await getToolsUser(event);
 	if (!user)
 		return privateJson({ error: 'Sign in to use the drawing assistant.' }, { status: 401 });
-	if (!user.isOwner)
-		return privateJson(
-			{ error: 'The hosted drawing assistant is available only to the site owner.' },
-			{ status: 403 }
-		);
 	const expectedUser = event.request.headers.get('X-Tools-User');
-	if (expectedUser !== null && expectedUser !== user.id)
+	if (expectedUser !== user.id)
 		return privateJson(
 			{ code: 'account_changed', error: 'Your Google account changed. Reload before continuing.' },
 			{ status: 409 }
@@ -241,6 +238,13 @@ export async function runDrawingAgent(event) {
 	if (!messages || (body.screenshot !== undefined && !validScreenshot(body.screenshot))) {
 		return privateJson({ error: 'The assistant conversation is invalid.' }, { status: 422 });
 	}
+	// Bound total text so the per-turn reservation remains a conservative estimate.
+	if (encoder.encode(JSON.stringify(messages)).byteLength > 60_000) {
+		return privateJson(
+			{ error: 'The assistant conversation is too long. Start a new conversation.' },
+			{ status: 413 }
+		);
+	}
 	if (messages[0]?.role !== 'user') {
 		return privateJson({ error: 'Begin with a drawing request.' }, { status: 422 });
 	}
@@ -268,6 +272,14 @@ export async function runDrawingAgent(event) {
 			]
 		});
 	}
+	const reservation = await reserveToolsAiUsage(
+		event,
+		user.id,
+		'assistant',
+		DRAW_AGENT_MODEL,
+		TOOLS_AI_POLICY.assistantReservationUsd
+	);
+	if (reservation instanceof Response) return reservation;
 	/** @type {any} */
 	let result;
 	try {
@@ -280,6 +292,8 @@ export async function runDrawingAgent(event) {
 			stream: false
 		});
 	} catch (error) {
+		const recorded = await finishToolsAiUsage(event, user.id, reservation.id, 'failed');
+		if (!recorded.ok) return recorded;
 		const message = error instanceof Error ? error.message : '';
 		if (/rate.?limit|429/i.test(message)) {
 			return privateJson(
@@ -296,6 +310,7 @@ export async function runDrawingAgent(event) {
 	let content = normalizeResponseContent(output?.content || output?.response);
 	const toolCalls = output?.tool_calls === undefined ? [] : normalizeToolCalls(output.tool_calls);
 	if (!toolCalls) {
+		await finishToolsAiUsage(event, user.id, reservation.id, 'failed');
 		return privateJson(
 			{ error: 'The drawing assistant returned an invalid response.' },
 			{ status: 502 }
@@ -303,6 +318,7 @@ export async function runDrawingAgent(event) {
 	}
 	if (!content.trim() && !toolCalls.length) {
 		if (!hasCompletedToolReview(messages)) {
+			await finishToolsAiUsage(event, user.id, reservation.id, 'failed');
 			return privateJson(
 				{ error: 'The drawing assistant returned an invalid response.' },
 				{ status: 502 }
@@ -332,6 +348,7 @@ export async function runDrawingAgent(event) {
 		response.spendingUsd = charged.spendingUsd;
 		response.modelCostUsd = modelCostUsd;
 	} catch (error) {
+		await finishToolsAiUsage(event, user.id, reservation.id, 'failed');
 		return privateJson(
 			{
 				error: error instanceof Error ? error.message : 'The assistant spending limit was reached.'
@@ -339,5 +356,7 @@ export async function runDrawingAgent(event) {
 			{ status: 402 }
 		);
 	}
+	const recorded = await finishToolsAiUsage(event, user.id, reservation.id, 'succeeded');
+	if (!recorded.ok) return recorded;
 	return privateJson(response);
 }

@@ -224,11 +224,11 @@ test('two Google accounts cannot read or change each other’s cloud drawings', 
 		expect(
 			(
 				await other.request.post(`${origin}/tools/api/draw/agent`, {
-					headers: { Origin: origin },
+					headers: { Origin: origin, 'X-Tools-User': TEST_TOOLS_MEMBER.id },
 					data: {}
 				})
 			).status()
-		).toBe(403);
+		).toBe(422);
 		expect(
 			(
 				await other.request.post(`${origin}/tools/podcast/api/uploads`, {
@@ -297,4 +297,31 @@ test('account switching keeps browser caches separate and removes owner-only too
 		'data-storage-key',
 		'swyx-excalidraw:guest'
 	);
+});
+
+test('all accounts see funded AI limits and logging before using the assistant', async ({
+	page
+}) => {
+	await page.goto('/tools');
+	const notice = page.getByRole('complementary', { name: 'Funded AI usage notice' });
+	await expect(notice).toContainText('rate limited, and logged');
+	await expect(notice).toContainText('20 assistant turns');
+	await expect(notice).toContainText('30 days');
+	await authenticateTools(page, TEST_TOOLS_MEMBER);
+	await page.reload();
+	await expect(page.getByRole('region', { name: 'Your AI usage' })).toContainText(
+		'assistant turns'
+	);
+	const usage = await page.request.get('/tools/api/ai/usage', {
+		headers: { 'X-Tools-User': TEST_TOOLS_MEMBER.id }
+	});
+	expect(usage.status()).toBe(200);
+	expect(await usage.json()).toMatchObject({
+		policy: { assistantTurnsPerHour: 20, mediaJobsPerHour: 5, retentionDays: 30 }
+	});
+	await page.goto('/draw');
+	await page.getByRole('button', { name: 'Open drawing assistant' }).click();
+	await expect(page.getByRole('complementary', { name: 'Funded AI usage notice' })).toBeVisible();
+	await expect(page.getByRole('link', { name: 'Sign in to use the assistant' })).toHaveCount(0);
+	await expect(page.getByText(/available only to that account/)).toHaveCount(0);
 });

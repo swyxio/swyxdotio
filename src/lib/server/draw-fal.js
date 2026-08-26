@@ -1,3 +1,5 @@
+import { estimateToolsMediaReservation } from '../tools-ai-policy.js';
+import { reserveToolsAiUsage, finishToolsAiUsage, toolsAiLedger } from './tools-ai-usage.js';
 import { getToolsUser } from './tools-auth.js';
 import { privateJson, requireSameOrigin } from '../podcast-admin-route.js';
 import {
@@ -77,13 +79,8 @@ function upstreamError(status) {
 async function authenticate(event) {
 	const user = await getToolsUser(event);
 	if (!user) return privateJson({ error: 'Sign in to edit images with AI.' }, { status: 401 });
-	if (!user.isOwner)
-		return privateJson(
-			{ error: 'Hosted AI image editing is available only to the site owner.' },
-			{ status: 403 }
-		);
 	const expectedUser = event.request.headers.get('X-Tools-User');
-	if (expectedUser !== null && expectedUser !== user.id)
+	if ((event.request.method !== 'GET' || expectedUser !== null) && expectedUser !== user.id)
 		return privateJson(
 			{ code: 'account_changed', error: 'Your Google account changed. Reload before continuing.' },
 			{ status: 409 }
@@ -92,7 +89,7 @@ async function authenticate(event) {
 	const falKey = event.platform?.env?.FAL_KEY;
 	if (!falKey)
 		return privateJson({ error: 'AI image editing has not been configured.' }, { status: 503 });
-	return falKey;
+	return { falKey, user };
 }
 
 /** @param {Blob} image */
@@ -122,8 +119,9 @@ function drawingFalJobUrl(model, requestId) {
  * @param {typeof fetch} [fetchProvider]
  */
 export async function editDrawingImage(event, fetchProvider = fetch) {
-	const falKey = await authenticate(event);
-	if (falKey instanceof Response) return falKey;
+	const auth = await authenticate(event);
+	if (auth instanceof Response) return auth;
+	const { falKey, user } = auth;
 
 	if (!event.request.headers.get('content-type')?.startsWith('multipart/form-data;')) {
 		return privateJson(
@@ -271,6 +269,14 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 		delete (/** @type {Record<string, unknown>} */ (modelSettings).safety_tolerance);
 	}
 	Object.assign(providerInput, modelSettings);
+	const reservation = await reserveToolsAiUsage(
+		event,
+		user.id,
+		'media',
+		model.id,
+		estimateToolsMediaReservation(estimateDrawFalModelCost(model, modelSettings))
+	);
+	if (reservation instanceof Response) return reservation;
 	/** @type {Response} */
 	let upstream;
 	try {
@@ -281,25 +287,42 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 			signal: AbortSignal.timeout(30_000)
 		});
 	} catch {
+		await finishToolsAiUsage(event, user.id, reservation.id, 'failed');
 		return privateJson({ error: 'Image editing could not be started.' }, { status: 502 });
 	}
-	if (!upstream.ok) return upstreamError(upstream.status);
+	if (!upstream.ok) {
+		await finishToolsAiUsage(event, user.id, reservation.id, 'failed');
+		return upstreamError(upstream.status);
+	}
 	/** @type {any} */
 	let result;
 	try {
 		result = await upstream.json();
 	} catch {
+		await finishToolsAiUsage(event, user.id, reservation.id, 'failed');
 		return privateJson(
 			{ error: 'The image-editing provider returned an invalid job.' },
 			{ status: 502 }
 		);
 	}
 	if (typeof result?.request_id !== 'string' || !REQUEST_ID.test(result.request_id)) {
+		await finishToolsAiUsage(event, user.id, reservation.id, 'failed');
 		return privateJson(
 			{ error: 'The image-editing provider returned an invalid job.' },
 			{ status: 502 }
 		);
 	}
+	const registered = await toolsAiLedger(event, 'register', {
+		userId: user.id,
+		id: reservation.id,
+		model: model.id,
+		requestId: result.request_id
+	});
+	if (!registered.ok)
+		return privateJson(
+			{ error: 'The generation could not be registered safely. Please try again later.' },
+			{ status: 503 }
+		);
 	return privateJson(
 		{
 			requestId: result.request_id,
@@ -321,13 +344,22 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
  * @param {typeof fetch} [fetchProvider]
  */
 export async function pollDrawingImage(event, fetchProvider = fetch) {
-	const falKey = await authenticate(event);
-	if (falKey instanceof Response) return falKey;
+	const auth = await authenticate(event);
+	if (auth instanceof Response) return auth;
+	const { falKey, user } = auth;
 	const requestId = event.url.searchParams.get('requestId');
 	const model = getDrawFalModel(event.url.searchParams.get('model'));
 	if (!requestId || !REQUEST_ID.test(requestId) || !model) {
 		return privateJson({ error: 'The image-generation request is invalid.' }, { status: 422 });
 	}
+	const owned = await toolsAiLedger(event, 'owned-job', {
+		poll: true,
+		userId: user.id,
+		model: model.id,
+		requestId
+	});
+	if (!owned.ok) return owned;
+	const job = await owned.json();
 	const jobUrl = drawingFalJobUrl(model, requestId);
 	const providerOptions = {
 		headers: { Authorization: `Key ${falKey}` },
@@ -370,6 +402,18 @@ export async function pollDrawingImage(event, fetchProvider = fetch) {
 				: undefined;
 		return privateJson({ status: 'IN_PROGRESS', message });
 	}
+	if (progress?.status === 'FAILED' || progress?.status === 'CANCELLED') {
+		const recorded = await finishToolsAiUsage(
+			event,
+			user.id,
+			job.id,
+			progress.status === 'FAILED' ? 'failed' : 'cancelled'
+		);
+		if (!recorded.ok) return recorded;
+		return progress.status === 'CANCELLED'
+			? privateJson({ status: 'CANCELLED' })
+			: privateJson({ error: 'The image generation failed.' }, { status: 502 });
+	}
 	if (progress?.status !== 'COMPLETED') {
 		return privateJson(
 			{ error: 'The image-editing provider returned invalid progress.' },
@@ -387,6 +431,7 @@ export async function pollDrawingImage(event, fetchProvider = fetch) {
 	try {
 		result = await upstream.json();
 	} catch {
+		await finishToolsAiUsage(event, user.id, job.id, 'failed');
 		return privateJson(
 			{ error: 'The image-editing provider returned an invalid image.' },
 			{ status: 502 }
@@ -395,20 +440,26 @@ export async function pollDrawingImage(event, fetchProvider = fetch) {
 	if (model.kind === 'image-to-video') {
 		const video = result?.video?.url;
 		if (!isFalVideoUrl(video)) {
+			await finishToolsAiUsage(event, user.id, job.id, 'failed');
 			return privateJson(
 				{ error: 'The image-editing provider returned an invalid video.' },
 				{ status: 502 }
 			);
 		}
+		const recorded = await finishToolsAiUsage(event, user.id, job.id, 'succeeded');
+		if (!recorded.ok) return recorded;
 		return privateJson({ status: 'COMPLETED', video, model: model.model });
 	}
 	const image = result?.images?.[0]?.url;
 	if (!isImageDataUrl(image) || encoder.encode(image).byteLength > MAX_DRAW_FAL_REQUEST_BYTES) {
+		await finishToolsAiUsage(event, user.id, job.id, 'failed');
 		return privateJson(
 			{ error: 'The image-editing provider returned an invalid image.' },
 			{ status: 502 }
 		);
 	}
+	const recorded = await finishToolsAiUsage(event, user.id, job.id, 'succeeded');
+	if (!recorded.ok) return recorded;
 	return privateJson({ status: 'COMPLETED', image, model: model.model });
 }
 
@@ -417,13 +468,21 @@ export async function pollDrawingImage(event, fetchProvider = fetch) {
  * @param {typeof fetch} [fetchProvider]
  */
 export async function cancelDrawingImage(event, fetchProvider = fetch) {
-	const falKey = await authenticate(event);
-	if (falKey instanceof Response) return falKey;
+	const auth = await authenticate(event);
+	if (auth instanceof Response) return auth;
+	const { falKey, user } = auth;
 	const requestId = event.url.searchParams.get('requestId');
 	const model = getDrawFalModel(event.url.searchParams.get('model'));
 	if (!requestId || !REQUEST_ID.test(requestId) || !model) {
 		return privateJson({ error: 'The image-generation request is invalid.' }, { status: 422 });
 	}
+	const owned = await toolsAiLedger(event, 'owned-job', {
+		userId: user.id,
+		model: model.id,
+		requestId
+	});
+	if (!owned.ok) return owned;
+	const job = await owned.json();
 	try {
 		const upstream = await fetchProvider(`${drawingFalJobUrl(model, requestId)}/cancel`, {
 			method: 'PUT',
@@ -437,5 +496,7 @@ export async function cancelDrawingImage(event, fetchProvider = fetch) {
 			{ status: 502 }
 		);
 	}
+	const recorded = await finishToolsAiUsage(event, user.id, job.id, 'cancelled');
+	if (!recorded.ok) return recorded;
 	return privateJson({ status: 'CANCELLED' });
 }

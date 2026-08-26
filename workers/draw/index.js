@@ -1,3 +1,5 @@
+import { ToolsAiUsage } from './ai-usage.js';
+
 const MAX_SCENE_BYTES = 1_800_000;
 const MAX_PAGE_COUNT = 100;
 const MAX_PAGE_NAME_LENGTH = 120;
@@ -50,9 +52,12 @@ function respond(body, status = 200) {
 }
 
 export class DrawingPages {
-	/** @param {{ storage: { sql: SqlStorage } }} ctx */
+	/** @param {{ storage: { sql: SqlStorage, setAlarm?: (time: number) => Promise<void> } }} ctx */
 	constructor(ctx) {
 		this.sql = ctx.storage.sql;
+		this.storage = ctx.storage;
+		/** @type {ToolsAiUsage | undefined} */
+		this.aiUsage = undefined;
 		this.sql.exec(`
 			CREATE TABLE IF NOT EXISTS drawing_pages (
 				id TEXT PRIMARY KEY,
@@ -201,6 +206,27 @@ export class DrawingPages {
 	/** @param {Request} request */
 	async fetch(request) {
 		const path = new URL(request.url).pathname;
+		if (path.startsWith('/ai/')) {
+			if (request.method !== 'POST') return respond({ error: 'Method not allowed.' }, 405);
+			const raw = await request.text();
+			if (raw.length > 4096) return respond({ error: 'Usage metadata is too large.' }, 413);
+			let body;
+			try {
+				body = JSON.parse(raw);
+			} catch {
+				return respond({ error: 'Invalid usage metadata.' }, 400);
+			}
+			if (!isObject(body)) return respond({ error: 'Invalid usage metadata.' }, 400);
+			this.aiUsage ??= new ToolsAiUsage(this.sql);
+			const response = this.aiUsage.handle(path, body);
+			const expiry = this.aiUsage.nextExpiry();
+			if (expiry !== null) {
+				if (!this.storage.setAlarm)
+					return respond({ error: 'Usage retention is unavailable.' }, 503);
+				await this.storage.setAlarm(expiry);
+			}
+			return response;
+		}
 		if (path === '/pages') {
 			if (request.method === 'GET') return this.listPages();
 			if (request.method === 'POST') return this.createPage(request);
@@ -220,6 +246,12 @@ export class DrawingPages {
 		if (request.method === 'PUT') return this.updatePage(id, request);
 		if (request.method === 'DELETE') return this.deletePage(id);
 		return respond({ error: 'Method not allowed.' }, 405);
+	}
+	async alarm() {
+		this.aiUsage ??= new ToolsAiUsage(this.sql);
+		this.aiUsage.prune();
+		const expiry = this.aiUsage.nextExpiry();
+		if (expiry !== null && this.storage.setAlarm) await this.storage.setAlarm(expiry);
 	}
 }
 

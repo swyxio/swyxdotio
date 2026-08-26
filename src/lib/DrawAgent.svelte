@@ -1,5 +1,6 @@
 <script>
 	import { onMount, tick } from 'svelte';
+	import ToolsAiNotice from '$lib/ToolsAiNotice.svelte';
 	import {
 		DEFAULT_DRAW_AGENT_BUDGET_USD,
 		MAX_DRAW_AGENT_ROUNDS,
@@ -14,20 +15,12 @@
 
 	/** @type {{
 	 *  authenticated?: boolean,
-	 *  canUseCloudAI?: boolean,
 	 *  userId?: string,
 	 *  pageId: string,
 	 *  executeCommand: (args: string[], options: CommandOptions) => Promise<unknown>,
 	 *  captureViewport: () => Promise<string | undefined>
 	 * }} */
-	let {
-		authenticated = false,
-		canUseCloudAI = false,
-		userId,
-		pageId,
-		executeCommand,
-		captureViewport
-	} = $props();
+	let { authenticated = false, userId, pageId, executeCommand, captureViewport } = $props();
 
 	const HISTORY_PREFIX = 'swyx-excalidraw:assistant:';
 	const MAX_HISTORY_MESSAGES = 36;
@@ -200,7 +193,7 @@
 
 	async function sendMessage() {
 		const request = prompt.trim();
-		if (!request || running || !canUseCloudAI) return;
+		if (!request || running || !authenticated) return;
 		const prior = messages
 			.filter((message) => message.role !== 'step')
 			.slice(-10)
@@ -413,7 +406,7 @@
 				<span>Sees your visible canvas</span>
 			</div>
 			<div class="header-actions">
-				{#if canUseCloudAI}
+				{#if authenticated}
 					<button
 						type="button"
 						class="icon-button"
@@ -433,7 +426,7 @@
 						>
 					</button>
 				{/if}
-				{#if canUseCloudAI && messages.length}
+				{#if authenticated && messages.length}
 					<button
 						type="button"
 						class="icon-button"
@@ -479,14 +472,8 @@
 				<p>Sign in to let your private assistant inspect and edit this drawing.</p>
 				<a href="/tools?next=/draw">Sign in to use the assistant</a>
 			</div>
-		{:else if !canUseCloudAI}
-			<div class="assistant-signin">
-				<p>
-					Cloud AI currently uses the site owner’s paid account and is available only to that
-					account. Your drawings and local image tools work independently.
-				</p>
-			</div>
 		{:else}
+			<ToolsAiNotice />
 			<div class="assistant-disclosure">
 				Visible canvas screenshots are sent to Cloudflare AI. Image generation may also upload
 				selected images to fal.ai.

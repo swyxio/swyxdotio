@@ -1,13 +1,35 @@
 <script>
 	import { onMount } from 'svelte';
+	import ToolsAiNotice from '$lib/ToolsAiNotice.svelte';
+	import { TOOLS_AI_POLICY } from '$lib/tools-ai-policy.js';
 	/** @type {import('./$types').PageData} */
 	export let data;
 	let signingOut = false;
 	let error = '';
+	/** @type {{assistantTurnsThisHour:number,mediaJobsThisHour:number,estimatedReservedTodayUsd:number}|null} */
+	let aiUsage = null;
+	let usageUnavailable = false;
 	onMount(() => {
 		try {
 			localStorage.setItem('swyx-tools:account', data.user?.id ?? 'guest');
 		} catch {}
+		const abort = new AbortController();
+		if (data.user) {
+			void fetch('/tools/api/ai/usage', {
+				cache: 'no-store',
+				headers: { 'X-Tools-User': data.user.id },
+				signal: abort.signal
+			})
+				.then(async (response) => {
+					if (!response.ok) throw new Error('Usage unavailable');
+					const result = await response.json();
+					aiUsage = result.usage;
+				})
+				.catch(() => {
+					if (!abort.signal.aborted) usageUnavailable = true;
+				});
+		}
+		return () => abort.abort();
 	});
 	async function logout() {
 		signingOut = true;
@@ -84,6 +106,26 @@
 			>
 		</p>
 	{/if}
+	<ToolsAiNotice />
+	{#if data.user}
+		<section class="usage" aria-label="Your AI usage">
+			<strong>Your AI usage</strong>
+			{#if aiUsage}
+				<p>
+					{aiUsage.assistantTurnsThisHour}/{TOOLS_AI_POLICY.assistantTurnsPerHour} assistant turns · {aiUsage.mediaJobsThisHour}/{TOOLS_AI_POLICY.mediaJobsPerHour}
+					generations this hour
+				</p>
+				<p>
+					${aiUsage.estimatedReservedTodayUsd.toFixed(2)} / ${TOOLS_AI_POLICY.userEstimatedDailyUsd.toFixed(
+						2
+					)} estimated allowance reserved today. Resets at midnight UTC.
+				</p>
+			{:else if usageUnavailable}<p>
+					Usage is temporarily unavailable. Paid requests remain protected by the server’s limits.
+				</p>
+			{:else}<p>Loading your usage…</p>{/if}
+		</section>
+	{/if}
 	<ul class="tool-list">
 		<li>
 			<a href="/draw"
@@ -118,6 +160,14 @@
 </section>
 
 <style>
+	.usage {
+		font-size: 0.85rem;
+		color: var(--page-muted);
+		margin: 1rem 0;
+	}
+	.usage p {
+		margin: 0.25rem 0;
+	}
 	.tools {
 		max-width: 44rem;
 	}
