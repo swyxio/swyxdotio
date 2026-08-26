@@ -34,6 +34,7 @@
 	} from '$lib/draw-designs.js';
 	import DrawAgent from '$lib/DrawAgent.svelte';
 	import { DRAW_THINKING_WORKFLOWS } from '$lib/draw-thinking.js';
+	import { DRAW_ILLUSTRATION_BRUSHES, applyIllustrationBrush } from '$lib/draw-illustration.js';
 	import DrawImageToolbox from '$lib/DrawImageToolbox.svelte';
 	import DrawWorkspaceNav from '$lib/DrawWorkspaceNav.svelte';
 	import DrawStartingPoints from '$lib/DrawStartingPoints.svelte';
@@ -100,6 +101,8 @@
 	let dismissedStartingPages = $state([]);
 	/** @type {typeof import('@excalidraw/excalidraw').convertToExcalidrawElements | null} */
 	let convertElements = null;
+	/** @type {typeof import('@excalidraw/excalidraw').restoreElements | null} */
+	let restoreNativeElements = null;
 	/** @type {typeof import('@excalidraw/excalidraw').newElementWith | null} */
 	let updateElement = $state.raw(null);
 	/** @type {typeof import('@excalidraw/excalidraw').CaptureUpdateAction.IMMEDIATELY | null} */
@@ -110,6 +113,14 @@
 	let exportToSvg;
 	/** @type {typeof import('$lib/draw-presets.js').DRAW_PRESETS} */
 	let presets = $state([]);
+	let presetQuery = $state('');
+	let matchingPresets = $derived(
+		presets.filter((preset) =>
+			`${preset.label} ${preset.description} ${preset.id} ${preset.source?.author ?? ''}`
+				.toLowerCase()
+				.includes(presetQuery.trim().toLowerCase())
+		)
+	);
 	/** @type {typeof import('$lib/draw-ui-components.js').DRAW_UI_COMPONENTS} */
 	let uiComponents = $state([]);
 	/** @type {typeof import('$lib/draw-ui-components.js').createDrawUiComponent | undefined} */
@@ -695,6 +706,14 @@
 				category: 'Components',
 				keywords: [component.category, ...(component.keywords ?? [])],
 				run: () => insertUiComponent(component.id)
+			})),
+			...DRAW_ILLUSTRATION_BRUSHES.map((brush) => ({
+				id: `brush-${brush.id}`,
+				label: `Use ${brush.label.toLowerCase()}`,
+				description: `${brush.description} Only affects new strokes.`,
+				category: 'Illustration tools',
+				keywords: ['brush', 'illustration', brush.id],
+				run: () => chooseIllustrationBrush(brush.id)
 			})),
 			...presets.map((preset) => ({
 				id: `preset-${preset.id}`,
@@ -1674,12 +1693,14 @@
 			x: (shape.x ?? 0) + offsetX,
 			y: (shape.y ?? 0) + offsetY
 		}));
-		const shapes = convertElements(
+		const converted = convertElements(
 			/** @type {import('@excalidraw/excalidraw/data/transform').ExcalidrawElementSkeleton[]} */ (
 				skeletons
 			),
 			{ regenerateIds: true }
 		);
+		// Normalize linear bounds before capture so insertion and reload agree.
+		const shapes = restoreNativeElements ? restoreNativeElements(converted, null) : converted;
 
 		editor.updateScene({
 			elements: [...editor.getSceneElementsIncludingDeleted(), ...shapes],
@@ -1699,29 +1720,39 @@
 		drawingAssistant?.prepareWorkflow(id);
 	}
 
+	/** @param {string} brushId */
+	function chooseIllustrationBrush(brushId) {
+		if (!editor || accountChanged) return;
+		const brush = applyIllustrationBrush(editor, brushId);
+		editor.setToast({ message: `${brush.label} ready. Existing artwork is unchanged.` });
+	}
+
 	/** @param {string} componentId */
 	function insertUiComponent(componentId) {
-		if (!editor || !convertElements || !createUiComponent) return;
-		const existingElements = editor.getSceneElements();
+		if (!editor || !convertElements || !restoreNativeElements || !createUiComponent) return;
 		const state = editor.getAppState();
 		const centerX = state.width / (2 * state.zoom.value) - state.scrollX;
 		const centerY = state.height / (2 * state.zoom.value) - state.scrollY;
 		const skeletons = createUiComponent(componentId, centerX - 140, centerY - 65);
 		if (!skeletons.length) return;
-		const shapes = convertElements(
+		const converted = convertElements(
 			/** @type {import('@excalidraw/excalidraw/data/transform').ExcalidrawElementSkeleton[]} */ (
 				skeletons
 			),
 			{ regenerateIds: true }
 		);
+		// Normalize line bounds/arrow origins now, not on the next native reload.
+		const shapes = restoreNativeElements(converted, null);
 		editor.updateScene({
-			elements: [...existingElements, ...shapes],
+			elements: [...editor.getSceneElementsIncludingDeleted(), ...shapes],
 			appState: {
 				selectedElementIds: Object.fromEntries(shapes.map((shape) => [shape.id, true]))
 			},
 			...(captureImmediately ? { captureUpdate: captureImmediately } : {})
 		});
-		editor.scrollToContent(shapes, { fitToContent: false, animate: true, duration: 180 });
+		if (['illustration-sampler', 'illustration-marks-sampler'].includes(componentId))
+			focusDesignArtboard(shapes);
+		else editor.scrollToContent(shapes, { fitToContent: false, animate: true, duration: 180 });
 	}
 
 	/** @param {'presets' | 'designs' | 'components' | 'memes'} section */
@@ -2159,6 +2190,7 @@
 					DefaultSidebar,
 					Sidebar,
 					convertToExcalidrawElements,
+					restoreElements,
 					useHandleLibrary,
 					newElementWith,
 					CaptureUpdateAction,
@@ -2183,6 +2215,7 @@
 			blankScene = isNewBlankDrawing(initialScene);
 
 			convertElements = convertToExcalidrawElements;
+			restoreNativeElements = restoreElements;
 			updateElement = newElementWith;
 			captureImmediately = CaptureUpdateAction.IMMEDIATELY;
 			exportToBlob = excalidrawExportToBlob;
@@ -2805,7 +2838,53 @@
 					{/each}
 					<span>Assistant actions prepare a request. Review before sending.</span>
 				</div>
-				{#each presets as preset (preset.id)}
+				<label class="preset-search">
+					<span>Find a diagram</span>
+					<input
+						type="search"
+						bind:value={presetQuery}
+						placeholder="Try Kafka, memory, or ByteByteGo"
+					/>
+				</label>
+				{#if matchingPresets.some((preset) => preset.source)}
+					<div class="preset-heading reference-heading">
+						<strong>Alex Xu / ByteByteGo studies</strong>
+						<span
+							>One click inserts the complete editable diagram. Rebuilt glyphs and wording; no
+							animation.</span
+						>
+					</div>
+					{#each matchingPresets.filter((preset) => preset.source) as preset (preset.id)}
+						<div class="reference-preset">
+							<button
+								type="button"
+								class="reference-insert"
+								aria-label="Insert {preset.label} preset"
+								onclick={() => insertPreset(preset)}
+							>
+								<img
+									src={preset.preview}
+									alt="{preset.label} editable reconstruction preview"
+									loading="lazy"
+									width="280"
+									height="240"
+								/>
+								<strong>{preset.label}</strong>
+								<span>{preset.description}</span>
+								<span class="reference-insert-label">＋ Insert editable diagram</span>
+							</button>
+							<a href={preset.source?.url} target="_blank" rel="noreferrer"
+								>View Alex Xu / ByteByteGo original ↗</a
+							>
+						</div>
+					{/each}
+				{/if}
+				{#if matchingPresets.some((preset) => !preset.source)}<div
+						class="preset-heading reference-heading"
+					>
+						<strong>Visual thinking starters</strong>
+					</div>{/if}
+				{#each matchingPresets.filter((preset) => !preset.source) as preset (preset.id)}
 					<button
 						type="button"
 						class="preset-option"
@@ -2874,6 +2953,9 @@
 						</span>
 					</button>
 				{/each}
+				{#if !matchingPresets.length}<p>
+						No diagrams match “{presetQuery}”. Try another term.
+					</p>{/if}
 			</section>
 		{:else if workspaceSection === 'designs'}
 			<section
@@ -2918,9 +3000,52 @@
 		{:else if workspaceSection === 'components'}
 			<section id="drawing-components" class="workspace-content" aria-label="UI components">
 				<div class="component-heading">
-					<strong>Sketch an interface</strong>
-					<span>Hand-drawn, editable components.</span>
+					<strong>Illustrate or wireframe</strong>
+					<span>Editable native pieces. No image generation.</span>
 				</div>
+				<fieldset class="illustration-brushes">
+					<legend>Illustration tools · new strokes only</legend>
+					{#each DRAW_ILLUSTRATION_BRUSHES as brush (brush.id)}
+						<button
+							type="button"
+							title={brush.description}
+							aria-label={`Use ${brush.label.toLowerCase()}`}
+							onclick={() => chooseIllustrationBrush(brush.id)}
+						>
+							<svg aria-hidden="true" viewBox="0 0 44 22">
+								{#if brush.tool === 'rectangle'}
+									<rect
+										x="8"
+										y="3"
+										width="28"
+										height="16"
+										rx="4"
+										fill={brush.fill}
+										stroke={brush.color}
+										stroke-width="2"
+									/>
+								{:else if brush.tool === 'arrow'}
+									<path
+										d="M4 11h34m-5-5 5 5-5 5"
+										fill="none"
+										stroke={brush.color}
+										stroke-width={brush.width}
+									/>
+								{:else}
+									<path
+										d="M5 15C14 2 25 22 39 7"
+										fill="none"
+										stroke={brush.color}
+										stroke-width={brush.width > 2 ? 9 : 2}
+										opacity={brush.opacity / 100}
+										stroke-linecap="round"
+									/>
+								{/if}
+							</svg>
+							{brush.label}
+						</button>
+					{/each}
+				</fieldset>
 				<input
 					class="component-search"
 					aria-label="Search UI components"
@@ -2931,7 +3056,9 @@
 					<p class="component-empty">No matching components.</p>
 				{:else}
 					{#each filteredComponentCategories as category (category)}
-						<div class="component-category">{category}</div>
+						<div class="component-category">
+							{category === 'illustration' ? 'Technical illustration' : category}
+						</div>
 						{#each filteredComponents.filter((component) => component.category === category) as component (component.id)}
 							<button
 								type="button"
@@ -3040,7 +3167,7 @@
 						type="button"
 						class="command-option"
 						class:highlighted={highlightedCommandIndex === index}
-						onmouseenter={() => (highlightedCommandIndex = index)}
+						onpointermove={() => (highlightedCommandIndex = index)}
 						onclick={() => runWorkspaceCommand(command)}
 					>
 						<strong>{command.label}</strong>
@@ -3468,6 +3595,44 @@
 		padding: 0 6px 12px;
 	}
 
+	.illustration-brushes {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 6px;
+		margin: 0 0 12px;
+		padding: 8px;
+		border: 1px solid #d8dee8;
+		border-radius: 8px;
+	}
+	.illustration-brushes legend {
+		font-size: 11px;
+		color: #647084;
+		padding: 0 4px;
+	}
+	.illustration-brushes button {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		min-height: 44px;
+		border: 1px solid #e2e6ec;
+		border-radius: 6px;
+		background: #fff;
+		color: #20232b;
+		font-size: 12px;
+		cursor: pointer;
+	}
+	.illustration-brushes button:hover {
+		background: #f1f5fb;
+	}
+	.illustration-brushes button:focus-visible {
+		outline: 2px solid #4263eb;
+		outline-offset: 2px;
+	}
+	.illustration-brushes svg {
+		width: 36px;
+		height: 22px;
+		flex: none;
+	}
 	.preset-heading,
 	.page-heading,
 	.component-heading {
@@ -3613,6 +3778,73 @@
 		font-size: 13px;
 		text-align: left;
 		cursor: pointer;
+	}
+
+	.preset-search {
+		display: grid;
+		gap: 6px;
+		margin: 14px 0;
+		font-size: 12px;
+	}
+	.preset-search input {
+		width: 100%;
+		min-height: 42px;
+		padding: 8px;
+		border: 1px solid #cdd2dc;
+		border-radius: 7px;
+		color: inherit;
+		background: transparent;
+		font-size: 16px;
+	}
+	.reference-heading {
+		margin: 14px 0 8px;
+	}
+	.reference-preset {
+		border: 1px solid #dce0e7;
+		border-radius: 9px;
+		margin-bottom: 12px;
+		overflow: hidden;
+	}
+	.reference-insert {
+		display: grid;
+		gap: 6px;
+		width: 100%;
+		padding: 10px;
+		border: 0;
+		background: transparent;
+		color: inherit;
+		text-align: left;
+		cursor: pointer;
+	}
+	.reference-insert img {
+		width: 100%;
+		height: 220px;
+		object-fit: contain;
+		background: white;
+		border-radius: 5px;
+	}
+	.reference-insert > span {
+		font-size: 12px;
+		line-height: 1.4;
+	}
+	.reference-insert-label {
+		color: #356db8;
+		font-weight: 600;
+	}
+	.reference-preset > a {
+		display: block;
+		padding: 8px 10px;
+		border-top: 1px solid #dce0e7;
+		color: inherit;
+		font-size: 11px;
+	}
+	.reference-insert:hover {
+		background: #8fa5bf15;
+	}
+	.reference-insert:focus-visible,
+	.reference-preset > a:focus-visible {
+		outline: 2px solid #356db8;
+		outline-offset: -3px;
 	}
 
 	.design-content {

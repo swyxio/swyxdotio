@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
+import { DRAW_REFERENCE_PRESETS } from '../src/lib/draw-reference-presets.js';
 
 /** @typedef {{ isDeleted?: boolean, text?: string, roughness?: number }} DrawingElement */
 
@@ -11,6 +12,353 @@ async function openDrawingTemplates(page, section) {
 	await page.getByRole('checkbox', { name: 'Library' }).check({ force: true });
 	await page.getByRole('tab', { name: 'Templates, components, and memes' }).click();
 	await page.getByRole('tab', { name: section, exact: true }).click();
+}
+
+/** @param {import('@playwright/test').Page} page @returns {Promise<any[]>} */
+async function illustrationElements(page) {
+	return page.evaluate(() => {
+		const key = document.querySelector('.draw-canvas')?.getAttribute('data-storage-key');
+		return JSON.parse(localStorage.getItem(key ?? '') ?? '{"elements":[]}').elements.filter(
+			(/** @type {any} */ item) => !item.isDeleted
+		);
+	});
+}
+
+for (const preset of DRAW_REFERENCE_PRESETS) {
+	test(`reference preset ${preset.id} is native, bound, undoable and exportable`, async ({
+		page
+	}, testInfo) => {
+		/** @type {string[]} */
+		const inference = [];
+		page.on('request', (request) => {
+			if (/\/api\/draw\/(agent|generate|image)/.test(request.url())) inference.push(request.url());
+		});
+		await page.goto('/tools/draw');
+		await openDrawingTemplates(page, 'Presets');
+		await page.getByRole('searchbox', { name: 'Find a diagram' }).fill(preset.label);
+		const preview = page.getByRole('img', {
+			name: `${preset.label} editable reconstruction preview`
+		});
+		await expect(preview).toBeVisible();
+		await expect
+			.poll(() => preview.evaluate((/** @type {HTMLImageElement} */ image) => image.naturalWidth))
+			.toBeGreaterThan(0);
+		await page.getByRole('button', { name: `Insert ${preset.label} preset`, exact: true }).click();
+		await expect.poll(async () => (await illustrationElements(page)).length).toBeGreaterThan(60);
+		const elements = await illustrationElements(page);
+		const ids = new Set(elements.map((item) => item.id));
+		expect(elements.every((item) => item.type !== 'image')).toBe(true);
+		expect(elements.some((item) => item.link === preset.source?.url)).toBe(true);
+		for (const edge of elements.filter((item) => item.type === 'arrow')) {
+			expect(ids.has(edge.startBinding?.elementId)).toBe(true);
+			expect(ids.has(edge.endBinding?.elementId)).toBe(true);
+		}
+		await page.getByRole('button', { name: 'Undo', exact: true }).click();
+		await expect.poll(async () => (await illustrationElements(page)).length).toBe(0);
+		await page.getByRole('button', { name: 'Redo', exact: true }).click();
+		await expect.poll(async () => (await illustrationElements(page)).length).toBe(elements.length);
+		await page.reload();
+		await expect.poll(async () => (await illustrationElements(page)).length).toBe(elements.length);
+		const restored = await illustrationElements(page);
+		// Native history recomputes attached arrow endpoints against rounded outlines.
+		// Nodes/text must not move; connections must retain their actual bindings.
+		const geometry = (/** @type {any[]} */ items) =>
+			items.map((item) =>
+				item.type === 'arrow'
+					? [item.id, item.startBinding, item.endBinding]
+					: [item.id, item.x, item.y, item.width, item.height, item.text]
+			);
+		expect(geometry(restored)).toEqual(geometry(elements));
+		await page.getByRole('radio', { name: 'Selection', exact: true }).press('ControlOrMeta+a');
+		await page.getByRole('button', { name: 'Open drawing export options', exact: true }).click();
+		const exporter = page.getByRole('dialog', { name: 'Creative workspace' });
+		await exporter
+			.getByRole('combobox', { name: 'Scope', exact: true })
+			.selectOption({ label: 'Selected elements' });
+		for (const format of ['PNG', 'SVG']) {
+			await exporter
+				.getByRole('combobox', { name: 'Format', exact: true })
+				.selectOption({ label: format });
+			const downloading = page.waitForEvent('download', { timeout: 10000 });
+			await exporter.getByRole('button', { name: 'Download', exact: true }).click();
+			await (await downloading).saveAs(testInfo.outputPath(`${preset.id}.${format.toLowerCase()}`));
+		}
+		const svg = await readFile(testInfo.outputPath(`${preset.id}.svg`), 'utf8');
+		expect(svg).not.toContain('<image');
+		expect(svg).toContain('ByteByteGo');
+		expect(inference).toEqual([]);
+		await writeFile(
+			testInfo.outputPath(`${preset.id}.excalidraw`),
+			JSON.stringify({
+				type: 'excalidraw',
+				version: 2,
+				source: 'https://swyx.io/tools/draw',
+				elements: restored,
+				appState: { viewBackgroundColor: '#ffffff', gridSize: null },
+				files: {}
+			})
+		);
+	});
+}
+
+for (const mode of ['thinking', 'thumbnails', 'experiment']) {
+	test(`reference presets remain reachable in ${mode} on mobile without replacing artwork`, async ({
+		page
+	}) => {
+		await page.setViewportSize({ width: 390, height: 844 });
+		await page.goto('/tools/draw');
+		await page.getByRole('button', { name: 'Choose drawing mode and tools', exact: true }).click();
+		await page
+			.getByRole('combobox', { name: 'Starting experience', exact: true })
+			.selectOption(mode);
+		await page.keyboard.press('Escape');
+		await openDrawingTemplates(page, 'Presets');
+		await page.getByRole('searchbox', { name: 'Find a diagram' }).fill('Priority quadrants');
+		await page
+			.getByRole('button', { name: 'Insert Priority quadrants preset', exact: true })
+			.click();
+		await expect.poll(async () => (await illustrationElements(page)).length).toBeGreaterThan(0);
+		const original = await illustrationElements(page);
+		await openDrawingTemplates(page, 'Presets');
+		await page.getByRole('searchbox', { name: 'Find a diagram' }).fill('ByteByteGo');
+		await expect(page.getByRole('button', { name: /^Insert .+ preset$/ })).toHaveCount(8);
+		await page
+			.getByRole('button', { name: 'Insert Harness engineering preset', exact: true })
+			.click();
+		await expect
+			.poll(async () => (await illustrationElements(page)).length)
+			.toBeGreaterThan(original.length + 60);
+		const current = await illustrationElements(page);
+		for (const old of original) expect(current.find((item) => item.id === old.id)).toEqual(old);
+		await page.getByRole('button', { name: 'Undo', exact: true }).click();
+		await expect.poll(async () => (await illustrationElements(page)).length).toBe(original.length);
+		await page.keyboard.press('ControlOrMeta+k');
+		await page
+			.getByRole('textbox', { name: 'Search components, presets, pages, and actions' })
+			.fill('Git merge vs rebase');
+		await page.keyboard.press('Enter');
+		await expect
+			.poll(async () => (await illustrationElements(page)).length)
+			.toBeGreaterThan(original.length + 60);
+	});
+}
+
+for (const study of [
+	{
+		name: 'icons',
+		button: 'Illustration sampler',
+		title: 'Small pieces, clear ideas',
+		groups: 4,
+		lines: 10,
+		labels: ['Document', 'Request queue'],
+		stem: 'illustration-study'
+	},
+	{
+		name: 'marks',
+		button: 'Marks and structure sampler',
+		title: 'Give the eye a path',
+		groups: 6,
+		lines: 3,
+		labels: ['Show the mechanism', 'HOW IT WORKS'],
+		stem: 'illustration-marks-study'
+	}
+]) {
+	test(`illustration ${study.name} sampler is native, grouped, undoable and survives reload`, async ({
+		page
+	}, testInfo) => {
+		await page.goto('/tools/draw');
+		await openDrawingTemplates(page, 'Components');
+		await page.getByRole('button', { name: `Insert ${study.button} component` }).click();
+		await expect.poll(async () => (await illustrationElements(page)).length).toBeGreaterThan(40);
+		const elements = await illustrationElements(page);
+		expect(elements.every((/** @type {any} */ item) => item.type !== 'image')).toBe(true);
+		expect(elements.some((/** @type {any} */ item) => item.text === study.title)).toBe(true);
+		expect(new Set(elements.flatMap((/** @type {any} */ item) => item.groupIds)).size).toBe(
+			study.groups
+		);
+		expect(
+			elements.filter((/** @type {any} */ item) => item.type === 'line').length
+		).toBeGreaterThan(study.lines);
+		await expect(page.getByRole('button', { name: 'Undo', exact: true })).toBeEnabled();
+		await page.getByRole('button', { name: 'Undo', exact: true }).click();
+		await expect.poll(async () => (await illustrationElements(page)).length).toBe(0);
+		await page.getByRole('button', { name: 'Redo', exact: true }).click();
+		await expect.poll(async () => (await illustrationElements(page)).length).toBe(elements.length);
+		await page.reload();
+		await expect.poll(async () => (await illustrationElements(page)).length).toBe(elements.length);
+		const restored = await illustrationElements(page);
+		expect(
+			restored.map((/** @type {any} */ item) => [
+				item.id,
+				item.x,
+				item.y,
+				item.width,
+				item.height,
+				item.groupIds,
+				item.text
+			])
+		).toEqual(
+			elements.map((/** @type {any} */ item) => [
+				item.id,
+				item.x,
+				item.y,
+				item.width,
+				item.height,
+				item.groupIds,
+				item.text
+			])
+		);
+		await page.getByRole('radio', { name: 'Selection', exact: true }).press('ControlOrMeta+a');
+		await expect(
+			page.getByRole('button', { name: 'Ungroup selection', exact: true })
+		).toBeVisible();
+		await page.getByRole('button', { name: 'Open drawing export options', exact: true }).click();
+		const exporter = page.getByRole('dialog', { name: 'Creative workspace' });
+		await exporter
+			.getByRole('combobox', { name: 'Scope', exact: true })
+			.selectOption({ label: 'Selected elements' });
+		for (const format of ['PNG', 'SVG']) {
+			await exporter
+				.getByRole('combobox', { name: 'Format', exact: true })
+				.selectOption({ label: format });
+			const downloading = page.waitForEvent('download', { timeout: 10000 });
+			await exporter.getByRole('button', { name: 'Download', exact: true }).click();
+			const download = await downloading;
+			await download.saveAs(testInfo.outputPath(`${study.stem}.${format.toLowerCase()}`));
+		}
+		const svg = await readFile(testInfo.outputPath(`${study.stem}.svg`), 'utf8');
+		for (const text of study.labels) expect(svg).toContain(text);
+		expect(svg).not.toContain('<image');
+		await writeFile(
+			testInfo.outputPath(`${study.stem}.excalidraw`),
+			JSON.stringify({
+				type: 'excalidraw',
+				version: 2,
+				source: 'https://swyx.io/tools/draw',
+				elements: restored,
+				appState: { viewBackgroundColor: '#ffffff', gridSize: null },
+				files: {}
+			})
+		);
+	});
+}
+
+test('illustration brushes draw new styles without recoloring existing artwork or calling AI', async ({
+	page
+}) => {
+	let inference = 0;
+	await page.route(/\/tools\/api\/draw\/(edit|agent|generate)(?:[/?]|$)/, (route) => {
+		if (route.request().method() === 'GET') return route.continue();
+		inference += 1;
+		return route.abort();
+	});
+	await page.goto('/tools/draw');
+	await openDrawingTemplates(page, 'Components');
+	await page.getByRole('button', { name: 'Insert Layered document component' }).click();
+	await expect.poll(async () => (await illustrationElements(page)).length).toBeGreaterThan(0);
+	const original = await illustrationElements(page);
+	await page.getByRole('button', { name: 'Use soft marker', exact: true }).click();
+	await page.getByRole('button', { name: 'Close', exact: true }).click();
+	await page.mouse.move(330, 270);
+	await page.mouse.down();
+	await page.mouse.move(470, 295, { steps: 12 });
+	await page.mouse.up();
+	await expect
+		.poll(async () =>
+			(await illustrationElements(page)).some((/** @type {any} */ item) => item.type === 'freedraw')
+		)
+		.toBe(true);
+	let current = await illustrationElements(page);
+	const marker = current.find((/** @type {any} */ item) => item.type === 'freedraw');
+	expect(marker.opacity).toBe(25);
+	expect(marker.strokeWidth).toBe(20);
+	await page.keyboard.press('Control+k');
+	const search = page.getByRole('textbox', {
+		name: 'Search components, presets, pages, and actions'
+	});
+	await search.fill('Use pastel shape');
+	await search.press('Enter');
+	await page.mouse.move(550, 270);
+	await page.mouse.down();
+	await page.mouse.move(680, 340, { steps: 5 });
+	await page.mouse.up();
+	await expect
+		.poll(async () => (await illustrationElements(page)).length)
+		.toBe(original.length + 2);
+	current = await illustrationElements(page);
+	const addedShape = current.find(
+		(/** @type {any} */ item) =>
+			!original.some((/** @type {any} */ old) => old.id === item.id) && item.type === 'rectangle'
+	);
+	expect(addedShape).toMatchObject({
+		backgroundColor: '#d5d1f3',
+		opacity: 100,
+		roughness: 0,
+		strokeWidth: 2
+	});
+	await page.keyboard.press('Control+k');
+	await search.fill('Use flow arrow');
+	await expect(
+		page.getByRole('dialog', { name: 'Workspace commands' }).getByRole('button').first()
+	).toContainText('Use flow arrow');
+	await search.press('Enter');
+	await page.mouse.move(550, 480);
+	await page.mouse.down();
+	await page.mouse.move(680, 480, { steps: 5 });
+	await page.mouse.up();
+	await expect
+		.poll(async () => (await illustrationElements(page)).length)
+		.toBe(original.length + 3);
+	const flow = (await illustrationElements(page)).find(
+		(/** @type {any} */ item) => item.type === 'arrow'
+	);
+	expect(flow).toMatchObject({ strokeWidth: 3, endArrowhead: 'triangle', opacity: 100 });
+	await page.keyboard.press('Control+k');
+	await search.fill('Use bold ink');
+	await expect(
+		page.getByRole('dialog', { name: 'Workspace commands' }).getByRole('button').first()
+	).toContainText('Use bold ink');
+	await search.press('Enter');
+	await page.mouse.move(330, 500);
+	await page.mouse.down();
+	await page.mouse.move(470, 520, { steps: 12 });
+	await page.mouse.up();
+	await expect
+		.poll(async () => (await illustrationElements(page)).length)
+		.toBe(original.length + 4);
+	current = await illustrationElements(page);
+	expect(
+		current.find((/** @type {any} */ item) => item.type === 'freedraw' && item.id !== marker.id)
+	).toMatchObject({ strokeWidth: 5, opacity: 100, strokeColor: '#20232b' });
+	expect(
+		current.filter((/** @type {any} */ item) =>
+			original.some((/** @type {any} */ old) => old.id === item.id)
+		)
+	).toEqual(original);
+	expect(inference).toBe(0);
+});
+
+for (const mode of ['thinking', 'thumbnails', 'experiment']) {
+	test(`illustration tools stay reachable from ${mode} on mobile`, async ({ page }) => {
+		await page.setViewportSize({ width: 390, height: 844 });
+		await page.goto('/tools/draw');
+		await page.getByRole('button', { name: 'Choose drawing mode and tools' }).click();
+		await page
+			.getByRole('combobox', { name: 'Starting experience', exact: true })
+			.selectOption(mode);
+		await page.keyboard.press('Escape');
+		await openDrawingTemplates(page, 'Components');
+		await expect(page.getByRole('button', { name: 'Use ink pen', exact: true })).toBeVisible();
+		const brushBounds = await page
+			.getByRole('button', { name: 'Use ink pen', exact: true })
+			.boundingBox();
+		expect(brushBounds?.height).toBeGreaterThanOrEqual(44);
+		expect((brushBounds?.x ?? 0) + (brushBounds?.width ?? 0)).toBeLessThanOrEqual(390);
+		await page.getByRole('textbox', { name: 'Search UI components' }).fill('request queue');
+		await page.getByRole('button', { name: 'Insert Request queue component' }).click();
+		await expect.poll(async () => (await illustrationElements(page)).length).toBeGreaterThan(0);
+		await expect(page.getByRole('button', { name: 'Use pastel shape', exact: true })).toBeVisible();
+	});
 }
 
 test('drawing canvas always uses light mode even when the site is dark', async ({ page }) => {
@@ -158,7 +506,7 @@ test('visual presets insert labeled editable diagrams without replacing existing
 	await openDrawingTemplates(page, 'Presets');
 
 	const presetOptions = page.getByRole('button', { name: /^insert .+ preset$/i });
-	await expect(presetOptions).toHaveCount(12);
+	await expect(presetOptions).toHaveCount(20);
 
 	await page.getByRole('button', { name: /insert priority quadrants preset/i }).click();
 	await expect
