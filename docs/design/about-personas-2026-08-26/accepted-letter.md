@@ -61,6 +61,8 @@ Limits: full keyboard-only traversal, 200% zoom, no-JavaScript browser mode, and
 
 Release checkout: `/Users/swyx/.codex/worktrees/swyxdotio-seo-aeo`, branch `codex/swyxdotio-seo-aeo`, targeting the repository's default `master`. Local verification does not imply production activation; release and live checks follow separately.
 
+After integrating current master: 527 tests passed, typecheck remained clean, and the production build succeeded. PR #580 deployed successfully. Live verification then caught a legacy root `_redirects` rule sending `/now` to `/about#now`, which the Vite preview did not apply. Removed that obsolete rule and added a regression assertion; direct production-route checks are required, not only client-side navigation.
+
 ## Memory ledger candidates
 
 Before implementing a two-pane design, identify each pane's semantic role: primary content, navigation, or commentary. Check that every substantive section remains in the intended reading column, rather than accepting a superficially similar two-column layout.
