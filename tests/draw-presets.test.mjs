@@ -2,13 +2,14 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { DRAW_PRESETS } from '../src/lib/draw-presets.js';
+import { DRAW_REFERENCE_PRESETS } from '../src/lib/draw-reference-presets.js';
 
 const SUPPORTED_ELEMENT_TYPES = new Set(['arrow', 'ellipse', 'rectangle', 'text']);
 const HAND_DRAWN_FONT = 5;
 
 test('drawing presets expose the complete named visual-thinking catalog', () => {
 	assert.deepEqual(
-		DRAW_PRESETS.map(({ id }) => id),
+		DRAW_PRESETS.filter((preset) => !preset.source).map(({ id }) => id),
 		[
 			'architecture-comparison',
 			'agent-tool-loop',
@@ -62,8 +63,8 @@ test('essay starters encode comparisons, feedback and evidence with editable bou
 	);
 });
 
-test('every preset generates independently editable native Excalidraw element skeletons', () => {
-	for (const preset of DRAW_PRESETS) {
+test('original presets retain their independently editable hand-drawn skeletons', () => {
+	for (const preset of DRAW_PRESETS.filter((preset) => !preset.source)) {
 		const shapes = preset.createShapes();
 		const identifiers = new Set();
 
@@ -105,6 +106,108 @@ test('every preset generates independently editable native Excalidraw element sk
 				assert.equal(shape.fontFamily, HAND_DRAWN_FONT);
 				assert.ok(shape.fontSize >= 16, `${preset.id} has unreadable text`);
 			}
+		}
+	}
+});
+
+test('reference reconstructions retain complete mechanisms, source links and native bindings', () => {
+	assert.equal(DRAW_REFERENCE_PRESETS.length, 8);
+	const required = {
+		'bytebytego-harness': [
+			'Context builder',
+			'Policy gate',
+			'Tools / runtime',
+			'Verify',
+			'Accepted result',
+			'Observability',
+			'Constraints'
+		],
+		'bytebytego-inference-engines': [
+			'Ollama',
+			'vLLM',
+			'SGLang',
+			'Continuous batching',
+			'RadixAttention cache'
+		],
+		'bytebytego-api-testing': [
+			'Smoke',
+			'Functional',
+			'Contract',
+			'Integration',
+			'Regression',
+			'Load',
+			'Stress',
+			'Security',
+			'Fuzz'
+		],
+		'bytebytego-kafka': [
+			'Log analysis',
+			'Real-time ML',
+			'Monitoring',
+			'Change data',
+			'Event-driven'
+		],
+		'bytebytego-cicd': [
+			'Build',
+			'Automated checks',
+			'Merge to main',
+			'Artifact',
+			'Staging',
+			'Continuous delivery',
+			'Continuous deployment',
+			'Production'
+		],
+		'bytebytego-memory': [
+			'Context window',
+			'Retrieval',
+			'Persistent memory store',
+			'Episodic',
+			'Semantic',
+			'Procedural'
+		],
+		'bytebytego-git-history': [
+			'INITIAL STATE',
+			'AFTER GIT MERGE',
+			'AFTER GIT REBASE',
+			'E′',
+			'F′',
+			'G′'
+		],
+		'bytebytego-data-agent': [
+			'OFFLINE DATA PREP',
+			'RUNTIME WORKFLOW',
+			'Similarity search',
+			'Assembled context',
+			'Runtime',
+			'LLM',
+			'TOOLS'
+		]
+	};
+	for (const preset of DRAW_REFERENCE_PRESETS) {
+		assert.match(
+			preset.source.url,
+			/^https:\/\/www.linkedin.com\/feed\/update\/urn:li:activity:\d+\/$/
+		);
+		assert.match(preset.source.note, /Not a pixel-exact or animated copy/);
+		const shapes = preset.createShapes();
+		const ids = new Set(shapes.map((s) => s.id));
+		const content = shapes.map((s) => s.text ?? s.label?.text ?? '').join('\n');
+		for (const term of required[preset.id])
+			assert.ok(content.includes(term), `${preset.id} must retain ${term}`);
+		assert.ok(shapes.length > 60);
+		assert.ok(
+			shapes.some((s) => s.link === preset.source.url),
+			'source travels with the native scene'
+		);
+		for (const s of shapes) {
+			assert.ok(['rectangle', 'ellipse', 'line', 'arrow', 'text'].includes(s.type));
+			assert.equal(s.roughness, 0);
+			assert.ok(Number.isFinite(s.x) && Number.isFinite(s.y));
+			if (s.type === 'arrow') {
+				assert.ok(ids.has(s.start?.id), 'edge starts at an editable native node');
+				assert.ok(ids.has(s.end?.id), 'edge ends at an editable native node');
+			}
+			if (s.type === 'text') assert.equal(s.fontFamily, 2);
 		}
 	}
 });

@@ -1,5 +1,19 @@
 # Ink and pastel: first native illustration study
 
+## Full-diagram preset expansion (26 August)
+
+Following approval to update presets, added eight complete native **reconstructions**, rather than claiming pixel-exact clones: `bytebytego-harness`, `bytebytego-inference-engines`, `bytebytego-api-testing`, `bytebytego-kafka`, `bytebytego-cicd`, `bytebytego-memory`, `bytebytego-git-history`, `bytebytego-data-agent`.
+
+Each is explicitly inserted from the existing Presets tab or shared command registry, beside any existing artwork, with the entire insertion selected. Native arrows bind to native nodes; glyphs, labels, fills and containers remain editable. No inference or source-image request is required. The original twelve starters and every mode retain access. Source attribution is a separate gallery link and a linked text element that travels with the scene.
+
+`draw-reference-presets.js` holds builders and source metadata; `draw-presets.js` appends them to the shared registry. The narrow route addition provides search, actual native-render previews and one-click insertion. Static previews are local WebP exports of our native scenes, not reference screenshots. Insertion uses Excalidraw's native restore normalization. No new engine, dependency, document type, auth rule or provider configuration.
+
+Coverage: [the saved inventory](../research/draw-bytebytego-inventory.md) contains 296 distinct Alex activity IDs plus eleven company entries, reaching one-year-old material with gaps. Older-feed timeouts prevented proving an all-time endpoint. Eight selected diagrams were closely inspected, including source screenshots and browser-delivered assets. Do not describe this as scanning every historical post.
+
+Fidelity limits: static diagrams, simplified original glyphs, native sans-serif type, rewritten captions and some compressed subgraphs; no trademark logos, original raster artwork, animation or exact brand typography. The Git reconstruction is a light-paper variant of the dark source. Model rankings, numerical benchmarks and dated model-version claims are not imported as facts. These are usable editable studies, not ByteByteGo-endorsed originals.
+
+Verification: all eight native renders inspected, PNG/SVG and `.excalidraw` artifacts retained outside git. Corrected the CDC sequence and Git replay-label wrapping during visual review. Browser checks cover each preset's bindings, insertion, native one-step undo/redo and reload, plus actual mode switching on 390px screens, preservation of old artwork, command-palette access and zero inference requests. Nodes/text retain exact geometry; native history may recompute bound-arrow endpoints against rounded shapes, so tests verify those connections instead of falsely asserting pixel-identical arrow coordinates. Existing illustration sampler tests still require exact unbound geometry.
+
 26 August 2026. Local visual prototype, based on current master `12bc3f7`. The separate provider/model-picker checkpoint `f7f55d8` and its secrets remain untouched. No inference or production changes.
 
 ## Close-up observations
@@ -13,13 +27,13 @@ Captured the [harness graphic](https://www.linkedin.com/feed/update/urn:li:activ
 
 ## Small implemented pieces
 
-| ID | Native construction |
-| --- | --- |
-| `illustration-document` | Folded closed paper outline, separate lavender backing sheet, fine detail lines and editable label. |
-| `illustration-database` | Elliptical top, closed cylinder body, two curved separator strokes, highlight and backing layer. |
-| `illustration-queue` | Repeated teal request tiles, independent outline/backing tray, filled direction arrows and editable label. |
-| `illustration-callout` | Pale panel, offset backing, number badge, editable title and caption. |
-| `illustration-sampler` | One explicitly inserted demonstration combining those parts and two line weights. Never inserted automatically. |
+| ID                      | Native construction                                                                                             |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `illustration-document` | Folded closed paper outline, separate lavender backing sheet, fine detail lines and editable label.             |
+| `illustration-database` | Elliptical top, closed cylinder body, two curved separator strokes, highlight and backing layer.                |
+| `illustration-queue`    | Repeated teal request tiles, independent outline/backing tray, filled direction arrows and editable label.      |
+| `illustration-callout`  | Pale panel, offset backing, number badge, editable title and caption.                                           |
+| `illustration-sampler`  | One explicitly inserted demonstration combining those parts and two line weights. Never inserted automatically. |
 
 Original constructions, not copied reference icon files. Each icon/callout has its own group; ungroup exposes individual editable native objects. No image files or external asset dependency.
 

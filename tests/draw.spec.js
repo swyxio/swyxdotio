@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { readFile, writeFile } from 'node:fs/promises';
+import { DRAW_REFERENCE_PRESETS } from '../src/lib/draw-reference-presets.js';
 
 /** @typedef {{ isDeleted?: boolean, text?: string, roughness?: number }} DrawingElement */
 
@@ -20,6 +21,117 @@ async function illustrationElements(page) {
 		return JSON.parse(localStorage.getItem(key ?? '') ?? '{"elements":[]}').elements.filter(
 			(/** @type {any} */ item) => !item.isDeleted
 		);
+	});
+}
+
+for (const preset of DRAW_REFERENCE_PRESETS) {
+	test(`reference preset ${preset.id} is native, bound, undoable and exportable`, async ({
+		page
+	}, testInfo) => {
+		const inference = [];
+		page.on('request', (request) => {
+			if (/\/api\/draw\/(agent|generate|image)/.test(request.url())) inference.push(request.url());
+		});
+		await page.goto('/tools/draw');
+		await openDrawingTemplates(page, 'Presets');
+		await page.getByRole('searchbox', { name: 'Find a diagram' }).fill(preset.label);
+		await page.getByRole('button', { name: `Insert ${preset.label} preset`, exact: true }).click();
+		await expect.poll(async () => (await illustrationElements(page)).length).toBeGreaterThan(60);
+		const elements = await illustrationElements(page);
+		const ids = new Set(elements.map((item) => item.id));
+		expect(elements.every((item) => item.type !== 'image')).toBe(true);
+		expect(elements.some((item) => item.link === preset.source.url)).toBe(true);
+		for (const edge of elements.filter((item) => item.type === 'arrow')) {
+			expect(ids.has(edge.startBinding?.elementId)).toBe(true);
+			expect(ids.has(edge.endBinding?.elementId)).toBe(true);
+		}
+		await page.getByRole('button', { name: 'Undo', exact: true }).click();
+		await expect.poll(async () => (await illustrationElements(page)).length).toBe(0);
+		await page.getByRole('button', { name: 'Redo', exact: true }).click();
+		await expect.poll(async () => (await illustrationElements(page)).length).toBe(elements.length);
+		await page.reload();
+		await expect.poll(async () => (await illustrationElements(page)).length).toBe(elements.length);
+		const restored = await illustrationElements(page);
+		// Native history recomputes attached arrow endpoints against rounded outlines.
+		// Nodes/text must not move; connections must retain their actual bindings.
+		const geometry = (items) =>
+			items.map((item) =>
+				item.type === 'arrow'
+					? [item.id, item.startBinding, item.endBinding]
+					: [item.id, item.x, item.y, item.width, item.height, item.text]
+			);
+		expect(geometry(restored)).toEqual(geometry(elements));
+		await page.getByRole('radio', { name: 'Selection', exact: true }).press('ControlOrMeta+a');
+		await page.getByRole('button', { name: 'Open drawing export options', exact: true }).click();
+		const exporter = page.getByRole('dialog', { name: 'Creative workspace' });
+		await exporter
+			.getByRole('combobox', { name: 'Scope', exact: true })
+			.selectOption({ label: 'Selected elements' });
+		for (const format of ['PNG', 'SVG']) {
+			await exporter
+				.getByRole('combobox', { name: 'Format', exact: true })
+				.selectOption({ label: format });
+			const downloading = page.waitForEvent('download', { timeout: 10000 });
+			await exporter.getByRole('button', { name: 'Download', exact: true }).click();
+			await (await downloading).saveAs(testInfo.outputPath(`${preset.id}.${format.toLowerCase()}`));
+		}
+		const svg = await readFile(testInfo.outputPath(`${preset.id}.svg`), 'utf8');
+		expect(svg).not.toContain('<image');
+		expect(svg).toContain('ByteByteGo');
+		expect(inference).toEqual([]);
+		await writeFile(
+			testInfo.outputPath(`${preset.id}.excalidraw`),
+			JSON.stringify({
+				type: 'excalidraw',
+				version: 2,
+				source: 'https://swyx.io/tools/draw',
+				elements: restored,
+				appState: { viewBackgroundColor: '#ffffff', gridSize: null },
+				files: {}
+			})
+		);
+	});
+}
+
+for (const mode of ['thinking', 'thumbnails', 'experiment']) {
+	test(`reference presets remain reachable in ${mode} on mobile without replacing artwork`, async ({
+		page
+	}) => {
+		await page.setViewportSize({ width: 390, height: 844 });
+		await page.goto('/tools/draw');
+		await page.getByRole('button', { name: 'Choose drawing mode and tools', exact: true }).click();
+		await page
+			.getByRole('combobox', { name: 'Starting experience', exact: true })
+			.selectOption(mode);
+		await page.keyboard.press('Escape');
+		await openDrawingTemplates(page, 'Presets');
+		await page.getByRole('searchbox', { name: 'Find a diagram' }).fill('Priority quadrants');
+		await page
+			.getByRole('button', { name: 'Insert Priority quadrants preset', exact: true })
+			.click();
+		await expect.poll(async () => (await illustrationElements(page)).length).toBeGreaterThan(0);
+		const original = await illustrationElements(page);
+		await openDrawingTemplates(page, 'Presets');
+		await page.getByRole('searchbox', { name: 'Find a diagram' }).fill('ByteByteGo');
+		await expect(page.getByRole('button', { name: /^Insert .+ preset$/ })).toHaveCount(8);
+		await page
+			.getByRole('button', { name: 'Insert Harness engineering preset', exact: true })
+			.click();
+		await expect
+			.poll(async () => (await illustrationElements(page)).length)
+			.toBeGreaterThan(original.length + 60);
+		const current = await illustrationElements(page);
+		for (const old of original) expect(current.find((item) => item.id === old.id)).toEqual(old);
+		await page.getByRole('button', { name: 'Undo', exact: true }).click();
+		await expect.poll(async () => (await illustrationElements(page)).length).toBe(original.length);
+		await page.keyboard.press('ControlOrMeta+k');
+		await page
+			.getByRole('textbox', { name: 'Search components, presets, pages, and actions' })
+			.fill('Git merge vs rebase');
+		await page.keyboard.press('Enter');
+		await expect
+			.poll(async () => (await illustrationElements(page)).length)
+			.toBeGreaterThan(original.length + 60);
 	});
 }
 
@@ -386,7 +498,7 @@ test('visual presets insert labeled editable diagrams without replacing existing
 	await openDrawingTemplates(page, 'Presets');
 
 	const presetOptions = page.getByRole('button', { name: /^insert .+ preset$/i });
-	await expect(presetOptions).toHaveCount(12);
+	await expect(presetOptions).toHaveCount(20);
 
 	await page.getByRole('button', { name: /insert priority quadrants preset/i }).click();
 	await expect

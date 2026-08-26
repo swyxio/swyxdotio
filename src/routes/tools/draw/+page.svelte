@@ -113,6 +113,14 @@
 	let exportToSvg;
 	/** @type {typeof import('$lib/draw-presets.js').DRAW_PRESETS} */
 	let presets = $state([]);
+	let presetQuery = $state('');
+	let matchingPresets = $derived(
+		presets.filter((preset) =>
+			`${preset.label} ${preset.description} ${preset.id} ${preset.source?.author ?? ''}`
+				.toLowerCase()
+				.includes(presetQuery.trim().toLowerCase())
+		)
+	);
 	/** @type {typeof import('$lib/draw-ui-components.js').DRAW_UI_COMPONENTS} */
 	let uiComponents = $state([]);
 	/** @type {typeof import('$lib/draw-ui-components.js').createDrawUiComponent | undefined} */
@@ -1678,12 +1686,14 @@
 			x: (shape.x ?? 0) + offsetX,
 			y: (shape.y ?? 0) + offsetY
 		}));
-		const shapes = convertElements(
+		const converted = convertElements(
 			/** @type {import('@excalidraw/excalidraw/data/transform').ExcalidrawElementSkeleton[]} */ (
 				skeletons
 			),
 			{ regenerateIds: true }
 		);
+		// Normalize linear bounds before capture so insertion and reload agree.
+		const shapes = restoreNativeElements ? restoreNativeElements(converted, null) : converted;
 
 		editor.updateScene({
 			elements: [...editor.getSceneElementsIncludingDeleted(), ...shapes],
@@ -2819,7 +2829,53 @@
 					{/each}
 					<span>Assistant actions prepare a request. Review before sending.</span>
 				</div>
-				{#each presets as preset (preset.id)}
+				<label class="preset-search">
+					<span>Find a diagram</span>
+					<input
+						type="search"
+						bind:value={presetQuery}
+						placeholder="Try Kafka, memory, or ByteByteGo"
+					/>
+				</label>
+				{#if matchingPresets.some((preset) => preset.source)}
+					<div class="preset-heading reference-heading">
+						<strong>Alex Xu / ByteByteGo studies</strong>
+						<span
+							>One click inserts the complete editable diagram. Rebuilt glyphs and wording; no
+							animation.</span
+						>
+					</div>
+					{#each matchingPresets.filter((preset) => preset.source) as preset (preset.id)}
+						<div class="reference-preset">
+							<button
+								type="button"
+								class="reference-insert"
+								aria-label="Insert {preset.label} preset"
+								onclick={() => insertPreset(preset)}
+							>
+								<img
+									src={preset.preview}
+									alt="{preset.label} editable reconstruction preview"
+									loading="lazy"
+									width="280"
+									height="240"
+								/>
+								<strong>{preset.label}</strong>
+								<span>{preset.description}</span>
+								<span class="reference-insert-label">＋ Insert editable diagram</span>
+							</button>
+							<a href={preset.source?.url} target="_blank" rel="noreferrer"
+								>View Alex Xu / ByteByteGo original ↗</a
+							>
+						</div>
+					{/each}
+				{/if}
+				{#if matchingPresets.some((preset) => !preset.source)}<div
+						class="preset-heading reference-heading"
+					>
+						<strong>Visual thinking starters</strong>
+					</div>{/if}
+				{#each matchingPresets.filter((preset) => !preset.source) as preset (preset.id)}
 					<button
 						type="button"
 						class="preset-option"
@@ -2888,6 +2944,9 @@
 						</span>
 					</button>
 				{/each}
+				{#if !matchingPresets.length}<p>
+						No diagrams match “{presetQuery}”. Try another term.
+					</p>{/if}
 			</section>
 		{:else if workspaceSection === 'designs'}
 			<section
@@ -3710,6 +3769,73 @@
 		font-size: 13px;
 		text-align: left;
 		cursor: pointer;
+	}
+
+	.preset-search {
+		display: grid;
+		gap: 6px;
+		margin: 14px 0;
+		font-size: 12px;
+	}
+	.preset-search input {
+		width: 100%;
+		min-height: 42px;
+		padding: 8px;
+		border: 1px solid #cdd2dc;
+		border-radius: 7px;
+		color: inherit;
+		background: transparent;
+		font-size: 16px;
+	}
+	.reference-heading {
+		margin: 14px 0 8px;
+	}
+	.reference-preset {
+		border: 1px solid #dce0e7;
+		border-radius: 9px;
+		margin-bottom: 12px;
+		overflow: hidden;
+	}
+	.reference-insert {
+		display: grid;
+		gap: 6px;
+		width: 100%;
+		padding: 10px;
+		border: 0;
+		background: transparent;
+		color: inherit;
+		text-align: left;
+		cursor: pointer;
+	}
+	.reference-insert img {
+		width: 100%;
+		height: 220px;
+		object-fit: contain;
+		background: white;
+		border-radius: 5px;
+	}
+	.reference-insert > span {
+		font-size: 12px;
+		line-height: 1.4;
+	}
+	.reference-insert-label {
+		color: #356db8;
+		font-weight: 600;
+	}
+	.reference-preset > a {
+		display: block;
+		padding: 8px 10px;
+		border-top: 1px solid #dce0e7;
+		color: inherit;
+		font-size: 11px;
+	}
+	.reference-insert:hover {
+		background: #8fa5bf15;
+	}
+	.reference-insert:focus-visible,
+	.reference-preset > a:focus-visible {
+		outline: 2px solid #356db8;
+		outline-offset: -3px;
 	}
 
 	.design-content {
