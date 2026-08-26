@@ -34,6 +34,7 @@
 	} from '$lib/draw-designs.js';
 	import DrawAgent from '$lib/DrawAgent.svelte';
 	import { DRAW_THINKING_WORKFLOWS } from '$lib/draw-thinking.js';
+	import { DRAW_ILLUSTRATION_BRUSHES, applyIllustrationBrush } from '$lib/draw-illustration.js';
 	import DrawImageToolbox from '$lib/DrawImageToolbox.svelte';
 	import DrawWorkspaceNav from '$lib/DrawWorkspaceNav.svelte';
 	import DrawStartingPoints from '$lib/DrawStartingPoints.svelte';
@@ -100,6 +101,8 @@
 	let dismissedStartingPages = $state([]);
 	/** @type {typeof import('@excalidraw/excalidraw').convertToExcalidrawElements | null} */
 	let convertElements = null;
+	/** @type {typeof import('@excalidraw/excalidraw').restoreElements | null} */
+	let restoreNativeElements = null;
 	/** @type {typeof import('@excalidraw/excalidraw').newElementWith | null} */
 	let updateElement = $state.raw(null);
 	/** @type {typeof import('@excalidraw/excalidraw').CaptureUpdateAction.IMMEDIATELY | null} */
@@ -655,6 +658,14 @@
 		];
 
 		commands.push(
+			...DRAW_ILLUSTRATION_BRUSHES.map((brush) => ({
+				id: `brush-${brush.id}`,
+				label: `Use ${brush.label.toLowerCase()}`,
+				description: `${brush.description} Only affects new strokes.`,
+				category: 'Illustration tools',
+				keywords: ['brush', 'illustration', 'ink', 'pastel', brush.id],
+				run: () => chooseIllustrationBrush(brush.id)
+			})),
 			...DRAW_THINKING_WORKFLOWS.map((workflow) => ({
 				id: `workflow-${workflow.id}`,
 				label: workflow.label,
@@ -1692,29 +1703,38 @@
 		drawingAssistant?.prepareWorkflow(id);
 	}
 
+	/** @param {string} brushId */
+	function chooseIllustrationBrush(brushId) {
+		if (!editor || accountChanged) return;
+		const brush = applyIllustrationBrush(editor, brushId);
+		editor.setToast({ message: `${brush.label} ready. Existing artwork is unchanged.` });
+	}
+
 	/** @param {string} componentId */
 	function insertUiComponent(componentId) {
-		if (!editor || !convertElements || !createUiComponent) return;
-		const existingElements = editor.getSceneElements();
+		if (!editor || !convertElements || !restoreNativeElements || !createUiComponent) return;
 		const state = editor.getAppState();
 		const centerX = state.width / (2 * state.zoom.value) - state.scrollX;
 		const centerY = state.height / (2 * state.zoom.value) - state.scrollY;
 		const skeletons = createUiComponent(componentId, centerX - 140, centerY - 65);
 		if (!skeletons.length) return;
-		const shapes = convertElements(
+		const converted = convertElements(
 			/** @type {import('@excalidraw/excalidraw/data/transform').ExcalidrawElementSkeleton[]} */ (
 				skeletons
 			),
 			{ regenerateIds: true }
 		);
+		// Normalize line bounds/arrow origins now, not on the next native reload.
+		const shapes = restoreNativeElements(converted, null);
 		editor.updateScene({
-			elements: [...existingElements, ...shapes],
+			elements: [...editor.getSceneElementsIncludingDeleted(), ...shapes],
 			appState: {
 				selectedElementIds: Object.fromEntries(shapes.map((shape) => [shape.id, true]))
 			},
 			...(captureImmediately ? { captureUpdate: captureImmediately } : {})
 		});
-		editor.scrollToContent(shapes, { fitToContent: false, animate: true, duration: 180 });
+		if (componentId === 'illustration-sampler') focusDesignArtboard(shapes);
+		else editor.scrollToContent(shapes, { fitToContent: false, animate: true, duration: 180 });
 	}
 
 	/** @param {'presets' | 'designs' | 'components' | 'memes'} section */
@@ -2152,6 +2172,7 @@
 					DefaultSidebar,
 					Sidebar,
 					convertToExcalidrawElements,
+					restoreElements,
 					useHandleLibrary,
 					newElementWith,
 					CaptureUpdateAction,
@@ -2176,6 +2197,7 @@
 			blankScene = isNewBlankDrawing(initialScene);
 
 			convertElements = convertToExcalidrawElements;
+			restoreNativeElements = restoreElements;
 			updateElement = newElementWith;
 			captureImmediately = CaptureUpdateAction.IMMEDIATELY;
 			exportToBlob = excalidrawExportToBlob;
@@ -2909,9 +2931,52 @@
 		{:else if workspaceSection === 'components'}
 			<section id="drawing-components" class="workspace-content" aria-label="UI components">
 				<div class="component-heading">
-					<strong>Sketch an interface</strong>
-					<span>Hand-drawn, editable components.</span>
+					<strong>Illustrate or wireframe</strong>
+					<span>Editable native pieces. No image generation.</span>
 				</div>
+				<fieldset class="illustration-brushes">
+					<legend>Illustration tools · new strokes only</legend>
+					{#each DRAW_ILLUSTRATION_BRUSHES as brush (brush.id)}
+						<button
+							type="button"
+							title={brush.description}
+							aria-label={`Use ${brush.label.toLowerCase()}`}
+							onclick={() => chooseIllustrationBrush(brush.id)}
+						>
+							<svg aria-hidden="true" viewBox="0 0 44 22">
+								{#if brush.tool === 'rectangle'}
+									<rect
+										x="8"
+										y="3"
+										width="28"
+										height="16"
+										rx="4"
+										fill={brush.fill}
+										stroke={brush.color}
+										stroke-width="2"
+									/>
+								{:else if brush.tool === 'arrow'}
+									<path
+										d="M4 11h34m-5-5 5 5-5 5"
+										fill="none"
+										stroke={brush.color}
+										stroke-width="1.5"
+									/>
+								{:else}
+									<path
+										d="M5 15C14 2 25 22 39 7"
+										fill="none"
+										stroke={brush.color}
+										stroke-width={brush.width > 2 ? 9 : 2}
+										opacity={brush.opacity / 100}
+										stroke-linecap="round"
+									/>
+								{/if}
+							</svg>
+							{brush.label}
+						</button>
+					{/each}
+				</fieldset>
 				<input
 					class="component-search"
 					aria-label="Search UI components"
@@ -2922,7 +2987,9 @@
 					<p class="component-empty">No matching components.</p>
 				{:else}
 					{#each filteredComponentCategories as category (category)}
-						<div class="component-category">{category}</div>
+						<div class="component-category">
+							{category === 'illustration' ? 'Technical illustration' : category}
+						</div>
 						{#each filteredComponents.filter((component) => component.category === category) as component (component.id)}
 							<button
 								type="button"
@@ -3459,6 +3526,44 @@
 		padding: 0 6px 12px;
 	}
 
+	.illustration-brushes {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 6px;
+		margin: 0 0 12px;
+		padding: 8px;
+		border: 1px solid #d8dee8;
+		border-radius: 8px;
+	}
+	.illustration-brushes legend {
+		font-size: 11px;
+		color: #647084;
+		padding: 0 4px;
+	}
+	.illustration-brushes button {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		min-height: 44px;
+		border: 1px solid #e2e6ec;
+		border-radius: 6px;
+		background: #fff;
+		color: #20232b;
+		font-size: 12px;
+		cursor: pointer;
+	}
+	.illustration-brushes button:hover {
+		background: #f1f5fb;
+	}
+	.illustration-brushes button:focus-visible {
+		outline: 2px solid #4263eb;
+		outline-offset: 2px;
+	}
+	.illustration-brushes svg {
+		width: 36px;
+		height: 22px;
+		flex: none;
+	}
 	.preset-heading,
 	.page-heading,
 	.component-heading {

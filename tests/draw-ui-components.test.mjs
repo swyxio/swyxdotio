@@ -1,5 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import {
+	DRAW_ILLUSTRATION_COMPONENTS,
+	applyIllustrationBrush
+} from '../src/lib/draw-illustration.js';
 
 import {
 	createDrawUiComponent,
@@ -12,7 +16,7 @@ const SUPPORTED_ELEMENT_TYPES = new Set(['arrow', 'ellipse', 'rectangle', 'text'
 test('UI component catalog includes complete searchable wireframing categories', () => {
 	assert.deepEqual(
 		DRAW_UI_COMPONENT_CATEGORIES.map(({ id }) => id),
-		['forms', 'content', 'data', 'navigation', 'layouts']
+		['illustration', 'forms', 'content', 'data', 'navigation', 'layouts']
 	);
 	assert.ok(DRAW_UI_COMPONENTS.length >= 25);
 	assert.equal(new Set(DRAW_UI_COMPONENTS.map(({ id }) => id)).size, DRAW_UI_COMPONENTS.length);
@@ -29,7 +33,7 @@ test('UI component catalog includes complete searchable wireframing categories',
 });
 
 test('every wireframe component creates editable hand-drawn native Excalidraw skeletons', () => {
-	for (const component of DRAW_UI_COMPONENTS) {
+	for (const component of DRAW_UI_COMPONENTS.filter((item) => item.category !== 'illustration')) {
 		const shapes = component.createShapes();
 		const identities = new Set();
 		assert.ok(shapes.length >= 2, `${component.id} needs visible editable parts`);
@@ -64,6 +68,46 @@ test('every wireframe component creates editable hand-drawn native Excalidraw sk
 			}
 		}
 	}
+});
+
+test('illustration pieces remain native, independently grouped and freshly editable on each insertion', () => {
+	for (const component of DRAW_ILLUSTRATION_COMPONENTS) {
+		const first = component.createShapes();
+		const second = component.createShapes();
+		assert.ok(first.some((item) => item.type === 'text'));
+		assert.ok(first.some((item) => item.type === 'line'));
+		assert.equal(new Set(first.map((item) => item.id)).size, first.length);
+		const oldGroups = new Set(first.flatMap((item) => item.groupIds ?? []));
+		assert.ok(oldGroups.size > 0);
+		for (const item of second) {
+			assert.ok(['rectangle', 'ellipse', 'text', 'line', 'arrow'].includes(item.type));
+			assert.equal('fileId' in item, false);
+			assert.ok(Number.isFinite(item.x) && Number.isFinite(item.y));
+			assert.ok(!first.some((old) => old.id === item.id));
+			assert.ok((item.groupIds ?? []).every((group) => !oldGroups.has(group)));
+			if (item.points) assert.deepEqual(item.points[0], [0, 0]);
+		}
+	}
+});
+
+test('brush selection changes only future drawing defaults and resets marker opacity', () => {
+	const calls = [];
+	const editor = {
+		updateScene: (scene) => calls.push(scene),
+		setActiveTool: (tool) => calls.push(tool)
+	};
+	applyIllustrationBrush(editor, 'illustration-marker');
+	applyIllustrationBrush(editor, 'illustration-pastel');
+	assert.equal(calls[0].appState.currentItemOpacity, 25);
+	assert.equal(calls[0].appState.currentItemStrokeWidth, 20);
+	assert.deepEqual(calls[1], { type: 'freedraw' });
+	assert.equal(calls[2].appState.currentItemOpacity, 100);
+	assert.equal(calls[2].appState.currentItemStrokeWidth, 2);
+	assert.deepEqual(calls[3], { type: 'rectangle' });
+	assert.deepEqual(calls[0].appState.selectedElementIds, {});
+	assert.ok(calls.every((call) => !('elements' in call)));
+	assert.throws(() => applyIllustrationBrush(editor, 'missing'), /Unknown illustration brush/);
+	assert.equal(calls.length, 4);
 });
 
 test('components insert at requested coordinates and always generate fresh identities', () => {

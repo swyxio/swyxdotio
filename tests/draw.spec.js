@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 
 /** @typedef {{ isDeleted?: boolean, text?: string, roughness?: number }} DrawingElement */
 
@@ -11,6 +11,178 @@ async function openDrawingTemplates(page, section) {
 	await page.getByRole('checkbox', { name: 'Library' }).check({ force: true });
 	await page.getByRole('tab', { name: 'Templates, components, and memes' }).click();
 	await page.getByRole('tab', { name: section, exact: true }).click();
+}
+
+/** @param {import('@playwright/test').Page} page */
+async function illustrationElements(page) {
+	return page.evaluate(() => {
+		const key = document.querySelector('.draw-canvas')?.getAttribute('data-storage-key');
+		return JSON.parse(localStorage.getItem(key ?? '') ?? '{"elements":[]}').elements.filter(
+			(/** @type {any} */ item) => !item.isDeleted
+		);
+	});
+}
+
+test('illustration sampler is native, grouped, undoable and survives reload', async ({
+	page
+}, testInfo) => {
+	await page.goto('/tools/draw');
+	await openDrawingTemplates(page, 'Components');
+	await page.getByRole('button', { name: 'Insert Illustration sampler component' }).click();
+	await expect.poll(async () => (await illustrationElements(page)).length).toBeGreaterThan(40);
+	const elements = await illustrationElements(page);
+	expect(elements.every((/** @type {any} */ item) => item.type !== 'image')).toBe(true);
+	expect(
+		elements.some((/** @type {any} */ item) => item.text === 'Small pieces, clear ideas')
+	).toBe(true);
+	expect(new Set(elements.flatMap((/** @type {any} */ item) => item.groupIds)).size).toBe(4);
+	expect(elements.filter((/** @type {any} */ item) => item.type === 'line').length).toBeGreaterThan(
+		10
+	);
+	await expect(page.getByRole('button', { name: 'Undo', exact: true })).toBeEnabled();
+	await page.getByRole('button', { name: 'Undo', exact: true }).click();
+	await expect.poll(async () => (await illustrationElements(page)).length).toBe(0);
+	await page.getByRole('button', { name: 'Redo', exact: true }).click();
+	await expect.poll(async () => (await illustrationElements(page)).length).toBe(elements.length);
+	await page.reload();
+	await expect.poll(async () => (await illustrationElements(page)).length).toBe(elements.length);
+	const restored = await illustrationElements(page);
+	expect(
+		restored.map((/** @type {any} */ item) => [
+			item.id,
+			item.x,
+			item.y,
+			item.width,
+			item.height,
+			item.groupIds,
+			item.text
+		])
+	).toEqual(
+		elements.map((/** @type {any} */ item) => [
+			item.id,
+			item.x,
+			item.y,
+			item.width,
+			item.height,
+			item.groupIds,
+			item.text
+		])
+	);
+	await page.getByRole('radio', { name: 'Selection', exact: true }).press('ControlOrMeta+a');
+	await expect(page.getByRole('button', { name: 'Ungroup selection', exact: true })).toBeVisible();
+	await page.getByRole('button', { name: 'Open drawing export options', exact: true }).click();
+	const exporter = page.getByRole('dialog', { name: 'Creative workspace' });
+	await exporter
+		.getByRole('combobox', { name: 'Scope', exact: true })
+		.selectOption({ label: 'Selected elements' });
+	for (const format of ['PNG', 'SVG']) {
+		await exporter
+			.getByRole('combobox', { name: 'Format', exact: true })
+			.selectOption({ label: format });
+		const downloading = page.waitForEvent('download', { timeout: 10000 });
+		await exporter.getByRole('button', { name: 'Download', exact: true }).click();
+		const download = await downloading;
+		await download.saveAs(testInfo.outputPath(`illustration-study.${format.toLowerCase()}`));
+	}
+	const svg = await readFile(testInfo.outputPath('illustration-study.svg'), 'utf8');
+	expect(svg).toContain('Document');
+	expect(svg).toContain('Request queue');
+	expect(svg).not.toContain('<image');
+	await writeFile(
+		testInfo.outputPath('illustration-study.excalidraw'),
+		JSON.stringify({
+			type: 'excalidraw',
+			version: 2,
+			source: 'https://swyx.io/tools/draw',
+			elements: restored,
+			appState: { viewBackgroundColor: '#ffffff', gridSize: null },
+			files: {}
+		})
+	);
+});
+
+test('illustration brushes draw new styles without recoloring existing artwork or calling AI', async ({
+	page
+}) => {
+	let inference = 0;
+	await page.route(/\/tools\/api\/draw\/(edit|agent|generate)(?:[/?]|$)/, (route) => {
+		if (route.request().method() === 'GET') return route.continue();
+		inference += 1;
+		return route.abort();
+	});
+	await page.goto('/tools/draw');
+	await openDrawingTemplates(page, 'Components');
+	await page.getByRole('button', { name: 'Insert Layered document component' }).click();
+	await expect.poll(async () => (await illustrationElements(page)).length).toBeGreaterThan(0);
+	const original = await illustrationElements(page);
+	await page.getByRole('button', { name: 'Use soft marker', exact: true }).click();
+	await page.getByRole('button', { name: 'Close', exact: true }).click();
+	await page.mouse.move(330, 270);
+	await page.mouse.down();
+	await page.mouse.move(470, 295, { steps: 12 });
+	await page.mouse.up();
+	await expect
+		.poll(async () =>
+			(await illustrationElements(page)).some((/** @type {any} */ item) => item.type === 'freedraw')
+		)
+		.toBe(true);
+	let current = await illustrationElements(page);
+	const marker = current.find((/** @type {any} */ item) => item.type === 'freedraw');
+	expect(marker.opacity).toBe(25);
+	expect(marker.strokeWidth).toBe(20);
+	await page.keyboard.press('Control+k');
+	const search = page.getByRole('textbox', {
+		name: 'Search components, presets, pages, and actions'
+	});
+	await search.fill('Use pastel shape');
+	await search.press('Enter');
+	await page.mouse.move(550, 270);
+	await page.mouse.down();
+	await page.mouse.move(680, 340, { steps: 5 });
+	await page.mouse.up();
+	await expect
+		.poll(async () => (await illustrationElements(page)).length)
+		.toBe(original.length + 2);
+	current = await illustrationElements(page);
+	const addedShape = current.find(
+		(/** @type {any} */ item) =>
+			!original.some((/** @type {any} */ old) => old.id === item.id) && item.type === 'rectangle'
+	);
+	expect(addedShape).toMatchObject({
+		backgroundColor: '#d5d1f3',
+		opacity: 100,
+		roughness: 0,
+		strokeWidth: 2
+	});
+	expect(
+		current.filter((/** @type {any} */ item) =>
+			original.some((/** @type {any} */ old) => old.id === item.id)
+		)
+	).toEqual(original);
+	expect(inference).toBe(0);
+});
+
+for (const mode of ['thinking', 'thumbnails', 'experiment']) {
+	test(`illustration tools stay reachable from ${mode} on mobile`, async ({ page }) => {
+		await page.setViewportSize({ width: 390, height: 844 });
+		await page.goto('/tools/draw');
+		await page.getByRole('button', { name: 'Choose drawing mode and tools' }).click();
+		await page
+			.getByRole('combobox', { name: 'Starting experience', exact: true })
+			.selectOption(mode);
+		await page.keyboard.press('Escape');
+		await openDrawingTemplates(page, 'Components');
+		await expect(page.getByRole('button', { name: 'Use ink pen', exact: true })).toBeVisible();
+		const brushBounds = await page
+			.getByRole('button', { name: 'Use ink pen', exact: true })
+			.boundingBox();
+		expect(brushBounds?.height).toBeGreaterThanOrEqual(44);
+		expect((brushBounds?.x ?? 0) + (brushBounds?.width ?? 0)).toBeLessThanOrEqual(390);
+		await page.getByRole('textbox', { name: 'Search UI components' }).fill('request queue');
+		await page.getByRole('button', { name: 'Insert Request queue component' }).click();
+		await expect.poll(async () => (await illustrationElements(page)).length).toBeGreaterThan(0);
+		await expect(page.getByRole('button', { name: 'Use pastel shape', exact: true })).toBeVisible();
+	});
 }
 
 test('drawing canvas always uses light mode even when the site is dark', async ({ page }) => {

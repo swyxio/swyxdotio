@@ -1,7 +1,9 @@
+import { DRAW_ILLUSTRATION_COMPONENTS } from './draw-illustration.js';
+
 /**
  * @typedef {{
  *   id: string,
- *   type: 'rectangle' | 'ellipse' | 'text' | 'arrow',
+ *   type: 'rectangle' | 'ellipse' | 'text' | 'arrow' | 'line',
  *   x: number,
  *   y: number,
  *   width?: number,
@@ -19,7 +21,8 @@
  *   textAlign?: 'left' | 'center',
  *   points?: Array<[number, number]>,
  *   startArrowhead?: null,
- *   endArrowhead?: null
+ *   endArrowhead?: 'arrow' | null,
+ *   groupIds?: string[]
  * }} UiComponentShape
  */
 
@@ -507,6 +510,7 @@ function faqAccordion() {
 }
 
 export const DRAW_UI_COMPONENT_CATEGORIES = [
+	{ id: 'illustration', label: 'Technical illustration' },
 	{ id: 'forms', label: 'Forms & controls' },
 	{ id: 'content', label: 'Content & feedback' },
 	{ id: 'data', label: 'Data & metrics' },
@@ -530,6 +534,7 @@ function component({ build, ...entry }) {
 
 /** @type {DrawUiComponent[]} */
 export const DRAW_UI_COMPONENTS = [
+	...DRAW_ILLUSTRATION_COMPONENTS,
 	component({
 		id: 'primary-button',
 		title: 'Primary button',
