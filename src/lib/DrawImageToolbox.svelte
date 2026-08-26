@@ -426,7 +426,6 @@
 		if (options && referenceCount > 1) {
 			return openThumbnails(options);
 		}
-		presentation = 'general';
 		if (options && processingGeneration) {
 			operationError = 'Finish or cancel this batch before opening a different recipe.';
 			return false;
@@ -456,6 +455,7 @@
 			destination = 'preview';
 		}
 
+		presentation = 'general';
 		action = 'generate';
 		toolboxMinimized = false;
 		if (

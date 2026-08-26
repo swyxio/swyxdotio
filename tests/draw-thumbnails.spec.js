@@ -7,8 +7,12 @@ async function openThumbnails(page) {
 	await page.goto('/tools/draw');
 	await authenticateTools(page, TEST_TOOLS_OWNER);
 	await page.reload();
-	if ((page.viewportSize()?.width ?? 1280) <= 650)
-		await page.getByRole('button', { name: 'Choose drawing mode and tools', exact: true }).click();
+	await expect(page.getByRole('group', { name: 'Drawing workspace tools' })).toBeVisible();
+	const toolsMenu = page.getByRole('button', {
+		name: 'Choose drawing mode and tools',
+		exact: true
+	});
+	if (await toolsMenu.isVisible()) await toolsMenu.click();
 	await page.getByRole('button', { name: 'Make thumbnails', exact: true }).click();
 	const composer = page.getByRole('region', { name: 'Thumbnail composer', exact: true });
 	await expect(composer.getByRole('textbox', { name: 'Thumbnail context' })).toBeEnabled();
@@ -229,7 +233,7 @@ test('thumbnail loop sends actual ordered references, four directions, then four
 	await composer
 		.getByRole('textbox', { name: 'Thumbnail feedback' })
 		.fill('Less busy. Keep every person, both logos, and the composition. Make four variations.');
-	await composer.getByRole('button', { name: 'Generate 4 more variants', exact: true }).click();
+	await composer.getByRole('textbox', { name: 'Thumbnail feedback' }).press('Meta+Enter');
 	await expect(composer.locator('.result-grid article')).toHaveCount(8);
 	expect(mock.calls).toHaveLength(8);
 	await expectReferencePixels(page, mock.calls[4].images, [
@@ -406,6 +410,39 @@ test('thumbnail style saves through the actual private library and can be explic
 	await library.getByRole('button', { name: `${name} · Use style`, exact: true }).click();
 	await expect(composer.locator('.reference-card')).toHaveCount(4);
 	expect(mock.calls).toHaveLength(4);
+});
+
+test.describe('touch thumbnail feedback', () => {
+	test.use({ hasTouch: true, viewport: { width: 844, height: 390 } });
+
+	test('selecting a result does not summon the keyboard in landscape', async ({ page }) => {
+		const mock = await modelMock(page);
+		const composer = await openThumbnails(page);
+		const output = await fixtures(page);
+		mock.setOutputs(output);
+		await attach(composer, output);
+		await composer.getByRole('button', { name: 'Generate 4 thumbnails', exact: true }).click();
+		await expect(composer.locator('.result-grid article')).toHaveCount(4);
+		await composer
+			.locator('.result-grid article')
+			.first()
+			.getByRole('button', { name: 'Use for feedback', exact: true })
+			.click();
+		const feedback = composer.getByRole('textbox', { name: 'Thumbnail feedback' });
+		await expect(feedback).toBeVisible();
+		await expect(feedback).not.toBeFocused();
+		await expect(feedback).toHaveCSS('font-size', '16px');
+		await feedback.click();
+		await expect(feedback).toBeFocused();
+		await feedback.fill('Keep the selected composition.');
+		await composer.getByRole('button', { name: 'Close thumbnail composer' }).click();
+		await expect(page.locator('input:focus, textarea:focus, select:focus')).toHaveCount(0);
+		await page.getByRole('button', { name: 'Choose drawing mode and tools', exact: true }).click();
+		await page.getByRole('button', { name: 'Make thumbnails', exact: true }).click();
+		await expect(feedback).toHaveValue('Keep the selected composition.');
+		await expect(feedback).not.toBeFocused();
+		expect(mock.calls).toHaveLength(4);
+	});
 });
 
 test('a pending thumbnail file read cannot attach to a different drawing page', async ({

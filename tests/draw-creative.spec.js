@@ -448,6 +448,28 @@ test('saved thumbnail versions open the shared composer with only explicitly sel
 	await expect(panel.getByRole('region', { name: 'Thumbnail composer' })).toBeVisible();
 	await expect(panel.locator('.reference-card')).toHaveCount(2);
 	expect(paid).toEqual([]);
+
+	// Declining a replacement must not change the covered tool's presentation.
+	const thumbnailContext = panel.getByRole('textbox', { name: 'Thumbnail context' });
+	const retainedThumbnailContext = await thumbnailContext.inputValue();
+	await page.getByRole('button', { name: 'Open assets and creative workspace' }).click();
+	await workspace.getByRole('button', { name: 'Compose', exact: true }).click();
+	await workspace
+		.getByRole('group', { name: 'References selected for a future model run' })
+		.getByLabel('second-reference.png', { exact: true })
+		.uncheck();
+	await workspace
+		.getByRole('button', { name: 'Create 4 editable layouts · no AI cost', exact: true })
+		.click();
+	page.once('dialog', (dialog) => dialog.dismiss());
+	await workspace.getByRole('button', { name: 'Open in shared Generate', exact: true }).click();
+	await expect(workspace).toBeVisible();
+	await workspace.getByRole('button', { name: 'Close creative workspace' }).click();
+	await panel.getByRole('button', { name: 'Expand image tools', exact: true }).click();
+	await expect(thumbnailContext).toHaveValue(retainedThumbnailContext);
+	await expect(panel.locator('.reference-card')).toHaveCount(2);
+	await expect(prompt).not.toBeVisible();
+	expect(paid).toEqual([]);
 });
 
 test('guest workspace does not request an account library and blank insertion is explicit and undoable', async ({

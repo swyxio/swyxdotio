@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onDestroy, tick } from 'svelte';
+	import { canAutofocusDrawingInput } from './draw-focus.js';
 	import type { DrawingImageGeneration as Generation } from './draw-generation-history.js';
 	import type { DrawingGenerationRun } from './draw-generation-batch.js';
 	import type { DrawingGenerationModel } from './draw-generation-models.js';
@@ -85,8 +86,7 @@
 		await tick();
 		if (parentGeneration?.id === generation.id) {
 			feedbackInput?.scrollIntoView({ block: 'center' });
-			if (window.matchMedia('(min-width: 700px)').matches)
-				feedbackInput?.focus({ preventScroll: true });
+			if (canAutofocusDrawingInput()) feedbackInput?.focus({ preventScroll: true });
 		}
 	}
 	let reading = $state(false);
