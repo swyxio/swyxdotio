@@ -4,7 +4,7 @@
 	import '@excalidraw/excalidraw/index.css';
 	import { DRAW_MEME_TEMPLATES, fetchMemeTemplates, searchMemeTemplates } from '$lib/draw-memes.js';
 	import { orderRecentDrawingPages, searchWorkspaceCommands } from '$lib/draw-workspace.js';
-	import { DEFAULT_DRAW_FAL_MODEL, getDrawFalModel } from '$lib/draw-fal-models.js';
+	import { DEFAULT_DRAW_GENERATION_MODEL, getDrawGenerationModel } from '$lib/draw-generation-models.js';
 	import {
 		loadDrawingGenerationHistory,
 		saveDrawingGenerationHistory
@@ -14,9 +14,9 @@
 		captureVisibleDrawingViewport
 	} from '$lib/draw-agent-tools.js';
 	import { processImageTool } from '$lib/draw-image-tools.js';
-	import { prepareDrawingFalImage } from '$lib/draw-fal-image.js';
-	import { runDrawingFalGeneration } from '$lib/draw-fal-queue.js';
-	import { optimizeDrawingImageForCloud, replaceDrawingImage } from '$lib/draw-image-scene.js';
+	import { prepareDrawingGenerationImage } from '$lib/draw-generation-image.js';
+	import { runDrawingGeneration } from '$lib/draw-generation-client.js';
+	import { optimizeDrawingImageForCloud, replaceDrawingImage, insertDrawingGenerations } from '$lib/draw-image-scene.js';
 	import {
 		createDrawingDesign,
 		DRAW_DESIGN_FORMATS,
@@ -114,13 +114,19 @@
 	let selectedImageId = $state('');
 	let selectedImageDataUrl = $state('');
 	let imageToolAction = $state(
-		/** @type {'magic-select' | 'magic-eraser' | 'depth-blur' | 'vectorize' | 'background' | 'fal' | null} */ (
+		/** @type {'magic-select' | 'magic-eraser' | 'depth-blur' | 'vectorize' | 'background' | 'generate' | null} */ (
 			null
 		)
 	);
+	let isGenerationOpen = $state(false);
+	let generationRunning = $state(false);
+	let imageToolMinimized = $state(false);
+	let generationHistoryError = $state('');
+	let generationPanel = $state(/** @type {{openGeneration:()=>void}|undefined} */ (undefined));
+	const generationCanvasAbort = new AbortController();
 	let imageToolPrompt = $state('');
 	let imageToolStatus = $state('');
-	let imageToolModelIds = $state([DEFAULT_DRAW_FAL_MODEL.id]);
+	let imageToolModelIds = $state([DEFAULT_DRAW_GENERATION_MODEL.id]);
 	let imageToolGenerationParameters = $state(
 		/** @type {Record<string, Record<string, unknown>>} */ ({})
 	);
@@ -187,7 +193,8 @@
 
 	/** @param {DrawingImageGeneration} generation */
 	function rememberImageGeneration(generation) {
-		const history = [generation, ...imageGenerations];
+		if (accountChanged) return;
+		const history = [generation, ...imageGenerations.filter((entry) => entry.id !== generation.id)];
 		const originals = history.filter((image) => image.modelLabel === 'Original');
 		const generated = history.filter((image) => image.modelLabel !== 'Original');
 		imageGenerations = [
@@ -198,7 +205,7 @@
 			`${STORAGE_KEY}:${activePageId}`,
 			$state.snapshot(imageGenerations)
 		).catch((error) => {
-			console.warn('Generation history could not be saved on this device.', error);
+			generationHistoryError = 'Not saved to device: generation history is unavailable or full. Download results you want to keep.';
 		});
 	}
 
@@ -218,7 +225,7 @@
 				].slice(0, 32);
 			})
 			.catch((error) => {
-				console.warn('Generation history could not be loaded from this device.', error);
+				generationHistoryError = 'Generation history could not be loaded from this device.';
 			});
 		return () => {
 			cancelled = true;
@@ -227,7 +234,31 @@
 
 	/** @param {boolean} active */
 	function updateImageGenerationState(active) {
+		generationRunning = active;
 		processingImage = active ? { id: selectedImageId, dataURL: selectedImageDataUrl } : null;
+	}
+	async function openGenerationComposer() {
+		isGenerationOpen = true;
+		imageToolMinimized = false;
+		await tick();
+		generationPanel?.openGeneration();
+	}
+
+	/** @param {DrawingImageGeneration[]} generations @param {boolean} [board] */
+	async function insertGeneratedImages(generations, board = false) {
+		if (accountChanged || !editor || !convertElements || !captureImmediately) throw new Error('The drawing is unavailable.');
+		const result = await insertDrawingGenerations({editor,generations,board,convertElements,captureUpdate:captureImmediately,cloudAvailable,signal:generationCanvasAbort.signal});
+		if (result.exceedsCloudLimit) {
+			saveStatus = 'error';
+			generationHistoryError = 'Added on this device only: the drawing exceeds the 1.8 MB cloud limit.';
+		}
+	}
+
+	function canNavigateDrawing() {
+		if (!generationRunning) return true;
+		imageToolMinimized = false;
+		imageToolStatus = 'Finish or cancel the generation queue before switching pages.';
+		return false;
 	}
 	const recentPages = $derived(orderRecentDrawingPages(pages, activePageId));
 	const filteredComponents = $derived(
@@ -246,6 +277,7 @@
 	const workspaceCommands = $derived.by(() => {
 		/** @type {WorkspaceCommand[]} */
 		const commands = [
+			{id:'action-generate-media',label:'Generate image or video',description:'Prompt, compare models, remix and open generation history',category:'Actions',keywords:['ai','image','video','generate','history','experiment'],run:openGenerationComposer},
 			{
 				id: 'action-new-page',
 				label: 'Create new page',
@@ -434,6 +466,7 @@
 			).code === 'account_changed'
 		) {
 			accountChanged = true;
+			generationCanvasAbort.abort();
 			pendingSave = undefined;
 			location.reload();
 			throw new Error('Your account changed. Reloading your workspace.');
@@ -531,6 +564,7 @@
 
 	/** @param {DrawingPage} page */
 	async function switchPage(page) {
+		if (!canNavigateDrawing()) return;
 		if (!editor || page.id === activePageId) {
 			isPageMenuOpen = false;
 			return;
@@ -577,6 +611,7 @@
 	}
 
 	async function createPage() {
+		if (!canNavigateDrawing()) return;
 		const name = `Page ${pages.length + 1}`;
 		try {
 			const page = /** @type {DrawingPage} */ (
@@ -593,6 +628,7 @@
 	}
 
 	async function duplicatePage() {
+		if (!canNavigateDrawing()) return;
 		if (!editor || !activePage) return;
 		await flushPendingSave();
 		const source = {
@@ -699,12 +735,12 @@
 		}
 		let dataURL;
 		let mimeType;
-		/** @type {typeof import('$lib/draw-fal-models.js').DRAW_FAL_MODELS[number] | undefined} */
+		/** @type {typeof import('$lib/draw-generation-models.js').DRAW_GENERATION_MODELS[number] | undefined} */
 		let model;
 		/** @type {DrawingImageGeneration | undefined} */
 		let sourceGeneration;
 		if (action === 'fal') {
-			model = getDrawFalModel(options.model ?? DEFAULT_DRAW_FAL_MODEL.id);
+			model = getDrawGenerationModel(options.model ?? DEFAULT_DRAW_GENERATION_MODEL.id);
 			if (!model) throw new Error('Choose one of the available fal image models.');
 			const imagePrompt = typeof options.prompt === 'string' ? options.prompt.trim() : '';
 			if (!imagePrompt) throw new Error('Cloud image editing requires --prompt TEXT.');
@@ -726,7 +762,7 @@
 			const prepared =
 				model.kind === 'text-to-image'
 					? undefined
-					: await prepareDrawingFalImage({
+					: await prepareDrawingGenerationImage({
 							dataURL: sourceFile.dataURL,
 							prompt: imagePrompt,
 							model,
@@ -736,7 +772,7 @@
 			const generationModel = model;
 			const agentBudget = operation.getBudget();
 			if (!agentBudget) throw new Error('The assistant spending authorization is unavailable.');
-			const generated = await runDrawingFalGeneration({
+			const generated = await runDrawingGeneration({
 				userId: toolsUser?.id,
 				image: prepared?.blob,
 				prompt: imagePrompt,
@@ -761,7 +797,7 @@
 					modelLabel: model.label,
 					createdAt: Date.now(),
 					modelId: model.id,
-					modelEndpoint: model.model,
+					adapterId: model.adapter,
 					modelProvider: model.provider,
 					modelKind: model.kind,
 					modelWorkflow: model.workflow,
@@ -845,7 +881,7 @@
 				modelLabel: model.label,
 				createdAt: Date.now(),
 				modelId: model.id,
-				modelEndpoint: model.model,
+				adapterId: model.adapter,
 				modelProvider: model.provider,
 				modelKind: model.kind,
 				modelWorkflow: model.workflow,
@@ -1157,6 +1193,7 @@
 
 	/** @param {DrawingPage} page */
 	async function deletePage(page) {
+		if (!canNavigateDrawing()) return;
 		if (pages.length < 2) return;
 		try {
 			if (page.id === activePageId) {
@@ -1723,6 +1760,7 @@
 		void mountEditor();
 		const accountUpdated = () => {
 			accountChanged = true;
+			generationCanvasAbort.abort();
 			pendingSave = undefined;
 			if (saveTimer) clearTimeout(saveTimer);
 			backgroundAbort?.abort();
@@ -1867,9 +1905,10 @@
 	{#if designStatus}<div class="artboard-status" role="status">{designStatus}</div>{/if}
 {/if}
 
-{#if activeImageToolId || isRemovingBackground}
+{#if editor && updateElement && captureImmediately}
 	<section
 		class="image-tools"
+		hidden={!isGenerationOpen && !activeImageToolId && !isRemovingBackground && !generationRunning}
 		aria-label="Selected image tools"
 		style:left={imageToolsPosition ? `${imageToolsPosition.x}px` : undefined}
 		style:top={imageToolsPosition ? `${imageToolsPosition.y}px` : undefined}
@@ -1881,15 +1920,20 @@
 		onpointerup={finishDraggingImageTools}
 		onpointercancel={finishDraggingImageTools}
 	>
-		{#if editor && updateElement && captureImmediately && activeImageToolId}
 			<DrawImageToolbox
+				bind:this={generationPanel}
+				storageKey={STORAGE_KEY}
+				pageKey={`${STORAGE_KEY}:${activePageId}`}
+				historyError={generationHistoryError}
+				bind:minimized={imageToolMinimized}
+				onInsert={insertGeneratedImages}
 				{editor}
 				imageId={activeImageToolId}
 				imageDataUrl={activeImageToolDataUrl}
 				bind:action={imageToolAction}
 				bind:prompt={imageToolPrompt}
 				bind:operationStatus={imageToolStatus}
-				bind:selectedFalModelIds={imageToolModelIds}
+				bind:selectedModelIds={imageToolModelIds}
 				bind:generationParameters={imageToolGenerationParameters}
 				{updateElement}
 				captureUpdate={captureImmediately}
@@ -1953,9 +1997,10 @@
 					{/if}
 				{/snippet}
 			</DrawImageToolbox>
-		{/if}
 	</section>
 {/if}
+
+{#if editor}<button class="generation-launcher" type="button" aria-label="Open image and video generation" onclick={openGenerationComposer}>{generationRunning ? 'Generating…' : 'Generate'}</button>{/if}
 
 {#if pages.length > 0}
 	<div class="page-picker">
@@ -2388,6 +2433,10 @@
 {/if}
 
 <style>
+	.generation-launcher { position: fixed; right: 16px; bottom: 72px; z-index: 33; padding: 9px 13px; border: 1px solid #d8d7e0; border-radius: 9px; background: white; box-shadow: 0 3px 12px #0001; color: #373065; font: 600 12px system-ui; }
+	.generation-launcher:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
+	.image-tools[hidden] { display: none; }
+
 	.account-error {
 		position: fixed;
 		inset: 30% 1rem auto;
