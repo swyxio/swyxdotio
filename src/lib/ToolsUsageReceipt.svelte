@@ -2,13 +2,15 @@
 	import { TOOLS_AI_POLICY } from '$lib/tools-ai-policy.js';
 	export let signedIn = false;
 	export let isOwner = false;
-	/** @type {{assistantTurnsThisHour:number,mediaJobsThisHour:number,estimatedReservedTodayUsd:number}|null} */
+	/** @type {{assistantTurnsToday:number,mediaJobsToday:number,estimatedReservedTodayUsd:number}|null} */
 	export let usage = null;
 	export let unavailable = false;
 </script>
 
 <aside class="receipt" aria-label={isOwner ? 'Usage summary' : 'Usage allowance'}>
-	<p class="receipt-title">{isOwner ? "Today's usage" : "Today's allowance"}</p>
+	<p class="receipt-title">
+		{signedIn ? "Today's usage" : "Today's allowance"}<span class="day-zone">UTC</span>
+	</p>
 	{#if signedIn}
 		<section
 			class="counters"
@@ -17,17 +19,8 @@
 			aria-busy={!usage && !unavailable}
 		>
 			{#if usage}
-				<p>
-					<b
-						>{usage.assistantTurnsThisHour}{isOwner
-							? ''
-							: ` / ${TOOLS_AI_POLICY.assistantTurnsPerHour}`}</b
-					><span>assistant turns this hour</span>
-				</p>
-				<p>
-					<b>{usage.mediaJobsThisHour}{isOwner ? '' : ` / ${TOOLS_AI_POLICY.mediaJobsPerHour}`}</b
-					><span>generations this hour</span>
-				</p>
+				<p><b>{usage.assistantTurnsToday}</b><span>assistant turns today</span></p>
+				<p><b>{usage.mediaJobsToday}</b><span>generations today</span></p>
 				<p>
 					<b
 						>${usage.estimatedReservedTodayUsd.toFixed(2)}{isOwner
@@ -109,6 +102,12 @@
 		background: #bb9a57;
 		border: 2px ridge #d6b77a;
 		box-shadow: 0 2px 2px #34281944;
+	}
+	.day-zone {
+		float: right;
+		color: #65513e;
+		font-size: 0.65rem;
+		font-weight: 400;
 	}
 	.receipt-title {
 		font: 600 0.83rem var(--font-mono);

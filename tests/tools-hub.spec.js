@@ -4,6 +4,8 @@ import { authenticateTools, TEST_TOOLS_OWNER, TEST_TOOLS_MEMBER } from './helper
 const sampleUsage = {
 	assistantTurnsThisHour: 1,
 	mediaJobsThisHour: 0,
+	assistantTurnsToday: 8,
+	mediaJobsToday: 3,
 	estimatedReservedTodayUsd: 0.05
 };
 
@@ -190,6 +192,8 @@ test('usage loading and failure never masquerade as zero, and browser reload rec
 	);
 	await page.reload();
 	await expect(usage).toContainText('$0.05 / $2.00');
+	await expect(usage).toContainText('assistant turns today');
+	await expect(usage).not.toContainText(' / 20');
 });
 
 test('signout shows pending and recoverable failure without hiding the current account', async ({
@@ -286,6 +290,10 @@ test('owner usage is uncapped and quiet while member notices remain visible', as
 	await signIn(page);
 	const usage = page.getByRole('complementary', { name: 'Usage summary' });
 	await expect(usage).toContainText("Today's usage");
+	await expect(usage).toContainText('UTC');
+	await expect(usage.locator('.counters p').nth(0)).toHaveText('8assistant turns today');
+	await expect(usage.locator('.counters p').nth(1)).toHaveText('3generations today');
+	await expect(usage).not.toContainText('this hour');
 	await expect(usage).toContainText('$0.05');
 	await expect(usage).not.toContainText('/ $2.00');
 	await expect(usage).not.toContainText(' / 20');

@@ -25,7 +25,7 @@
 			accountMenu.open = false;
 	}
 	let error = '';
-	/** @type {{assistantTurnsThisHour:number,mediaJobsThisHour:number,estimatedReservedTodayUsd:number}|null} */
+	/** @type {{assistantTurnsToday:number,mediaJobsToday:number,estimatedReservedTodayUsd:number}|null} */
 	let aiUsage = null;
 	let usageUnavailable = false;
 	onMount(() => {

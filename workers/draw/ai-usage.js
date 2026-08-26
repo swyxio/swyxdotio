@@ -61,17 +61,22 @@ export class ToolsAiUsage {
 			)
 			.one();
 		const dayStart = Math.floor(now / DAY_MS) * DAY_MS;
-		const spent = this.sql
+		const day = this.sql
 			.exec(
-				'SELECT COALESCE(SUM(reserved_micros), 0) AS total FROM tools_ai_usage WHERE user_id = ? AND created_at >= ?',
+				`SELECT COALESCE(SUM(reserved_micros), 0) AS total,
+				COALESCE(SUM(CASE WHEN kind = 'assistant' THEN 1 ELSE 0 END), 0) AS assistantTurnsToday,
+				COALESCE(SUM(CASE WHEN kind = 'media' THEN 1 ELSE 0 END), 0) AS mediaJobsToday
+				FROM tools_ai_usage WHERE user_id = ? AND created_at >= ?`,
 				userId,
 				dayStart
 			)
-			.one().total;
+			.one();
 		return {
 			assistantTurnsThisHour: hour.assistantTurnsThisHour,
 			mediaJobsThisHour: hour.mediaJobsThisHour,
-			estimatedReservedTodayUsd: spent / MILLION,
+			assistantTurnsToday: day.assistantTurnsToday,
+			mediaJobsToday: day.mediaJobsToday,
+			estimatedReservedTodayUsd: day.total / MILLION,
 			hourResetsAt: new Date((hour.firstAt ?? now) + HOUR_MS).toISOString(),
 			dayResetsAt: new Date(dayStart + DAY_MS).toISOString()
 		};
