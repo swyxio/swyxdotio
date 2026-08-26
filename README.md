@@ -530,10 +530,11 @@ Owner access is usage metadata only, not permission to read private drawing asse
 prompts or generated content. The notice and privacy page disclose owner visibility
 of account names/emails and metadata to all users.
 
-- Filters: last 24 hours / 7 / 30 days, AI / tool actions, and tool. Owner scope is
-  separate from filters. Daily UTC counts, estimated reserved cost, statuses and
-  request IDs are available, with 50-record cursor pages. Totals cover all filtered
-  records, not only the loaded page.
+- Quick views isolate AI, failures, pending requests, or meaningful actions with
+  tool opens hidden. Daily UTC activity and tool/model/action/account breakdowns
+  drill into matching records. Request quick views expose metadata and related
+  filters, with 50-record cursor pages. Totals cover all filtered records, not
+  only the loaded page.
 - AI admissions/statuses are read directly from the existing quota ledger. They
   are **not actual invoices**; provider token totals and usage outside swyx.io are
   unavailable. Pending means completion has not been recorded, not success.
@@ -544,7 +545,22 @@ of account names/emails and metadata to all users.
 - Records and inactive account-directory entries are pruned after 30 days by the
   companion’s durable alarm. Browser reporting has a separate 120-events/hour
   per-account limit and cannot spend or alter AI quotas.
-- `GET /tools/api/logs` accepts `days`, `kind`, `tool`, `scope=mine|all`, and `before`.
+- `GET /tools/api/logs` accepts `days=1|7|30`, `kind`, `tool`, `scope=mine|all`,
+  `status` (including pending), `source`, exact `model`/`action`, `opens=hide`,
+  metadata-only `q` (request ID/action/tool/model), and a UTC `day` within the period.
+  Owner Everyone views can also filter by opaque `account` ID. Query parameters are
+  validated and account scope is enforced before every query, aggregate, or export.
+  Quick views, summary counts, daily activity, and top-20 tool/model/action/account
+  breakdowns drill into the same bookmarkable filters; totals are never page-only.
+- `GET /tools/api/logs/export?format=csv|json` accepts the same filters and requires
+  the current account's `X-Tools-User` header. Downloads include **all matching
+  records**, not only the first 50. Views over 10,000 rows return 413 with instructions
+  to narrow filters; no partial file is generated. CSV cells are spreadsheet-formula
+  safe; JSON includes filters, coverage, range, count, and cost definitions.
+  `snapshot` fixes the creation-time cutoff to the displayed result. Outcomes can
+  settle after a prior read, and expired records still obey 30-day retention.
+  Pagination `before` cursors bind the full filter set, account, and cutoff; they
+  cannot be used on export routes.
   `all` is server-authorized. Browser `POST` accepts only `{id,action,status}`,
   requires same origin plus `X-Tools-User`, and gets identity/time/provenance from
   the server. User IDs, profile fields and arbitrary payloads are rejected.

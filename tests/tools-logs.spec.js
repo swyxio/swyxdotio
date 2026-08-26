@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
 import { authenticateTools, TEST_TOOLS_OWNER } from './helpers/tools-auth.js';
 
 function member() {
@@ -6,13 +7,13 @@ function member() {
 	return { id, name: 'Dashboard member', email: `${id}@example.com` };
 }
 
-/** @param {import('@playwright/test').Page} page @param {ReturnType<typeof member>} user @param {string} [action] */
-async function seedBrowserAction(page, user, action = 'box.open') {
+/** @param {import('@playwright/test').Page} page @param {ReturnType<typeof member>} user @param {string} [action] @param {string} [status] */
+async function seedBrowserAction(page, user, action = 'box.open', status = 'succeeded') {
 	const origin = await authenticateTools(page, user);
 	const id = crypto.randomUUID();
 	const response = await page.request.post('/tools/api/logs', {
 		headers: { Origin: origin, 'X-Tools-User': user.id },
-		data: { id, action, status: 'succeeded' }
+		data: { id, action, status }
 	});
 	expect(response.status()).toBe(201);
 	return { id, origin };
@@ -101,7 +102,7 @@ test('dashboard filters and unavailable state do not invent totals', async ({ pa
 	);
 	await page.getByRole('button', { name: 'Refresh', exact: true }).click();
 	await expect(page.getByRole('alert')).toContainText('Activity is unavailable');
-	await expect(page.getByRole('definition')).toHaveCount(0);
+	await expect(page.locator('.summary')).toHaveCount(0);
 	await expect(page.getByText('not connected', { exact: true })).toBeVisible();
 });
 
@@ -110,7 +111,7 @@ test('owner can inspect everyone while ordinary users cannot; mobile stays conta
 }) => {
 	await page.goto('/tools');
 	const user = member();
-	await seedBrowserAction(page, user);
+	const { id } = await seedBrowserAction(page, user);
 	await authenticateTools(page, TEST_TOOLS_OWNER);
 	await page.goto('/tools/logs?scope=all&tool=box');
 	await expect(page.getByRole('combobox', { name: 'Accounts', exact: true })).toHaveValue('all');
@@ -127,6 +128,18 @@ test('owner can inspect everyone while ordinary users cannot; mobile stays conta
 	await page.getByRole('combobox', { name: 'Accounts', exact: true }).selectOption('all');
 	await expect(page.getByRole('table')).toContainText(user.email);
 	await page.screenshot({ path: '/tmp/swyxdotio-tool-logs-desktop.png', fullPage: true });
+	await page.getByRole('searchbox', { name: 'Search metadata' }).fill(id);
+	await page.getByRole('button', { name: 'Search', exact: true }).click();
+	await expect(page.locator('tbody tr')).toHaveCount(1);
+	await page.getByRole('button', { name: 'Accounts', exact: true }).click();
+	await page
+		.getByRole('button', { name: 'Filter Dashboard member: 1 events', exact: true })
+		.click();
+	await expect(page).toHaveURL(new RegExp(`account=${user.id}`));
+	expect(page.url()).not.toContain(user.email);
+	await page.getByRole('combobox', { name: 'Accounts', exact: true }).selectOption('mine');
+	await expect(page.getByText(user.email, { exact: true })).toHaveCount(0);
+	expect(new URL(page.url()).searchParams.has('account')).toBe(false);
 });
 
 test('signed-in box opens appear in the dashboard without its text', async ({ page }) => {
@@ -165,6 +178,34 @@ test('loading older activity preserves filtered totals and does not duplicate ro
 	await page.goto('/tools/logs?tool=draw');
 	await expect(page.locator('tbody tr')).toHaveCount(50);
 	await expect(page.locator('.summary')).toContainText('55');
+	for (const format of ['csv', 'json']) {
+		const requestPromise = page.waitForRequest(
+			(request) =>
+				request.url().includes(`/tools/api/logs/export?`) &&
+				request.url().includes(`format=${format}`)
+		);
+		const [download] = await Promise.all([
+			page.waitForEvent('download'),
+			page.getByRole('button', { name: `Export ${format.toUpperCase()}`, exact: true }).click()
+		]);
+		const request = await requestPromise;
+		expect(request.headers()['x-tools-user']).toBe(user.id);
+		expect(new URL(request.url()).searchParams.has('snapshot')).toBe(true);
+		const file = await download.path();
+		expect(file).toBeTruthy();
+		const contents = await readFile(file, 'utf8');
+		if (format === 'json') {
+			/** @type {{entries:import('../src/lib/tools-logs-view.js').ToolLogEntry[]}} */
+			const exported = JSON.parse(contents);
+			expect(exported.entries).toHaveLength(55);
+			expect(exported.entries.every((entry) => entry.account === undefined)).toBe(true);
+		} else {
+			expect(contents.trim().split(/\r?\n/)).toHaveLength(56);
+			expect(contents).not.toContain(user.email);
+		}
+		await expect(page.getByRole('status')).toContainText('all 55 records');
+		await expect(page.locator('tbody tr')).toHaveCount(50);
+	}
 	await page.getByRole('button', { name: 'Load older activity' }).click();
 	await expect(page.locator('tbody tr')).toHaveCount(55);
 	await expect(page.getByRole('button', { name: 'Load older activity' })).toHaveCount(0);
@@ -182,4 +223,108 @@ test('a changed account clears the old dashboard rather than showing the new acc
 	await page.getByRole('button', { name: 'Refresh', exact: true }).click();
 	await expect(page).toHaveURL(/\/tools\?next=(?:%2F|\/)tools(?:%2F|\/)logs/);
 	await expect(page.getByRole('table')).toHaveCount(0);
+});
+
+test('quick views, metadata search, drilldowns and request details remain bookmarkable', async ({
+	page
+}) => {
+	await page.goto('/tools');
+	const user = member();
+	await seedBrowserAction(page, user);
+	const failed = await seedBrowserAction(page, user, 'draw.meme.insert', 'failed');
+	await seedBrowserAction(page, user, 'draw.design.insert');
+	await page.goto('/tools/logs');
+	await expect(page.locator('tbody tr')).toHaveCount(3);
+	await page.getByRole('checkbox', { name: 'Hide tool opens' }).check();
+	await expect(page.locator('tbody tr')).toHaveCount(2);
+	await expect(page).toHaveURL(/opens=hide/);
+	await page.getByRole('button', { name: 'Failures', exact: true }).click();
+	await expect(page.locator('tbody tr')).toHaveCount(1);
+	await expect(page.getByRole('table')).toContainText('Inserted meme');
+	await page.getByRole('searchbox', { name: 'Search metadata' }).fill(failed.id);
+	await page.getByRole('button', { name: 'Search', exact: true }).click();
+	await expect(page).toHaveURL(new RegExp(`q=${failed.id}`));
+	await page.reload();
+	await expect(page.getByRole('searchbox', { name: 'Search metadata' })).toHaveValue(failed.id);
+	await expect(page.getByRole('combobox', { name: 'Status', exact: true })).toHaveValue('failed');
+	await page.getByRole('button', { name: /Inspect Inserted meme/ }).click();
+	await expect(page.getByRole('region', { name: 'Request quick view' })).toContainText(failed.id);
+	await expect(page.getByRole('button', { name: 'Close quick view' })).toBeFocused();
+	await page.getByRole('button', { name: 'Close quick view' }).click();
+	await expect(page.getByRole('button', { name: /Inspect Inserted meme/ })).toBeFocused();
+	await page.getByRole('button', { name: 'Reset filters', exact: true }).click();
+	await expect(page.locator('tbody tr')).toHaveCount(3);
+	await expect(page).toHaveURL(/\/tools\/logs$/);
+	await page.getByRole('button', { name: 'Filter Draw: 2 events', exact: true }).click();
+	await expect(page.locator('tbody tr')).toHaveCount(2);
+	await expect(page).toHaveURL(/tool=draw/);
+	await page.getByRole('button', { name: 'Actions', exact: true }).click();
+	await page.getByRole('button', { name: 'Filter Inserted meme: 1 events', exact: true }).click();
+	await expect(page.locator('tbody tr')).toHaveCount(1);
+	await expect(page).toHaveURL(/action=draw.meme.insert/);
+	await page.getByRole('button', { name: /^Filter \d{4}-\d{2}-\d{2}:/ }).click();
+	await expect(page).toHaveURL(/day=\d{4}-\d{2}-\d{2}/);
+	await page.getByRole('button', { name: 'More filters', exact: true }).click();
+	await expect(page.getByRole('combobox', { name: 'Action', exact: true })).toHaveValue(
+		'draw.meme.insert'
+	);
+	await page.evaluate(() => {
+		history.pushState({}, '', '/tools/logs?kind=tool&source=browser&status=failed');
+		window.dispatchEvent(new PopStateEvent('popstate'));
+	});
+	await expect(page.getByRole('combobox', { name: 'Source', exact: true })).toHaveValue('browser');
+	await expect(page.getByRole('combobox', { name: 'Status', exact: true })).toHaveValue('failed');
+	await expect(page.locator('tbody tr')).toHaveCount(1);
+});
+
+test('export failures are explicit and a changed filter cancels an in-flight download', async ({
+	page
+}) => {
+	await page.goto('/tools');
+	await seedBrowserAction(page, member());
+	await page.goto('/tools/logs');
+	await expect(page.getByRole('table')).toBeVisible();
+	await page.route('**/tools/api/logs/export?*', (route) =>
+		route.fulfill({ status: 413, json: { error: 'too_many_records' } })
+	);
+	await page.getByRole('button', { name: 'Export CSV' }).click();
+	await expect(page.getByRole('alert')).toContainText('No partial file was downloaded');
+	await page.unroute('**/tools/api/logs/export?*');
+	let release = () => {};
+	/** @type {Promise<void>} */
+	const held = new Promise((resolve) => {
+		release = resolve;
+	});
+	let finish = () => {};
+	/** @type {Promise<void>} */
+	const completed = new Promise((resolve) => {
+		finish = resolve;
+	});
+	let downloads = 0;
+	page.on('download', () => downloads++);
+	await page.route('**/tools/api/logs/export?*', async (route) => {
+		await held;
+		try {
+			await route.fulfill({
+				status: 200,
+				contentType: 'text/csv',
+				headers: { 'X-Export-Count': '1', 'X-Export-Complete': 'true' },
+				body: 'id\nshould-not-download\n'
+			});
+		} catch {
+			/* Request was aborted by the filter change. */
+		}
+		finish();
+	});
+	await page.getByRole('button', { name: 'Export CSV' }).click();
+	await expect(page.getByRole('button', { name: 'Cancel export' })).toBeVisible();
+	await page.getByRole('button', { name: 'AI only', exact: true }).click();
+	await expect(
+		page.getByRole('heading', { name: 'No recorded activity in this view' })
+	).toBeVisible();
+	release();
+	await completed;
+	await expect(page.getByRole('button', { name: 'Cancel export' })).toHaveCount(0);
+	expect(downloads).toBe(0);
+	await expect(page.getByRole('status')).toHaveCount(0);
 });

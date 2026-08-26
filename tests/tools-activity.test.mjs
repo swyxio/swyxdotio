@@ -3,11 +3,12 @@ import test from 'node:test';
 import { createToolsSession, toolsSessionCookieName } from '../src/lib/server/tools-auth.js';
 import {
 	getToolsActivityLogs,
+	exportToolsActivityLogs,
 	postToolsActivity,
 	recordServerToolActivity,
 	withServerToolActivity
 } from '../src/lib/server/tools-activity.js';
-import { parseToolsActivityFilters } from '../src/lib/tools-activity.js';
+import { parseToolsActivityFilters, TOOLS_LOG_FILTER_DEFAULTS } from '../src/lib/tools-activity.js';
 import { createTestAiLedger, ledgerRequest } from './helpers/tools-ai-ledger.mjs';
 
 const SECRET = 'tools-activity-tests-private-session-secret';
@@ -168,16 +169,25 @@ test('recording rejects malformed, oversized and unsupported body/filter inputs 
 		'?days=7&days=1',
 		'?before=not%20base64',
 		'?before=',
-		`?before=${'x'.repeat(769)}`
+		'?status=admin',
+		'?source=private',
+		'?opens=none',
+		'?action=unknown',
+		'?account=other',
+		'?day=2026-02-30',
+		'?snapshot=invalid',
+		'?model=',
+		'?q=%00',
+		`?q=${'x'.repeat(101)}`,
+		`?before=${'x'.repeat(4097)}`
 	])
 		assert.equal((await getToolsActivityLogs(await event(ledger, { query }))).status, 400, query);
 	assert.equal(ledger.calls.length, 0);
 	assert.deepEqual(parseToolsActivityFilters(new URLSearchParams()), {
+		...TOOLS_LOG_FILTER_DEFAULTS,
 		days: 7,
-		kind: 'all',
-		tool: 'all',
 		before: null,
-		scope: 'mine'
+		snapshot: null
 	});
 });
 
@@ -225,6 +235,9 @@ test('mine logs combine existing AI and tool rows without duplication, never lea
 		toolActions: 1,
 		estimatedReservedUsd: 0.05,
 		failedRequests: 1,
+		pendingRequests: 0,
+		succeededRequests: 1,
+		cancelledRequests: 0,
 		activeAccounts: 1
 	});
 	assert.equal(
@@ -297,6 +310,9 @@ test('pagination is stable across tied timestamps/kinds and summaries cover the 
 		toolActions: 105,
 		estimatedReservedUsd: 0.2,
 		failedRequests: 0,
+		pendingRequests: 4,
+		succeededRequests: 105,
+		cancelledRequests: 0,
 		activeAccounts: 1
 	});
 	assert.equal(first.daily[0].toolActions, 105);
@@ -327,6 +343,9 @@ test('pagination is stable across tied timestamps/kinds and summaries cover the 
 		toolActions: 52,
 		estimatedReservedUsd: 0,
 		failedRequests: 0,
+		pendingRequests: 0,
+		succeededRequests: 52,
+		cancelledRequests: 0,
 		activeAccounts: 1
 	});
 	assert.equal(filtered.daily[0].toolActions, 52);
@@ -446,6 +465,10 @@ test('all-scope pagination never omits same-ID same-timestamp events across sixt
 		60
 	);
 	assert.equal(first.summary.activeAccounts, 60);
+	assert.equal(first.breakdowns.accounts.length, 20);
+	assert.equal(first.breakdownLimit, 20);
+	assert.equal(first.breakdowns.accounts[0].key, 'account-00');
+	assert.equal(first.breakdowns.tools[0].count, 60);
 });
 
 test('trusted server actions update readable profiles and failed scheduling still preserves the user operation', async () => {
@@ -505,4 +528,205 @@ test('rolling date filters and UTC daily totals reflect only retained filtered r
 		filtered.daily.map((day) => day.date),
 		[new Date(NOW - 8 * DAY).toISOString().slice(0, 10), new Date(NOW).toISOString().slice(0, 10)]
 	);
+});
+
+test('filters, UTC day drilldown and breakdowns use all matched rows and never widen tenant scope', async (context) => {
+	context.mock.method(Date, 'now', () => NOW);
+	const ledger = createTestAiLedger();
+	await record(ledger, ALICE, 'draw.open', uuid(1));
+	await record(ledger, ALICE, 'draw.meme.insert', uuid(2), {
+		entry: { id: uuid(2), action: 'draw.meme.insert', status: 'failed' }
+	});
+	await record(ledger, BOB, 'box.open', uuid(3));
+	for (const [model, status] of [
+		['model/a', 'failed'],
+		['model/b', 'reserved'],
+		['model/b', 'succeeded']
+	]) {
+		const admission = await ledgerRequest(ledger, 'admit', {
+			userId: ALICE,
+			kind: 'assistant',
+			model,
+			estimatedReservedUsd: 0.05
+		});
+		const { id } = await admission.json();
+		if (status !== 'reserved') await ledgerRequest(ledger, 'finish', { userId: ALICE, id, status });
+	}
+	for (const [filters, count] of [
+		[{ status: 'failed' }, 2],
+		[{ status: 'pending' }, 1],
+		[{ status: 'succeeded' }, 2],
+		[{ status: 'cancelled' }, 0],
+		[{ source: 'browser' }, 2],
+		[{ source: 'server' }, 3],
+		[{ model: 'model/b' }, 2],
+		[{ action: 'draw.ai.assistant' }, 3],
+		[{ q: 'MODEL/B' }, 2],
+		[{ q: '%' }, 0],
+		[{ q: "' OR 1=1 --" }, 0],
+		[{ opens: 'hide' }, 4],
+		[{ day: '2026-08-25' }, 5],
+		[{ day: '2026-08-24' }, 0],
+		[{ kind: 'ai', status: 'failed', source: 'server', model: 'model/a', day: '2026-08-25' }, 1]
+	]) {
+		const result = await (await logs(ledger, ALICE, filters)).json();
+		assert.equal(result.entries.length, count, JSON.stringify(filters));
+		assert.equal(result.summary.aiRequests + result.summary.toolActions, count);
+		assert.equal(
+			result.breakdowns.tools.reduce((n, row) => n + row.count, 0),
+			count
+		);
+		assert.deepEqual(result.breakdowns.accounts, []);
+		assert.doesNotMatch(JSON.stringify(result), new RegExp(BOB));
+	}
+	const all = await (await logs(ledger, OWNER, { scope: 'all' }, true)).json();
+	assert.equal(all.breakdowns.accounts.length, 2);
+	const alice = await (await logs(ledger, OWNER, { scope: 'all', account: ALICE }, true)).json();
+	assert.equal(alice.summary.activeAccounts, 1);
+	assert.equal(alice.entries.length, 5);
+	assert.ok(alice.entries.every((row) => row.account.id === ALICE));
+	assert.equal((await logs(ledger, BOB, { scope: 'all', account: ALICE })).status, 403);
+	assert.equal((await logs(ledger, BOB, { account: ALICE })).status, 400);
+	const failed = await (await logs(ledger, ALICE, { status: 'failed' })).json();
+	assert.equal(failed.breakdowns.models[0].estimatedReservedUsd, 0.05);
+	assert.equal(failed.breakdowns.models[0].count, 1);
+	assert.equal(failed.daily[0].failedRequests, 2);
+});
+
+test('extended-filter cursors cannot replay under a different filter and export fixes the creation window', async (context) => {
+	let now = NOW;
+	context.mock.method(Date, 'now', () => now);
+	const ledger = createTestAiLedger();
+	for (let i = 1; i <= 55; i++) await record(ledger, ALICE, 'draw.meme.insert', uuid(i));
+	const first = await (await logs(ledger, ALICE, { opens: 'hide' })).json();
+	for (const filter of [
+		{ status: 'succeeded' },
+		{ q: 'draw' },
+		{ source: 'browser' },
+		{ day: '2026-08-25' },
+		{ action: 'draw.meme.insert' }
+	])
+		assert.equal(
+			(await logs(ledger, ALICE, { opens: 'hide', before: first.nextCursor, ...filter })).status,
+			400
+		);
+	now += 1000;
+	await record(ledger, ALICE, 'draw.meme.insert', uuid(99));
+	const response = await exportToolsActivityLogs(
+		await event(ledger, { query: `?format=json&opens=hide&snapshot=${first.range.to}` })
+	);
+	const exported = await response.json();
+	assert.equal(exported.exportedCount, 55);
+	assert.equal(exported.entries.length, 55);
+	assert.equal(exported.nextCursor, null);
+	assert.equal(exported.complete, true);
+	assert.equal(exported.range.to, first.range.to);
+	assert.equal(exported.summary.toolActions, 55);
+	assert.equal(exported.costBasis.includes('not provider bills'), true);
+	assert.equal(response.headers.get('X-Export-Complete'), 'true');
+	assert.equal(
+		response.headers.get('Content-Disposition'),
+		'attachment; filename="tool-logs-mine-2026-08-25.json"'
+	);
+	assert.equal(
+		(await logs(ledger, ALICE, { snapshot: new Date(now + 1000).toISOString() })).status,
+		400
+	);
+	assert.equal(
+		(await logs(ledger, ALICE, { snapshot: new Date(now - 31 * DAY).toISOString() })).status,
+		400
+	);
+	assert.equal(
+		(
+			await exportToolsActivityLogs(
+				await event(ledger, { query: `?format=json&before=${first.nextCursor}` })
+			)
+		).status,
+		400
+	);
+});
+
+test('CSV and JSON exports require the current account, reject scope escalation, and neutralize spreadsheet formulas', async () => {
+	const ledger = createTestAiLedger();
+	const profile = { name: '  =HYPERLINK("https://evil.example")', email: '+formula@example.com' };
+	await postToolsActivity(
+		await event(ledger, { profile, body: { id: uuid(1), action: 'box.open', status: 'succeeded' } })
+	);
+	await record(ledger, BOB, 'draw.open', uuid(2));
+	for (const format of ['csv', 'json']) {
+		const query = `?format=${format}`;
+		assert.equal(
+			(await exportToolsActivityLogs(await event(ledger, { query, userId: null }))).status,
+			401
+		);
+		assert.equal(
+			(await exportToolsActivityLogs(await event(ledger, { query, expectedUser: BOB }))).status,
+			409
+		);
+		assert.equal(
+			(await exportToolsActivityLogs(await event(ledger, { query, expectedUser: null }))).status,
+			409
+		);
+		assert.equal(
+			(await exportToolsActivityLogs(await event(ledger, { query: query + '&scope=all' }))).status,
+			403
+		);
+		const own = await exportToolsActivityLogs(await event(ledger, { query }));
+		assert.equal(own.headers.get('Cache-Control'), 'private, no-store');
+		assert.equal(own.headers.get('X-Content-Type-Options'), 'nosniff');
+		const text = await own.text();
+		assert.doesNotMatch(text, /example.com|HYPERLINK/);
+		assert.doesNotMatch(text, new RegExp(BOB));
+	}
+	const csv = await exportToolsActivityLogs(
+		await event(ledger, { userId: OWNER, query: `?format=csv&scope=all&account=${ALICE}` })
+	);
+	const content = await csv.text();
+	assert.equal(content.split('\r\n').length, 3);
+	assert.ok(content.includes(`"'${ALICE}"`));
+	assert.ok(content.includes(`"'  =HYPERLINK(""https://evil.example"")"`));
+	assert.ok(content.includes(`"'+formula@example.com"`));
+	assert.ok(content.includes('estimated_reserved_usd'));
+	assert.doesNotMatch(content, new RegExp(BOB));
+	for (const query of ['?format=html', '?format=csv&format=json', '?format=json&userId=forged'])
+		assert.equal((await exportToolsActivityLogs(await event(ledger, { query }))).status, 400);
+});
+
+test('exports reject oversized views rather than silently truncating while narrower views stay complete', async () => {
+	const ledger = createTestAiLedger();
+	await record(ledger, ALICE, 'draw.open', uuid(1));
+	const insert = ledger.database.prepare(
+		"INSERT INTO tools_activity (id,user_id,created_at,tool,action,status,source) VALUES (?,?,?,'draw','draw.open','succeeded','browser')"
+	);
+	ledger.database.exec('BEGIN');
+	for (let i = 2; i <= 10001; i++) insert.run(uuid(i), ALICE, Date.now());
+	ledger.database.exec('COMMIT');
+	const result = await exportToolsActivityLogs(await event(ledger, { query: '?format=json' }));
+	assert.equal(result.status, 413);
+	assert.match((await result.json()).error, /No partial file/);
+	const narrow = await exportToolsActivityLogs(
+		await event(ledger, { query: `?format=json&q=${uuid(1)}` })
+	);
+	assert.equal(narrow.status, 200);
+	assert.equal((await narrow.json()).entries.length, 1);
+});
+
+test('an old or incomplete companion response cannot masquerade as a complete export', async () => {
+	const ledger = {
+		namespace: {
+			idFromName: (name) => name,
+			get: () => ({
+				fetch: async () =>
+					Response.json({
+						entries: [],
+						nextCursor: 'more-records',
+						summary: { aiRequests: 0, toolActions: 55 }
+					})
+			})
+		}
+	};
+	const result = await exportToolsActivityLogs(await event(ledger, { query: '?format=csv' }));
+	assert.equal(result.status, 503);
+	assert.equal(result.headers.has('Content-Disposition'), false);
+	assert.match((await result.json()).error, /complete export is unavailable/);
 });

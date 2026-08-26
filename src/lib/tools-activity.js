@@ -79,25 +79,69 @@ export function validToolsActivityInput(value, source) {
 	);
 }
 
+/** @typedef {'days'|'kind'|'tool'|'scope'|'status'|'source'|'model'|'action'|'account'|'q'|'day'|'opens'} ToolsLogFilterKey */
+/** Bookmarkable metadata-only filters. Account names/emails and private content are never searched.
+ * @type {Readonly<Record<ToolsLogFilterKey,string>>} */
+export const TOOLS_LOG_FILTER_DEFAULTS = Object.freeze({
+	days: '7',
+	kind: 'all',
+	tool: 'all',
+	scope: 'mine',
+	status: 'all',
+	source: 'all',
+	model: 'all',
+	action: 'all',
+	account: 'all',
+	q: '',
+	day: '',
+	opens: 'all'
+});
+export const TOOLS_LOG_EXPORT_LIMIT = 10_000;
+
 /** @param {URLSearchParams} params */
 export function parseToolsActivityFilters(params) {
+	const allowed = [...Object.keys(TOOLS_LOG_FILTER_DEFAULTS), 'before', 'snapshot'];
 	if (
-		[...params.keys()].some((key) => !['days', 'kind', 'tool', 'before', 'scope'].includes(key)) ||
+		[...params.keys()].some((key) => !allowed.includes(key)) ||
 		[...new Set(params.keys())].some((key) => params.getAll(key).length !== 1)
 	)
 		return null;
-	const days = params.get('days') ?? '7';
-	const kind = params.get('kind') ?? 'all';
-	const scope = params.get('scope') ?? 'mine';
-	const tool = params.get('tool') ?? 'all';
+	const f = /** @type {Record<ToolsLogFilterKey,string>} */ (
+		Object.fromEntries(
+			Object.entries(TOOLS_LOG_FILTER_DEFAULTS).map(([key, value]) => [
+				key,
+				params.get(key) ?? value
+			])
+		)
+	);
 	const before = params.get('before');
+	const snapshot = params.get('snapshot');
 	if (
-		!['1', '7', '30'].includes(days) ||
-		!['all', 'ai', 'tool'].includes(kind) ||
-		!['mine', 'all'].includes(scope) ||
-		!['all', ...Object.keys(TOOLS_ACTIVITY_TOOLS)].includes(tool) ||
-		(before !== null && (!/^[A-Za-z0-9_-]+$/.test(before) || before.length > 768))
+		!['1', '7', '30'].includes(f.days) ||
+		!['all', 'ai', 'tool'].includes(f.kind) ||
+		!['mine', 'all'].includes(f.scope) ||
+		!['all', ...Object.keys(TOOLS_ACTIVITY_TOOLS)].includes(f.tool) ||
+		!['all', 'succeeded', 'failed', 'cancelled', 'pending'].includes(f.status) ||
+		!['all', 'server', 'browser'].includes(f.source) ||
+		!['all', 'hide'].includes(f.opens) ||
+		!['all', ...Object.keys(TOOLS_ACTIVITY_ACTIONS)].includes(f.action) ||
+		!f.model ||
+		f.model.length > 200 ||
+		/[\u0000-\u001f\u007f]/.test(f.model) ||
+		f.q.length > 100 ||
+		/[\u0000-\u001f\u007f]/.test(f.q) ||
+		!/^[A-Za-z0-9_-]{1,255}$/.test(f.account) ||
+		(f.account !== 'all' && f.scope !== 'all') ||
+		(f.day !== '' &&
+			(!/^\d{4}-\d{2}-\d{2}$/.test(f.day) ||
+				!Number.isFinite(Date.parse(f.day)) ||
+				new Date(f.day).toISOString().slice(0, 10) !== f.day)) ||
+		(snapshot !== null &&
+			(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(snapshot) ||
+				!Number.isFinite(Date.parse(snapshot)) ||
+				new Date(snapshot).toISOString() !== snapshot)) ||
+		(before !== null && (!/^[A-Za-z0-9_-]+$/.test(before) || before.length > 4096))
 	)
 		return null;
-	return { days: Number(days), kind, tool, before, scope };
+	return { ...f, days: Number(f.days), before, snapshot };
 }
