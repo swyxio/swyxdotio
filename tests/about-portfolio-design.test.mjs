@@ -36,7 +36,7 @@ test('the press kit has real thumbnails, labeled originals, and no known broken 
 	]);
 	assert.equal((source.match(/title: '/g) || []).length, 4);
 	assert.match(source, /<h2 id="press-photos">Press photos<\/h2>/);
-	assert.match(source, /Open original ↗/);
+	assert.match(source, /Open full-size ↗/);
 	assert.match(source, /loading="lazy"/);
 	const html = await renderMarkdown(photos);
 	assert.doesNotMatch(html, />https?:\/\//);
@@ -49,6 +49,34 @@ test('the press kit has real thumbnails, labeled originals, and no known broken 
 		'Cartoon avatars'
 	]) {
 		assert.ok(html.includes(name), `Missing photo source: ${name}`);
+	}
+});
+
+test('World’s Fair photos lead the press kit while older conferences remain under show more', async () => {
+	const [source, markdown] = await Promise.all([
+		read('src/routes/about/+page.svelte'),
+		read('src/routes/about/photos.md')
+	]);
+	const featured = [...source.matchAll(/src: '(\/about-photos\/worlds-fair-[a-z-]+\.webp)'/g)];
+	assert.equal(featured.length, 4);
+	assert.equal((source.match(/href: 'https:\/\/images\.pixieset\.com\/123558811\/[a-f0-9]+-xxlarge\.jpg'/g) || []).length, 4);
+	assert.match(source, /https:\/\/aiengineer\.pixieset\.com\/worldsfair2026\//);
+	assert.doesNotMatch(source, /React Miami|React Advanced|tools\.aieconf\.com/);
+	assert.match(source, /aspect-ratio: 3 \/ 2;\s*object-fit: contain/);
+	assert.match(source, /width="720"\s*height="480"\s*loading="lazy"\s*decoding="async"/);
+	let totalBytes = 0;
+	for (const [, path] of featured) {
+		const bytes = await readFile(new URL(`static${path}`, root));
+		assert.equal(bytes.toString('ascii', 0, 4), 'RIFF');
+		assert.equal(bytes.toString('ascii', 8, 12), 'WEBP');
+		totalBytes += bytes.length;
+	}
+	assert.ok(totalBytes < 200_000, 'The featured photos stay lightweight');
+	const html = await renderMarkdown(markdown);
+	assert.match(html, /<details>\s*<summary>More sizes, event photos, and avatars<\/summary>/);
+	assert.match(html, /<h3 id="earlier-speaking-photos">Earlier speaking photos<\/h3>/);
+	for (const name of ['React Miami', 'React Advanced', 'Niseko headshot', 'Thursday Nights in AI']) {
+		assert.ok(html.includes(name), `Older photo remains available: ${name}`);
 	}
 });
 
