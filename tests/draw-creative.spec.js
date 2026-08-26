@@ -898,15 +898,19 @@ test('show-first onboarding applies only chosen fields, saves six examples, and 
 		await workspace
 			.getByRole('heading', { name: 'Start with the show.', exact: true })
 			.scrollIntoViewIfNeeded();
-		await expect
-			.poll(() =>
-				workspace
-					.locator('.starter-references img')
-					.first()
-					.evaluate((image) => /** @type {HTMLImageElement} */ (image).naturalWidth)
-			)
-			.toBeGreaterThan(0);
-		await page.screenshot({ path: '/tmp/draw-onboarding-desktop.png' });
+		const starter = workspace.getByRole('combobox', { name: 'Show starter', exact: true });
+		for (const value of ['ls', 'aie']) {
+			await starter.selectOption(value);
+			await expect(workspace.locator('.starter-references img')).toHaveCount(0);
+			await expect(workspace.locator('.starter-references')).toContainText(
+				'not recommended examples of good design'
+			);
+		}
+		await starter.selectOption('ls');
+		await workspace
+			.getByRole('heading', { name: 'Start with the show.', exact: true })
+			.scrollIntoViewIfNeeded();
+		await page.screenshot({ path: '/tmp/draw-reference-quality-desktop.png' });
 		const fields = workspace
 			.locator('.house-panel')
 			.getByRole('group', { name: 'Fill only these fields' });
@@ -944,6 +948,9 @@ test('show-first onboarding applies only chosen fields, saves six examples, and 
 		await workspace
 			.getByRole('button', { name: 'Choose reference examples →', exact: true })
 			.click();
+		await expect(
+			workspace.locator('.channel-tabs').getByRole('button', { name: dwarkesh.name, exact: true })
+		).toHaveAttribute('aria-pressed', 'true');
 		for (const channel of referenceCatalog.channels) {
 			await workspace
 				.locator('.channel-tabs')
@@ -957,6 +964,12 @@ test('show-first onboarding applies only chosen fields, saves six examples, and 
 					.getByRole('button', { name: /** @type {string} */ (button), exact: true })
 					.click();
 				await expect(workspace.locator('.example-grid article')).toHaveCount(5);
+				if (['latent-space', 'ai-engineer'].includes(channel.slug) && button === 'Latest 5') {
+					await expect(workspace.getByRole('note')).toContainText('Recent uploads · context only.');
+					await expect(workspace.getByRole('note')).toContainText(
+						'not recommended examples of good design'
+					);
+				}
 				const hrefs = await workspace
 					.locator('.example-grid .thumbnail')
 					.evaluateAll((links) => links.map((link) => link.getAttribute('href')));
@@ -1008,6 +1021,10 @@ test('show-first onboarding applies only chosen fields, saves six examples, and 
 
 	await test.step('six explicit role selections persist and a seventh is rejected without changing the draft', async () => {
 		await workspace.getByRole('button', { name: 'Examples', exact: true }).click();
+		await workspace
+			.locator('.channel-tabs')
+			.getByRole('button', { name: ls.name, exact: true })
+			.click();
 		for (const id of ls.latestIds)
 			await exampleCard(workspace, id)
 				.getByRole('checkbox', { name: 'Title', exact: true })
@@ -1266,7 +1283,7 @@ test('390px show onboarding and public examples remain readable with visible dis
 	await expect(
 		workspace.getByRole('heading', { name: 'Start with the show.', exact: true })
 	).toBeVisible();
-	await page.screenshot({ path: '/tmp/draw-onboarding-mobile.png' });
+	await page.screenshot({ path: '/tmp/draw-reference-quality-mobile.png' });
 	for (const section of ['Show brief', 'Examples']) {
 		await workspace.getByRole('button', { name: section, exact: true }).click();
 		const width = await workspace
