@@ -107,7 +107,45 @@ Select any preview to open the full-size original.
 
 ### Social photos
 
+Friends, community, and life between conferences. Select a new photo to see the original post and its context.
+
 <div class="photo-preview-grid">
+  <a class="photo-preview" href="https://x.com/MilksandMatcha/status/1993102854035587370/photo/1" aria-label="Open original: Flowers from the community, posted by Sarah Chieng">
+    <figure>
+      <img src="/about-photos/social-community-flowers.webp" alt="swyx smiling with a bouquet of flowers and a drink" width="560" height="747" loading="lazy" decoding="async" />
+      <figcaption>Flowers from the community <span>Sarah Chieng · Original post ↗</span></figcaption>
+    </figure>
+  </a>
+  <a class="photo-preview" href="https://x.com/steveruizok/status/1552271707804782594/photo/1" aria-label="Open original: Office visit with Steve Ruiz">
+    <figure>
+      <img src="/about-photos/social-steve-ruiz.webp" alt="swyx laughing in an office selfie with Steve Ruiz" width="560" height="420" loading="lazy" decoding="async" />
+      <figcaption>Office visit with Steve Ruiz <span>Steve Ruiz · Original post ↗</span></figcaption>
+    </figure>
+  </a>
+  <a class="photo-preview" href="https://x.com/mada299/status/2037720889434030083/photo/1" aria-label="Open original: Couch selfie with Mada Seghete">
+    <figure>
+      <img src="/about-photos/social-mada-seghete.webp" alt="swyx and Mada Seghete smiling in a couch selfie" width="560" height="420" loading="lazy" decoding="async" />
+      <figcaption>Couch selfie with Mada Seghete <span>Mada Seghete · Original post ↗</span></figcaption>
+    </figure>
+  </a>
+  <a class="photo-preview" href="https://x.com/MichelleBakels/status/2046913465822933465/photo/1" aria-label="Open original: Miami with Michelle Bakels">
+    <figure>
+      <img src="/about-photos/social-michelle-bakels.webp" alt="Black-and-white portrait of swyx and Michelle Bakels smiling at a table" width="560" height="585" loading="lazy" decoding="async" />
+      <figcaption>Miami with Michelle Bakels <span>Michelle Bakels · Original post ↗</span></figcaption>
+    </figure>
+  </a>
+  <a class="photo-preview" href="https://x.com/MilksandMatcha/status/2089771790063259743/photo/2" aria-label="Open original: Omakase dinner, posted by Sarah Chieng">
+    <figure>
+      <img src="/about-photos/social-omakase.webp" alt="Candid conversation with swyx around an omakase dinner table" width="560" height="420" loading="lazy" decoding="async" />
+      <figcaption>Omakase dinner <span>Sarah Chieng · Original post ↗</span></figcaption>
+    </figure>
+  </a>
+  <a class="photo-preview" href="https://x.com/MilksandMatcha/status/2048888519293075962/photo/1" aria-label="Open original: Café Compute Miami afterparty, posted by Sarah Chieng">
+    <figure>
+      <img src="/about-photos/social-miami-afterparty.webp" alt="swyx with friends at the Café Compute Miami afterparty" width="560" height="400" loading="lazy" decoding="async" />
+      <figcaption>Café Compute Miami afterparty <span>Sarah Chieng · Original post ↗</span></figcaption>
+    </figure>
+  </a>
   <a class="photo-preview" href="https://user-images.githubusercontent.com/6764957/179319070-7c223991-e965-4d69-b6d9-f894feb02cf8.png" aria-label="Open original: Social photo one">
     <figure>
       <img src="/about-photos/social-one.webp" alt="Social photo one" width="560" height="420" loading="lazy" decoding="async" />
