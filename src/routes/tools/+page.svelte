@@ -128,6 +128,14 @@
 	{/if}
 	<ul class="tool-list">
 		<li>
+			<a href="/tools/logs"
+				><strong>Tool logs</strong><span
+					>Your AI requests, tool activity, and estimated usage.{#if data.user?.isOwner}
+						Includes everyone’s activity for you as site owner.{/if}</span
+				></a
+			>
+		</li>
+		<li>
 			<a href="/draw"
 				><strong>Draw</strong><span>A multipage whiteboard with your own drawings and library.</span
 				></a
@@ -136,7 +144,7 @@
 		<li>
 			<a href="/box"
 				><strong>Big text box</strong><span
-					>A distraction-free text box. No account or server storage.</span
+					>A distraction-free text box. Text stays on your device.</span
 				></a
 			>
 		</li>

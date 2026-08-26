@@ -4,11 +4,13 @@
 
 <aside class="ai-notice" aria-label="Funded AI usage notice">
 	<strong>AI is funded by swyx.io, rate limited, and logged.</strong>
+	<span>Signed-in tool actions are also recorded in <a href="/tools/logs">Tool logs</a>.</span>
 	<span>
 		{TOOLS_AI_POLICY.assistantTurnsPerHour} assistant turns and
 		{TOOLS_AI_POLICY.mediaJobsPerHour} generations per hour per account; ${TOOLS_AI_POLICY.userEstimatedDailyUsd}/day
 		estimated allowance. Account, model, time, status, and estimated-cost logs are kept for
-		{TOOLS_AI_POLICY.retentionDays} days—not prompts or images.
+		{TOOLS_AI_POLICY.retentionDays} days—not prompts or images. The site owner can review everyone’s usage
+		metadata and account identity.
 		<a href="/tools/privacy">Details</a>
 	</span>
 </aside>

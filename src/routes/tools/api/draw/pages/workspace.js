@@ -1,3 +1,4 @@
+import { recordServerToolActivity } from '../../../../../lib/server/tools-activity.js';
 import { getToolsUser } from '../../../../../lib/server/tools-auth.js';
 import { privateJson, requireSameOrigin } from '../../../../../lib/podcast-admin-route.js';
 
@@ -45,8 +46,22 @@ export async function forwardDrawingRequest(event, { mutation = false } = {}) {
 		headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
 		body
 	});
-	const response = await workspace
-		.get(workspace.idFromName(user.isOwner ? 'personal' : `google:${user.id}`))
-		.fetch(request);
+	const actions = /** @type {Record<string, string>} */ ({
+		POST: 'draw.page.create',
+		PUT: 'draw.page.save',
+		DELETE: 'draw.page.delete'
+	});
+	const action = actions[event.request.method];
+	let response;
+	try {
+		response = await workspace
+			.get(workspace.idFromName(user.isOwner ? 'personal' : `google:${user.id}`))
+			.fetch(request);
+	} catch (error) {
+		if (action) await recordServerToolActivity(event, user.id, action, 'failed');
+		throw error;
+	}
+	if (action)
+		await recordServerToolActivity(event, user.id, action, response.ok ? 'succeeded' : 'failed');
 	return privateJson(await response.json(), { status: response.status });
 }

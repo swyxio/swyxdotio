@@ -1,5 +1,6 @@
 <script>
 	import { onMount, tick } from 'svelte';
+	import { recordToolActivity } from '$lib/tools-activity-client.js';
 	import { drawingStorageKey, TOOLS_ACCOUNT_EVENT_KEY } from '$lib/draw-account.js';
 	import '@excalidraw/excalidraw/index.css';
 	import { DRAW_MEME_TEMPLATES, fetchMemeTemplates, searchMemeTemplates } from '$lib/draw-memes.js';
@@ -707,6 +708,29 @@
 	 * @param {{ signal: AbortSignal, onProgress: (message: string) => void, reserveSpending: (amount: number, label: string) => void, getBudget: () => string | undefined, updateBudget: (token: string, spendingUsd: number) => void }} operation
 	 */
 	async function applyAgentImageTool(action, options, operation) {
+		const activityUser = toolsUser?.id;
+		try {
+			const result = await performAgentImageTool(action, options, operation);
+			if (action !== 'fal' && action !== 'background')
+				void recordToolActivity(activityUser, `draw.image.${action}`);
+			return result;
+		} catch (error) {
+			if (action !== 'fal' && action !== 'background')
+				void recordToolActivity(
+					activityUser,
+					`draw.image.${action}`,
+					error instanceof Error && error.name === 'AbortError' ? 'cancelled' : 'failed'
+				);
+			throw error;
+		}
+	}
+
+	/**
+	 * @param {string} action
+	 * @param {Record<string, string | number>} options
+	 * @param {{ signal: AbortSignal, onProgress: (message: string) => void, reserveSpending: (amount: number, label: string) => void, getBudget: () => string | undefined, updateBudget: (token: string, spendingUsd: number) => void }} operation
+	 */
+	async function performAgentImageTool(action, options, operation) {
 		if (!editor || !updateElement || !captureImmediately)
 			throw new Error('The drawing editor is unavailable.');
 		const requestedId = typeof options.id === 'string' ? options.id : selectedImageId;
@@ -983,6 +1007,7 @@
 
 	/** @param {string} templateId @param {Record<string, string>} [options] */
 	async function insertDesign(templateId, options = {}) {
+		const activityUser = toolsUser?.id;
 		if (!editor || !convertElements || !captureImmediately)
 			throw new Error('The drawing canvas is not ready.');
 		const template = getDrawingDesignTemplate(templateId);
@@ -1011,6 +1036,7 @@
 		});
 		selectedArtboardId = frame.id;
 		designStatus = `${design.format.width} × ${design.format.height} artboard created`;
+		void recordToolActivity(activityUser, 'draw.design.insert');
 		focusDesignArtboard(elements);
 		return {
 			frameId: frame.id,
@@ -1132,6 +1158,7 @@
 
 	/** @param {string} frameId @param {'png' | 'jpg' | 'svg'} format @param {number} [scale] */
 	async function exportDesign(frameId, format, scale = 1) {
+		const activityUser = toolsUser?.id;
 		if (!editor || !exportToBlob || !exportToSvg)
 			throw new Error('The drawing export is not ready.');
 		const frame = editor
@@ -1179,6 +1206,7 @@
 			download.remove();
 			setTimeout(() => URL.revokeObjectURL(url), 60_000);
 			designStatus = `Downloaded ${format.toUpperCase()} · ${frame.width * scale} × ${frame.height * scale}`;
+			void recordToolActivity(activityUser, 'draw.design.export');
 			return {
 				exported: true,
 				format,
@@ -1298,12 +1326,15 @@
 	/** @param {typeof DRAW_MEME_TEMPLATES[number]} template */
 	async function insertMemeTemplate(template) {
 		if (!editor || !convertElements || !captureImmediately || isInsertingMeme) return;
+		const activityUser = toolsUser?.id;
 		isInsertingMeme = true;
 		memeError = '';
 		try {
 			const { insertMemeImage } = await import('$lib/draw-meme-image.js');
 			await insertMemeImage(editor, template, { convertElements, captureImmediately });
+			void recordToolActivity(activityUser, 'draw.meme.insert');
 		} catch (error) {
+			void recordToolActivity(activityUser, 'draw.meme.insert', 'failed');
 			memeError = error instanceof Error ? error.message : 'The meme image could not be added.';
 		} finally {
 			isInsertingMeme = false;
@@ -1423,6 +1454,7 @@
 
 	async function removeSelectedImageBackground() {
 		if (!editor || !updateElement || !captureImmediately || !selectedImageId) return;
+		const activityUser = toolsUser?.id;
 		const image = editor
 			.getSceneElements()
 			.find((element) => element.id === selectedImageId && element.type === 'image');
@@ -1499,6 +1531,7 @@
 				captureUpdate: captureImmediately
 			});
 			backgroundStatus = 'Background removed';
+			void recordToolActivity(activityUser, 'draw.image.background-remove');
 			backgroundProgress = 100;
 			if (exceedsCloudLimit) {
 				saveStatus = 'error';
@@ -1507,7 +1540,9 @@
 		} catch (error) {
 			if (error instanceof Error && error.name === 'AbortError') {
 				backgroundStatus = '';
+				void recordToolActivity(activityUser, 'draw.image.background-remove', 'cancelled');
 			} else {
+				void recordToolActivity(activityUser, 'draw.image.background-remove', 'failed');
 				backgroundError =
 					error instanceof Error ? error.message : 'Could not remove the background.';
 				backgroundStatus = '';
@@ -1624,6 +1659,7 @@
 				if (destroyed) return;
 				toolsUser = session.user ?? null;
 				toolsAuthenticated = session.authenticated === true;
+				void recordToolActivity(toolsUser?.id, 'draw.open');
 				STORAGE_KEY = drawingStorageKey(toolsUser);
 				PAGE_STORAGE_KEY = `${STORAGE_KEY}:pages`;
 				LIBRARY_STORAGE_KEY = `${STORAGE_KEY}:library`;
@@ -2045,6 +2081,11 @@
 							on this device{:else}Saved on this device{/if}
 					</span>
 				</div>
+
+				{#if toolsAuthenticated}<p class="page-logging">
+						<a href="/tools/logs">Tool activity is logged</a> · visible to you and swyx; drawing contents
+						stay private.
+					</p>{/if}
 
 				{#each recentPages as page (page.id)}
 					<div class="page-row" class:active={page.id === activePageId}>
@@ -2780,6 +2821,12 @@
 
 	.save-status[data-status='saved'] {
 		color: #328357;
+	}
+	.page-logging {
+		margin: 0.4rem 0;
+		font-size: 0.7rem;
+		color: #64748b;
+		line-height: 1.4;
 	}
 
 	.save-status[data-status='saving'] {

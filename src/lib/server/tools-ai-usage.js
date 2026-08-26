@@ -1,3 +1,4 @@
+import { getToolsUser } from './tools-auth.js';
 import { privateJson } from '../podcast-admin-route.js';
 
 /** @typedef {Pick<import('@sveltejs/kit').RequestEvent, 'platform'>} UsageEvent */
@@ -11,16 +12,14 @@ export async function toolsAiLedger(event, path, body) {
 			{ status: 503 }
 		);
 	try {
-		const result = await namespace
-			.get(namespace.idFromName('tools-ai-usage'))
-			.fetch(
-				new Request(`https://drawing.internal/ai/${path}`, {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify(body),
-					signal: AbortSignal.timeout(10_000)
-				})
-			);
+		const result = await namespace.get(namespace.idFromName('tools-ai-usage')).fetch(
+			new Request(`https://drawing.internal/ai/${path}`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(body),
+				signal: AbortSignal.timeout(10_000)
+			})
+		);
 		if (result.status >= 500 || result.status === 405) throw new Error('Usage ledger unavailable');
 		const payload = await result.json();
 		return privateJson(payload, {
@@ -37,9 +36,18 @@ export async function toolsAiLedger(event, path, body) {
 	}
 }
 
-/** @param {UsageEvent} event @param {string} userId @param {'assistant'|'media'} kind @param {string} model @param {number} estimatedReservedUsd */
+/** @param {UsageEvent & Pick<import('@sveltejs/kit').RequestEvent, 'cookies'>} event @param {string} userId @param {'assistant'|'media'} kind @param {string} model @param {number} estimatedReservedUsd */
 export async function reserveToolsAiUsage(event, userId, kind, model, estimatedReservedUsd) {
-	const result = await toolsAiLedger(event, 'admit', { userId, kind, model, estimatedReservedUsd });
+	const user = await getToolsUser(event);
+	const profile =
+		user?.id === userId ? { id: user.id, email: user.email, name: user.name } : undefined;
+	const result = await toolsAiLedger(event, 'admit', {
+		userId,
+		kind,
+		model,
+		estimatedReservedUsd,
+		profile
+	});
 	if (!result.ok) return result;
 	const reservation = await result.json();
 	if (typeof reservation?.id !== 'string')

@@ -1,6 +1,7 @@
 <script>
 	import { tick } from 'svelte';
 	import ToolsAiNotice from '$lib/ToolsAiNotice.svelte';
+	import { recordToolActivity } from '$lib/tools-activity-client.js';
 	import { DRAW_IMAGE_TOOLS, processImageTool } from '$lib/draw-image-tools.js';
 	import { createDrawingGenerationRun, runDrawingGenerationBatch } from '$lib/draw-generation-batch.js';
 	import { estimateToolsMediaReservation } from '$lib/tools-ai-policy.js';
@@ -638,6 +639,7 @@
 	async function applyLocalImageTool() {
 		if (processing || processingGeneration || !selectedTool) return;
 		const selectedAction = /** @type {ImageAction} */ (action);
+		const activityUser = userId;
 		processing = true;
 		operationProgress = 0;
 		operationStatus = 'Preparing image';
@@ -666,7 +668,13 @@
 				result.type || 'image/png',
 				`${selectedTool?.label ?? 'Image edit'} applied`
 			);
+			void recordToolActivity(activityUser, `draw.image.${selectedAction}`);
 		} catch (error) {
+			void recordToolActivity(
+				activityUser,
+				`draw.image.${selectedAction}`,
+				error instanceof Error && error.name === 'AbortError' ? 'cancelled' : 'failed'
+			);
 			if (error instanceof Error && error.name === 'AbortError') {
 				operationStatus = '';
 			} else {
