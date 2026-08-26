@@ -1,5 +1,9 @@
 import { expect, test } from '@playwright/test';
-import { createDrawingPendingSave, drawingPendingSaveKey } from '../src/lib/draw-pending-save.js';
+import {
+	createDrawingPendingSave,
+	drawingPendingSaveKey,
+	writeDrawingPendingSave
+} from '../src/lib/draw-pending-save.js';
 
 const userId = '222222222222222222222';
 const storageKey = `swyx-excalidraw:google:${userId}`;
@@ -137,10 +141,11 @@ async function cloudFixture(page) {
 
 /** @param {import('@playwright/test').Page} page @returns {Promise<DrawingScene>} */
 async function cachedScene(page) {
-	return page.evaluate(
-		(key) => JSON.parse(localStorage.getItem(key) ?? '{"elements":[],"appState":{},"files":{}}'),
-		storageKey
-	);
+	return page.evaluate(() => {
+		const key = document.querySelector('.draw-canvas')?.getAttribute('data-storage-key');
+		if (!key) throw new Error('The active drawing snapshot is unavailable.');
+		return JSON.parse(localStorage.getItem(key) ?? '{"elements":[],"appState":{},"files":{}}');
+	});
 }
 
 test('successful page deletion removes only its recovery journal, preserving other pages and accounts', async ({
@@ -157,10 +162,18 @@ test('successful page deletion removes only its recovery journal, preserving oth
 		destinationId,
 		nativeScene('private-other-account')
 	);
-	const entries = [deleted, otherPage, otherAccount].map((record) => [
-		drawingPendingSaveKey(record.storageKey, record.pageId),
-		JSON.stringify(record)
-	]);
+	/** @type {[string, string][]} */
+	const entries = [];
+	for (const record of [deleted, otherPage, otherAccount]) {
+		writeDrawingPendingSave(
+			{
+				getItem: () => null,
+				setItem: (key, value) => entries.push([key, value]),
+				removeItem: () => {}
+			},
+			record
+		);
+	}
 	await page.addInitScript((entries) => {
 		for (const [key, value] of entries) localStorage.setItem(key, value);
 	}, entries);
@@ -199,19 +212,22 @@ test('a failed destination cache write keeps the source page and native scene ac
 	const pages = page.getByRole('button', { name: 'Manage drawing pages' });
 	await expect(pages).toContainText('Source page');
 	await expect.poll(async () => (await cachedScene(page)).elements[0]?.id).toBe('source-shape');
-	await page.evaluate((key) => {
-		const setItem = Storage.prototype.setItem;
-		Storage.prototype.setItem = function (
-			/** @type {string} */ itemKey,
-			/** @type {string} */ value
-		) {
-			if (this === localStorage && itemKey === key && value.includes('destination-shape')) {
-				document.documentElement.dataset.failedDrawingCacheWrite = 'true';
-				throw new DOMException('Test destination cache is full.', 'QuotaExceededError');
-			}
-			return setItem.call(this, itemKey, value);
-		};
-	}, storageKey);
+	await page.evaluate(
+		(key) => {
+			const setItem = Storage.prototype.setItem;
+			Storage.prototype.setItem = function (
+				/** @type {string} */ itemKey,
+				/** @type {string} */ value
+			) {
+				if (this === localStorage && itemKey === key && value.includes('destination-shape')) {
+					document.documentElement.dataset.failedDrawingCacheWrite = 'true';
+					throw new DOMException('Test destination cache is full.', 'QuotaExceededError');
+				}
+				return setItem.call(this, itemKey, value);
+			};
+		},
+		drawingPendingSaveKey(storageKey, destinationId)
+	);
 	await pages.click();
 	await page.getByRole('button', { name: 'Destination page', exact: true }).click();
 	await expect(page.locator('html')).toHaveAttribute('data-failed-drawing-cache-write', 'true');

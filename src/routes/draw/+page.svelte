@@ -50,6 +50,8 @@
 		createDrawingPendingSave,
 		writeDrawingPendingSave,
 		readDrawingPendingSave,
+		readDrawingScene,
+		writeDrawingScene,
 		drawingPendingSaveKey,
 		acknowledgeDrawingPendingSave
 	} from '$lib/draw-pending-save.js';
@@ -157,6 +159,9 @@
 	let saveRequest;
 	let persistenceError = $state('');
 	let recoveryNotice = $state('');
+	let initialSceneChange = true;
+	let localSaveFailed = false;
+	let legacyCachePageId = '';
 	let isSwitchingPage = $state(false);
 	let isLibraryOpen = $state(false);
 	let selectedImageId = $state('');
@@ -523,6 +528,7 @@
 	}
 
 	function canNavigateDrawing() {
+		if (localSaveFailed) return false;
 		if (!generationRunning && !generationInsertionRunning) return true;
 		imageToolMinimized = false;
 		imageToolStatus = generationInsertionRunning
@@ -769,9 +775,7 @@
 
 	/** @param {string} id */
 	function restorePageScene(id) {
-		return /** @type {DrawingScene | undefined} */ (
-			readStorage(`${STORAGE_KEY}:${id}`) ?? readStorage(STORAGE_KEY)
-		);
+		return readDrawingScene(localStorage, STORAGE_KEY, id);
 	}
 
 	/**
@@ -825,8 +829,6 @@
 		const stored = /** @type {{ pages?: DrawingPage[], activePageId?: string } | undefined} */ (
 			readStorage(PAGE_STORAGE_KEY)
 		);
-		const previousScene = /** @type {DrawingScene | undefined} */ (readStorage(STORAGE_KEY));
-
 		try {
 			const result = await requestPage('');
 			cloudAvailable = true;
@@ -839,12 +841,6 @@
 					body: JSON.stringify({ name: 'Page 1' })
 				});
 				pages = [firstPage];
-				if (previousScene?.elements?.length) {
-					await requestPage(`/${encodeURIComponent(firstPage.id)}`, {
-						method: 'PUT',
-						body: JSON.stringify({ scene: previousScene })
-					});
-				}
 			}
 
 			const rememberedPageId = stored?.activePageId ?? result.activePageId;
@@ -854,7 +850,7 @@
 			storePages();
 			const currentPage = await requestPage(`/${encodeURIComponent(activePageId)}`);
 			saveStatus = 'saved';
-			return currentPage.scene ?? previousScene;
+			return /** @type {DrawingScene | undefined} */ (currentPage.scene);
 		} catch (error) {
 			cloudAvailable = false;
 			saveStatus = 'local';
@@ -865,21 +861,54 @@
 				? /** @type {string} */ (stored?.activePageId)
 				: pages[0].id;
 			storePages();
-			return restorePageScene(activePageId);
+			return undefined;
 		}
 	}
 
 	async function loadInitialDrawingScene() {
-		const cloudOrLocalScene = await loadInitialPage();
+		const remembered = /** @type {{ activePageId?: string } | undefined} */ (
+			readStorage(PAGE_STORAGE_KEY)
+		);
+		const cloudScene = await loadInitialPage();
+		const cachedScene = restorePageScene(activePageId);
 		const recovery = readDrawingPendingSave(localStorage, STORAGE_KEY, activePageId);
-		if (!recovery) return cloudOrLocalScene;
-		pendingSave =
-			new TextEncoder().encode(JSON.stringify(recovery.scene)).byteLength <= MAX_CLOUD_SCENE_BYTES
-				? recovery
-				: undefined;
-		recoveryNotice = 'Recovered unsynced changes from this device.';
-		saveStatus = cloudAvailable ? 'saving' : 'local';
-		return recovery.scene;
+		if (recovery) {
+			pendingSave =
+				new TextEncoder().encode(JSON.stringify(recovery.scene)).byteLength <= MAX_CLOUD_SCENE_BYTES
+					? recovery
+					: undefined;
+			recoveryNotice = 'Recovered unsynced changes from this device.';
+			saveStatus = cloudAvailable ? (pendingSave ? 'saving' : 'error') : 'local';
+			return recovery.scene;
+		}
+
+		// The old active-page cache has no proof of unsynced edits: never let it
+		// outrank cloud data, or import it into a different remembered page.
+		const canImportLegacy =
+			!cachedScene && (!remembered?.activePageId || remembered.activePageId === activePageId);
+		const legacyBytes = canImportLegacy ? localStorage.getItem(STORAGE_KEY) : null;
+		const legacyScene =
+			legacyBytes === null
+				? undefined
+				: createDrawingPendingSave(STORAGE_KEY, activePageId, JSON.parse(legacyBytes)).scene;
+		const scene = cloudScene ?? cachedScene ?? legacyScene;
+		legacyCachePageId = legacyBytes === null ? '' : activePageId;
+		if (scene) {
+			try {
+				writeDrawingScene(localStorage, STORAGE_KEY, activePageId, scene);
+				// Only remove legacy bytes after the canonical scene is safely written.
+				if (legacyCachePageId) localStorage.removeItem(STORAGE_KEY);
+				legacyCachePageId = '';
+			} catch {
+				// A full device must not make valid legacy artwork inaccessible.
+				// Keep it open for export/optimization, retaining the original bytes.
+				localSaveFailed = true;
+				persistenceError =
+					'Could not save the latest changes on this device. Export your drawing before reloading.';
+				saveStatus = 'error';
+			}
+		}
+		return scene;
 	}
 
 	/** Serialize PUTs as well as guarding acknowledgements: older requests cannot win on the server. */
@@ -941,31 +970,11 @@
 			const scene = /** @type {DrawingScene} */ (
 				recovery?.scene ??
 					response?.scene ??
-					readStorage(`${STORAGE_KEY}:${page.id}`) ?? { elements: [], files: {} }
+					restorePageScene(page.id) ?? { elements: [], files: {} }
 			);
-			const destinationCacheKey = `${STORAGE_KEY}:${page.id}`;
-			const destinationCache = localStorage.getItem(destinationCacheKey);
-			if (!cloudAvailable) {
-				const previousScene = localStorage.getItem(STORAGE_KEY);
-				if (previousScene !== null) {
-					localStorage.removeItem(STORAGE_KEY);
-					try {
-						localStorage.setItem(`${STORAGE_KEY}:${activePageId}`, previousScene);
-					} catch (error) {
-						localStorage.setItem(STORAGE_KEY, previousScene);
-						throw error;
-					}
-				}
-			}
-			// Complete fallible cache writes before changing which page owns the canvas.
-			// If the device is full, retain the source page and the destination's cache.
-			try {
-				localStorage.removeItem(destinationCacheKey);
-				localStorage.setItem(STORAGE_KEY, JSON.stringify(scene));
-			} catch (error) {
-				if (destinationCache !== null) localStorage.setItem(destinationCacheKey, destinationCache);
-				throw error;
-			}
+			// Each page owns one stable snapshot key. A failed destination write
+			// cannot discard or relabel the source canvas; no copies need moving.
+			if (!recovery) writeDrawingScene(localStorage, STORAGE_KEY, page.id, scene);
 			activePageId = page.id;
 			if (
 				recovery &&
@@ -1034,7 +1043,7 @@
 					body: JSON.stringify({ scene: source })
 				});
 			} else {
-				localStorage.setItem(`${STORAGE_KEY}:${page.id}`, JSON.stringify(source));
+				writeDrawingScene(localStorage, STORAGE_KEY, page.id, source);
 			}
 			setPages([...pages, page]);
 			await switchPage(page);
@@ -1622,7 +1631,6 @@
 			if (cloudAvailable) {
 				await requestPage(`/${encodeURIComponent(page.id)}`, { method: 'DELETE' });
 			}
-			localStorage.removeItem(`${STORAGE_KEY}:${page.id}`);
 			localStorage.removeItem(drawingPendingSaveKey(STORAGE_KEY, page.id));
 			if (pendingSave?.pageId === page.id) pendingSave = undefined;
 			setPages(pages.filter((candidate) => candidate.id !== page.id));
@@ -2005,6 +2013,10 @@
 		if (nextLibraryOpen && !isLibraryOpen) prepareWorkspaceSurface('library');
 		if (isLibraryOpen !== nextLibraryOpen) isLibraryOpen = nextLibraryOpen;
 		if (!activePageId || isSwitchingPage || appState.isLoading || accountChanged) return;
+		// Native restoration normalizes defaults and indices. That first callback
+		// is not evidence that a clean legacy/cloud scene contains unsynced edits.
+		const normalizingInitialScene = initialSceneChange;
+		initialSceneChange = false;
 		if (!appState.isLoading) {
 			sceneReady = true;
 			blankScene = elements.length === 0;
@@ -2057,18 +2069,34 @@
 		const withinCloudLimit =
 			new TextEncoder().encode(serialized).byteLength <= MAX_CLOUD_SCENE_BYTES;
 		try {
-			const changed = localStorage.getItem(STORAGE_KEY) !== serialized;
-			if (!changed && !pendingSave) return;
-			if (toolsUser) {
+			const changed = JSON.stringify(restorePageScene(activePageId)) !== serialized;
+			if (!changed) {
+				if (pendingSave && cloudAvailable && !saveRequest) {
+					if (saveTimer) clearTimeout(saveTimer);
+					saveTimer = setTimeout(() => void flushPendingSave(), SAVE_DELAY);
+				}
+				return;
+			}
+			const hasPendingRevision =
+				pendingSave ||
+				(normalizingInitialScene &&
+					readDrawingPendingSave(localStorage, STORAGE_KEY, activePageId));
+			if (toolsUser && (!normalizingInitialScene || hasPendingRevision)) {
 				// Journal offline edits too: recovery must never outrank a newer local draft.
 				const journal = createDrawingPendingSave(STORAGE_KEY, activePageId, scene);
 				writeDrawingPendingSave(localStorage, journal);
 				pendingSave = withinCloudLimit ? journal : undefined;
+			} else if (changed) {
+				writeDrawingScene(localStorage, STORAGE_KEY, activePageId, scene);
 			}
-			if (changed) localStorage.setItem(STORAGE_KEY, serialized);
-			localStorage.removeItem(`${STORAGE_KEY}:${activePageId}`);
+			if (legacyCachePageId === activePageId) {
+				localStorage.removeItem(STORAGE_KEY);
+				legacyCachePageId = '';
+			}
+			localSaveFailed = false;
 			persistenceError = '';
 		} catch (error) {
+			localSaveFailed = true;
 			persistenceError =
 				'Could not save the latest changes on this device. Export your drawing before reloading.';
 			saveStatus = 'error';
@@ -2325,7 +2353,10 @@
 
 <div
 	class="draw-canvas"
-	data-storage-key={STORAGE_KEY}
+	data-storage-key={STORAGE_KEY && activePageId
+		? drawingPendingSaveKey(STORAGE_KEY, activePageId)
+		: undefined}
+	data-account-storage-key={STORAGE_KEY || undefined}
 	role="application"
 	aria-label="Drawing canvas"
 	onpointerdowncapture={handleCanvasPointer}

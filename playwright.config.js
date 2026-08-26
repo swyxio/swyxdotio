@@ -7,7 +7,9 @@ const config = {
 		timeout: 120_000,
 		reuseExistingServer: !process.env.CI
 	},
-	testDir: 'tests'
+	testDir: 'tests',
+	// Node's .test.mjs suites run with `node --test`, not inside Playwright's loader.
+	testMatch: '**/*.spec.js'
 };
 
 export default config;

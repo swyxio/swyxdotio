@@ -1,9 +1,10 @@
 /**
- * A recovery journal for edits that have not been acknowledged by cloud sync.
- * Each write is one localStorage operation; there is no separate dirty flag
- * which could survive without its scene (or point at another page's cache).
- * Callers must handle storage errors visibly and only enqueue a journaled save.
+ * One native scene snapshot per account/page. Unsynced revision metadata lives
+ * in the same atomic localStorage value, never in a second copy of the image.
+ * Callers must handle storage errors visibly and only enqueue a persisted save.
  */
+
+const RECOVERY_FIELD = '__swyxDrawingRecovery';
 
 /**
  * @typedef {{
@@ -47,7 +48,24 @@ export function drawingPendingSaveKey(storageKey, pageId) {
 	) {
 		throw new TypeError('An account-bound drawing storage key and page ID are required.');
 	}
-	return `${encodeURIComponent(storageKey)}:pending-scene:${encodeURIComponent(pageId)}`;
+	return `${storageKey}:${encodeURIComponent(pageId)}`;
+}
+
+/** @param {DrawingPendingScene} scene @returns {DrawingPendingScene} */
+function nativeScene(scene) {
+	const result = { ...scene };
+	delete (/** @type {Record<string, unknown>} */ (result)[RECOVERY_FIELD]);
+	return result;
+}
+
+/** @param {DrawingPendingScene} scene @returns {DrawingPendingScene} */
+function snapshotScene(scene) {
+	if (!isScene(scene))
+		throw new TypeError('A complete drawing scene is required for local recovery.');
+	const snapshot = JSON.parse(JSON.stringify(nativeScene(scene)));
+	if (!isScene(snapshot))
+		throw new TypeError('The drawing scene could not be serialized for recovery.');
+	return snapshot;
 }
 
 /**
@@ -62,12 +80,7 @@ export function drawingPendingSaveKey(storageKey, pageId) {
  */
 export function createDrawingPendingSave(storageKey, pageId, scene) {
 	drawingPendingSaveKey(storageKey, pageId);
-	if (!isScene(scene))
-		throw new TypeError('A complete drawing scene is required for local recovery.');
-	const snapshot = JSON.parse(JSON.stringify(scene));
-	if (!isScene(snapshot))
-		throw new TypeError('The drawing scene could not be serialized for recovery.');
-	return { storageKey, pageId, revision: crypto.randomUUID(), scene: snapshot };
+	return { storageKey, pageId, revision: crypto.randomUUID(), scene: snapshotScene(scene) };
 }
 
 /**
@@ -101,30 +114,77 @@ function assertPendingSave(value, storageKey, pageId) {
 export function writeDrawingPendingSave(storage, pending) {
 	const key = drawingPendingSaveKey(pending.storageKey, pending.pageId);
 	assertPendingSave(pending, pending.storageKey, pending.pageId);
-	storage.setItem(key, JSON.stringify(pending));
+	storage.setItem(
+		key,
+		JSON.stringify({
+			...nativeScene(pending.scene),
+			[RECOVERY_FIELD]: {
+				storageKey: pending.storageKey,
+				pageId: pending.pageId,
+				revision: pending.revision
+			}
+		})
+	);
 }
 
 /**
- * Prefer this scene to a cloud scene until its exact revision is acknowledged.
- * Corruption is an error, not an empty drawing. Preserve corrupt bytes so a
- * failed restore does not destructively replace potentially recoverable data.
- *
+ * @param {DrawingPendingStorage} storage
+ * @param {string} storageKey
+ * @param {string} pageId
+ * @returns {{ scene: DrawingPendingScene, pending?: DrawingPendingSave } | undefined}
+ */
+function readDrawingSnapshot(storage, storageKey, pageId) {
+	const stored = storage.getItem(drawingPendingSaveKey(storageKey, pageId));
+	if (stored === null) return undefined;
+	let snapshot;
+	try {
+		snapshot = JSON.parse(stored);
+	} catch {
+		throw new Error('The drawing recovery record could not be read.');
+	}
+	if (!isScene(snapshot)) throw new Error('The drawing recovery record is invalid.');
+	const scene = nativeScene(snapshot);
+	if (!(RECOVERY_FIELD in snapshot)) return { scene };
+	const pending = { ...snapshot[RECOVERY_FIELD], scene };
+	assertPendingSave(pending, storageKey, pageId);
+	return { scene, pending };
+}
+
+/**
+ * Read a native scene with internal recovery metadata removed. Clean legacy
+ * per-page caches remain usable; corruption never becomes an empty canvas.
+ * @param {DrawingPendingStorage} storage
+ * @param {string} storageKey
+ * @param {string} pageId
+ * @returns {DrawingPendingScene | undefined}
+ */
+export function readDrawingScene(storage, storageKey, pageId) {
+	return readDrawingSnapshot(storage, storageKey, pageId)?.scene;
+}
+
+/**
+ * Cache a known clean cloud scene (or a guest scene) without a pending marker.
+ * Do not use this to overwrite a known pending revision during restoration.
+ * @param {DrawingPendingStorage} storage
+ * @param {string} storageKey
+ * @param {string} pageId
+ * @param {DrawingPendingScene} scene
+ */
+export function writeDrawingScene(storage, storageKey, pageId, scene) {
+	const key = drawingPendingSaveKey(storageKey, pageId);
+	storage.setItem(key, JSON.stringify(snapshotScene(scene)));
+}
+
+/**
+ * Only revision-marked edits outrank cloud data. A clean old cache is not proof
+ * of unsynced edits. Preserve malformed bytes and fail visibly on corruption.
  * @param {DrawingPendingStorage} storage
  * @param {string} storageKey
  * @param {string} pageId
  * @returns {DrawingPendingSave | undefined}
  */
 export function readDrawingPendingSave(storage, storageKey, pageId) {
-	const stored = storage.getItem(drawingPendingSaveKey(storageKey, pageId));
-	if (stored === null) return undefined;
-	let pending;
-	try {
-		pending = JSON.parse(stored);
-	} catch {
-		throw new Error('The unsynced drawing recovery record could not be read.');
-	}
-	assertPendingSave(pending, storageKey, pageId);
-	return pending;
+	return readDrawingSnapshot(storage, storageKey, pageId)?.pending;
 }
 
 /**
@@ -142,6 +202,8 @@ export function acknowledgeDrawingPendingSave(storage, acknowledged) {
 	assertPendingSave(acknowledged, storageKey, pageId);
 	const pending = readDrawingPendingSave(storage, storageKey, pageId);
 	if (pending?.revision !== revision) return false;
-	storage.removeItem(drawingPendingSaveKey(storageKey, pageId));
+	// Replacing the same key is atomic and needs no second full scene copy.
+	// Keep the native scene available offline after clearing only its marker.
+	writeDrawingScene(storage, storageKey, pageId, pending.scene);
 	return true;
 }

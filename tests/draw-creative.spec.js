@@ -30,7 +30,7 @@ async function signIn(page) {
 	await authenticateTools(page, identity);
 	await page.goto('/draw');
 	await expect(page.locator('.draw-canvas')).toHaveAttribute(
-		'data-storage-key',
+		'data-account-storage-key',
 		`swyx-excalidraw:google:${identity.id}`
 	);
 	await expect(page.getByRole('button', { name: 'Manage drawing pages' })).toBeVisible();

@@ -507,58 +507,40 @@ test('reselecting an image restores the AI prompt, selected workflow, and drafte
 	).toContainText('FLUX.2 [dev]');
 });
 
-test('the active drawing is persisted once without exhausting storage on a duplicate page copy', async ({
-	page
-}) => {
-	/** @type {string[]} */
-	const storageErrors = [];
-	page.on('console', (message) => {
-		if (message.text().includes('Could not save the drawing locally.')) {
-			storageErrors.push(message.text());
-		}
+for (const signedIn of [false, true]) {
+	test(`the active drawing uses one recoverable scene copy for ${signedIn ? 'an offline signed-in account' : 'a guest'}`, async ({
+		page
+	}) => {
+		if (signedIn) await mockSignedInPersonalTools(page);
+		/** @type {string[]} */
+		const storageErrors = [];
+		page.on('console', (message) => {
+			if (message.text().includes('Could not save the drawing locally.'))
+				storageErrors.push(message.text());
+		});
+		await pasteSelectedImage(page);
+		const original = await selectedSceneImage(page);
+		const persisted = await page.evaluate(() => {
+			const key = document.querySelector('.draw-canvas')?.getAttribute('data-storage-key');
+			if (!key) throw new Error('The active scene key is unavailable.');
+			const imageSceneKeys = Object.keys(localStorage).filter((entry) => {
+				try {
+					const record = JSON.parse(localStorage.getItem(entry) ?? 'null');
+					const elements = record?.elements ?? record?.scene?.elements;
+					return Array.isArray(elements) && elements.some((element) => element.type === 'image');
+				} catch {
+					return false;
+				}
+			});
+			return { key, imageSceneKeys };
+		});
+		expect(persisted.imageSceneKeys).toEqual([persisted.key]);
+		expect(storageErrors).toEqual([]);
+		await page.reload();
+		await expect(page.getByRole('button', { name: 'Manage drawing pages' })).toBeVisible();
+		await expect.poll(async () => (await selectedSceneImage(page)).fileId).toBe(original.fileId);
 	});
-	await page.addInitScript(() => {
-		const originalSetItem = Storage.prototype.setItem;
-		Storage.prototype.setItem = function (/** @type {string} */ key, /** @type {string} */ value) {
-			if (
-				key ===
-				(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
-					'swyx-excalidraw:guest') +
-					':default'
-			) {
-				throw new DOMException('The storage quota has been exceeded.', 'QuotaExceededError');
-			}
-			return originalSetItem.call(this, key, value);
-		};
-	});
-
-	await pasteSelectedImage(page);
-	const persisted = await page.evaluate(() => {
-		const metadata = JSON.parse(
-			localStorage.getItem(
-				(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
-					'swyx-excalidraw:guest') + ':pages'
-			) ?? '{}'
-		);
-		const scene = JSON.parse(
-			localStorage.getItem(
-				document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
-					'swyx-excalidraw:guest'
-			) ?? '{"elements":[]}'
-		);
-		return {
-			imageCount: scene.elements.filter(
-				(/** @type {{type:string}} */ element) => element.type === 'image'
-			).length,
-			duplicate: localStorage.getItem(
-				`${document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') || 'swyx-excalidraw:guest'}:${metadata.activePageId}`
-			)
-		};
-	});
-
-	expect(persisted).toEqual({ imageCount: 1, duplicate: null });
-	expect(storageErrors).toEqual([]);
-});
+}
 
 for (const fixture of [
 	{ id: 'magic-select', label: 'Magic Select', mimeType: 'image/png' },
@@ -727,12 +709,12 @@ test('large transparent image edits preserve dimensions and synchronize under th
 	const cloudPage = await create.json();
 	await page.reload();
 	await expect(page.locator('.draw-canvas')).toHaveAttribute(
-		'data-storage-key',
+		'data-account-storage-key',
 		`swyx-excalidraw:google:${TEST_TOOLS_OWNER.id}`
 	);
 	await page.evaluate((drawingPage) => {
 		localStorage.setItem(
-			(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+			(document.querySelector('.draw-canvas')?.getAttribute('data-account-storage-key') ||
 				'swyx-excalidraw:guest') + ':pages',
 			JSON.stringify({ pages: [drawingPage], activePageId: drawingPage.id })
 		);
@@ -1060,7 +1042,7 @@ test('each selected modality exposes supported model settings, accurate pricing,
 						.transaction('drawing-pages')
 						.objectStore('drawing-pages')
 						.get(
-							(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+							(document.querySelector('.draw-canvas')?.getAttribute('data-account-storage-key') ||
 								'swyx-excalidraw:guest') + ':default'
 						);
 					request.onsuccess = () => resolve(request.result);
@@ -1225,7 +1207,7 @@ test('prompt editing shows progress, retains session generations, and restores t
 						.transaction('drawing-pages')
 						.objectStore('drawing-pages')
 						.get(
-							(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+							(document.querySelector('.draw-canvas')?.getAttribute('data-account-storage-key') ||
 								'swyx-excalidraw:guest') + ':default'
 						);
 					request.onsuccess = () => resolve(request.result);

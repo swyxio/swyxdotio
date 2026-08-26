@@ -586,7 +586,7 @@ test('software architecture libraries preload and preserve personally added comp
 				const items = /** @type {{ id: string }[]} */ (
 					JSON.parse(
 						localStorage.getItem(
-							(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+							(document.querySelector('.draw-canvas')?.getAttribute('data-account-storage-key') ||
 								'swyx-excalidraw:guest') + ':library'
 						) ?? '[]'
 					)
@@ -601,7 +601,7 @@ test('software architecture libraries preload and preserve personally added comp
 			/** @type {{ id: string }[]} */ (
 				JSON.parse(
 					localStorage.getItem(
-						(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+						(document.querySelector('.draw-canvas')?.getAttribute('data-account-storage-key') ||
 							'swyx-excalidraw:guest') + ':library'
 					) ?? '[]'
 				)
@@ -633,14 +633,14 @@ test('software architecture libraries preload and preserve personally added comp
 		const storedItems = /** @type {{ id: string }[]} */ (
 			JSON.parse(
 				localStorage.getItem(
-					(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+					(document.querySelector('.draw-canvas')?.getAttribute('data-account-storage-key') ||
 						'swyx-excalidraw:guest') + ':library'
 				) ?? '[]'
 			)
 		);
 		storedItems.push({ ...storedItems[0], id: 'my-personal-component' });
 		localStorage.setItem(
-			(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+			(document.querySelector('.draw-canvas')?.getAttribute('data-account-storage-key') ||
 				'swyx-excalidraw:guest') + ':library',
 			JSON.stringify(storedItems)
 		);
@@ -652,7 +652,7 @@ test('software architecture libraries preload and preserve personally added comp
 				const storedItems = /** @type {{ id: string }[]} */ (
 					JSON.parse(
 						localStorage.getItem(
-							(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+							(document.querySelector('.draw-canvas')?.getAttribute('data-account-storage-key') ||
 								'swyx-excalidraw:guest') + ':library'
 						) ?? '[]'
 					)
@@ -807,7 +807,7 @@ for (const fixture of [
 				imageHeight: bitmap.height,
 				rememberedMode: JSON.parse(
 					localStorage.getItem(
-						(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+						(document.querySelector('.draw-canvas')?.getAttribute('data-account-storage-key') ||
 							'swyx-excalidraw:guest') + ':background-mode'
 					) ?? 'null'
 				)

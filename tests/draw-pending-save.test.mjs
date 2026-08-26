@@ -4,7 +4,9 @@ import {
 	acknowledgeDrawingPendingSave,
 	createDrawingPendingSave,
 	drawingPendingSaveKey,
+	readDrawingScene,
 	readDrawingPendingSave,
+	writeDrawingScene,
 	writeDrawingPendingSave
 } from '../src/lib/draw-pending-save.js';
 
@@ -69,6 +71,10 @@ test('a reload restores the complete native pending scene without mutating edito
 	assert.deepEqual(restored, pending);
 	assert.notEqual(restored.scene, pending.scene);
 	assert.deepEqual(Object.keys(restored.scene).sort(), ['appState', 'elements', 'files']);
+	const stored = JSON.parse(storage.getItem(drawingPendingSaveKey(ACCOUNT, PAGE)));
+	assert.equal(stored.scene, undefined);
+	assert.deepEqual(stored.elements, expected.elements);
+	assert.deepEqual(readDrawingScene(storage, ACCOUNT, PAGE), expected);
 });
 
 test('a cloud failure or reload does not discard a journaled edit', () => {
@@ -93,6 +99,8 @@ test('only the exact acknowledged revision is cleared; a late response preserves
 	assert.deepEqual(readDrawingPendingSave(storage, ACCOUNT, PAGE), next);
 	assert.equal(acknowledgeDrawingPendingSave(storage, next), true);
 	assert.equal(readDrawingPendingSave(storage, ACCOUNT, PAGE), undefined);
+	assert.deepEqual(readDrawingScene(storage, ACCOUNT, PAGE), next.scene);
+	assert.equal(storage.entries.size, 1);
 	assert.equal(acknowledgeDrawingPendingSave(storage, first), false);
 	assert.equal(acknowledgeDrawingPendingSave(storage, next), false);
 });
@@ -132,27 +140,33 @@ test('recovery and acknowledgements stay scoped to both account and page', () =>
 test('malformed or mis-scoped stored records fail visibly without deleting recoverable bytes', () => {
 	const storage = memoryStorage();
 	const valid = createDrawingPendingSave(ACCOUNT, PAGE, scene());
+	writeDrawingPendingSave(storage, valid);
+	const native = JSON.parse(storage.getItem(drawingPendingSaveKey(ACCOUNT, PAGE)));
+	const metadata = native.__swyxDrawingRecovery;
 	const malformed = [
 		'{broken',
 		'',
 		'null',
 		'[]',
 		'{}',
-		JSON.stringify({ ...valid, revision: '' }),
-		JSON.stringify({ ...valid, revision: 42 }),
-		JSON.stringify({ ...valid, storageKey: 'another-account' }),
-		JSON.stringify({ ...valid, pageId: 'another-page' }),
-		JSON.stringify({ ...valid, scene: null }),
-		JSON.stringify({ ...valid, scene: {} }),
-		JSON.stringify({ ...valid, scene: { elements: 'not-an-array' } }),
-		JSON.stringify({ ...valid, scene: { elements: [null] } }),
-		JSON.stringify({ ...valid, scene: { elements: [], files: [] } }),
-		JSON.stringify({ ...valid, scene: { elements: [], appState: [] } })
+		JSON.stringify({ ...native, __swyxDrawingRecovery: { ...metadata, revision: '' } }),
+		JSON.stringify({ ...native, __swyxDrawingRecovery: { ...metadata, revision: 42 } }),
+		JSON.stringify({
+			...native,
+			__swyxDrawingRecovery: { ...metadata, storageKey: 'another-account' }
+		}),
+		JSON.stringify({ ...native, __swyxDrawingRecovery: { ...metadata, pageId: 'another-page' } }),
+		JSON.stringify({ ...native, __swyxDrawingRecovery: null }),
+		JSON.stringify({ ...native, elements: 'not-an-array' }),
+		JSON.stringify({ ...native, elements: [null] }),
+		JSON.stringify({ ...native, files: [] }),
+		JSON.stringify({ ...native, appState: [] })
 	];
 	const key = drawingPendingSaveKey(ACCOUNT, PAGE);
 	for (const value of malformed) {
 		storage.setItem(key, value);
 		assert.throws(() => readDrawingPendingSave(storage, ACCOUNT, PAGE), /recovery record/);
+		assert.throws(() => readDrawingScene(storage, ACCOUNT, PAGE), /recovery record/);
 		assert.throws(() => acknowledgeDrawingPendingSave(storage, valid), /recovery record/);
 		assert.equal(storage.getItem(key), value);
 	}
@@ -191,13 +205,13 @@ test('unavailable storage and failed acknowledgement do not claim a durable save
 	assert.throws(() => acknowledgeDrawingPendingSave(unavailable, pending), {
 		name: 'SecurityError'
 	});
-	const cannotRemove = {
+	const cannotAcknowledge = {
 		...storage,
-		removeItem() {
-			throw new Error('Could not remove pending save');
+		setItem() {
+			throw new Error('Could not clear pending revision');
 		}
 	};
-	assert.throws(() => acknowledgeDrawingPendingSave(cannotRemove, pending), /Could not remove/);
+	assert.throws(() => acknowledgeDrawingPendingSave(cannotAcknowledge, pending), /Could not clear/);
 	assert.deepEqual(readDrawingPendingSave(storage, ACCOUNT, PAGE), pending);
 });
 
@@ -249,4 +263,45 @@ test('empty native scenes and oversized local recovery are preserved without cha
 	);
 	// The caller checks the cloud limit before enqueueing; recovery does not truncate local work.
 	assert.ok(new TextEncoder().encode(JSON.stringify(large.scene)).byteLength > 1_800_000);
+});
+
+test('a clean legacy page cache is not mistaken for proof of unsynced edits', () => {
+	const storage = memoryStorage();
+	const legacy = scene('Old clean cache');
+	storage.setItem(drawingPendingSaveKey(ACCOUNT, PAGE), JSON.stringify(legacy));
+	assert.deepEqual(readDrawingScene(storage, ACCOUNT, PAGE), legacy);
+	assert.equal(readDrawingPendingSave(storage, ACCOUNT, PAGE), undefined);
+	const cloud = scene('Newer cloud scene');
+	writeDrawingScene(storage, ACCOUNT, PAGE, cloud);
+	assert.deepEqual(readDrawingScene(storage, ACCOUNT, PAGE), cloud);
+	assert.equal(readDrawingPendingSave(storage, ACCOUNT, PAGE), undefined);
+});
+
+test('large edits and their exact acknowledgements occupy one full snapshot under a five MiB quota', () => {
+	const storage = memoryStorage();
+	const quota = 5 * 1024 * 1024;
+	const bounded = {
+		...storage,
+		setItem(key, value) {
+			const next = new Map(storage.entries);
+			next.set(key, value);
+			const bytes = [...next].reduce(
+				(sum, [key, value]) => sum + Buffer.byteLength(key) + Buffer.byteLength(value),
+				0
+			);
+			if (bytes > quota) throw new DOMException('Storage is full', 'QuotaExceededError');
+			storage.setItem(key, value);
+		}
+	};
+	writeDrawingScene(bounded, ACCOUNT, PAGE, scene('x'.repeat(1_100_000)));
+	const edit = createDrawingPendingSave(ACCOUNT, PAGE, scene('y'.repeat(2_966_668)));
+	writeDrawingPendingSave(bounded, edit);
+	assert.equal(storage.entries.size, 1);
+	assert.equal(readDrawingScene(bounded, ACCOUNT, PAGE).elements[1].text.length, 2_966_668);
+	assert.equal(readDrawingPendingSave(bounded, ACCOUNT, PAGE).revision, edit.revision);
+	assert.ok(Buffer.byteLength(storage.getItem(drawingPendingSaveKey(ACCOUNT, PAGE))) < quota);
+	assert.equal(acknowledgeDrawingPendingSave(bounded, edit), true);
+	assert.equal(storage.entries.size, 1);
+	assert.equal(readDrawingPendingSave(bounded, ACCOUNT, PAGE), undefined);
+	assert.equal(readDrawingScene(bounded, ACCOUNT, PAGE).elements[1].text.length, 2_966_668);
 });
