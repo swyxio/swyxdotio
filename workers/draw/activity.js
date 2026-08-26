@@ -4,6 +4,7 @@ import {
 	TOOLS_ACTIVITY_BROWSER_LIMIT,
 	TOOLS_ACTIVITY_COVERAGE,
 	TOOLS_ACTIVITY_ID_PATTERN,
+	TOOLS_LOG_EXPORT_LIMIT,
 	validToolsActivityInput,
 	parseToolsActivityFilters
 } from '../../src/lib/tools-activity.js';
@@ -15,13 +16,22 @@ const USER_ID = /^[A-Za-z0-9_-]{1,255}$/;
 
 /** @param {unknown} data */
 function encodeCursor(data) {
-	return btoa(JSON.stringify(data)).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/, '');
+	return btoa(String.fromCharCode(...new TextEncoder().encode(JSON.stringify(data))))
+		.replaceAll('+', '-')
+		.replaceAll('/', '_')
+		.replace(/=+$/, '');
 }
 
 /** @param {string} token */
 function decodeCursor(token) {
 	try {
-		return JSON.parse(atob(token.replaceAll('-', '+').replaceAll('_', '/')));
+		return JSON.parse(
+			new TextDecoder().decode(
+				Uint8Array.from(atob(token.replaceAll('-', '+').replaceAll('_', '/')), (c) =>
+					c.charCodeAt(0)
+				)
+			)
+		);
 	} catch {
 		return null;
 	}
@@ -135,62 +145,64 @@ export class ToolsActivity {
 		return Response.json({ recorded: true, duplicate: false }, { status: 201 });
 	}
 
-	/** @param {string} userId @param {Record<string, unknown>} input @param {number} now @param {boolean} isOwner */
-	logs(userId, input, now, isOwner) {
+	/** All reads use one tenant-scoped SQL relation, including aggregates and exports.
+	 * @param {string} userId @param {Record<string, unknown>} input @param {number} now @param {boolean} isOwner @param {boolean} [exportAll] */
+	logs(userId, input, now, isOwner, exportAll = false) {
 		const params = new URLSearchParams();
 		for (const [key, value] of Object.entries(input)) {
-			if (
-				!['days', 'kind', 'tool', 'before', 'scope'].includes(key) ||
-				(value !== null && !['string', 'number'].includes(typeof value))
-			)
+			if (value !== null && !['string', 'number'].includes(typeof value))
 				return Response.json({ error: 'Invalid log filters.' }, { status: 400 });
-			if (value !== null) params.set(key, String(value));
+			// Keep unknown null keys so the shared parser rejects them too.
+			if (value !== null || !['before', 'snapshot'].includes(key)) params.set(key, String(value));
 		}
 		const filters = parseToolsActivityFilters(params);
-		if (!filters) return Response.json({ error: 'Invalid log filters.' }, { status: 400 });
+		if (!filters || (exportAll && filters.before))
+			return Response.json({ error: 'Invalid log filters.' }, { status: 400 });
 		if (filters.scope === 'all' && !isOwner)
 			return Response.json(
 				{ error: 'Only the site owner can inspect all accounts.' },
 				{ status: 403 }
 			);
-		let to = now;
+		const { before, snapshot, ...selection } = filters;
+		const fingerprint = JSON.stringify(selection);
+		let to = snapshot ? Date.parse(snapshot) : now;
 		let cursor = null;
-		if (filters.before) {
-			cursor = decodeCursor(filters.before);
+		if (before) {
+			cursor = decodeCursor(before);
 			if (
 				!cursor ||
-				Object.keys(cursor).sort().join(',') !==
-					'actor,at,days,entryAccount,id,kind,scope,to,tool,type' ||
+				Object.keys(cursor).sort().join(',') !== 'actor,at,entryAccount,filters,id,to,type' ||
 				!Number.isSafeInteger(cursor.at) ||
 				!Number.isSafeInteger(cursor.to) ||
-				cursor.to > now ||
-				cursor.to < now - RETENTION_MS ||
 				cursor.at > cursor.to ||
 				cursor.at <= cursor.to - filters.days * DAY_MS ||
 				!['ai', 'tool'].includes(cursor.type) ||
 				typeof cursor.id !== 'string' ||
 				!TOOLS_ACTIVITY_ID_PATTERN.test(cursor.id) ||
-				cursor.days !== filters.days ||
-				cursor.kind !== filters.kind ||
-				cursor.tool !== filters.tool ||
-				cursor.scope !== filters.scope ||
+				cursor.filters !== fingerprint ||
 				cursor.actor !== userId ||
 				typeof cursor.entryAccount !== 'string' ||
 				!USER_ID.test(cursor.entryAccount) ||
-				(filters.scope === 'mine' && cursor.entryAccount !== userId)
+				(filters.scope === 'mine' && cursor.entryAccount !== userId) ||
+				(filters.account !== 'all' && cursor.entryAccount !== filters.account) ||
+				(snapshot && to !== cursor.to)
 			)
 				return Response.json({ error: 'Invalid or expired log cursor.' }, { status: 400 });
 			to = cursor.to;
 		}
-		const from = to - filters.days * DAY_MS;
-		// Both arms bind the server-authenticated account before filtering or aggregation.
+		if (to > now || to < now - RETENTION_MS)
+			return Response.json(
+				{ error: 'Invalid or expired log snapshot. Refresh this view.' },
+				{ status: 400 }
+			);
+		// Delayed exports cannot resurrect records that expired since the initial read.
+		const from = Math.max(to - filters.days * DAY_MS, now - RETENTION_MS);
 		const base = `SELECT id, user_id, created_at, 'ai' AS kind, 'draw' AS tool,
 			CASE kind WHEN 'assistant' THEN 'draw.ai.assistant' ELSE 'draw.ai.media' END AS action,
 			status, 'server' AS source, model, reserved_micros
 			FROM tools_ai_usage WHERE (? = 1 OR user_id = ?) AND created_at > ? AND created_at <= ?
 			UNION ALL SELECT id, user_id, created_at, 'tool' AS kind, tool, action, status, source, NULL AS model, NULL AS reserved_micros
 			FROM tools_activity WHERE (? = 1 OR user_id = ?) AND created_at > ? AND created_at <= ?`;
-		const filtered = `SELECT * FROM (${base}) WHERE (? = 'all' OR kind = ?) AND (? = 'all' OR tool = ?)`;
 		const bindings = [
 			filters.scope === 'all' ? 1 : 0,
 			userId,
@@ -199,34 +211,72 @@ export class ToolsActivity {
 			filters.scope === 'all' ? 1 : 0,
 			userId,
 			from,
-			to,
-			filters.kind,
-			filters.kind,
-			filters.tool,
-			filters.tool
+			to
 		];
+		const conditions = [];
+		for (const [key, column] of [
+			['kind', 'kind'],
+			['tool', 'tool'],
+			['source', 'source'],
+			['model', 'model'],
+			['action', 'action'],
+			['account', 'user_id']
+		]) {
+			if (filters[key] !== 'all') {
+				conditions.push(`${column} = ?`);
+				bindings.push(filters[key]);
+			}
+		}
+		if (filters.status === 'pending') conditions.push("status IN ('reserved', 'submitted')");
+		else if (filters.status !== 'all') {
+			conditions.push('status = ?');
+			bindings.push(filters.status);
+		}
+		if (filters.opens === 'hide')
+			conditions.push("action NOT IN ('draw.open', 'box.open', 'podcast.open', 'reclip.open')");
+		if (filters.q) {
+			conditions.push(
+				"instr(lower(id || ' ' || action || ' ' || tool || ' ' || coalesce(model, '')), lower(?)) > 0"
+			);
+			bindings.push(filters.q.trim());
+		}
+		if (filters.day) {
+			conditions.push('created_at >= ? AND created_at < ?');
+			bindings.push(Date.parse(filters.day), Date.parse(filters.day) + DAY_MS);
+		}
+		const filtered = `SELECT * FROM (${base})${conditions.length ? ' WHERE ' + conditions.join(' AND ') : ''}`;
+		const metrics = `COUNT(*) AS count,
+			COALESCE(SUM(kind = 'ai'), 0) AS aiRequests,
+			COALESCE(SUM(kind = 'tool'), 0) AS toolActions,
+			COALESCE(SUM(reserved_micros), 0) AS reservedMicros,
+			COALESCE(SUM(status = 'failed'), 0) AS failedRequests,
+			COALESCE(SUM(status IN ('reserved', 'submitted')), 0) AS pendingRequests`;
 		const aggregate = this.sql
 			.exec(
-				`SELECT
-			COALESCE(SUM(CASE WHEN kind = 'ai' THEN 1 ELSE 0 END), 0) AS aiRequests,
-			COALESCE(SUM(CASE WHEN kind = 'tool' THEN 1 ELSE 0 END), 0) AS toolActions,
-			COALESCE(SUM(reserved_micros), 0) AS reservedMicros,
-			COALESCE(SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END), 0) AS failedRequests,
-			COUNT(DISTINCT user_id) AS activeAccounts
-			FROM (${filtered})`,
+				`SELECT ${metrics},
+			COALESCE(SUM(status = 'succeeded'), 0) AS succeededRequests,
+			COALESCE(SUM(status = 'cancelled'), 0) AS cancelledRequests,
+			COUNT(DISTINCT user_id) AS activeAccounts FROM (${filtered})`,
 				...bindings
 			)
 			.one();
-		const daily = this.sql
-			.exec(
-				`SELECT strftime('%Y-%m-%d', created_at / 1000, 'unixepoch') AS date,
-			SUM(CASE WHEN kind = 'ai' THEN 1 ELSE 0 END) AS aiRequests,
-			SUM(CASE WHEN kind = 'tool' THEN 1 ELSE 0 END) AS toolActions,
-			COALESCE(SUM(reserved_micros), 0) AS reservedMicros
-			FROM (${filtered}) GROUP BY date ORDER BY date`,
-				...bindings
-			)
-			.toArray();
+		if (exportAll && aggregate.count > TOOLS_LOG_EXPORT_LIMIT)
+			return Response.json(
+				{
+					error: `This view contains ${aggregate.count} records. Narrow the filters to ${TOOLS_LOG_EXPORT_LIMIT.toLocaleString('en-US')} or fewer before exporting. No partial file was created.`
+				},
+				{ status: 413 }
+			);
+		const summary = {
+			aiRequests: aggregate.aiRequests,
+			toolActions: aggregate.toolActions,
+			estimatedReservedUsd: aggregate.reservedMicros / 1_000_000,
+			failedRequests: aggregate.failedRequests,
+			pendingRequests: aggregate.pendingRequests,
+			succeededRequests: aggregate.succeededRequests,
+			cancelledRequests: aggregate.cancelledRequests,
+			activeAccounts: aggregate.activeAccounts
+		};
 		const pageBindings = [...bindings];
 		let condition = '';
 		if (cursor) {
@@ -242,27 +292,26 @@ export class ToolsActivity {
 				cursor.entryAccount
 			);
 		}
+		const limit = exportAll ? TOOLS_LOG_EXPORT_LIMIT : PAGE_SIZE;
 		const rows = this.sql
 			.exec(
-				`SELECT * FROM (${filtered})${condition} ORDER BY created_at DESC, kind DESC, id DESC, user_id DESC LIMIT ${PAGE_SIZE + 1}`,
+				`SELECT activity.*${filters.scope === 'all' ? ', account.email, account.name' : ''}
+			FROM (SELECT * FROM (${filtered})${condition} ORDER BY created_at DESC, kind DESC, id DESC, user_id DESC LIMIT ${limit + 1}) activity
+			${filters.scope === 'all' ? 'LEFT JOIN tools_activity_accounts account ON account.id = activity.user_id' : ''}
+			ORDER BY created_at DESC, kind DESC, activity.id DESC, user_id DESC`,
 				...pageBindings
 			)
 			.toArray();
-		const page = rows.slice(0, PAGE_SIZE);
+		const page = rows.slice(0, limit);
 		const last = page.at(-1);
-		return Response.json({
+		const accountFromRow = (row) => ({
+			id: row.user_id,
+			...(row.email ? { email: row.email, name: row.name } : {})
+		});
+		const result = {
 			scope: filters.scope,
 			entries: page.map((row) => ({
-				...(filters.scope === 'all'
-					? {
-							account: this.sql
-								.exec(
-									'SELECT id, email, name FROM tools_activity_accounts WHERE id = ?',
-									row.user_id
-								)
-								.toArray()[0] ?? { id: row.user_id }
-						}
-					: {}),
+				...(filters.scope === 'all' ? { account: accountFromRow(row) } : {}),
 				id: row.id,
 				createdAt: new Date(row.created_at).toISOString(),
 				kind: row.kind,
@@ -274,36 +323,76 @@ export class ToolsActivity {
 				estimatedReservedUsd: row.reserved_micros === null ? null : row.reserved_micros / 1_000_000
 			})),
 			nextCursor:
-				rows.length > PAGE_SIZE
+				rows.length > limit
 					? encodeCursor({
 							at: last.created_at,
 							type: last.kind,
 							id: last.id,
 							to,
-							days: filters.days,
-							kind: filters.kind,
-							tool: filters.tool,
-							scope: filters.scope,
+							filters: fingerprint,
 							actor: userId,
 							entryAccount: last.user_id
 						})
 					: null,
-			summary: {
-				aiRequests: aggregate.aiRequests,
-				toolActions: aggregate.toolActions,
-				estimatedReservedUsd: aggregate.reservedMicros / 1_000_000,
-				failedRequests: aggregate.failedRequests,
-				activeAccounts: aggregate.activeAccounts
-			},
-			daily: daily.map((row) => ({
-				date: row.date,
-				aiRequests: row.aiRequests,
-				toolActions: row.toolActions,
-				estimatedReservedUsd: row.reservedMicros / 1_000_000
-			})),
+			summary,
 			range: { from: new Date(from).toISOString(), to: new Date(to).toISOString() },
 			retentionDays: TOOLS_AI_POLICY.retentionDays,
 			coverage: TOOLS_ACTIVITY_COVERAGE
+		};
+		if (exportAll)
+			return Response.json({
+				...result,
+				schemaVersion: 1,
+				generatedAt: new Date(now).toISOString(),
+				filters: selection,
+				exportedCount: page.length,
+				complete: true,
+				costBasis:
+					'Estimated reservations, not provider bills. Failed AI attempts retain their reservation.',
+				snapshotNote:
+					'Creation-time window is fixed; outcomes reflect the time of export. Retention may remove expired records.'
+			});
+		const daily = this.sql
+			.exec(
+				`SELECT strftime('%Y-%m-%d', created_at / 1000, 'unixepoch') AS date,
+			${metrics} FROM (${filtered}) GROUP BY date ORDER BY date`,
+				...bindings
+			)
+			.toArray();
+		const breakdown = (column, aiOnly = false) =>
+			this.sql
+				.exec(
+					`SELECT ${column} AS key, ${metrics}
+			FROM (${filtered}) ${aiOnly ? "WHERE kind = 'ai'" : ''} GROUP BY ${column} ORDER BY count DESC, key ASC LIMIT 20`,
+					...bindings
+				)
+				.toArray()
+				.map(({ reservedMicros, ...row }) => ({
+					...row,
+					estimatedReservedUsd: reservedMicros / 1_000_000
+				}));
+		const accounts =
+			filters.scope === 'all'
+				? breakdown('user_id').map((row) => ({
+						...row,
+						account: this.sql
+							.exec('SELECT id, email, name FROM tools_activity_accounts WHERE id = ?', row.key)
+							.toArray()[0] ?? { id: row.key }
+					}))
+				: [];
+		return Response.json({
+			...result,
+			daily: daily.map(({ reservedMicros, ...row }) => ({
+				...row,
+				estimatedReservedUsd: reservedMicros / 1_000_000
+			})),
+			breakdowns: {
+				tools: breakdown('tool'),
+				models: breakdown('model', true),
+				actions: breakdown('action'),
+				accounts
+			},
+			breakdownLimit: 20
 		});
 	}
 
@@ -318,7 +407,13 @@ export class ToolsActivity {
 			return this.record(body.userId, body.source, body.entry, now);
 		}
 		if (path === '/ai/activity-logs')
-			return this.logs(body.userId, body.filters ?? {}, now, body.isOwner === true);
+			return this.logs(
+				body.userId,
+				body.filters ?? {},
+				now,
+				body.isOwner === true,
+				body.exportAll === true
+			);
 		return Response.json({ error: 'Not found.' }, { status: 404 });
 	}
 }
