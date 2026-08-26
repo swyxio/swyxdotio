@@ -82,32 +82,52 @@
 			<details class="account-menu" bind:this={accountMenu} on:focusout={closeAccountOutside}>
 				<summary
 					><span class="account-name">{data.user.name || data.user.email}</span><span
-						class="account-role">{data.user.isOwner ? 'Site owner' : 'Personal account'}</span
+						class="account-role"
+						>{data.user.isDevelopment
+							? 'Local development'
+							: data.user.isOwner
+								? 'Site owner'
+								: 'Personal account'}</span
 					><span class="chevron" aria-hidden="true">⌄</span></summary
 				>
 				<div class="account-panel">
 					<strong>{data.user.name || data.user.email}</strong>
 					<p>{data.user.email}</p>
 					<p class="sync-note">
-						Your drawings sync to your Google account’s workspace. Other accounts have their own.
+						{#if data.user.isDevelopment}
+							Synthetic local account. Uses a separate workspace, not your Google account's data.
+						{:else}
+							Your drawings sync to your Google account’s workspace. Other accounts have their own.
+						{/if}
 					</p>
 					<details class="account-identity">
 						<summary>Account identity</summary>
-						<p>Google account ID: <code>{data.user.id}</code></p>
+						<p>
+							{data.user.isDevelopment ? 'Development' : 'Google account'} ID:
+							<code>{data.user.id}</code>
+						</p>
 						<p>
 							{data.user.isOwner ? 'Site owner' : 'Personal account'} · permissions are checked on the
 							server.
 						</p>
 					</details>
-					<button class="plain-button signout" on:click={logout} disabled={signingOut}
-						>{signingOut ? 'Signing out…' : 'Sign out'}</button
-					>
+					{#if data.user.isDevelopment}
+						<p>To test sign-in, restart with <code>TOOLS_DEV_AUTH=off npm run dev</code>.</p>
+					{:else}<button class="plain-button signout" on:click={logout} disabled={signingOut}
+							>{signingOut ? 'Signing out…' : 'Sign out'}</button
+						>{/if}
 				</div>
 			</details>
 		{/if}
 	</div>
 	{#if data.authError}<p class="error" role="alert">{data.authError}</p>{/if}
 	{#if error}<p class="error" role="alert">{error}</p>{/if}
+	{#if data.user?.isDevelopment}
+		<p class="sync-note" role="status">
+			Local development account active. No Google login needed. Storage bindings and AI providers
+			still need local configuration.
+		</p>
+	{/if}
 	<div class="workshop-intro">
 		<div class="intro-copy">
 			<h1>The useful things cabinet.</h1>

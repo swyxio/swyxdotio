@@ -5,6 +5,7 @@ import {
 	createToolsSession,
 	getToolsSession,
 	getToolsUser,
+	localDevelopmentToolsUser,
 	googleAuthConfig,
 	readToolsSession,
 	safeToolsNext,
@@ -158,6 +159,48 @@ test('roles use the current configured Google subject, never email, name, or sig
 		user: null,
 		googleConfigured: false
 	});
+});
+
+test('local development identity is loopback-only and never an owner or a Google identity', () => {
+	for (const host of ['localhost', '127.0.0.1', '[::1]']) {
+		assert.deepEqual(localDevelopmentToolsUser(new URL(`http://${host}:5193/tools/draw`)), {
+			id: 'local-development',
+			email: 'developer@localhost',
+			name: 'Local developer',
+			isOwner: false,
+			isDevelopment: true
+		});
+	}
+	for (const value of [
+		undefined,
+		'https://swyx.io/tools',
+		'http://localhost.evil.example/tools',
+		'http://192.168.1.2/tools',
+		'https://preview.workers.dev/tools',
+		'https://localhost/tools'
+	])
+		assert.equal(localDevelopmentToolsUser(value ? new URL(value) : undefined), null);
+});
+
+test('normal runtime never accepts a dev identity from localhost, flags or forwarded headers', async () => {
+	const event = createEvent('http://localhost:5193/tools', { TOOLS_DEV_AUTH: 'on' });
+	const previous = process.env.TOOLS_DEV_AUTH;
+	process.env.TOOLS_DEV_AUTH = 'on';
+	try {
+		event.request = new Request(event.url, {
+			headers: { 'X-Tools-User': 'local-development', 'X-Forwarded-Host': 'localhost:5193' }
+		});
+		assert.equal(await getToolsUser(event), null, 'Vite development mode is required');
+		event.values.set(toolsSessionCookieName(), await createToolsSession(IDENTITY, SECRET));
+		assert.equal(
+			(await getToolsUser(event)).id,
+			IDENTITY.id,
+			'real sessions retain their identity'
+		);
+	} finally {
+		if (previous === undefined) delete process.env.TOOLS_DEV_AUTH;
+		else process.env.TOOLS_DEV_AUTH = previous;
+	}
 });
 
 test('Google configuration and return targets fail closed, while alternate hosts redirect to the registered host', async () => {

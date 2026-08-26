@@ -434,6 +434,23 @@ See https://swyx.io
 
 ## Google sign-in and tenant boundaries
 
+### Local development
+
+`npm run dev` automatically provides a **Local developer** tools account on HTTP
+`localhost`, `127.0.0.1`, and `[::1]`. No Google setup or cookie injection is needed.
+The synthetic `local-development` identity is a regular member with its own
+cache/storage namespace, not the production owner or your Google data. Existing
+valid sessions take precedence. To test the real signed-out/Google flow, restart
+with `TOOLS_DEV_AUTH=off npm run dev`.
+
+This requires Vite's build-time `DEV` flag **and** a loopback URL. It is unavailable
+in production builds, deployed previews, LAN hosts, or `wrangler dev` running a
+production build; those previews use normal Google/test-fixture sessions.
+Local sign-in does not supply storage bindings or provider keys, and no AI request
+starts automatically. Vite keeps remote bindings disabled.
+
+### Production sessions
+
 Tools follow [Google OpenID Connect](https://developers.google.com/identity/openid-connect/openid-connect) through [`openid-client`](https://github.com/panva/openid-client) with PKCE, state, nonce,
 issuer/audience/expiry checks and signed ID-token verification. `jose` signs the
 seven-day HTTP-only tools session. No Google access/refresh tokens are retained.
