@@ -447,7 +447,8 @@ There is no password-login endpoint or legacy session fallback.
   imported into a Google account. Guest drawings are not silently uploaded on login.
 - Drawing writes require `X-Tools-User` matching the signed session, so an old tab
   cannot write into another account after a session switch.
-- `/box` has no server persistence. Public articles and podcast feeds remain public.
+- `/box` text has no server persistence; signed-in opens have activity metadata.
+  Public articles and podcast feeds remain public.
 - Cloud AI is **site-funded for every signed-in account**, with durable admission
   limits enforced before provider calls: 20 assistant turns/hour, 5 media jobs/hour,
   $2/day per account and $20/day site-wide in conservative estimated reservations.
@@ -495,3 +496,37 @@ Tools**, audience **External**, client **swyx.io Tools Web**. Registered callbac
 are production and `http://localhost:4188/tools/auth/google/callback` for verification.
 Deploy the drawing companion first whenever the AI ledger protocol changes, then
 the main Worker. The companion has no public data endpoint.
+
+### Tool logs
+
+`/tools/logs` is the Google-authenticated activity dashboard. Everyone can inspect
+their own records; only the current `TOOLS_OWNER_GOOGLE_SUB` can select **Everyone**.
+Owner access is usage metadata only, not permission to read private drawing assets,
+prompts or generated content. The notice and privacy page disclose owner visibility
+of account names/emails and metadata to all users.
+
+- Filters: last 24 hours / 7 / 30 days, AI / tool actions, and tool. Owner scope is
+  separate from filters. Daily UTC counts, estimated reserved cost, statuses and
+  request IDs are available, with 50-record cursor pages. Totals cover all filtered
+  records, not only the loaded page.
+- AI admissions/statuses are read directly from the existing quota ledger. They
+  are **not actual invoices**; provider token totals and usage outside swyx.io are
+  unavailable. Pending means completion has not been recorded, not success.
+- Server instrumentation records cloud drawing changes, podcast uploads, and
+  Reclip launches. Browser reports cover Draw/Box opens, local image operations,
+  design insert/export, and memes. Tool records are best-effort; offline, blocked,
+  rate-limited or unavailable recording may leave gaps. No anonymous backfill.
+- Records and inactive account-directory entries are pruned after 30 days by the
+  companion’s durable alarm. Browser reporting has a separate 120-events/hour
+  per-account limit and cannot spend or alter AI quotas.
+- `GET /tools/api/logs` accepts `days`, `kind`, `tool`, `scope=mine|all`, and `before`.
+  `all` is server-authorized. Browser `POST` accepts only `{id,action,status}`,
+  requires same origin plus `X-Tools-User`, and gets identity/time/provenance from
+  the server. User IDs, profile fields and arbitrary payloads are rejected.
+
+New tool integrations must extend the bounded vocabulary in
+`src/lib/tools-activity.js`. Use `recordToolActivity(userId, action, status)` only
+for browser-reported actions, and the server activity helpers for authoritative
+operations. Never pass prompts, images, page/file names, URLs, cookies, or keys.
+The logs API and dashboard never expose another account to ordinary users, even
+if they supply an account ID, owner scope, or another account’s cursor.

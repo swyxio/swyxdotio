@@ -1,4 +1,5 @@
 import { ToolsAiUsage } from './ai-usage.js';
+import { ToolsActivity } from './activity.js';
 
 const MAX_SCENE_BYTES = 1_800_000;
 const MAX_PAGE_COUNT = 100;
@@ -58,6 +59,8 @@ export class DrawingPages {
 		this.storage = ctx.storage;
 		/** @type {ToolsAiUsage | undefined} */
 		this.aiUsage = undefined;
+		/** @type {ToolsActivity | undefined} */
+		this.activity = undefined;
 		this.sql.exec(`
 			CREATE TABLE IF NOT EXISTS drawing_pages (
 				id TEXT PRIMARY KEY,
@@ -218,8 +221,14 @@ export class DrawingPages {
 			}
 			if (!isObject(body)) return respond({ error: 'Invalid usage metadata.' }, 400);
 			this.aiUsage ??= new ToolsAiUsage(this.sql);
-			const response = this.aiUsage.handle(path, body);
-			const expiry = this.aiUsage.nextExpiry();
+			this.activity ??= new ToolsActivity(this.sql);
+			if (path.startsWith('/ai/activity-')) this.aiUsage.prune();
+			const response = path.startsWith('/ai/activity-')
+				? this.activity.handle(path, body)
+				: this.aiUsage.handle(path, body);
+			if (response.ok && (path === '/ai/admit' || path === '/ai/activity-record'))
+				this.activity.recordProfile(body.userId, body.profile);
+			const expiry = this.nextUsageExpiry();
 			if (expiry !== null) {
 				if (!this.storage.setAlarm)
 					return respond({ error: 'Usage retention is unavailable.' }, 503);
@@ -247,10 +256,18 @@ export class DrawingPages {
 		if (request.method === 'DELETE') return this.deletePage(id);
 		return respond({ error: 'Method not allowed.' }, 405);
 	}
+	nextUsageExpiry() {
+		const values = [this.aiUsage?.nextExpiry(), this.activity?.nextExpiry()].filter(
+			(value) => typeof value === 'number'
+		);
+		return values.length ? Math.min(.../** @type {number[]} */ (values)) : null;
+	}
 	async alarm() {
 		this.aiUsage ??= new ToolsAiUsage(this.sql);
+		this.activity ??= new ToolsActivity(this.sql);
 		this.aiUsage.prune();
-		const expiry = this.aiUsage.nextExpiry();
+		this.activity.prune();
+		const expiry = this.nextUsageExpiry();
 		if (expiry !== null && this.storage.setAlarm) await this.storage.setAlarm(expiry);
 	}
 }

@@ -31,6 +31,18 @@
 	</p>
 	<h2>Funded AI: limits and logging</h2>
 	<p>
+		Signed-in tool activity is also recorded: tool opens, cloud drawing page changes, local image
+		operations, designs, memes, podcast uploads, and Reclip launches. These are action names,
+		timestamps, statuses, and account identifiers—not the text you type, file names, images, or
+		drawing contents. Browser records are best-effort and may be missing when offline or blocked.
+	</p>
+	<p>
+		You can review your own records in <a href="/tools/logs">Tool logs</a>. The site owner, swyx,
+		can review everyone’s activity metadata, including the Google account name and email associated
+		with it. Other users cannot view your logs. Activity records and inactive account-directory
+		entries expire after 30 days; this dashboard does not collect usage from external apps.
+	</p>
+	<p>
 		Every account, including the site owner, is limited to {TOOLS_AI_POLICY.assistantTurnsPerHour} assistant
 		model turns and {TOOLS_AI_POLICY.mediaJobsPerHour} media generations per hour. Each account has a
 		${TOOLS_AI_POLICY.userEstimatedDailyUsd} daily estimated-cost allowance, with a ${TOOLS_AI_POLICY.siteEstimatedDailyUsd}
