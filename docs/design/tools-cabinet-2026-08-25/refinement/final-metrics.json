@@ -1,0 +1,38 @@
+[
+  {
+    "phase": "final",
+    "state": "owner",
+    "name": "desktop",
+    "width": 1440,
+    "height": 900,
+    "firstToolTop": 427.5,
+    "overflow": 0
+  },
+  {
+    "phase": "final",
+    "state": "owner",
+    "name": "tablet",
+    "width": 834,
+    "height": 1194,
+    "firstToolTop": 462.28125,
+    "overflow": 0
+  },
+  {
+    "phase": "final",
+    "state": "owner",
+    "name": "split",
+    "width": 720,
+    "height": 900,
+    "firstToolTop": 459.0625,
+    "overflow": 0
+  },
+  {
+    "phase": "final",
+    "state": "owner",
+    "name": "phone",
+    "width": 390,
+    "height": 844,
+    "firstToolTop": 383.109375,
+    "overflow": 0
+  }
+]

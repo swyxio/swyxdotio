@@ -111,7 +111,7 @@
 	<div class="workshop-intro">
 		<div class="intro-copy">
 			<h1>The useful things cabinet.</h1>
-			<div class="ornament" aria-hidden="true"><span>✧</span></div>
+			<div class="ornament" aria-hidden="true"><span>❧</span></div>
 			<p class="intro-description">
 				A few tools for thinking, making, and keeping record.<br class="desktop-break" /> Pick one and
 				get to work.
@@ -160,7 +160,7 @@
 			</div>
 		</div>
 	{/if}
-	<ToolsCabinet isOwner={!!data.user?.isOwner} />
+	<div class="workshop-scene"><ToolsCabinet isOwner={!!data.user?.isOwner} /></div>
 	<details class="workshop-rules">
 		<summary
 			><span>The rules of the workshop</span><span class="rules-hint"
@@ -183,7 +183,8 @@
 
 <style>
 	.tools {
-		padding-block: 1.6rem 0.5rem;
+		--site-max-width: 1160px;
+		padding-block: 1.2rem 0.5rem;
 	}
 	.topline {
 		display: flex;
@@ -290,13 +291,13 @@
 	.workshop-intro {
 		display: grid;
 		grid-template-columns: minmax(0, 1fr) 320px;
-		align-items: center;
-		gap: 50px;
-		margin-bottom: 26px;
+		align-items: start;
+		gap: 36px;
+		margin-bottom: 24px;
 	}
 	.intro-copy h1 {
-		font-size: clamp(2.4rem, 4vw, 3.6rem);
-		max-width: 15ch;
+		font-size: clamp(2rem, 3.1vw, 2.7rem);
+		max-width: none;
 		line-height: 1.05;
 		margin: 0;
 		letter-spacing: -0.025em;
@@ -314,7 +315,8 @@
 		content: '';
 		height: 1px;
 		flex: 1;
-		background: var(--page-border);
+		background: var(--page-gold);
+		opacity: 0.65;
 	}
 	.ornament span {
 		font-size: 1.15rem;
@@ -378,11 +380,13 @@
 		margin-bottom: 16px;
 	}
 	.workshop-rules {
-		border: 1px solid var(--page-border);
-		background: var(--page-surface);
-		border-radius: 2px;
+		position: relative;
+		isolation: isolate;
+		border: 0;
+		background: transparent;
+		color: #403326;
 		margin-top: 22px;
-		padding: 10px 18px;
+		padding: 14px 24px;
 	}
 	.workshop-rules > summary {
 		min-height: 44px;
@@ -393,14 +397,14 @@
 		font-size: 1.2rem;
 	}
 	.rules-hint {
-		color: var(--page-muted);
+		color: #65513e;
 		font-size: 0.72rem;
 		margin-left: 14px;
 	}
 	.workshop-rules > p {
 		font-size: 0.8rem;
 		margin: 10px 0;
-		color: var(--page-muted);
+		color: #65513e;
 	}
 	.tools :is(a, button, summary):focus-visible {
 		outline: 3px solid var(--page-accent);
@@ -412,7 +416,7 @@
 			gap: 28px;
 		}
 		.intro-copy h1 {
-			font-size: 2.5rem;
+			font-size: 2rem;
 		}
 		.desktop-break {
 			display: none;
@@ -469,5 +473,89 @@
 			font-size: 0.67rem;
 			line-height: 1.6;
 		}
+	}
+	.workshop-scene {
+		position: relative;
+	}
+	.workshop-rules::before {
+		content: '';
+		position: absolute;
+		z-index: -1;
+		inset: -5px;
+		border-image: url('/assets/tools-cabinet/paper-sheet.webp') 60 fill / 18px / 0 stretch;
+		pointer-events: none;
+	}
+	.workshop-rules::after {
+		content: '';
+		position: absolute;
+		left: 13px;
+		top: -9px;
+		width: 9px;
+		height: 27px;
+		border: 2px solid #8d784a;
+		border-radius: 5px;
+		transform: rotate(-10deg);
+		box-shadow: 1px 1px 1px #35291e33;
+		pointer-events: none;
+	}
+	.workshop-rules :global(:focus-visible) {
+		outline: 3px solid #87432f;
+		outline-offset: 3px;
+	}
+	.workshop-rules :global(a) {
+		color: #87432f;
+	}
+	.workshop-rules :global(.ai-notice) {
+		color: #403326;
+	}
+	@media (min-width: 1050px) {
+		.workshop-scene {
+			padding-left: 165px;
+		}
+		.workshop-scene::before {
+			content: '';
+			position: absolute;
+			pointer-events: none;
+			bottom: -4px;
+			left: -15px;
+			width: 225px;
+			height: 340px;
+			background: url('/assets/tools-cabinet/desk-still-life.webp') left bottom / contain no-repeat;
+		}
+		.intro-description {
+			max-width: 52ch;
+		}
+		.workshop-rules {
+			max-width: 700px;
+			margin-top: 20px;
+		}
+	}
+	@media (forced-colors: active) {
+		.workshop-scene::before,
+		.workshop-rules::before,
+		.workshop-rules::after {
+			display: none;
+		}
+		.workshop-rules {
+			background: Canvas;
+			color: CanvasText;
+			border: 1px solid CanvasText;
+		}
+		.workshop-rules :global(a),
+		.workshop-rules :global(.ai-notice),
+		.workshop-rules > p,
+		.rules-hint {
+			color: CanvasText;
+		}
+	}
+	:global(.site-main:has(.tools) + footer.literary-footer) {
+		width: min(calc(100% - var(--site-gutter) - var(--site-gutter)), 1160px);
+		max-width: 1160px;
+		border: 0;
+		border-top: 1px solid var(--page-border);
+		border-radius: 0;
+		background: transparent;
+		box-shadow: none;
+		padding-inline: 0;
 	}
 </style>

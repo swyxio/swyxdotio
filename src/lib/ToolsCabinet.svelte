@@ -36,9 +36,10 @@
 						<span class="mobile-arrow" aria-hidden="true">›</span>
 					</span>
 					<span class="drawer-pull">
-						<span class="brass-label"
-							>{tool.owner ? 'Site owner' : 'Open'}<span aria-hidden="true"> →</span></span
-						>
+						{#if tool.owner}<span class="brass-label">Site owner</span>{:else}<span
+								class="cup-handle"
+								aria-hidden="true"
+							></span>{/if}
 					</span>
 				</a>
 			</li>
@@ -48,6 +49,8 @@
 
 <style>
 	.cabinet {
+		position: relative;
+		z-index: 1;
 		--wood: url('/assets/tools-cabinet/wood.webp');
 		--paper: #f4ead7;
 		--ink: #35291e;
@@ -94,21 +97,21 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		min-height: 268px;
-		padding: 15px 10px 17px;
+		min-height: 229px;
+		padding: 12px 8px 13px;
 		background: var(--paper) url('/assets/tools-cabinet/paper.webp') center / 360px;
 		border: 1px solid #51331d;
 		border-radius: 3px;
 		box-shadow:
-			inset 0 0 13px #93672a2b,
-			inset 0 0 0 3px #dfcda98c;
+			inset 2px 3px 12px #5c381a3d,
+			inset 0 0 0 2px #d9c49b;
 	}
 	img {
-		width: 144px;
-		height: 144px;
+		width: 132px;
+		height: 132px;
 		object-fit: contain;
 		background: transparent;
-		margin-bottom: 12px;
+		margin-bottom: 8px;
 	}
 	.drawer-copy {
 		display: grid;
@@ -117,7 +120,7 @@
 	}
 	strong {
 		font-family: var(--font-display);
-		font-size: 1.4rem;
+		font-size: 1.25rem;
 		line-height: 1.12;
 		font-weight: 600;
 	}
@@ -131,7 +134,21 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		min-height: 48px;
+		min-height: 74px;
+		margin: 5px 1px 0;
+		border: 1px solid #3d2816;
+		border-radius: 2px;
+		background: #674424 var(--wood) bottom / 280px;
+		box-shadow:
+			inset 0 1px 1px #d4ad7188,
+			inset 0 -3px 4px #21140888,
+			0 1px 1px #c19b5d66;
+	}
+	.cup-handle {
+		display: block;
+		width: 118px;
+		height: 60px;
+		background: url('/assets/tools-cabinet/brass-pull.webp') center / contain no-repeat;
 	}
 	.brass-label {
 		position: relative;
@@ -223,7 +240,7 @@
 			font-size: 1.15rem;
 		}
 		.owner-drawer .drawer-pull {
-			min-height: 36px;
+			min-height: 44px;
 		}
 	}
 	@media (max-width: 600px) {
@@ -276,6 +293,10 @@
 		.owner-drawer .drawer-pull {
 			display: flex;
 			position: absolute;
+			background: transparent;
+			border: 0;
+			box-shadow: none;
+			margin: 0;
 			bottom: 8px;
 			left: 88px;
 		}
@@ -294,6 +315,14 @@
 			background: Canvas;
 			color: CanvasText;
 			border: 1px solid CanvasText;
+			box-shadow: none;
+		}
+		.cup-handle {
+			background: none;
+		}
+		.drawer-pull {
+			background: Canvas;
+			border-color: CanvasText;
 			box-shadow: none;
 		}
 		.description {

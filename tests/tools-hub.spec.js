@@ -161,6 +161,17 @@ for (const [name, width, height] of viewports) {
 		const first = await cabinet.getByRole('link').first().boundingBox();
 		if (!first) throw new Error('First drawer is missing');
 		expect(first.y).toBeLessThan(height - 120);
+		if (width === 390) expect(first.y).toBeLessThan(420);
+		if (width === 1440) {
+			const headingLines = await page
+				.getByRole('heading', { level: 1 })
+				.evaluate(
+					(element) =>
+						element.getBoundingClientRect().height /
+						parseFloat(getComputedStyle(element).lineHeight)
+				);
+			expect(headingLines).toBeLessThan(1.2);
+		}
 		expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
 			true
 		);
