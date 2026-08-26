@@ -52,7 +52,10 @@
 	let presetFields = $state(['hints', 'house']);
 	let kitChoice = $state('');
 	const selectedPreset = $derived(SHOW_PRESETS.find((preset) => preset.id === starter));
+	const needsReviewedExamples = $derived(starter === 'ls' || starter === 'aie');
 	const starterExamples = $derived.by(() => {
+		// Recency is not a quality endorsement for either house. Do not substitute Popular.
+		if (needsReviewedExamples) return [];
 		const channel = referenceCatalog.channels.find(
 			(channel) => channel.slug === selectedPreset?.channelSlug
 		);
@@ -202,7 +205,7 @@
 				<div class="step-title">
 					<span>2</span>
 					<div>
-						<h4>Show what good looks like</h4>
+						<h4>Choose what to learn from</h4>
 						<p>Choose up to six examples and decide what to learn from each.</p>
 					</div>
 				</div>
@@ -225,7 +228,9 @@
 							Dwarkesh Patel · Matthew Berman · Matt Pocock · AI Engineer · Latent Space · Theo ·
 							ThePrimeagen
 						</p>
-						<span>Latest five + most-viewed five per channel, with dated coverage.</span>
+						<span
+							>Latest five + most-viewed five per channel. Neither list is a quality ranking.</span
+						>
 					</div>{/if}
 				<button class="primary" disabled={busy} onclick={onExamples}
 					>{selectedExamples.length ? 'Review selected examples' : 'Choose reference examples'} →</button
@@ -264,19 +269,33 @@
 		</div>
 		<aside class="house-panel">
 			<div class="starter-references">
-				<p class="eyebrow">START WITH EXAMPLES</p>
-				{#each starterExamples as example}{#if example}<button disabled={busy} onclick={onExamples}
-							><img
-								src={example.thumbnailUrl}
-								alt={`Public example: ${example.title}`}
-								loading="lazy"
-								referrerpolicy="no-referrer"
-							/><span>{example.thumbnailText ?? example.title}</span></button
-						>{/if}{/each}
-				<p class="helper">
-					Public inspiration · not selected or attached. Browse all seven channels to choose your
-					own.
+				<p class="eyebrow">
+					{needsReviewedExamples ? 'CHOOSE YOUR REFERENCES' : 'RECENT REFERENCES'}
 				</p>
+				{#if needsReviewedExamples}
+					<h4>Choose the standard, not the latest upload.</h4>
+					<p>
+						Recent AI Engineer and Latent Space thumbnails are browsing context only—not recommended
+						examples of good design. Most viewed does not mean approved either.
+					</p>
+					<button class="quiet" disabled={busy} onclick={onExamples}>Browse other channels</button>
+				{:else}
+					{#each starterExamples as example}{#if example}<button
+								class="reference-preview"
+								disabled={busy}
+								onclick={onExamples}
+								><img
+									src={example.thumbnailUrl}
+									alt={`Public example: ${example.title}`}
+									loading="lazy"
+									referrerpolicy="no-referrer"
+								/><span>{example.thumbnailText ?? example.title}</span></button
+							>{/if}{/each}
+					<p class="helper">
+						Recent uploads, not quality-ranked. Nothing selected or attached; choose what to learn
+						from.
+					</p>
+				{/if}
 			</div>
 			<p class="eyebrow">REUSABLE DEFAULTS</p>
 			<h4>{firstRun ? 'Give yourself a starting point.' : 'Keep the house. Change the show.'}</h4>
@@ -358,7 +377,7 @@
 	.starter-references {
 		margin-bottom: 24px;
 	}
-	.starter-references button {
+	.starter-references .reference-preview {
 		padding: 0 !important;
 		overflow: hidden;
 		text-align: left;

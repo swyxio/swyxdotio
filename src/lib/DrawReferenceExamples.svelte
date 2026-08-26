@@ -23,7 +23,7 @@
 		busy?: boolean;
 	}>();
 	let channelId = $state(
-		referenceCatalog.channels.find((item) => item.slug === 'latent-space')?.id ??
+		referenceCatalog.channels.find((item) => item.slug === 'dwarkesh-patel')?.id ??
 			referenceCatalog.channels[0]?.id ??
 			''
 	);
@@ -31,6 +31,9 @@
 	let query = $state('');
 	let error = $state('');
 	const channel = $derived(referenceCatalog.channels.find((item) => item.id === channelId));
+	const recentHouseContext = $derived(
+		collection === 'latest' && (channel?.slug === 'ai-engineer' || channel?.slug === 'latent-space')
+	);
 	const displayed = $derived(
 		referenceCatalog.examples
 			.filter((item) => {
@@ -76,7 +79,7 @@
 	<div class="reference-heading">
 		<div>
 			<p class="kicker">A REFERENCE SHELF, NOT A BLANK FORM</p>
-			<h3>Learn from real videos.</h3>
+			<h3>Browse real videos. Choose your standards.</h3>
 			<p>
 				Choose what each example should teach: title structure, thumbnail wording or visual
 				direction. Your new show's facts stay separate.
@@ -119,9 +122,14 @@
 			bind:value={query}
 		/>
 	</div>
+	{#if recentHouseContext}<p class="scope-note" role="note">
+			<strong>Recent uploads · context only.</strong> These {channel?.name} thumbnails are not recommended
+			examples of good design. Keep them for comparison; select a reference only if you want to learn
+			a specific feature from it.
+		</p>{/if}
 	<p class="provenance">
 		Snapshot {referenceCatalog.retrievedAt.slice(0, 10)} · Official Videos-tab Latest and Popular lists;
-		Shorts and Live tabs excluded. Views do not prove thumbnail performance. {#if channel}<a
+		Shorts and Live tabs excluded. Recency and views are not quality approval. {#if channel}<a
 				href={channel.url}
 				target="_blank"
 				rel="noreferrer">View {channel.name} on YouTube ↗</a
