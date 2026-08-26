@@ -22,7 +22,7 @@
 			name: 'Cap',
 			description: 'Record and share your screen.',
 			href: '/tools/cap',
-			image: '/assets/tools-cabinet/cap.svg',
+			image: '/assets/tools-cabinet/cap.webp',
 			reload: true,
 			owner: true
 		},

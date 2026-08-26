@@ -1,0 +1,20 @@
+{
+  "method": "Built-in image_gen",
+  "purpose": "Matching additions to the approved curiosity-cabinet artwork; no layout or behavior changes.",
+  "assets": [
+    {
+      "asset": "cap",
+      "path": "static/assets/tools-cabinet/cap.webp",
+      "status": "Used by existing Cap cabinet entry; upstream cap.svg retained.",
+      "source": "exec-559cc543-f93e-40e9-b25d-643663a12726.png",
+      "prompt": "Use case: stylized-concept. Production website illustration for an existing literary curiosity-cabinet tool launcher. Create a single compact vintage desktop screen-recording instrument representing the Cap app: a handsome small walnut-cased monitor with a softly rounded rectangular ivory glass screen, restrained brass frame and base, black side panel, one small dark red circular recording indicator and a tiny square stop symbol on the screen. Three-quarter front view, screen face clearly visible. No camera lens and no film reel; the silhouette must read as a computer screen recorder. Style: carefully painted antique scientific-catalog object, realistic tactile walnut, aged brass, black enamel and warm ivory glass, gently worn engraved details, warm neutral lighting, precise crisp silhouette and a tiny soft contact shadow. Match a set of antique fountain-pen drafting papers, a black leather ledger, a vintage broadcast microphone and an old film reel. One isolated object, fully in view, centered, occupying about 78% of a square canvas with at least 10% clear safe margin on every side. Genuine transparent background with alpha, no solid backdrop, no ground plane, no surrounding cabinet or shelf, no labels, no letters or words, no logos, no watermark, no UI card. Restrained warm walnut/ivory/black/brass palette, only a small muted red record dot. Designed to remain recognizable at 66 to 132px display size."
+    },
+    {
+      "asset": "calendar",
+      "path": "static/assets/tools-cabinet/calendar.webp",
+      "status": "Ready-to-use illustration; no new tool link added. swyxcal inferred from active project, awaiting user confirmation.",
+      "source": "exec-dc3c8c94-bd6f-4f10-859b-46a5e59a5d52.png",
+      "prompt": "Use case: stylized-concept. Production website illustration for an existing literary curiosity-cabinet tool launcher. Create a single handsome antique desktop calendar to represent a personal scheduling tool: warm ivory paper pages hanging from two aged-brass binding rings in a compact dark walnut stand. The front page has a crisp dark-ink calendar grid with seven columns and five rows, with one cell marked by a small muted red circle. No words, letters, numbers or logos. Slight three-quarter front view, the calendar face must be clearly visible and recognizable at 66 to 132px. Style: carefully painted antique scientific-catalog object with realistic tactile paper, aged brass, walnut grain and dark ink, restrained fine engraved detail, gently worn edges, warm neutral lighting, a precise silhouette and tiny soft contact shadow. Match a set of fountain-pen drafting papers, a black leather ledger, a vintage broadcast microphone, an old film reel and a walnut-and-brass recording monitor. One isolated object, fully in view, centered, occupying about 78% of a square canvas with at least 10% clear safe margin on every side. Genuine transparent background with alpha, no solid backdrop, no ground plane, no cabinet or shelf, no UI card, no surrounding decorations, no watermark. Restrained warm walnut/ivory/black/brass palette, only a small muted red date marker."
+    }
+  ]
+}
