@@ -114,6 +114,10 @@ export function canonicalFeedUrl(slug) {
 	return `https://swyx.io/podcast/${assertSlug(slug)}/rss.xml`;
 }
 
+export function canonicalWebsiteUrl(slug) {
+	return `https://swyx.io/podcasts#${assertSlug(slug)}`;
+}
+
 export function joinUrl(base, key) {
 	return `${base.replace(/\/+$/, '')}/${key.replace(/^\/+/, '')}`;
 }
@@ -335,7 +339,17 @@ export function collectFeed(document, sourceUrl) {
 export function ensureCanonicalFeedLinks(document, slug) {
 	const { rss, channel } = rssAndChannel(document);
 	const feedUrl = canonicalFeedUrl(slug);
+	const websiteUrl = canonicalWebsiteUrl(slug);
 	const rssAttributes = attributes(rss);
+
+	let websiteLink = firstDirectChild(channel, 'link');
+	if (!websiteLink) websiteLink = appendElement(channel, 'link');
+	setTextValue(websiteLink, websiteUrl);
+	for (const image of directChildren(channel, 'image')) {
+		let imageLink = firstDirectChild(image, 'link');
+		if (!imageLink) imageLink = appendElement(image, 'link');
+		setTextValue(imageLink, websiteUrl);
+	}
 
 	if (!rssAttributes['@_xmlns:atom'] && !rssAttributes['xmlns:atom']) {
 		setAttribute(rss, 'xmlns:atom', 'http://www.w3.org/2005/Atom');
