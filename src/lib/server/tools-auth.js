@@ -7,8 +7,24 @@ const SESSION_AUDIENCE = 'tools-session';
 const CALLBACK_PATH = '/tools/auth/google/callback';
 
 /** @typedef {{ id: string, email: string, name: string }} ToolsIdentity */
-/** @typedef {ToolsIdentity & { isOwner: boolean }} ToolsUser */
-/** @typedef {Pick<import('@sveltejs/kit').RequestEvent, 'cookies' | 'platform'>} ToolsSessionEvent */
+/** @typedef {ToolsIdentity & { isOwner: boolean, isDevelopment?: boolean }} ToolsUser */
+/** @typedef {Pick<import('@sveltejs/kit').RequestEvent, 'cookies' | 'platform'> & Partial<Pick<import('@sveltejs/kit').RequestEvent, 'url'>>} ToolsSessionEvent */
+
+/** A synthetic member, never the production owner's `personal` namespace.
+ * Called only inside the Vite DEV branch below; localhost alone is not authorization.
+ * @param {URL | undefined} url @returns {ToolsUser | null}
+ */
+export function localDevelopmentToolsUser(url) {
+	if (url?.protocol !== 'http:' || !['localhost', '127.0.0.1', '[::1]'].includes(url.hostname))
+		return null;
+	return {
+		id: 'local-development',
+		email: 'developer@localhost',
+		name: 'Local developer',
+		isOwner: false,
+		isDevelopment: true
+	};
+}
 
 /** @param {unknown} secret */
 export function validToolsSessionSecret(secret) {
@@ -80,7 +96,12 @@ export async function getToolsUser(event) {
 		event.cookies.get(toolsSessionCookieName()),
 		event.platform?.env?.TOOLS_SESSION_SECRET
 	);
-	if (!user) return null;
+	if (!user) {
+		// Production replaces DEV with false. Request headers and Worker vars cannot enable it.
+		if (import.meta.env?.DEV === true && process.env.TOOLS_DEV_AUTH !== 'off')
+			return localDevelopmentToolsUser(event.url);
+		return null;
+	}
 	const owner = event.platform?.env?.TOOLS_OWNER_GOOGLE_SUB;
 	return { ...user, isOwner: Boolean(owner && user.id === owner) };
 }

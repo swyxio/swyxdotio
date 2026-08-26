@@ -21,7 +21,7 @@ export function requireSameOrigin(request, url) {
  * @returns {Promise<R2Bucket | undefined>}
  */
 export async function requirePodcastStudio({ cookies, platform, request, url }) {
-	const user = await getToolsUser({ cookies, platform });
+	const user = await getToolsUser({ cookies, platform, url });
 	if (!user) throw error(401, 'Sign in with Google');
 	if (!user.isOwner) throw error(403, 'Podcast publishing is available only to the site owner.');
 	const expectedUser = request.headers.get('X-Tools-User');
