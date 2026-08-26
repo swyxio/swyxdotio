@@ -199,6 +199,15 @@ test('generation telemetry selects bounded catalog/settings metadata and never c
 		assert.equal(data.estimatedCostUsd, estimateDrawGenerationModelCost(model, settings));
 		assert.doesNotMatch(JSON.stringify(data), /PRIVATE|weights|checkpoint|safety|seed/);
 	}
+	const minimax = getDrawGenerationModel('minimax-h3-video');
+	assert.equal(
+		generationLogMetadata(
+			minimax,
+			resolveDrawGenerationModelSettings(minimax, { resolution: '768P' }),
+			1
+		).resolution,
+		'768P'
+	);
 	const video = getDrawGenerationModel('veo-3-1-video');
 	assert.equal(
 		generationLogMetadata(video, resolveDrawGenerationModelSettings(video), 1).durationSeconds,

@@ -19,7 +19,7 @@ export function generationLogMetadata(model, settings, referenceCount) {
 				: null;
 	const resolution =
 		typeof settings.resolution === 'string' &&
-		/^(?:[1-8][kK]|[0-9]{3,4}p)$/.test(settings.resolution)
+		/^(?:[1-8][kK]|[0-9]{3,4}[pP])$/.test(settings.resolution)
 			? settings.resolution
 			: null;
 	const metadata = {

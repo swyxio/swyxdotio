@@ -57,7 +57,7 @@ export function validGenerationMetadata(value) {
 		(m.width === null || integer(m.width, 1, 16384)) &&
 		(m.height === null || integer(m.height, 1, 16384)) &&
 		(m.resolution === null ||
-			(typeof m.resolution === 'string' && /^(?:[1-8][kK]|[0-9]{3,4}p)$/.test(m.resolution))) &&
+			(typeof m.resolution === 'string' && /^(?:[1-8][kK]|[0-9]{3,4}[pP])$/.test(m.resolution))) &&
 		(m.durationSeconds === null || integer(m.durationSeconds, 1, 3600))
 	);
 }

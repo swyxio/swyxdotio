@@ -1344,6 +1344,10 @@ test('ordered multi-image references and a 32k prompt reach GPT Image 2 without 
 		Array.from({ length: 16 }, (_, index) => `reference-${index}`)
 	);
 	assert.equal(ledger.calls.filter((call) => call.path === '/ai/admit').length, 1);
+	const metadata = ledger.calls.find((call) => call.path === '/ai/admit').body.generation;
+	assert.equal(metadata.referenceCount, 16);
+	assert.equal(metadata.width, 1280);
+	assert.equal(metadata.height, 720);
 	assert.equal(JSON.stringify(ledger.calls).includes('reference-15'), false);
 });
 
