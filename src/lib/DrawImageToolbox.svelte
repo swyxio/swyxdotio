@@ -1687,7 +1687,7 @@
 						Cancel
 					</button>
 				{:else if !authenticated}
-					<a class="fal-action fal-sign-in" href="/tools?next=/draw">Sign in to generate</a>
+					<a class="fal-action fal-sign-in" href="/tools?next=/tools/draw">Sign in to generate</a>
 				{:else}
 					<button
 						type="button"

@@ -222,7 +222,7 @@
 					Use a tool while signed in, then refresh. Try another filter if you expected records.
 					Earlier, signed-out, or unconnected usage cannot be reconstructed.
 				</p>
-				<a href="/draw">Open Draw →</a>
+				<a href="/tools/draw">Open Draw →</a>
 			</div>
 		{:else}
 			<p class="scroll-hint muted small">Scroll the table horizontally to see every column →</p>

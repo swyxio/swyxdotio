@@ -68,7 +68,7 @@ test('reload before cloud acknowledgement restores unsynced native artwork and l
 	page
 }) => {
 	const cloud = await cloudFixture(page);
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await page
 		.getByRole('region', { name: 'Drawing starting points' })
 		.getByRole('button', { name: /^Compare architectures/ })
@@ -126,7 +126,7 @@ test('edits during a cloud outage update recovery and survive later cloud restor
 	page
 }) => {
 	const cloud = await cloudFixture(page);
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await page
 		.getByRole('region', { name: 'Drawing starting points' })
 		.getByRole('button', { name: /^Compare architectures/ })
@@ -200,7 +200,7 @@ test('a legacy active cache is a local fallback, not authority to overwrite newe
 		},
 		{ key: storageKey, pageId, scene: legacyScene }
 	);
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await expect(page.locator('.excalidraw')).toBeVisible();
 	await expect(page.locator('.draw-canvas')).toHaveAttribute('data-storage-key', recoveryKey);
 	await expect(page.locator('.draw-canvas')).toHaveAttribute(
@@ -236,7 +236,7 @@ test('an offline legacy cache normalizes cleanly, then its first real edit becom
 		},
 		{ key: storageKey, pageId, scene: legacyScene }
 	);
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await expect(page.locator('.excalidraw')).toBeVisible();
 	await expect
 		.poll(() =>
@@ -340,7 +340,7 @@ test('a full device keeps valid legacy artwork open for export and preserves its
 		},
 		{ key: storageKey, pageId, canonical: recoveryKey, bytes: legacyBytes }
 	);
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await expect(page.locator('.excalidraw')).toBeVisible();
 	await expect(page.getByRole('alert')).toContainText(
 		'Could not save the latest changes on this device'
@@ -365,7 +365,7 @@ test('a legacy cache from a different remembered page is never imported into the
 		},
 		{ key: storageKey, bytes: legacyBytes }
 	);
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await expect(page.locator('.excalidraw')).toBeVisible();
 	expect(await page.evaluate((key) => localStorage.getItem(key), storageKey)).toBe(legacyBytes);
 	expect(
@@ -384,7 +384,7 @@ test('corrupt recovery data is not overwritten by an old cloud scene or a blank 
 	await page.addInitScript(({ key }) => localStorage.setItem(key, '{partial-recovery'), {
 		key: recoveryKey
 	});
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await expect(page.getByRole('alert')).toContainText('Could not restore your drawing safely');
 	await expect(page.getByRole('region', { name: 'Drawing starting points' })).toHaveCount(0);
 	expect(await page.evaluate((key) => localStorage.getItem(key), recoveryKey)).toBe(

@@ -28,7 +28,7 @@ async function signIn(page) {
 		name: 'Creative browser test'
 	};
 	await authenticateTools(page, identity);
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await expect(page.locator('.draw-canvas')).toHaveAttribute(
 		'data-account-storage-key',
 		`swyx-excalidraw:google:${identity.id}`
@@ -431,13 +431,13 @@ test('guest workspace does not request an account library and blank insertion is
 	page.on('request', (request) => {
 		if (new URL(request.url()).pathname.startsWith(`${api}/`)) privateRequests.push(request.url());
 	});
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await expect(page.getByRole('button', { name: 'Manage drawing pages' })).toBeVisible();
 	const before = content(await scene(page));
 	const workspace = await openWorkspace(page);
 	await expect(workspace.getByRole('link', { name: 'Sign in with Google' })).toHaveAttribute(
 		'href',
-		'/tools?next=/draw'
+		'/tools?next=/tools/draw'
 	);
 	await expect(workspace.getByText('Guest · canvas tools remain available')).toBeVisible();
 	await workspace.getByRole('button', { name: 'Brand kits', exact: true }).click();

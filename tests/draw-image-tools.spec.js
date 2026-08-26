@@ -47,7 +47,7 @@ async function mockSignedInPersonalTools(page) {
  * @param {{ width: number, height: number, noisy?: boolean } | undefined} [generatedSize]
  */
 async function pasteSelectedImage(page, generatedSize) {
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	const drawingCanvas = page.locator('.draw-canvas canvas.excalidraw__canvas.interactive');
 	await expect(drawingCanvas).toBeVisible();
 	// Start drawing through the canvas outside the new starter cards.
@@ -180,7 +180,7 @@ async function chooseOnlyModel(toolbox, modelId) {
 test('selected images expose private tools, exact model sizes, and disclosed fal uploads', async ({
 	page
 }) => {
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await expect(page.getByLabel('AI image toolbox')).not.toBeVisible();
 	const toolbox = await pasteSelectedImage(page);
 
@@ -210,7 +210,7 @@ test('selected images expose private tools, exact model sizes, and disclosed fal
 	await expect(toolbox.getByText(/Sign in required/)).toBeVisible();
 	await expect(toolbox.getByRole('link', { name: 'Sign in to generate' })).toHaveAttribute(
 		'href',
-		'/tools?next=/draw'
+		'/tools?next=/tools/draw'
 	);
 	await expect(toolbox.getByRole('button', { name: 'Generate AI image edit' })).toHaveCount(0);
 	await expect(toolbox.getByText('Runs privately on your device')).toHaveCount(0);
@@ -698,7 +698,7 @@ test('large transparent image edits preserve dimensions and synchronize under th
 			return result;
 		};
 	});
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	const origin = new URL(page.url()).origin;
 	await authenticateTools(page);
 	const create = await page.request.post(`${origin}/tools/api/draw/pages`, {
@@ -1444,14 +1444,14 @@ test('the drawing AI action shares the Google owner session', async ({ page }) =
 	await expect(toolbox.getByText(/Sign in required/)).toBeVisible();
 
 	await signIn.click();
-	await expect(page).toHaveURL(/\/tools\?next=(?:%2F|\/)draw$/);
+	await expect(page).toHaveURL(/\/tools\?next=(?:%2F|\/)tools(?:%2F|\/)draw$/);
 	await expect(page.getByRole('link', { name: 'Sign in with Google' })).toHaveAttribute(
 		'href',
-		'/tools/auth/google?next=%2Fdraw'
+		'/tools/auth/google?next=%2Ftools%2Fdraw'
 	);
 	await authenticateTools(page);
-	await page.goto('/draw');
-	await expect(page).toHaveURL(/\/draw$/);
+	await page.goto('/tools/draw');
+	await expect(page).toHaveURL(/\/tools\/draw$/);
 
 	const status = await page.request.get(`${new URL(page.url()).origin}/tools/api/session`);
 	expect(status.ok()).toBe(true);

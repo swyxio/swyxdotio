@@ -439,7 +439,9 @@ issuer/audience/expiry checks and signed ID-token verification. `jose` signs the
 seven-day HTTP-only tools session. No Google access/refresh tokens are retained.
 There is no password-login endpoint or legacy session fallback.
 
-- `/draw`: every Google `sub` gets its own Durable Object workspace. Only the
+- `/draw` and `/box` permanently redirect to `/tools/draw` and `/tools/box`.
+  Tool URLs are grouped under `/tools`; browser storage and API paths are unchanged.
+- `/tools/draw`: every Google `sub` gets its own Durable Object workspace. Only the
   configured owner maps to the existing `personal` workspace, preserving production
   drawings. Requests cannot supply another tenant’s namespace.
 - Browser drawing caches, library, assistant history and generation history are
@@ -447,7 +449,7 @@ There is no password-login endpoint or legacy session fallback.
   imported into a Google account. Guest drawings are not silently uploaded on login.
 - Drawing writes require `X-Tools-User` matching the signed session, so an old tab
   cannot write into another account after a session switch.
-- `/box` text has no server persistence; signed-in opens have activity metadata.
+- `/tools/box` text has no server persistence; signed-in opens have activity metadata.
   Public articles and podcast feeds remain public.
 - Cloud AI is **site-funded for every signed-in account**, with durable admission
   limits enforced before provider calls: 20 assistant turns/hour, 5 media jobs/hour,

@@ -15,7 +15,7 @@ async function openDrawingTemplates(page, section) {
 
 test('drawing canvas always uses light mode even when the site is dark', async ({ page }) => {
 	await page.addInitScript(() => localStorage.setItem('theme', 'dark'));
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 
 	await expect(page.locator('html')).toHaveClass(/dark/);
 	await expect(page.locator('.excalidraw')).toBeVisible();
@@ -46,7 +46,7 @@ for (const viewport of [
 		page
 	}) => {
 		await page.setViewportSize(viewport);
-		await page.goto('/draw');
+		await page.goto('/tools/draw');
 
 		const pages = page.getByRole('button', { name: 'Manage drawing pages' });
 		const workspace = page.getByRole('button', { name: 'Choose drawing mode and tools' });
@@ -81,10 +81,10 @@ for (const viewport of [
 test('drawing canvas is public, fullscreen, and persists drawings in the browser', async ({
 	page
 }) => {
-	const response = await page.goto('/draw');
+	const response = await page.goto('/tools/draw');
 
 	expect(response?.status()).toBe(200);
-	await expect(page).toHaveURL(/\/draw$/);
+	await expect(page).toHaveURL(/\/tools\/draw$/);
 	await expect(page).toHaveTitle('Draw · swyx.io');
 	await expect(page.locator('nav')).toHaveCount(0);
 	await expect(page.locator('footer')).toHaveCount(0);
@@ -153,7 +153,7 @@ test('drawing canvas is public, fullscreen, and persists drawings in the browser
 test('visual presets insert labeled editable diagrams without replacing existing work', async ({
 	page
 }) => {
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 
 	await openDrawingTemplates(page, 'Presets');
 
@@ -256,7 +256,7 @@ for (const label of ['Two architectures', 'Agent / tool loop', 'Claim, evidence,
 			Reflect.deleteProperty(window, 'showOpenFilePicker');
 			Reflect.deleteProperty(window, 'showSaveFilePicker');
 		});
-		await page.goto('/draw');
+		await page.goto('/tools/draw');
 		await openDrawingTemplates(page, 'Presets');
 		await page.getByRole('button', { name: `Insert ${label} preset`, exact: true }).click();
 		/** @returns {Promise<{ elements: any[] }>} */
@@ -340,7 +340,7 @@ for (const label of ['Two architectures', 'Agent / tool loop', 'Claim, evidence,
 test('hand-drawn UI components are searchable, editable, and preserve existing drawings', async ({
 	page
 }) => {
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await openDrawingTemplates(page, 'Components');
 
 	const componentMenu = page.getByRole('region', { name: 'UI components' });
@@ -443,7 +443,7 @@ test('meme templates live in the native library, search current memes, and inser
 			headers: { 'access-control-allow-origin': '*' }
 		})
 	);
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	expect(catalogRequests).toBe(0);
 	await openDrawingTemplates(page, 'Memes');
 
@@ -501,7 +501,7 @@ test('meme templates live in the native library, search current memes, and inser
 test('command palette searches components, presets, pages, and actions with keyboard controls', async ({
 	page
 }) => {
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await expect(page.getByRole('button', { name: 'Manage drawing pages' })).toBeVisible();
 	await page.keyboard.press('Control+k');
 
@@ -578,7 +578,7 @@ test('command palette searches components, presets, pages, and actions with keyb
 test('software architecture libraries preload and preserve personally added components', async ({
 	page
 }) => {
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 
 	await expect
 		.poll(() =>
@@ -693,7 +693,7 @@ for (const fixture of [
 				});
 			};
 		});
-		await page.goto('/draw');
+		await page.goto('/tools/draw');
 		const drawingCanvas = page.locator('.draw-canvas canvas.excalidraw__canvas.interactive');
 		await expect(drawingCanvas).toBeVisible();
 		await expect(page.getByRole('region', { name: 'Selected image tools' })).toHaveCount(0);

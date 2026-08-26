@@ -13,7 +13,7 @@
 	$: presencePageKey =
 		$page.status === 200 && typeof $page.data?.slug === 'string' ? $page.data.slug : publicPageKey;
 	$: presenceAdmissionRate = Number(env.PUBLIC_PRESENCE_ADMISSION_RATE ?? 1);
-	$: immersiveTool = $page.url.pathname === '/box' || $page.url.pathname === '/draw';
+	$: immersiveTool = $page.url.pathname === '/tools/box' || $page.url.pathname === '/tools/draw';
 </script>
 
 <svelte:head>

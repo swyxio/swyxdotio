@@ -13,6 +13,27 @@ test.beforeEach(async ({ page }) => {
 	);
 });
 
+for (const tool of ['draw', 'box']) {
+	test(`${tool} bookmarks redirect permanently and preserve query and fragment`, async ({
+		page
+	}) => {
+		const oldUrl = `/${tool}?from=bookmark&value=a%2Fb`;
+		const canonical = `/tools${oldUrl}`;
+		const redirect = await page.request.get(oldUrl, { maxRedirects: 0 });
+		expect(redirect.status()).toBe(308);
+		expect(redirect.headers().location).toBe(canonical);
+		const response = await page.goto(`${oldUrl}#saved`);
+		expect(response?.status()).toBe(200);
+		expect(response?.headers()['cache-control']).toContain('no-store');
+		expect(response?.headers()['x-robots-tag']).toContain('noindex');
+		await expect(page).toHaveURL(new RegExp(`/tools/${tool}\\?from=bookmark&value=a%2Fb#saved$`));
+		await expect(page.locator('.site-nav-shell')).toHaveCount(0);
+		await expect(page.locator('.literary-footer')).toHaveCount(0);
+		if (tool === 'draw') await expect(page.locator('.excalidraw')).toBeVisible();
+		else await expect(page.getByRole('textbox', { name: 'Write anything' })).toBeVisible();
+	});
+}
+
 /** @param {import('@playwright/test').Page} page @param {typeof TEST_TOOLS_OWNER} [user] */
 async function signIn(page, user = TEST_TOOLS_OWNER) {
 	await page.goto('/tools');
@@ -23,14 +44,14 @@ async function signIn(page, user = TEST_TOOLS_OWNER) {
 test('guest has three working direct links, honest disclosure, and a safe Google continuation', async ({
 	page
 }) => {
-	await page.goto('/tools?next=%2Fdraw&authError=1');
+	await page.goto('/tools?next=%2Ftools%2Fdraw&authError=1');
 	await expect(page.getByRole('alert')).toContainText('Google sign-in did not finish');
 	const cabinet = page.getByRole('navigation', { name: 'Your tools' });
 	await expect(cabinet.getByRole('link')).toHaveCount(3);
-	await expect(cabinet.getByRole('link', { name: /^Draw/ })).toHaveAttribute('href', '/draw');
+	await expect(cabinet.getByRole('link', { name: /^Draw/ })).toHaveAttribute('href', '/tools/draw');
 	await expect(cabinet.getByRole('link', { name: /^Big text box/ })).toHaveAttribute(
 		'href',
-		'/box'
+		'/tools/box'
 	);
 	await expect(cabinet.getByRole('link', { name: /^Tool logs/ })).toHaveAttribute(
 		'href',
@@ -38,7 +59,7 @@ test('guest has three working direct links, honest disclosure, and a safe Google
 	);
 	await expect(page.getByRole('link', { name: 'Sign in with Google' })).toHaveAttribute(
 		'href',
-		'/tools/auth/google?next=%2Fdraw'
+		'/tools/auth/google?next=%2Ftools%2Fdraw'
 	);
 	await expect(page.getByRole('complementary', { name: 'Usage allowance' })).toContainText(
 		'site owner can review usage metadata and account identity'

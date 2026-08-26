@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test('big text box is public, focused, fullscreen, and distraction-free', async ({ page }) => {
-	await page.goto('/box');
+	await page.goto('/tools/box');
 
 	const textbox = page.getByRole('textbox', { name: 'Write anything' });
 	await expect(page).toHaveTitle('Big text box · swyx.io');

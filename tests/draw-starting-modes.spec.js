@@ -35,7 +35,7 @@ test('starting points wait for verified identity and never mistake restoration f
 		await ready;
 		await route.fulfill({ json: { authenticated: false, user: null } });
 	});
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await expect(page.getByRole('region', { name: 'Drawing starting points' })).toHaveCount(0);
 	identify?.();
 	await expect(page.getByRole('region', { name: 'Drawing starting points' })).toBeVisible();
@@ -57,7 +57,7 @@ test('mode changes preserve artwork, native undo, and account-scoped defaults wi
 			json: { error: 'Unexpected inference in navigation test' }
 		});
 	});
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	const welcome = page.getByRole('region', { name: 'Drawing starting points' });
 	await welcome.getByRole('button', { name: /^Compare architectures/ }).click();
 	await expect(welcome).toHaveCount(0);
@@ -114,7 +114,7 @@ test('mode changes preserve artwork, native undo, and account-scoped defaults wi
 test('mode and library navigation preserve an assistant draft and Escape dismisses the topmost menu', async ({
 	page
 }) => {
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await authenticateTools(page);
 	await page.reload();
 	await page.getByRole('button', { name: 'Open drawing assistant' }).click();
@@ -144,7 +144,7 @@ test('phone menus and Library have one foreground surface, with no controls cove
 	page
 }) => {
 	await page.setViewportSize({ width: 390, height: 844 });
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	const mode = page.getByRole('button', { name: 'Choose drawing mode and tools' });
 	const pages = page.getByRole('button', { name: 'Manage drawing pages' });
 	await mode.click();
@@ -187,7 +187,7 @@ test('blank Experiment opens one idle composer and preserves model choices even 
 		paidRequests++;
 		return route.abort('blockedbyclient');
 	});
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await page
 		.getByRole('region', { name: 'Drawing starting points' })
 		.getByRole('button', { name: 'Experiment', exact: true })
@@ -234,7 +234,7 @@ for (const viewport of [
 				paid++;
 				return route.abort('blockedbyclient');
 			});
-			await page.goto('/draw');
+			await page.goto('/tools/draw');
 			await authenticateTools(page);
 			await page.reload();
 			const menu = page.getByRole('button', { name: 'Choose drawing mode and tools' });
@@ -327,7 +327,7 @@ for (const viewport of [
 					.fulfill({ json: { content: 'Fixture response', toolCalls: [] } })
 					.catch(() => {});
 			});
-			await page.goto('/draw');
+			await page.goto('/tools/draw');
 			await authenticateTools(page);
 			await page.reload();
 			await page.getByRole('button', { name: 'Choose drawing mode and tools' }).click();
