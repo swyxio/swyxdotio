@@ -35,7 +35,7 @@ test('the letter has six sections and aligned commentary, never a second column 
 		'start-here',
 		'current-work',
 		'founders',
-		'speaking',
+		'sponsor',
 		'speaker-bio',
 		'my-story'
 	]) {
@@ -49,6 +49,27 @@ test('the letter has six sections and aligned commentary, never a second column 
 	assert.match(page, /href="\/now"/);
 	assert.match(page, /Previous bios &amp; older links/);
 	assert.doesNotMatch(page, /use without asking/);
+});
+
+test('sponsorship replaces speaking navigation with sourced audience milestones and distinct contacts', async () => {
+	const page = await read('src/routes/about/+page.svelte');
+	assert.match(page, /href="#sponsor"><span>4\.<\/span> Sponsor my work/);
+	assert.match(page, /<LetterSection id="sponsor" title="Sponsor my work"/);
+	assert.doesNotMatch(page, /Invite me to speak|href="#speaking"/);
+	for (const contact of ['sponsorships@ai.engineer', 'business@latent.space']) {
+		assert.ok(page.includes(`href="mailto:${contact}"`));
+	}
+	for (const source of ['https://ai.engineer/about', 'https://www.latent.space/about']) {
+		assert.ok(page.includes(`href="${source}"`));
+	}
+	assert.match(page, /15,000\+ in-person AI engineers/);
+	assert.match(page, /100,000\+ newsletter subscribers/);
+	assert.match(page, /10M\+ talk &amp; workshop views in 2025/);
+	assert.match(page, /200,000 subscribers/);
+	assert.match(page, /10M viewers across all channels/);
+	assert.match(page, /Top 30 for US Technology on Apple Podcasts/);
+	assert.match(page, /Selected talks &amp; conversations/);
+	assert.match(page, /href="\/ai-eng-agents"/);
 });
 
 test('version controls provide pressed state, scoped copy feedback, and readable text on clipboard failure', async () => {

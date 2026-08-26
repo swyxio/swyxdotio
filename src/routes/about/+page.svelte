@@ -77,7 +77,7 @@
 				>
 			</li>
 			<li>
-				<a href="#speaking"><span>4.</span> Invite me to speak <span aria-hidden="true">→</span></a>
+				<a href="#sponsor"><span>4.</span> Sponsor my work <span aria-hidden="true">→</span></a>
 			</li>
 			<li>
 				<a href="#speaker-bio"><span>5.</span> Bio &amp; photos <span aria-hidden="true">→</span></a
@@ -199,29 +199,38 @@
 		>
 	</LetterSection>
 
-	<LetterSection id="speaking" title="Speaking & conversations" number="5">
+	<LetterSection id="sponsor" title="Sponsor my work" number="5">
 		<p>
-			I speak and write about AI engineering, developer experience, learning in public, and building
-			a technical career. A few representative talks:
+			Want to support what I’m building and reach the people building with AI? I work with sponsors
+			through <strong>AI Engineer</strong> and <strong>Latent Space</strong>.
 		</p>
-		<ul class="talk-links">
-			<li><a href="/ai-eng-agents">Engineering AI Agents</a></li>
-			<li><a href="https://www.youtube.com/watch?v=D-Sj6jo4o1I">The Operating System of You</a></li>
-			<li><a href="/paradigm-lost">Paradigm Lost</a></li>
-			<li>
-				<a href="/hooks">The Hooks talk</a> ·
-				<a href="https://www.youtube.com/watch?v=nyFHR0dDZo0">Concurrent React</a>
-			</li>
-		</ul>
+		<h3>AI Engineer — meet the builders</h3>
 		<p>
-			For an invitation, include the audience, topic, date, location or format, and what you’d like
-			people to leave with. You can find me on <a href="https://x.com/swyx">Twitter</a>; my
-			<a href="/podcasts">podcasts page</a> has more conversations.
+			Technical conferences, expos, and workshops for AI engineers, founders, and technical leaders.
+			<strong>15,000+ in-person AI engineers</strong>,
+			<strong>100,000+ newsletter subscribers</strong>, and
+			<strong>10M+ talk &amp; workshop views in 2025</strong>.
+			<a href="https://ai.engineer/about">More about the AIE audience ↗</a>
+		</p>
+		<p>
+			<a href="mailto:sponsorships@ai.engineer">Sponsor AI Engineer →</a>
+		</p>
+		<h3>Latent Space — be part of the conversation</h3>
+		<p>
+			Our technical AI newsletter, podcast, and community have passed <strong
+				>200,000 subscribers</strong
+			>
+			and <strong>10M viewers across all channels</strong>. The podcast has ranked in the
+			<strong>Top 30 for US Technology on Apple Podcasts</strong>.
+			<a href="https://www.latent.space/about">More about the Latent Space audience ↗</a>
+		</p>
+		<p>
+			<a href="mailto:business@latent.space">Sponsor Latent Space →</a>
 		</p>
 		<svelte:fragment slot="commentary"
 			><p>
-				The audience and the question matter as much as the title of a talk. What would make the
-				conversation useful to the people in the room?
+				If you’re building something useful for AI engineers, these are the two places where I can
+				help you meet them. Tell us what you’re launching, who it’s for, and your timing.
 			</p></svelte:fragment
 		>
 	</LetterSection>
@@ -238,6 +247,22 @@
 				>Conference &amp; social photos ↓</a
 			>
 		</p>
+		<details class="previous-bios">
+			<summary>Selected talks &amp; conversations</summary>
+			<p>I speak and write about AI engineering, developer experience, and learning in public.</p>
+			<ul class="talk-links">
+				<li><a href="/ai-eng-agents">Engineering AI Agents</a></li>
+				<li>
+					<a href="https://www.youtube.com/watch?v=D-Sj6jo4o1I">The Operating System of You</a>
+				</li>
+				<li><a href="/paradigm-lost">Paradigm Lost</a></li>
+				<li>
+					<a href="/hooks">The Hooks talk</a> ·
+					<a href="https://www.youtube.com/watch?v=nyFHR0dDZo0">Concurrent React</a>
+				</li>
+			</ul>
+			<p><a href="/podcasts">More conversations on the podcasts page →</a></p>
+		</details>
 		<details class="previous-bios">
 			<summary>Previous bios &amp; older links</summary>
 			<div class="reading-prose about-copy">{@html data.html}</div>
