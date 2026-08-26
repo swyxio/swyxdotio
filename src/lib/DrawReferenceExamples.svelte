@@ -34,12 +34,16 @@
 	const displayed = $derived(
 		referenceCatalog.examples
 			.filter((item) => {
-				if (collection === 'selected')
-					return selection.examples.some((chosen: ExampleSelection) => chosen.id === item.id);
 				const ids = collection === 'top' ? channel?.topIds : channel?.latestIds;
+				const inCollection =
+					collection === 'selected'
+						? selection.examples.some((chosen: ExampleSelection) => chosen.id === item.id)
+						: ids?.includes(item.id);
 				return (
-					ids?.includes(item.id) &&
-					`${item.title} ${item.thumbnailText ?? ''}`.toLowerCase().includes(query.toLowerCase())
+					inCollection &&
+					`${item.title} ${item.thumbnailText ?? ''}`
+						.toLowerCase()
+						.includes(query.trim().toLowerCase())
 				);
 			})
 			.sort((a, b) => {
@@ -83,6 +87,7 @@
 	<div class="channel-tabs" aria-label="Reference channels">
 		{#each referenceCatalog.channels as item}<button
 				class:active={channelId === item.id}
+				aria-pressed={channelId === item.id}
 				onclick={() => {
 					channelId = item.id;
 					if (collection === 'selected') collection = 'latest';
@@ -91,14 +96,20 @@
 	</div>
 	<div class="reference-controls">
 		<div class="collections" aria-label="Example collection">
-			<button class:active={collection === 'latest'} onclick={() => (collection = 'latest')}
-				>Latest 5</button
+			<button
+				class:active={collection === 'latest'}
+				aria-pressed={collection === 'latest'}
+				onclick={() => (collection = 'latest')}>Latest 5</button
 			>
-			<button class:active={collection === 'top'} onclick={() => (collection = 'top')}
-				>Most viewed 5</button
+			<button
+				class:active={collection === 'top'}
+				aria-pressed={collection === 'top'}
+				onclick={() => (collection = 'top')}>Most viewed 5</button
 			>
-			<button class:active={collection === 'selected'} onclick={() => (collection = 'selected')}
-				>Selected ({selection.examples.length})</button
+			<button
+				class:active={collection === 'selected'}
+				aria-pressed={collection === 'selected'}
+				onclick={() => (collection = 'selected')}>Selected ({selection.examples.length})</button
 			>
 		</div>
 		<input
@@ -195,10 +206,10 @@
 				</div>
 			</article>
 		{:else}<p class="empty">
-				{collection === 'selected'
-					? 'Select examples with the field toggles to build your reference set.'
-					: query
-						? 'No matching examples. Try a different title.'
+				{query.trim()
+					? 'No matching examples. Try a different title.'
+					: collection === 'selected'
+						? 'Select examples with the field toggles to build your reference set.'
 						: 'This ranking is unavailable in this research snapshot; no substitute ranking was invented.'}
 			</p>{/each}
 	</div>

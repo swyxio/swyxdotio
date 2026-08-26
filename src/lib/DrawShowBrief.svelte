@@ -647,8 +647,6 @@
 		font-size: 12px;
 	}
 	.prompt-review pre {
-		max-height: 300px;
-		overflow: auto;
 		white-space: pre-wrap;
 		overflow-wrap: anywhere;
 		background: #f3f5fa;

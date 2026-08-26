@@ -1038,6 +1038,15 @@ test('show-first onboarding applies only chosen fields, saves six examples, and 
 			.getByRole('checkbox', { name: 'Hook', exact: true })
 			.check();
 		await expect(workspace.getByRole('alert')).toHaveCount(0);
+		const search = workspace.getByRole('searchbox', { name: 'Search reference examples' });
+		await search.fill(sample.title);
+		await expect(workspace.locator('.example-grid article')).toHaveCount(1);
+		await expect(exampleCard(workspace, sample.id)).toBeVisible();
+		await search.fill('No matching reference example 000000');
+		await expect(workspace.locator('.example-grid article')).toHaveCount(0);
+		await expect(workspace.getByText('No matching examples. Try a different title.')).toBeVisible();
+		await search.clear();
+		await expect(workspace.locator('.example-grid article')).toHaveCount(6);
 		await workspace.locator('.example-grid article').first().scrollIntoViewIfNeeded();
 		await page.screenshot({ path: '/tmp/draw-onboarding-examples.png' });
 		await workspace.getByRole('button', { name: '← Back to show brief', exact: true }).click();
@@ -1047,6 +1056,17 @@ test('show-first onboarding applies only chosen fields, saves six examples, and 
 		await expect(prompt).toContainText(sampleHook);
 		await expect(prompt).toContainText('These entries supply text only');
 		await expect(prompt).toContainText('do not assume their thumbnail images were attached');
+		const verticalScrollers = await workspace.evaluate((root) =>
+			[...root.querySelectorAll('*')]
+				.filter(
+					(element) =>
+						element.clientHeight > 0 &&
+						element.scrollHeight > element.clientHeight + 2 &&
+						['auto', 'scroll'].includes(getComputedStyle(element).overflowY)
+				)
+				.map((element) => element.tagName)
+		);
+		expect(verticalScrollers).toEqual(['MAIN']);
 		await workspace.getByRole('button', { name: 'Save show brief', exact: true }).click();
 		await expect(workspace.getByRole('status')).toContainText('Brief saved privately');
 		const saved = (await readLibrary()).records.briefs[0];
@@ -1070,6 +1090,30 @@ test('show-first onboarding applies only chosen fields, saves six examples, and 
 		await expect(
 			workspace.getByRole('textbox', { name: 'Episode title', exact: true })
 		).toHaveValue('My own episode title');
+	});
+
+	await test.step('new and saved show navigation never silently discards a draft', async () => {
+		const name = workspace.getByRole('textbox', { name: 'Show / brief name', exact: true });
+		const savedShow = workspace
+			.getByRole('region', { name: 'Continue a saved show' })
+			.getByRole('button', { name: /My own upcoming show/ });
+		await workspace.getByRole('button', { name: '+ New show', exact: true }).click();
+		await expect(name).toHaveValue('');
+		await name.fill('Unsaved next episode');
+		page.once('dialog', (dialog) => dialog.dismiss());
+		await workspace.getByRole('button', { name: '+ New show', exact: true }).click();
+		await expect(name).toHaveValue('Unsaved next episode');
+		page.once('dialog', (dialog) => dialog.dismiss());
+		await savedShow.click();
+		await expect(name).toHaveValue('Unsaved next episode');
+		page.once('dialog', (dialog) => dialog.accept());
+		await savedShow.click();
+		await expect(name).toHaveValue('My own upcoming show');
+		await expect(workspace.locator('.chosen-examples article')).toHaveCount(6);
+		await name.fill('Unsaved changes to current show');
+		await savedShow.click();
+		await expect(name).toHaveValue('Unsaved changes to current show');
+		await name.fill('My own upcoming show');
 	});
 
 	await test.step('metadata is previewed, then only checked fields apply and the source URL becomes canonical', async () => {

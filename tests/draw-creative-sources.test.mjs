@@ -104,6 +104,7 @@ async function event(body, options = {}) {
 		url,
 		request: new Request(url, {
 			method: 'POST',
+			signal: options.signal,
 			headers: {
 				Origin: options.origin ?? url.origin,
 				'Content-Type': options.contentType ?? 'application/json',
@@ -904,6 +905,130 @@ const oembedResult = () => ({
 	duration: 'PT10M',
 	privacyStatus: 'unlisted'
 });
+
+for (const [lookup, youtubeKey, endpoint] of [
+	['Data API', 'configured-test-key', 'https://www.googleapis.com/youtube/v3/videos'],
+	['oEmbed', undefined, 'https://www.youtube.com/oembed']
+]) {
+	test(`${lookup} video imports reject pre-aborted requests before any downstream call`, async () => {
+		const controller = new AbortController();
+		controller.abort(new Error('private-source-cancellation-reason'));
+		const ledger = createTestAiLedger();
+		let calls = 0;
+		const response = await runCreativeSource(
+			await event(
+				{ action: 'video', video: VIDEO },
+				{ youtubeKey, ledger, signal: controller.signal }
+			),
+			{
+				fetcher: async () => {
+					calls++;
+					assert.fail('A cancelled import must not reach YouTube');
+				}
+			}
+		);
+		assert.equal(response.status, 409);
+		assert.equal((await response.json()).code, 'metadata_cancelled');
+		assert.equal(calls, 0);
+		assert.deepEqual(ledger.calls, []);
+	});
+
+	test(
+		`${lookup} video imports propagate in-flight fetch cancellation without fallback or private errors`,
+		{ timeout: 2000 },
+		async () => {
+			const controller = new AbortController();
+			const ledger = createTestAiLedger();
+			let calls = 0;
+			let downstreamSignal;
+			const response = await runCreativeSource(
+				await event(
+					{ action: 'video', video: VIDEO },
+					{ youtubeKey, ledger, signal: controller.signal }
+				),
+				{
+					fetcher: async (url, options) => {
+						calls++;
+						assert.equal(new URL(url).origin + new URL(url).pathname, endpoint);
+						assert.equal(options.redirect, 'error');
+						downstreamSignal = options.signal;
+						return new Promise((_resolve, reject) => {
+							options.signal.addEventListener('abort', () => reject(options.signal.reason), {
+								once: true
+							});
+							controller.abort(new Error('private-source-cancellation-reason'));
+						});
+					}
+				}
+			);
+			assert.equal(response.status, 409);
+			const raw = await response.text();
+			assert.equal(JSON.parse(raw).code, 'metadata_cancelled');
+			assert.equal(raw.includes('private-source-cancellation-reason'), false);
+			assert.equal(raw.includes(VIDEO), false);
+			assert.equal(raw.includes('configured-test-key'), false);
+			assert.equal(calls, 1);
+			assert.equal(downstreamSignal.aborted, true);
+			assert.deepEqual(ledger.calls, []);
+		}
+	);
+
+	test(
+		`${lookup} video imports cancel a partially-read response body and accept no metadata`,
+		{ timeout: 2000 },
+		async () => {
+			const controller = new AbortController();
+			const ledger = createTestAiLedger();
+			let calls = 0;
+			let pulls = 0;
+			let cancellations = 0;
+			let downstreamSignal;
+			const response = await runCreativeSource(
+				await event(
+					{ action: 'video', video: VIDEO },
+					{ youtubeKey, ledger, signal: controller.signal }
+				),
+				{
+					fetcher: async (url, options) => {
+						calls++;
+						assert.equal(new URL(url).origin + new URL(url).pathname, endpoint);
+						downstreamSignal = options.signal;
+						return new Response(
+							new ReadableStream({
+								pull(stream) {
+									pulls++;
+									if (pulls === 1) stream.enqueue(new TextEncoder().encode('{"partial":"'));
+									else
+										queueMicrotask(() =>
+											controller.abort(new Error('private-body-cancellation-reason'))
+										);
+								},
+								cancel() {
+									cancellations++;
+								}
+							}),
+							{ headers: { 'Content-Type': 'application/json' } }
+						);
+					}
+				}
+			);
+			assert.equal(response.status, 409);
+			const result = await response.json();
+			assert.equal(result.code, 'metadata_cancelled');
+			assert.equal(result.video, undefined);
+			assert.equal(JSON.stringify(result).includes('private-body-cancellation-reason'), false);
+			assert.equal(calls, 1);
+			assert.ok(pulls >= 2, 'cancellation occurs after body reading begins');
+			assert.equal(
+				cancellations,
+				1,
+				'the response stream is cancelled, not left reading in the background'
+			);
+			assert.equal(downstreamSignal.aborted, true);
+			assert.deepEqual(ledger.calls, []);
+		}
+	);
+}
 
 test('no-key video lookup uses fixed official oEmbed and returns explicitly limited metadata', async () => {
 	const calls = [];

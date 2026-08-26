@@ -88,6 +88,7 @@
 	let kitRevisions = $state<any[]>([]);
 	let brief = $state(newBriefDraft());
 	let briefId = $state('');
+	let briefSavedSnapshot = JSON.stringify(newBriefDraft());
 	let exampleTarget = $state<'brief' | 'house'>('brief');
 	let importPreview = $state<any>(null);
 	let importFields = $state<string[]>(['name', 'title', 'description']);
@@ -446,13 +447,25 @@
 		replaceRecord(record);
 		briefId = record.id;
 		brief.name = record.data.name;
+		briefSavedSnapshot = JSON.stringify({ ...data, name: record.data.name });
 		status = 'Brief saved privately.';
 		return record;
 	}
+	function canReplaceBrief() {
+		return (
+			JSON.stringify($state.snapshot(brief)) === briefSavedSnapshot ||
+			window.confirm(
+				'Discard unsaved changes to this show brief? Save it first to keep your changes.'
+			)
+		);
+	}
 	function chooseBrief(record: CreativeRecord) {
+		if (record.id === briefId) return true;
+		if (!canReplaceBrief()) return false;
 		operation?.abort();
 		briefId = record.id;
 		brief = { ...newBriefDraft(), ...$state.snapshot(record.data) };
+		briefSavedSnapshot = JSON.stringify($state.snapshot(brief));
 		sourceQuotes = brief.analysis?.quotes ?? [];
 		sourceTitles = brief.analysis?.titles ?? [];
 		sourceChunks = brief.analysis?.chunks ?? [];
@@ -470,11 +483,14 @@
 		importPreview = null;
 		demoPreview = null;
 		void restoreHousePrompt();
+		return true;
 	}
 	function newSourceBrief() {
+		if (!canReplaceBrief()) return;
 		operation?.abort();
 		briefId = '';
 		brief = newBriefDraft();
+		briefSavedSnapshot = JSON.stringify($state.snapshot(brief));
 		housePrompt = '';
 		fieldUndo = null;
 		importPreview = null;
@@ -597,6 +613,11 @@
 		briefId = record.id;
 		brief.name = record.data.name;
 		brief.analysis = record.data.analysis;
+		briefSavedSnapshot = JSON.stringify({
+			...data,
+			name: record.data.name,
+			analysis: record.data.analysis
+		});
 		sourceFingerprint = fingerprint;
 		sourceChunks = chunks;
 		sourceQuotes = quotes;
@@ -1008,7 +1029,7 @@
 		if (!selectedComposition) return;
 		const composition = selectedComposition;
 		const source = library.records.briefs.find((record) => record.id === composition.data.briefId);
-		if (source && source.id !== briefId) chooseBrief(source);
+		if (source && source.id !== briefId && !chooseBrief(source)) return;
 		parentCompositionId = composition.id;
 		brief.hook = composition.data.headline;
 		brief.kitId = composition.data.kitId;

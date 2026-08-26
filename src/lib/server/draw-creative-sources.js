@@ -125,20 +125,50 @@ function validateTitles(output, evidence) {
 	});
 }
 
+const metadataCancelled = () =>
+	privateJson(
+		{
+			code: 'metadata_cancelled',
+			error: 'Video metadata lookup cancelled. Nothing was saved or attached.'
+		},
+		{ status: 409 }
+	);
+
+/** Keep cancellation active while reading the bounded response, not just until headers arrive.
+ * @param {Response} response @param {number} limit @param {AbortSignal} signal
+ */
+async function readVideoMetadata(response, limit, signal) {
+	signal.throwIfAborted();
+	const bytes = await readCreativeBody(
+		{
+			headers: response.headers,
+			body: response.body?.pipeThrough(new TransformStream(), { signal }) ?? null
+		},
+		limit
+	);
+	signal.throwIfAborted();
+	return JSON.parse(new TextDecoder().decode(bytes));
+}
+
 /**
  * Fixed YouTube endpoint and allowlisted params only; never fetch a user-supplied URL.
  * @param {string} key @param {'channels'|'playlistItems'|'videos'} path @param {Record<string,string>} params @param {typeof fetch} fetcher
+ * @param {AbortSignal} [requestSignal] Exact-video requests only; channel behavior is unchanged.
  */
-async function youtubeRequest(key, path, params, fetcher) {
+async function youtubeRequest(key, path, params, fetcher, requestSignal) {
 	const url = new URL(`https://www.googleapis.com/youtube/v3/${path}`);
 	for (const [name, value] of Object.entries(params)) url.searchParams.set(name, value);
 	url.searchParams.set('key', key);
+	const timeout = AbortSignal.timeout(15_000);
+	const signal = requestSignal ? AbortSignal.any([requestSignal, timeout]) : timeout;
 	try {
+		signal.throwIfAborted();
 		const response = await fetcher(url, {
-			signal: AbortSignal.timeout(15_000),
+			signal,
 			redirect: 'error',
 			headers: { Accept: 'application/json' }
 		});
+		if (requestSignal) signal.throwIfAborted();
 		if (!response.ok)
 			return privateJson(
 				{
@@ -150,8 +180,11 @@ async function youtubeRequest(key, path, params, fetcher) {
 				},
 				{ status: response.status === 404 ? 404 : 503 }
 			);
-		return JSON.parse(new TextDecoder().decode(await readCreativeBody(response, 1_000_000)));
+		return requestSignal
+			? await readVideoMetadata(response, 1_000_000, signal)
+			: JSON.parse(new TextDecoder().decode(await readCreativeBody(response, 1_000_000)));
 	} catch {
+		if (requestSignal?.aborted) return metadataCancelled();
 		return privateJson(
 			{
 				code: 'youtube_unavailable',
@@ -165,19 +198,22 @@ async function youtubeRequest(key, path, params, fetcher) {
 /**
  * No-key metadata path on YouTube's registered oEmbed endpoint (https://oembed.com/providers.json).
  * Never follow returned HTML/author URLs or use this path after a configured Data API failure.
- * @param {{videoId:string,url:string}} source @param {typeof fetch} fetcher
+ * @param {{videoId:string,url:string}} source @param {typeof fetch} fetcher @param {AbortSignal} requestSignal
  */
-async function videoOEmbed(source, fetcher) {
+async function videoOEmbed(source, fetcher, requestSignal) {
 	const url = new URL('https://www.youtube.com/oembed');
 	url.searchParams.set('format', 'json');
 	url.searchParams.set('url', source.url);
+	const signal = AbortSignal.any([requestSignal, AbortSignal.timeout(15_000)]);
 	let result;
 	try {
+		signal.throwIfAborted();
 		const response = await fetcher(url, {
 			redirect: 'error',
-			signal: AbortSignal.timeout(15_000),
+			signal,
 			headers: { Accept: 'application/json' }
 		});
+		signal.throwIfAborted();
 		if ([401, 403, 404].includes(response.status))
 			return privateJson(
 				{
@@ -188,8 +224,9 @@ async function videoOEmbed(source, fetcher) {
 				{ status: 404 }
 			);
 		if (!response.ok) throw new Error('Metadata unavailable');
-		result = JSON.parse(new TextDecoder().decode(await readCreativeBody(response, 64_000)));
+		result = await readVideoMetadata(response, 64_000, signal);
 	} catch {
+		if (requestSignal.aborted) return metadataCancelled();
 		return privateJson(
 			{
 				code: 'youtube_unavailable',
@@ -260,6 +297,8 @@ async function videoOEmbed(source, fetcher) {
  * @param {any} event @param {any} body @param {typeof fetch} fetcher
  */
 async function videoLookup(event, body, fetcher) {
+	const requestSignal = event.request.signal;
+	if (requestSignal.aborted) return metadataCancelled();
 	let source;
 	try {
 		if (!exactKeys(body, ['action', 'video']) || typeof body.video !== 'string')
@@ -278,7 +317,7 @@ async function videoLookup(event, body, fetcher) {
 		);
 	}
 	const key = event.platform?.env?.YOUTUBE_API_KEY;
-	if (typeof key !== 'string' || !key.trim()) return videoOEmbed(source, fetcher);
+	if (typeof key !== 'string' || !key.trim()) return videoOEmbed(source, fetcher, requestSignal);
 	const result = await youtubeRequest(
 		key,
 		'videos',
@@ -288,7 +327,8 @@ async function videoLookup(event, body, fetcher) {
 			fields:
 				'items(id,snippet(title,description,channelId,channelTitle,thumbnails,publishedAt),contentDetails(duration),status(privacyStatus))'
 		},
-		fetcher
+		fetcher,
+		requestSignal
 	);
 	if (result instanceof Response) return result;
 	if (!Array.isArray(result?.items) || result.items.length > 1)
