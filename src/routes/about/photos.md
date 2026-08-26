@@ -32,7 +32,7 @@ Select any preview to open the full-size original.
   </a>
 </div>
 
-### Speaking photos
+### Earlier speaking photos
 
 <div class="photo-preview-grid">
   <a class="photo-preview" href="https://pbs.twimg.com/media/GH68dQ0bkAAk7Mi?format=jpg" aria-label="Open original: Thursday Nights in AI, arms folded">

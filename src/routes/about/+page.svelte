@@ -6,32 +6,32 @@
 	const social = getPageSocialMeta('about');
 	const photos = [
 		{
-			title: 'Niseko headshot',
-			src: '/about-photos/headshot-niseko.webp',
-			href: 'https://user-images.githubusercontent.com/6764957/103350806-26d9ca80-4adc-11eb-9e53-a8ce9ca3f21f.jpeg',
-			alt: 'swyx in the snow at Niseko',
-			format: '460 × 460 · JPEG'
+			title: 'At the lectern',
+			src: '/about-photos/worlds-fair-speaking.webp',
+			href: 'https://images.pixieset.com/123558811/6c76a1739b4eabc52f657fde9713a4f4-xxlarge.jpg',
+			alt: 'swyx speaking into a microphone against blue curtains at AI Engineer World’s Fair 2026',
+			format: '1600 × 1067 · JPEG'
 		},
 		{
-			title: 'Thursday Nights in AI',
-			src: '/about-photos/thursday-with-dog.webp',
-			href: 'https://pbs.twimg.com/media/GH7eSt8a0AAhQDy?format=png',
-			alt: 'swyx smiling and holding a dog at Thursday Nights in AI',
-			format: 'Portrait · PNG'
+			title: 'Main-stage close-up',
+			src: '/about-photos/worlds-fair-main-stage.webp',
+			href: 'https://images.pixieset.com/123558811/4d6e437d525dacddd421dd54f80b82ba-xxlarge.jpg',
+			alt: 'swyx gesturing with both hands on the main stage at AI Engineer World’s Fair 2026',
+			format: '1600 × 1066 · JPEG'
 		},
 		{
-			title: 'React Miami',
-			src: '/about-photos/react-miami-stage.webp',
-			href: 'https://user-images.githubusercontent.com/6764957/164554925-e6a2791e-4c75-4d5f-8003-2932193d5b25.png',
-			alt: 'swyx presenting Temporal on stage at React Miami',
-			format: 'On stage · PNG'
+			title: 'Fireside conversation',
+			src: '/about-photos/worlds-fair-fireside.webp',
+			href: 'https://images.pixieset.com/123558811/1c7d09dc3e532093ab515a1934290380-xxlarge.jpg',
+			alt: 'swyx in an onstage fireside conversation at AI Engineer World’s Fair 2026',
+			format: '1600 × 1066 · JPEG'
 		},
 		{
-			title: 'React Advanced',
-			src: '/about-photos/react-advanced-stage.webp',
-			href: 'https://user-images.githubusercontent.com/6764957/182177069-eae41bb1-ec46-4622-9659-ec9392b5add8.png',
-			alt: 'swyx on stage for React With Hooks from Scratch at React Advanced London',
-			format: 'On stage · PNG'
+			title: 'A little guitar',
+			src: '/about-photos/worlds-fair-guitar.webp',
+			href: 'https://images.pixieset.com/123558811/aeb10950f838422b446615e625163675-xxlarge.jpg',
+			alt: 'swyx playing acoustic guitar alongside another musician at AI Engineer World’s Fair 2026',
+			format: '1600 × 1067 · JPEG'
 		}
 	];
 </script>
@@ -78,19 +78,28 @@
 		<header class="reading-prose">
 			<h2 id="press-photos">Press photos</h2>
 			<p>
-				Pictures of me you can use without asking. Open an original to save the full-size image.
+				Pictures of me you can use without asking. Recent favorites from
+				<a href="https://aiengineer.pixieset.com/worldsfair2026/">AI Engineer World’s Fair 2026</a>,
+				with headshots and older photos below.
 			</p>
 		</header>
 		<div class="press-photo-grid">
 			{#each photos as photo}
 				<figure>
-					<a href={photo.href} aria-label={`Open original: ${photo.title}`}>
-						<img src={photo.src} alt={photo.alt} width="460" height="460" loading="lazy" />
+					<a href={photo.href} aria-label={`Open full-size: ${photo.title}`}>
+						<img
+							src={photo.src}
+							alt={photo.alt}
+							width="720"
+							height="480"
+							loading="lazy"
+							decoding="async"
+						/>
 					</a>
 					<figcaption>
 						<strong>{photo.title}</strong>
 						<span>{photo.format}</span>
-						<a href={photo.href}>Open original ↗</a>
+						<a href={photo.href}>Open full-size ↗</a>
 					</figcaption>
 				</figure>
 			{/each}
@@ -233,8 +242,8 @@
 		display: block;
 		width: 100%;
 		height: auto;
-		aspect-ratio: 1;
-		object-fit: cover;
+		aspect-ratio: 3 / 2;
+		object-fit: contain;
 		object-position: center;
 	}
 
