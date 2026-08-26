@@ -3,9 +3,50 @@ import test from 'node:test';
 
 import { DRAW_PRESETS } from '../src/lib/draw-presets.js';
 import { DRAW_REFERENCE_PRESETS } from '../src/lib/draw-reference-presets.js';
+import { LS_DIAGRAM, diagramFiles } from '../src/lib/draw-diagram-kit.js';
 
 const SUPPORTED_ELEMENT_TYPES = new Set(['arrow', 'ellipse', 'rectangle', 'text']);
 const HAND_DRAWN_FONT = 5;
+
+test('data-agent LS edition retains source detail, numbered stages and self-contained logos', () => {
+	const shapes = DRAW_REFERENCE_PRESETS.find(
+		(p) => p.id === 'bytebytego-data-agent'
+	).createShapes();
+	const labels = shapes.filter((s) => s.type === 'text').map((s) => s.text);
+	for (const n of ['1', '2', '3']) assert.equal(labels.filter((t) => t === n).length, 1);
+	for (const term of [
+		'Table usage',
+		'Human',
+		'Codex',
+		'Retrieved',
+		'e.g., Org Info Lookup',
+		'e.g., Docs Search',
+		'e.g., DAG Lookup',
+		'e.g., Dataset Metadata',
+		'GPT-5.5',
+		'Airflow',
+		'Spark'
+	])
+		assert.ok(
+			labels.some((t) => t.includes(term)),
+			term
+		);
+	assert.equal(
+		shapes.filter((s) => s.type === 'rectangle' && s.strokeStyle === 'dashed').length,
+		4
+	);
+	assert.ok(
+		shapes.some((s) => s.backgroundColor === LS_DIAGRAM.pale && s.strokeColor === LS_DIAGRAM.purple)
+	);
+	assert.ok(!shapes.some((s) => s.backgroundColor === '#c5eee0'));
+	assert.ok(shapes.filter((s) => s.type === 'arrow' && s.roundness?.type === 2).length >= 8);
+	const files = diagramFiles(shapes);
+	assert.equal(files.length, 7);
+	assert.ok(
+		JSON.stringify({ elements: shapes, files }).length < 200_000,
+		'logos must not bloat the stored scene'
+	);
+});
 
 test('drawing presets expose the complete named visual-thinking catalog', () => {
 	assert.deepEqual(
@@ -174,13 +215,13 @@ test('reference reconstructions retain complete mechanisms, source links and nat
 			'G′'
 		],
 		'bytebytego-data-agent': [
-			'OFFLINE DATA PREP',
-			'RUNTIME WORKFLOW',
-			'Similarity search',
-			'Assembled context',
+			'Offline Data Prep',
+			'Runtime Workflow',
+			'Similarity\nSearch',
+			'Assembled\nContext',
 			'Runtime',
-			'LLM',
-			'TOOLS'
+			'GPT-5.5',
+			'Tools'
 		]
 	};
 	for (const preset of DRAW_REFERENCE_PRESETS) {
@@ -200,14 +241,14 @@ test('reference reconstructions retain complete mechanisms, source links and nat
 			'source travels with the native scene'
 		);
 		for (const s of shapes) {
-			assert.ok(['rectangle', 'ellipse', 'line', 'arrow', 'text'].includes(s.type));
+			assert.ok(['rectangle', 'ellipse', 'line', 'arrow', 'text', 'image'].includes(s.type));
 			assert.equal(s.roughness, 0);
 			assert.ok(Number.isFinite(s.x) && Number.isFinite(s.y));
 			if (s.type === 'arrow') {
 				assert.ok(ids.has(s.start?.id), 'edge starts at an editable native node');
 				assert.ok(ids.has(s.end?.id), 'edge ends at an editable native node');
 			}
-			if (s.type === 'text') assert.equal(s.fontFamily, 2);
+			if (s.type === 'text') assert.ok([2, 7].includes(s.fontFamily));
 		}
 	}
 });

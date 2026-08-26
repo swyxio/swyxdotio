@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { readFile, writeFile } from 'node:fs/promises';
 import { DRAW_REFERENCE_PRESETS } from '../src/lib/draw-reference-presets.js';
+import { DRAW_DIAGRAM_LOGOS } from '../src/lib/draw-diagram-kit.js';
 
 /** @typedef {{ isDeleted?: boolean, text?: string, roughness?: number }} DrawingElement */
 
@@ -24,10 +25,19 @@ async function illustrationElements(page) {
 	});
 }
 
+/** Study geometry/history tests use fresh local persistence, not a shared fixture tenant.
+ * @param {import('@playwright/test').Page} page */
+async function isolateStudyStorage(page) {
+	await page.route('**/tools/api/draw/pages**', (route) =>
+		route.fulfill({ status: 503, json: { error: 'Local-only diagram study test' } })
+	);
+}
+
 for (const preset of DRAW_REFERENCE_PRESETS) {
 	test(`reference preset ${preset.id} is native, bound, undoable and exportable`, async ({
 		page
 	}, testInfo) => {
+		await isolateStudyStorage(page);
 		/** @type {string[]} */
 		const inference = [];
 		page.on('request', (request) => {
@@ -47,7 +57,27 @@ for (const preset of DRAW_REFERENCE_PRESETS) {
 		await expect.poll(async () => (await illustrationElements(page)).length).toBeGreaterThan(60);
 		const elements = await illustrationElements(page);
 		const ids = new Set(elements.map((item) => item.id));
-		expect(elements.every((item) => item.type !== 'image')).toBe(true);
+		const imageLayers = elements.filter((item) => item.type === 'image');
+		if (preset.id === 'bytebytego-data-agent') {
+			expect(imageLayers).toHaveLength(7);
+			expect(
+				imageLayers.every((item) => DRAW_DIAGRAM_LOGOS.some((a) => a.id === item.fileId))
+			).toBe(true);
+			expect(elements.filter((item) => ['1', '2', '3'].includes(item.text))).toHaveLength(3);
+			for (const [label, cx, y1, y2] of /** @type {Array<[string,number,number,number]>} */ ([
+				['Offline Data Prep', 637.5, 99, 142],
+				['Runtime Workflow', 640.5, 558, 601],
+				['1', 208, 945, 991],
+				['2', 192, 600, 646],
+				['3', 836, 1073, 1119],
+				['Runtime', 606.5, 1108, 1200]
+			])) {
+				const text = elements.find((item) => item.type === 'text' && item.text === label);
+				expect(text.x + text.width / 2).toBeCloseTo(cx, 1);
+				expect(text.y).toBeGreaterThanOrEqual(y1);
+				expect(text.y + text.height).toBeLessThanOrEqual(y2);
+			}
+		} else expect(imageLayers).toHaveLength(0);
 		expect(elements.some((item) => item.link === preset.source?.url)).toBe(true);
 		for (const edge of elements.filter((item) => item.type === 'arrow')) {
 			expect(ids.has(edge.startBinding?.elementId)).toBe(true);
@@ -84,7 +114,8 @@ for (const preset of DRAW_REFERENCE_PRESETS) {
 			await (await downloading).saveAs(testInfo.outputPath(`${preset.id}.${format.toLowerCase()}`));
 		}
 		const svg = await readFile(testInfo.outputPath(`${preset.id}.svg`), 'utf8');
-		expect(svg).not.toContain('<image');
+		if (preset.id === 'bytebytego-data-agent') expect(svg).toContain('<image');
+		else expect(svg).not.toContain('<image');
 		expect(svg).toContain('ByteByteGo');
 		expect(inference).toEqual([]);
 		await writeFile(
@@ -95,16 +126,85 @@ for (const preset of DRAW_REFERENCE_PRESETS) {
 				source: 'https://swyx.io/tools/draw',
 				elements: restored,
 				appState: { viewBackgroundColor: '#ffffff', gridSize: null },
-				files: {}
+				files: await page.evaluate(() => {
+					const key = document.querySelector('.draw-canvas')?.getAttribute('data-storage-key');
+					return JSON.parse(localStorage.getItem(key ?? '') ?? '{}').files ?? {};
+				})
 			})
 		);
 	});
 }
 
 for (const mode of ['thinking', 'thumbnails', 'experiment']) {
+	test(`diagram library logos and icons work in ${mode} on mobile with native undo and reload`, async ({
+		page
+	}) => {
+		await isolateStudyStorage(page);
+		/** @type {string[]} */ const unwanted = [];
+		page.on('request', (r) => {
+			if (
+				/\/api\/draw\/(agent|generate|image)/.test(r.url()) ||
+				/raw\.githubusercontent|simpleicons|devicon/.test(r.url())
+			)
+				unwanted.push(r.url());
+		});
+		await page.setViewportSize({ width: 390, height: 844 });
+		await page.goto('/tools/draw');
+		await page.getByRole('button', { name: 'Choose drawing mode and tools', exact: true }).click();
+		await page
+			.getByRole('combobox', { name: 'Starting experience', exact: true })
+			.selectOption(mode);
+		await page.keyboard.press('Escape');
+		await openDrawingTemplates(page, 'Components');
+		await page
+			.getByRole('textbox', { name: 'Search UI components', exact: true })
+			.fill('Latent Space logo');
+		const insert = page.getByRole('button', {
+			name: 'Insert Latent Space logo component',
+			exact: true
+		});
+		await expect(insert.locator('img')).toBeVisible();
+		await insert.click();
+		await expect
+			.poll(async () => (await illustrationElements(page)).filter((s) => s.type === 'image').length)
+			.toBe(1);
+		const logoElements = await illustrationElements(page);
+		await page.getByRole('button', { name: 'Close', exact: true }).click();
+		await page.getByRole('button', { name: 'Undo', exact: true }).click();
+		await expect.poll(async () => (await illustrationElements(page)).length).toBe(0);
+		await page.getByRole('button', { name: 'Redo', exact: true }).click();
+		await expect
+			.poll(async () => (await illustrationElements(page)).length)
+			.toBe(logoElements.length);
+		await page.reload();
+		await expect
+			.poll(async () => (await illustrationElements(page)).length)
+			.toBe(logoElements.length);
+		const restoredLogo = await illustrationElements(page);
+		const content = (/** @type {any[]} */ items) =>
+			items.map((s) => [s.id, s.type, s.x, s.y, s.width, s.height, s.text, s.fileId]);
+		expect(content(restoredLogo)).toEqual(content(logoElements));
+		const bytes = await page.evaluate(() => {
+			const key = document.querySelector('.draw-canvas')?.getAttribute('data-storage-key');
+			const s = JSON.parse(localStorage.getItem(key ?? '') ?? '{}');
+			return Object.values(s.files ?? {}).map((f) => f.dataURL);
+		});
+		expect(bytes).toEqual([DRAW_DIAGRAM_LOGOS.find((a) => a.slug === 'latent-space')?.dataURL]);
+		await openDrawingTemplates(page, 'Components');
+		await page.getByRole('textbox', { name: 'Search UI components', exact: true }).fill('database');
+		await page.getByRole('button', { name: 'Insert Database component', exact: true }).click();
+		await expect
+			.poll(async () => (await illustrationElements(page)).length)
+			.toBeGreaterThan(logoElements.length + 2);
+		const current = await illustrationElements(page);
+		for (const original of restoredLogo)
+			expect(current.find((s) => s.id === original.id)).toEqual(original);
+		expect(unwanted).toEqual([]);
+	});
 	test(`reference presets remain reachable in ${mode} on mobile without replacing artwork`, async ({
 		page
 	}) => {
+		await isolateStudyStorage(page);
 		await page.setViewportSize({ width: 390, height: 844 });
 		await page.goto('/tools/draw');
 		await page.getByRole('button', { name: 'Choose drawing mode and tools', exact: true }).click();

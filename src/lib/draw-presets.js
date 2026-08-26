@@ -6,7 +6,7 @@ import { DRAW_REFERENCE_PRESETS } from './draw-reference-presets.js';
 /**
  * @typedef {{
  *   id: string,
- *   type: 'rectangle' | 'ellipse' | 'text' | 'arrow' | 'line',
+ *   type: 'rectangle' | 'ellipse' | 'text' | 'arrow' | 'line' | 'image',
  *   x: number,
  *   y: number,
  *   width?: number,
@@ -28,6 +28,9 @@ import { DRAW_REFERENCE_PRESETS } from './draw-reference-presets.js';
  *   startArrowhead?: 'arrow' | null,
  *   endArrowhead?: 'arrow' | 'triangle' | null,
  *   groupIds?: string[],
+ *   fileId?: string,
+ *   scale?: [number, number],
+ *   status?: 'saved',
  *   link?: string,
  *   roundness?: { type: number } | null
  * }} PresetShape

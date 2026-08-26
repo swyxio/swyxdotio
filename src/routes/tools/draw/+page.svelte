@@ -1,4 +1,5 @@
 <script>
+	import { diagramFiles } from '$lib/draw-diagram-kit.js';
 	import { onMount, tick } from 'svelte';
 	import { recordToolActivity } from '$lib/tools-activity-client.js';
 	import { drawingStorageKey, TOOLS_ACCOUNT_EVENT_KEY } from '$lib/draw-account.js';
@@ -1674,7 +1675,10 @@
 		// Excalidraw measures text synchronously: wait for its registered font so
 		// first-use diagrams don't retain fallback-font widths and clipped labels.
 		try {
-			await document.fonts.load('23px Excalifont');
+			await Promise.all([
+				document.fonts.load('23px Excalifont'),
+				document.fonts.load('42px "Lilita One"')
+			]);
 		} catch {
 			editor.setToast({ message: 'The drawing font could not load. Please try again.' });
 			return false;
@@ -1693,6 +1697,9 @@
 			x: (shape.x ?? 0) + offsetX,
 			y: (shape.y ?? 0) + offsetY
 		}));
+		// Files are bundled locally and retained by Excalidraw's existing undo/save path.
+		const files = diagramFiles(skeletons);
+		if (files.length) editor.addFiles(files);
 		const converted = convertElements(
 			/** @type {import('@excalidraw/excalidraw/data/transform').ExcalidrawElementSkeleton[]} */ (
 				skeletons
@@ -1735,6 +1742,8 @@
 		const centerY = state.height / (2 * state.zoom.value) - state.scrollY;
 		const skeletons = createUiComponent(componentId, centerX - 140, centerY - 65);
 		if (!skeletons.length) return;
+		const files = diagramFiles(skeletons);
+		if (files.length) editor.addFiles(files);
 		const converted = convertElements(
 			/** @type {import('@excalidraw/excalidraw/data/transform').ExcalidrawElementSkeleton[]} */ (
 				skeletons
@@ -2850,8 +2859,8 @@
 					<div class="preset-heading reference-heading">
 						<strong>Alex Xu / ByteByteGo studies</strong>
 						<span
-							>One click inserts the complete editable diagram. Rebuilt glyphs and wording; no
-							animation.</span
+							>One click inserts an editable study. Data agent uses Latent Space colors and
+							authentic logo layers; other studies use simplified glyphs.</span
 						>
 					</div>
 					{#each matchingPresets.filter((preset) => preset.source) as preset (preset.id)}
@@ -3000,8 +3009,8 @@
 		{:else if workspaceSection === 'components'}
 			<section id="drawing-components" class="workspace-content" aria-label="UI components">
 				<div class="component-heading">
-					<strong>Illustrate or wireframe</strong>
-					<span>Editable native pieces. No image generation.</span>
+					<strong>Icons, logos & components</strong>
+					<span>Latent Space diagram icons, bundled brand marks and wireframes. No AI needed.</span>
 				</div>
 				<fieldset class="illustration-brushes">
 					<legend>Illustration tools · new strokes only</legend>
@@ -3049,7 +3058,7 @@
 				<input
 					class="component-search"
 					aria-label="Search UI components"
-					placeholder="Search components…"
+					placeholder="Try logo, database, Slack…"
 					bind:value={componentQuery}
 				/>
 				{#if filteredComponents.length === 0}
@@ -3066,6 +3075,15 @@
 								aria-label="Insert {component.title} component"
 								onclick={() => insertUiComponent(component.id)}
 							>
+								{#if component.preview}<img
+										class="component-thumbnail"
+										style:background={component.previewBackground ?? '#ffffff'}
+										src={component.preview}
+										alt=""
+										loading="lazy"
+										width="64"
+										height="64"
+									/>{/if}
 								<strong>{component.title}</strong>
 								<span>{component.description}</span>
 							</button>
@@ -3973,6 +3991,20 @@
 	.command-option strong {
 		font-size: 12px;
 		font-weight: 550;
+	}
+	.component-option:has(.component-thumbnail) {
+		grid-template-columns: 52px 1fr;
+		column-gap: 10px;
+		min-height: 70px;
+	}
+	.component-thumbnail {
+		grid-row: 1 / 3;
+		width: 48px;
+		height: 48px;
+		object-fit: contain;
+		align-self: center;
+		padding: 4px;
+		border-radius: 5px;
 	}
 
 	.component-option span,
