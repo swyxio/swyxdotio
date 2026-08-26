@@ -186,6 +186,12 @@
 		</div>
 	{/if}
 	<div class="workshop-scene"><ToolsCabinet isOwner={!!data.user?.isOwner} /></div>
+	<p class="calendar-disclosure">
+		The separately hosted <a href="https://cal.swyx.io/about">swyxcal</a> scheduler uses this Google
+		app’s consent configuration. Its invited team connects Google calendars in a separate flow;
+		ordinary Tools sign-in does not grant calendar access. Scheduler setup is in progress and new
+		bookings are paused. <a href="/tools/privacy#swyxcal">Calendar access and privacy →</a>
+	</p>
 	{#if !data.user?.isOwner}<details class="workshop-rules">
 			<summary
 				><span>The rules of the workshop</span><span class="rules-hint"
@@ -204,6 +210,17 @@
 </section>
 
 <style>
+	.calendar-disclosure {
+		max-width: 52rem;
+		margin: 1.5rem auto;
+		font-size: 0.8rem;
+		line-height: 1.7;
+		color: var(--page-muted);
+	}
+	.calendar-disclosure a {
+		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
 	.tools {
 		--site-max-width: 1160px;
 		padding-block: 1.2rem 0.5rem;

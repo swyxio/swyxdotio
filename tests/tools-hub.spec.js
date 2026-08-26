@@ -69,6 +69,43 @@ test('guest has three working direct links, honest disclosure, and a safe Google
 	await expect(page.getByRole('textbox', { name: 'Write anything' })).toBeVisible();
 });
 
+test('public calendar disclosures distinguish Tools login and preserve existing privacy details', async ({
+	page
+}) => {
+	await page.goto('/tools');
+	const disclosure = page.locator('.calendar-disclosure');
+	await expect(disclosure).toContainText('ordinary Tools sign-in does not grant calendar access');
+	await expect(disclosure).toContainText('new bookings are paused');
+	await expect(page.getByRole('navigation', { name: 'Your tools' }).getByRole('link')).toHaveCount(
+		3
+	);
+	await disclosure.getByRole('link', { name: 'Calendar access and privacy' }).click();
+	await expect(page).toHaveURL(/\/tools\/privacy#swyxcal$/);
+	const calendarPolicy = page.getByRole('region', {
+		name: 'swyxcal: separately authorized Google Calendar access'
+	});
+	for (const scope of [
+		'calendar.calendarlist.readonly',
+		'calendar.events.freebusy',
+		'calendar.events.owned',
+		'calendar.events.readonly'
+	]) {
+		await expect(calendarPolicy.locator('code').filter({ hasText: scope })).toBeVisible();
+	}
+	await expect(calendarPolicy).toContainText('encrypted calendar refresh tokens');
+	await expect(calendarPolicy).toContainText('do not use the Tools activity logs’ 30-day expiry');
+	await expect(
+		calendarPolicy.getByRole('link', { name: 'swyxcal privacy policy' })
+	).toHaveAttribute('href', 'https://cal.swyx.io/privacy');
+	await expect(page.locator('article')).toContainText(
+		'For this Tools/Draw login flow, Google access tokens are not retained after sign-in.'
+	);
+	await expect(page.getByRole('heading', { name: 'Funded AI: limits and logging' })).toBeVisible();
+	await expect(page.locator('article')).toContainText(
+		'Signing out removes the sign-in cookie; it does not delete saved drawings or device caches.'
+	);
+});
+
 test('account disclosure retains identity, dismisses conventionally, and adapts to role changes', async ({
 	page
 }) => {
