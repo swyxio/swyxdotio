@@ -1,5 +1,5 @@
 import { renderMarkdown } from '$lib/markdown';
-import content from './content.md?raw';
+import content from './archive.md?raw';
 import photos from './photos.md?raw';
 
 // Static page: rendered once at build time.

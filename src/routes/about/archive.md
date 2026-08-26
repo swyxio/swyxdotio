@@ -1,10 +1,12 @@
-## Current work
+### Earlier work and writing
+
+This is the previous About text, preserved for its links and history. The bios below retain their original dates; they are not current introductions.
 
 I work on [Latent Space](https://www.latent.space/), [AI Engineer](https://ai.engineer), and [Cognition](/cognition) in San Francisco.
 
 I am also a frequent writer and speaker, best known for [the Rise of the AI Engineer](https://www.latent.space/p/ai-engineer), the [Self Provisioning Runtime](/self-provisioning-runtime), the [Third Age of JS](/js-third-age), and the [End of Localhost](https://dx.tips/the-end-of-localhost). On the nontechnical side, there's the [Learn in Public](/learn-in-public) movement and the now free and open-source [Coding Career Handbook](https://learninpublic.org).
 
-## My story
+### Earlier community notes
 
 I am a [developer](https://github.com/swyxio), [founder](https://freecodecamp.libsyn.com/90-shawn-swyx-wang-from-dev-to-ai-founder), and [angel investor](/portfolio), primarily active in the AI and devtools community. I am a [GitHub Star](https://stars.github.com/) and [Stripe Community Expert](https://twitter.com/swyx/status/1392016498944741376), helped run [the React subreddit for over 200,000 developers](/moderating-rreactjs), and grew [Svelte Society from 0 to over 15,000 developers](https://twitter.com/swyx/status/1411071913548414976) ([writeup](/starting-dev-community-meetup)).
 
@@ -28,7 +30,7 @@ This is an archived [Now page](https://nownownow.com/about) update, not a curren
 
 </details>
 
-## Speaker bio
+### Speaker bio · January 2025
 
 <p class="bio-date">January 2025 version · Please confirm titles before reusing this bio.</p>
 
@@ -36,7 +38,7 @@ swyx (Shawn Wang) is Editor of Latent.Space. As a developer experience leader an
 
 swyx has started and run communities for hundreds of thousands of developers, like [the Latent Space Paper Club](https://www.latent.space/p/paperclub), [Svelte Society](https://twitter.com/sveltesociety/), [/r/reactjs](/moderating-rreactjs), and the [React TypeScript Cheatsheet](https://github.com/typescript-cheatsheets/react). His main platform [Latent Space](https://www.latent.space/) covers [the Rise of the AI Engineer](https://www.latent.space/p/ai-engineer) in podcast, newsletter, and YouTube formats.
 
-### Selected talks
+### Earlier talk selection
 
 - [Engineering AI Agents](/ai-eng-agents)
 - [The Hooks talk](/hooks)

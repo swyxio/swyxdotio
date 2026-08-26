@@ -12,6 +12,7 @@ test('defines metadata for every public non-article page', () => {
 	assert.deepEqual(Object.keys(PAGE_SOCIAL_CARDS), [
 		'home',
 		'about',
+		'now',
 		'ideas',
 		'podcasts',
 		'portfolio',
