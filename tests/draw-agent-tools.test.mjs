@@ -242,6 +242,13 @@ test('essay-ready duplication preserves bound labels and internal arrows without
 		appState: { selectedElementIds: { a: true, b: true, edge: true } }
 	});
 	const before = structuredClone(originals);
+	const convertElements = context.convertElements;
+	context.convertElements = (shapes) =>
+		convertElements(shapes).map((shape) =>
+			shape.type === 'text'
+				? { ...shape, x: shape.x - shape.width / 2, y: shape.y - shape.height / 2 }
+				: shape
+		);
 	const result = await executeDrawingAgentCommand(['duplicate', '--dx', '600'], context);
 	const all = context.editor.getSceneElements();
 	assert.deepEqual(all.slice(0, 4), before);
@@ -254,6 +261,10 @@ test('essay-ready duplication preserves bound labels and internal arrows without
 	assert.equal(a.groupIds[0], b.groupIds[0]);
 	assert.notEqual(a.groupIds[0], 'group');
 	assert.equal(a.x, 600);
+	assert.equal(label.x, before[1].x + 600);
+	assert.equal(label.y, before[1].y + 24);
+	assert.equal(label.width, before[1].width);
+	assert.equal(label.height, before[1].height);
 	assert.equal(scenes.at(-1).captureUpdate, 'immediately');
 });
 

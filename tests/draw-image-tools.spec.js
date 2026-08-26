@@ -325,7 +325,26 @@ test('the selected image chooser stays compact and never stretches previews on n
 	await expect(toolbox.getByRole('combobox', { name: 'Background removal model' })).toHaveCount(0);
 	const cloudBounds = await toolbox.boundingBox();
 	if (!cloudBounds) throw new Error('The cloud image toolbox is not visible.');
-	expect(cloudBounds.height).toBeLessThan(430);
+	// The shared composer can use the available height, while leaving both
+	// native toolbar and bottom canvas controls accessible.
+	expect(cloudBounds.y).toBeGreaterThanOrEqual(126);
+	expect(cloudBounds.y + cloudBounds.height).toBeLessThanOrEqual(844 - 68);
+	const signIn = toolbox.getByRole('link', { name: 'Sign in to generate' });
+	await signIn.scrollIntoViewIfNeeded();
+	await expect(signIn).toBeInViewport();
+	expect(
+		await signIn.evaluate((element) => {
+			let scrollers = 0;
+			for (let node = element.parentElement; node; node = node.parentElement) {
+				if (
+					/(auto|scroll)/.test(getComputedStyle(node).overflowY) &&
+					node.scrollHeight > node.clientHeight
+				)
+					scrollers++;
+			}
+			return scrollers;
+		})
+	).toBe(1);
 });
 
 test('model discovery filters workflows and dismisses cleanly without losing a batch', async ({
@@ -445,13 +464,13 @@ test('the floating image toolbox can be dragged without losing the selected tool
 	if (!start || !handle) throw new Error('The draggable image toolbox is not visible.');
 	await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2);
 	await page.mouse.down();
-	await page.mouse.move(handle.x + handle.width / 2 + 110, handle.y + handle.height / 2 + 90, {
+	await page.mouse.move(handle.x + handle.width / 2 - 110, handle.y + handle.height / 2 + 90, {
 		steps: 6
 	});
 	await page.mouse.up();
 	const moved = await toolbox.boundingBox();
 	if (!moved) throw new Error('The toolbox disappeared after being dragged.');
-	expect(moved.x).toBeGreaterThan(start.x + 90);
+	expect(moved.x).toBeLessThan(start.x - 90);
 	expect(moved.y).toBeGreaterThan(start.y + 70);
 	await expect(toolbox.getByRole('button', { name: 'Magic Select', exact: true })).toHaveAttribute(
 		'aria-pressed',
@@ -471,9 +490,9 @@ test('reselecting an image restores the AI prompt, selected workflow, and drafte
 	const canvas = page.locator('.draw-canvas canvas.excalidraw__canvas.interactive');
 	const bounds = await canvas.boundingBox();
 	if (!bounds) throw new Error('The drawing canvas is not visible.');
-	await canvas.click({ position: { x: bounds.width - 40, y: bounds.height - 120 }, force: true });
+	await canvas.click({ position: { x: bounds.width / 2, y: bounds.height - 120 } });
 	await expect(toolbox).not.toBeVisible();
-	await canvas.click({ position: { x: 360, y: 280 }, force: true });
+	await canvas.click({ position: { x: 360, y: 280 } });
 
 	await expect(toolbox).toBeVisible();
 	await expect(toolbox.getByRole('button', { name: 'AI prompt', exact: true })).toHaveAttribute(

@@ -463,6 +463,12 @@ export async function executeDrawingAgentCommand(args, context) {
 					? { ...value, elementId: copiedIds.get(value.elementId) }
 					: null;
 			return context.updateElement(copy, {
+				// The skeleton converter lays out aligned text again. A duplicate
+				// already has measured native geometry, so retain it exactly.
+				x: original.x + dx,
+				y: original.y + dy,
+				width: original.width,
+				height: original.height,
 				groupIds: groups,
 				frameId: null,
 				boundElements:

@@ -348,13 +348,12 @@ test('essay workflows prepare requests, protect drafts and preserve bound copies
 	const copies = after.filter((element) => !originalIds.has(element.id));
 	const copyIds = new Set(copies.map((element) => element.id));
 	expect(copies.length).toBe(inserted.length);
-	for (const original of inserted) {
-		expect(
-			copies.some(
-				(copy) =>
-					copy.type === original.type && copy.x === original.x + 1300 && copy.y === original.y
-			)
-		).toBe(true);
+	for (const [index, original] of inserted.entries()) {
+		const copy = copies[index];
+		expect(copy.type).toBe(original.type);
+		expect(copy.x).toBeCloseTo(original.x + 1300, 6);
+		expect(copy.y).toBeCloseTo(original.y, 6);
+		if (original.type === 'text') expect(copy.text).toBe(original.text);
 	}
 	for (const edge of copies.filter((element) => element.type === 'arrow')) {
 		expect(copyIds.has(edge.startBinding.elementId)).toBe(true);
