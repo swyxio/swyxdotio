@@ -51,9 +51,15 @@ resume. Keep the directory private because it includes unpublished drafts and
 administrative metadata. This backs up the current R2 inventory, not the
 missing original Transistor staging manifests or analytics exports.
 
-The dedicated `wrangler.podcast-redirects.toml` deploy target restores
-`mixtape.swyx.io` as a Cloudflare Custom Domain and sends all legacy website
-paths to the Mixtape archive. It does not redeploy the main website:
+The dedicated `wrangler.podcast-redirects.toml` deploy target serves three
+Cloudflare Custom Domains and sends every legacy website path to its matching
+archive. It does not redeploy the main website:
+
+| Transistor website | Owned redirect domain | Archive section |
+| --- | --- | --- |
+| `swyx.transistor.fm` | `mixtape.swyx.io` | `/podcasts#learn-in-podcast` |
+| `temporal.transistor.fm` | `temporal.swyx.io` | `/podcasts#the-temporal-podcast` |
+| `careerchats.transistor.fm` | `careerchats.swyx.io` | `/podcasts#career-chats` |
 
 ```sh
 npx wrangler deploy --config wrangler.podcast-redirects.toml
@@ -61,8 +67,13 @@ npx wrangler deploy --config wrangler.podcast-redirects.toml
 
 Code, deployment, and live DNS/HTTP verification are separate steps. The
 Transistor-owned `temporal.transistor.fm` and `careerchats.transistor.fm`
-hostnames cannot be configured in our Cloudflare zone; their website redirect
-behavior must be configured in Transistor or arranged with Transistor support.
+hostnames cannot be configured in our Cloudflare zone. After deploying and
+verifying the owned domains, use each show's **Website > URL** settings to set
+the matching custom domain and enable **Redirect all requests to your custom
+domain**. Verify the full redirect chain, including an episode path.
+Transistor's documentation guarantees RSS redirects after cancellation, but
+does not explicitly guarantee website redirects; confirm their retention with
+support before treating the provider-owned website addresses as permanent.
 Do not substitute a JavaScript redirect for a durable provider-level 301 after
 account cancellation. Website redirects are separate from the three existing
 RSS redirects.
