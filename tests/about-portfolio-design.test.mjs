@@ -9,16 +9,16 @@ const read = (path) => readFile(new URL(path, root), 'utf8');
 test('About separates current work, story, and explicitly dated speaker bios', async () => {
 	const [source, content] = await Promise.all([
 		read('src/routes/about/+page.svelte'),
-		read('src/routes/about/content.md')
+		read('src/routes/about/archive.md')
 	]);
 	const html = await renderMarkdown(content);
-	assert.match(source, /<h1>Shawn Wang \(swyx\)<\/h1>/);
+	assert.match(source, /<h1>Hey, I’m swyx\.<\/h1>/);
 	assert.match(source, /class="reading-prose about-copy"/);
 	assert.match(source, /src="\/swyx-ski\.jpeg"/);
 	assert.doesNotMatch(source, /site-card/);
 	for (const id of ['current-work', 'my-story', 'speaker-bio']) {
 		assert.ok(source.includes(`href="#${id}"`));
-		assert.ok(html.includes(`<h2 id="${id}">`));
+		assert.ok(source.includes(`id="${id}"`));
 	}
 	assert.match(html, /January 2025 version/);
 	assert.match(html, /Please confirm titles before reusing this bio/);

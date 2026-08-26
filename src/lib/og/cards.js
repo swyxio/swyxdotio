@@ -23,6 +23,7 @@ export { OG_DESIGN_VERSION };
 const PAGE_ANNOTATIONS = {
 	home: 'learn in public',
 	about: 'hello, world',
+	now: 'a note from the present',
 	ideas: 'essays · notes · talks',
 	podcasts: 'press play',
 	portfolio: 'advisor / investor',

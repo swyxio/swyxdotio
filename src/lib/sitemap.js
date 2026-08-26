@@ -1,6 +1,6 @@
 import { SITE_URL } from './siteConfig.js';
 
-export const PUBLIC_PAGE_PATHS = ['/', '/about', '/ideas', '/podcasts', '/portfolio', '/subscribe'];
+export const PUBLIC_PAGE_PATHS = ['/', '/about', '/now', '/ideas', '/podcasts', '/portfolio', '/subscribe'];
 
 /**
  * @param {import('./types').ContentItem[]} posts

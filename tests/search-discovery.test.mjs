@@ -47,6 +47,6 @@ test('identity and portfolio pages each expose a visible primary heading', async
 	const about = await readFile(new URL('src/routes/about/+page.svelte', root), 'utf8');
 	const portfolio = await readFile(new URL('src/routes/portfolio/+page.svelte', root), 'utf8');
 
-	assert.match(about, /<h1>Shawn Wang \(swyx\)<\/h1>/);
+	assert.match(about, /<h1>Hey, I’m swyx\.<\/h1>/);
 	assert.match(portfolio, /<h1>Advising &amp; investing<\/h1>/);
 });

@@ -9,7 +9,7 @@ export const OG_DESIGN_VERSION = '1';
 
 /**
  * @typedef {'identity' | 'collection' | 'audio' | 'portfolio' | 'newsletter'} PageCardKind
- * @typedef {'home' | 'about' | 'ideas' | 'podcasts' | 'portfolio' | 'subscribe'} PageCardKey
+ * @typedef {'home' | 'about' | 'now' | 'ideas' | 'podcasts' | 'portfolio' | 'subscribe'} PageCardKey
  * @typedef {{
  *   kind: PageCardKind;
  *   title: string;
@@ -48,6 +48,14 @@ export const PAGE_SOCIAL_CARDS = {
 		label: 'About',
 		path: '/about',
 		imageAlt: 'About Shawn @swyx Wang'
+	},
+	now: {
+		kind: 'identity',
+		title: 'What swyx is doing now',
+		description: 'A dated note on what has Shawn Wang’s attention: current work, writing, and priorities.',
+		label: 'Now',
+		path: '/now',
+		imageAlt: 'What Shawn Wang is doing now'
 	},
 	ideas: {
 		kind: 'collection',
@@ -94,6 +102,7 @@ export function getPageSocialMeta(key) {
 	const documentTitles = {
 		home: SITE_TITLE,
 		about: `About | ${SITE_TITLE}`,
+		now: `Now | ${SITE_TITLE}`,
 		ideas: 'Swyx Idea Showcase',
 		podcasts: 'Podcasts · swyx',
 		portfolio: `Portfolio | ${SITE_TITLE}`,
