@@ -730,3 +730,328 @@ test('an old or incomplete companion response cannot masquerade as a complete ex
 	assert.equal(result.headers.has('Content-Disposition'), false);
 	assert.match((await result.json()).error, /complete export is unavailable/);
 });
+
+async function admittedMedia(
+	ledger,
+	userId,
+	{
+		runId = 'fanout-1',
+		jobId = crypto.randomUUID(),
+		generation,
+		model = 'flux-klein-9b-generate'
+	} = {}
+) {
+	const response = await ledgerRequest(ledger, 'admit', {
+		userId,
+		kind: 'media',
+		model,
+		estimatedReservedUsd: 0.05,
+		run: { id: runId, clientJobId: jobId, limitUsd: 2 },
+		...(generation ? { generation } : {})
+	});
+	assert.equal(response.status, 201);
+	return (await response.json()).id;
+}
+const mediaMetadata = {
+	adapter: 'fal',
+	modelMaker: 'Black Forest Labs',
+	modality: 'text-to-image',
+	estimatedCostUsd: 0.006,
+	requestedOutputs: 1,
+	referenceCount: 0,
+	width: 1024,
+	height: 1024,
+	resolution: null,
+	durationSeconds: null
+};
+
+test('generation logs correlate canonical run/job/provider IDs and preserve observed lifecycle semantics without duplicate admissions', async (context) => {
+	let now = NOW;
+	context.mock.method(Date, 'now', () => now);
+	const ledger = createTestAiLedger();
+	const id = await admittedMedia(ledger, ALICE, {
+		jobId: 'candidate-1',
+		generation: mediaMetadata
+	});
+	const otherId = await admittedMedia(ledger, ALICE, {
+		jobId: 'candidate-2',
+		generation: mediaMetadata
+	});
+	now += 2000;
+	assert.equal(
+		(
+			await ledgerRequest(ledger, 'register', {
+				userId: ALICE,
+				id,
+				model: 'flux-klein-9b-generate',
+				requestId: 'provider-job-1',
+				adapter: 'fal'
+			})
+		).status,
+		200
+	);
+	const observe = (observation) =>
+		ledgerRequest(ledger, 'generation-observe', { userId: ALICE, id, observation });
+	now += 3000;
+	await observe({ status: 'IN_PROGRESS' });
+	now += 1000;
+	await observe({ cancellation: 'requested' });
+	let result = await (
+		await logs(ledger, ALICE, { adapter: 'fal', run: 'fanout-1', modality: 'text-to-image' })
+	).json();
+	let entry = result.entries.find((e) => e.id === id);
+	assert.equal(entry.generation.runId, 'fanout-1');
+	assert.equal(entry.generation.clientJobId, 'candidate-1');
+	assert.equal(entry.generation.providerRequestId, 'provider-job-1');
+	assert.equal(entry.generation.modelMaker, 'Black Forest Labs');
+	assert.equal(entry.generation.estimatedCostUsd, 0.006);
+	assert.equal(entry.estimatedReservedUsd, 0.05);
+	assert.equal(entry.generation.providerStatus, 'IN_PROGRESS');
+	assert.equal(entry.generation.cancellation, 'requested');
+	assert.equal(entry.status, 'submitted');
+	assert.equal(entry.generation.observedElapsedMs, null);
+	assert.equal(entry.generation.observedQueueMs, 3000);
+	assert.equal(entry.generation.cancellationRequestedAt, new Date(NOW + 6000).toISOString());
+	assert.deepEqual(
+		result.breakdowns.adapters.map((r) => r.key),
+		['fal']
+	);
+	assert.deepEqual(
+		result.breakdowns.modalities.map((r) => r.key),
+		['text-to-image']
+	);
+	now += 9000;
+	await observe({ status: 'COMPLETED' });
+	await ledgerRequest(ledger, 'finish', { userId: ALICE, id, status: 'succeeded' });
+	result = await (await logs(ledger)).json();
+	entry = result.entries.find((e) => e.id === id);
+	assert.equal(entry.generation.observedElapsedMs, 15000);
+	assert.equal(result.generationRuns[0].jobs, 2);
+	assert.equal(result.generationRuns[0].pending, 1);
+	assert.equal(result.generationRuns[0].timingCoverage, 1);
+	assert.equal(result.generationRuns[0].observedElapsedMs, null);
+	assert.equal(result.generationRuns[0].estimatedCostUsd, 0.012);
+	now += 5000;
+	assert.equal((await (await observe({ status: 'COMPLETED' })).json()).duplicate, true);
+	assert.equal((await (await observe({ status: 'IN_PROGRESS' })).json()).stale, true);
+	await ledgerRequest(ledger, 'finish', { userId: ALICE, id, status: 'failed' });
+	await ledgerRequest(ledger, 'finish', { userId: ALICE, id: otherId, status: 'failed' });
+	result = await (await logs(ledger)).json();
+	entry = result.entries.find((e) => e.id === id);
+	assert.equal(entry.status, 'succeeded');
+	assert.equal(entry.generation.observedElapsedMs, 15000);
+	assert.equal(result.summary.aiRequests, 2);
+	assert.equal(result.generationRuns[0].jobs, 2);
+	assert.equal(result.generationRuns[0].timingCoverage, 2);
+	assert.equal(result.generationRuns[0].observedElapsedMs, 20000);
+	assert.equal(result.generationRuns[0].failed, 1);
+	assert.equal(
+		ledger.database.prepare('SELECT COUNT(*) AS n FROM tools_ai_generation_observations').get().n,
+		2
+	);
+	const searched = await (await logs(ledger, ALICE, { q: 'provider-job-1' })).json();
+	assert.deepEqual(
+		searched.entries.map((e) => e.id),
+		[id]
+	);
+	assert.doesNotMatch(JSON.stringify(result), new RegExp(ALICE));
+});
+
+test('same run IDs across accounts never merge; media filters and exports keep tenant scope and canonical metadata', async () => {
+	const ledger = createTestAiLedger();
+	const alice = await admittedMedia(ledger, ALICE, { generation: mediaMetadata });
+	await admittedMedia(ledger, BOB, {
+		generation: {
+			...mediaMetadata,
+			modelMaker: 'Google',
+			modality: 'image-to-video',
+			referenceCount: 1,
+			durationSeconds: 5,
+			resolution: '720p'
+		}
+	});
+	assert.equal(
+		(
+			await ledgerRequest(ledger, 'generation-observe', {
+				userId: BOB,
+				id: alice,
+				observation: { status: 'COMPLETED' }
+			})
+		).status,
+		404
+	);
+	const mine = await (await logs(ledger, ALICE, { run: 'fanout-1' })).json();
+	assert.equal(mine.generationRuns.length, 1);
+	assert.equal(mine.generationRuns[0].jobs, 1);
+	assert.ok(!mine.generationRuns[0].account);
+	const everyone = await (
+		await logs(ledger, OWNER, { scope: 'all', run: 'fanout-1' }, true)
+	).json();
+	assert.equal(everyone.generationRuns.length, 2);
+	assert.ok(everyone.generationRuns.every((r) => r.jobs === 1));
+	const selected = await (
+		await logs(ledger, OWNER, { scope: 'all', account: BOB, run: 'fanout-1' }, true)
+	).json();
+	assert.equal(selected.generationRuns[0].account.id, BOB);
+	assert.equal(selected.entries[0].generation.durationSeconds, 5);
+	assert.equal((await logs(ledger, ALICE, { scope: 'all', run: 'fanout-1' })).status, 403);
+	const json = await (
+		await exportToolsActivityLogs(
+			await event(ledger, { query: '?format=json&adapter=fal&run=fanout-1&modality=text-to-image' })
+		)
+	).json();
+	assert.equal(json.schemaVersion, 2);
+	assert.equal(json.entries.length, 1);
+	assert.equal(json.entries[0].generation.runId, 'fanout-1');
+	assert.equal(json.entries[0].generation.finishedObservedAt, null);
+	const csv = await (
+		await exportToolsActivityLogs(await event(ledger, { query: '?format=csv&run=fanout-1' }))
+	).text();
+	assert.match(csv, /hosting_adapter/);
+	assert.match(csv, /observed_elapsed_ms/);
+	assert.match(csv, /"fal"/);
+	assert.doesNotMatch(csv, new RegExp(BOB));
+});
+
+test('historical missing timing/catalog cost stays unavailable and retention prunes observations with usage', async (context) => {
+	let now = NOW;
+	context.mock.method(Date, 'now', () => now);
+	const ledger = createTestAiLedger();
+	const old = await admittedMedia(ledger, ALICE, {});
+	const known = await admittedMedia(ledger, ALICE, { generation: mediaMetadata });
+	const first = await (await logs(ledger)).json();
+	assert.equal(first.entries.find((e) => e.id === old).generation.adapter, null);
+	assert.equal(first.entries.find((e) => e.id === old).generation.estimatedCostUsd, null);
+	assert.equal(first.generationRuns[0].estimateCoverage, 1);
+	assert.equal(first.generationRuns[0].estimatedCostUsd, null);
+	assert.equal(first.generationRuns[0].observedElapsedMs, null);
+	await ledgerRequest(ledger, 'generation-observe', {
+		userId: ALICE,
+		id: known,
+		observation: { cancellation: 'unsupported' }
+	});
+	let result = await (await logs(ledger)).json();
+	assert.equal(result.entries.find((e) => e.id === known).generation.cancellation, 'unsupported');
+	assert.equal(result.entries.find((e) => e.id === known).generation.cancellationRequestedAt, null);
+	assert.equal(result.entries.find((e) => e.id === known).status, 'reserved');
+	await ledgerRequest(ledger, 'generation-observe', {
+		userId: ALICE,
+		id: known,
+		observation: { cancellation: 'confirmed', status: 'CANCELLED' }
+	});
+	await ledgerRequest(ledger, 'finish', { userId: ALICE, id: known, status: 'cancelled' });
+	result = await (await logs(ledger)).json();
+	assert.equal(result.entries.find((e) => e.id === known).generation.cancellation, 'confirmed');
+	now += 31 * DAY;
+	await ledger.object.alarm();
+	assert.equal(
+		ledger.database.prepare('SELECT COUNT(*) AS n FROM tools_ai_generation_observations').get().n,
+		0
+	);
+});
+
+test('generation metadata and observations reject private/freeform payloads before persistence', async () => {
+	const ledger = createTestAiLedger();
+	for (const generation of [
+		{ ...mediaMetadata, prompt: 'PRIVATE' },
+		{ ...mediaMetadata, modelMaker: 'https://private.example/weights' },
+		{ ...mediaMetadata, referenceCount: 99 },
+		{ ...mediaMetadata, width: -1 },
+		{ ...mediaMetadata, resolution: 'PRIVATE' },
+		{ ...mediaMetadata, estimatedCostUsd: NaN }
+	]) {
+		const response = await ledgerRequest(ledger, 'admit', {
+			userId: ALICE,
+			kind: 'media',
+			model: 'model',
+			estimatedReservedUsd: 0.05,
+			generation
+		});
+		assert.equal(response.status, 400);
+	}
+	assert.equal(ledger.database.prepare('SELECT COUNT(*) AS n FROM tools_ai_usage').get().n, 0);
+	const id = await admittedMedia(ledger, ALICE, { generation: mediaMetadata });
+	for (const observation of [
+		{ status: 'IN_PROGRESS', prompt: 'PRIVATE' },
+		{ errorCode: 'PRIVATE provider error' },
+		{ cancellation: 'maybe' },
+		{ status: 'unknown' },
+		{}
+	]) {
+		const response = await ledgerRequest(ledger, 'generation-observe', {
+			userId: ALICE,
+			id,
+			observation
+		});
+		assert.equal(response.status, 400);
+	}
+	await ledgerRequest(ledger, 'generation-observe', {
+		userId: ALICE,
+		id,
+		observation: { errorCode: 'submission_uncertain' }
+	});
+	await ledgerRequest(ledger, 'finish', { userId: ALICE, id, status: 'failed' });
+	const result = await (await logs(ledger)).json();
+	assert.equal(result.entries[0].status, 'failed');
+	assert.equal(result.entries[0].generation.errorCode, 'submission_uncertain');
+	assert.equal(result.entries[0].generation.providerStatus, null);
+	assert.doesNotMatch(JSON.stringify(result), /PRIVATE|weights|provider error/);
+});
+
+test('expanded generation filters keep cursors within the private transport limit at maximum identifier lengths', async (context) => {
+	context.mock.method(Date, 'now', () => NOW);
+	const ledger = createTestAiLedger();
+	const userId = 'a'.repeat(255),
+		model = 'm'.repeat(200),
+		adapter = 'p'.repeat(128),
+		runId = 'r'.repeat(128);
+	for (let i = 0; i < 55; i++) {
+		const response = await ledgerRequest(ledger, 'admit', {
+			userId,
+			ownerUserId: userId,
+			kind: 'media',
+			model,
+			estimatedReservedUsd: 0.05,
+			run: { id: runId, clientJobId: `job-${i}`, limitUsd: null },
+			generation: { ...mediaMetadata, adapter }
+		});
+		assert.equal(response.status, 201);
+	}
+	const filters = {
+		scope: 'all',
+		account: userId,
+		model,
+		adapter,
+		run: runId,
+		q: 'm'.repeat(100),
+		kind: 'ai',
+		status: 'pending',
+		modality: 'text-to-image',
+		tool: 'draw',
+		source: 'server',
+		opens: 'hide',
+		day: '2026-08-25'
+	};
+	const first = await (await logs(ledger, userId, filters, true)).json();
+	assert.equal(first.entries.length, 50);
+	const response = await logs(ledger, userId, { ...filters, before: first.nextCursor }, true);
+	assert.equal(response.status, 200);
+	assert.equal((await response.json()).entries.length, 5);
+});
+
+test('additive observations initialization preserves existing usage and run replay claims without inventing historical metadata', async () => {
+	const ledger = createTestAiLedger();
+	const id = await admittedMedia(ledger, ALICE, {});
+	ledger.database.exec('DROP TABLE tools_ai_generation_observations');
+	ledger.object.aiUsage = undefined;
+	ledger.object.activity = undefined;
+	const result = await (await logs(ledger)).json();
+	assert.equal(result.entries.length, 1);
+	assert.equal(result.entries[0].id, id);
+	assert.equal(result.entries[0].generation.estimatedCostUsd, null);
+	assert.equal(result.entries[0].generation.finishedObservedAt, null);
+	assert.equal(
+		ledger.database.prepare('SELECT COUNT(*) AS n FROM tools_ai_generation_jobs').get().n,
+		1
+	);
+});

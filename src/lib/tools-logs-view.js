@@ -1,10 +1,45 @@
 import { TOOLS_LOG_FILTER_DEFAULTS, parseToolsActivityFilters } from './tools-activity.js';
 
-/** @typedef {{id:string,createdAt:string,kind:'ai'|'tool',tool:'draw'|'box'|'podcast'|'reclip',action:string,status:string,source:'server'|'browser',model:string|null,estimatedReservedUsd:number|null,account?:{id:string,email?:string,name?:string}}} ToolLogEntry */
+/** @typedef {{id:string,createdAt:string,kind:'ai'|'tool',tool:'draw'|'box'|'podcast'|'reclip',action:string,status:string,source:'server'|'browser',model:string|null,estimatedReservedUsd:number|null,account?:{id:string,email?:string,name?:string},generation?:ToolLogGeneration}} ToolLogEntry */
 /** @typedef {{date:string,aiRequests:number,toolActions:number,estimatedReservedUsd:number,failedRequests:number,pendingRequests:number}} ToolLogDay */
 /** @typedef {{key:string,count:number,aiRequests:number,toolActions:number,failedRequests:number,pendingRequests:number,estimatedReservedUsd:number,account?:{id:string,email?:string,name?:string}}} ToolLogBreakdown */
-/** @typedef {{entries:ToolLogEntry[],nextCursor:string|null,summary:{aiRequests:number,toolActions:number,estimatedReservedUsd:number,failedRequests:number,pendingRequests:number,succeededRequests:number,cancelledRequests:number,activeAccounts:number},daily:ToolLogDay[],breakdowns:{tools:ToolLogBreakdown[],models:ToolLogBreakdown[],actions:ToolLogBreakdown[],accounts:ToolLogBreakdown[]},breakdownLimit:number,range:{from:string,to:string},retentionDays:number,coverage?:{message:string}}} ToolLogs */
-/** @typedef {{days:string,kind:string,tool:string,scope:string,status:string,source:string,model:string,action:string,account:string,q:string,day:string,opens:string}} ToolLogFilters */
+/** @typedef {{entries:ToolLogEntry[],nextCursor:string|null,summary:{aiRequests:number,toolActions:number,estimatedReservedUsd:number,failedRequests:number,pendingRequests:number,succeededRequests:number,cancelledRequests:number,activeAccounts:number},daily:ToolLogDay[],breakdowns:{tools:ToolLogBreakdown[],models:ToolLogBreakdown[],actions:ToolLogBreakdown[],accounts:ToolLogBreakdown[],adapters:ToolLogBreakdown[],modalities:ToolLogBreakdown[]},breakdownLimit:number,generationRuns:ToolLogGenerationRun[],range:{from:string,to:string},retentionDays:number,coverage?:{message:string}}} ToolLogs */
+/** @typedef {{days:string,kind:string,tool:string,scope:string,status:string,source:string,model:string,action:string,account:string,q:string,day:string,opens:string,adapter:string,modality:string,run:string}} ToolLogFilters */
+
+/** @typedef {{adapter:string|null,modelMaker:string|null,modality:string|null,runId:string|null,clientJobId:string|null,providerRequestId:string|null,estimatedCostUsd:number|null,requestedOutputs:number|null,referenceCount:number|null,width:number|null,height:number|null,resolution:string|null,durationSeconds:number|null,submittedAt:string|null,startedObservedAt:string|null,finishedObservedAt:string|null,lastObservedAt:string|null,providerStatus:string|null,cancellation:'requested'|'confirmed'|'unsupported'|null,cancellationRequestedAt:string|null,errorCode:string|null,observedElapsedMs:number|null,observedQueueMs:number|null}} ToolLogGeneration */
+/** @typedef {{id:string,jobs:number,succeeded:number,failed:number,cancelled:number,pending:number,estimatedCostUsd:number|null,estimatedReservedUsd:number,estimateCoverage:number,timingCoverage:number,firstAdmittedAt:string,lastOutcomeAt:string|null,observedElapsedMs:number|null,account?:{id:string,name?:string,email?:string}}} ToolLogGenerationRun */
+
+/** Observed server wall time, not provider/GPU execution time. Unknown never means zero.
+ * @param {number|null|undefined} milliseconds
+ */
+export function logDuration(milliseconds) {
+	if (
+		milliseconds === null ||
+		milliseconds === undefined ||
+		!Number.isFinite(milliseconds) ||
+		milliseconds < 0
+	)
+		return 'Unavailable';
+	if (milliseconds < 1000) return `${Math.round(milliseconds)} ms`;
+	if (milliseconds < 60000) return `${(milliseconds / 1000).toFixed(1)} s`;
+	return `${Math.floor(milliseconds / 60000)}m ${Math.floor((milliseconds % 60000) / 1000)}s`;
+}
+
+/** A run ID is account-scoped. Reset row-level filters, preserve the selected period and scope.
+ * @param {ToolLogFilters} filters @param {ToolLogGenerationRun} run @returns {ToolLogFilters}
+ */
+export function logRunFilters(filters, run) {
+	return {
+		...TOOLS_LOG_FILTER_DEFAULTS,
+		days: filters.days,
+		scope: filters.scope,
+		kind: 'ai',
+		tool: 'draw',
+		action: 'draw.ai.media',
+		run: run.id,
+		account: filters.scope === 'all' ? (run.account?.id ?? filters.account) : 'all'
+	};
+}
 
 /** Restore only bounded, supported bookmark state, using the API's validation rules.
  * Invalid individual fields cannot discard otherwise useful filters.
@@ -73,4 +108,17 @@ export function logTime(date) {
 		minute: '2-digit',
 		hour12: false
 	});
+}
+
+/** Catalog estimates can be fractions of a cent; do not round away differences between models.
+ * @param {number|null} amount */
+export function logEstimateMoney(amount) {
+	return amount === null
+		? 'Unavailable'
+		: new Intl.NumberFormat('en-US', {
+				style: 'currency',
+				currency: 'USD',
+				minimumFractionDigits: 2,
+				maximumFractionDigits: 6
+			}).format(amount);
 }

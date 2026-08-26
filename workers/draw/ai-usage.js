@@ -1,5 +1,10 @@
 import { TOOLS_AI_POLICY, TOOLS_AI_LOGGING } from '../../src/lib/tools-ai-policy.js';
 import { GenerationRuns } from './generation-runs.js';
+import { GenerationObservations } from './generation-observations.js';
+import {
+	validGenerationMetadata,
+	validGenerationObservation
+} from '../../src/lib/tools-generation-telemetry.js';
 
 const HOUR_MS = 3_600_000;
 const DAY_MS = 24 * HOUR_MS;
@@ -23,12 +28,14 @@ export class ToolsAiUsage {
 		CREATE INDEX IF NOT EXISTS tools_ai_usage_time ON tools_ai_usage(created_at);
 		CREATE UNIQUE INDEX IF NOT EXISTS tools_ai_usage_job ON tools_ai_usage(model, provider_request_id) WHERE provider_request_id IS NOT NULL;`);
 		this.generationRuns = new GenerationRuns(sql);
+		this.generationObservations = new GenerationObservations(sql);
 	}
 
 	/** @param {number} [now] */
 	prune(now = Date.now()) {
 		this.sql.exec('DELETE FROM tools_ai_usage WHERE created_at <= ?', now - RETENTION_MS);
 		this.generationRuns.prune(now - RETENTION_MS);
+		this.generationObservations.prune();
 	}
 
 	nextExpiry() {
@@ -94,6 +101,11 @@ export class ToolsAiUsage {
 				: TOOLS_AI_POLICY.mediaMinimumReservationUsd;
 		if (!Number.isSafeInteger(micros) || micros < Math.round(minimum * MILLION))
 			return Response.json({ error: 'Invalid usage reservation.' }, { status: 400 });
+		if (
+			body.generation !== undefined &&
+			(kind !== 'media' || !validGenerationMetadata(body.generation))
+		)
+			return Response.json({ error: 'Invalid generation metadata.' }, { status: 400 });
 		if (body.run !== undefined && kind !== 'media')
 			return Response.json({ error: 'Run budgets apply to media generation.' }, { status: 400 });
 		const run = this.generationRuns.prepare(userId, body.run, micros, unlimited);
@@ -164,6 +176,10 @@ export class ToolsAiUsage {
 			'reserved'
 		);
 		if (run) this.generationRuns.reserve(run, id, now);
+		if (body.generation) {
+			this.generationObservations.admit(userId, id, body.generation);
+			this.generationRuns.bindAdapter(userId, id, body.generation.adapter);
+		}
 		return Response.json({ id, estimatedReservedUsd: micros / MILLION }, { status: 201 });
 	}
 
@@ -177,7 +193,7 @@ export class ToolsAiUsage {
 			return undefined;
 		return this.sql
 			.exec(
-				'SELECT id, status, last_polled_at FROM tools_ai_usage WHERE user_id = ? AND model = ? AND provider_request_id = ?',
+				'SELECT id, kind, status, last_polled_at FROM tools_ai_usage WHERE user_id = ? AND model = ? AND provider_request_id = ?',
 				body.userId,
 				body.model,
 				body.requestId
@@ -231,6 +247,25 @@ export class ToolsAiUsage {
 				adapter: this.generationRuns.adapterFor(job.id)
 			});
 		}
+		if (path === '/ai/generation-observe') {
+			if (typeof body.id !== 'string' || !validGenerationObservation(body.observation))
+				return Response.json({ error: 'Invalid generation observation.' }, { status: 400 });
+			const row = this.sql
+				.exec(
+					'SELECT kind, status FROM tools_ai_usage WHERE id = ? AND user_id = ?',
+					body.id ?? '',
+					body.userId
+				)
+				.toArray()[0];
+			if (!row || row.kind !== 'media')
+				return Response.json({ error: 'Generation not found.' }, { status: 404 });
+			const expected = { succeeded: 'COMPLETED', failed: 'FAILED', cancelled: 'CANCELLED' }[
+				row.status
+			];
+			if (expected && body.observation?.status && body.observation.status !== expected)
+				return Response.json({ recorded: false, stale: true });
+			return this.generationObservations.observe(body.userId, body.id, body.observation, now);
+		}
 		if (path === '/ai/register') {
 			if (
 				typeof body.id !== 'string' ||
@@ -269,6 +304,8 @@ export class ToolsAiUsage {
 				body.requestId,
 				body.id
 			);
+			if (!row.provider_request_id)
+				this.generationObservations.submitted(body.userId, body.id, now);
 			return Response.json({ ok: true });
 		}
 		if (path === '/ai/finish') {
@@ -278,15 +315,17 @@ export class ToolsAiUsage {
 				typeof body.id === 'string'
 					? this.sql
 							.exec(
-								'SELECT id, status FROM tools_ai_usage WHERE id = ? AND user_id = ?',
+								'SELECT id, kind, status FROM tools_ai_usage WHERE id = ? AND user_id = ?',
 								body.id,
 								body.userId
 							)
 							.toArray()[0]
 					: this.owned(body);
 			if (!row) return Response.json({ error: 'Generation not found.' }, { status: 404 });
-			if (!TERMINAL.has(row.status))
+			if (!TERMINAL.has(row.status)) {
 				this.sql.exec('UPDATE tools_ai_usage SET status = ? WHERE id = ?', body.status, row.id);
+				if (row.kind === 'media') this.generationObservations.finished(body.userId, row.id, now);
+			}
 			return Response.json({ ok: true });
 		}
 		return Response.json({ error: 'Not found.' }, { status: 404 });

@@ -565,6 +565,20 @@ of account names/emails and metadata to all users.
   requires same origin plus `X-Tools-User`, and gets identity/time/provenance from
   the server. User IDs, profile fields and arbitrary payloads are rejected.
 
+Generation metadata stays in the same usage ledger: `tools_ai_generation_observations`
+is a one-row extension keyed by the canonical usage ID, not another job scheduler.
+Logs join existing run/client-job IDs, immutable hosting adapter, and provider request ID.
+Media views filter `adapter`, `modality`, and `run`; run summaries count **matching admitted
+jobs**, not planned/unsubmitted candidates, and never combine the same run ID across accounts.
+Catalog cost estimates are distinct from budget reservations and provider bills. Observed
+request span and wait-until-running include queue/poll delays, not GPU execution time.
+Missing historical estimates/timings stay null; mixed run totals show coverage rather than
+inventing zero costs. Cancellation requested/confirmed/unsupported and bounded failure codes
+are separate from request outcomes. Polls do not add admissions or move terminal timestamps.
+No new inference provider or billing integration is enabled. GPU, cold-start, warm-idle and
+actual billed cost remain unavailable. The metadata extension is created additively and pruned
+with the existing 30-day usage records; existing quotas and owner exemptions are unchanged.
+
 New tool integrations must extend the bounded vocabulary in
 `src/lib/tools-activity.js`. Use `recordToolActivity(userId, action, status)` only
 for browser-reported actions, and the server activity helpers for authoritative

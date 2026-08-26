@@ -1,3 +1,9 @@
+import { createHash } from 'node:crypto';
+import {
+	GENERATION_LOG_PROJECTION,
+	generationFromRow,
+	generationRunsForLogs
+} from './generation-log-view.js';
 import { TOOLS_AI_POLICY } from '../../src/lib/tools-ai-policy.js';
 import {
 	TOOLS_ACTIVITY_ACTIONS,
@@ -164,7 +170,7 @@ export class ToolsActivity {
 				{ status: 403 }
 			);
 		const { before, snapshot, ...selection } = filters;
-		const fingerprint = JSON.stringify(selection);
+		const fingerprint = createHash('sha256').update(JSON.stringify(selection)).digest('hex');
 		let to = snapshot ? Date.parse(snapshot) : now;
 		let cursor = null;
 		if (before) {
@@ -197,12 +203,17 @@ export class ToolsActivity {
 			);
 		// Delayed exports cannot resurrect records that expired since the initial read.
 		const from = Math.max(to - filters.days * DAY_MS, now - RETENTION_MS);
-		const base = `SELECT id, user_id, created_at, 'ai' AS kind, 'draw' AS tool,
-			CASE kind WHEN 'assistant' THEN 'draw.ai.assistant' ELSE 'draw.ai.media' END AS action,
-			status, 'server' AS source, model, reserved_micros
-			FROM tools_ai_usage WHERE (? = 1 OR user_id = ?) AND created_at > ? AND created_at <= ?
-			UNION ALL SELECT id, user_id, created_at, 'tool' AS kind, tool, action, status, source, NULL AS model, NULL AS reserved_micros
-			FROM tools_activity WHERE (? = 1 OR user_id = ?) AND created_at > ? AND created_at <= ?`;
+		const base = `SELECT u.id, u.user_id, u.created_at, 'ai' AS kind, 'draw' AS tool,
+   CASE u.kind WHEN 'assistant' THEN 'draw.ai.assistant' ELSE 'draw.ai.media' END AS action,
+   u.status, 'server' AS source, u.model, u.reserved_micros,
+   ${GENERATION_LOG_PROJECTION.map(([expression, name]) => `${expression} AS ${name}`).join(', ')}
+   FROM tools_ai_usage u
+   LEFT JOIN tools_ai_generation_jobs j ON j.usage_id=u.id AND j.user_id=u.user_id
+   LEFT JOIN tools_ai_generation_observations o ON o.usage_id=u.id AND o.user_id=u.user_id
+   WHERE (? = 1 OR u.user_id = ?) AND u.created_at > ? AND u.created_at <= ?
+   UNION ALL SELECT id,user_id,created_at,'tool' AS kind,tool,action,status,source,NULL AS model,NULL AS reserved_micros,
+   ${GENERATION_LOG_PROJECTION.map(([, name]) => `NULL AS ${name}`).join(', ')}
+   FROM tools_activity WHERE (? = 1 OR user_id = ?) AND created_at > ? AND created_at <= ?`;
 		const bindings = [
 			filters.scope === 'all' ? 1 : 0,
 			userId,
@@ -220,7 +231,10 @@ export class ToolsActivity {
 			['source', 'source'],
 			['model', 'model'],
 			['action', 'action'],
-			['account', 'user_id']
+			['account', 'user_id'],
+			['adapter', 'adapter'],
+			['modality', 'generation_modality'],
+			['run', 'run_id']
 		]) {
 			if (filters[key] !== 'all') {
 				conditions.push(`${column} = ?`);
@@ -236,7 +250,7 @@ export class ToolsActivity {
 			conditions.push("action NOT IN ('draw.open', 'box.open', 'podcast.open', 'reclip.open')");
 		if (filters.q) {
 			conditions.push(
-				"instr(lower(id || ' ' || action || ' ' || tool || ' ' || coalesce(model, '')), lower(?)) > 0"
+				"instr(lower(id || ' ' || action || ' ' || tool || ' ' || coalesce(model, '') || ' ' || coalesce(adapter,'') || ' ' || coalesce(run_id,'') || ' ' || coalesce(client_job_id,'') || ' ' || coalesce(provider_request_id,'')), lower(?)) > 0"
 			);
 			bindings.push(filters.q.trim());
 		}
@@ -312,6 +326,7 @@ export class ToolsActivity {
 			scope: filters.scope,
 			entries: page.map((row) => ({
 				...(filters.scope === 'all' ? { account: accountFromRow(row) } : {}),
+				...(row.action === 'draw.ai.media' ? { generation: generationFromRow(row) } : {}),
 				id: row.id,
 				createdAt: new Date(row.created_at).toISOString(),
 				kind: row.kind,
@@ -342,7 +357,7 @@ export class ToolsActivity {
 		if (exportAll)
 			return Response.json({
 				...result,
-				schemaVersion: 1,
+				schemaVersion: 2,
 				generatedAt: new Date(now).toISOString(),
 				filters: selection,
 				exportedCount: page.length,
@@ -359,11 +374,11 @@ export class ToolsActivity {
 				...bindings
 			)
 			.toArray();
-		const breakdown = (column, aiOnly = false) =>
+		const breakdown = (column, aiOnly = false, knownOnly = false) =>
 			this.sql
 				.exec(
 					`SELECT ${column} AS key, ${metrics}
-			FROM (${filtered}) ${aiOnly ? "WHERE kind = 'ai'" : ''} GROUP BY ${column} ORDER BY count DESC, key ASC LIMIT 20`,
+			FROM (${filtered}) ${aiOnly ? "WHERE kind = 'ai'" + (knownOnly ? ` AND ${column} IS NOT NULL` : '') : ''} GROUP BY ${column} ORDER BY count DESC, key ASC LIMIT 20`,
 					...bindings
 				)
 				.toArray()
@@ -390,8 +405,11 @@ export class ToolsActivity {
 				tools: breakdown('tool'),
 				models: breakdown('model', true),
 				actions: breakdown('action'),
+				adapters: breakdown('adapter', true, true),
+				modalities: breakdown('generation_modality', true, true),
 				accounts
 			},
+			generationRuns: generationRunsForLogs(this.sql, filtered, bindings, filters.scope === 'all'),
 			breakdownLimit: 20
 		});
 	}

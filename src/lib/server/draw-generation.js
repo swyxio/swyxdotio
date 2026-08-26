@@ -14,6 +14,11 @@ import {
 } from '../draw-generation-models.js';
 import { chargeDrawingAgentBudget } from './draw-agent-budget.js';
 import { DrawingGenerationError, getDrawingGenerationAdapter } from './draw-generation-provider.js';
+import {
+	generationLogMetadata,
+	generationLogError,
+	observeGeneration
+} from './tools-generation-observation.js';
 import { readCreativeBody } from '../../../workers/draw/creative-library.js';
 
 const IMAGE_MIME_TYPE = /^image\/(?:png|jpeg|webp|avif|gif)$/;
@@ -260,13 +265,17 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 		'media',
 		model.id,
 		estimateToolsMediaReservation(estimateDrawGenerationModelCost(model, modelSettings)),
-		run
+		run,
+		generationLogMetadata(model, modelSettings, images.length)
 	);
 	if (reservation instanceof Response) return reservation;
 	let submitted;
 	try {
 		submitted = await adapter.submit({ model, prompt, settings: modelSettings, images }, context);
 	} catch (error) {
+		await observeGeneration(event, user.id, reservation.id, {
+			errorCode: generationLogError(error, 'submission_uncertain')
+		});
 		await finishToolsAiUsage(event, user.id, reservation.id, 'failed');
 		return generationError(error, 'Generation could not be started.');
 	}
@@ -278,7 +287,13 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 		adapter: model.adapter
 	});
 	if (!registered.ok) {
-		await adapter.cancel({ model, requestId: submitted.requestId }, context).catch(() => {});
+		await observeGeneration(event, user.id, reservation.id, { errorCode: 'registration_failed' });
+		await adapter
+			.cancel({ model, requestId: submitted.requestId }, context)
+			.then((cancelled) =>
+				observeGeneration(event, user.id, reservation.id, { cancellation: cancelled.cancellation })
+			)
+			.catch(() => {});
 		return privateJson(
 			{
 				code: 'job_registration_failed',
@@ -346,6 +361,10 @@ export async function pollDrawingImage(event, fetchProvider = fetch) {
 		);
 	try {
 		const progress = await adapter.status({ model: boundModel, requestId }, context);
+		await observeGeneration(event, user.id, job.id, {
+			status: progress.status,
+			...(progress.status === 'FAILED' ? { errorCode: 'generation_failed' } : {})
+		});
 		if (['COMPLETED', 'FAILED', 'CANCELLED'].includes(progress.status)) {
 			const recorded = await finishToolsAiUsage(
 				event,
@@ -366,6 +385,9 @@ export async function pollDrawingImage(event, fetchProvider = fetch) {
 			);
 		return privateJson(progress);
 	} catch (error) {
+		await observeGeneration(event, user.id, job.id, {
+			errorCode: generationLogError(error, 'progress_unavailable')
+		});
 		return generationError(error, 'Generation progress is temporarily unavailable.');
 	}
 }
@@ -413,12 +435,19 @@ export async function cancelDrawingImage(event, fetchProvider = fetch) {
 		);
 	try {
 		const cancelled = await adapter.cancel({ model: boundModel, requestId }, context);
+		await observeGeneration(event, user.id, job.id, {
+			cancellation: cancelled.cancellation,
+			...(cancelled.cancellation === 'confirmed' ? { status: 'CANCELLED' } : {})
+		});
 		if (cancelled.cancellation === 'confirmed') {
 			const recorded = await finishToolsAiUsage(event, user.id, job.id, 'cancelled');
 			if (!recorded.ok) return recorded;
 		}
 		return privateJson(cancelled);
 	} catch (error) {
+		await observeGeneration(event, user.id, job.id, {
+			errorCode: generationLogError(error, 'cancellation_unavailable')
+		});
 		return generationError(
 			error,
 			'The queued generation could not be cancelled. It may still complete and be charged.'
