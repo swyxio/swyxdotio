@@ -1,17 +1,17 @@
-import { MAX_DRAW_FAL_REQUEST_BYTES } from './draw-fal-models.js';
+import { MAX_DRAW_GENERATION_REQUEST_BYTES } from './draw-generation-models.js';
 
 const REQUEST_HEADROOM_BYTES = 8192;
 const SUPPORTED_IMAGE = /^image\/(?:png|jpeg|webp|avif|gif)$/;
 const encoder = new TextEncoder();
 
 /**
- * @typedef {typeof import('./draw-fal-models.js').DRAW_FAL_MODELS[number]} DrawingFalModel
+ * @typedef {typeof import('./draw-generation-models.js').DRAW_GENERATION_MODELS[number]} DrawingGenerationModel
  */
 
 /**
  * @param {{ imageBytes: number, prompt: string, model: string }} request
  */
-export function estimateDrawingFalUploadBytes(request) {
+export function estimateDrawingGenerationUploadBytes(request) {
 	return (
 		request.imageBytes +
 		encoder.encode(request.prompt).byteLength +
@@ -25,9 +25,9 @@ export function estimateDrawingFalUploadBytes(request) {
  * inventing detail by upscaling a small source image.
  * @param {number} width
  * @param {number} height
- * @param {Pick<DrawingFalModel, 'input'>} model
+ * @param {Pick<DrawingGenerationModel, 'input'>} model
  */
-export function drawingFalInputDimensions(width, height, model) {
+export function drawingGenerationInputDimensions(width, height, model) {
 	if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
 		throw new Error('The selected image has invalid dimensions.');
 	}
@@ -48,12 +48,12 @@ export function drawingFalInputDimensions(width, height, model) {
  * @param {{
  *  dataURL: string,
  *  prompt: string,
- *  model: DrawingFalModel,
+ *  model: Pick<DrawingGenerationModel, 'input' | 'id' | 'label'>,
  *  signal?: AbortSignal,
  *  onProgress?: (message: string) => void
  * }} options
  */
-export async function prepareDrawingFalImage(options) {
+export async function prepareDrawingGenerationImage(options) {
 	const { dataURL, prompt, model, signal, onProgress } = options;
 	signal?.throwIfAborted();
 	const originalBlob = await fetch(dataURL, { signal }).then((response) => response.blob());
@@ -65,14 +65,14 @@ export async function prepareDrawingFalImage(options) {
 		throw new Error('The selected image could not be prepared for AI editing.');
 	}
 	try {
-		let dimensions = drawingFalInputDimensions(bitmap.width, bitmap.height, model);
+		let dimensions = drawingGenerationInputDimensions(bitmap.width, bitmap.height, model);
 		const originalRequest = { imageBytes: originalBlob.size, prompt, model: model.id };
 		if (
 			SUPPORTED_IMAGE.test(originalBlob.type) &&
 			originalBlob.type === model.input.mimeType &&
 			dimensions.width === bitmap.width &&
 			dimensions.height === bitmap.height &&
-			estimateDrawingFalUploadBytes(originalRequest) <= MAX_DRAW_FAL_REQUEST_BYTES
+			estimateDrawingGenerationUploadBytes(originalRequest) <= MAX_DRAW_GENERATION_REQUEST_BYTES
 		) {
 			return {
 				blob: originalBlob,
@@ -104,8 +104,11 @@ export async function prepareDrawingFalImage(options) {
 				const blob = await canvas.convertToBlob({ type: model.input.mimeType, quality });
 				if (blob.type !== model.input.mimeType) continue;
 				if (
-					estimateDrawingFalUploadBytes({ imageBytes: blob.size, prompt, model: model.id }) <=
-					MAX_DRAW_FAL_REQUEST_BYTES
+					estimateDrawingGenerationUploadBytes({
+						imageBytes: blob.size,
+						prompt,
+						model: model.id
+					}) <= MAX_DRAW_GENERATION_REQUEST_BYTES
 				) {
 					return {
 						blob,

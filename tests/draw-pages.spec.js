@@ -253,7 +253,7 @@ test('account switching keeps browser caches separate and removes owner-only too
 	await page.goto('/draw');
 	await expect(page.getByRole('button', { name: 'Manage drawing pages' })).toBeVisible();
 	const ownerKey = `swyx-excalidraw:google:${TEST_TOOLS_OWNER.id}`;
-	await expect(page.locator('.draw-canvas')).toHaveAttribute('data-storage-key', ownerKey);
+	await expect(page.locator('.draw-canvas')).toHaveAttribute('data-account-storage-key', ownerKey);
 	await page.goto('/tools');
 	await expect(page.getByRole('link', { name: /Podcast studio/ })).toBeVisible();
 	await page.evaluate(
@@ -263,11 +263,14 @@ test('account switching keeps browser caches separate and removes owner-only too
 	);
 	const openDrawing = await page.context().newPage();
 	await openDrawing.goto('/draw');
-	await expect(openDrawing.locator('.draw-canvas')).toHaveAttribute('data-storage-key', ownerKey);
+	await expect(openDrawing.locator('.draw-canvas')).toHaveAttribute(
+		'data-account-storage-key',
+		ownerKey
+	);
 	await authenticateTools(page, TEST_TOOLS_MEMBER);
 	await page.reload();
 	await expect(openDrawing.locator('.draw-canvas')).toHaveAttribute(
-		'data-storage-key',
+		'data-account-storage-key',
 		`swyx-excalidraw:google:${TEST_TOOLS_MEMBER.id}`
 	);
 	await expect(page.getByRole('link', { name: /Podcast studio/ })).toHaveCount(0);
@@ -276,7 +279,7 @@ test('account switching keeps browser caches separate and removes owner-only too
 	await page.goto('/draw');
 	await expect(page.getByRole('button', { name: 'Manage drawing pages' })).toBeVisible();
 	await expect(page.locator('.draw-canvas')).toHaveAttribute(
-		'data-storage-key',
+		'data-account-storage-key',
 		`swyx-excalidraw:google:${TEST_TOOLS_MEMBER.id}`
 	);
 	const memberLibrary = await page.evaluate(
@@ -290,13 +293,13 @@ test('account switching keeps browser caches separate and removes owner-only too
 	await expect(page.getByRole('link', { name: 'Sign in with Google' })).toBeVisible();
 	expect((await page.request.get('/tools/api/draw/pages')).status()).toBe(401);
 	await expect(openDrawing.locator('.draw-canvas')).toHaveAttribute(
-		'data-storage-key',
+		'data-account-storage-key',
 		'swyx-excalidraw:guest'
 	);
 	await openDrawing.close();
 	await page.goto('/draw');
 	await expect(page.locator('.draw-canvas')).toHaveAttribute(
-		'data-storage-key',
+		'data-account-storage-key',
 		'swyx-excalidraw:guest'
 	);
 });

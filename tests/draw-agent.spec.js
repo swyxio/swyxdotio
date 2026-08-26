@@ -8,6 +8,120 @@ async function authenticate(page) {
 	await page.reload();
 }
 
+test('shared provider picker discloses capabilities, preserves drafts and sends no screenshot to text-only models', async ({
+	page
+}) => {
+	await page.setViewportSize({ width: 390, height: 844 });
+	await page.goto('/draw');
+	await authenticate(page);
+	/** @type {any[]} */
+	const requests = [];
+	let finish = () => {};
+	const pending = new Promise((resolve) => {
+		finish = () => resolve(undefined);
+	});
+	await page.route('**/tools/api/draw/agent', async (route) => {
+		if (route.request().method() === 'GET')
+			return route.fulfill({
+				json: {
+					providers: [
+						{
+							id: 'cloudflare',
+							label: 'Cloudflare AI',
+							model: 'Qwen',
+							vision: true,
+							configured: true
+						},
+						{
+							id: 'openai',
+							label: 'OpenAI',
+							model: 'gpt-5.4-mini',
+							vision: true,
+							configured: true
+						},
+						{
+							id: 'deepseek',
+							label: 'DeepSeek',
+							model: 'deepseek-v4-flash',
+							vision: false,
+							configured: true
+						},
+						{
+							id: 'featherless',
+							label: 'Featherless',
+							model: 'Qwen/Test-Model',
+							vision: true,
+							configured: true,
+							notice:
+								'Catalog access metadata conflicts with the authenticated plan. Model and tool execution remain unverified.'
+						}
+					]
+				}
+			});
+		requests.push(route.request().postDataJSON());
+		await pending;
+		await route.fulfill({ json: { content: 'Read the native drawing.', toolCalls: [] } });
+	});
+	await page.getByRole('button', { name: 'Choose drawing mode and tools' }).click();
+	await page.getByRole('button', { name: 'Open drawing assistant' }).click();
+	const assistant = page.getByRole('region', { name: 'Drawing assistant' });
+	const picker = assistant.getByRole('combobox', { name: 'Drawing model' });
+	const composer = assistant.getByRole('textbox', { name: 'Message drawing assistant' });
+	await expect(picker).toBeEnabled();
+	await composer.fill('Keep this draft while switching models.');
+	await picker.selectOption('openai');
+	await expect(assistant).toContainText('screenshots are sent to OpenAI');
+	await picker.selectOption('featherless');
+	await expect(assistant).toContainText('Model and tool execution remain unverified.');
+	await expect(picker.locator('option[value="featherless"]')).toBeEnabled();
+	await picker.selectOption('deepseek');
+	await expect(assistant).toContainText('no screenshot is sent');
+	await expect(composer).toHaveValue('Keep this draft while switching models.');
+	const panelBounds = await assistant.boundingBox();
+	const sendBounds = await assistant
+		.getByRole('button', { name: 'Send', exact: true })
+		.boundingBox();
+	if (!panelBounds || !sendBounds) throw new Error('Assistant and Send must be visible');
+	expect(sendBounds.y + sendBounds.height).toBeLessThanOrEqual(panelBounds.y + panelBounds.height);
+	await test.info().attach('mobile-text-only-provider', {
+		body: await page.screenshot({ path: test.info().outputPath('mobile-text-only-provider.png') }),
+		contentType: 'image/png'
+	});
+	expect(requests).toHaveLength(0);
+	await assistant.getByRole('button', { name: 'Send', exact: true }).click();
+	await expect(picker).toBeDisabled();
+	const stopBounds = await assistant
+		.getByRole('button', { name: 'Stop', exact: true })
+		.boundingBox();
+	if (!stopBounds) throw new Error('Stop must be visible');
+	expect(stopBounds.y + stopBounds.height).toBeLessThanOrEqual(panelBounds.y + panelBounds.height);
+	await expect.poll(() => requests.length).toBe(1);
+	expect(requests[0].provider).toBe('deepseek');
+	expect(requests[0].screenshot).toBeUndefined();
+	finish();
+	await expect(assistant).toContainText('Read the native drawing.');
+	const bounds = await picker.boundingBox();
+	expect(bounds?.x).toBeGreaterThanOrEqual(0);
+	expect((bounds?.x || 0) + (bounds?.width || 0)).toBeLessThanOrEqual(390);
+});
+
+test('unavailable provider settings fail closed without losing the composer draft', async ({
+	page
+}) => {
+	await page.goto('/draw');
+	await authenticate(page);
+	await page.route('**/tools/api/draw/agent', (route) =>
+		route.fulfill({ status: 503, json: { error: 'Unavailable' } })
+	);
+	await page.getByRole('button', { name: 'Open drawing assistant' }).click();
+	const assistant = page.getByRole('region', { name: 'Drawing assistant' });
+	await expect(assistant).toContainText('Provider settings could not be loaded.');
+	await assistant
+		.getByRole('textbox', { name: 'Message drawing assistant' })
+		.fill('My draft stays here');
+	await expect(assistant.getByRole('button', { name: 'Send', exact: true })).toBeDisabled();
+});
+
 test('drawing assistant and model endpoint require the Google tools session', async ({ page }) => {
 	await page.goto('/draw');
 	await page.getByRole('button', { name: 'Open drawing assistant' }).click();
@@ -31,6 +145,7 @@ test('authenticated floating assistant uses viewport vision, sandboxed commands,
 	/** @type {any[]} */
 	const requests = [];
 	await page.route('**/tools/api/draw/agent', async (route) => {
+		if (route.request().method() === 'GET') return route.continue();
 		requests.push(route.request().postDataJSON());
 		await route.fulfill({
 			json:
@@ -163,6 +278,101 @@ test('authenticated floating assistant uses viewport vision, sandboxed commands,
 	).toBe(false);
 });
 
+test('essay workflows prepare requests, protect drafts and preserve bound copies through the real command bridge', async ({
+	page
+}) => {
+	await page.goto('/draw');
+	await authenticate(page);
+	await page.getByRole('checkbox', { name: 'Library' }).check({ force: true });
+	await page.getByRole('tab', { name: 'Templates, components, and memes' }).click();
+	/** @returns {Promise<{ elements: any[] }>} */
+	const readScene = () =>
+		page.evaluate(() => {
+			const key = document.querySelector('.draw-canvas')?.getAttribute('data-storage-key');
+			if (!key) throw new Error('The drawing account scope is not ready.');
+			return JSON.parse(localStorage.getItem(key) ?? '{"elements":[]}');
+		});
+	const existingIds = new Set((await readScene()).elements.map((element) => element.id));
+	await page.getByRole('button', { name: 'Insert Claim, evidence, objection preset' }).click();
+	await expect
+		.poll(
+			async () =>
+				(await readScene()).elements.filter((element) => !existingIds.has(element.id)).length
+		)
+		.toBeGreaterThan(8);
+	const before = (await readScene()).elements;
+	const inserted = before.filter((element) => !existingIds.has(element.id));
+	let calls = 0;
+	await page.route('**/tools/api/draw/agent', async (route) => {
+		if (route.request().method() === 'GET') return route.continue();
+		calls++;
+		await route.fulfill({
+			json:
+				calls === 1
+					? {
+							content: '',
+							toolCalls: [
+								{
+									id: 'duplicate_figure',
+									type: 'function',
+									function: {
+										name: 'canvas_bash',
+										arguments: JSON.stringify({ command: 'draw duplicate --dx 1300 --dy 0' })
+									}
+								}
+							]
+						}
+					: { content: 'The editable copy is ready for review.', toolCalls: [] }
+		});
+	});
+	await page.getByRole('button', { name: 'Notes → diagram', exact: true }).click();
+	const assistant = page.getByRole('region', { name: 'Drawing assistant' });
+	const composer = assistant.getByRole('textbox', { name: 'Message drawing assistant' });
+	await expect(composer).toHaveValue(/My notes:/);
+	await composer.fill('My original essay notes must remain intact.');
+	await assistant.getByRole('button', { name: 'Try Make this essay-ready workflow' }).click();
+	await expect(composer).toHaveValue('My original essay notes must remain intact.');
+	await assistant.getByRole('button', { name: 'Keep draft', exact: true }).click();
+	await assistant.getByRole('button', { name: 'Try Make this essay-ready workflow' }).click();
+	await assistant.getByRole('button', { name: 'Use suggestion instead' }).click();
+	await expect(composer).toHaveValue(/Duplicate the selected figure/);
+	expect(calls).toBe(0);
+	await assistant.getByRole('button', { name: 'Send', exact: true }).click();
+	await expect(assistant).toContainText('The editable copy is ready for review.', {
+		timeout: 20000
+	});
+	const after = (await readScene()).elements;
+	for (const original of before)
+		expect(after.find((element) => element.id === original.id)).toEqual(original);
+	const originalIds = new Set(before.map((element) => element.id));
+	const copies = after.filter((element) => !originalIds.has(element.id));
+	const copyIds = new Set(copies.map((element) => element.id));
+	expect(copies.length).toBe(inserted.length);
+	for (const [index, original] of inserted.entries()) {
+		const copy = copies[index];
+		expect(copy.type).toBe(original.type);
+		expect(copy.x).toBeCloseTo(original.x + 1300, 6);
+		expect(copy.y).toBeCloseTo(original.y, 6);
+		if (original.type === 'text') expect(copy.text).toBe(original.text);
+	}
+	for (const edge of copies.filter((element) => element.type === 'arrow')) {
+		expect(copyIds.has(edge.startBinding.elementId)).toBe(true);
+		expect(copyIds.has(edge.endBinding.elementId)).toBe(true);
+	}
+	for (const label of copies.filter((element) => element.type === 'text' && element.containerId)) {
+		expect(copyIds.has(label.containerId)).toBe(true);
+	}
+	await assistant.getByRole('button', { name: 'Minimize drawing assistant' }).click();
+	await page.getByRole('button', { name: 'Undo', exact: true }).click();
+	await expect
+		.poll(async () =>
+			(await readScene()).elements
+				.filter((element) => !element.isDeleted)
+				.map((element) => element.id)
+		)
+		.toEqual(before.filter((element) => !element.isDeleted).map((element) => element.id));
+});
+
 test('assistant retries the last request after a temporary authenticated model failure', async ({
 	page
 }) => {
@@ -170,6 +380,7 @@ test('assistant retries the last request after a temporary authenticated model f
 	await authenticate(page);
 	let attempts = 0;
 	await page.route('**/tools/api/draw/agent', async (route) => {
+		if (route.request().method() === 'GET') return route.continue();
 		attempts++;
 		await route.fulfill(
 			attempts === 1
@@ -195,6 +406,7 @@ test('assistant sandbox cannot execute network, JavaScript, or host-shell comman
 	/** @type {any[]} */
 	const requests = [];
 	await page.route('**/tools/api/draw/agent', async (route) => {
+		if (route.request().method() === 'GET') return route.continue();
 		requests.push(route.request().postDataJSON());
 		await route.fulfill({
 			json:
@@ -241,6 +453,7 @@ test('assistant arranges shapes and connects them with native Excalidraw arrow b
 	const markerColor = `#${crypto.randomUUID().replaceAll('-', '').slice(0, 6)}`;
 	let round = 0;
 	await page.route('**/tools/api/draw/agent', async (route) => {
+		if (route.request().method() === 'GET') return route.continue();
 		round++;
 		const script =
 			round === 1

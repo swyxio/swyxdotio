@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
 
 /** @typedef {{ isDeleted?: boolean, text?: string, roughness?: number }} DrawingElement */
 
@@ -48,14 +49,14 @@ for (const viewport of [
 		await page.goto('/draw');
 
 		const pages = page.getByRole('button', { name: 'Manage drawing pages' });
-		const templates = page.getByRole('button', { name: 'Open drawing templates and library' });
+		const workspace = page.getByRole('button', { name: 'Choose drawing mode and tools' });
 		const toolbar = page.locator('.App-toolbar').first();
 		await expect(pages).toBeVisible();
-		await expect(templates).toBeVisible();
+		await expect(workspace).toBeVisible();
 		await expect(toolbar).toBeVisible();
 
 		const pageBounds = await pages.boundingBox();
-		const templateBounds = await templates.boundingBox();
+		const templateBounds = await workspace.boundingBox();
 		const toolbarBounds = await toolbar.boundingBox();
 		if (!pageBounds || !templateBounds || !toolbarBounds) {
 			throw new Error('Compact drawing controls must have visible bounds.');
@@ -64,13 +65,16 @@ for (const viewport of [
 		expect(templateBounds.y).toBeGreaterThanOrEqual(toolbarBounds.y + toolbarBounds.height);
 		expect(pageBounds.x + pageBounds.width).toBeLessThanOrEqual(templateBounds.x);
 
-		await templates.click();
-		await expect(templates).toHaveCount(0);
+		await workspace.click();
+		await page.getByRole('button', { name: 'Open drawing templates and library' }).click();
+		await expect(workspace).toBeHidden();
+		await expect(pages).toBeHidden();
 		await expect(page.getByRole('tab', { name: 'Presets', exact: true })).toBeVisible();
 		await page.getByRole('tab', { name: 'Memes', exact: true }).click();
 		await expect(page.getByRole('region', { name: 'Meme templates' })).toBeVisible();
 		await page.getByTestId('sidebar-close').click();
-		await expect(templates).toBeVisible();
+		await expect(workspace).toBeVisible();
+		await expect(pages).toBeVisible();
 	});
 }
 
@@ -154,7 +158,7 @@ test('visual presets insert labeled editable diagrams without replacing existing
 	await openDrawingTemplates(page, 'Presets');
 
 	const presetOptions = page.getByRole('button', { name: /^insert .+ preset$/i });
-	await expect(presetOptions).toHaveCount(9);
+	await expect(presetOptions).toHaveCount(12);
 
 	await page.getByRole('button', { name: /insert priority quadrants preset/i }).click();
 	await expect
@@ -237,6 +241,101 @@ test('visual presets insert labeled editable diagrams without replacing existing
 		)
 		.toBe(true);
 });
+
+for (const label of ['Two architectures', 'Agent / tool loop', 'Claim, evidence, objection']) {
+	test(`${label} starter inserts bound editable shapes with one native undo and no inference`, async ({
+		page
+	}, testInfo) => {
+		/** @type {string[]} */
+		const inference = [];
+		page.on('request', (request) => {
+			if (/\/draw\/(agent|fal)|huggingface\.co/.test(request.url())) inference.push(request.url());
+		});
+		// Exercise Excalidraw's browser-download path, not the OS-native save picker.
+		await page.addInitScript(() => {
+			Reflect.deleteProperty(window, 'showOpenFilePicker');
+			Reflect.deleteProperty(window, 'showSaveFilePicker');
+		});
+		await page.goto('/draw');
+		await openDrawingTemplates(page, 'Presets');
+		await page.getByRole('button', { name: `Insert ${label} preset`, exact: true }).click();
+		/** @returns {Promise<{ elements: any[] }>} */
+		const getScene = () =>
+			page.evaluate(() => {
+				const key = document.querySelector('.draw-canvas')?.getAttribute('data-storage-key');
+				if (!key) throw new Error('The drawing account scope is not ready.');
+				return JSON.parse(localStorage.getItem(key) ?? '{"elements":[]}');
+			});
+		await expect.poll(async () => (await getScene()).elements.length).toBeGreaterThan(8);
+		const inserted = await getScene();
+		const clippedLabels = await page.evaluate((elements) => {
+			const measure = document.createElement('canvas').getContext('2d');
+			return elements
+				.filter((element) => {
+					if (element.type !== 'text' || !measure) return false;
+					measure.font = `${element.fontSize}px Excalifont`;
+					return element.text
+						.split('\n')
+						.some(
+							(/** @type {string} */ line) => measure.measureText(line).width > element.width + 2
+						);
+				})
+				.map((element) => element.text);
+		}, inserted.elements);
+		expect(clippedLabels).toEqual([]);
+		const ids = new Set(inserted.elements.map((element) => element.id));
+		const arrows = inserted.elements.filter((element) => element.type === 'arrow');
+		expect(arrows.length).toBeGreaterThanOrEqual(3);
+		for (const edge of arrows) {
+			expect(ids.has(edge.startBinding?.elementId)).toBe(true);
+			expect(ids.has(edge.endBinding?.elementId)).toBe(true);
+			expect(edge.boundElements.some((/** @type {any} */ bound) => bound.type === 'text')).toBe(
+				true
+			);
+		}
+		await page.getByRole('button', { name: 'Undo', exact: true }).click();
+		await expect
+			.poll(async () => (await getScene()).elements.filter((element) => !element.isDeleted).length)
+			.toBe(0);
+		await page.getByRole('button', { name: 'Redo', exact: true }).click();
+		await expect
+			.poll(async () => (await getScene()).elements.filter((element) => !element.isDeleted).length)
+			.toBe(inserted.elements.length);
+		expect(inference).toEqual([]);
+		await page.getByRole('checkbox', { name: 'Library', exact: true }).uncheck({ force: true });
+		await page.mouse.click(900, 660);
+		await testInfo.attach('editable-scene', {
+			body: JSON.stringify(inserted),
+			contentType: 'application/json'
+		});
+		await testInfo.attach('figure', { body: await page.screenshot(), contentType: 'image/png' });
+		await page.getByTestId('main-menu-trigger').click();
+		await page.getByRole('button', { name: 'Export image...', exact: true }).click();
+		for (const format of ['PNG', 'SVG']) {
+			const downloadEvent = page.waitForEvent('download');
+			await page.getByRole('button', { name: `Export to ${format}`, exact: true }).click();
+			const download = await downloadEvent;
+			const path = testInfo.outputPath(`figure.${format.toLowerCase()}`);
+			await download.saveAs(path);
+			const bytes = await readFile(path);
+			if (format === 'PNG') {
+				expect(bytes.subarray(1, 4).toString()).toBe('PNG');
+				expect(bytes.readUInt32BE(16)).toBeGreaterThan(900);
+				expect(bytes.readUInt32BE(20)).toBeGreaterThan(400);
+			} else {
+				expect(bytes.toString()).toContain('<svg');
+				for (const element of inserted.elements.filter((element) => element.type === 'text')) {
+					for (const line of element.text.split('\n')) expect(bytes.toString()).toContain(line);
+				}
+			}
+			await testInfo.attach(`export-${format.toLowerCase()}`, {
+				path,
+				contentType: format === 'PNG' ? 'image/png' : 'image/svg+xml'
+			});
+		}
+		expect(inference).toEqual([]);
+	});
+}
 
 test('hand-drawn UI components are searchable, editable, and preserve existing drawings', async ({
 	page
@@ -487,7 +586,7 @@ test('software architecture libraries preload and preserve personally added comp
 				const items = /** @type {{ id: string }[]} */ (
 					JSON.parse(
 						localStorage.getItem(
-							(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+							(document.querySelector('.draw-canvas')?.getAttribute('data-account-storage-key') ||
 								'swyx-excalidraw:guest') + ':library'
 						) ?? '[]'
 					)
@@ -502,7 +601,7 @@ test('software architecture libraries preload and preserve personally added comp
 			/** @type {{ id: string }[]} */ (
 				JSON.parse(
 					localStorage.getItem(
-						(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+						(document.querySelector('.draw-canvas')?.getAttribute('data-account-storage-key') ||
 							'swyx-excalidraw:guest') + ':library'
 					) ?? '[]'
 				)
@@ -534,14 +633,14 @@ test('software architecture libraries preload and preserve personally added comp
 		const storedItems = /** @type {{ id: string }[]} */ (
 			JSON.parse(
 				localStorage.getItem(
-					(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+					(document.querySelector('.draw-canvas')?.getAttribute('data-account-storage-key') ||
 						'swyx-excalidraw:guest') + ':library'
 				) ?? '[]'
 			)
 		);
 		storedItems.push({ ...storedItems[0], id: 'my-personal-component' });
 		localStorage.setItem(
-			(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+			(document.querySelector('.draw-canvas')?.getAttribute('data-account-storage-key') ||
 				'swyx-excalidraw:guest') + ':library',
 			JSON.stringify(storedItems)
 		);
@@ -553,7 +652,7 @@ test('software architecture libraries preload and preserve personally added comp
 				const storedItems = /** @type {{ id: string }[]} */ (
 					JSON.parse(
 						localStorage.getItem(
-							(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+							(document.querySelector('.draw-canvas')?.getAttribute('data-account-storage-key') ||
 								'swyx-excalidraw:guest') + ':library'
 						) ?? '[]'
 					)
@@ -598,6 +697,7 @@ for (const fixture of [
 		const drawingCanvas = page.locator('.draw-canvas canvas.excalidraw__canvas.interactive');
 		await expect(drawingCanvas).toBeVisible();
 		await expect(page.getByRole('region', { name: 'Selected image tools' })).toHaveCount(0);
+		await drawingCanvas.click({ position: { x: 80, y: 170 } });
 		await drawingCanvas.click({ position: { x: 360, y: 280 } });
 		await page.evaluate(async (path) => {
 			const source = await fetch(path).then((response) => response.blob());
@@ -707,7 +807,7 @@ for (const fixture of [
 				imageHeight: bitmap.height,
 				rememberedMode: JSON.parse(
 					localStorage.getItem(
-						(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+						(document.querySelector('.draw-canvas')?.getAttribute('data-account-storage-key') ||
 							'swyx-excalidraw:guest') + ':background-mode'
 					) ?? 'null'
 				)

@@ -135,6 +135,7 @@ test('authenticated assistant offers grounded Canva-style tasks and creates bran
 	await page.reload();
 	let round = 0;
 	await page.route('**/tools/api/draw/agent', async (route) => {
+		if (route.request().method() === 'GET') return route.continue();
 		round++;
 		await route.fulfill({
 			json:
@@ -162,7 +163,7 @@ test('authenticated assistant offers grounded Canva-style tasks and creates bran
 	});
 	await page.getByRole('button', { name: 'Open drawing assistant' }).click();
 	const assistant = page.getByRole('region', { name: 'Drawing assistant' });
-	await expect(assistant.getByRole('button', { name: /try .+ workflow/i })).toHaveCount(6);
+	await expect(assistant.getByRole('button', { name: /try .+ workflow/i })).toHaveCount(8);
 	await assistant.getByRole('button', { name: 'Try Podcast thumbnail workflow' }).click();
 	await expect(assistant.getByRole('textbox', { name: 'Message drawing assistant' })).toHaveValue(
 		/timestamp zone/
@@ -172,7 +173,7 @@ test('authenticated assistant offers grounded Canva-style tasks and creates bran
 		timeout: 20_000
 	});
 	await assistant.getByRole('button', { name: 'Browse assistant design workflows' }).click();
-	await expect(assistant.getByRole('button', { name: /try .+ workflow/i })).toHaveCount(6);
+	await expect(assistant.getByRole('button', { name: /try .+ workflow/i })).toHaveCount(8);
 	await assistant.getByRole('button', { name: 'Try Speaker announcement workflow' }).click();
 	await expect(assistant.getByRole('textbox', { name: 'Message drawing assistant' })).toHaveValue(
 		/1080 × 1350/
@@ -195,6 +196,7 @@ test('design workflows remain reachable and artboard controls stay contained on 
 }) => {
 	await page.setViewportSize({ width: 390, height: 844 });
 	await page.goto('/draw');
+	await page.getByRole('button', { name: 'Choose drawing mode and tools' }).click();
 	await page.getByRole('button', { name: 'Open drawing templates and library' }).click();
 	await page.getByRole('tab', { name: 'Design', exact: true }).click();
 	await page.getByRole('button', { name: 'Insert Article launch banner design' }).click();

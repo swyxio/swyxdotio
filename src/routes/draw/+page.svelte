@@ -5,7 +5,10 @@
 	import '@excalidraw/excalidraw/index.css';
 	import { DRAW_MEME_TEMPLATES, fetchMemeTemplates, searchMemeTemplates } from '$lib/draw-memes.js';
 	import { orderRecentDrawingPages, searchWorkspaceCommands } from '$lib/draw-workspace.js';
-	import { DEFAULT_DRAW_FAL_MODEL, getDrawFalModel } from '$lib/draw-fal-models.js';
+	import {
+		DEFAULT_DRAW_GENERATION_MODEL,
+		getDrawGenerationModel
+	} from '$lib/draw-generation-models.js';
 	import {
 		loadDrawingGenerationHistory,
 		saveDrawingGenerationHistory
@@ -15,9 +18,13 @@
 		captureVisibleDrawingViewport
 	} from '$lib/draw-agent-tools.js';
 	import { processImageTool } from '$lib/draw-image-tools.js';
-	import { prepareDrawingFalImage } from '$lib/draw-fal-image.js';
-	import { runDrawingFalGeneration } from '$lib/draw-fal-queue.js';
-	import { optimizeDrawingImageForCloud, replaceDrawingImage } from '$lib/draw-image-scene.js';
+	import { prepareDrawingGenerationImage } from '$lib/draw-generation-image.js';
+	import { runDrawingGeneration } from '$lib/draw-generation-client.js';
+	import {
+		optimizeDrawingImageForCloud,
+		replaceDrawingImage,
+		insertDrawingGenerations
+	} from '$lib/draw-image-scene.js';
 	import {
 		createDrawingDesign,
 		DRAW_DESIGN_FORMATS,
@@ -26,7 +33,28 @@
 		getDrawingDesignTemplate
 	} from '$lib/draw-designs.js';
 	import DrawAgent from '$lib/DrawAgent.svelte';
+	import { DRAW_THINKING_WORKFLOWS } from '$lib/draw-thinking.js';
 	import DrawImageToolbox from '$lib/DrawImageToolbox.svelte';
+	import DrawWorkspaceNav from '$lib/DrawWorkspaceNav.svelte';
+	import DrawStartingPoints from '$lib/DrawStartingPoints.svelte';
+	import {
+		getDrawingStartingMode,
+		drawingStartingModeKey,
+		isNewBlankDrawing,
+		shouldShowDrawingStart
+	} from '$lib/draw-starting-modes.js';
+	import DrawCreativeWorkspace from '$lib/DrawCreativeWorkspace.svelte';
+	import { creativeSceneActions } from '$lib/draw-creative-scene';
+	import { CreativeClient } from '$lib/draw-creative-client';
+	import {
+		createDrawingPendingSave,
+		writeDrawingPendingSave,
+		readDrawingPendingSave,
+		readDrawingScene,
+		writeDrawingScene,
+		drawingPendingSaveKey,
+		acknowledgeDrawingPendingSave
+	} from '$lib/draw-pending-save.js';
 
 	// Set once after the server identifies the account, before reading any drawing data.
 	let STORAGE_KEY = $state('');
@@ -55,6 +83,21 @@
 	let canvas;
 	/** @type {import('@excalidraw/excalidraw/types').ExcalidrawImperativeAPI | null} */
 	let editor = $state.raw(null);
+	/** @type {{ prepareWorkflow: (id: string) => void, showAssistant: () => void, stop: () => void } | undefined} */
+	let drawingAssistant = $state();
+	let assistantOpen = $state(false);
+	let assistantMinimized = $state(false);
+	let assistantRunning = $state(false);
+	let startingMode = $state(getDrawingStartingMode('thinking'));
+	let workspaceMenuOpen = $state(false);
+	let sceneReady = $state(false);
+	let blankScene = $state(false);
+	let startingPointsRestoreFailed = $state(false);
+	let startingPointsRequested = $state(false);
+	let startingDefaultsPage = '';
+	let creativeOpen = $state(false);
+	/** @type {string[]} */
+	let dismissedStartingPages = $state([]);
 	/** @type {typeof import('@excalidraw/excalidraw').convertToExcalidrawElements | null} */
 	let convertElements = null;
 	/** @type {typeof import('@excalidraw/excalidraw').newElementWith | null} */
@@ -102,26 +145,52 @@
 	/** @type {{ id: string, email: string, name: string, isOwner: boolean } | null} */
 	let toolsUser = $state(null);
 	let accountError = $state('');
-	let accountChanged = false;
+	/** @type {DrawCreativeWorkspace | undefined} */
+	let creativeWorkspace = $state();
+	let accountChanged = $state(false);
 	let needsSignIn = $state(false);
 	/** @type {'local' | 'saving' | 'saved' | 'error'} */
 	let saveStatus = $state('local');
 	/** @type {ReturnType<typeof setTimeout> | undefined} */
 	let saveTimer;
-	/** @type {{ pageId: string, scene: DrawingScene } | undefined} */
+	/** @type {import('$lib/draw-pending-save.js').DrawingPendingSave | undefined} */
 	let pendingSave;
-	let isSwitchingPage = false;
+	/** @type {Promise<void> | undefined} */
+	let saveRequest;
+	let persistenceError = $state('');
+	let recoveryNotice = $state('');
+	let initialSceneChange = true;
+	let localSaveFailed = false;
+	let legacyCachePageId = '';
+	let isSwitchingPage = $state(false);
 	let isLibraryOpen = $state(false);
 	let selectedImageId = $state('');
 	let selectedImageDataUrl = $state('');
 	let imageToolAction = $state(
-		/** @type {'magic-select' | 'magic-eraser' | 'depth-blur' | 'vectorize' | 'background' | 'fal' | null} */ (
+		/** @type {'magic-select' | 'magic-eraser' | 'depth-blur' | 'vectorize' | 'background' | 'generate' | null} */ (
 			null
 		)
 	);
+	let isGenerationOpen = $state(false);
+	let generationRunning = $state(false);
+	let imageToolMinimized = $state(false);
+	let generationHistoryError = $state('');
+	let generationPanel = $state(
+		/** @type {{openGeneration:(options?:{prompt?:string,modelIds?:string[],referenceImages?:import('$lib/draw-generation-history.js').DrawingGenerationReference[],context?:Record<string,unknown>})=>boolean,openHistory:()=>Promise<void>,cancelGeneration:()=>void}|undefined} */ (
+			undefined
+		)
+	);
+	let generationCanvasAbort = new AbortController();
+	let generationInsertionRunning = $state(false);
+	$effect(() => {
+		const pageId = activePageId;
+		generationCanvasAbort.abort();
+		generationCanvasAbort = new AbortController();
+		return () => generationCanvasAbort.abort();
+	});
 	let imageToolPrompt = $state('');
 	let imageToolStatus = $state('');
-	let imageToolModelIds = $state([DEFAULT_DRAW_FAL_MODEL.id]);
+	let imageToolModelIds = $state([DEFAULT_DRAW_GENERATION_MODEL.id]);
 	let imageToolGenerationParameters = $state(
 		/** @type {Record<string, Record<string, unknown>>} */ ({})
 	);
@@ -143,6 +212,197 @@
 	const activeBackgroundMode = $derived(
 		BACKGROUND_MODES.find((mode) => mode.id === backgroundMode) ?? BACKGROUND_MODES[0]
 	);
+	const showStartingPoints = $derived(
+		shouldShowDrawingStart({
+			ready: sceneReady && !isSwitchingPage,
+			restoreFailed: startingPointsRestoreFailed,
+			blank: blankScene || startingPointsRequested,
+			dismissed: !startingPointsRequested && dismissedStartingPages.includes(activePageId),
+			surfaceOpen:
+				isLibraryOpen ||
+				creativeOpen ||
+				generationRunning ||
+				assistantRunning ||
+				(isGenerationOpen && !imageToolMinimized) ||
+				(assistantOpen && !assistantMinimized) ||
+				Boolean(activeImageToolId) ||
+				isCommandPaletteOpen ||
+				workspaceMenuOpen ||
+				isPageMenuOpen
+		})
+	);
+	const workspaceActions = $derived([
+		{
+			id: 'templates',
+			label: 'Templates',
+			ariaLabel: 'Open drawing templates and library',
+			active: isLibraryOpen
+		},
+		{
+			id: 'assets',
+			label: 'Assets',
+			ariaLabel: 'Open assets and creative workspace',
+			active: creativeOpen
+		},
+		{
+			id: 'generate',
+			label: 'Generate',
+			busyLabel: 'Generating…',
+			ariaLabel: 'Open image and video generation',
+			active: isGenerationOpen && !imageToolMinimized,
+			busy: generationRunning
+		},
+		{
+			id: 'assistant',
+			label: 'Assistant',
+			busyLabel: 'Assistant working…',
+			ariaLabel: 'Open drawing assistant',
+			active: assistantOpen && !assistantMinimized,
+			busy: assistantRunning
+		},
+		{ id: 'export', label: 'Export', ariaLabel: 'Open drawing export options' }
+	]);
+	const mediaSurfaceCovered = $derived(
+		isLibraryOpen || creativeOpen || (assistantOpen && !assistantMinimized)
+	);
+	const mediaJobInBackground = $derived.by(() => {
+		if (!generationRunning) return false;
+		return mediaSurfaceCovered || imageToolMinimized;
+	});
+	const assistantJobInBackground = $derived.by(() => {
+		if (!assistantRunning) return false;
+		return !assistantOpen || assistantMinimized;
+	});
+	const backgroundJobCount = $derived(
+		Number(mediaJobInBackground) + Number(assistantJobInBackground)
+	);
+	const backgroundInset = $derived(backgroundJobCount ? backgroundJobCount * 51 + 15 : 0);
+
+	$effect(() => {
+		if (!sceneReady || isSwitchingPage || !activePageId || startingDefaultsPage === activePageId)
+			return;
+		startingDefaultsPage = activePageId;
+		applyStartingDefaults();
+	});
+
+	function applyStartingDefaults() {
+		if (
+			startingMode.id === 'experiment' &&
+			blankScene &&
+			!startingPointsRestoreFailed &&
+			!dismissedStartingPages.includes(activePageId) &&
+			!isLibraryOpen &&
+			!creativeOpen &&
+			!(assistantOpen && !assistantMinimized) &&
+			!isGenerationOpen
+		)
+			void openGenerationComposer();
+	}
+
+	function dismissStartingPoints() {
+		startingPointsRequested = false;
+		if (!dismissedStartingPages.includes(activePageId))
+			dismissedStartingPages = [...dismissedStartingPages, activePageId];
+	}
+
+	/** UI-only: never changes the active tool, scene, selection, draft, or undo history. */
+	function changeStartingMode(/** @type {string} */ id) {
+		startingMode = getDrawingStartingMode(id);
+		workspaceSection = startingMode.section;
+		try {
+			localStorage.setItem(drawingStartingModeKey(STORAGE_KEY), JSON.stringify(startingMode.id));
+		} catch {}
+		if (sceneReady) applyStartingDefaults();
+	}
+
+	/** Keep controllers mounted; opening a surface only changes which one is in front. */
+	function prepareWorkspaceSurface(
+		/** @type {'library' | 'assistant' | 'generate' | 'creative' | 'start'} */ surface
+	) {
+		workspaceMenuOpen = false;
+		isPageMenuOpen = false;
+		startingPointsRequested = false;
+		if (surface !== 'assistant') assistantMinimized = true;
+		if (surface !== 'generate') imageToolMinimized = true;
+		if (surface !== 'creative') creativeWorkspace?.close();
+		if (surface !== 'library' && isLibraryOpen)
+			editor?.toggleSidebar({ name: 'default', force: false });
+	}
+
+	function openWorkspaceAction(/** @type {string} */ action) {
+		if (action === 'templates') openWorkspaceSection(workspaceSection);
+		if (action === 'assistant') drawingAssistant?.showAssistant();
+		if (action === 'assets') void openCreativeWorkspace('assets');
+		if (action === 'generate') void openGenerationComposer();
+		if (action === 'export') void openCreativeWorkspace('export');
+	}
+
+	async function openCreativeWorkspace(
+		/** @type {'assets' | 'kits' | 'sources' | 'compose' | 'versions' | 'export'} */ view
+	) {
+		prepareWorkspaceSurface('creative');
+		await creativeWorkspace?.show(view);
+	}
+
+	/** Resolve only references the user explicitly chose; never attach their whole kit. */
+	async function openCreativeGeneration(
+		/** @type {{ prompt: string, referenceAssetIds: string[], context: Record<string, unknown> }} */ request
+	) {
+		if (request.referenceAssetIds.length > 1)
+			throw new Error(
+				'Generate currently accepts one reference image. Choose one reference in your brief, then save a new composition. Nothing was uploaded to a model.'
+			);
+		if (generationRunning)
+			throw new Error(
+				'Finish or cancel the current generation batch before opening this composition.'
+			);
+		const userId = toolsUser?.id;
+		const pageId = activePageId;
+		const signal = generationCanvasAbort.signal;
+		/** @type {import('$lib/draw-generation-history.js').DrawingGenerationReference[]} */
+		const references = [];
+		if (request.referenceAssetIds.length) {
+			if (!userId || accountChanged)
+				throw new Error('Sign in again to use your private reference.');
+			const assetId = request.referenceAssetIds[0];
+			const blob = await new CreativeClient(userId, signal).asset(assetId);
+			if (!/^image\/(png|jpeg|webp|avif|gif)$/.test(blob.type))
+				throw new Error('Choose a PNG, JPEG, WebP, AVIF or GIF reference for Generate.');
+			references.push({ dataURL: await readBlobDataUrl(blob), mimeType: blob.type, assetId });
+		}
+		if (signal.aborted || accountChanged || toolsUser?.id !== userId || activePageId !== pageId)
+			throw new Error('The account or page changed. Open the composition again.');
+		await openGenerationComposer({
+			prompt: request.prompt,
+			referenceImages: references,
+			context: request.context
+		});
+	}
+
+	async function openGenerationHistory() {
+		await openGenerationComposer();
+		await generationPanel?.openHistory();
+	}
+
+	function browseStartingPoints() {
+		prepareWorkspaceSurface('start');
+		startingPointsRequested = true;
+	}
+
+	function runStartingCommand(/** @type {string} */ id) {
+		const command = workspaceCommands.find((command) => command.id === id);
+		if (!command) return;
+		dismissStartingPoints();
+		void command.run();
+	}
+
+	function handleCanvasPointer(/** @type {PointerEvent} */ event) {
+		if (
+			event.target instanceof Element &&
+			event.target.closest('canvas.excalidraw__canvas.interactive')
+		)
+			dismissStartingPoints();
+	}
 
 	/** @param {PointerEvent} event */
 	function startDraggingImageTools(event) {
@@ -188,7 +448,8 @@
 
 	/** @param {DrawingImageGeneration} generation */
 	function rememberImageGeneration(generation) {
-		const history = [generation, ...imageGenerations];
+		if (accountChanged) return;
+		const history = [generation, ...imageGenerations.filter((entry) => entry.id !== generation.id)];
 		const originals = history.filter((image) => image.modelLabel === 'Original');
 		const generated = history.filter((image) => image.modelLabel !== 'Original');
 		imageGenerations = [
@@ -199,7 +460,8 @@
 			`${STORAGE_KEY}:${activePageId}`,
 			$state.snapshot(imageGenerations)
 		).catch((error) => {
-			console.warn('Generation history could not be saved on this device.', error);
+			generationHistoryError =
+				'Not saved to device: generation history is unavailable or full. Download results you want to keep.';
 		});
 	}
 
@@ -219,7 +481,7 @@
 				].slice(0, 32);
 			})
 			.catch((error) => {
-				console.warn('Generation history could not be loaded from this device.', error);
+				generationHistoryError = 'Generation history could not be loaded from this device.';
 			});
 		return () => {
 			cancelled = true;
@@ -228,7 +490,51 @@
 
 	/** @param {boolean} active */
 	function updateImageGenerationState(active) {
+		generationRunning = active;
 		processingImage = active ? { id: selectedImageId, dataURL: selectedImageDataUrl } : null;
+	}
+	/** @param {Parameters<NonNullable<typeof generationPanel>['openGeneration']>[0]} [options] */
+	async function openGenerationComposer(options) {
+		await tick();
+		if (generationPanel?.openGeneration(options) === false) return;
+		prepareWorkspaceSurface('generate');
+		isGenerationOpen = true;
+		imageToolMinimized = false;
+	}
+
+	/** @param {DrawingImageGeneration[]} generations @param {boolean} [board] */
+	async function insertGeneratedImages(generations, board = false) {
+		if (accountChanged || !editor || !convertElements || !captureImmediately)
+			throw new Error('The drawing is unavailable.');
+		generationInsertionRunning = true;
+		try {
+			const result = await insertDrawingGenerations({
+				editor,
+				generations,
+				board,
+				convertElements,
+				captureUpdate: captureImmediately,
+				cloudAvailable,
+				signal: generationCanvasAbort.signal
+			});
+			if (result.exceedsCloudLimit) {
+				saveStatus = 'error';
+				generationHistoryError =
+					'Added on this device only: the drawing exceeds the 1.8 MB cloud limit.';
+			}
+		} finally {
+			generationInsertionRunning = false;
+		}
+	}
+
+	function canNavigateDrawing() {
+		if (localSaveFailed) return false;
+		if (!generationRunning && !generationInsertionRunning) return true;
+		imageToolMinimized = false;
+		imageToolStatus = generationInsertionRunning
+			? 'Finish adding the result before switching pages.'
+			: 'Finish or cancel the generation queue before switching pages.';
+		return false;
 	}
 	const recentPages = $derived(orderRecentDrawingPages(pages, activePageId));
 	const filteredComponents = $derived(
@@ -247,6 +553,57 @@
 	const workspaceCommands = $derived.by(() => {
 		/** @type {WorkspaceCommand[]} */
 		const commands = [
+			{
+				id: 'action-generate-media',
+				label: 'Generate image or video',
+				description: 'Prompt, compare models, remix and open generation history',
+				category: 'Actions',
+				keywords: ['ai', 'image', 'video', 'generate', 'history', 'experiment'],
+				run: () => openGenerationComposer()
+			},
+			{
+				id: 'action-open-creative-library',
+				label: 'Open assets and creative workspace',
+				description:
+					'Personal brand kits, sources, house prompts, editable compositions and exports',
+				category: 'Actions',
+				keywords: [
+					'assets',
+					'brand',
+					'thumbnail',
+					'youtube',
+					'source',
+					'transcript',
+					'prompt',
+					'versions',
+					'export'
+				],
+				run: () => openCreativeWorkspace('assets')
+			},
+			{
+				id: 'action-compose-thumbnail',
+				label: 'Create a thumbnail',
+				description: 'Choose your brand kit, source brief, and editable layout',
+				category: 'Actions',
+				keywords: ['thumbnail', 'aie', 'latent space', 'compose'],
+				run: () => openCreativeWorkspace('compose')
+			},
+			{
+				id: 'action-generation-history',
+				label: 'Open generation history',
+				description: 'Preview, compare and remix this page’s saved recipes',
+				category: 'Actions',
+				keywords: ['history', 'generation', 'results', 'compare'],
+				run: () => openGenerationHistory()
+			},
+			{
+				id: 'action-export-artwork',
+				label: 'Export drawing artwork',
+				description: 'Download a page, selection, or design in common formats',
+				category: 'Actions',
+				keywords: ['export', 'png', 'jpg', 'svg', 'zip'],
+				run: () => openCreativeWorkspace('export')
+			},
 			{
 				id: 'action-new-page',
 				label: 'Create new page',
@@ -298,6 +655,14 @@
 		];
 
 		commands.push(
+			...DRAW_THINKING_WORKFLOWS.map((workflow) => ({
+				id: `workflow-${workflow.id}`,
+				label: workflow.label,
+				description: workflow.description,
+				category: 'Assistant',
+				keywords: ['essay', 'argument', 'diagram', 'writing', 'thinking'],
+				run: () => prepareThinkingWorkflow(workflow.id)
+			})),
 			...DRAW_DESIGN_TEMPLATES.map((design) => ({
 				id: `design-${design.id}`,
 				label: design.label,
@@ -330,7 +695,9 @@
 				description: preset.description,
 				category: 'Presets',
 				keywords: ['framework', 'diagram', 'template'],
-				run: () => insertPreset(preset)
+				run: async () => {
+					await insertPreset(preset);
+				}
 			})),
 			...recentPages.map((page) => ({
 				id: `page-${page.id}`,
@@ -359,6 +726,8 @@
 			const value = localStorage.getItem(key);
 			return value ? JSON.parse(value) : undefined;
 		} catch {
+			if (key === STORAGE_KEY || key === `${STORAGE_KEY}:${activePageId}`)
+				startingPointsRestoreFailed = true;
 			return undefined;
 		}
 	}
@@ -406,9 +775,7 @@
 
 	/** @param {string} id */
 	function restorePageScene(id) {
-		return /** @type {DrawingScene | undefined} */ (
-			readStorage(`${STORAGE_KEY}:${id}`) ?? readStorage(STORAGE_KEY)
-		);
+		return readDrawingScene(localStorage, STORAGE_KEY, id);
 	}
 
 	/**
@@ -435,6 +802,7 @@
 			).code === 'account_changed'
 		) {
 			accountChanged = true;
+			generationCanvasAbort.abort();
 			pendingSave = undefined;
 			location.reload();
 			throw new Error('Your account changed. Reloading your workspace.');
@@ -461,8 +829,6 @@
 		const stored = /** @type {{ pages?: DrawingPage[], activePageId?: string } | undefined} */ (
 			readStorage(PAGE_STORAGE_KEY)
 		);
-		const previousScene = /** @type {DrawingScene | undefined} */ (readStorage(STORAGE_KEY));
-
 		try {
 			const result = await requestPage('');
 			cloudAvailable = true;
@@ -475,12 +841,6 @@
 					body: JSON.stringify({ name: 'Page 1' })
 				});
 				pages = [firstPage];
-				if (previousScene?.elements?.length) {
-					await requestPage(`/${encodeURIComponent(firstPage.id)}`, {
-						method: 'PUT',
-						body: JSON.stringify({ scene: previousScene })
-					});
-				}
 			}
 
 			const rememberedPageId = stored?.activePageId ?? result.activePageId;
@@ -490,48 +850,110 @@
 			storePages();
 			const currentPage = await requestPage(`/${encodeURIComponent(activePageId)}`);
 			saveStatus = 'saved';
-			return currentPage.scene ?? previousScene;
+			return /** @type {DrawingScene | undefined} */ (currentPage.scene);
 		} catch (error) {
 			cloudAvailable = false;
 			saveStatus = 'local';
+			if (!needsSignIn) startingPointsRestoreFailed = true;
 			if (!needsSignIn) console.warn('Drawing pages are using browser-only storage.', error);
 			pages = stored?.pages?.length ? stored.pages : [{ id: 'default', name: 'Page 1' }];
 			activePageId = pages.some((page) => page.id === stored?.activePageId)
 				? /** @type {string} */ (stored?.activePageId)
 				: pages[0].id;
 			storePages();
-			return restorePageScene(activePageId);
+			return undefined;
 		}
 	}
 
+	async function loadInitialDrawingScene() {
+		const remembered = /** @type {{ activePageId?: string } | undefined} */ (
+			readStorage(PAGE_STORAGE_KEY)
+		);
+		const cloudScene = await loadInitialPage();
+		const cachedScene = restorePageScene(activePageId);
+		const recovery = readDrawingPendingSave(localStorage, STORAGE_KEY, activePageId);
+		if (recovery) {
+			pendingSave =
+				new TextEncoder().encode(JSON.stringify(recovery.scene)).byteLength <= MAX_CLOUD_SCENE_BYTES
+					? recovery
+					: undefined;
+			recoveryNotice = 'Recovered unsynced changes from this device.';
+			saveStatus = cloudAvailable ? (pendingSave ? 'saving' : 'error') : 'local';
+			return recovery.scene;
+		}
+
+		// The old active-page cache has no proof of unsynced edits: never let it
+		// outrank cloud data, or import it into a different remembered page.
+		const canImportLegacy =
+			!cachedScene && (!remembered?.activePageId || remembered.activePageId === activePageId);
+		const legacyBytes = canImportLegacy ? localStorage.getItem(STORAGE_KEY) : null;
+		const legacyScene =
+			legacyBytes === null
+				? undefined
+				: createDrawingPendingSave(STORAGE_KEY, activePageId, JSON.parse(legacyBytes)).scene;
+		const scene = cloudScene ?? cachedScene ?? legacyScene;
+		legacyCachePageId = legacyBytes === null ? '' : activePageId;
+		if (scene) {
+			try {
+				writeDrawingScene(localStorage, STORAGE_KEY, activePageId, scene);
+				// Only remove legacy bytes after the canonical scene is safely written.
+				if (legacyCachePageId) localStorage.removeItem(STORAGE_KEY);
+				legacyCachePageId = '';
+			} catch {
+				// A full device must not make valid legacy artwork inaccessible.
+				// Keep it open for export/optimization, retaining the original bytes.
+				localSaveFailed = true;
+				persistenceError =
+					'Could not save the latest changes on this device. Export your drawing before reloading.';
+				saveStatus = 'error';
+			}
+		}
+		return scene;
+	}
+
+	/** Serialize PUTs as well as guarding acknowledgements: older requests cannot win on the server. */
 	async function flushPendingSave() {
 		if (saveTimer) clearTimeout(saveTimer);
-		const saving = pendingSave;
-		pendingSave = undefined;
-		if (accountChanged || !cloudAvailable || !saving) return;
-
-		saveStatus = 'saving';
-		try {
-			const savedPage = await requestPage(`/${encodeURIComponent(saving.pageId)}`, {
-				method: 'PUT',
-				body: JSON.stringify({ scene: saving.scene })
-			});
-			setPages(
-				pages.map((page) =>
-					page.id === saving.pageId
-						? { ...page, name: savedPage.name ?? page.name, updatedAt: savedPage.updatedAt }
-						: page
-				)
-			);
-			if (!pendingSave) saveStatus = 'saved';
-		} catch (error) {
-			saveStatus = 'error';
-			console.error('Could not synchronize the drawing.', error);
-		}
+		if (saveRequest) return saveRequest;
+		if (accountChanged || !cloudAvailable || !pendingSave) return;
+		saveRequest = (async () => {
+			while (pendingSave && !accountChanged && cloudAvailable) {
+				const saving = pendingSave;
+				pendingSave = undefined;
+				saveStatus = 'saving';
+				try {
+					const savedPage = await requestPage(`/${encodeURIComponent(saving.pageId)}`, {
+						method: 'PUT',
+						body: JSON.stringify({ scene: saving.scene })
+					});
+					if (accountChanged || saving.storageKey !== STORAGE_KEY) return;
+					const acknowledged = acknowledgeDrawingPendingSave(localStorage, saving);
+					setPages(
+						pages.map((page) =>
+							page.id === saving.pageId
+								? { ...page, name: savedPage.name ?? page.name, updatedAt: savedPage.updatedAt }
+								: page
+						)
+					);
+					if (!pendingSave && activePageId === saving.pageId)
+						saveStatus = acknowledged && !persistenceError ? 'saved' : 'error';
+				} catch (error) {
+					if (accountChanged) return;
+					if (!pendingSave) pendingSave = saving;
+					saveStatus = 'error';
+					console.error('Could not synchronize the drawing.', error);
+					break;
+				}
+			}
+		})().finally(() => {
+			saveRequest = undefined;
+		});
+		return saveRequest;
 	}
 
 	/** @param {DrawingPage} page */
 	async function switchPage(page) {
+		if (!canNavigateDrawing()) return;
 		if (!editor || page.id === activePageId) {
 			isPageMenuOpen = false;
 			return;
@@ -544,25 +966,25 @@
 			const response = cloudAvailable
 				? await requestPage(`/${encodeURIComponent(page.id)}`)
 				: undefined;
+			const recovery = readDrawingPendingSave(localStorage, STORAGE_KEY, page.id);
 			const scene = /** @type {DrawingScene} */ (
-				response?.scene ?? readStorage(`${STORAGE_KEY}:${page.id}`) ?? { elements: [], files: {} }
+				recovery?.scene ??
+					response?.scene ??
+					restorePageScene(page.id) ?? { elements: [], files: {} }
 			);
-			if (!cloudAvailable) {
-				const previousScene = localStorage.getItem(STORAGE_KEY);
-				if (previousScene !== null) {
-					localStorage.removeItem(STORAGE_KEY);
-					try {
-						localStorage.setItem(`${STORAGE_KEY}:${activePageId}`, previousScene);
-					} catch (error) {
-						localStorage.setItem(STORAGE_KEY, previousScene);
-						throw error;
-					}
-				}
-			}
+			// Each page owns one stable snapshot key. A failed destination write
+			// cannot discard or relabel the source canvas; no copies need moving.
+			if (!recovery) writeDrawingScene(localStorage, STORAGE_KEY, page.id, scene);
 			activePageId = page.id;
+			if (
+				recovery &&
+				new TextEncoder().encode(JSON.stringify(recovery.scene)).byteLength <= MAX_CLOUD_SCENE_BYTES
+			)
+				pendingSave = recovery;
+			recoveryNotice = recovery ? 'Recovered unsynced changes from this device.' : '';
+			startingPointsRequested = false;
+			blankScene = isNewBlankDrawing(scene);
 			storePages();
-			localStorage.removeItem(`${STORAGE_KEY}:${page.id}`);
-			localStorage.setItem(STORAGE_KEY, JSON.stringify(scene));
 			editor.updateScene({
 				elements: scene.elements ?? [],
 				appState: { ...scene.appState, selectedElementIds: {} }
@@ -571,13 +993,19 @@
 			isPageMenuOpen = false;
 		} catch (error) {
 			saveStatus = 'error';
+			persistenceError = 'Could not open that page safely. Your current drawing is still open.';
 			console.error('Could not open the drawing page.', error);
 		} finally {
 			isSwitchingPage = false;
+			if (pendingSave && cloudAvailable) {
+				if (saveTimer) clearTimeout(saveTimer);
+				saveTimer = setTimeout(() => void flushPendingSave(), SAVE_DELAY);
+			}
 		}
 	}
 
 	async function createPage() {
+		if (!canNavigateDrawing()) return;
 		const name = `Page ${pages.length + 1}`;
 		try {
 			const page = /** @type {DrawingPage} */ (
@@ -594,6 +1022,7 @@
 	}
 
 	async function duplicatePage() {
+		if (!canNavigateDrawing()) return;
 		if (!editor || !activePage) return;
 		await flushPendingSave();
 		const source = {
@@ -614,7 +1043,7 @@
 					body: JSON.stringify({ scene: source })
 				});
 			} else {
-				localStorage.setItem(`${STORAGE_KEY}:${page.id}`, JSON.stringify(source));
+				writeDrawingScene(localStorage, STORAGE_KEY, page.id, source);
 			}
 			setPages([...pages, page]);
 			await switchPage(page);
@@ -723,12 +1152,12 @@
 		}
 		let dataURL;
 		let mimeType;
-		/** @type {typeof import('$lib/draw-fal-models.js').DRAW_FAL_MODELS[number] | undefined} */
+		/** @type {typeof import('$lib/draw-generation-models.js').DRAW_GENERATION_MODELS[number] | undefined} */
 		let model;
 		/** @type {DrawingImageGeneration | undefined} */
 		let sourceGeneration;
 		if (action === 'fal') {
-			model = getDrawFalModel(options.model ?? DEFAULT_DRAW_FAL_MODEL.id);
+			model = getDrawGenerationModel(options.model ?? DEFAULT_DRAW_GENERATION_MODEL.id);
 			if (!model) throw new Error('Choose one of the available fal image models.');
 			const imagePrompt = typeof options.prompt === 'string' ? options.prompt.trim() : '';
 			if (!imagePrompt) throw new Error('Cloud image editing requires --prompt TEXT.');
@@ -750,7 +1179,7 @@
 			const prepared =
 				model.kind === 'text-to-image'
 					? undefined
-					: await prepareDrawingFalImage({
+					: await prepareDrawingGenerationImage({
 							dataURL: sourceFile.dataURL,
 							prompt: imagePrompt,
 							model,
@@ -760,7 +1189,7 @@
 			const generationModel = model;
 			const agentBudget = operation.getBudget();
 			if (!agentBudget) throw new Error('The assistant spending authorization is unavailable.');
-			const generated = await runDrawingFalGeneration({
+			const generated = await runDrawingGeneration({
 				userId: toolsUser?.id,
 				image: prepared?.blob,
 				prompt: imagePrompt,
@@ -785,7 +1214,7 @@
 					modelLabel: model.label,
 					createdAt: Date.now(),
 					modelId: model.id,
-					modelEndpoint: model.model,
+					adapterId: model.adapter,
 					modelProvider: model.provider,
 					modelKind: model.kind,
 					modelWorkflow: model.workflow,
@@ -869,7 +1298,7 @@
 				modelLabel: model.label,
 				createdAt: Date.now(),
 				modelId: model.id,
-				modelEndpoint: model.model,
+				adapterId: model.adapter,
 				modelProvider: model.provider,
 				modelKind: model.kind,
 				modelWorkflow: model.workflow,
@@ -902,6 +1331,10 @@
 	 */
 	async function executeAgentCommand(args, operation) {
 		operation.signal.throwIfAborted();
+		if (['add', 'update', 'connect', 'duplicate'].includes(args[0])) {
+			await document.fonts.load('23px Excalifont');
+			operation.signal.throwIfAborted();
+		}
 		return executeDrawingAgentCommand(args, {
 			editor,
 			convertElements,
@@ -1185,16 +1618,21 @@
 
 	/** @param {DrawingPage} page */
 	async function deletePage(page) {
+		if (!canNavigateDrawing()) return;
 		if (pages.length < 2) return;
 		try {
 			if (page.id === activePageId) {
 				const replacement = pages.find((candidate) => candidate.id !== page.id);
 				if (replacement) await switchPage(replacement);
+				if (page.id === activePageId) return;
 			}
+			await flushPendingSave();
+			if (accountChanged) return;
 			if (cloudAvailable) {
 				await requestPage(`/${encodeURIComponent(page.id)}`, { method: 'DELETE' });
 			}
-			localStorage.removeItem(`${STORAGE_KEY}:${page.id}`);
+			localStorage.removeItem(drawingPendingSaveKey(STORAGE_KEY, page.id));
+			if (pendingSave?.pageId === page.id) pendingSave = undefined;
 			setPages(pages.filter((candidate) => candidate.id !== page.id));
 			isPageMenuOpen = true;
 		} catch (error) {
@@ -1204,8 +1642,18 @@
 	}
 
 	/** @param {typeof presets[number]} preset */
-	function insertPreset(preset) {
-		if (!editor || !convertElements) return;
+	async function insertPreset(preset) {
+		if (!editor || !convertElements) return false;
+		const insertionPage = activePageId;
+		// Excalidraw measures text synchronously: wait for its registered font so
+		// first-use diagrams don't retain fallback-font widths and clipped labels.
+		try {
+			await document.fonts.load('23px Excalifont');
+		} catch {
+			editor.setToast({ message: 'The drawing font could not load. Please try again.' });
+			return false;
+		}
+		if (activePageId !== insertionPage || !editor) return false;
 
 		const existingElements = editor.getSceneElements();
 		const offsetX =
@@ -1227,12 +1675,21 @@
 		);
 
 		editor.updateScene({
-			elements: [...existingElements, ...shapes],
+			elements: [...editor.getSceneElementsIncludingDeleted(), ...shapes],
 			appState: {
 				selectedElementIds: Object.fromEntries(shapes.map((shape) => [shape.id, true]))
-			}
+			},
+			...(captureImmediately ? { captureUpdate: captureImmediately } : {})
 		});
-		editor.scrollToContent(shapes, { fitToContent: true, animate: true, duration: 260 });
+		focusDesignArtboard(shapes);
+		return true;
+	}
+
+	/** @param {string} id */
+	function prepareThinkingWorkflow(id) {
+		// A navigation action only: no inference, page switch, or scene mutation.
+		prepareWorkspaceSurface('assistant');
+		drawingAssistant?.prepareWorkflow(id);
 	}
 
 	/** @param {string} componentId */
@@ -1262,6 +1719,7 @@
 
 	/** @param {'presets' | 'designs' | 'components' | 'memes'} section */
 	function openWorkspaceSection(section) {
+		prepareWorkspaceSurface('library');
 		workspaceSection = section;
 		isPageMenuOpen = false;
 		editor?.updateScene({ appState: { openSidebar: { name: 'default', tab: 'workspace' } } });
@@ -1520,6 +1978,20 @@
 		backgroundAbort?.abort();
 	}
 
+	const creativeActions = creativeSceneActions(() => ({
+		editor,
+		convertElements,
+		captureImmediately,
+		userId: accountChanged ? undefined : toolsUser?.id,
+		pageId: activePageId,
+		exportToBlob,
+		exportToSvg,
+		focus: focusDesignArtboard,
+		status: (message) => {
+			designStatus = message;
+		}
+	}));
+
 	/** @param {Event} event */
 	function changeBackgroundMode(event) {
 		backgroundMode = /** @type {HTMLSelectElement} */ (event.currentTarget).value;
@@ -1538,8 +2010,18 @@
 	 */
 	function saveScene(elements, appState, files) {
 		const nextLibraryOpen = appState.openSidebar?.name === 'default';
+		if (nextLibraryOpen && !isLibraryOpen) prepareWorkspaceSurface('library');
 		if (isLibraryOpen !== nextLibraryOpen) isLibraryOpen = nextLibraryOpen;
-		if (!activePageId || isSwitchingPage) return;
+		if (!activePageId || isSwitchingPage || appState.isLoading || accountChanged) return;
+		// Native restoration normalizes defaults and indices. That first callback
+		// is not evidence that a clean legacy/cloud scene contains unsynced edits.
+		const normalizingInitialScene = initialSceneChange;
+		initialSceneChange = false;
+		if (!appState.isLoading) {
+			sceneReady = true;
+			blankScene = elements.length === 0;
+			if (!blankScene || appState.activeTool.type !== 'selection') dismissStartingPoints();
+		}
 		const selectedIds = Object.entries(appState.selectedElementIds)
 			.filter(([, selected]) => selected)
 			.map(([id]) => id);
@@ -1583,27 +2065,52 @@
 			},
 			files: filesUsedByScene(elements, files)
 		};
+		const serialized = JSON.stringify(scene);
+		const withinCloudLimit =
+			new TextEncoder().encode(serialized).byteLength <= MAX_CLOUD_SCENE_BYTES;
 		try {
-			const serialized = JSON.stringify(scene);
-			localStorage.removeItem(`${STORAGE_KEY}:${activePageId}`);
-			if (localStorage.getItem(STORAGE_KEY) !== serialized) {
-				localStorage.setItem(STORAGE_KEY, serialized);
-			}
-		} catch (error) {
-			console.error('Could not save the drawing locally.', error);
-		}
-		if (cloudAvailable) {
-			const sceneBytes = new TextEncoder().encode(JSON.stringify(scene)).byteLength;
-			if (sceneBytes > MAX_CLOUD_SCENE_BYTES) {
-				if (saveTimer) clearTimeout(saveTimer);
-				pendingSave = undefined;
-				saveStatus = 'error';
+			const changed = JSON.stringify(restorePageScene(activePageId)) !== serialized;
+			if (!changed) {
+				if (pendingSave && cloudAvailable && !saveRequest) {
+					if (saveTimer) clearTimeout(saveTimer);
+					saveTimer = setTimeout(() => void flushPendingSave(), SAVE_DELAY);
+				}
 				return;
 			}
-			pendingSave = { pageId: activePageId, scene };
-			if (saveTimer) clearTimeout(saveTimer);
-			saveTimer = setTimeout(() => void flushPendingSave(), SAVE_DELAY);
+			const hasPendingRevision =
+				pendingSave ||
+				(normalizingInitialScene &&
+					readDrawingPendingSave(localStorage, STORAGE_KEY, activePageId));
+			if (toolsUser && (!normalizingInitialScene || hasPendingRevision)) {
+				// Journal offline edits too: recovery must never outrank a newer local draft.
+				const journal = createDrawingPendingSave(STORAGE_KEY, activePageId, scene);
+				writeDrawingPendingSave(localStorage, journal);
+				pendingSave = withinCloudLimit ? journal : undefined;
+			} else if (changed) {
+				writeDrawingScene(localStorage, STORAGE_KEY, activePageId, scene);
+			}
+			if (legacyCachePageId === activePageId) {
+				localStorage.removeItem(STORAGE_KEY);
+				legacyCachePageId = '';
+			}
+			localSaveFailed = false;
+			persistenceError = '';
+		} catch (error) {
+			localSaveFailed = true;
+			persistenceError =
+				'Could not save the latest changes on this device. Export your drawing before reloading.';
+			saveStatus = 'error';
+			console.error('Could not save the drawing locally.', error);
+			return;
 		}
+		if (!cloudAvailable) return;
+		if (saveTimer) clearTimeout(saveTimer);
+		if (!withinCloudLimit) {
+			pendingSave = undefined;
+			saveStatus = 'error';
+			return;
+		}
+		saveTimer = setTimeout(() => void flushPendingSave(), SAVE_DELAY);
 	}
 
 	onMount(() => {
@@ -1628,6 +2135,8 @@
 				LIBRARY_STORAGE_KEY = `${STORAGE_KEY}:library`;
 				INSTALLED_LIBRARY_STORAGE_KEY = `${LIBRARY_STORAGE_KEY}:installed-defaults`;
 				BACKGROUND_MODE_STORAGE_KEY = `${STORAGE_KEY}:background-mode`;
+				startingMode = getDrawingStartingMode(readStorage(drawingStartingModeKey(STORAGE_KEY)));
+				workspaceSection = startingMode.section;
 				try {
 					localStorage.setItem(TOOLS_ACCOUNT_EVENT_KEY, toolsUser?.id ?? 'guest');
 				} catch {}
@@ -1660,10 +2169,11 @@
 				import('$lib/draw-presets.js'),
 				import('$lib/draw-ui-components.js'),
 				import('$lib/draw-library.js'),
-				loadInitialPage()
+				loadInitialDrawingScene()
 			]);
 
 			if (destroyed) return;
+			blankScene = isNewBlankDrawing(initialScene);
 
 			convertElements = convertToExcalidrawElements;
 			updateElement = newElementWith;
@@ -1756,9 +2266,14 @@
 			root.render(createElement(DrawingEditor));
 		}
 
-		void mountEditor();
+		void mountEditor().catch(() => {
+			accountError =
+				'Could not restore your drawing safely. Your saved data was left untouched. Reload to try again.';
+		});
 		const accountUpdated = () => {
 			accountChanged = true;
+			sceneReady = false;
+			generationCanvasAbort.abort();
 			pendingSave = undefined;
 			if (saveTimer) clearTimeout(saveTimer);
 			backgroundAbort?.abort();
@@ -1829,21 +2344,74 @@
 		<button onclick={() => location.reload()}>Reload workspace</button>
 	</div>{/if}
 
+{#if persistenceError}<div class="drawing-save-error" role="alert">
+		<span>{persistenceError}</span>
+		<button type="button" onclick={() => void openCreativeWorkspace('export')}
+			>Export drawing</button
+		>
+	</div>{/if}
+
 <div
 	class="draw-canvas"
-	data-storage-key={STORAGE_KEY}
+	data-storage-key={STORAGE_KEY && activePageId
+		? drawingPendingSaveKey(STORAGE_KEY, activePageId)
+		: undefined}
+	data-account-storage-key={STORAGE_KEY || undefined}
 	role="application"
 	aria-label="Drawing canvas"
+	onpointerdowncapture={handleCanvasPointer}
 	bind:this={canvas}
 ></div>
 
 {#if editor && activePageId}
+	{#if !accountChanged}{#key toolsUser?.id ?? 'guest'}
+			<DrawCreativeWorkspace
+				bind:this={creativeWorkspace}
+				user={toolsUser}
+				onInsert={creativeActions.insert}
+				onInsertAsset={creativeActions.insertAsset}
+				onBlank={creativeActions.blank}
+				onAdapt={creativeActions.adapt}
+				onExport={creativeActions.download}
+				onSaveSelected={creativeActions.selectedAsset}
+				onGenerate={openCreativeGeneration}
+				onOpenChange={(open) => {
+					creativeOpen = open;
+					if (open) prepareWorkspaceSurface('creative');
+				}}
+			/>
+		{/key}{/if}
 	<DrawAgent
+		bind:this={drawingAssistant}
+		bind:open={assistantOpen}
+		bind:minimized={assistantMinimized}
+		bind:running={assistantRunning}
+		showLauncher={false}
+		{backgroundInset}
+		onOpen={() => prepareWorkspaceSurface('assistant')}
 		authenticated={toolsAuthenticated}
 		userId={toolsUser?.id}
 		pageId={`${STORAGE_KEY}:${activePageId}`}
 		executeCommand={executeAgentCommand}
 		captureViewport={() => captureVisibleDrawingViewport(canvas)}
+	/>
+	<DrawWorkspaceNav
+		mode={startingMode}
+		actions={workspaceActions}
+		onMode={changeStartingMode}
+		onAction={openWorkspaceAction}
+		onStartingPoints={browseStartingPoints}
+		bind:menuOpen={workspaceMenuOpen}
+		libraryOpen={isLibraryOpen}
+	/>
+{/if}
+
+{#if showStartingPoints}
+	<DrawStartingPoints
+		mode={startingMode}
+		onMode={changeStartingMode}
+		onCommand={runStartingCommand}
+		onDismiss={dismissStartingPoints}
 	/>
 {/if}
 
@@ -1903,12 +2471,17 @@
 	{#if designStatus}<div class="artboard-status" role="status">{designStatus}</div>{/if}
 {/if}
 
-{#if activeImageToolId || isRemovingBackground}
+{#if editor && updateElement && captureImmediately}
 	<section
 		class="image-tools"
+		style:--draw-background-inset={`${backgroundInset}px`}
+		hidden={mediaSurfaceCovered ||
+			(!isGenerationOpen && !activeImageToolId && !isRemovingBackground && !generationRunning)}
 		aria-label="Selected image tools"
 		style:left={imageToolsPosition ? `${imageToolsPosition.x}px` : undefined}
 		style:top={imageToolsPosition ? `${imageToolsPosition.y}px` : undefined}
+		style:right={imageToolsPosition ? 'auto' : undefined}
+		style:bottom={imageToolsPosition ? 'auto' : undefined}
 		style:transform={imageToolsPosition ? 'none' : undefined}
 		style:max-height={imageToolsPosition
 			? `calc(100dvh - ${imageToolsPosition.y + 12}px)`
@@ -1917,84 +2490,117 @@
 		onpointerup={finishDraggingImageTools}
 		onpointercancel={finishDraggingImageTools}
 	>
-		{#if editor && updateElement && captureImmediately && activeImageToolId}
-			<DrawImageToolbox
-				{editor}
-				imageId={activeImageToolId}
-				imageDataUrl={activeImageToolDataUrl}
-				bind:action={imageToolAction}
-				bind:prompt={imageToolPrompt}
-				bind:operationStatus={imageToolStatus}
-				bind:selectedFalModelIds={imageToolModelIds}
-				bind:generationParameters={imageToolGenerationParameters}
-				{updateElement}
-				captureUpdate={captureImmediately}
-				{cloudAvailable}
-				authenticated={toolsAuthenticated}
-				userId={toolsUser?.id}
-				backgroundProcessing={isRemovingBackground}
-				generations={imageGenerations}
-				onGeneration={rememberImageGeneration}
-				onProcessingChange={updateImageGenerationState}
-				onDragStart={startDraggingImageTools}
-				onCloudLimit={() => (saveStatus = 'error')}
-			>
-				{#snippet backgroundControls()}
-					<div class="image-tool-controls">
-						<select
-							class="background-mode-select"
-							aria-label="Background removal model"
-							value={backgroundMode}
-							disabled={isRemovingBackground}
-							onchange={changeBackgroundMode}
-						>
-							{#each BACKGROUND_MODES as mode (mode.id)}
-								<option value={mode.id}>{mode.label} ({mode.size})</option>
-							{/each}
-						</select>
-
-						{#if isRemovingBackground}
-							<button type="button" class="cancel-background" onclick={cancelBackgroundRemoval}>
-								Cancel
-							</button>
-						{:else}
-							<button
-								type="button"
-								class="remove-background"
-								aria-label="Remove image background"
-								onclick={() => void removeSelectedImageBackground()}
-							>
-								Remove background
-							</button>
-						{/if}
-					</div>
+		<DrawImageToolbox
+			bind:this={generationPanel}
+			storageKey={STORAGE_KEY}
+			pageKey={`${STORAGE_KEY}:${activePageId}`}
+			historyError={generationHistoryError}
+			bind:minimized={imageToolMinimized}
+			onInsert={insertGeneratedImages}
+			{editor}
+			imageId={activeImageToolId}
+			imageDataUrl={activeImageToolDataUrl}
+			bind:action={imageToolAction}
+			bind:prompt={imageToolPrompt}
+			bind:operationStatus={imageToolStatus}
+			bind:selectedModelIds={imageToolModelIds}
+			bind:generationParameters={imageToolGenerationParameters}
+			{updateElement}
+			captureUpdate={captureImmediately}
+			{cloudAvailable}
+			authenticated={toolsAuthenticated}
+			userId={toolsUser?.id}
+			backgroundProcessing={isRemovingBackground}
+			generations={imageGenerations}
+			onGeneration={rememberImageGeneration}
+			onProcessingChange={updateImageGenerationState}
+			onDragStart={startDraggingImageTools}
+			onCloudLimit={() => (saveStatus = 'error')}
+		>
+			{#snippet backgroundControls()}
+				<div class="image-tool-controls">
+					<select
+						class="background-mode-select"
+						aria-label="Background removal model"
+						value={backgroundMode}
+						disabled={isRemovingBackground}
+						onchange={changeBackgroundMode}
+					>
+						{#each BACKGROUND_MODES as mode (mode.id)}
+							<option value={mode.id}>{mode.label} ({mode.size})</option>
+						{/each}
+					</select>
 
 					{#if isRemovingBackground}
-						<div class="background-progress" aria-live="polite">
-							<span>{backgroundStatus}{backgroundProgress ? ` · ${backgroundProgress}%` : ''}</span>
-							<progress
-								aria-label="Background removal progress"
-								max="100"
-								value={backgroundProgress || undefined}
-							></progress>
-						</div>
-					{:else if backgroundError}
-						<p class="background-error" role="alert">{backgroundError}</p>
-					{:else if backgroundMode !== 'portrait-fast'}
-						<p class="background-download-warning">
-							First use downloads {activeBackgroundMode.size}.
-						</p>
-					{:else if backgroundStatus}
-						<p class="background-success" role="status">{backgroundStatus}</p>
+						<button type="button" class="cancel-background" onclick={cancelBackgroundRemoval}>
+							Cancel
+						</button>
+					{:else}
+						<button
+							type="button"
+							class="remove-background"
+							aria-label="Remove image background"
+							onclick={() => void removeSelectedImageBackground()}
+						>
+							Remove background
+						</button>
 					{/if}
-				{/snippet}
-			</DrawImageToolbox>
-		{/if}
+				</div>
+
+				{#if isRemovingBackground}
+					<div class="background-progress" aria-live="polite">
+						<span>{backgroundStatus}{backgroundProgress ? ` · ${backgroundProgress}%` : ''}</span>
+						<progress
+							aria-label="Background removal progress"
+							max="100"
+							value={backgroundProgress || undefined}
+						></progress>
+					</div>
+				{:else if backgroundError}
+					<p class="background-error" role="alert">{backgroundError}</p>
+				{:else if backgroundMode !== 'portrait-fast'}
+					<p class="background-download-warning">
+						First use downloads {activeBackgroundMode.size}.
+					</p>
+				{:else if backgroundStatus}
+					<p class="background-success" role="status">{backgroundStatus}</p>
+				{/if}
+			{/snippet}
+		</DrawImageToolbox>
 	</section>
 {/if}
 
+{#if mediaJobInBackground || assistantJobInBackground}
+	<div class="workspace-job-status" aria-label="Background drawing jobs" role="status">
+		{#if mediaJobInBackground}
+			<span>Generating media…</span>
+			<button
+				type="button"
+				aria-label="Show generation"
+				onclick={() => void openGenerationComposer()}>Show</button
+			>
+			<button
+				type="button"
+				aria-label="Cancel generation"
+				onclick={() => generationPanel?.cancelGeneration()}>Cancel</button
+			>
+		{/if}
+		{#if assistantJobInBackground}
+			<span>Assistant working…</span>
+			<button
+				type="button"
+				aria-label="Show assistant"
+				onclick={() => drawingAssistant?.showAssistant()}>Show</button
+			>
+			<button type="button" aria-label="Stop assistant" onclick={() => drawingAssistant?.stop()}
+				>Stop</button
+			>
+		{/if}
+	</div>
+{/if}
+
 {#if pages.length > 0}
-	<div class="page-picker">
+	<div class="page-picker" class:library-open={isLibraryOpen}>
 		<button
 			type="button"
 			class="page-toggle"
@@ -2036,6 +2642,7 @@
 							on this device{:else}Saved on this device{/if}
 					</span>
 				</div>
+				{#if recoveryNotice}<p class="page-logging" role="status">{recoveryNotice}</p>{/if}
 
 				{#if toolsAuthenticated}<p class="page-logging">
 						<a href="/tools/logs">Tool activity is logged</a> · visible to you and swyx; drawing contents
@@ -2141,27 +2748,6 @@
 	</div>
 {/if}
 
-{#if editor && presets.length > 0 && !isLibraryOpen}
-	<button
-		type="button"
-		class="compact-library-toggle"
-		aria-label="Open drawing templates and library"
-		title="Open presets, components, and meme templates"
-		onclick={() => openWorkspaceSection('presets')}
-	>
-		<svg aria-hidden="true" viewBox="0 0 20 20" fill="none">
-			<path
-				d="M4 4h5v5H4V4Zm7 0h5v5h-5V4ZM4 11h5v5H4v-5Zm9.5 0v5m-2.5-2.5h5"
-				stroke="currentColor"
-				stroke-width="1.6"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-			/>
-		</svg>
-		<span>Templates</span>
-	</button>
-{/if}
-
 {#if presets.length > 0 && uiComponents.length > 0}
 	<section
 		class="workspace-library"
@@ -2185,12 +2771,30 @@
 				</button>
 			{/each}
 		</div>
+		<button
+			type="button"
+			class="creative-library-entry"
+			onclick={() => void openCreativeWorkspace('assets')}
+		>
+			Assets & creative workspace
+			<span>Brand kits · sources · editable versions</span>
+		</button>
 
 		{#if workspaceSection === 'presets'}
 			<section id="drawing-presets" class="workspace-content" aria-label="Drawing presets">
 				<div class="preset-heading">
-					<strong>Start with a framework</strong>
-					<span>Every shape stays editable.</span>
+					<strong>Make an idea clear</strong>
+					<span>Editable diagrams. No AI needed to start.</span>
+				</div>
+				<div class="thinking-actions" aria-label="Essay diagram assistant actions">
+					{#each DRAW_THINKING_WORKFLOWS as workflow (workflow.id)}
+						<button
+							type="button"
+							title={workflow.description}
+							onclick={() => prepareThinkingWorkflow(workflow.id)}>{workflow.label}</button
+						>
+					{/each}
+					<span>Assistant actions prepare a request. Review before sending.</span>
 				</div>
 				{#each presets as preset (preset.id)}
 					<button
@@ -2200,7 +2804,19 @@
 						onclick={() => insertPreset(preset)}
 					>
 						<svg class="preset-preview" aria-hidden="true" viewBox="0 0 56 42" fill="none">
-							{#if preset.id.includes('quadrant') || preset.id.includes('matrix')}
+							{#if preset.id === 'argument-map'}
+								<path d="m12 30 16-18 16 18M28 30V12" stroke="#10243b" />
+								<rect x="20" y="4" width="16" height="10" rx="2" fill="#dbeafa" stroke="#155f9b" />
+								<path
+									d="M5 30h14v8H5zM23 30h10v8H23zM38 30h14v8H38z"
+									fill="white"
+									stroke="#10243b"
+								/>
+							{:else if preset.id === 'agent-tool-loop'}
+								<path d="m20 21 14-12v24L20 21Zm0 0h30" stroke="#10243b" />
+								<rect x="5" y="16" width="16" height="10" rx="2" fill="#ddf0e3" stroke="#346b4e" />
+								<path d="M30 4h10v9H30zM30 29h10v9H30z" fill="white" stroke="#10243b" />
+							{:else if preset.id.includes('quadrant') || preset.id.includes('matrix')}
 								<rect x="8" y="5" width="19" height="15" rx="2" fill="#e14d2a" opacity=".8" />
 								<rect x="29" y="5" width="19" height="15" rx="2" fill="#f7c845" />
 								<rect x="8" y="22" width="19" height="15" rx="2" fill="#155f9b" opacity=".8" />
@@ -2429,11 +3045,115 @@
 {/if}
 
 <style>
+	.thinking-actions {
+		display: grid;
+		gap: 6px;
+		margin-bottom: 12px;
+	}
+	.thinking-actions button {
+		min-height: 44px;
+		text-align: left;
+		padding: 8px 12px;
+		border: 1px solid #deddf3;
+		border-radius: 8px;
+		background: white;
+		color: #4f46a4;
+		cursor: pointer;
+	}
+	.thinking-actions span {
+		font-size: 11px;
+		color: #71717a;
+		line-height: 1.5;
+	}
+	.image-tools[hidden] {
+		display: none;
+	}
+	.workspace-job-status {
+		position: fixed;
+		bottom: 68px;
+		right: 12px;
+		z-index: 1003;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto auto;
+		align-items: center;
+		gap: 7px;
+		max-width: calc(100vw - 24px);
+		padding: 7px 10px;
+		border: 1px solid #ddd7f0;
+		border-radius: 10px;
+		background: white;
+		box-shadow: 0 5px 20px #0001;
+		color: #554b78;
+		font:
+			12px system-ui,
+			sans-serif;
+	}
+	.workspace-job-status button {
+		min-height: 44px;
+		padding: 0 9px;
+		border: 0;
+		border-radius: 6px;
+		background: #f2effb;
+		color: #55458c;
+		cursor: pointer;
+	}
+	@media (min-width: 961px) {
+		:global(.draw-canvas .HintViewer) {
+			margin-top: 3.5rem;
+		}
+	}
+
+	.creative-library-entry {
+		margin: 10px 12px;
+		padding: 12px;
+		border: 1px solid #d5cbe4;
+		border-radius: 8px;
+		background: #f4f0fa;
+		color: #554071;
+		font-weight: 600;
+		text-align: left;
+		cursor: pointer;
+	}
+	.creative-library-entry span {
+		display: block;
+		margin-top: 4px;
+		font-size: 12px;
+		font-weight: 400;
+	}
 	.account-error {
 		position: fixed;
 		inset: 30% 1rem auto;
 		z-index: 20;
 		text-align: center;
+	}
+	.drawing-save-error {
+		position: fixed;
+		bottom: 12px;
+		left: 50%;
+		transform: translateX(-50%);
+		z-index: 1100;
+		display: flex;
+		align-items: center;
+		gap: 9px;
+		width: min(630px, calc(100vw - 24px));
+		padding: 8px 12px;
+		border: 1px solid #efc397;
+		border-radius: 8px;
+		background: #fff6e9;
+		color: #79421c;
+		font:
+			12px system-ui,
+			sans-serif;
+	}
+	.drawing-save-error button {
+		flex: none;
+		min-height: 44px;
+		border: 0;
+		border-radius: 6px;
+		padding: 6px 9px;
+		background: white;
+		color: inherit;
+		cursor: pointer;
 	}
 	.draw-canvas {
 		position: fixed;
@@ -2444,13 +3164,12 @@
 
 	.image-tools {
 		position: fixed;
-		top: 72px;
-		left: 50%;
+		top: 126px;
+		right: 14px;
 		z-index: 1001;
 		width: min(405px, calc(100vw - 28px));
-		max-height: calc(100dvh - 95px);
+		max-height: calc(100dvh - 195px - var(--draw-background-inset, 0px));
 		padding: 12px;
-		transform: translateX(-50%);
 		border: 1px solid rgb(0 0 0 / 9%);
 		border-radius: 12px;
 		background: #fff;
@@ -2624,8 +3343,7 @@
 		color: #1d1d1d;
 	}
 
-	.page-toggle,
-	.compact-library-toggle {
+	.page-toggle {
 		display: flex;
 		align-items: center;
 		gap: 8px;
@@ -2639,12 +3357,6 @@
 		font-size: 13px;
 		font-weight: 550;
 		cursor: pointer;
-	}
-
-	.compact-library-toggle {
-		display: none;
-		position: fixed;
-		z-index: 1000;
 	}
 
 	.page-toggle {
@@ -2674,7 +3386,6 @@
 	}
 
 	.page-toggle svg,
-	.compact-library-toggle svg,
 	.page-action svg,
 	.add-page svg {
 		flex: none;
@@ -2745,9 +3456,7 @@
 	}
 
 	.workspace-content {
-		max-height: calc(100dvh - 150px);
 		padding: 0 6px 12px;
-		overflow-y: auto;
 	}
 
 	.preset-heading,
@@ -3118,6 +3827,12 @@
 
 	:global(.swyx-workspace-sidebar-tab) {
 		width: 100%;
+		min-height: 0;
+		overflow-y: auto;
+		overscroll-behavior: contain;
+	}
+	:global(.draw-canvas .sidebar-tabs-root) {
+		min-height: 0;
 	}
 
 	.command-backdrop {
@@ -3216,20 +3931,17 @@
 	}
 
 	@media (max-width: 960px) {
+		.page-picker.library-open {
+			display: none;
+		}
 		.page-picker {
 			top: 72px;
 			left: 12px;
 		}
 
-		.compact-library-toggle {
-			top: 72px;
-			right: 64px;
-			display: flex;
-			min-height: 40px;
-		}
-
 		.page-toggle {
-			min-height: 40px;
+			min-height: 44px;
+			max-width: min(180px, calc(100vw - 235px));
 		}
 
 		.page-menu {
@@ -3241,6 +3953,14 @@
 		}
 	}
 
+	@media (max-width: 650px), (pointer: coarse) {
+		.page-picker input,
+		.command-palette input,
+		.workspace-content :global(:is(input, textarea, select)),
+		.image-tools :global(:is(input, textarea, select)) {
+			font-size: 16px;
+		}
+	}
 	@media (max-width: 600px) {
 		.artboard-toolbar {
 			right: 10px;
@@ -3257,8 +3977,12 @@
 			max-width: 96px;
 		}
 		.image-tools {
-			top: 124px;
-			max-height: min(420px, calc(100dvh - 150px));
+			top: auto;
+			right: 10px;
+			bottom: calc(68px + var(--draw-background-inset, 0px));
+			left: 10px;
+			width: auto;
+			max-height: calc(100dvh - 204px - var(--draw-background-inset, 0px));
 		}
 
 		.page-picker {
@@ -3266,15 +3990,10 @@
 			left: 10px;
 		}
 
-		.compact-library-toggle {
-			top: 70px;
-			right: 59px;
-		}
-
 		.page-toggle {
-			height: 40px;
+			height: 44px;
 			padding: 0 10px;
-			max-width: min(180px, calc(100vw - 125px));
+			max-width: calc(100vw - 235px);
 		}
 
 		.page-menu {
@@ -3284,6 +4003,14 @@
 
 		.command-palette {
 			top: 11vh;
+		}
+	}
+	@media (max-height: 550px) {
+		.image-tools {
+			top: 8px;
+			bottom: auto;
+			z-index: 1004;
+			max-height: calc(100dvh - 16px - var(--draw-background-inset, 0px));
 		}
 	}
 </style>

@@ -2,14 +2,18 @@ import { TOOLS_AI_POLICY } from '../tools-ai-policy.js';
 import { reserveToolsAiUsage, finishToolsAiUsage } from './tools-ai-usage.js';
 import { getToolsUser } from './tools-auth.js';
 import { privateJson, requireSameOrigin } from '../podcast-admin-route.js';
+import { DRAW_ESSAY_STYLE_GUIDE } from '../draw-thinking.js';
+import { chargeDrawingAgentBudget, createDrawingAgentBudget } from './draw-agent-budget.js';
 import {
-	chargeDrawingAgentBudget,
-	createDrawingAgentBudget,
-	drawingAgentModelCostUsd,
-	DRAW_AGENT_MODEL_STEP_RESERVE_USD
-} from './draw-agent-budget.js';
+	callDrawingProvider,
+	getDrawingProvider,
+	listDrawingProviders,
+	drawingProviderCost,
+	drawingProviderReservation,
+	DrawingProviderError
+} from './draw-agent-providers.js';
 
-export const DRAW_AGENT_MODEL = '@cf/qwen/qwen3.8-27b';
+export { DRAW_AGENT_MODEL } from './draw-agent-providers.js';
 export const MAX_DRAW_AGENT_REQUEST_BYTES = 1_500_000;
 export const MAX_DRAW_AGENT_MESSAGES = 40;
 export const MAX_DRAW_AGENT_COMMAND_LENGTH = 4_000;
@@ -47,7 +51,9 @@ draw pages [create|switch PAGE_ID|rename PAGE_ID NAME]
 draw image ACTION [--id ELEMENT_ID] [--prompt TEXT] [--model MODEL_ID] [--x 0.5] [--y 0.5] [--radius 0.12] [--blur 14] [--focus 0.55]
 Image actions: background, magic-select, magic-eraser, depth-blur, vectorize, fal. On-device image tools remain local; fal uploads the selected image or prompt and consumes the visible per-run spending cap.
 
-For thumbnail, speaker, article, social, or presentation requests, start with draw designs and insert the closest branded template rather than assembling an artboard from scratch. Preserve official Latent Space branding, one dominant two-to-six-word curiosity hook, editable guest/company placeholders, near-black or violet backgrounds, and the lower-right YouTube duration-overlay safe zone. Duplicate artboards for variants; change meaningful hooks or composition, not merely color. Preserve the original when resizing. Never invent guests, company affiliations, logos, or episode facts. Use valid JSON, realistic coordinates and dimensions, clear typography, intentional spacing, and native Excalidraw shape/text/arrow skeletons. Prefer a small number of purposeful changes. Inspect visible results after meaningful edits and improve them. Never claim a command succeeded without its tool result. Never seek secrets, arbitrary network access, or a host shell. If a request cannot be done within the allowed tools or budget, say so plainly. Respond concisely when the task is complete.`;
+${DRAW_ESSAY_STYLE_GUIDE}
+
+For thumbnail, speaker announcement, article launch banner, social, or presentation requests, start with draw designs and insert the closest branded template rather than assembling an artboard from scratch. Preserve official Latent Space branding, one dominant two-to-six-word curiosity hook, editable guest/company placeholders, near-black or violet backgrounds, and the lower-right YouTube duration-overlay safe zone. Duplicate artboards for variants; change meaningful hooks or composition, not merely color. Preserve the original when resizing. Never invent guests, company affiliations, logos, or episode facts. Use valid JSON, realistic coordinates and dimensions, clear typography, intentional spacing, and native Excalidraw shape/text/arrow skeletons. Prefer a small number of purposeful changes. Inspect visible results after meaningful edits and improve them. Never claim a command succeeded without its tool result. Never seek secrets, arbitrary network access, or a host shell. If a request cannot be done within the allowed tools or budget, say so plainly. Respond concisely when the task is complete.`;
 
 export const DRAW_AGENT_TOOLS = Object.freeze([
 	Object.freeze({
@@ -199,13 +205,6 @@ export async function runDrawingAgent(event) {
 		);
 	const sessionSecret = /** @type {string} */ (event.platform?.env?.TOOLS_SESSION_SECRET);
 	requireSameOrigin(event.request, event.url);
-	const ai = event.platform?.env?.AI;
-	if (!ai) {
-		return privateJson(
-			{ error: 'The drawing assistant has not been configured.' },
-			{ status: 503 }
-		);
-	}
 	if (!event.request.headers.get('content-type')?.startsWith('application/json')) {
 		return privateJson({ error: 'Send a JSON assistant request.' }, { status: 415 });
 	}
@@ -234,6 +233,19 @@ export async function runDrawingAgent(event) {
 	} catch {
 		return privateJson({ error: 'The assistant request is invalid.' }, { status: 400 });
 	}
+	if (
+		!body ||
+		typeof body !== 'object' ||
+		Array.isArray(body) ||
+		Object.keys(body).some(
+			(key) => !['messages', 'screenshot', 'budget', 'budgetCap', 'provider'].includes(key)
+		)
+	) {
+		return privateJson(
+			{ error: 'The assistant request contains unsupported fields.' },
+			{ status: 422 }
+		);
+	}
 	const messages = normalizeMessages(body?.messages);
 	if (!messages || (body.screenshot !== undefined && !validScreenshot(body.screenshot))) {
 		return privateJson({ error: 'The assistant conversation is invalid.' }, { status: 422 });
@@ -248,13 +260,45 @@ export async function runDrawingAgent(event) {
 	if (messages[0]?.role !== 'user') {
 		return privateJson({ error: 'Begin with a drawing request.' }, { status: 422 });
 	}
+	let provider;
+	let stepReserve;
+	const env = event.platform?.env || {};
+	let systemPrompt = DRAW_AGENT_SYSTEM_PROMPT;
+	try {
+		if (body.provider !== undefined && typeof body.provider !== 'string')
+			throw new DrawingProviderError('Choose a supported drawing provider.', 422);
+		provider = await getDrawingProvider(env, body.provider ?? 'cloudflare');
+		if (!provider.configured)
+			throw new DrawingProviderError(
+				provider.reason || 'The drawing assistant has not been configured.'
+			);
+		if (!provider.vision)
+			systemPrompt +=
+				'\nThis selected model is text-only. No screenshot is provided: use draw inspect and draw list to read native scene geometry and text. Do not claim to see or visually review raster images or the viewport. Explain this limitation when it matters.';
+		stepReserve = drawingProviderReservation(
+			provider,
+			[{ role: 'system', content: systemPrompt }, ...messages],
+			DRAW_AGENT_TOOLS,
+			Boolean(provider.vision && body.screenshot)
+		);
+	} catch (error) {
+		return privateJson(
+			{
+				error:
+					error instanceof DrawingProviderError
+						? error.message
+						: 'The provider configuration is unavailable.'
+			},
+			{ status: error instanceof DrawingProviderError ? error.status : 503 }
+		);
+	}
 	/** @type {string} */
 	let budget;
 	try {
 		budget = body.budget
 			? body.budget
 			: await createDrawingAgentBudget(body.budgetCap ?? 1, sessionSecret);
-		await chargeDrawingAgentBudget(budget, DRAW_AGENT_MODEL_STEP_RESERVE_USD, sessionSecret);
+		await chargeDrawingAgentBudget(budget, stepReserve, sessionSecret);
 	} catch (error) {
 		return privateJson(
 			{
@@ -263,7 +307,7 @@ export async function runDrawingAgent(event) {
 			{ status: 402 }
 		);
 	}
-	if (body.screenshot) {
+	if (provider.vision && body.screenshot) {
 		messages.push({
 			role: 'user',
 			content: [
@@ -276,24 +320,25 @@ export async function runDrawingAgent(event) {
 		event,
 		user.id,
 		'assistant',
-		DRAW_AGENT_MODEL,
-		TOOLS_AI_POLICY.assistantReservationUsd
+		`${provider.id}/${provider.model}`,
+		Math.max(TOOLS_AI_POLICY.assistantReservationUsd, stepReserve)
 	);
 	if (reservation instanceof Response) return reservation;
 	/** @type {any} */
 	let result;
 	try {
-		result = await ai.run(DRAW_AGENT_MODEL, {
-			messages: [{ role: 'system', content: DRAW_AGENT_SYSTEM_PROMPT }, ...messages],
-			tools: DRAW_AGENT_TOOLS,
-			tool_choice: 'auto',
-			parallel_tool_calls: false,
-			max_completion_tokens: 1_200,
-			stream: false
-		});
+		result = await callDrawingProvider(
+			provider,
+			env,
+			[{ role: 'system', content: systemPrompt }, ...messages],
+			DRAW_AGENT_TOOLS,
+			event.request.signal
+		);
 	} catch (error) {
 		const recorded = await finishToolsAiUsage(event, user.id, reservation.id, 'failed');
 		if (!recorded.ok) return recorded;
+		if (error instanceof DrawingProviderError)
+			return privateJson({ error: error.message }, { status: error.status });
 		const message = error instanceof Error ? error.message : '';
 		if (/rate.?limit|429/i.test(message)) {
 			return privateJson(
@@ -303,6 +348,16 @@ export async function runDrawingAgent(event) {
 		}
 		return privateJson(
 			{ error: 'The drawing assistant could not complete this step.' },
+			{ status: 502 }
+		);
+	}
+	if (result?.choices?.[0]?.finish_reason === 'length') {
+		await finishToolsAiUsage(event, user.id, reservation.id, 'failed');
+		return privateJson(
+			{
+				code: 'response_truncated',
+				error: 'The drawing assistant reached its response limit. Try a smaller drawing change.'
+			},
 			{ status: 502 }
 		);
 	}
@@ -327,8 +382,13 @@ export async function runDrawingAgent(event) {
 		content = 'Canvas review complete.';
 	}
 	/** @type {Record<string, unknown>} */
-	const response = { content: content.slice(0, 12_000), toolCalls };
-	let modelCostUsd = DRAW_AGENT_MODEL_STEP_RESERVE_USD;
+	const response = {
+		content: content.slice(0, 12_000),
+		toolCalls,
+		provider: provider.id,
+		model: provider.model
+	};
+	let modelCostUsd = stepReserve;
 	if (result?.usage && typeof result.usage === 'object') {
 		const inputTokens = result.usage.prompt_tokens;
 		const outputTokens = result.usage.completion_tokens;
@@ -339,7 +399,12 @@ export async function runDrawingAgent(event) {
 			outputTokens >= 0
 		) {
 			response.usage = { inputTokens, outputTokens };
-			modelCostUsd = drawingAgentModelCostUsd(inputTokens, outputTokens);
+			modelCostUsd = drawingProviderCost(
+				provider,
+				inputTokens,
+				outputTokens,
+				Boolean(provider.vision && body.screenshot)
+			);
 		}
 	}
 	try {
@@ -359,4 +424,17 @@ export async function runDrawingAgent(event) {
 	const recorded = await finishToolsAiUsage(event, user.id, reservation.id, 'succeeded');
 	if (!recorded.ok) return recorded;
 	return privateJson(response);
+}
+
+/** Read-only configuration metadata. Keys and provider responses never cross this boundary. @param {Pick<import('@sveltejs/kit').RequestEvent, 'cookies' | 'platform' | 'request'>} event */
+export async function drawingAgentProviders(event) {
+	const user = await getToolsUser(event);
+	if (!user)
+		return privateJson({ error: 'Sign in to use the drawing assistant.' }, { status: 401 });
+	if (event.request.headers.get('X-Tools-User') !== user.id)
+		return privateJson(
+			{ code: 'account_changed', error: 'Your Google account changed. Reload before continuing.' },
+			{ status: 409 }
+		);
+	return privateJson({ providers: await listDrawingProviders(event.platform?.env || {}) });
 }

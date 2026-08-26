@@ -6,7 +6,9 @@ const config = {
 	preprocess: [vitePreprocess()],
 
 	kit: {
-		adapter: adapter()
+		// Prerender and Vite development never need production bindings or AI access.
+		// Use preview:draw for the full Worker runtime (remote AI remains explicit).
+		adapter: adapter({ platformProxy: { remoteBindings: false } })
 		// https://kit.svelte.dev/docs/configuration#csp
 		// csp: {
 		// 	directives: {

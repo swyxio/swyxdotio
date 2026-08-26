@@ -155,6 +155,42 @@ test('ledger retains only allowlisted metadata and own summaries never expose an
 	assert.equal(summary.usage.assistantTurnsThisHour, 1);
 	assert.equal(summary.logging.retentionDays, 30);
 	assert.doesNotMatch(JSON.stringify(summary), /alice|bob|private-job/);
+	const reserved = await (
+		await ledgerRequest(ledger, 'admit', {
+			...media(),
+			run: { id: 'run', clientJobId: 'client-job', limitUsd: 0.2, prompt: 'PRIVATE-PROMPT' }
+		})
+	).json();
+	await ledgerRequest(ledger, 'register', {
+		userId: 'alice',
+		id: reserved.id,
+		model: 'flux-2',
+		requestId: 'provider-job',
+		adapter: 'fal',
+		prompt: 'PRIVATE-PROMPT',
+		outputUrl: 'PRIVATE-OUTPUT'
+	});
+	const runRows = ledger.database.prepare('SELECT * FROM tools_ai_generation_runs').all();
+	const jobRows = ledger.database.prepare('SELECT * FROM tools_ai_generation_jobs').all();
+	assert.deepEqual(Object.keys(runRows[0]).sort(), [
+		'limit_micros',
+		'reserved_micros',
+		'run_id',
+		'updated_at',
+		'user_id'
+	]);
+	assert.deepEqual(Object.keys(jobRows[0]).sort(), [
+		'adapter',
+		'client_job_id',
+		'run_id',
+		'usage_id',
+		'user_id'
+	]);
+	assert.doesNotMatch(JSON.stringify([runRows, jobRows]), /PRIVATE/);
+	assert.match(
+		summary.logging.fields.join(', '),
+		/generation run and client job IDs.*hosting adapter.*authorized run spending limit/
+	);
 	assert.equal(drawWorker.fetch(new Request('https://drawing.example/ai/summary')).status, 404);
 });
 
@@ -223,4 +259,100 @@ test('hourly rejection points to the reset for the limited request kind, not an 
 	assert.equal(response.status, 429);
 	assert.equal(body.retryAt, new Date(NOW + 10_000 + HOUR).toISOString());
 	assert.ok(body.error.includes(body.retryAt));
+});
+
+test('concurrent run reservations atomically enforce their immutable budget in addition to account quotas', async () => {
+	const fixture = createTestAiLedger();
+	const run = { id: 'comparison', limitUsd: 0.1 };
+	const responses = await Promise.all(
+		Array.from({ length: 4 }, (_, index) =>
+			ledgerRequest(fixture, 'admit', {
+				...media(),
+				run: { ...run, clientJobId: `job-${index}` }
+			})
+		)
+	);
+	assert.equal(responses.filter((response) => response.status === 201).length, 2);
+	assert.equal(responses.filter((response) => response.status === 402).length, 2);
+	const accepted = await responses[0].json();
+	await ledgerRequest(fixture, 'finish', { userId: 'alice', id: accepted.id, status: 'failed' });
+	assert.equal(
+		(await ledgerRequest(fixture, 'admit', { ...media(), run: { ...run, clientJobId: 'retry' } }))
+			.status,
+		402
+	);
+	assert.equal(
+		(await ledgerRequest(fixture, 'admit', { ...media(), run: { ...run, clientJobId: 'job-0' } }))
+			.status,
+		409
+	);
+	assert.equal(
+		(
+			await ledgerRequest(fixture, 'admit', {
+				...media(),
+				run: { ...run, limitUsd: 1, clientJobId: 'new' }
+			})
+		).status,
+		409
+	);
+	assert.equal(
+		(
+			await ledgerRequest(fixture, 'admit', {
+				...media('bob'),
+				run: { ...run, clientJobId: 'job-0' }
+			})
+		).status,
+		201
+	);
+	assert.equal(
+		(
+			await ledgerRequest(fixture, 'admit', {
+				...media(),
+				run: { id: 'fresh', limitUsd: 1, clientJobId: 'fresh' }
+			})
+		).status,
+		201
+	);
+});
+
+test('a job transport stays bound to its original adapter and run metadata expires through the existing alarm', async (context) => {
+	let now = NOW;
+	context.mock.method(Date, 'now', () => now);
+	const fixture = createTestAiLedger();
+	const response = await ledgerRequest(fixture, 'admit', {
+		...media(),
+		run: { id: 'run', limitUsd: 0.2, clientJobId: 'job' }
+	});
+	const { id } = await response.json();
+	const registration = {
+		userId: 'alice',
+		id,
+		model: 'flux-2',
+		requestId: 'external',
+		adapter: 'fake'
+	};
+	assert.equal((await ledgerRequest(fixture, 'register', registration)).status, 200);
+	assert.equal(
+		(await ledgerRequest(fixture, 'register', { ...registration, adapter: 'fal' })).status,
+		409
+	);
+	assert.equal(
+		(await (await ledgerRequest(fixture, 'owned-job', registration)).json()).adapter,
+		'fake'
+	);
+	assert.equal(fixture.alarmAt(), NOW + 30 * DAY);
+	fixture.object.aiUsage = undefined;
+	assert.equal(
+		(
+			await ledgerRequest(fixture, 'admit', {
+				...media(),
+				run: { id: 'run', limitUsd: 0.2, clientJobId: 'job' }
+			})
+		).status,
+		409
+	);
+	now += 30 * DAY;
+	await fixture.object.alarm();
+	for (const table of ['tools_ai_usage', 'tools_ai_generation_runs', 'tools_ai_generation_jobs'])
+		assert.equal(fixture.database.prepare(`SELECT COUNT(*) AS count FROM ${table}`).get().count, 0);
 });

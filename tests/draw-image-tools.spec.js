@@ -50,6 +50,8 @@ async function pasteSelectedImage(page, generatedSize) {
 	await page.goto('/draw');
 	const drawingCanvas = page.locator('.draw-canvas canvas.excalidraw__canvas.interactive');
 	await expect(drawingCanvas).toBeVisible();
+	// Start drawing through the canvas outside the new starter cards.
+	await drawingCanvas.click({ position: { x: 80, y: 170 } });
 	await drawingCanvas.click({ position: { x: 360, y: 280 } });
 	await page.evaluate(async (size) => {
 		let source;
@@ -179,11 +181,11 @@ test('selected images expose private tools, exact model sizes, and disclosed fal
 	page
 }) => {
 	await page.goto('/draw');
-	await expect(page.getByLabel('AI image toolbox')).toHaveCount(0);
+	await expect(page.getByLabel('AI image toolbox')).not.toBeVisible();
 	const toolbox = await pasteSelectedImage(page);
 
 	await expect(toolbox.getByText('Runs privately on your device')).toBeVisible();
-	await expect(toolbox.getByText('Uploads this image to fal.ai')).toHaveCount(0);
+	await expect(toolbox.getByText('Uploads the reference to fal')).toHaveCount(0);
 	await expect(toolbox.getByText('First use downloads ~13.8 MB.')).toBeVisible();
 	await expect(toolbox.getByRole('button', { name: 'Background', exact: true })).toBeVisible();
 	await expect(toolbox.getByRole('button', { name: 'Magic Select', exact: true })).toBeVisible();
@@ -204,7 +206,7 @@ test('selected images expose private tools, exact model sizes, and disclosed fal
 	await expect(toolbox.getByText('No model download required.')).toBeVisible();
 
 	await toolbox.getByRole('button', { name: 'AI prompt', exact: true }).click();
-	await expect(toolbox.getByText('Uploads this image to fal.ai')).toBeVisible();
+	await expect(toolbox.getByText('Uploads the reference to fal')).toBeVisible();
 	await expect(toolbox.getByText(/Sign in required/)).toBeVisible();
 	await expect(toolbox.getByRole('link', { name: 'Sign in to generate' })).toHaveAttribute(
 		'href',
@@ -323,7 +325,26 @@ test('the selected image chooser stays compact and never stretches previews on n
 	await expect(toolbox.getByRole('combobox', { name: 'Background removal model' })).toHaveCount(0);
 	const cloudBounds = await toolbox.boundingBox();
 	if (!cloudBounds) throw new Error('The cloud image toolbox is not visible.');
-	expect(cloudBounds.height).toBeLessThan(430);
+	// The shared composer can use the available height, while leaving both
+	// native toolbar and bottom canvas controls accessible.
+	expect(cloudBounds.y).toBeGreaterThanOrEqual(126);
+	expect(cloudBounds.y + cloudBounds.height).toBeLessThanOrEqual(844 - 68);
+	const signIn = toolbox.getByRole('link', { name: 'Sign in to generate' });
+	await signIn.scrollIntoViewIfNeeded();
+	await expect(signIn).toBeInViewport();
+	expect(
+		await signIn.evaluate((element) => {
+			let scrollers = 0;
+			for (let node = element.parentElement; node; node = node.parentElement) {
+				if (
+					/(auto|scroll)/.test(getComputedStyle(node).overflowY) &&
+					node.scrollHeight > node.clientHeight
+				)
+					scrollers++;
+			}
+			return scrollers;
+		})
+	).toBe(1);
 });
 
 test('model discovery filters workflows and dismisses cleanly without losing a batch', async ({
@@ -443,13 +464,13 @@ test('the floating image toolbox can be dragged without losing the selected tool
 	if (!start || !handle) throw new Error('The draggable image toolbox is not visible.');
 	await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2);
 	await page.mouse.down();
-	await page.mouse.move(handle.x + handle.width / 2 + 110, handle.y + handle.height / 2 + 90, {
+	await page.mouse.move(handle.x + handle.width / 2 - 110, handle.y + handle.height / 2 + 90, {
 		steps: 6
 	});
 	await page.mouse.up();
 	const moved = await toolbox.boundingBox();
 	if (!moved) throw new Error('The toolbox disappeared after being dragged.');
-	expect(moved.x).toBeGreaterThan(start.x + 90);
+	expect(moved.x).toBeLessThan(start.x - 90);
 	expect(moved.y).toBeGreaterThan(start.y + 70);
 	await expect(toolbox.getByRole('button', { name: 'Magic Select', exact: true })).toHaveAttribute(
 		'aria-pressed',
@@ -469,9 +490,9 @@ test('reselecting an image restores the AI prompt, selected workflow, and drafte
 	const canvas = page.locator('.draw-canvas canvas.excalidraw__canvas.interactive');
 	const bounds = await canvas.boundingBox();
 	if (!bounds) throw new Error('The drawing canvas is not visible.');
-	await canvas.click({ position: { x: bounds.width - 40, y: bounds.height - 120 }, force: true });
-	await expect(toolbox).toHaveCount(0);
-	await canvas.click({ position: { x: 360, y: 280 }, force: true });
+	await canvas.click({ position: { x: bounds.width / 2, y: bounds.height - 120 } });
+	await expect(toolbox).not.toBeVisible();
+	await canvas.click({ position: { x: 360, y: 280 } });
 
 	await expect(toolbox).toBeVisible();
 	await expect(toolbox.getByRole('button', { name: 'AI prompt', exact: true })).toHaveAttribute(
@@ -486,58 +507,40 @@ test('reselecting an image restores the AI prompt, selected workflow, and drafte
 	).toContainText('FLUX.2 [dev]');
 });
 
-test('the active drawing is persisted once without exhausting storage on a duplicate page copy', async ({
-	page
-}) => {
-	/** @type {string[]} */
-	const storageErrors = [];
-	page.on('console', (message) => {
-		if (message.text().includes('Could not save the drawing locally.')) {
-			storageErrors.push(message.text());
-		}
+for (const signedIn of [false, true]) {
+	test(`the active drawing uses one recoverable scene copy for ${signedIn ? 'an offline signed-in account' : 'a guest'}`, async ({
+		page
+	}) => {
+		if (signedIn) await mockSignedInPersonalTools(page);
+		/** @type {string[]} */
+		const storageErrors = [];
+		page.on('console', (message) => {
+			if (message.text().includes('Could not save the drawing locally.'))
+				storageErrors.push(message.text());
+		});
+		await pasteSelectedImage(page);
+		const original = await selectedSceneImage(page);
+		const persisted = await page.evaluate(() => {
+			const key = document.querySelector('.draw-canvas')?.getAttribute('data-storage-key');
+			if (!key) throw new Error('The active scene key is unavailable.');
+			const imageSceneKeys = Object.keys(localStorage).filter((entry) => {
+				try {
+					const record = JSON.parse(localStorage.getItem(entry) ?? 'null');
+					const elements = record?.elements ?? record?.scene?.elements;
+					return Array.isArray(elements) && elements.some((element) => element.type === 'image');
+				} catch {
+					return false;
+				}
+			});
+			return { key, imageSceneKeys };
+		});
+		expect(persisted.imageSceneKeys).toEqual([persisted.key]);
+		expect(storageErrors).toEqual([]);
+		await page.reload();
+		await expect(page.getByRole('button', { name: 'Manage drawing pages' })).toBeVisible();
+		await expect.poll(async () => (await selectedSceneImage(page)).fileId).toBe(original.fileId);
 	});
-	await page.addInitScript(() => {
-		const originalSetItem = Storage.prototype.setItem;
-		Storage.prototype.setItem = function (/** @type {string} */ key, /** @type {string} */ value) {
-			if (
-				key ===
-				(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
-					'swyx-excalidraw:guest') +
-					':default'
-			) {
-				throw new DOMException('The storage quota has been exceeded.', 'QuotaExceededError');
-			}
-			return originalSetItem.call(this, key, value);
-		};
-	});
-
-	await pasteSelectedImage(page);
-	const persisted = await page.evaluate(() => {
-		const metadata = JSON.parse(
-			localStorage.getItem(
-				(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
-					'swyx-excalidraw:guest') + ':pages'
-			) ?? '{}'
-		);
-		const scene = JSON.parse(
-			localStorage.getItem(
-				document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
-					'swyx-excalidraw:guest'
-			) ?? '{"elements":[]}'
-		);
-		return {
-			imageCount: scene.elements.filter(
-				(/** @type {{type:string}} */ element) => element.type === 'image'
-			).length,
-			duplicate: localStorage.getItem(
-				`${document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') || 'swyx-excalidraw:guest'}:${metadata.activePageId}`
-			)
-		};
-	});
-
-	expect(persisted).toEqual({ imageCount: 1, duplicate: null });
-	expect(storageErrors).toEqual([]);
-});
+}
 
 for (const fixture of [
 	{ id: 'magic-select', label: 'Magic Select', mimeType: 'image/png' },
@@ -706,12 +709,12 @@ test('large transparent image edits preserve dimensions and synchronize under th
 	const cloudPage = await create.json();
 	await page.reload();
 	await expect(page.locator('.draw-canvas')).toHaveAttribute(
-		'data-storage-key',
+		'data-account-storage-key',
 		`swyx-excalidraw:google:${TEST_TOOLS_OWNER.id}`
 	);
 	await page.evaluate((drawingPage) => {
 		localStorage.setItem(
-			(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+			(document.querySelector('.draw-canvas')?.getAttribute('data-account-storage-key') ||
 				'swyx-excalidraw:guest') + ':pages',
 			JSON.stringify({ pages: [drawingPage], activePageId: drawingPage.id })
 		);
@@ -884,13 +887,24 @@ test('text-to-image never uploads the selected image and generated video stays o
 		.getByRole('textbox', { name: 'AI image editing prompt' })
 		.fill('Create an alpine landscape');
 	await toolbox.getByRole('button', { name: 'Generate AI image' }).click();
-	await expect.poll(async () => (await selectedSceneImage(page)).fileId).not.toBe(original.fileId);
+	await expect(toolbox.getByAltText('Generated preview')).toHaveAttribute('src', generatedImage);
+	expect((await selectedSceneImage(page)).fileId).toBe(original.fileId);
 	expect(requests[0]).toEqual({ model: 'flux-klein-9b-generate', hasImage: false });
 
 	const beforeVideo = await selectedSceneImage(page);
 	await chooseOnlyModel(toolbox, 'grok-imagine-video');
-	await expect(toolbox.getByText('Uploads this image to fal.ai')).toBeVisible();
-	await toolbox.getByRole('button', { name: 'Generate AI video' }).click();
+	await expect(toolbox.getByText('Uploads the reference to fal')).toBeVisible();
+	await expect(
+		toolbox.getByRole('spinbutton', { name: 'Generation confirmation threshold' })
+	).toHaveValue('0.25');
+	const confirmation = page.waitForEvent('dialog');
+	const submitted = toolbox.getByRole('button', { name: 'Generate AI video' }).click();
+	const dialog = await confirmation;
+	expect(dialog.type()).toBe('confirm');
+	expect(dialog.message()).toContain('approximately $0.252');
+	expect(requests).toHaveLength(1);
+	await dialog.accept();
+	await submitted;
 	await expect(toolbox.getByRole('region', { name: 'Generated video preview' })).toBeVisible();
 	await expect(toolbox.getByRole('link', { name: 'Download video' })).toHaveAttribute(
 		'href',
@@ -972,7 +986,17 @@ test('each selected modality exposes supported model settings, accurate pricing,
 	await toolbox
 		.getByRole('textbox', { name: 'AI image editing prompt' })
 		.fill('Slow cinematic camera orbit');
-	await toolbox.getByRole('button', { name: 'Generate AI video' }).click();
+	const generateVideo = toolbox.getByRole('button', { name: 'Generate AI video' });
+	await expect(generateVideo).toBeDisabled();
+	await toolbox.getByRole('spinbutton', { name: 'Run spending limit' }).fill('2');
+	const confirmation = page.waitForEvent('dialog');
+	const submitted = generateVideo.click();
+	const dialog = await confirmation;
+	expect(dialog.type()).toBe('confirm');
+	expect(dialog.message()).toContain('approximately $1.200');
+	expect(uploaded).toBeUndefined();
+	await dialog.accept();
+	await submitted;
 	await expect(toolbox.getByRole('region', { name: 'Generated video preview' })).toBeVisible();
 	expect(uploaded?.model).toBe('veo-3-1-video');
 	expect(uploaded?.settings).toEqual({
@@ -999,6 +1023,9 @@ test('each selected modality exposes supported model settings, accurate pricing,
 	await history
 		.getByRole('button', { name: /Use generation \d+: Slow cinematic camera orbit/ })
 		.click();
+	await expect(videoSettings.getByLabel('Image to video Duration')).toHaveValue('8');
+	await expect(videoSettings.getByLabel('Image to video Generate audio')).toBeChecked();
+	await history.getByRole('button', { name: 'Restore reference image, prompt, and model' }).click();
 	await expect(videoSettings.getByLabel('Image to video Duration')).toHaveValue('6');
 	await expect(videoSettings.getByLabel('Image to video Generate audio')).not.toBeChecked();
 	await expect(videoSettings.getByLabel('Image to video Seed')).toHaveValue('42');
@@ -1015,7 +1042,7 @@ test('each selected modality exposes supported model settings, accurate pricing,
 						.transaction('drawing-pages')
 						.objectStore('drawing-pages')
 						.get(
-							(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+							(document.querySelector('.draw-canvas')?.getAttribute('data-account-storage-key') ||
 								'swyx-excalidraw:guest') + ':default'
 						);
 					request.onsuccess = () => resolve(request.result);
@@ -1126,10 +1153,14 @@ test('prompt editing shows progress, retains session generations, and restores t
 	);
 	await promptInput.press('Meta+Enter');
 	await expect(toolbox.getByRole('progressbar', { name: 'AI generation progress' })).toBeVisible();
-	await expect(toolbox.getByText('Waiting for Seedream 5.0 Pro · 2 ahead')).toBeVisible();
-	await expect(toolbox.getByText('Denoising pass 2 of 8')).toBeVisible();
 	await expect(
-		toolbox.getByText('Your result will appear on the canvas and in session history.')
+		toolbox.getByRole('region', { name: 'Generation queue' }).getByText(/Queued · 2 ahead/)
+	).toBeVisible();
+	await expect(
+		toolbox.getByRole('region', { name: 'Generation queue' }).getByText(/Denoising pass 2 of 8/)
+	).toBeVisible();
+	await expect(
+		toolbox.getByText('Your result will replace the selected image and stay in history.')
 	).toBeVisible();
 	const drawingCanvas = page.locator('.draw-canvas canvas.excalidraw__canvas.interactive');
 	const drawingBounds = await drawingCanvas.boundingBox();
@@ -1146,7 +1177,7 @@ test('prompt editing shows progress, retains session generations, and restores t
 	expect(captured[0]?.imageBytes).toBeLessThan(captured[0]?.image.length ?? 0);
 	expect(captured[0]?.model).toBe('seedream-5-pro');
 	expect(captured[0]?.requestBytes).toBeLessThan(12_000_000);
-	await expect(toolbox.getByText('AI edit applied')).toBeVisible();
+	await expect(toolbox.getByText('Generated 1 of 1 results')).toBeVisible();
 	const history = toolbox.getByRole('region', { name: 'Generated images from this session' });
 	await expect(history.locator('.generation-card')).toHaveCount(2);
 	await expect(history.getByText('Original', { exact: true })).toBeVisible();
@@ -1176,7 +1207,7 @@ test('prompt editing shows progress, retains session generations, and restores t
 						.transaction('drawing-pages')
 						.objectStore('drawing-pages')
 						.get(
-							(document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+							(document.querySelector('.draw-canvas')?.getAttribute('data-account-storage-key') ||
 								'swyx-excalidraw:guest') + ':default'
 						);
 					request.onsuccess = () => resolve(request.result);
@@ -1189,7 +1220,7 @@ test('prompt editing shows progress, retains session generations, and restores t
 		)
 		.toMatchObject({
 			modelId: 'seedream-5-pro',
-			modelEndpoint: 'bytedance/seedream/v5/pro/edit',
+			adapterId: 'fal',
 			modelKind: 'image-edit',
 			modelWorkflow: 'Precise product 1K edit',
 			modelSettings: { image_size: 'auto_1K', output_format: 'jpeg' },
@@ -1217,8 +1248,12 @@ test('prompt editing shows progress, retains session generations, and restores t
 	);
 	const latest = await selectedSceneImage(page);
 	await history.getByRole('button', { name: /Use generation \d+: Original image/ }).click();
+	expect((await selectedSceneImage(page)).fileId).toBe(latest.fileId);
+	await generationDetails
+		.getByRole('button', { name: 'Replace selected image', exact: true })
+		.click();
 	await expect.poll(async () => (await selectedSceneImage(page)).fileId).not.toBe(latest.fileId);
-	await expect(toolbox.getByText(/Original image restored/)).toBeVisible();
+	await expect(toolbox.getByText(/Generation restored — Undo available/)).toBeVisible();
 	const restoredOriginal = await page.evaluate(() => {
 		const scene =
 			/** @type {{elements:{type:string,fileId:string}[],files:Record<string,{dataURL:string}>}} */ (
@@ -1235,6 +1270,11 @@ test('prompt editing shows progress, retains session generations, and restores t
 	expect(restoredOriginal).toBe(originalDataURL);
 	const originalRestored = await selectedSceneImage(page);
 	await history.getByRole('button', { name: /Use generation 2:.*studio product mockup/i }).click();
+	expect((await selectedSceneImage(page)).fileId).toBe(originalRestored.fileId);
+	await expect(promptInput).toHaveValue('A second variation');
+	await generationDetails
+		.getByRole('button', { name: 'Replace selected image', exact: true })
+		.click();
 	await expect
 		.poll(async () => (await selectedSceneImage(page)).fileId)
 		.not.toBe(originalRestored.fileId);
@@ -1252,12 +1292,14 @@ test('prompt editing shows progress, retains session generations, and restores t
 		return image ? scene.files[image.fileId].dataURL : '';
 	});
 	expect(restored).toBe(outputImages[0]);
-	await expect(promptInput).toHaveValue(/studio product mockup/i);
+	await expect(promptInput).toHaveValue('A second variation');
 	const generationsBeforeRecipe = captured.length;
 	await generationDetails
 		.getByRole('button', { name: 'Restore reference image, prompt, and model' })
 		.click();
-	await expect(toolbox.getByText(/Reference image, prompt, and model restored/)).toBeVisible();
+	await expect(
+		toolbox.getByText(/Recipe restored — edit it, then generate when ready/)
+	).toBeVisible();
 	expect(
 		await page.evaluate(() => {
 			const scene = /** @type {any} */ (
@@ -1271,7 +1313,11 @@ test('prompt editing shows progress, retains session generations, and restores t
 			const image = scene.elements.find((/** @type {any} */ element) => element.type === 'image');
 			return scene.files[image.fileId].dataURL;
 		})
-	).toBe(originalDataURL);
+	).toBe(outputImages[0]);
+	await expect(toolbox.getByAltText('Reference attached to this draft')).toHaveAttribute(
+		'src',
+		originalDataURL
+	);
 	await expect(promptInput).toHaveValue(/studio product mockup/i);
 	await expect(
 		toolbox.getByRole('button', { name: 'AI model and workflow selector' })

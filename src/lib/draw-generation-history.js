@@ -1,7 +1,7 @@
 const DATABASE_NAME = 'swyx-draw-generation-history';
 const STORE_NAME = 'drawing-pages';
 
-/** @typedef {{ dataURL: string, mimeType: string, generationId?: string }} DrawingGenerationReference */
+/** @typedef {{ dataURL: string, mimeType: string, generationId?: string, assetId?: string }} DrawingGenerationReference */
 /**
  * @typedef {{
  *   id: string,
@@ -16,6 +16,19 @@ const STORE_NAME = 'drawing-pages';
  *   modelKind?: string,
  *   modelWorkflow?: string,
  *   modelSettings?: Record<string, unknown>,
+ *   adapterId?: string,
+ *   batchId?: string,
+ *   recipeId?: string,
+ *   runId?: string,
+ *   jobId?: string,
+ *   context?: Record<string, unknown>,
+ *   elapsedMs?: number,
+ *   estimatedUsd?: number,
+ *   reportedUsd?: number,
+ *   qualityNote?: string,
+ *   width?: number,
+ *   height?: number,
+ *   promptModifiers?: { id?: string, name: string, text: string }[],
  *   referenceImages?: DrawingGenerationReference[],
  *   parentGenerationId?: string
  * }} DrawingImageGeneration

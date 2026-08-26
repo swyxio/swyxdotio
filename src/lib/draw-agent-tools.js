@@ -1,4 +1,4 @@
-import { DRAW_FAL_MODELS } from './draw-fal-models.js';
+import { DRAW_GENERATION_MODELS } from './draw-generation-models.js';
 import { DRAW_DESIGN_FORMATS, DRAW_DESIGN_TEMPLATES } from './draw-designs.js';
 
 export const MAX_DRAW_AGENT_ROUNDS = 6;
@@ -175,19 +175,13 @@ function designOptions(args, allowed) {
 	return options;
 }
 
-/** @param {string[]} requested @param {any[]} elements @param {any} state @param {number} minimum */
-function chosenElements(requested, elements, state, minimum = 1) {
+/** @param {string[]} requested @param {any[]} elements @param {any} state @param {number} minimum @param {number} maximum */
+function chosenElements(requested, elements, state, minimum = 1, maximum = MAX_MUTATION_ELEMENTS) {
 	const ids = requested.length
 		? requested
 		: Object.keys(state.selectedElementIds ?? {}).filter((id) => state.selectedElementIds[id]);
-	if (
-		ids.length < minimum ||
-		ids.length > MAX_MUTATION_ELEMENTS ||
-		new Set(ids).size !== ids.length
-	) {
-		throw new Error(
-			`Choose between ${minimum} and ${MAX_MUTATION_ELEMENTS} distinct drawing elements.`
-		);
+	if (ids.length < minimum || ids.length > maximum || new Set(ids).size !== ids.length) {
+		throw new Error(`Choose between ${minimum} and ${maximum} distinct drawing elements.`);
 	}
 	const matches = ids.map((id) => elements.find((element) => element.id === id));
 	if (matches.some((element) => !element))
@@ -223,7 +217,7 @@ function commitChanges(context, changes, appState) {
  *  createPage: () => Promise<void>,
  *  switchPage: (page: any) => Promise<void>,
  *  renamePage: (id: string, name: string) => Promise<void>,
- *  insertPreset: (preset: any) => void,
+ *  insertPreset: (preset: any) => void | Promise<boolean>,
  *  insertComponent: (id: string) => void,
  *  insertDesign?: (id: string, options: Record<string, string>) => Promise<unknown>,
  *  duplicateDesign?: (frameId: string, name?: string) => unknown,
@@ -240,7 +234,7 @@ export async function executeDrawingAgentCommand(args, context) {
 	if (!editor) throw new Error('The drawing canvas is not ready.');
 	const [command = 'help', action, ...rest] = args;
 	const state = editor.getAppState();
-	const elements = editor.getSceneElements();
+	const elements = /** @type {any[]} */ (editor.getSceneElements());
 	if (command === 'help') return { help: DRAW_AGENT_HELP };
 	if (command === 'inspect') {
 		return {
@@ -269,7 +263,7 @@ export async function executeDrawingAgentCommand(args, context) {
 					width: frame.width,
 					height: frame.height
 				})),
-			imageModels: DRAW_FAL_MODELS.map((model) => ({
+			imageModels: DRAW_GENERATION_MODELS.map((model) => ({
 				id: model.id,
 				label: model.label,
 				kind: model.kind,
@@ -429,8 +423,20 @@ export async function executeDrawingAgentCommand(args, context) {
 				throw new Error(`Unsupported duplication option: ${token}`);
 			else ids.push(token);
 		}
-		const originals = chosenElements(ids, elements, state, 1);
-		const copies = context.convertElements(
+		const selected = chosenElements(ids, elements, state, 1, MAX_ELEMENTS);
+		if (selected.some((element) => element.type === 'frame')) {
+			throw new Error('Use draw design duplicate FRAME_ID to copy an artboard.');
+		}
+		const selectedIds = new Set(selected.map((element) => element.id));
+		// Include bound labels even when Excalidraw selects only their containers.
+		const originals = elements.filter(
+			(element) =>
+				selectedIds.has(element.id) ||
+				(element.type === 'text' && selectedIds.has(element.containerId))
+		);
+		if (originals.length > MAX_ELEMENTS)
+			throw new Error('Duplicate at most 120 elements including bound labels.');
+		let copies = context.convertElements(
 			originals.map(({ id, index, version, versionNonce, seed, ...element }) => ({
 				...element,
 				x: element.x + dx,
@@ -444,6 +450,42 @@ export async function executeDrawingAgentCommand(args, context) {
 			})),
 			{ regenerateIds: true }
 		);
+		const copiedIds = new Map(originals.map((element, index) => [element.id, copies[index].id]));
+		const groupIds = new Map();
+		copies = copies.map((/** @type {any} */ copy, /** @type {number} */ index) => {
+			const original = originals[index];
+			const groups = (original.groupIds ?? []).map((/** @type {string} */ id) => {
+				if (!groupIds.has(id)) groupIds.set(id, crypto.randomUUID());
+				return groupIds.get(id);
+			});
+			const binding = (/** @type {any} */ value) =>
+				value && copiedIds.has(value.elementId)
+					? { ...value, elementId: copiedIds.get(value.elementId) }
+					: null;
+			return context.updateElement(copy, {
+				// The skeleton converter lays out aligned text again. A duplicate
+				// already has measured native geometry, so retain it exactly.
+				x: original.x + dx,
+				y: original.y + dy,
+				width: original.width,
+				height: original.height,
+				groupIds: groups,
+				frameId: null,
+				boundElements:
+					original.boundElements
+						?.filter((/** @type {any} */ bound) => copiedIds.has(bound.id))
+						.map((/** @type {any} */ bound) => ({ ...bound, id: copiedIds.get(bound.id) })) ?? null,
+				...(original.type === 'text'
+					? { containerId: copiedIds.get(original.containerId) ?? null }
+					: {}),
+				...(original.type === 'arrow'
+					? {
+							startBinding: binding(original.startBinding),
+							endBinding: binding(original.endBinding)
+						}
+					: {})
+			});
+		});
 		editor.updateScene({
 			elements: [...editor.getSceneElementsIncludingDeleted(), ...copies],
 			appState: {
@@ -666,7 +708,10 @@ export async function executeDrawingAgentCommand(args, context) {
 		if (action !== 'insert' || !rest[0]) throw new Error('Use draw presets insert PRESET_ID.');
 		const preset = context.presets.find((entry) => entry.id === rest[0]);
 		if (!preset) throw new Error('The requested drawing preset does not exist.');
-		context.insertPreset(preset);
+		if ((await context.insertPreset(preset)) === false)
+			throw new Error(
+				'The preset could not be inserted. Check that the page and drawing fonts are ready.'
+			);
 		return { inserted: preset.id, label: preset.label };
 	}
 	if (command === 'components') {
