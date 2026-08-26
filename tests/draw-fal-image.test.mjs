@@ -2,9 +2,9 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
-	drawingFalInputDimensions,
-	estimateDrawingFalUploadBytes
-} from '../src/lib/draw-fal-image.js';
+	drawingGenerationInputDimensions,
+	estimateDrawingGenerationUploadBytes
+} from '../src/lib/draw-generation-image.js';
 import { DRAW_FAL_MODELS, MAX_DRAW_FAL_REQUEST_BYTES } from '../src/lib/draw-fal-models.js';
 
 test('each configured model has an explicit documented resolution and image-format budget', () => {
@@ -32,7 +32,7 @@ test('large references downsize to each model budget while retaining their aspec
 			{ width: 1600, height: 4000 },
 			{ width: 8000, height: 1000 }
 		]) {
-			const resized = drawingFalInputDimensions(source.width, source.height, model);
+			const resized = drawingGenerationInputDimensions(source.width, source.height, model);
 			assert.ok(resized.width <= model.input.maxEdge, `${model.id} width`);
 			assert.ok(resized.height <= model.input.maxEdge, `${model.id} height`);
 			assert.ok(resized.width * resized.height <= model.input.maxPixels, `${model.id} pixels`);
@@ -46,7 +46,10 @@ test('large references downsize to each model budget while retaining their aspec
 
 test('small references retain their original dimensions instead of being upscaled', () => {
 	for (const model of DRAW_FAL_MODELS) {
-		assert.deepEqual(drawingFalInputDimensions(420, 280, model), { width: 420, height: 280 });
+		assert.deepEqual(drawingGenerationInputDimensions(420, 280, model), {
+			width: 420,
+			height: 280
+		});
 	}
 });
 
@@ -58,7 +61,10 @@ test('invalid reference dimensions are rejected before upload', () => {
 		[Infinity, 300],
 		[300, NaN]
 	]) {
-		assert.throws(() => drawingFalInputDimensions(width, height, model), /invalid dimensions/i);
+		assert.throws(
+			() => drawingGenerationInputDimensions(width, height, model),
+			/invalid dimensions/i
+		);
 	}
 });
 
@@ -69,8 +75,10 @@ test('binary upload budgets count raw image bytes, UTF-8 fields, and multipart h
 		model: 'flux-2'
 	};
 	assert.equal(
-		estimateDrawingFalUploadBytes(request),
+		estimateDrawingGenerationUploadBytes(request),
 		2_000_000 + new TextEncoder().encode(request.prompt).byteLength + request.model.length + 8192
 	);
-	assert.ok(estimateDrawingFalUploadBytes({ ...request, prompt: 'a'.repeat(1000) }) > 2_009_000);
+	assert.ok(
+		estimateDrawingGenerationUploadBytes({ ...request, prompt: 'a'.repeat(1000) }) > 2_009_000
+	);
 });

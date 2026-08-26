@@ -3,6 +3,7 @@
 // for information about these interfaces
 // and what to do when importing types
 interface R2Bucket {
+	delete(key: string): Promise<void>;
 	get(key: string): Promise<R2ObjectBody | null>;
 	head(key: string): Promise<R2Object | null>;
 	put(
@@ -119,6 +120,8 @@ declare namespace App {
 			READ_FUNNEL_RATE_LIMITER?: RateLimit;
 			PRESENCE_ROOMS?: DurableObjectNamespace;
 			DRAW_PAGES?: DurableObjectNamespace;
+			DRAW_ASSETS?: R2Bucket;
+			YOUTUBE_API_KEY?: string;
 			PRESENCE_ENABLED?: string;
 			PUBLIC_PRESENCE_ADMISSION_RATE?: string;
 			PODCAST_MEDIA?: R2Bucket;

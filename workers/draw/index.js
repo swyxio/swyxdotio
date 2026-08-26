@@ -1,5 +1,6 @@
 import { ToolsAiUsage } from './ai-usage.js';
 import { ToolsActivity } from './activity.js';
+import { CreativeLibrary } from './creative-library.js';
 
 const MAX_SCENE_BYTES = 1_800_000;
 const MAX_PAGE_COUNT = 100;
@@ -61,6 +62,8 @@ export class DrawingPages {
 		this.aiUsage = undefined;
 		/** @type {ToolsActivity | undefined} */
 		this.activity = undefined;
+		/** @type {CreativeLibrary | undefined} */
+		this.creativeLibrary = undefined;
 		this.sql.exec(`
 			CREATE TABLE IF NOT EXISTS drawing_pages (
 				id TEXT PRIMARY KEY,
@@ -209,6 +212,10 @@ export class DrawingPages {
 	/** @param {Request} request */
 	async fetch(request) {
 		const path = new URL(request.url).pathname;
+		if (path.startsWith('/creative/')) {
+			this.creativeLibrary ??= new CreativeLibrary(this.sql);
+			return this.creativeLibrary.fetch(request);
+		}
 		if (path.startsWith('/ai/')) {
 			if (request.method !== 'POST') return respond({ error: 'Method not allowed.' }, 405);
 			const raw = await request.text();

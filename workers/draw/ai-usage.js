@@ -1,4 +1,5 @@
 import { TOOLS_AI_POLICY, TOOLS_AI_LOGGING } from '../../src/lib/tools-ai-policy.js';
+import { GenerationRuns } from './generation-runs.js';
 
 const HOUR_MS = 3_600_000;
 const DAY_MS = 24 * HOUR_MS;
@@ -21,18 +22,22 @@ export class ToolsAiUsage {
 		CREATE INDEX IF NOT EXISTS tools_ai_usage_user_time ON tools_ai_usage(user_id, created_at);
 		CREATE INDEX IF NOT EXISTS tools_ai_usage_time ON tools_ai_usage(created_at);
 		CREATE UNIQUE INDEX IF NOT EXISTS tools_ai_usage_job ON tools_ai_usage(model, provider_request_id) WHERE provider_request_id IS NOT NULL;`);
+		this.generationRuns = new GenerationRuns(sql);
 	}
 
 	/** @param {number} [now] */
 	prune(now = Date.now()) {
 		this.sql.exec('DELETE FROM tools_ai_usage WHERE created_at <= ?', now - RETENTION_MS);
+		this.generationRuns.prune(now - RETENTION_MS);
 	}
 
 	nextExpiry() {
 		const oldest = this.sql
 			.exec('SELECT MIN(created_at) AS oldest FROM tools_ai_usage')
 			.one().oldest;
-		return typeof oldest === 'number' ? oldest + RETENTION_MS : null;
+		const runOldest = this.generationRuns.oldest();
+		const timestamps = [oldest, runOldest].filter((value) => typeof value === 'number');
+		return timestamps.length ? Math.min(...timestamps) + RETENTION_MS : null;
 	}
 
 	/** @param {string} userId @param {number} now */
@@ -84,6 +89,10 @@ export class ToolsAiUsage {
 				: TOOLS_AI_POLICY.mediaMinimumReservationUsd;
 		if (micros < Math.round(minimum * MILLION))
 			return Response.json({ error: 'Invalid usage reservation.' }, { status: 400 });
+		if (body.run !== undefined && kind !== 'media')
+			return Response.json({ error: 'Run budgets apply to media generation.' }, { status: 400 });
+		const run = this.generationRuns.prepare(userId, body.run, micros);
+		if (run instanceof Response) return run;
 		const usage = this.summary(userId, now);
 		const limit =
 			kind === 'assistant'
@@ -147,6 +156,7 @@ export class ToolsAiUsage {
 			micros,
 			'reserved'
 		);
+		if (run) this.generationRuns.reserve(run, id, now);
 		return Response.json({ id, estimatedReservedUsd: micros / MILLION }, { status: 201 });
 	}
 
@@ -197,7 +207,11 @@ export class ToolsAiUsage {
 					);
 				this.sql.exec('UPDATE tools_ai_usage SET last_polled_at = ? WHERE id = ?', now, job.id);
 			}
-			return Response.json({ id: job.id, status: job.status });
+			return Response.json({
+				id: job.id,
+				status: job.status,
+				adapter: this.generationRuns.adapterFor(job.id)
+			});
 		}
 		if (path === '/ai/register') {
 			if (
@@ -230,6 +244,8 @@ export class ToolsAiUsage {
 				.toArray()[0];
 			if (existing && existing.id !== body.id)
 				return Response.json({ error: 'Generation already registered.' }, { status: 409 });
+			const binding = this.generationRuns.bindAdapter(body.userId, body.id, body.adapter);
+			if (binding instanceof Response) return binding;
 			this.sql.exec(
 				"UPDATE tools_ai_usage SET provider_request_id = ?, status = 'submitted' WHERE id = ?",
 				body.requestId,

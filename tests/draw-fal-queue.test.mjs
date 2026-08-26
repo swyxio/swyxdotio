@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { runDrawingFalGeneration } from '../src/lib/draw-fal-queue.js';
+import { runDrawingGeneration } from '../src/lib/draw-generation-client.js';
 
 /** @param {unknown} body @param {number} [status] */
 function response(body, status = 200) {
@@ -23,7 +23,7 @@ test('generation uploads raw multipart bytes once and reports queue position and
 		{ status: 'IN_PROGRESS', message: 'Denoising step 4 of 12' },
 		{ status: 'COMPLETED', image: 'data:image/png;base64,ZWRpdGVk', model: 'fal-ai/flux-2/edit' }
 	];
-	const result = await runDrawingFalGeneration({
+	const result = await runDrawingGeneration({
 		image,
 		prompt: 'Improve lighting',
 		model: 'flux-2',
@@ -61,7 +61,7 @@ test('generation uploads raw multipart bytes once and reports queue position and
 
 test('generation sends only selected endpoint settings as a bounded multipart JSON field', async () => {
 	let call = 0;
-	await runDrawingFalGeneration({
+	await runDrawingGeneration({
 		image: new Blob(['image'], { type: 'image/jpeg' }),
 		prompt: 'Animate the portrait',
 		model: 'veo-3-1-video',
@@ -105,7 +105,7 @@ test('generation rejects invalid jobs, invalid images, and private endpoint fail
 	]) {
 		let call = 0;
 		await assert.rejects(
-			runDrawingFalGeneration({
+			runDrawingGeneration({
 				image: new Blob(['image'], { type: 'image/jpeg' }),
 				prompt: 'Edit',
 				model: 'flux-2',
@@ -120,7 +120,7 @@ test('generation rejects invalid jobs, invalid images, and private endpoint fail
 
 test('text-to-image queue jobs do not upload a selected image', async () => {
 	let call = 0;
-	const result = await runDrawingFalGeneration({
+	const result = await runDrawingGeneration({
 		prompt: 'A cinematic mountain landscape',
 		model: 'flux-klein-9b-generate',
 		signal: new AbortController().signal,
@@ -139,7 +139,7 @@ test('text-to-image queue jobs do not upload a selected image', async () => {
 
 test('video queue jobs return playable provider URLs without treating them as canvas images', async () => {
 	let call = 0;
-	const result = await runDrawingFalGeneration({
+	const result = await runDrawingGeneration({
 		image: new Blob(['image'], { type: 'image/jpeg' }),
 		prompt: 'Add a slow cinematic pan',
 		model: 'grok-imagine-video',
@@ -160,7 +160,7 @@ test('queued generation stops promptly when cancelled', async () => {
 	const controller = new AbortController();
 	let calls = 0;
 	await assert.rejects(
-		runDrawingFalGeneration({
+		runDrawingGeneration({
 			image: new Blob(['image'], { type: 'image/png' }),
 			prompt: 'Edit',
 			model: 'flux-2',
@@ -185,7 +185,7 @@ test('stopping an autonomous generation cancels its existing fal queue job witho
 	/** @type {Array<[string, number]>} */
 	const budgets = [];
 	await assert.rejects(
-		runDrawingFalGeneration({
+		runDrawingGeneration({
 			image: new Blob(['image'], { type: 'image/png' }),
 			prompt: 'Edit',
 			model: 'flux-2',
@@ -229,7 +229,7 @@ test('a stalled queue poll is retried without resubmitting the paid generation',
 	let calls = 0;
 	/** @type {{status: string, message?: string, elapsedMs?: number}[]} */
 	const progress = [];
-	const result = await runDrawingFalGeneration({
+	const result = await runDrawingGeneration({
 		image: new Blob(['image'], { type: 'image/png' }),
 		prompt: 'Edit',
 		model: 'flux-2',

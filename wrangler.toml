@@ -81,6 +81,11 @@ script_name = "swyxdotio-draw"
 binding = "PODCAST_MEDIA"
 bucket_name = "swyxdotio-podcast-media"
 
+# Private creative assets: no public R2 URL; all reads require the account session.
+[[r2_buckets]]
+binding = "DRAW_ASSETS"
+bucket_name = "swyxdotio-draw-assets"
+
 # Example bindings for future use (uncomment + configure when needed):
 # [[durable_objects.bindings]]
 # name = "MY_DO"

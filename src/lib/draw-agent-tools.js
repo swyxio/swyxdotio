@@ -1,4 +1,4 @@
-import { DRAW_FAL_MODELS } from './draw-fal-models.js';
+import { DRAW_GENERATION_MODELS } from './draw-generation-models.js';
 import { DRAW_DESIGN_FORMATS, DRAW_DESIGN_TEMPLATES } from './draw-designs.js';
 
 export const MAX_DRAW_AGENT_ROUNDS = 6;
@@ -263,7 +263,7 @@ export async function executeDrawingAgentCommand(args, context) {
 					width: frame.width,
 					height: frame.height
 				})),
-			imageModels: DRAW_FAL_MODELS.map((model) => ({
+			imageModels: DRAW_GENERATION_MODELS.map((model) => ({
 				id: model.id,
 				label: model.label,
 				kind: model.kind,

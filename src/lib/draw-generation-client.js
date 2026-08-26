@@ -22,12 +22,17 @@ function waitForNextPoll(milliseconds, signal) {
 async function readResponse(response) {
 	const body = await response.json().catch(() => ({}));
 	if (!response.ok) {
-		throw new Error(
+		const error = new Error(
 			body.error ??
 				(response.status === 401
 					? 'Sign in to use cloud image editing.'
 					: 'The cloud image edit could not be completed.')
 		);
+		Object.assign(error, {
+			code: typeof body.code === 'string' ? body.code : 'generation_failed',
+			status: response.status
+		});
+		throw error;
 	}
 	return body;
 }
@@ -48,10 +53,13 @@ async function readResponse(response) {
  *  settings?: Record<string, string | number | boolean>
  *  agentBudget?: string
  *  onBudget?: (budget: string, spendingUsd: number) => void
+ *  runId?: string
+ *  runLimitUsd?: number
+ *  clientJobId?: string
  *  cancelOnAbort?: boolean
  * }} options
  */
-export async function runDrawingFalGeneration(options) {
+export async function runDrawingGeneration(options) {
 	const {
 		image,
 		prompt,
@@ -75,6 +83,10 @@ export async function runDrawingFalGeneration(options) {
 	}
 	if (options.providerSafetyDefaults) form.append('providerSafetyDefaults', '1');
 	if (options.agentBudget) form.append('agentBudget', options.agentBudget);
+	if (options.runId !== undefined) form.append('runId', options.runId);
+	if (options.runLimitUsd !== undefined) form.append('runLimitUsd', String(options.runLimitUsd));
+	if (options.clientJobId !== undefined) form.append('clientJobId', options.clientJobId);
+	signal.throwIfAborted();
 	onProgress({ status: 'UPLOADING' });
 	const submitted = await readResponse(
 		await fetcher('/tools/api/draw/edit', {
@@ -102,7 +114,15 @@ export async function runDrawingFalGeneration(options) {
 	onProgress({ status: 'IN_QUEUE', requestId, queuePosition: submitted.queuePosition });
 	const startedAt = Date.now();
 	const query = new URLSearchParams({ requestId, model });
+	let cancellationRequested = false;
 	const cancel = () => {
+		if (cancellationRequested) return;
+		cancellationRequested = true;
+		onProgress({
+			status: 'CANCEL_REQUESTED',
+			requestId,
+			message: 'Cancellation requested; provider work may still complete and be charged.'
+		});
 		void fetcher(`/tools/api/draw/edit?${query}`, {
 			method: 'DELETE',
 			credentials: 'same-origin',
@@ -137,6 +157,12 @@ export async function runDrawingFalGeneration(options) {
 				});
 				continue;
 			}
+			if (update.status === 'CANCELLED') {
+				throw Object.assign(new Error('The generation was cancelled.'), {
+					name: 'AbortError',
+					code: 'cancelled'
+				});
+			}
 			if (update.status === 'COMPLETED') {
 				if (typeof update.video === 'string') {
 					return update;
@@ -158,7 +184,13 @@ export async function runDrawingFalGeneration(options) {
 			});
 			await waitForNextPoll(pollIntervalMs, signal);
 		}
-		throw new Error('Image generation took too long. Please try again.');
+		if (options.cancelOnAbort) cancel();
+		throw Object.assign(
+			new Error(
+				'Generation timed out. The provider may still finish and charge; do not retry automatically.'
+			),
+			{ code: 'generation_timeout' }
+		);
 	} finally {
 		if (options.cancelOnAbort) signal.removeEventListener('abort', cancel);
 	}

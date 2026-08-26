@@ -26,8 +26,7 @@ export const DRAW_FAL_MODELS = /** @type {const} */ ([
 		settings: {
 			resolution: '1K',
 			aspect_ratio: 'auto',
-			output_format: 'webp',
-			safety_tolerance: '6'
+			output_format: 'webp'
 		}
 	},
 	{
@@ -99,8 +98,7 @@ export const DRAW_FAL_MODELS = /** @type {const} */ ([
 		input: { maxPixels: 1_048_576, maxEdge: 2048, mimeType: 'image/jpeg', size: '1K' },
 		settings: {
 			image_size: 'auto_1K',
-			output_format: 'jpeg',
-			enable_safety_checker: false
+			output_format: 'jpeg'
 		}
 	},
 	{
@@ -121,8 +119,7 @@ export const DRAW_FAL_MODELS = /** @type {const} */ ([
 		settings: {
 			resolution: '1K',
 			aspect_ratio: 'auto',
-			output_format: 'webp',
-			safety_tolerance: '6'
+			output_format: 'webp'
 		}
 	},
 	{
@@ -145,8 +142,7 @@ export const DRAW_FAL_MODELS = /** @type {const} */ ([
 			image_size: 'auto',
 			expansion_model: 'None',
 			rendering_speed: 'BALANCED',
-			output_format: 'jpeg',
-			enable_safety_checker: false
+			output_format: 'jpeg'
 		}
 	},
 	{
@@ -164,7 +160,7 @@ export const DRAW_FAL_MODELS = /** @type {const} */ ([
 		description: 'Highest-ranked open-weight editor for instruction-following edits',
 		badge: 'Open #1',
 		input: { maxPixels: 1_048_576, maxEdge: 2048, mimeType: 'image/jpeg', size: '1 MP' },
-		settings: { image_size: 'auto', output_format: 'jpeg', enable_safety_checker: false }
+		settings: { image_size: 'auto', output_format: 'jpeg' }
 	},
 	{
 		id: 'hidream-o1',
@@ -182,7 +178,7 @@ export const DRAW_FAL_MODELS = /** @type {const} */ ([
 		badge: 'Open #2',
 		imageInput: 'reference_image_urls',
 		input: { maxPixels: 1_048_576, maxEdge: 2048, mimeType: 'image/webp', size: '1 MP' },
-		settings: { output_format: 'webp', keep_original_aspect: true, enable_safety_checker: false }
+		settings: { output_format: 'webp', keep_original_aspect: true }
 	},
 	{
 		id: 'qwen-image-edit-2511',
@@ -199,7 +195,7 @@ export const DRAW_FAL_MODELS = /** @type {const} */ ([
 		description: 'Open-weight Qwen editor with accurate text and subject changes',
 		badge: 'Open weights',
 		input: { maxPixels: 1_048_576, maxEdge: 2048, mimeType: 'image/webp', size: '1 MP' },
-		settings: { output_format: 'webp', enable_safety_checker: false }
+		settings: { output_format: 'webp' }
 	},
 	{
 		id: 'flux-klein-9b',
@@ -216,7 +212,7 @@ export const DRAW_FAL_MODELS = /** @type {const} */ ([
 		description: 'Third-ranked open-weight editor with fast four-step inference',
 		badge: 'Open #3',
 		input: { maxPixels: 1_048_576, maxEdge: 2048, mimeType: 'image/webp', size: '1 MP' },
-		settings: { output_format: 'webp', enable_safety_checker: false }
+		settings: { output_format: 'webp' }
 	},
 	{
 		id: 'flux-2',
@@ -233,7 +229,7 @@ export const DRAW_FAL_MODELS = /** @type {const} */ ([
 		description: 'Budget-friendly everyday edits at roughly one megapixel',
 		badge: 'Best value',
 		input: { maxPixels: 1_048_576, maxEdge: 2048, mimeType: 'image/webp', size: '1 MP' },
-		settings: { output_format: 'webp', enable_safety_checker: false }
+		settings: { output_format: 'webp' }
 	},
 	{
 		id: 'flux-klein-9b-generate',
@@ -250,7 +246,7 @@ export const DRAW_FAL_MODELS = /** @type {const} */ ([
 		description: 'Generate a new image from your prompt without uploading the canvas image',
 		badge: 'Text to image',
 		input: { maxPixels: 1_048_576, maxEdge: 2048, mimeType: 'image/webp', size: '1 MP' },
-		settings: { image_size: 'square_hd', output_format: 'webp', enable_safety_checker: false }
+		settings: { image_size: 'square_hd', output_format: 'webp' }
 	},
 	{
 		id: 'grok-imagine-2-generate',

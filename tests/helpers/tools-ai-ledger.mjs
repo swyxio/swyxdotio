@@ -45,14 +45,12 @@ export function createTestAiLedger() {
 }
 
 export async function ledgerRequest(ledger, path, body) {
-	return ledger.namespace
-		.get('tools-ai-usage')
-		.fetch(
-			new Request(`https://drawing.internal/ai/${path}`, {
-				method: 'POST',
-				body: JSON.stringify(body)
-			})
-		);
+	return ledger.namespace.get('tools-ai-usage').fetch(
+		new Request(`https://drawing.internal/ai/${path}`, {
+			method: 'POST',
+			body: JSON.stringify(body)
+		})
+	);
 }
 
 export async function seedTestJob(ledger, userId, model, requestId) {
@@ -63,6 +61,6 @@ export async function seedTestJob(ledger, userId, model, requestId) {
 		estimatedReservedUsd: 0.05
 	});
 	const { id } = await admitted.json();
-	await ledgerRequest(ledger, 'register', { userId, id, model, requestId });
+	await ledgerRequest(ledger, 'register', { userId, id, model, requestId, adapter: 'fal' });
 	return id;
 }
