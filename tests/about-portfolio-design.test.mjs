@@ -52,6 +52,44 @@ test('the press kit has real thumbnails, labeled originals, and no known broken 
 	}
 });
 
+test('every additional press photo has a small local preview and its original link', async () => {
+	const [source, markdown] = await Promise.all([
+		read('src/routes/about/+page.svelte'),
+		read('src/routes/about/photos.md')
+	]);
+	const html = await renderMarkdown(markdown);
+	const previews = [...html.matchAll(/<a\s+class="photo-preview"\s+href="([^"]+)"[\s\S]*?<\/a>/g)];
+	assert.equal(previews.length, 21);
+	assert.equal((html.match(/class="photo-preview-grid"/g) || []).length, 4);
+	const paths = new Set();
+	let totalBytes = 0;
+	for (const [preview, href] of previews) {
+		assert.match(href, /^https:\/\//);
+		assert.match(preview, /aria-label="Open original: /);
+		assert.match(preview, /loading="lazy"/);
+		assert.match(preview, /decoding="async"/);
+		assert.match(preview, /alt="[^"]+"/);
+		assert.match(preview, /<figcaption>/);
+		const path = preview.match(/src="(\/about-photos\/[a-z-]+\.webp)"/)?.[1];
+		assert.ok(path, 'Each preview uses a local thumbnail');
+		paths.add(path);
+		const bytes = await readFile(new URL(`static${path}`, root));
+		assert.equal(bytes.toString('ascii', 0, 4), 'RIFF');
+		assert.equal(bytes.toString('ascii', 8, 12), 'WEBP');
+		assert.ok(bytes.length < 100_000, `${path} is too large for a thumbnail`);
+		totalBytes += bytes.length;
+	}
+	assert.equal(paths.size, 21);
+	assert.ok(totalBytes < 750_000, 'The complete gallery stays lightweight');
+	assert.match(html, /drive\.google\.com\/drive\/folders\//);
+	assert.match(html, /twitter\.com\/Thoritie\/status\//);
+	assert.doesNotMatch(html, /<img[^>]+src="https?:/);
+	assert.match(source, /object-fit: contain/);
+	assert.match(source, /\.photo-preview:focus-visible/);
+	assert.match(source, /grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
+	assert.equal((source.match(/src: '\/about-photos\//g) || []).length, 4);
+});
+
 test('Portfolio presents its entries in an accessible, uncollapsed responsive table', async () => {
 	const source = await read('src/routes/portfolio/+page.svelte');
 	assert.equal((source.match(/<h1>/g) || []).length, 1);

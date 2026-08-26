@@ -7,28 +7,28 @@
 	const photos = [
 		{
 			title: 'Niseko headshot',
-			src: '/swyx-ski.jpeg',
+			src: '/about-photos/headshot-niseko.webp',
 			href: 'https://user-images.githubusercontent.com/6764957/103350806-26d9ca80-4adc-11eb-9e53-a8ce9ca3f21f.jpeg',
 			alt: 'swyx in the snow at Niseko',
 			format: '460 × 460 · JPEG'
 		},
 		{
 			title: 'Thursday Nights in AI',
-			src: 'https://pbs.twimg.com/media/GH7eSt8a0AAhQDy?format=png',
+			src: '/about-photos/thursday-with-dog.webp',
 			href: 'https://pbs.twimg.com/media/GH7eSt8a0AAhQDy?format=png',
 			alt: 'swyx smiling and holding a dog at Thursday Nights in AI',
 			format: 'Portrait · PNG'
 		},
 		{
 			title: 'React Miami',
-			src: 'https://user-images.githubusercontent.com/6764957/164554925-e6a2791e-4c75-4d5f-8003-2932193d5b25.png',
+			src: '/about-photos/react-miami-stage.webp',
 			href: 'https://user-images.githubusercontent.com/6764957/164554925-e6a2791e-4c75-4d5f-8003-2932193d5b25.png',
 			alt: 'swyx presenting Temporal on stage at React Miami',
 			format: 'On stage · PNG'
 		},
 		{
 			title: 'React Advanced',
-			src: 'https://user-images.githubusercontent.com/6764957/182177069-eae41bb1-ec46-4622-9659-ec9392b5add8.png',
+			src: '/about-photos/react-advanced-stage.webp',
 			href: 'https://user-images.githubusercontent.com/6764957/182177069-eae41bb1-ec46-4622-9659-ec9392b5add8.png',
 			alt: 'swyx on stage for React With Hooks from Scratch at React Advanced London',
 			format: 'On stage · PNG'
@@ -95,7 +95,7 @@
 				</figure>
 			{/each}
 		</div>
-		<div class="reading-prose photo-sources">
+		<div class="photo-sources">
 			{@html data.photoHtml}
 		</div>
 	</section>
@@ -261,6 +261,78 @@
 		width: fit-content;
 	}
 
+	.photo-sources :global(details) {
+		border-top: 1px solid var(--page-border);
+	}
+
+	.photo-sources :global(summary) {
+		display: list-item;
+		min-height: 44px;
+		cursor: pointer;
+	}
+
+	.photo-sources :global(h3) {
+		margin-block: 2rem 1rem;
+		font: 600 1.35rem / 1.2 var(--font-display);
+	}
+
+	.photo-sources :global(p) {
+		margin-block: 0.75rem;
+		font-size: 0.9rem;
+		line-height: 1.6;
+	}
+
+	.photo-sources :global(.photo-preview-grid) {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 1.5rem 1.25rem;
+	}
+
+	.photo-sources :global(.photo-preview) {
+		display: block;
+		min-width: 0;
+		text-decoration: none;
+	}
+
+	.photo-sources :global(.photo-preview:focus-visible) {
+		outline: 2px solid var(--page-link);
+		outline-offset: 5px;
+	}
+
+	.photo-sources :global(.photo-preview figure) {
+		margin: 0;
+	}
+
+	.photo-sources :global(.photo-preview img) {
+		display: block;
+		width: 100%;
+		height: auto;
+		aspect-ratio: 4 / 3;
+		object-fit: contain;
+		background: rgb(128 128 128 / 6%);
+		border: 1px solid var(--page-border);
+	}
+
+	.photo-sources :global(.photo-preview figcaption) {
+		display: grid;
+		gap: 0.25rem;
+		margin-top: 0.65rem;
+		color: var(--page-text);
+		font-size: 0.9rem;
+		font-weight: 600;
+		line-height: 1.4;
+	}
+
+	.photo-sources :global(.photo-preview:hover figcaption) {
+		color: var(--page-link);
+	}
+
+	.photo-sources :global(.photo-preview figcaption span) {
+		color: var(--page-muted);
+		font-size: 0.8rem;
+		font-weight: 400;
+	}
+
 	@media (max-width: 42rem) {
 		.about-introduction {
 			grid-template-columns: minmax(0, 1fr) 7.5rem;
@@ -268,7 +340,8 @@
 			gap: 1rem;
 		}
 
-		.press-photo-grid {
+		.press-photo-grid,
+		.photo-sources :global(.photo-preview-grid) {
 			grid-template-columns: repeat(2, minmax(0, 1fr));
 		}
 	}
