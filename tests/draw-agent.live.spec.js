@@ -59,6 +59,7 @@ test('real drawing agent produces three source-grounded essay figures', async ({
 		// Exclude media inference from this diagram-only authorization.
 		await page.route('**/tools/api/draw/edit**', (route) => route.abort());
 		await page.route('**/tools/api/draw/agent', async (route) => {
+			if (route.request().method() === 'GET') return route.continue();
 			// $0.05 conservatively covers one bounded request; keep unknown/failed calls reserved.
 			if (ledger.accountedUsd + 0.05 > ledger.capUsd + Number.EPSILON) {
 				await route.fulfill({

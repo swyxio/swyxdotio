@@ -97,6 +97,10 @@ declare namespace App {
 			GA4_MEASUREMENT_ID?: string;
 			GA4_API_SECRET?: string;
 			FAL_KEY?: string;
+			OPENAI_API_KEY?: string;
+			DEEPSEEK_API_KEY?: string;
+			FEATHERLESS_API_KEY?: string;
+			FEATHERLESS_MODEL?: string;
 			GH_TOKEN?: string;
 			GH_WEBHOOK_SECRET?: string;
 			GOOGLE_CLIENT_ID?: string;

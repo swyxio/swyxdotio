@@ -135,6 +135,7 @@ test('authenticated assistant offers grounded Canva-style tasks and creates bran
 	await page.reload();
 	let round = 0;
 	await page.route('**/tools/api/draw/agent', async (route) => {
+		if (route.request().method() === 'GET') return route.continue();
 		round++;
 		await route.fulfill({
 			json:

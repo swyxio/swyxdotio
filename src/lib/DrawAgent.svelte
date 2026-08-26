@@ -54,6 +54,13 @@
 	let toolCalls = $state(0);
 	let spending = $state(0);
 	let spendingCap = $state(DEFAULT_DRAW_AGENT_BUDGET_USD);
+	/** @type {{id: string, label: string, model: string, vision: boolean, configured: boolean, reason?: string}[]} */
+	let providerOptions = $state([]);
+	let providerId = $state('cloudflare');
+	let providersLoading = $state(false);
+	let providerError = $state('');
+	let providerAccount = '';
+	let selectedProvider = $derived(providerOptions.find((provider) => provider.id === providerId));
 	let showWorkflowPicker = $state(false);
 	let pendingWorkflow = $state('');
 	/** @type {string | undefined} */
@@ -72,6 +79,44 @@
 	let pendingExecution;
 	/** @type {{ pointerId: number, x: number, y: number, left: number, top: number, width: number } | undefined} */
 	let drag;
+
+	$effect(() => {
+		const account = userId || '';
+		if (providerAccount !== account) {
+			providerAccount = account;
+			providerOptions = [];
+			providerId = 'cloudflare';
+			providerError = '';
+		}
+		if (!authenticated || !account || !open || minimized) return;
+		const controller = new AbortController();
+		void loadProviders(account, controller.signal);
+		return () => controller.abort();
+	});
+
+	/** @param {string} account @param {AbortSignal} [signal] */
+	async function loadProviders(account, signal) {
+		providersLoading = true;
+		providerError = '';
+		try {
+			const response = await fetch('/tools/api/draw/agent', {
+				headers: { 'X-Tools-User': account },
+				signal
+			});
+			const result = await response.json();
+			if (!response.ok || !Array.isArray(result.providers))
+				throw new Error('Provider settings could not be loaded.');
+			if (account === userId && !signal?.aborted) providerOptions = result.providers;
+		} catch {
+			if (account === userId && !signal?.aborted) {
+				providerOptions = [];
+				providerError =
+					'Provider settings could not be loaded. Close and reopen the assistant to retry.';
+			}
+		} finally {
+			if (account === userId && !signal?.aborted) providersLoading = false;
+		}
+	}
 
 	$effect(() => {
 		if (!pageId || typeof localStorage === 'undefined') return;
@@ -213,7 +258,9 @@
 
 	async function sendMessage() {
 		const request = prompt.trim();
-		if (!request || running || !authenticated) return;
+		if (!request || running || !authenticated || providersLoading || !selectedProvider?.configured)
+			return;
+		const provider = selectedProvider;
 		const prior = messages
 			.filter((message) => message.role !== 'step')
 			.slice(-10)
@@ -234,10 +281,10 @@
 			for (let round = 0; round < MAX_DRAW_AGENT_ROUNDS; round++) {
 				operation.signal.throwIfAborted();
 				rounds = round + 1;
-				status = `Reviewing your visible canvas · round ${rounds}/${MAX_DRAW_AGENT_ROUNDS}`;
+				status = `${provider.vision ? 'Reviewing your visible canvas' : 'Reading your drawing'} · round ${rounds}/${MAX_DRAW_AGENT_ROUNDS}`;
 				let screenshot;
 				try {
-					screenshot = await captureViewport();
+					if (provider.vision) screenshot = await captureViewport();
 				} catch {
 					// Scene-inspection commands remain usable if the browser blocks canvas capture.
 				}
@@ -246,6 +293,7 @@
 					credentials: 'same-origin',
 					headers: { 'Content-Type': 'application/json', 'X-Tools-User': userId ?? 'guest' },
 					body: JSON.stringify({
+						provider: provider.id,
 						messages: conversation,
 						...(screenshot ? { screenshot } : {}),
 						...(budgetToken ? { budget: budgetToken } : { budgetCap: Number(spendingCap) })
@@ -281,7 +329,7 @@
 			}
 			appendMessage(
 				'assistant',
-				`I completed ${rounds} visual review rounds and ${toolCalls} drawing commands. Ask me to continue if you'd like further changes.`
+				`I completed ${rounds} review rounds and ${toolCalls} drawing commands. Ask me to continue if you'd like further changes.`
 			);
 			status = '';
 		} catch (failure) {
@@ -445,7 +493,11 @@
 		<header class="assistant-header" onpointerdown={beginDrag} role="presentation">
 			<div>
 				<strong>Drawing assistant</strong>
-				<span>Sees your visible canvas</span>
+				<span
+					>{selectedProvider?.vision
+						? 'Sees your visible canvas'
+						: 'Edits your native drawing'}</span
+				>
 			</div>
 			<div class="header-actions">
 				{#if authenticated}
@@ -515,55 +567,88 @@
 				<a href="/tools?next=/draw">Sign in to use the assistant</a>
 			</div>
 		{:else}
-			<ToolsAiNotice />
-			<div class="assistant-disclosure">
-				Visible canvas screenshots are sent to Cloudflare AI. Image generation may also upload
-				selected images to fal.ai.
-			</div>
-			{#if showWorkflowPicker && messages.length}
-				<div class="workflow-picker" aria-label="Suggested design tasks">
-					{#each workflows as workflow (workflow.id)}
-						<button
-							type="button"
-							class="workflow-chip"
-							disabled={running}
-							aria-label="Try {workflow.label} workflow"
-							onclick={() => useWorkflow(workflow.prompt)}>{workflow.label}</button
-						>
-					{/each}
+			<div class="assistant-content" bind:this={transcript}>
+				<ToolsAiNotice />
+				<div class="provider-settings">
+					<label for="drawing-provider">Drawing model</label>
+					<select
+						id="drawing-provider"
+						aria-label="Drawing model"
+						bind:value={providerId}
+						disabled={running || providersLoading}
+					>
+						{#if !providerOptions.length}<option value="cloudflare"
+								>{providersLoading ? 'Loading providers…' : 'Providers unavailable'}</option
+							>{/if}
+						{#each providerOptions as provider (provider.id)}
+							<option value={provider.id} disabled={!provider.configured}
+								>{provider.label} · {provider.model || 'model not set'}{provider.configured
+									? ''
+									: ' · not configured'}</option
+							>
+						{/each}
+					</select>
+					{#if providerError}<span role="alert">{providerError}</span>{/if}
+					{#if selectedProvider && !selectedProvider.configured}<span
+							>{selectedProvider.reason}</span
+						>{/if}
+					<small>Keys are configured by the site owner, never stored in your browser.</small>
 				</div>
-			{/if}
-			<div class="assistant-transcript" aria-live="polite" bind:this={transcript}>
-				{#if messages.length === 0}
-					<div class="assistant-empty">
-						<strong>What should we draw?</strong>
-						<span
-							>I can inspect the canvas, create diagrams, arrange shapes, use templates, edit
-							images, and review the result.</span
-						>
-						<div class="assistant-workflows" aria-label="Suggested design tasks">
-							{#each workflows as workflow (workflow.id)}
-								<button
-									type="button"
-									class="workflow-chip"
-									disabled={running}
-									aria-label="Try {workflow.label} workflow"
-									onclick={() => useWorkflow(workflow.prompt)}>{workflow.label}</button
-								>
-							{/each}
-						</div>
+				<div class="assistant-disclosure">
+					{#if selectedProvider?.configured}
+						Prompts and drawing tool results are sent to {selectedProvider.label}.
+						{#if selectedProvider.vision}Visible canvas screenshots are sent to {selectedProvider.label}.
+						{:else}Text-only: uses native scene text and geometry; no screenshot is sent.{/if}
+					{/if}
+					Image generation may also upload selected images to fal.ai. Usage shown is an estimate; provider
+					plans and discounts may differ.
+				</div>
+				{#if showWorkflowPicker && messages.length}
+					<div class="workflow-picker" aria-label="Suggested design tasks">
+						{#each workflows as workflow (workflow.id)}
+							<button
+								type="button"
+								class="workflow-chip"
+								disabled={running}
+								aria-label="Try {workflow.label} workflow"
+								onclick={() => useWorkflow(workflow.prompt)}>{workflow.label}</button
+							>
+						{/each}
 					</div>
 				{/if}
-				{#each messages as message, index (`${message.createdAt}-${index}`)}
-					<div
-						class="agent-message"
-						class:user={message.role === 'user'}
-						class:step={message.role === 'step'}
-					>
-						{#if message.role === 'step'}<span class="step-marker" aria-hidden="true">›</span>{/if}
-						{message.content}
-					</div>
-				{/each}
+				<div class="assistant-transcript" aria-live="polite">
+					{#if messages.length === 0}
+						<div class="assistant-empty">
+							<strong>What should we draw?</strong>
+							<span
+								>I can inspect the canvas, create diagrams, arrange shapes, use templates, edit
+								images, and review the result.</span
+							>
+							<div class="assistant-workflows" aria-label="Suggested design tasks">
+								{#each workflows as workflow (workflow.id)}
+									<button
+										type="button"
+										class="workflow-chip"
+										disabled={running}
+										aria-label="Try {workflow.label} workflow"
+										onclick={() => useWorkflow(workflow.prompt)}>{workflow.label}</button
+									>
+								{/each}
+							</div>
+						</div>
+					{/if}
+					{#each messages as message, index (`${message.createdAt}-${index}`)}
+						<div
+							class="agent-message"
+							class:user={message.role === 'user'}
+							class:step={message.role === 'step'}
+						>
+							{#if message.role === 'step'}<span class="step-marker" aria-hidden="true">›</span
+								>{/if}
+							{message.content}
+						</div>
+					{/each}
+				</div>
 			</div>
 
 			{#if status || error}
@@ -634,7 +719,7 @@
 						<button
 							type="submit"
 							class="send-button"
-							disabled={!prompt.trim()}
+							disabled={!prompt.trim() || providersLoading || !selectedProvider?.configured}
 							title="Send (⌘/Ctrl+Enter)">Send</button
 						>
 					{/if}
@@ -645,6 +730,37 @@
 {/if}
 
 <style>
+	.assistant-content {
+		flex: 1;
+		min-height: 0;
+		overflow-y: auto;
+		overscroll-behavior: contain;
+	}
+	.assistant-header,
+	.assistant-composer,
+	.assistant-status,
+	.draft-choice {
+		flex-shrink: 0;
+	}
+	.provider-settings {
+		display: grid;
+		gap: 5px;
+		padding: 10px 12px;
+		font-size: 12px;
+	}
+	.provider-settings select {
+		width: 100%;
+		min-width: 0;
+		min-height: 36px;
+		border: 1px solid #dfdfe8;
+		border-radius: 7px;
+		background: white;
+		padding: 6px;
+		font: inherit;
+	}
+	.provider-settings small {
+		color: #666575;
+	}
 	.draft-choice {
 		display: flex;
 		flex-wrap: wrap;
@@ -755,13 +871,9 @@
 	}
 	.assistant-transcript {
 		display: grid;
-		flex: 1;
 		align-content: start;
 		gap: 10px;
-		min-height: 0;
 		padding: 13px;
-		overflow-y: auto;
-		overscroll-behavior: contain;
 	}
 	.assistant-empty {
 		display: grid;
