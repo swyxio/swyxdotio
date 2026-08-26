@@ -1,7 +1,13 @@
 import assert from 'node:assert/strict';
 import { readFile, stat } from 'node:fs/promises';
 import test from 'node:test';
-import { filterPortfolio, formatValuation, formatValuationDate } from '../src/lib/portfolio.js';
+import {
+	PORTFOLIO_TIERS,
+	filterPortfolio,
+	formatPortfolioValuation,
+	formatValuation,
+	formatValuationDate
+} from '../src/lib/portfolio.js';
 
 const root = new URL('../', import.meta.url);
 const companies = JSON.parse(await readFile(new URL('src/lib/data/portfolio.json', root), 'utf8'));
@@ -27,14 +33,119 @@ test('every public valuation has a positive amount, dated source, and no future 
 		const valuation = company.valuation;
 		if (valuation === null) continue;
 		assert.ok(Number.isFinite(valuation.amountUsd) && valuation.amountUsd > 0, company.name);
-		assert.match(valuation.date, /^\d{4}-\d{2}-\d{2}$/);
+		assert.match(valuation.date, /^\d{4}-\d{2}(-\d{2})?$/);
 		assert.ok(Date.parse(valuation.date) <= Date.parse('2026-08-26'), company.name);
 		assert.equal(new URL(valuation.sourceUrl).protocol, 'https:');
 		assert.ok(valuation.sourceTitle);
 	}
 	assert.equal(companies.find((company) => company.id === 'matx').valuation.prefix, '>');
 	assert.match(companies.find((company) => company.id === 'circle').valuation.dateLabel, /^2023/);
-	assert.equal(companies.find((company) => company.id === 'railway').valuation, null);
+	for (const company of companies.filter(
+		(company) => company.valuation?.kind === 'filing-derived'
+	)) {
+		assert.equal(company.valuation.prefix, '≈');
+		assert.match(company.valuation.qualifier, /[Ff]iling-derived/);
+	}
+});
+
+test('original tiers retain their exact memberships independently of status', () => {
+	const groups = companies.reduce((groups, company) => {
+		(groups[company.tier] ??= []).push(company.id);
+		return groups;
+	}, {});
+	assert.deepEqual(Object.keys(groups), PORTFOLIO_TIERS);
+	assert.deepEqual(groups, {
+		'Well known names': [
+			'temporal',
+			'cognition',
+			'supabase',
+			'railway',
+			'workos',
+			'matx',
+			'artificial-analysis',
+			'browserbase',
+			'fireworks',
+			'e2b',
+			'daytona',
+			'resend',
+			'modal',
+			'conductor',
+			'chroma',
+			'restate',
+			'logan-kilpatrick',
+			'matthew-berman'
+		],
+		'You should know': [
+			'datalab',
+			'viktor',
+			'brightwave',
+			'quadratic',
+			'flutterflow',
+			'circle',
+			'airbyte',
+			'sphere',
+			'val-town',
+			'stackblitz'
+		],
+		'Smaller names': [
+			'preference-model',
+			'littlebird',
+			'clarify',
+			'phonic',
+			'keycard',
+			'confident-security',
+			'lightweight-labs',
+			'wordware',
+			'polyhive',
+			'sailplane',
+			'morph',
+			'fireproof',
+			'arcjet',
+			'cosine',
+			'responsive',
+			'budibase',
+			'100ms',
+			'expand',
+			'catamaran',
+			'replay'
+		],
+		Done: [
+			'astral',
+			'promptfoo',
+			'gabber',
+			'codegen',
+			'brev',
+			'gel',
+			'dynamic',
+			'begin',
+			'dimension'
+		]
+	});
+	assert.deepEqual(
+		filterPortfolio(companies, { tier: 'Done', status: 'closed' }).map((company) => company.id),
+		['begin', 'dimension']
+	);
+	assert.equal(
+		filterPortfolio(companies, { tier: 'Smaller names', category: 'AI coding' }).length,
+		1
+	);
+	assert.equal(filterPortfolio(companies, { tier: 'You should know', status: 'exited' }).length, 0);
+});
+
+test('funding evidence stays distinct from valuations and has its own dated source', () => {
+	const funded = companies.filter((company) => company.funding);
+	for (const { funding } of funded) {
+		if (funding.amountUsd !== null)
+			assert.ok(funding.amountUsd > 0 && Number.isFinite(funding.amountUsd));
+		assert.ok(funding.stage && funding.sourceTitle);
+		assert.equal(new URL(funding.sourceUrl).protocol, 'https:');
+		assert.ok(Date.parse(funding.date) <= Date.parse('2026-08-26'));
+	}
+	const fixture = [
+		{ ...companies[0], id: 'funding-only', valuation: null, funding: { amountUsd: 1e12 } },
+		{ ...companies[1], id: 'valued', valuation: { amountUsd: 1e6 } }
+	];
+	assert.equal(filterPortfolio(fixture, { sort: 'valuation' })[0].id, 'valued');
 });
 
 test('logos are local, nonempty assets with recorded provenance', async () => {
@@ -81,4 +192,11 @@ test('valuation formatting preserves meaningful precision and stable UTC dates',
 	assert.equal(formatValuation(10_500_000_000), '$10.5B');
 	assert.equal(formatValuation(125_000_000), '$125M');
 	assert.equal(formatValuationDate('2026-06-01'), 'Jun 2026');
+	assert.equal(formatValuationDate('2023-04'), 'Apr 2023');
+	assert.equal(formatValuation(350_000), '$350K');
+	assert.equal(
+		formatPortfolioValuation({ amountUsd: 8_500_000, maxAmountUsd: 10_000_000 }),
+		'$8.5M–$10M'
+	);
+	assert.equal(formatPortfolioValuation({ amountUsd: 409_010_000, prefix: '≈' }), '≈$409.01M');
 });
