@@ -9,10 +9,11 @@
 	<p><a href="/tools">← Your tools</a></p>
 	<h1>Tools privacy</h1>
 	<p>
-		Google sign-in identifies your workspace using your Google account ID. We receive your basic
-		profile and verified email address, and keep a signed, HTTP-only sign-in cookie for up to seven
-		days. We do not request access to Gmail, Drive, contacts, or your Google password. Google access
-		tokens are not retained after sign-in.
+		Ordinary Tools/Draw Google sign-in identifies your workspace using your Google account ID. We
+		receive your basic profile and verified email address, and keep a signed, HTTP-only sign-in
+		cookie for up to seven days. We do not request access to Gmail, Drive, contacts, or your Google
+		password. For this Tools/Draw login flow, Google access tokens are not retained after sign-in.
+		This does not describe the separately authorized swyxcal calendar connections below.
 	</p>
 	<p>
 		Signed-in drawings are stored on Cloudflare in an account-specific workspace. Drawing caches,
@@ -78,4 +79,49 @@
 			href="/about">contact swyx</a
 		>.
 	</p>
+	<section id="swyxcal" aria-labelledby="swyxcal-heading">
+		<h2 id="swyxcal-heading">swyxcal: separately authorized Google Calendar access</h2>
+		<p>
+			The separately hosted <a href="https://cal.swyx.io/about">swyxcal</a> scheduler shares this Google
+			app’s consent configuration but has its own private, exact-email allowlisted team and storage. Ordinary
+			Tools sign-in does not connect calendars. In swyxcal, a member first signs in, then separately authorizes
+			a Google calendar account for ongoing scheduling access. Setup is in progress and new bookings are
+			paused; this disclosure is not a booking launch or a claim of Google verification.
+		</p>
+		<p>
+			Calendar linking requests <code>calendar.calendarlist.readonly</code> to list calendar
+			choices,
+			<code>calendar.events.freebusy</code> to check busy time on selected calendars,
+			<code>calendar.events.owned</code> to create and manage bookings on the organizer’s owned
+			destination, and <code>calendar.events.readonly</code> to check event metadata across selected conflict
+			calendars when rescheduling. Missing coverage is unavailable, not free. Public visitors see offered
+			times, not private calendar events. An older authorization may retain broader Google permissions
+			until separately revoked; updating the app does not revoke it.
+		</p>
+		<p>
+			swyxcal stores encrypted calendar refresh tokens for continued access, with short-lived access
+			tokens in server memory. It keeps account/calendar selections, availability, guest name, email
+			and time zone, booking and recovery records, and notification status in Cloudflare
+			Workers/Durable Object storage. Configured backups are encrypted in private Cloudflare R2.
+			These booking records do not use the Tools activity logs’ 30-day expiry.
+		</p>
+		<p>
+			Google processes calendar reads, booking writes, Meet and attendee invitations. Configured
+			Cloudflare email sends booking details and a private management link to the guest; hosts’
+			Google invitations do not include that private link. Cloudflare also processes hosting and
+			security checks. Read the <a href="https://cal.swyx.io/privacy">swyxcal privacy policy</a> for optional
+			agent access, data processing, retention and deletion requests, and the distinction between disconnecting
+			a live account and revoking Google access. Disconnecting does not automatically erase booking history
+			or backups.
+		</p>
+		<p>
+			swyxcal’s use and transfer of Google user data is limited to the scheduling functionality
+			described in its policy and the <a
+				href="https://developers.google.com/terms/api-services-user-data-policy"
+				>Google API Services User Data Policy</a
+			>, including Limited Use. Calendar data is not used for the separately described funded AI
+			features above, advertising, or training general-purpose AI models. For calendar-data
+			questions or requests, contact <a href="mailto:swyx@ai.engineer">swyx@ai.engineer</a>.
+		</p>
+	</section>
 </article>
