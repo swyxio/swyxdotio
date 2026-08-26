@@ -1,73 +1,112 @@
 <script>
-	/** @type {boolean} */
 	export let isOwner = false;
-	const tools = [
-		{ id: 'draw', name: 'Draw', description: 'A multipage whiteboard.', href: '/tools/draw' },
+	/** @type {Array<{id:string,name:string,description:string,owner?:boolean,tools:Array<{id:string,name:string,description:string,href:string,reload?:boolean,badge?:string}>}>} */
+	const groups = [
 		{
-			id: 'box',
-			name: 'Big text box',
-			description: 'Text stays on your device.',
-			href: '/tools/box'
-		},
-		{ id: 'logs', name: 'Tool logs', description: 'AI and tool activity.', href: '/tools/logs' },
-		{
-			id: 'podcast',
-			name: 'Podcast studio',
-			description: 'Publish to your existing feeds.',
-			href: '/tools/podcast',
-			owner: true
-		},
-		{
-			id: 'cap',
-			name: 'Cap',
-			description: 'Record and share your screen.',
-			href: '/tools/cap',
-			image: '/assets/tools-cabinet/cap.webp',
-			reload: true,
-			owner: true
+			id: 'workspace',
+			name: 'Your workspace',
+			description: 'Think, write, and make.',
+			tools: [
+				{ id: 'draw', name: 'Draw', description: 'A multipage whiteboard.', href: '/tools/draw' },
+				{
+					id: 'box',
+					name: 'Big text box',
+					description: 'Text stays on your device.',
+					href: '/tools/box'
+				}
+			]
 		},
 		{
-			id: 'reclip',
-			name: 'Reclip',
-			description: 'Open the media downloader.',
-			href: '/tools/reclip',
-			owner: true
+			id: 'team',
+			name: 'Team swyx',
+			description: 'Separate app sign-in and team access.',
+			tools: [
+				{
+					id: 'cap',
+					name: 'Cap',
+					description: 'Record and share your screen.',
+					href: '/tools/cap',
+					reload: true,
+					badge: 'Team access'
+				},
+				{
+					id: 'calendar',
+					name: 'swyxcal',
+					description: 'Team scheduling. Bookings paused.',
+					href: 'https://cal.swyx.io/app',
+					reload: true,
+					badge: 'Invited team'
+				}
+			]
+		},
+		{
+			id: 'owner',
+			name: 'Site owner',
+			description: 'Publishing and media utilities.',
+			owner: true,
+			tools: [
+				{
+					id: 'podcast',
+					name: 'Podcast studio',
+					description: 'Publish to your existing feeds.',
+					href: '/tools/podcast',
+					badge: 'Site owner'
+				},
+				{
+					id: 'reclip',
+					name: 'Reclip',
+					description: 'Open the media downloader.',
+					href: '/tools/reclip',
+					badge: 'Site owner'
+				}
+			]
 		}
 	];
 </script>
 
-<nav class="cabinet" class:owner={isOwner} aria-label="Your tools">
-	<ul>
-		{#each tools.filter((tool) => !tool.owner || isOwner) as tool}
-			<li class:owner-drawer={tool.owner}>
-				<a href={tool.href} class="drawer" data-sveltekit-reload={tool.reload}>
-					<span class="drawer-face">
-						<img
-							src={tool.image ?? `/assets/tools-cabinet/${tool.id}.webp`}
-							alt=""
-							width="420"
-							height="420"
-						/>
-						<span class="drawer-copy">
-							<strong>{tool.name}</strong>
-							<span class="description">{tool.description}</span>
-						</span>
-						<span class="mobile-arrow" aria-hidden="true">›</span>
-					</span>
-					<span class="drawer-pull">
-						{#if tool.owner}<span class="brass-label">Site owner</span>{:else}<span
-								class="cup-handle"
-								aria-hidden="true"
-							></span>{/if}
-					</span>
-				</a>
-			</li>
-		{/each}
-	</ul>
+<nav class="cabinet" aria-label="Your tools">
+	{#each groups.filter((group) => !group.owner || isOwner) as group}
+		<section class:owner-tools={group.owner} aria-labelledby={'tools-' + group.id}>
+			<header>
+				<h2 id={'tools-' + group.id}>{group.name}</h2>
+				<p>{group.description}</p>
+			</header>
+			<ul>
+				{#each group.tools as tool}
+					<li class:labelled-drawer={tool.badge}>
+						<a href={tool.href} class="drawer" data-sveltekit-reload={tool.reload}>
+							<span class="drawer-face">
+								<img
+									src={'/assets/tools-cabinet/' + tool.id + '.webp'}
+									alt=""
+									width="420"
+									height="420"
+								/>
+								<span class="drawer-copy"
+									><strong>{tool.name}</strong><span class="description">{tool.description}</span
+									></span
+								>
+								<span class="mobile-arrow" aria-hidden="true">›</span>
+							</span>
+							<span class="drawer-pull">
+								{#if tool.badge}<span class="brass-label">{tool.badge}</span>{:else}<span
+										class="cup-handle"
+										aria-hidden="true"
+									></span>{/if}
+							</span>
+						</a>
+					</li>
+				{/each}
+			</ul>
+		</section>
+	{/each}
 </nav>
 
 <style>
 	.cabinet {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 18px;
 		position: relative;
 		z-index: 1;
 		--wood: url('/assets/tools-cabinet/wood.webp');
@@ -83,9 +122,30 @@
 			0 8px 14px #24180e26,
 			0 2px 2px #24180e44;
 	}
+	section {
+		min-width: 0;
+	}
+	.owner-tools {
+		grid-column: 1 / -1;
+	}
+	header {
+		color: #f4ead7;
+		padding: 2px 4px 10px;
+	}
+	header h2 {
+		margin: 0;
+		font-family: var(--font-display);
+		font-size: 1.15rem;
+		font-weight: 500;
+	}
+	header p {
+		margin: 4px 0 0;
+		font-size: 0.7rem;
+		color: #ead7b9;
+	}
 	ul {
 		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 		gap: 10px;
 		margin: 0;
 		padding: 0;
@@ -217,50 +277,41 @@
 			color: var(--ink);
 		}
 	}
-	@media (min-width: 1050px) {
-		.owner ul {
-			grid-template-columns: repeat(6, minmax(0, 1fr));
-		}
-	}
-	@media (min-width: 601px) and (max-width: 1049px) {
-		.owner ul {
-			grid-template-columns: repeat(6, minmax(0, 1fr));
-		}
-		.owner li {
-			grid-column: span 2;
-		}
-		.drawer-face {
-			min-height: 220px;
-			padding: 12px 8px;
-		}
-		img {
-			width: 115px;
-			height: 115px;
-			margin-bottom: 8px;
-		}
-		.owner-drawer .drawer-face {
+	@media (min-width: 601px) {
+		.owner-tools .drawer-face {
 			display: grid;
-			grid-template-columns: 85px minmax(0, 1fr);
-			gap: 8px;
-			min-height: 112px;
+			grid-template-columns: 80px minmax(0, 1fr);
+			gap: 12px;
+			min-height: 100px;
+			padding: 8px 16px;
 		}
-		.owner-drawer img {
-			width: 85px;
-			height: 85px;
+		.owner-tools img {
+			width: 80px;
+			height: 80px;
 			margin: 0;
 		}
-		.owner-drawer .drawer-copy {
+		.owner-tools .drawer-copy {
 			text-align: left;
 		}
-		.owner-drawer strong {
-			font-size: 1.15rem;
+		.owner-tools .description {
+			max-width: none;
 		}
-		.owner-drawer .drawer-pull {
-			min-height: 44px;
+		.owner-tools .drawer-pull {
+			display: none;
+		}
+	}
+	@media (min-width: 601px) and (max-width: 850px) {
+		.cabinet {
+			grid-template-columns: minmax(0, 1fr);
+		}
+		.drawer-face {
+			min-height: 210px;
 		}
 	}
 	@media (max-width: 600px) {
 		.cabinet {
+			grid-template-columns: minmax(0, 1fr);
+			gap: 18px;
 			padding: 8px;
 			border-width: 4px;
 		}
@@ -303,10 +354,10 @@
 			display: none;
 			min-height: 0;
 		}
-		.owner-drawer .drawer-face {
+		.labelled-drawer .drawer-face {
 			padding-bottom: max(25px, 1.65rem);
 		}
-		.owner-drawer .drawer-pull {
+		.labelled-drawer .drawer-pull {
 			display: flex;
 			position: absolute;
 			background: transparent;
@@ -316,7 +367,7 @@
 			bottom: 8px;
 			left: 88px;
 		}
-		.owner-drawer .brass-label {
+		.labelled-drawer .brass-label {
 			font-size: 0.53rem;
 			min-width: 0;
 			padding: 0 10px;
@@ -341,6 +392,8 @@
 			border-color: CanvasText;
 			box-shadow: none;
 		}
+		header,
+		header p,
 		.description {
 			color: CanvasText;
 		}

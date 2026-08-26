@@ -548,19 +548,6 @@
 		color: #403326;
 	}
 	@media (min-width: 1050px) {
-		.workshop-scene {
-			padding-left: 165px;
-		}
-		.workshop-scene::before {
-			content: '';
-			position: absolute;
-			pointer-events: none;
-			bottom: -4px;
-			left: -15px;
-			width: 225px;
-			height: 340px;
-			background: url('/assets/tools-cabinet/desk-still-life.webp') left bottom / contain no-repeat;
-		}
 		.intro-description {
 			max-width: 52ch;
 		}
