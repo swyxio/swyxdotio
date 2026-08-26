@@ -12,7 +12,7 @@ export const DRAW_AGENT_WORKFLOWS = /** @type {const} */ ([
 		id: 'ls-thumbnail',
 		label: 'Podcast thumbnail',
 		prompt:
-			'Create a Latent Space YouTube thumbnail using the ls-podcast design template. Keep the official logo, near-black background, one huge 2–6 word curiosity hook, acid-lime emphasis, an editable guest-photo placeholder, company rail, and empty bottom-right YouTube timestamp zone. Inspect the result and improve spacing.'
+			'Create a Latent Space YouTube thumbnail using the ls-podcast design template. Keep the official logo, near-black background, one huge 2–6 word curiosity hook, acid-lime emphasis, a large real guest photo, a high-contrast claim, any explicitly supplied companies, and empty bottom-right YouTube timestamp zone. Inspect the result and improve spacing.'
 	},
 	{
 		id: 'fde-variants',
@@ -63,7 +63,8 @@ export const DRAW_DESIGN_TEMPLATES = Object.freeze([
 	{
 		id: 'ls-podcast',
 		label: 'Latent Space thumbnail',
-		description: 'Official logo, guest portrait, curiosity hook, and timestamp-safe company rail.',
+		description:
+			'Big claim + guest. Tight portrait, oversized headline, and one red emphasis band.',
 		format: 'youtube',
 		brand: 'latent-space',
 		accent: '#c8ff47',
@@ -72,16 +73,28 @@ export const DRAW_DESIGN_TEMPLATES = Object.freeze([
 	{
 		id: 'fde-decision',
 		label: 'FDE episode thumbnail',
-		description: 'A sharp split-layout debate with LS × FDE branding and editable cast area.',
+		description:
+			'Comparison + guest. A bright before/after contrast with a large central portrait.',
 		format: 'youtube',
 		brand: 'latent-space',
 		accent: '#b9a1ff',
-		background: '#13101d'
+		background: '#f7f7f4'
+	},
+	{
+		id: 'thumbnail-evidence',
+		label: 'Evidence + reaction thumbnail',
+		description:
+			'A concrete detail beside a guest. Editable sample instructions, a red arrow, and one question.',
+		format: 'youtube',
+		brand: 'latent-space',
+		accent: '#ff293b',
+		background: '#121317'
 	},
 	{
 		id: 'aie-speaker',
 		label: 'AI Engineer speaker card',
-		description: 'Portrait-format conference announcement with a bold orange speaker treatment.',
+		description:
+			'Portrait announcement concept, not an approved AI Engineer video-thumbnail style.',
 		format: 'portrait',
 		brand: 'ai-engineer',
 		accent: '#ff6b35',
@@ -150,7 +163,8 @@ function text(x, y, content, size, color, options = {}) {
 		y,
 		text: content,
 		fontSize: size,
-		fontFamily: 2,
+		fontFamily: size >= 60 ? 7 : 2,
+		lineHeight: size >= 60 ? 1.05 : 1.25,
 		strokeColor: color,
 		strokeWidth: 1,
 		strokeStyle: 'solid',
@@ -161,9 +175,12 @@ function text(x, y, content, size, color, options = {}) {
 }
 
 /** @param {string} headline @param {number} preferredSize */
-function fitThumbnailHeadline(headline, preferredSize) {
-	const availableWidth = 700;
-	const availableHeight = 225;
+function fitThumbnailHeadline(
+	headline,
+	preferredSize,
+	availableWidth = 610,
+	availableHeight = 380
+) {
 	let size = preferredSize;
 	let lines = [headline];
 	for (let attempt = 0; attempt < 3; attempt++) {
@@ -191,33 +208,64 @@ function fitThumbnailHeadline(headline, preferredSize) {
 	return { text: lines.join('\n'), size };
 }
 
-/** @param {number} x @param {number} y @param {number} width @param {number} height @param {string} accent */
-function portraitPlaceholder(x, y, width, height, accent) {
-	return [
-		rectangle(x, y, width, height, '#211f2c', { stroke: accent, dashed: true }),
-		{
-			id: id(),
-			type: 'ellipse',
-			x: x + width / 2 - 46,
-			y: y + height * 0.3,
-			width: 92,
-			height: 92,
-			strokeColor: accent,
-			backgroundColor: '#302d3c',
-			fillStyle: 'solid',
-			strokeWidth: 2,
-			strokeStyle: 'solid',
-			roughness: 0
+/** Public demo asset, already published in /about/photos. Never a private library photo. */
+export const DRAW_DESIGN_DEMO_PHOTO = Object.freeze({
+	id: 'draw-public-swyx-headshot',
+	url: '/about-photos/headshot-transparent.webp',
+	width: 420,
+	height: 420
+});
+
+/** @typedef {{ fileId: string, width: number, height: number }} DesignPhoto */
+
+/** Center-crop in the native image layer; its original bytes stay available for recropping.
+ * @param {number} x @param {number} y @param {number} width @param {number} height @param {DesignPhoto} photo */
+function portrait(x, y, width, height, photo) {
+	const scale = Math.max(width / photo.width, height / photo.height);
+	const cropWidth = width / scale;
+	const cropHeight = height / scale;
+	return {
+		id: id(),
+		type: 'image',
+		x,
+		y,
+		width,
+		height,
+		fileId: photo.fileId,
+		status: 'saved',
+		scale: [1, 1],
+		crop: {
+			x: (photo.width - cropWidth) / 2,
+			y: (photo.height - cropHeight) / 2,
+			width: cropWidth,
+			height: cropHeight,
+			naturalWidth: photo.width,
+			naturalHeight: photo.height
 		},
-		text(x + Math.max(22, (width - 190) / 2), y + height * 0.7, 'DROP GUEST PHOTO', 16, '#c2bed0')
-	];
+		customData: { designRole: 'guest-photo' }
+	};
+}
+
+/** @param {number} x @param {number} y @param {number[][]} points @param {string} color @param {number} [width] @param {boolean} [arrow] */
+function stroke(x, y, points, color, width = 14, arrow = false) {
+	return {
+		id: id(),
+		type: arrow ? 'arrow' : 'line',
+		x,
+		y,
+		points,
+		strokeColor: color,
+		strokeWidth: width,
+		roughness: 0,
+		endArrowhead: arrow ? 'triangle' : null
+	};
 }
 
 /**
  * Build a native Excalidraw frame with independently editable children. Logo
  * images are attached separately from the official supplied brand asset.
  * @param {string} templateId
- * @param {{ headline?: string, subtitle?: string, name?: string, companies?: string, logoFileId?: string, x?: number, y?: number }} [options]
+ * @param {{ headline?: string, subtitle?: string, name?: string, companies?: string, logoFileId?: string, photo?: DesignPhoto, x?: number, y?: number }} [options]
  */
 export function createDrawingDesign(templateId, options = {}) {
 	const template = getDrawingDesignTemplate(templateId);
@@ -231,53 +279,152 @@ export function createDrawingDesign(templateId, options = {}) {
 	let children = [rectangle(ox, oy, width, height, template.background)];
 	const headline = options.headline?.trim().slice(0, 120);
 	const subtitle = options.subtitle?.trim().slice(0, 140);
-	const companies = options.companies?.trim().slice(0, 100) ?? 'COMPANY ONE   ·   COMPANY TWO';
-	if (templateId === 'ls-podcast' || templateId === 'fde-decision') {
-		const fde = templateId === 'fde-decision';
-		const fittedHeadline = fitThumbnailHeadline(
-			headline ?? (fde ? 'WHAT CHANGES\nWHEN AI SHIPS?' : 'YOUR SHARPEST\nIDEA HERE'),
-			fde ? 76 : 86
-		);
-		children.push(
-			rectangle(ox + 64, oy + 103, 64, 7, template.accent),
-			text(ox + 66, oy + 140, fittedHeadline.text, fittedHeadline.size, '#ffffff'),
-			text(
-				ox + 68,
-				oy + 387,
-				fde ? 'THE BET THAT MATTERS' : 'THE AI ENGINEER PODCAST',
-				22,
-				template.accent
-			),
-			text(ox + 68, oy + 450, subtitle ?? 'One specific idea worth clicking.', 19, '#bcb8c7'),
-			...portraitPlaceholder(ox + 790, oy + 135, 400, 440, template.accent),
-			rectangle(ox + 64, oy + 614, 926, 2, '#373442'),
-			text(ox + 69, oy + 640, companies, 17, '#e3e0ed'),
-			text(
-				ox + 1030,
-				oy + 57,
-				fde ? 'LATENT SPACE × FDE' : 'LATENT SPACE',
-				fde ? 12 : 15,
-				'#ffffff'
-			)
-		);
-		if (options.logoFileId) {
+	const companies = options.companies?.trim().slice(0, 100);
+	const photo = options.photo ?? { fileId: DRAW_DESIGN_DEMO_PHOTO.id, ...DRAW_DESIGN_DEMO_PHOTO };
+	if (
+		!Number.isFinite(photo.width) ||
+		!Number.isFinite(photo.height) ||
+		photo.width <= 0 ||
+		photo.height <= 0
+	)
+		throw new Error('Choose a photo with valid dimensions.');
+	if (template.format === 'youtube') {
+		if (templateId === 'ls-podcast') {
+			// A face at feed scale, a single claim, and one meaningful emphasis color.
+			children.push(portrait(ox + 640, oy + 80, 640, 640, photo));
+			const fitted = fitThumbnailHeadline(headline || 'CODE IS\nTHE EASY\nPART.', 122, 605, 435);
+			const lines = fitted.text.split('\n');
+			const lineHeight = fitted.size * 1.05;
+			const emphasisY = oy + 130 + (lines.length - 1) * lineHeight;
+			children.push(
+				rectangle(
+					ox + 44,
+					emphasisY - 2,
+					Math.min(604, (lines.at(-1)?.length ?? 0) * fitted.size * 0.65 + 28),
+					lineHeight + 6,
+					'#ed1835'
+				),
+				{
+					...text(ox + 54, oy + 130, fitted.text, fitted.size, '#ffffff'),
+					customData: { designRole: 'headline' }
+				}
+			);
+		} else if (templateId === 'fde-decision') {
+			// Three clear regions: two opposing labels and a real person between them.
+			children.push(portrait(ox + 350, oy + 120, 580, 600, photo));
+			const fitted = fitThumbnailHeadline(headline || 'WHAT ACTUALLY WORKS?', 76, 1080, 90);
+			children.push(
+				{
+					...text(ox + 44, oy + 35, fitted.text, fitted.size, '#111114'),
+					customData: { designRole: 'headline' }
+				},
+				text(ox + 46, oy + 280, 'MORE', 38, '#77777c'),
+				text(ox + 42, oy + 330, 'PROMPTS', 68, '#d72032'),
+				text(ox + 951, oy + 280, 'BETTER', 38, '#77777c'),
+				text(ox + 935, oy + 330, 'SYSTEMS', 65, '#15834b'),
+				stroke(
+					ox + 138,
+					oy + 465,
+					[
+						[0, 0],
+						[84, 84]
+					],
+					'#e42b3e',
+					20
+				),
+				stroke(
+					ox + 222,
+					oy + 465,
+					[
+						[0, 0],
+						[-84, 84]
+					],
+					'#e42b3e',
+					20
+				),
+				stroke(
+					ox + 1030,
+					oy + 510,
+					[
+						[0, 0],
+						[30, 30],
+						[100, -56]
+					],
+					'#15834b',
+					20
+				)
+			);
+		} else {
+			// An explicitly labelled sample document, not a fabricated screenshot or quote.
+			const fitted = fitThumbnailHeadline(headline || 'TOO MUCH\nCONTEXT?', 112, 730, 245);
+			children.push(
+				{
+					...text(ox + 44, oy + 50, fitted.text, fitted.size, '#ffffff'),
+					customData: { designRole: 'headline' }
+				},
+				rectangle(ox + 44, oy + 340, 692, 294, '#f5f5f3'),
+				{ ...text(ox + 76, oy + 366, 'AGENTS.md', 36, '#16171c'), fontFamily: 3 },
+				rectangle(ox + 76, oy + 422, 600, 2, '#d5d5d5'),
+				{
+					...text(
+						ox + 76,
+						oy + 450,
+						'Keep it short.\nUse the right tools.\nCheck your work.',
+						32,
+						'#34353a'
+					),
+					fontFamily: 3
+				},
+				stroke(
+					ox + 672,
+					oy + 295,
+					[
+						[0, 0],
+						[25, 55],
+						[-28, 102]
+					],
+					'#ff293b',
+					15,
+					true
+				),
+				portrait(ox + 742, oy + 135, 538, 585, photo)
+			);
+		}
+		// The compact identity is constant; the composition does not have to be purple.
+		if (options.logoFileId)
 			children.push({
 				id: id(),
 				type: 'image',
-				x: ox + 970,
-				y: oy + 38,
+				x: ox + 1168,
+				y: oy + 26,
 				width: 50,
 				height: 50,
 				fileId: options.logoFileId,
-				status: 'saved'
+				status: 'saved',
+				customData: { designRole: 'brand-logo' }
 			});
-		}
+		if (templateId === 'fde-decision')
+			children.push(text(ox + 1222, oy + 43, 'FDE', 16, '#19191d'));
+		if (subtitle)
+			children.push(
+				text(ox + 50, oy + 644, subtitle, 19, templateId === 'fde-decision' ? '#303037' : '#eeeeee')
+			);
+		if (companies)
+			children.push(
+				text(
+					ox + 50,
+					oy + 680,
+					companies,
+					16,
+					templateId === 'fde-decision' ? '#303037' : '#eeeeee'
+				)
+			);
 	} else if (templateId === 'aie-speaker') {
 		children.push(
 			rectangle(ox, oy, width, 28, template.accent),
 			text(ox + 74, oy + 85, 'AI ENGINEER', 29, '#ffffff'),
 			text(ox + 75, oy + 130, 'EUROPE', 22, template.accent),
-			...portraitPlaceholder(ox + 96, oy + 223, 888, 690, template.accent),
+			portrait(ox + 160, oy + 223, 760, 690, photo),
 			text(ox + 78, oy + 964, headline ?? 'SPEAKER\nNAME', 92, '#ffffff'),
 			text(ox + 82, oy + 1190, subtitle ?? 'The talk title goes here', 29, '#d2ced5'),
 			rectangle(ox + 80, oy + 1280, 116, 5, template.accent)
