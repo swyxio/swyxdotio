@@ -4,6 +4,8 @@ import { TOOLS_AI_POLICY, estimateToolsMediaReservation } from '../src/lib/tools
 import { ToolsAiUsage } from '../workers/draw/ai-usage.js';
 import drawWorker from '../workers/draw/index.js';
 import { createTestAiLedger, ledgerRequest, seedTestJob } from './helpers/tools-ai-ledger.mjs';
+import { createToolsSession } from '../src/lib/server/tools-auth.js';
+import { reserveToolsAiUsage, toolsAiLedger } from '../src/lib/server/tools-ai-usage.js';
 
 const HOUR = 3_600_000;
 const DAY = 24 * HOUR;
@@ -19,6 +21,79 @@ const media = (userId = 'alice', estimatedReservedUsd = 0.05) => ({
 	kind: 'media',
 	model: 'flux-2',
 	estimatedReservedUsd
+});
+
+test('only the configured owner bypasses budgets, remains logged, and cannot exhaust member funding', async () => {
+	const ledger = createTestAiLedger();
+	const secret = 'owner-exemption-test-secret-at-least-32-characters';
+	const eventFor = async (id) => {
+		const session = await createToolsSession(
+			{ id, email: 'owner@example.com', name: 'Test' },
+			secret
+		);
+		return {
+			platform: {
+				env: {
+					DRAW_PAGES: ledger.namespace,
+					TOOLS_SESSION_SECRET: secret,
+					TOOLS_OWNER_GOOGLE_SUB: 'owner'
+				}
+			},
+			cookies: { get: () => session }
+		};
+	};
+	const owner = await eventFor('owner');
+	for (let index = 0; index < 22; index++) {
+		const reservation = await reserveToolsAiUsage(owner, 'owner', 'assistant', 'model', 0.05);
+		assert.equal(typeof reservation.id, 'string');
+	}
+	for (let index = 0; index < 7; index++) {
+		const reservation = await reserveToolsAiUsage(owner, 'owner', 'media', 'model', 101);
+		assert.equal(typeof reservation.id, 'string');
+	}
+	const summary = await (await toolsAiLedger(owner, 'summary', { userId: 'owner' })).json();
+	assert.equal(summary.unlimited, true);
+	assert.equal(summary.policy.assistantTurnsPerHour, null);
+	assert.equal(summary.policy.mediaJobsPerHour, null);
+	assert.equal(summary.policy.userEstimatedDailyUsd, null);
+	assert.equal(summary.policy.siteEstimatedDailyUsd, null);
+	assert.equal(summary.usage.assistantTurnsThisHour, 22);
+	assert.equal(summary.usage.mediaJobsThisHour, 7);
+	assert.equal(summary.usage.estimatedReservedTodayUsd, 708.1);
+	assert.equal(summary.logging.retentionDays, 30);
+	// Same email and forged role/owner metadata cannot confer the exemption.
+	const member = await eventFor('member');
+	const memberSummary = await (
+		await toolsAiLedger(member, 'summary', {
+			userId: 'member',
+			ownerUserId: 'member',
+			isOwner: true
+		})
+	).json();
+	assert.equal(memberSummary.unlimited, false);
+	assert.equal(memberSummary.policy.userEstimatedDailyUsd, 2);
+	assert.equal((await reserveToolsAiUsage(member, 'owner', 'media', 'model', 1)).status, 409);
+	for (let index = 0; index < 10; index++) {
+		const userId = `member-${index}`;
+		const admitted = await reserveToolsAiUsage(await eventFor(userId), userId, 'media', 'model', 2);
+		assert.equal(typeof admitted.id, 'string');
+	}
+	const capped = await reserveToolsAiUsage(member, 'member', 'assistant', 'model', 0.05);
+	assert.equal(capped.status, 429);
+	assert.equal((await capped.json()).code, 'site_daily_limit');
+	assert.equal(
+		typeof (await reserveToolsAiUsage(owner, 'owner', 'media', 'model', 5)).id,
+		'string'
+	);
+	owner.platform.env.TOOLS_OWNER_GOOGLE_SUB = 'new-owner';
+	const demoted = await reserveToolsAiUsage(owner, 'owner', 'assistant', 'model', 0.05);
+	assert.equal(demoted.status, 429);
+	assert.equal(
+		ledger.database
+			.prepare('SELECT COUNT(*) AS count FROM tools_ai_usage WHERE user_id = ?')
+			.get('owner').count,
+		30
+	);
 });
 
 test('concurrent admission atomically enforces exactly 20 assistant turns and 5 media jobs per account/hour', async () => {

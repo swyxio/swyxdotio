@@ -45,6 +45,7 @@
 	 *  captureUpdate: typeof import('@excalidraw/excalidraw').CaptureUpdateAction.IMMEDIATELY,
 	 *  cloudAvailable?: boolean,
 	 *  authenticated?: boolean,
+	 *  isOwner?: boolean,
 	 *  userId?: string,
 	 *  onCloudLimit?: () => void,
 	 *  backgroundProcessing?: boolean,
@@ -72,6 +73,7 @@
 		captureUpdate,
 		cloudAvailable = false,
 		authenticated = false,
+		isOwner = false,
 		userId,
 		onCloudLimit,
 		backgroundProcessing = false,
@@ -856,7 +858,7 @@
 			const run = createDrawingGenerationRun({
 				pageKey,
 				recipes,
-				limitUsd: retry?.limitUsd ?? Number(runLimitUsd),
+				limitUsd: isOwner ? null : (retry?.limitUsd ?? Number(runLimitUsd)),
 				id: retry?.id
 			});
 			const estimate = recipes.reduce((total, recipe) => {
@@ -872,6 +874,7 @@
 				);
 			}, 0);
 			if (
+				!isOwner &&
 				estimate >= Number(confirmationThreshold) &&
 				!confirm(
 					`Generate ${recipes.length} result(s) for approximately $${estimate.toFixed(3)}? Funded by swyx.io. This is an estimate, not final provider billing. References will be sent to the selected providers.`
@@ -1080,9 +1083,11 @@
 			<strong>{imageId ? 'Image tools' : 'Generate'}</strong>
 			<span>
 				{action === 'generate'
-					? uploadsSelectedImage
-						? `Uploads the reference to ${[...new Set(selectedModels.map((model) => model.transportLabel))].join(', ')}`
-						: 'Prompt only · no image upload'
+					? isOwner
+						? 'Image and video generation'
+						: uploadsSelectedImage
+							? `Uploads the reference to ${[...new Set(selectedModels.map((model) => model.transportLabel))].join(', ')}`
+							: 'Prompt only · no image upload'
 					: action
 						? 'Runs privately on your device'
 						: 'Choose a tool'}
@@ -1555,14 +1560,14 @@
 						<strong>{selectedModel.badge}</strong>
 					</div>
 				{/if}
-				<p class="fal-upload-hint">
-					{authenticated ? 'Funded by swyx.io · ' : 'Sign in required · '}
-					{uploadsSelectedImage
-						? 'Large images automatically fit each model’s limits and the secure upload limit.'
-						: 'Text-to-image workflows only send your prompt; no reference image is uploaded.'}
-				</p>
+				{#if !isOwner}<p class="fal-upload-hint">
+						{authenticated ? 'Funded by swyx.io · ' : 'Sign in required · '}
+						{uploadsSelectedImage
+							? 'Large images automatically fit each model’s limits and the secure upload limit.'
+							: 'Text-to-image workflows only send your prompt; no reference image is uploaded.'}
+					</p>{/if}
 			</div>
-			<ToolsAiNotice />
+			<ToolsAiNotice {isOwner} />
 			{#each selectedWorkflowParameters as folder (folder.kind)}
 				{#if folder.parameters.length}
 					<section class="fal-parameter-group" aria-label="{folder.label} settings">
@@ -1645,37 +1650,37 @@
 					</section>
 				{/if}
 			{/each}
-			<div class="generation-budget">
-				<label
-					>Run reservation limit ($)<input
-						aria-label="Run spending limit"
-						type="number"
-						min="0.05"
-						max="20"
-						step="0.05"
-						bind:value={runLimitUsd}
-						disabled={processingGeneration}
-					/></label
-				>
-				<label
-					>Confirm estimates above ($)<input
-						aria-label="Generation confirmation threshold"
-						type="number"
-						min="0"
-						max="20"
-						step="0.05"
-						bind:value={confirmationThreshold}
-						disabled={processingGeneration}
-					/></label
-				>
-				<p>
-					Reserves ~${reservationTotal.toFixed(3)} against the run limit. Estimates are not final provider
-					billing. Account/site limits also apply.
-				</p>
-				{#each [...new Set(selectedModels.map((model) => model.disclosure))] as disclosure}<p>
-						{disclosure}
-					</p>{/each}
-			</div>
+			{#if !isOwner}<div class="generation-budget">
+					<label
+						>Run reservation limit ($)<input
+							aria-label="Run spending limit"
+							type="number"
+							min="0.05"
+							max="20"
+							step="0.05"
+							bind:value={runLimitUsd}
+							disabled={processingGeneration}
+						/></label
+					>
+					<label
+						>Confirm estimates above ($)<input
+							aria-label="Generation confirmation threshold"
+							type="number"
+							min="0"
+							max="20"
+							step="0.05"
+							bind:value={confirmationThreshold}
+							disabled={processingGeneration}
+						/></label
+					>
+					<p>
+						Reserves ~${reservationTotal.toFixed(3)} against the run limit. Estimates are not final provider
+						billing. Account/site limits also apply.
+					</p>
+					{#each [...new Set(selectedModels.map((model) => model.disclosure))] as disclosure}<p>
+							{disclosure}
+						</p>{/each}
+				</div>{/if}
 			<div class="fal-action-row">
 				<span>
 					{selectedModels.length
@@ -1698,7 +1703,7 @@
 							!prompt.trim() ||
 							!selectedModels.length ||
 							(uploadsSelectedImage && !activeReference) ||
-							reservationTotal > Number(runLimitUsd)}
+							(!isOwner && reservationTotal > Number(runLimitUsd))}
 						onclick={() => void applyGeneration()}
 					>
 						{selectedWorkflowKind === 'image-to-video'
@@ -1905,7 +1910,8 @@
 					>Cancel remaining jobs</button
 				>{:else if generationJobs.some((job) => job.status === 'failed')}<button
 					type="button"
-					onclick={() => applyGeneration(true)}>Retry failed jobs (same run budget)</button
+					onclick={() => applyGeneration(true)}
+					>{isOwner ? 'Retry failed jobs' : 'Retry failed jobs (same run budget)'}</button
 				>{/if}
 		</section>
 	{/if}

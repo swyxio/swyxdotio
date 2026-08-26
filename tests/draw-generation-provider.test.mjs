@@ -150,3 +150,25 @@ test('run reservations retain limits and replay claims across helper reconstruct
 	assert.equal(runs.adapterFor('reservation-one'), 'fake');
 	assert.equal(runs.bindAdapter('alice', 'reservation-one', 'fal').status, 409);
 });
+
+test('owner runs bypass their previous cap but keep replay claims and fail closed after demotion', async () => {
+	const fixture = createTestAiLedger();
+	const runs = new GenerationRuns(fixture.sql);
+	const run = { id: 'owner-run', clientJobId: 'one', limitUsd: 0.2 };
+	runs.reserve(runs.prepare('owner', run, 125_000), 'one', Date.now());
+	const second = runs.prepare(
+		'owner',
+		{ ...run, clientJobId: 'two', limitUsd: null },
+		10_000_000,
+		true
+	);
+	assert.ok(!(second instanceof Response));
+	runs.reserve(second, 'two', Date.now());
+	assert.equal(second.limitMicros, 0);
+	assert.equal(second.reservedMicros, 10_125_000);
+	const replay = runs.prepare('owner', { ...run, clientJobId: 'two' }, 125_000, true);
+	assert.equal(replay.status, 409);
+	assert.equal((await replay.json()).code, 'job_already_submitted');
+	assert.equal(runs.prepare('owner', { ...run, clientJobId: 'three' }, 125_000).status, 409);
+	assert.equal(runs.prepare('member', { ...run, limitUsd: null }, 125_000).status, 422);
+});

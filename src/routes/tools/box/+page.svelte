@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { recordToolActivity } from '$lib/tools-activity-client.js';
 	let signedIn = false;
+	let isOwner = false;
 	onMount(() => {
 		const abort = new AbortController();
 		void fetch('/tools/api/session', { cache: 'no-store', signal: abort.signal })
@@ -10,6 +11,7 @@
 				const session = await response.json();
 				if (abort.signal.aborted) return;
 				signedIn = Boolean(session.user);
+				isOwner = Boolean(session.user?.isOwner);
 				void recordToolActivity(session.user?.id, 'box.open');
 			})
 			.catch(() => {});
@@ -28,7 +30,7 @@
 	<!-- svelte-ignore a11y_autofocus (the dedicated writing canvas should be immediately editable) -->
 	<textarea autofocus aria-label="Write anything" spellcheck="false"></textarea>
 	<footer>
-		<a href="/">swyx.io</a>{#if signedIn}<a class="logging-note" href="/tools/logs"
+		<a href="/">swyx.io</a>{#if signedIn && !isOwner}<a class="logging-note" href="/tools/logs"
 				>Tool opens are logged · visible to you and swyx · text stays here</a
 			>{/if}
 	</footer>

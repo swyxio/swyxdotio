@@ -41,21 +41,20 @@ function generationError(error, fallback) {
 	);
 }
 
-/** @param {FormData} form */
-function runAuthorization(form) {
+/** @param {FormData} form @param {boolean} isOwner */
+function runAuthorization(form, isOwner) {
 	const runId = form.get('runId');
 	const clientJobId = form.get('clientJobId');
 	const rawLimit = form.get('runLimitUsd');
 	if (runId === null && clientJobId === null && rawLimit === null) return undefined;
-	const limitUsd = typeof rawLimit === 'string' ? Number(rawLimit) : NaN;
+	const limitUsd = isOwner ? null : typeof rawLimit === 'string' ? Number(rawLimit) : NaN;
 	if (
 		typeof runId !== 'string' ||
 		!REQUEST_ID.test(runId) ||
 		typeof clientJobId !== 'string' ||
 		!REQUEST_ID.test(clientJobId) ||
-		!Number.isFinite(limitUsd) ||
-		limitUsd <= 0 ||
-		limitUsd > 100
+		(!isOwner &&
+			(limitUsd === null || !Number.isFinite(limitUsd) || limitUsd <= 0 || limitUsd > 100))
 	)
 		throw new DrawingGenerationError(
 			'Choose a valid run spending limit.',
@@ -167,7 +166,7 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 		);
 	let run;
 	try {
-		run = runAuthorization(form);
+		run = runAuthorization(form, user.isOwner);
 	} catch (error) {
 		return generationError(error, 'The run spending limit is invalid.');
 	}
@@ -194,7 +193,7 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 		);
 	}
 	const agentBudget = form.get('agentBudget');
-	if ((providerSafetyDefaults === '1') !== (typeof agentBudget === 'string')) {
+	if (!user.isOwner && (providerSafetyDefaults === '1') !== (typeof agentBudget === 'string')) {
 		return privateJson(
 			{ error: 'The assistant requires an authorized spending limit.' },
 			{ status: 402 }
@@ -202,7 +201,7 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 	}
 	/** @type {{ token: string, spendingUsd: number } | undefined} */
 	let chargedBudget;
-	if (typeof agentBudget === 'string') {
+	if (!user.isOwner && typeof agentBudget === 'string') {
 		try {
 			chargedBudget = await chargeDrawingAgentBudget(
 				agentBudget,

@@ -1,13 +1,14 @@
 <script>
 	import { TOOLS_AI_POLICY } from '$lib/tools-ai-policy.js';
 	export let signedIn = false;
+	export let isOwner = false;
 	/** @type {{assistantTurnsThisHour:number,mediaJobsThisHour:number,estimatedReservedTodayUsd:number}|null} */
 	export let usage = null;
 	export let unavailable = false;
 </script>
 
-<aside class="receipt" aria-label="Usage allowance">
-	<p class="receipt-title">Today's allowance</p>
+<aside class="receipt" aria-label={isOwner ? 'Usage summary' : 'Usage allowance'}>
+	<p class="receipt-title">{isOwner ? "Today's usage" : "Today's allowance"}</p>
 	{#if signedIn}
 		<section
 			class="counters"
@@ -17,24 +18,28 @@
 		>
 			{#if usage}
 				<p>
-					<b>{usage.assistantTurnsThisHour} / {TOOLS_AI_POLICY.assistantTurnsPerHour}</b><span
-						>assistant turns this hour</span
-					>
+					<b
+						>{usage.assistantTurnsThisHour}{isOwner
+							? ''
+							: ` / ${TOOLS_AI_POLICY.assistantTurnsPerHour}`}</b
+					><span>assistant turns this hour</span>
 				</p>
 				<p>
-					<b>{usage.mediaJobsThisHour} / {TOOLS_AI_POLICY.mediaJobsPerHour}</b><span
-						>generations this hour</span
-					>
+					<b>{usage.mediaJobsThisHour}{isOwner ? '' : ` / ${TOOLS_AI_POLICY.mediaJobsPerHour}`}</b
+					><span>generations this hour</span>
 				</p>
 				<p>
 					<b
-						>${usage.estimatedReservedTodayUsd.toFixed(2)} / ${TOOLS_AI_POLICY.userEstimatedDailyUsd.toFixed(
-							2
-						)}</b
+						>${usage.estimatedReservedTodayUsd.toFixed(2)}{isOwner
+							? ''
+							: ` / $${TOOLS_AI_POLICY.userEstimatedDailyUsd.toFixed(2)}`}</b
 					><span>estimated reserved today</span>
 				</p>
 			{:else if unavailable}
-				<p class="usage-state">Usage is temporarily unavailable. Server limits still apply.</p>
+				<p class="usage-state">
+					Usage is temporarily unavailable.{#if !isOwner}
+						Server limits still apply.{/if}
+				</p>
 			{:else}
 				<p class="usage-state">Loading your usage…</p>
 			{/if}
@@ -45,13 +50,13 @@
 			generations / hour<br />${TOOLS_AI_POLICY.userEstimatedDailyUsd} estimated daily allowance
 		</p>
 	{/if}
-	<div class="disclosure">
-		<strong>AI is funded by swyx.io, rate limited, and logged.</strong>
-		<p>
-			Signed-in tool activity is logged too. The site owner can review usage metadata and account
-			identity.
-		</p>
-	</div>
+	{#if !isOwner}<div class="disclosure">
+			<strong>AI is funded by swyx.io, rate limited, and logged.</strong>
+			<p>
+				Signed-in tool activity is logged too. The site owner can review usage metadata and account
+				identity.
+			</p>
+		</div>{/if}
 </aside>
 
 <style>

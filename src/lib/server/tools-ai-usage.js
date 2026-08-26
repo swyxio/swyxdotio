@@ -16,7 +16,11 @@ export async function toolsAiLedger(event, path, body) {
 			new Request(`https://drawing.internal/ai/${path}`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(body),
+				body: JSON.stringify({
+					...body,
+					// This private binding never accepts an owner identity from the browser.
+					ownerUserId: event.platform?.env?.TOOLS_OWNER_GOOGLE_SUB ?? null
+				}),
 				signal: AbortSignal.timeout(10_000)
 			})
 		);
@@ -36,11 +40,16 @@ export async function toolsAiLedger(event, path, body) {
 	}
 }
 
-/** @param {UsageEvent & Pick<import('@sveltejs/kit').RequestEvent, 'cookies'>} event @param {string} userId @param {'assistant'|'media'} kind @param {string} model @param {number} estimatedReservedUsd @param {{id: string, clientJobId: string, limitUsd: number}} [run] */
+/** @param {UsageEvent & Pick<import('@sveltejs/kit').RequestEvent, 'cookies'>} event @param {string} userId @param {'assistant'|'media'} kind @param {string} model @param {number} estimatedReservedUsd @param {{id: string, clientJobId: string, limitUsd: number | null}} [run] */
 export async function reserveToolsAiUsage(event, userId, kind, model, estimatedReservedUsd, run) {
 	const user = await getToolsUser(event);
-	const profile =
-		user?.id === userId ? { id: user.id, email: user.email, name: user.name } : undefined;
+	if (!user) return privateJson({ error: 'Sign in to use AI.' }, { status: 401 });
+	if (user.id !== userId)
+		return privateJson(
+			{ error: 'Your Google account changed. Reload before continuing.' },
+			{ status: 409 }
+		);
+	const profile = { id: user.id, email: user.email, name: user.name };
 	const result = await toolsAiLedger(event, 'admit', {
 		userId,
 		kind,

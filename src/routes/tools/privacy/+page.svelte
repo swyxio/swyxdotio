@@ -43,12 +43,14 @@
 		entries expire after 30 days; this dashboard does not collect usage from external apps.
 	</p>
 	<p>
-		Every account, including the site owner, is limited to {TOOLS_AI_POLICY.assistantTurnsPerHour} assistant
-		model turns and {TOOLS_AI_POLICY.mediaJobsPerHour} media generations per hour. Each account has a
-		${TOOLS_AI_POLICY.userEstimatedDailyUsd} daily estimated-cost allowance, with a ${TOOLS_AI_POLICY.siteEstimatedDailyUsd}
+		Non-owner accounts are limited to {TOOLS_AI_POLICY.assistantTurnsPerHour} assistant model turns and
+		{TOOLS_AI_POLICY.mediaJobsPerHour} media generations per hour. Each account has a ${TOOLS_AI_POLICY.userEstimatedDailyUsd}
+		daily estimated-cost allowance, with a ${TOOLS_AI_POLICY.siteEstimatedDailyUsd}
 		estimated daily guard shared across the site. These are conservative reservation estimates, not exact
 		provider bills. Failed provider attempts still use a reservation. Hourly limits use a rolling one-hour
-		window; daily limits reset at midnight UTC.
+		window; daily limits reset at midnight UTC. The server-verified site owner is exempt from app usage
+		and spending limits, and owner usage does not consume this shared allowance. Owner activity is still
+		logged with the same retention and privacy rules.
 	</p>
 	<p>
 		Before making a paid request, the server records an admission and reserves quota. Operational

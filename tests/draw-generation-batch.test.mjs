@@ -30,6 +30,16 @@ test('run snapshots recipes and rejects an incompatible or over-budget batch bef
 	assert.throws(() => run([{ ...recipe(), modelId: 'nano-banana-2' }]), /Attach one/);
 });
 
+test('owner runs omit the client budget while preserving recipe validation', () => {
+	const batch = run(
+		Array.from({ length: 25 }, (_, index) => recipe(`recipe-${index}`)),
+		null
+	);
+	assert.equal(batch.limitUsd, null);
+	assert.equal(batch.jobs.length, 25);
+	assert.throws(() => run([{ ...recipe(), prompt: '' }], null), /Enter a prompt/);
+});
+
 test('comparison runs at bounded concurrency and keeps normalized results tied to recipes and run budget', async () => {
 	const batch = run([recipe('a'), recipe('b'), recipe('c')]);
 	let active = 0,
