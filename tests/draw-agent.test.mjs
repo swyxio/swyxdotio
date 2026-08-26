@@ -86,6 +86,7 @@ test('drawing assistant sends only the visible viewport to the selected vision m
 	const calls = [];
 	const response = await runDrawingAgent(
 		await createEvent({
+			owner: false,
 			body: { messages: [{ role: 'user', content: 'Draw a diagram' }], screenshot: SCREENSHOT },
 			ai: {
 				run: async (...args) => {
@@ -237,6 +238,7 @@ test('truncated model output cannot execute partial commands or claim a complete
 test('drawing assistant signs shared run budgets, tracks model tokens, and rejects tampering or overspending', async () => {
 	const first = await runDrawingAgent(
 		await createEvent({
+			owner: false,
 			body: { messages: [{ role: 'user', content: 'Align the diagram' }], budgetCap: 0.25 },
 			ai: {
 				run: async () => ({
@@ -251,6 +253,7 @@ test('drawing assistant signs shared run budgets, tracks model tokens, and rejec
 	assert.equal(firstBody.spendingUsd, 0.00077);
 	const second = await runDrawingAgent(
 		await createEvent({
+			owner: false,
 			body: { messages: [{ role: 'user', content: 'Continue' }], budget: firstBody.budget },
 			ai: {
 				run: async () => ({
@@ -263,6 +266,7 @@ test('drawing assistant signs shared run budgets, tracks model tokens, and rejec
 	assert.equal((await second.json()).spendingUsd, 0.00154);
 	const invalid = await runDrawingAgent(
 		await createEvent({
+			owner: false,
 			body: {
 				messages: [{ role: 'user', content: 'Continue' }],
 				budget: `${firstBody.budget}tampered`
@@ -278,6 +282,7 @@ test('drawing assistant signs shared run budgets, tracks model tokens, and rejec
 	);
 	const blocked = await runDrawingAgent(
 		await createEvent({
+			owner: false,
 			body: { messages: [{ role: 'user', content: 'Continue' }], budget: exhausted.token },
 			ai: {
 				run: async () => {
@@ -290,7 +295,10 @@ test('drawing assistant signs shared run budgets, tracks model tokens, and rejec
 	assert.equal(blocked.status, 402);
 	assert.equal(called, false);
 	const overMaximum = await runDrawingAgent(
-		await createEvent({ body: { messages: [{ role: 'user', content: 'Continue' }], budgetCap: 5 } })
+		await createEvent({
+			owner: false,
+			body: { messages: [{ role: 'user', content: 'Continue' }], budgetCap: 5 }
+		})
 	);
 	assert.equal(overMaximum.status, 402);
 });
@@ -465,6 +473,7 @@ test('replaying a signed per-run budget cannot bypass durable per-account funded
 	for (let index = 0; index < 21; index++) {
 		const response = await runDrawingAgent(
 			await createEvent({
+				owner: false,
 				ledger,
 				ai,
 				body: { messages: [{ role: 'user', content: 'Continue' }], budget }
@@ -476,6 +485,32 @@ test('replaying a signed per-run budget cannot bypass durable per-account funded
 	assert.equal(
 		ledger.database.prepare('SELECT COUNT(*) AS count FROM tools_ai_usage').get().count,
 		20
+	);
+});
+
+test('owner assistant calls ignore spending caps without issuing a transferable unlimited budget', async () => {
+	const ledger = createTestAiLedger();
+	for (let index = 0; index < 22; index++) {
+		const response = await runDrawingAgent(
+			await createEvent({
+				ledger,
+				body: {
+					messages: [{ role: 'user', content: 'Continue' }],
+					budgetCap: 0.001,
+					budget: 'obsolete-owner-budget'
+				}
+			})
+		);
+		assert.equal(response.status, 200);
+		const body = await response.json();
+		assert.equal(body.budget, undefined);
+		assert.ok(body.modelCostUsd > 0);
+	}
+	assert.equal(
+		ledger.database
+			.prepare("SELECT COUNT(*) AS count FROM tools_ai_usage WHERE status = 'succeeded'")
+			.get().count,
+		22
 	);
 });
 

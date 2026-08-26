@@ -54,7 +54,7 @@ async function readResponse(response) {
  *  agentBudget?: string
  *  onBudget?: (budget: string, spendingUsd: number) => void
  *  runId?: string
- *  runLimitUsd?: number
+ *  runLimitUsd?: number | null
  *  clientJobId?: string
  *  cancelOnAbort?: boolean
  * }} options

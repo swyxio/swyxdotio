@@ -73,13 +73,18 @@ export class ToolsAiUsage {
 	/** All reads and writes below remain synchronous, with no interleaving before the reservation. @param {Record<string, any>} body @param {number} now */
 	admit(body, now) {
 		const { userId, kind, model, estimatedReservedUsd } = body;
+		const ownerUserId =
+			typeof body.ownerUserId === 'string' && IDENTIFIER.test(body.ownerUserId)
+				? body.ownerUserId
+				: '';
+		const unlimited = userId === ownerUserId;
 		if (
 			!['assistant', 'media'].includes(kind) ||
 			typeof model !== 'string' ||
 			!MODEL.test(model) ||
 			!Number.isFinite(estimatedReservedUsd) ||
 			estimatedReservedUsd <= 0 ||
-			estimatedReservedUsd > 100
+			(estimatedReservedUsd > 100 && !unlimited)
 		)
 			return Response.json({ error: 'Invalid usage reservation.' }, { status: 400 });
 		const micros = Math.ceil(estimatedReservedUsd * MILLION);
@@ -87,11 +92,11 @@ export class ToolsAiUsage {
 			kind === 'assistant'
 				? TOOLS_AI_POLICY.assistantReservationUsd
 				: TOOLS_AI_POLICY.mediaMinimumReservationUsd;
-		if (micros < Math.round(minimum * MILLION))
+		if (!Number.isSafeInteger(micros) || micros < Math.round(minimum * MILLION))
 			return Response.json({ error: 'Invalid usage reservation.' }, { status: 400 });
 		if (body.run !== undefined && kind !== 'media')
 			return Response.json({ error: 'Run budgets apply to media generation.' }, { status: 400 });
-		const run = this.generationRuns.prepare(userId, body.run, micros);
+		const run = this.generationRuns.prepare(userId, body.run, micros, unlimited);
 		if (run instanceof Response) return run;
 		const usage = this.summary(userId, now);
 		const limit =
@@ -102,18 +107,20 @@ export class ToolsAiUsage {
 		const dayStart = Math.floor(now / DAY_MS) * DAY_MS;
 		const total = this.sql
 			.exec(
-				'SELECT COALESCE(SUM(reserved_micros), 0) AS total FROM tools_ai_usage WHERE created_at >= ?',
-				dayStart
+				'SELECT COALESCE(SUM(reserved_micros), 0) AS total FROM tools_ai_usage WHERE created_at >= ? AND user_id != ?',
+				dayStart,
+				ownerUserId
 			)
 			.one().total;
 		let code;
-		if (used >= limit) code = 'account_hourly_limit';
+		if (!unlimited && used >= limit) code = 'account_hourly_limit';
 		else if (
+			!unlimited &&
 			Math.round(usage.estimatedReservedTodayUsd * MILLION) + micros >
-			TOOLS_AI_POLICY.userEstimatedDailyUsd * MILLION
+				TOOLS_AI_POLICY.userEstimatedDailyUsd * MILLION
 		)
 			code = 'account_daily_limit';
-		else if (total + micros > TOOLS_AI_POLICY.siteEstimatedDailyUsd * MILLION)
+		else if (!unlimited && total + micros > TOOLS_AI_POLICY.siteEstimatedDailyUsd * MILLION)
 			code = 'site_daily_limit';
 		if (code) {
 			const firstOfKind =
@@ -186,7 +193,18 @@ export class ToolsAiUsage {
 		if (path === '/ai/admit') return this.admit(body, now);
 		if (path === '/ai/summary')
 			return Response.json({
-				policy: TOOLS_AI_POLICY,
+				policy: {
+					...TOOLS_AI_POLICY,
+					...(body.userId === body.ownerUserId
+						? {
+								assistantTurnsPerHour: null,
+								mediaJobsPerHour: null,
+								userEstimatedDailyUsd: null,
+								siteEstimatedDailyUsd: null
+							}
+						: {})
+				},
+				unlimited: body.userId === body.ownerUserId,
 				usage: this.summary(body.userId, now),
 				logging: TOOLS_AI_LOGGING
 			});

@@ -25,14 +25,14 @@ async function uploadedFalForm(request) {
 	};
 }
 
-/** @param {import('@playwright/test').Page} page */
-async function mockSignedInPersonalTools(page) {
+/** @param {import('@playwright/test').Page} page @param {boolean} [owner] */
+async function mockSignedInPersonalTools(page, owner = false) {
 	await page.route('**/tools/api/session', async (route) => {
 		if (route.request().method() === 'GET') {
 			await route.fulfill({
 				json: {
 					authenticated: true,
-					user: { ...TEST_TOOLS_OWNER, isOwner: true },
+					user: { ...(owner ? TEST_TOOLS_OWNER : TEST_TOOLS_MEMBER), isOwner: owner },
 					googleConfigured: true
 				}
 			});
@@ -1463,7 +1463,62 @@ test('the drawing AI action shares the Google owner session', async ({ page }) =
 
 	toolbox = await pasteSelectedImage(page);
 	await toolbox.getByRole('button', { name: 'AI prompt', exact: true }).click();
-	await expect(toolbox.getByText(/Funded by swyx.io/)).toBeVisible();
+	await expect(toolbox.getByText(/Funded by swyx.io/)).toHaveCount(0);
+	await expect(toolbox.getByRole('spinbutton', { name: 'Run spending limit' })).toHaveCount(0);
 	await expect(toolbox.getByRole('button', { name: 'Generate AI image edit' })).toBeVisible();
 	await expect(toolbox.getByRole('link', { name: 'Sign in to generate' })).toHaveCount(0);
+});
+
+test('owner generation exceeds the normal run cap without spending prompts and retains provider errors', async ({
+	page
+}) => {
+	await mockSignedInPersonalTools(page, true);
+	/** @type {Record<string,FormDataEntryValue>[]} */
+	const requests = [];
+	let confirmations = 0;
+	page.on('dialog', async (dialog) => {
+		confirmations++;
+		await dialog.dismiss();
+	});
+	await page.route('**/tools/api/draw/edit**', async (route) => {
+		if (route.request().method() !== 'POST') return route.continue();
+		const body = route.request().postDataBuffer();
+		const contentType = await route.request().headerValue('content-type');
+		if (!body || !contentType) throw new Error('A multipart request is required.');
+		const form = await new Response(new Uint8Array(body), {
+			headers: { 'Content-Type': contentType }
+		}).formData();
+		requests.push(Object.fromEntries(form));
+		await route.fulfill({ status: 503, json: { error: 'Fixture generation is unavailable.' } });
+	});
+	const toolbox = await pasteSelectedImage(page);
+	await toolbox.getByRole('button', { name: 'AI prompt', exact: true }).click();
+	await chooseOnlyModel(toolbox, 'veo-3-1-video');
+	const settings = toolbox.getByRole('region', { name: 'Image to video settings' });
+	await settings.getByLabel('Image to video Duration').selectOption('6');
+	await settings.getByLabel('Image to video Generate audio').uncheck();
+	await expect(toolbox.getByText('~$1.2 total · 1 generation')).toBeVisible();
+	await expect(toolbox.getByRole('spinbutton', { name: 'Run spending limit' })).toHaveCount(0);
+	await expect(
+		toolbox.getByRole('spinbutton', { name: 'Generation confirmation threshold' })
+	).toHaveCount(0);
+	await expect(toolbox.getByRole('complementary', { name: 'Funded AI usage notice' })).toHaveCount(
+		0
+	);
+	await expect(toolbox.getByText(/Uploads the reference to/)).toHaveCount(0);
+	await toolbox
+		.getByRole('textbox', { name: 'AI image editing prompt' })
+		.fill('Slow cinematic camera orbit');
+	const generate = toolbox.getByRole('button', { name: 'Generate AI video' });
+	await expect(generate).toBeEnabled();
+	await generate.click();
+	await expect(toolbox.getByRole('region', { name: 'Generation queue' })).toContainText(
+		'Fixture generation is unavailable.'
+	);
+	expect(confirmations).toBe(0);
+	expect(requests).toHaveLength(1);
+	expect(requests[0].runLimitUsd).toBe('null');
+	await expect(
+		toolbox.getByRole('button', { name: 'Retry failed jobs', exact: true })
+	).toBeVisible();
 });

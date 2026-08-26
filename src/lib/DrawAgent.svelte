@@ -18,6 +18,7 @@
 
 	/** @type {{
 	 *  authenticated?: boolean,
+	 *  isOwner?: boolean,
 	 *  userId?: string,
 	 *  pageId: string,
 	 *  open?: boolean,
@@ -31,6 +32,7 @@
 	 * }} */
 	let {
 		authenticated = false,
+		isOwner = false,
 		userId,
 		pageId,
 		executeCommand,
@@ -164,11 +166,10 @@
 
 	/** @param {number} amount @param {string} label */
 	function reserveSpending(amount, label) {
-		if (
-			!Number.isFinite(amount) ||
-			amount < 0 ||
-			spending + amount > spendingCap + Number.EPSILON
-		) {
+		if (!Number.isFinite(amount) || amount < 0) {
+			throw new Error(`${label} has an invalid cost estimate.`);
+		}
+		if (!isOwner && spending + amount > spendingCap + Number.EPSILON) {
 			throw new Error(
 				`${label} would exceed the $${spendingCap.toFixed(2)} assistant spending cap.`
 			);
@@ -296,14 +297,21 @@
 						provider: provider.id,
 						messages: conversation,
 						...(screenshot ? { screenshot } : {}),
-						...(budgetToken ? { budget: budgetToken } : { budgetCap: Number(spendingCap) })
+						...(!isOwner
+							? budgetToken
+								? { budget: budgetToken }
+								: { budgetCap: Number(spendingCap) }
+							: {})
 					}),
 					signal: operation.signal
 				});
 				const result = await response.json().catch(() => ({}));
 				if (!response.ok)
 					throw new Error(result.error ?? 'The drawing assistant could not respond.');
-				if (typeof result.budget === 'string') updateBudget(result.budget, result.spendingUsd);
+				if (!isOwner && typeof result.budget === 'string')
+					updateBudget(result.budget, result.spendingUsd);
+				else if (isOwner && Number.isFinite(result.modelCostUsd) && result.modelCostUsd >= 0)
+					spending += result.modelCostUsd;
 				const calls = Array.isArray(result.toolCalls) ? result.toolCalls : [];
 				if (!calls.length) {
 					appendMessage('assistant', result.content || 'Done.');
@@ -568,7 +576,7 @@
 			</div>
 		{:else}
 			<div class="assistant-content" bind:this={transcript}>
-				<ToolsAiNotice />
+				<ToolsAiNotice {isOwner} />
 				<div class="provider-settings">
 					<label for="drawing-provider">Drawing model</label>
 					<select
@@ -592,18 +600,20 @@
 					{#if selectedProvider && !selectedProvider.configured}<span
 							>{selectedProvider.reason}</span
 						>{/if}
-					<small>Keys are configured by the site owner, never stored in your browser.</small>
-					{#if selectedProvider?.notice}<small>{selectedProvider.notice}</small>{/if}
+					{#if !isOwner}<small
+							>Keys are configured by the site owner, never stored in your browser.</small
+						>
+						{#if selectedProvider?.notice}<small>{selectedProvider.notice}</small>{/if}{/if}
 				</div>
-				<div class="assistant-disclosure">
-					{#if selectedProvider?.configured}
-						Prompts and drawing tool results are sent to {selectedProvider.label}.
-						{#if selectedProvider.vision}Visible canvas screenshots are sent to {selectedProvider.label}.
-						{:else}Text-only: uses native scene text and geometry; no screenshot is sent.{/if}
-					{/if}
-					Image generation may also upload selected images to fal.ai. Usage shown is an estimate; provider
-					plans and discounts may differ.
-				</div>
+				{#if !isOwner}<div class="assistant-disclosure">
+						{#if selectedProvider?.configured}
+							Prompts and drawing tool results are sent to {selectedProvider.label}.
+							{#if selectedProvider.vision}Visible canvas screenshots are sent to {selectedProvider.label}.
+							{:else}Text-only: uses native scene text and geometry; no screenshot is sent.{/if}
+						{/if}
+						Image generation may also upload selected images to fal.ai. Usage shown is an estimate; provider
+						plans and discounts may differ.
+					</div>{/if}
 				{#if showWorkflowPicker && messages.length}
 					<div class="workflow-picker" aria-label="Suggested design tasks">
 						{#each workflows as workflow (workflow.id)}
@@ -702,18 +712,20 @@
 					}}
 				></textarea>
 				<div class="composer-footer">
-					<label>
-						<select
-							aria-label="Assistant spending limit"
-							bind:value={spendingCap}
-							disabled={running}
-						>
-							<option value={0.25}>$0.25 max</option>
-							<option value={0.5}>$0.50 max</option>
-							<option value={1}>$1.00 max</option>
-						</select>
-					</label>
-					{#if spending}<span class="spending">≈${spending.toFixed(4)} used</span>{/if}
+					{#if !isOwner}<label>
+							<select
+								aria-label="Assistant spending limit"
+								bind:value={spendingCap}
+								disabled={running}
+							>
+								<option value={0.25}>$0.25 max</option>
+								<option value={0.5}>$0.50 max</option>
+								<option value={1}>$1.00 max</option>
+							</select>
+						</label>{/if}
+					{#if spending}<span class="spending"
+							>≈${spending.toFixed(4)} {isOwner ? 'model calls' : 'used'}</span
+						>{/if}
 					{#if running}
 						<button type="button" class="stop-button" onclick={stop}>Stop</button>
 					{:else}

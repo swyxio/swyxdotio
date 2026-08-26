@@ -18,9 +18,9 @@ export class GenerationRuns {
 	}
 
 	/** Called synchronously with account/site admission, before any external I/O.
-	 * @param {string} userId @param {unknown} raw @param {number} micros
+	 * @param {string} userId @param {unknown} raw @param {number} micros @param {boolean} [unlimited]
 	 */
-	prepare(userId, raw, micros) {
+	prepare(userId, raw, micros, unlimited = false) {
 		if (raw === undefined) return undefined;
 		const run = /** @type {{id?: unknown, limitUsd?: unknown, clientJobId?: unknown} | null} */ (
 			raw
@@ -32,16 +32,20 @@ export class GenerationRuns {
 			!ID.test(run.id) ||
 			typeof run.clientJobId !== 'string' ||
 			!ID.test(run.clientJobId) ||
-			typeof run.limitUsd !== 'number' ||
-			!Number.isFinite(run.limitUsd) ||
-			run.limitUsd <= 0 ||
-			run.limitUsd > 100
+			(!unlimited &&
+				(typeof run.limitUsd !== 'number' ||
+					!Number.isFinite(run.limitUsd) ||
+					run.limitUsd <= 0 ||
+					run.limitUsd > 100))
 		)
 			return Response.json(
 				{ code: 'invalid_run_budget', error: 'Choose a valid run spending limit.' },
 				{ status: 422 }
 			);
-		const limitMicros = Math.floor(run.limitUsd * MILLION + 1e-7);
+		// Zero records an owner-exempt run; only server-authorized owners can use it.
+		const limitMicros = unlimited
+			? 0
+			: Math.floor(/** @type {number} */ (run.limitUsd) * MILLION + 1e-7);
 		const existing = this.sql
 			.exec(
 				'SELECT limit_micros, reserved_micros FROM tools_ai_generation_runs WHERE user_id = ? AND run_id = ?',
@@ -49,7 +53,7 @@ export class GenerationRuns {
 				run.id
 			)
 			.toArray()[0];
-		if (existing && existing.limit_micros !== limitMicros)
+		if (!unlimited && existing && existing.limit_micros !== limitMicros)
 			return Response.json(
 				{
 					code: 'run_budget_changed',
@@ -75,7 +79,7 @@ export class GenerationRuns {
 				{ status: 409 }
 			);
 		const reservedMicros = (existing?.reserved_micros ?? 0) + micros;
-		if (reservedMicros > limitMicros)
+		if (!unlimited && reservedMicros > limitMicros)
 			return Response.json(
 				{
 					code: 'run_budget_exceeded',
@@ -95,7 +99,7 @@ export class GenerationRuns {
 	reserve(run, usageId, now) {
 		this.sql.exec(
 			`INSERT INTO tools_ai_generation_runs (user_id, run_id, limit_micros, reserved_micros, updated_at)
-			VALUES (?, ?, ?, ?, ?) ON CONFLICT (user_id, run_id) DO UPDATE SET reserved_micros = excluded.reserved_micros, updated_at = excluded.updated_at`,
+			VALUES (?, ?, ?, ?, ?) ON CONFLICT (user_id, run_id) DO UPDATE SET limit_micros = excluded.limit_micros, reserved_micros = excluded.reserved_micros, updated_at = excluded.updated_at`,
 			run.userId,
 			run.runId,
 			run.limitMicros,

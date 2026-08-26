@@ -55,7 +55,7 @@
 		onGenerate,
 		onOpenChange
 	} = $props<{
-		user: { id: string; email: string } | null;
+		user: { id: string; email: string; isOwner?: boolean } | null;
 		onInsert: (recipe: any) => Promise<void>;
 		onInsertAsset: (asset: CreativeAsset) => Promise<void>;
 		onBlank: () => void;
@@ -1511,13 +1511,13 @@
 								/></label
 							>
 							{#if sourcePlan.error}<p class="notice" role="alert">{sourcePlan.error}</p>{/if}
-							<p class="notice">
-								Extraction sends only the current transcript chunk and hints to the shared AI
-								service. Titles send your selected exact quotes and hints. Each request reserves ${TOOLS_AI_POLICY.assistantReservationUsd.toFixed(
-									2
-								)} against shared funded AI limits; this is not actual provider billing. No images are
-								generated. Stop prevents further requests; an in-flight request may still use quota.
-							</p>
+							{#if !user?.isOwner}<p class="notice">
+									Extraction sends only the current transcript chunk and hints to the shared AI
+									service. Titles send your selected exact quotes and hints. Each request reserves ${TOOLS_AI_POLICY.assistantReservationUsd.toFixed(
+										2
+									)} against shared funded AI limits; this is not actual provider billing. No images are
+									generated. Stop prevents further requests; an in-flight request may still use quota.
+								</p>{/if}
 							<label
 								>Maximum chunks this run<select disabled={busy} bind:value={maxSourceChunks}
 									>{#each [1, 2, 4, 8] as count}<option value={count}>{count} chunks</option
@@ -1528,8 +1528,8 @@
 									{sourcePlan.plan.remaining} chunks remaining. This click: up to {sourcePlan.plan
 										.run.length} requests · ${sourcePlan.plan.estimatedRunUsd.toFixed(2)} reserved. All
 									remaining chunks: ${sourcePlan.plan.estimatedRemainingUsd.toFixed(2)}; titles are
-									a separate ${TOOLS_AI_POLICY.assistantReservationUsd.toFixed(2)} request. Quota limits
-									can pause the run.
+									a separate ${TOOLS_AI_POLICY.assistantReservationUsd.toFixed(2)} request.{#if !user?.isOwner}
+										Quota limits can pause the run.{/if}
 								</p>{/if}
 							<div class="actions">
 								<button

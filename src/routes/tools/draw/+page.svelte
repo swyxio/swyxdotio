@@ -1195,7 +1195,8 @@
 						});
 			const generationModel = model;
 			const agentBudget = operation.getBudget();
-			if (!agentBudget) throw new Error('The assistant spending authorization is unavailable.');
+			if (!toolsUser?.isOwner && !agentBudget)
+				throw new Error('The assistant spending authorization is unavailable.');
 			const generated = await runDrawingGeneration({
 				userId: toolsUser?.id,
 				image: prepared?.blob,
@@ -1203,8 +1204,7 @@
 				model: model.id,
 				signal: operation.signal,
 				providerSafetyDefaults: true,
-				agentBudget,
-				onBudget: operation.updateBudget,
+				...(!toolsUser?.isOwner ? { agentBudget, onBudget: operation.updateBudget } : {}),
 				cancelOnAbort: true,
 				onProgress: (progress) =>
 					operation.onProgress(
@@ -2397,6 +2397,7 @@
 		{backgroundInset}
 		onOpen={() => prepareWorkspaceSurface('assistant')}
 		authenticated={toolsAuthenticated}
+		isOwner={!!toolsUser?.isOwner}
 		userId={toolsUser?.id}
 		pageId={`${STORAGE_KEY}:${activePageId}`}
 		executeCommand={executeAgentCommand}
@@ -2516,6 +2517,7 @@
 			captureUpdate={captureImmediately}
 			{cloudAvailable}
 			authenticated={toolsAuthenticated}
+			isOwner={!!toolsUser?.isOwner}
 			userId={toolsUser?.id}
 			backgroundProcessing={isRemovingBackground}
 			generations={imageGenerations}
@@ -2651,7 +2653,7 @@
 				</div>
 				{#if recoveryNotice}<p class="page-logging" role="status">{recoveryNotice}</p>{/if}
 
-				{#if toolsAuthenticated}<p class="page-logging">
+				{#if toolsAuthenticated && !toolsUser?.isOwner}<p class="page-logging">
 						<a href="/tools/logs">Tool activity is logged</a> · visible to you and swyx; drawing contents
 						stay private.
 					</p>{/if}

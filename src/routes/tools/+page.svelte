@@ -120,7 +120,12 @@
 				<a class="continue" href={data.next}>Continue to your tool →</a>
 			{/if}
 		</div>
-		<ToolsUsageReceipt signedIn={!!data.user} usage={aiUsage} unavailable={usageUnavailable} />
+		<ToolsUsageReceipt
+			signedIn={!!data.user}
+			isOwner={!!data.user?.isOwner}
+			usage={aiUsage}
+			unavailable={usageUnavailable}
+		/>
 	</div>
 	{#if !data.user}
 		<div class="signin-strip">
@@ -161,24 +166,21 @@
 		</div>
 	{/if}
 	<div class="workshop-scene"><ToolsCabinet isOwner={!!data.user?.isOwner} /></div>
-	<details class="workshop-rules">
-		<summary
-			><span>The rules of the workshop</span><span class="rules-hint"
-				>{TOOLS_AI_POLICY.retentionDays}-day metadata logs · no prompts or images in logs</span
-			></summary
-		>
-		<ToolsAiNotice />
-		<p>
-			The daily estimated allowance is ${TOOLS_AI_POLICY.userEstimatedDailyUsd} per account, with a ${TOOLS_AI_POLICY.siteEstimatedDailyUsd}
-			site-wide guard. Daily limits reset at midnight UTC. Reservations are conservative estimates, not
-			provider invoices.
-		</p>
-		{#if data.user?.isOwner}<p>
-				As site owner, you can select Everyone in <a href="/tools/logs">Tool logs</a> to review account
-				identities and activity metadata—not private prompts or assets.
-			</p>{/if}
-		<p><a href="/tools/privacy">Privacy and full details →</a></p>
-	</details>
+	{#if !data.user?.isOwner}<details class="workshop-rules">
+			<summary
+				><span>The rules of the workshop</span><span class="rules-hint"
+					>{TOOLS_AI_POLICY.retentionDays}-day metadata logs · no prompts or images in logs</span
+				></summary
+			>
+			<ToolsAiNotice />
+			<p>
+				The daily estimated allowance is ${TOOLS_AI_POLICY.userEstimatedDailyUsd} per account, with a
+				${TOOLS_AI_POLICY.siteEstimatedDailyUsd}
+				site-wide guard. Daily limits reset at midnight UTC. Reservations are conservative estimates,
+				not provider invoices.
+			</p>
+			<p><a href="/tools/privacy">Privacy and full details →</a></p>
+		</details>{/if}
 </section>
 
 <style>
