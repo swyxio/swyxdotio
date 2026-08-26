@@ -1,14 +1,22 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { logFilters, logMoney } from '../src/lib/tools-logs-view.js';
+import {
+	logFilters,
+	logQuery,
+	logMoney,
+	logStatus,
+	mergeLogEntries
+} from '../src/lib/tools-logs-view.js';
+import { TOOLS_LOG_FILTER_DEFAULTS } from '../src/lib/tools-activity.js';
 import { recordToolActivity } from '../src/lib/tools-activity-client.js';
 
 test('log filters have bounded defaults and retain supported bookmarked views', () => {
 	assert.deepEqual(
 		logFilters(new URLSearchParams('days=999&kind=secrets&tool=private&scope=admin')),
-		{ days: '7', kind: 'all', tool: 'all', scope: 'mine' }
+		{ ...TOOLS_LOG_FILTER_DEFAULTS }
 	);
 	assert.deepEqual(logFilters(new URLSearchParams('days=30&kind=tool&tool=box&scope=all')), {
+		...TOOLS_LOG_FILTER_DEFAULTS,
 		days: '30',
 		kind: 'tool',
 		tool: 'box',
@@ -16,6 +24,69 @@ test('log filters have bounded defaults and retain supported bookmarked views', 
 	});
 	assert.equal(logMoney(null), '—');
 	assert.equal(logMoney(0), '$0.00');
+});
+
+test('analytics filters round-trip as minimal bookmarks without private identity or snapshot state', () => {
+	const query = new URLSearchParams({
+		days: '30',
+		kind: 'ai',
+		scope: 'all',
+		status: 'pending',
+		source: 'server',
+		model: 'fal-ai/test',
+		action: 'draw.ai.media',
+		account: 'google_123',
+		q: 'request-42',
+		day: '2026-08-26',
+		opens: 'hide'
+	});
+	const filters = logFilters(query);
+	assert.deepEqual(logFilters(logQuery(filters)), filters);
+	assert.equal(filters.account, 'google_123');
+	assert.equal(filters.model, 'fal-ai/test');
+	assert.equal(logQuery({ ...TOOLS_LOG_FILTER_DEFAULTS }).toString(), '');
+	assert.equal(
+		logQuery({ ...filters, before: 'cursor', snapshot: '2026-08-26T00:00:00.000Z' }).has(
+			'snapshot'
+		),
+		false
+	);
+	assert.equal(logQuery({ ...filters, before: 'cursor' }).has('before'), false);
+});
+
+test('invalid, duplicate, and private URL filters are discarded independently', () => {
+	const filters = logFilters(
+		new URLSearchParams({
+			kind: 'ai',
+			status: 'secret',
+			source: 'secret',
+			day: '2026-02-30',
+			model: 'x'.repeat(201),
+			q: 'x'.repeat(101),
+			action: 'read.private',
+			account: 'someone@example.com',
+			snapshot: 'not-a-bookmark'
+		})
+	);
+	assert.deepEqual(filters, { ...TOOLS_LOG_FILTER_DEFAULTS, kind: 'ai' });
+	assert.equal(
+		logFilters(new URLSearchParams('status=failed&status=pending&kind=ai')).status,
+		'all'
+	);
+	assert.equal(logFilters(new URLSearchParams('account=private_user&scope=mine')).account, 'all');
+	assert.equal(logFilters(new URLSearchParams('day=2026-08-26')).day, '2026-08-26');
+});
+
+test('paging deduplicates the same event without collapsing different accounts or kinds', () => {
+	const entry = { id: 'request-1', kind: 'tool', status: 'succeeded' };
+	const merged = mergeLogEntries(
+		[entry],
+		[{ ...entry }, { ...entry, kind: 'ai' }, { ...entry, account: { id: 'other' } }]
+	);
+	assert.equal(merged.length, 3);
+	assert.equal(logStatus('reserved'), 'Pending');
+	assert.equal(logStatus('submitted'), 'Pending');
+	assert.equal(logStatus('failed'), 'Failed');
 });
 
 test('browser activity sends only allowlisted metadata and the expected account header', async () => {

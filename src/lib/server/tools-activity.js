@@ -2,6 +2,7 @@ import { getToolsUser } from './tools-auth.js';
 import { toolsAiLedger } from './tools-ai-usage.js';
 import { privateJson, requireSameOrigin } from '../podcast-admin-route.js';
 import { parseToolsActivityFilters, validToolsActivityInput } from '../tools-activity.js';
+import { toolsLogsCsv } from './tools-logs-export.js';
 
 /** @typedef {Pick<import('@sveltejs/kit').RequestEvent, 'cookies'|'platform'|'request'|'url'>} ActivityEvent */
 
@@ -20,26 +21,73 @@ async function activityLedger(event, path, payload) {
 		: response;
 }
 
-/** @param {ActivityEvent} event */
-export async function getToolsActivityLogs(event) {
+/** @param {ActivityEvent} event @param {boolean} [exportAll] */
+export async function getToolsActivityLogs(event, exportAll = false) {
 	const user = await getToolsUser(event);
 	if (!user)
 		return privateJson({ error: 'Sign in to see your private activity.' }, { status: 401 });
 	const expected = event.request.headers.get('X-Tools-User');
-	if (expected !== null && expected !== user.id)
+	if ((exportAll || expected !== null) && expected !== user.id)
 		return privateJson(
 			{ code: 'account_changed', error: 'Your Google account changed. Reload before continuing.' },
 			{ status: 409 }
 		);
-	const filters = parseToolsActivityFilters(event.url.searchParams);
-	if (!filters) return privateJson({ error: 'Invalid log filters.' }, { status: 400 });
+	const params = new URLSearchParams(event.url.searchParams);
+	if (exportAll) params.delete('format');
+	const filters = parseToolsActivityFilters(params);
+	if (!filters || (exportAll && filters.before))
+		return privateJson({ error: 'Invalid log filters.' }, { status: 400 });
 	if (filters.scope === 'all' && !user.isOwner)
 		return privateJson({ error: 'Only the site owner can inspect all accounts.' }, { status: 403 });
 	return activityLedger(event, 'activity-logs', {
 		userId: user.id,
 		isOwner: user.isOwner,
-		filters
+		filters,
+		exportAll
 	});
+}
+
+/** Export only the same authorized metadata relation used by the dashboard. @param {ActivityEvent} event */
+export async function exportToolsActivityLogs(event) {
+	const formats = event.url.searchParams.getAll('format');
+	if (formats.length !== 1 || !['csv', 'json'].includes(formats[0]))
+		return privateJson({ error: 'Choose CSV or JSON export.' }, { status: 400 });
+	const result = await getToolsActivityLogs(event, true);
+	if (!result.ok) return result;
+	const data = await result.json();
+	// Fail closed if a stale/unavailable companion cannot prove a complete export.
+	if (
+		data.complete !== true ||
+		data.nextCursor !== null ||
+		!Array.isArray(data.entries) ||
+		!Number.isSafeInteger(data.exportedCount) ||
+		data.exportedCount < 0 ||
+		data.exportedCount !== data.entries.length ||
+		data.exportedCount !== data.summary?.aiRequests + data.summary?.toolActions
+	)
+		return privateJson(
+			{
+				error:
+					'A complete export is unavailable. Refresh and try again; no partial file was created.'
+			},
+			{ status: 503 }
+		);
+	const format = formats[0];
+	return new Response(
+		format === 'csv' ? toolsLogsCsv(data.entries) : JSON.stringify(data, null, 2),
+		{
+			headers: {
+				'Content-Type':
+					format === 'csv' ? 'text/csv; charset=utf-8' : 'application/json; charset=utf-8',
+				'Content-Disposition': `attachment; filename="tool-logs-${data.scope}-${data.range.to.slice(0, 10)}.${format}"`,
+				'Cache-Control': 'private, no-store',
+				'Referrer-Policy': 'no-referrer',
+				'X-Content-Type-Options': 'nosniff',
+				'X-Export-Count': String(data.exportedCount),
+				'X-Export-Complete': 'true'
+			}
+		}
+	);
 }
 
 /** @param {ActivityEvent} event */
