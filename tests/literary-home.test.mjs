@@ -13,10 +13,13 @@ test('the featured shelf contains a substantial, uniquely linked essay collectio
 });
 
 test('the public design keeps the private tools out of featured discovery', () => {
-	assert.ok(FEATURED_ESSAYS.every((essay) => !/^\/(?:box|draw)(?:\/|$)/.test(essay.href)));
+	assert.ok(FEATURED_ESSAYS.every((essay) => !/^\/(?:tools|box|draw)(?:\/|$)/.test(essay.href)));
 	const layout = fs.readFileSync(new URL('../src/routes/+layout.svelte', import.meta.url), 'utf8');
 	assert.match(layout, /GNU Terry Pratchett/);
-	assert.match(layout, /\$page\.url\.pathname === '\/box' \|\| \$page\.url\.pathname === '\/draw'/);
+	assert.match(
+		layout,
+		/\$page\.url\.pathname === '\/tools\/box' \|\| \$page\.url\.pathname === '\/tools\/draw'/
+	);
 });
 
 test('the same theme switch is present outside the collapsible navigation links', () => {

@@ -564,7 +564,7 @@
 		{#if !authenticated}
 			<div class="assistant-signin">
 				<p>Sign in to let your private assistant inspect and edit this drawing.</p>
-				<a href="/tools?next=/draw">Sign in to use the assistant</a>
+				<a href="/tools?next=/tools/draw">Sign in to use the assistant</a>
 			</div>
 		{:else}
 			<div class="assistant-content" bind:this={transcript}>

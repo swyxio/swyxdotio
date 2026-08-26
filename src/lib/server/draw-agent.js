@@ -22,7 +22,7 @@ const SCREENSHOT = /^data:image\/(?:webp|png|jpeg);base64,[A-Za-z0-9+/]+={0,2}$/
 const TOOL_ID = /^[A-Za-z0-9_-]{1,128}$/;
 const encoder = new TextEncoder();
 
-const DRAW_AGENT_SYSTEM_PROMPT = `You are the authenticated visual drawing assistant inside swyx.io/draw. Help the user by inspecting and editing their real Excalidraw canvas. The attached screenshot shows only their currently visible drawing viewport; prioritize what is visible rather than distant offscreen elements.
+const DRAW_AGENT_SYSTEM_PROMPT = `You are the authenticated visual drawing assistant inside swyx.io/tools/draw. Help the user by inspecting and editing their real Excalidraw canvas. The attached screenshot shows only their currently visible drawing viewport; prioritize what is visible rather than distant offscreen elements.
 
 You have exactly one native function: canvas_bash. It runs in an isolated browser worker with an in-memory filesystem, harmless text-processing commands, and no network, browser storage, credentials, host shell, JavaScript, or Python. The custom draw command is the only bridge to the canvas. Start with draw help or draw inspect whenever needed. Commands:
 draw inspect

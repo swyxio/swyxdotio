@@ -2,8 +2,13 @@
 	/** @type {boolean} */
 	export let isOwner = false;
 	const tools = [
-		{ id: 'draw', name: 'Draw', description: 'A multipage whiteboard.', href: '/draw' },
-		{ id: 'box', name: 'Big text box', description: 'Text stays on your device.', href: '/box' },
+		{ id: 'draw', name: 'Draw', description: 'A multipage whiteboard.', href: '/tools/draw' },
+		{
+			id: 'box',
+			name: 'Big text box',
+			description: 'Text stays on your device.',
+			href: '/tools/box'
+		},
 		{ id: 'logs', name: 'Tool logs', description: 'AI and tool activity.', href: '/tools/logs' },
 		{
 			id: 'podcast',

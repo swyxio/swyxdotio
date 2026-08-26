@@ -3,7 +3,7 @@ import { authenticateTools, TEST_TOOLS_MEMBER } from './helpers/tools-auth.js';
 
 /** @param {import('@playwright/test').Page} page */
 async function openComposer(page, signedIn = true) {
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	if (signedIn) {
 		await authenticateTools(page, TEST_TOOLS_MEMBER);
 		await page.reload();

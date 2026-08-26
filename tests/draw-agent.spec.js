@@ -12,7 +12,7 @@ test('shared provider picker discloses capabilities, preserves drafts and sends 
 	page
 }) => {
 	await page.setViewportSize({ width: 390, height: 844 });
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await authenticate(page);
 	/** @type {any[]} */
 	const requests = [];
@@ -108,7 +108,7 @@ test('shared provider picker discloses capabilities, preserves drafts and sends 
 test('unavailable provider settings fail closed without losing the composer draft', async ({
 	page
 }) => {
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await authenticate(page);
 	await page.route('**/tools/api/draw/agent', (route) =>
 		route.fulfill({ status: 503, json: { error: 'Unavailable' } })
@@ -123,11 +123,11 @@ test('unavailable provider settings fail closed without losing the composer draf
 });
 
 test('drawing assistant and model endpoint require the Google tools session', async ({ page }) => {
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await page.getByRole('button', { name: 'Open drawing assistant' }).click();
 	await expect(page.getByRole('link', { name: 'Sign in to use the assistant' })).toHaveAttribute(
 		'href',
-		'/tools?next=/draw'
+		'/tools?next=/tools/draw'
 	);
 	const response = await page.request.post('/tools/api/draw/agent', {
 		headers: { Origin: new URL(page.url()).origin },
@@ -140,7 +140,7 @@ test('drawing assistant and model endpoint require the Google tools session', as
 test('authenticated floating assistant uses viewport vision, sandboxed commands, undo, and drawing-local history', async ({
 	page
 }) => {
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await authenticate(page);
 	/** @type {any[]} */
 	const requests = [];
@@ -281,7 +281,7 @@ test('authenticated floating assistant uses viewport vision, sandboxed commands,
 test('essay workflows prepare requests, protect drafts and preserve bound copies through the real command bridge', async ({
 	page
 }) => {
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await authenticate(page);
 	await page.getByRole('checkbox', { name: 'Library' }).check({ force: true });
 	await page.getByRole('tab', { name: 'Templates, components, and memes' }).click();
@@ -376,7 +376,7 @@ test('essay workflows prepare requests, protect drafts and preserve bound copies
 test('assistant retries the last request after a temporary authenticated model failure', async ({
 	page
 }) => {
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await authenticate(page);
 	let attempts = 0;
 	await page.route('**/tools/api/draw/agent', async (route) => {
@@ -401,7 +401,7 @@ test('assistant retries the last request after a temporary authenticated model f
 test('assistant sandbox cannot execute network, JavaScript, or host-shell commands', async ({
 	page
 }) => {
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await authenticate(page);
 	/** @type {any[]} */
 	const requests = [];
@@ -448,7 +448,7 @@ test('assistant sandbox cannot execute network, JavaScript, or host-shell comman
 test('assistant arranges shapes and connects them with native Excalidraw arrow bindings', async ({
 	page
 }) => {
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await authenticate(page);
 	const markerColor = `#${crypto.randomUUID().replaceAll('-', '').slice(0, 6)}`;
 	let round = 0;

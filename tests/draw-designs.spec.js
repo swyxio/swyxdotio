@@ -26,7 +26,7 @@ async function scene(page) {
 test('branded thumbnail templates create exact editable frames with the official Latent Space logo', async ({
 	page
 }) => {
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await openDesignLibrary(page);
 	const library = page.getByRole('region', { name: 'Branded design templates' });
 	await expect(library.getByRole('button', { name: /^insert .+ design$/i })).toHaveCount(5);
@@ -55,7 +55,7 @@ test('branded thumbnail templates create exact editable frames with the official
 test('artboards duplicate as editable variants, resize proportionally, and export exact-size PNG files', async ({
 	page
 }) => {
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await openDesignLibrary(page);
 	await page.getByRole('button', { name: 'Insert FDE episode thumbnail design' }).click();
 	const controls = page.getByRole('region', { name: 'Selected design artboard' });
@@ -105,7 +105,7 @@ test('artboards duplicate as editable variants, resize proportionally, and expor
 test('speaker designs use portrait dimensions and pages duplicate the complete editable scene', async ({
 	page
 }) => {
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await openDesignLibrary(page);
 	await page.getByRole('button', { name: 'Insert AI Engineer speaker card design' }).click();
 	await expect(page.getByRole('region', { name: 'Selected design artboard' })).toContainText(
@@ -129,7 +129,7 @@ test('speaker designs use portrait dimensions and pages duplicate the complete e
 test('authenticated assistant offers grounded Canva-style tasks and creates branded editable artboards', async ({
 	page
 }) => {
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	const origin = new URL(page.url()).origin;
 	await authenticateTools(page);
 	await page.reload();
@@ -195,7 +195,7 @@ test('design workflows remain reachable and artboard controls stay contained on 
 	page
 }) => {
 	await page.setViewportSize({ width: 390, height: 844 });
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await page.getByRole('button', { name: 'Choose drawing mode and tools' }).click();
 	await page.getByRole('button', { name: 'Open drawing templates and library' }).click();
 	await page.getByRole('tab', { name: 'Design', exact: true }).click();

@@ -177,7 +177,7 @@ test('successful page deletion removes only its recovery journal, preserving oth
 	await page.addInitScript((entries) => {
 		for (const [key, value] of entries) localStorage.setItem(key, value);
 	}, entries);
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	const pages = page.getByRole('button', { name: 'Manage drawing pages' });
 	await expect(pages).toContainText('Source page');
 	await expect.poll(async () => (await cachedScene(page)).elements[0]?.id).toBe('source-shape');
@@ -208,7 +208,7 @@ test('a failed destination cache write keeps the source page and native scene ac
 }) => {
 	const cloud = await cloudFixture(page);
 	const destination = structuredClone(cloud.scene(destinationId));
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	const pages = page.getByRole('button', { name: 'Manage drawing pages' });
 	await expect(pages).toContainText('Source page');
 	await expect.poll(async () => (await cachedScene(page)).elements[0]?.id).toBe('source-shape');

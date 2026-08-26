@@ -31,10 +31,10 @@ test('homepage archive links use valid categories and canonical article paths', 
 });
 
 test('personal writing and drawing tools prohibit indexing and stay out of discovery', async () => {
-	assert.equal(PUBLIC_PAGE_PATHS.includes('/box'), false);
-	assert.equal(PUBLIC_PAGE_PATHS.includes('/draw'), false);
+	assert.equal(PUBLIC_PAGE_PATHS.includes('/tools/box'), false);
+	assert.equal(PUBLIC_PAGE_PATHS.includes('/tools/draw'), false);
 	for (const tool of ['box', 'draw']) {
-		const source = await readFile(new URL(`src/routes/${tool}/+page.svelte`, root), 'utf8');
+		const source = await readFile(new URL(`src/routes/tools/${tool}/+page.svelte`, root), 'utf8');
 		assert.match(source, /<meta name="robots" content="noindex, nofollow, noarchive"\s*\/>/);
 		assert.doesNotMatch(source, /rel="canonical"/);
 	}

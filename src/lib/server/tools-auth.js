@@ -131,8 +131,16 @@ export async function getToolsSession(event) {
 
 /** A small allowlist avoids open redirects, auth loops, and API destinations. @param {unknown} value */
 export function safeToolsNext(value) {
+	if (value === '/draw' || value === '/box') return `/tools${value}`;
 	return typeof value === 'string' &&
-		['/tools', '/draw', '/box', '/tools/podcast', '/tools/reclip', '/tools/logs'].includes(value)
+		[
+			'/tools',
+			'/tools/draw',
+			'/tools/box',
+			'/tools/podcast',
+			'/tools/reclip',
+			'/tools/logs'
+		].includes(value)
 		? value
 		: '/tools';
 }

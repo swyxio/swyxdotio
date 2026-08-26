@@ -11,7 +11,7 @@ async function unlockDrawingPages(page) {
 }
 
 test('cloud drawing pages require the Google tools session', async ({ page }) => {
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	const origin = new URL(page.url()).origin;
 
 	const response = await page.request.get(`${origin}${pagesPath}`);
@@ -30,13 +30,13 @@ test('cloud drawing pages require the Google tools session', async ({ page }) =>
 });
 
 test('drawing pages can be created, switched, renamed, and deleted locally', async ({ page }) => {
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	const pages = page.getByRole('button', { name: 'Manage drawing pages' });
 	await pages.click();
 	await expect(page.getByRole('button', { name: 'Page 1', exact: true })).toBeVisible();
 	await expect(page.getByRole('link', { name: 'Sign in to sync across devices' })).toHaveAttribute(
 		'href',
-		'/tools?next=/draw'
+		'/tools?next=/tools/draw'
 	);
 
 	await page.getByRole('button', { name: 'New page' }).click();
@@ -114,15 +114,15 @@ test('drawing pages can be created, switched, renamed, and deleted locally', asy
 });
 
 test('unlocking cloud drawing sync returns directly to the drawing canvas', async ({ page }) => {
-	await page.goto('/tools?next=/draw');
+	await page.goto('/tools?next=/tools/draw');
 	await page.waitForLoadState('networkidle');
 	await expect(page.getByRole('link', { name: 'Sign in with Google' })).toHaveAttribute(
 		'href',
-		'/tools/auth/google?next=%2Fdraw'
+		'/tools/auth/google?next=%2Ftools%2Fdraw'
 	);
 	await authenticateTools(page);
-	await page.goto('/draw');
-	await expect(page).toHaveURL(/\/draw$/);
+	await page.goto('/tools/draw');
+	await expect(page).toHaveURL(/\/tools\/draw$/);
 	await expect(page.getByRole('button', { name: 'Manage drawing pages' })).toBeVisible();
 });
 
@@ -130,7 +130,7 @@ test('drawing pages persist through the Durable Object across independent sessio
 	page,
 	browser
 }) => {
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	const origin = await unlockDrawingPages(page);
 	const crossOrigin = await page.request.post(`${origin}${pagesPath}`, {
 		headers: { Origin: 'https://untrusted.example', 'X-Tools-User': TEST_TOOLS_OWNER.id },
@@ -162,7 +162,7 @@ test('drawing pages persist through the Durable Object across independent sessio
 		const secondBrowser = await browser.newContext();
 		try {
 			const secondPage = await secondBrowser.newPage();
-			await secondPage.goto(`${origin}/draw`);
+			await secondPage.goto(`${origin}/tools/draw`);
 			await unlockDrawingPages(secondPage);
 
 			const persisted = await secondPage.request.get(pageUrl);
@@ -250,7 +250,7 @@ test('account switching keeps browser caches separate and removes owner-only too
 }) => {
 	await page.goto('/tools');
 	await authenticateTools(page);
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await expect(page.getByRole('button', { name: 'Manage drawing pages' })).toBeVisible();
 	const ownerKey = `swyx-excalidraw:google:${TEST_TOOLS_OWNER.id}`;
 	await expect(page.locator('.draw-canvas')).toHaveAttribute('data-account-storage-key', ownerKey);
@@ -262,7 +262,7 @@ test('account switching keeps browser caches separate and removes owner-only too
 		ownerKey
 	);
 	const openDrawing = await page.context().newPage();
-	await openDrawing.goto('/draw');
+	await openDrawing.goto('/tools/draw');
 	await expect(openDrawing.locator('.draw-canvas')).toHaveAttribute(
 		'data-account-storage-key',
 		ownerKey
@@ -276,7 +276,7 @@ test('account switching keeps browser caches separate and removes owner-only too
 	await expect(page.getByRole('link', { name: /Podcast studio/ })).toHaveCount(0);
 	await page.locator('.account-menu > summary').click();
 	await expect(page.getByText(TEST_TOOLS_MEMBER.email, { exact: true })).toBeVisible();
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await expect(page.getByRole('button', { name: 'Manage drawing pages' })).toBeVisible();
 	await expect(page.locator('.draw-canvas')).toHaveAttribute(
 		'data-account-storage-key',
@@ -297,7 +297,7 @@ test('account switching keeps browser caches separate and removes owner-only too
 		'swyx-excalidraw:guest'
 	);
 	await openDrawing.close();
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await expect(page.locator('.draw-canvas')).toHaveAttribute(
 		'data-account-storage-key',
 		'swyx-excalidraw:guest'
@@ -328,7 +328,7 @@ test('all accounts see funded AI limits and logging before using the assistant',
 	expect(await usage.json()).toMatchObject({
 		policy: { assistantTurnsPerHour: 20, mediaJobsPerHour: 5, retentionDays: 30 }
 	});
-	await page.goto('/draw');
+	await page.goto('/tools/draw');
 	await page.getByRole('button', { name: 'Open drawing assistant' }).click();
 	await expect(page.getByRole('complementary', { name: 'Funded AI usage notice' })).toBeVisible();
 	await expect(page.getByRole('link', { name: 'Sign in to use the assistant' })).toHaveCount(0);
