@@ -1,5 +1,11 @@
 # The useful things cabinet
 
+**Follow-up:** after comparing the first release with D, the user requested the
+obvious visual gaps be fixed. See [the refinement](refinement/README.md) for the
+restored still-life, drawer hardware, heading and paper treatment. The original
+release history below is retained; its omitted desktop artwork was visual drift,
+not a satisfactory interpretation of “keep the rest simple.”
+
 ## Approved design
 
 The user chose **D — Curiosity Cabinet**, explicitly asking to keep the rest simple.

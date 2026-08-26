@@ -59,13 +59,19 @@
 		container-type: inline-size;
 		position: relative;
 		padding: 20px 21px 16px;
-		border: 1px solid #d2b989;
-		border-radius: 2px;
-		background: #fcf5e7 url('/assets/tools-cabinet/paper.webp') center / 360px;
+		isolation: isolate;
+		border: 1px solid transparent;
+		background: transparent;
 		color: #403326;
-		box-shadow:
-			inset 0 0 18px #b48b4030,
-			1px 4px 7px #35291e18;
+		box-shadow: none;
+	}
+	.receipt::after {
+		content: '';
+		position: absolute;
+		z-index: -1;
+		inset: -6px;
+		border-image: url('/assets/tools-cabinet/paper-sheet.webp') 60 fill / 18px / 0 stretch;
+		pointer-events: none;
 	}
 	.receipt::before {
 		content: '';
@@ -177,6 +183,9 @@
 		}
 	}
 	@media (forced-colors: active) {
+		.receipt::after {
+			display: none;
+		}
 		.receipt {
 			background: Canvas;
 			color: CanvasText;
