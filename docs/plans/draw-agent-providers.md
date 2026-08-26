@@ -35,9 +35,14 @@ deployment was performed by this feature task. No new dependencies are required.
 | DeepSeek      | `deepseek-v4-flash`       | Native text/geometry only; no screenshot sent              | Peak uncached rates: $0.44 input / $1.32 output per million tokens             |
 | Featherless   | Server-configured model   | Vision only when the model metadata explicitly supports it | Verified model-catalog token, request and image rates; plan billing may differ |
 
-Featherless needs an active model available on the configured account's plan, native tool
-support, at least 16K context and 2K output capacity, and complete nonnegative pricing metadata.
-If any of those cannot be verified, the provider remains disabled. No guessed model or
+Featherless checks an active model with native tools, the authenticated `/v1/plan` model-size
+entitlement, at least 16K effective context and 2K output capacity, and complete nonnegative pricing
+metadata. Effective context is the smaller of the model and plan limits, less the output reserve.
+A false or missing catalog `available_on_current_plan` flag is advisory when the authenticated
+plan permits the model; the picker remains selectable and shows an execution-unverified notice.
+Metadata does not prove inference access. Real inference denials stop the run without retries,
+provider fallback, or assumptions that the account needs an upgrade.
+Unverifiable required limits/capabilities/prices still disable the configured model. No guessed model or
 prompt-based imitation of tool calling is used. Metadata checks are read-only, not inference.
 
 OpenAI uses stateless Responses requests (`store:false`, strict tools, no reasoning tokens).
@@ -75,7 +80,17 @@ was found there. The keys are configured only in this isolated checkout's ignore
 
 Read-only OpenAI model metadata confirms access to `gpt-5.4-mini-2026-03-17`. Featherless's
 authenticated catalog reports `available_on_current_plan:false` for `Qwen/Qwen3.8-27B` and zero
-results for the available-plan/tool-use filter; it stays disabled until account/model access changes.
+results for the available-plan/tool-use filter. **Correction:** this does not establish lack of
+account entitlement. The same key's `/v1/plan` independently returned HTTP 200 with Feather Chat
+(formerly Premium), `max_model_size:null`, `max_context_length:32768`, and `concurrency:4`.
+The current plan docs advertise access to all catalog models; native Qwen/Kimi tools are documented.
+The prior conclusion that account/model access must change was unjustified. The corrected adapter
+accepts the authenticated plan entitlement and warns about the conflicting catalog flag.
+Actual tool-call execution remains unverified; no new inference call was made to settle it.
+During the correction's read-only recheck, `/v1/plan` returned 200 but the configured model-detail
+endpoint returned 404 in this session. Therefore the corrected full metadata preflight did not
+pass live here, independently of the catalog-flag fix. This is a metadata-availability result,
+not evidence of missing plan entitlement or a need to upgrade.
 The raw `owner/model` detail URL works here; the encoded-slash form returned HTTP 403 despite
 being documented, so the adapter uses the documented raw slash with each segment encoded.
 No inference was requested with either key. Keys are not included in the handoff commit.
@@ -84,10 +99,17 @@ Verification: 146 drawing/auth/usage unit tests, 41 browser tests (paid test ski
 errors/warnings, and production build passed. Browser fixtures use fake credentials and mocked
 inference, not the reused keys.
 
+The catalog-flag correction adds two regression tests (148 drawing/auth/usage unit tests total),
+checks that the warning leaves Featherless selectable, bounds context by the authenticated plan,
+and confirms an actual mocked inference 403 stops without retry or fallback. No live tool-call
+success or new live inference cost is claimed.
+
 Sources checked 2026-08-25: [OpenAI model](https://developers.openai.com/api/docs/models/gpt-5.4-mini),
 [Responses tools](https://developers.openai.com/api/docs/guides/function-calling),
 [DeepSeek pricing](https://api-docs.deepseek.com/quick_start/pricing/),
 [DeepSeek strict tools](https://api-docs.deepseek.com/guides/tool_calls/),
 [Featherless model metadata](https://featherless.ai/docs/api-reference-models),
 [Featherless native tools](https://featherless.ai/docs/tool-calling),
+[Featherless plans](https://featherless.ai/docs/plans),
+[Authenticated plan limits](https://featherless.ai/docs/api-reference-plan),
 [Featherless vision](https://featherless.ai/docs/vision).

@@ -54,7 +54,7 @@
 	let toolCalls = $state(0);
 	let spending = $state(0);
 	let spendingCap = $state(DEFAULT_DRAW_AGENT_BUDGET_USD);
-	/** @type {{id: string, label: string, model: string, vision: boolean, configured: boolean, reason?: string}[]} */
+	/** @type {{id: string, label: string, model: string, vision: boolean, configured: boolean, reason?: string, notice?: string}[]} */
 	let providerOptions = $state([]);
 	let providerId = $state('cloudflare');
 	let providersLoading = $state(false);
@@ -593,6 +593,7 @@
 							>{selectedProvider.reason}</span
 						>{/if}
 					<small>Keys are configured by the site owner, never stored in your browser.</small>
+					{#if selectedProvider?.notice}<small>{selectedProvider.notice}</small>{/if}
 				</div>
 				<div class="assistant-disclosure">
 					{#if selectedProvider?.configured}

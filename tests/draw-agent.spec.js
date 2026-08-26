@@ -49,10 +49,11 @@ test('shared provider picker discloses capabilities, preserves drafts and sends 
 						{
 							id: 'featherless',
 							label: 'Featherless',
-							model: '',
-							vision: false,
-							configured: false,
-							reason: 'Key not configured'
+							model: 'Qwen/Test-Model',
+							vision: true,
+							configured: true,
+							notice:
+								'Catalog access metadata conflicts with the authenticated plan. Model and tool execution remain unverified.'
 						}
 					]
 				}
@@ -70,10 +71,12 @@ test('shared provider picker discloses capabilities, preserves drafts and sends 
 	await composer.fill('Keep this draft while switching models.');
 	await picker.selectOption('openai');
 	await expect(assistant).toContainText('screenshots are sent to OpenAI');
+	await picker.selectOption('featherless');
+	await expect(assistant).toContainText('Model and tool execution remain unverified.');
+	await expect(picker.locator('option[value="featherless"]')).toBeEnabled();
 	await picker.selectOption('deepseek');
 	await expect(assistant).toContainText('no screenshot is sent');
 	await expect(composer).toHaveValue('Keep this draft while switching models.');
-	await expect(picker.locator('option[value="featherless"]')).toBeDisabled();
 	const panelBounds = await assistant.boundingBox();
 	const sendBounds = await assistant
 		.getByRole('button', { name: 'Send', exact: true })

@@ -25,6 +25,16 @@ const metadata = {
 	max_completion_tokens: 4096,
 	pricing: { prompt: '0.0000005', completion: '0.000002', request: '0.001', image: '0.002' }
 };
+const plan = {
+	name: 'Feather Chat',
+	max_model_size: null,
+	max_context_length: 32768,
+	concurrency: 4
+};
+const metadataFetcher =
+	(detail = metadata, accountPlan = plan) =>
+	async (url) =>
+		Response.json(url.endsWith('/plan') ? accountPlan : detail);
 const image = 'data:image/webp;base64,aW1hZ2U=';
 const messages = [
 	{ role: 'system', content: 'Draw a useful diagram.' },
@@ -54,11 +64,16 @@ test('provider discovery exposes capabilities and model identity, never credenti
 	let calls = 0;
 	const providers = await listDrawingProviders(env, async (url, /** @type {any} */ options) => {
 		calls++;
-		assert.equal(url, 'https://api.featherless.ai/v1/models/Qwen/Test-Model');
+		assert.ok(
+			[
+				'https://api.featherless.ai/v1/models/Qwen/Test-Model',
+				'https://api.featherless.ai/v1/plan'
+			].includes(url)
+		);
 		assert.equal(options.headers.Authorization, `Bearer ${env.FEATHERLESS_API_KEY}`);
-		return Response.json(metadata);
+		return metadataFetcher()(url);
 	});
-	assert.equal(calls, 1);
+	assert.equal(calls, 2);
 	assert.deepEqual(
 		providers.map((p) => [p.id, p.configured, p.vision]),
 		[
@@ -75,18 +90,15 @@ test('provider discovery exposes capabilities and model identity, never credenti
 	);
 });
 
-test('Featherless fails closed on unavailable models, missing native tools or unknown prices', async () => {
+test('Featherless rejects inactive models, missing native tools or unknown prices', async () => {
 	for (const detail of [
-		{ ...metadata, available_on_current_plan: false },
 		{ ...metadata, status: 'pending_deploy' },
 		{ ...metadata, features: {} },
 		{ ...metadata, pricing: {} },
 		{ ...metadata, context_length: 2048 },
 		{ ...metadata, id: 'Other/Model' }
 	]) {
-		const provider = await getDrawingProvider(env, 'featherless', async () =>
-			Response.json(detail)
-		);
+		const provider = await getDrawingProvider(env, 'featherless', metadataFetcher(detail));
 		assert.equal(provider.configured, false);
 	}
 	const denied = await getDrawingProvider(
@@ -99,6 +111,63 @@ test('Featherless fails closed on unavailable models, missing native tools or un
 	await assert.rejects(
 		getDrawingProvider(env, 'https://evil.example'),
 		/supported drawing provider/
+	);
+});
+
+test('Featherless plan entitlements override conflicting catalog flags without claiming execution proof', async () => {
+	for (const flag of [false, undefined]) {
+		const detail = { ...metadata, available_on_current_plan: flag, context_length: 262144 };
+		const provider = await getDrawingProvider(env, 'featherless', metadataFetcher(detail));
+		assert.equal(provider.configured, true);
+		assert.match(provider.notice, /execution remain unverified/);
+		assert.equal(provider.maxInputTokens, 32768 - 2000);
+		const publicProvider = (await listDrawingProviders(env, metadataFetcher(detail))).find(
+			(p) => p.id === 'featherless'
+		);
+		assert.equal(publicProvider.notice, provider.notice);
+	}
+	const uncapped = await getDrawingProvider(
+		env,
+		'featherless',
+		metadataFetcher(metadata, { ...plan, max_context_length: null })
+	);
+	assert.equal(uncapped.maxInputTokens, metadata.context_length - 2000);
+});
+
+test('Featherless verifies plan context and model size independently of catalog flags', async () => {
+	for (const invalidPlan of [
+		{ ...plan, max_context_length: 8192 },
+		{ ...plan, max_context_length: undefined },
+		{ ...plan, max_context_length: '32768' },
+		{ ...plan, max_model_size: undefined },
+		{ ...plan, max_model_size: 8 }
+	]) {
+		assert.equal(
+			(await getDrawingProvider(env, 'featherless', metadataFetcher(metadata, invalidPlan)))
+				.configured,
+			false
+		);
+	}
+	const sized = { ...metadata, parameter_size: 27_000_000_000, available_on_current_plan: false };
+	assert.equal(
+		(
+			await getDrawingProvider(
+				env,
+				'featherless',
+				metadataFetcher(sized, { ...plan, max_model_size: 32 })
+			)
+		).configured,
+		true
+	);
+	assert.equal(
+		(
+			await getDrawingProvider(
+				env,
+				'featherless',
+				metadataFetcher(sized, { ...plan, max_model_size: 8 })
+			)
+		).configured,
+		false
 	);
 });
 
@@ -163,9 +232,7 @@ test('DeepSeek uses its documented strict endpoint and disables thinking for bou
 });
 
 test('Featherless native chat tools preserve bindings and use catalog prices, including fixed charges', async () => {
-	const provider = await getDrawingProvider(env, 'featherless', async () =>
-		Response.json(metadata)
-	);
+	const provider = await getDrawingProvider(env, 'featherless', metadataFetcher());
 	assert.equal(drawingProviderCost(provider, 1000, 100, true), 0.0037);
 	assert.ok(
 		drawingProviderReservation(provider, messages.slice(0, 4), DRAW_AGENT_TOOLS, true) >= 0.02
@@ -195,6 +262,22 @@ test('Featherless native chat tools preserve bindings and use catalog prices, in
 			return Response.json({ choices: [{ message: { content: 'Done' } }] });
 		}
 	);
+	let deniedRequests = 0;
+	await assert.rejects(
+		callDrawingProvider(
+			provider,
+			env,
+			messages,
+			DRAW_AGENT_TOOLS,
+			new AbortController().signal,
+			async () => {
+				deniedRequests++;
+				return new Response('private upstream denial', { status: 403 });
+			}
+		),
+		/key or model access needs attention/
+	);
+	assert.equal(deniedRequests, 1, 'An actual inference denial stops without retry or fallback');
 });
 
 test('provider transport rejects redirects, oversized replies and errors without leaking provider secrets', async () => {

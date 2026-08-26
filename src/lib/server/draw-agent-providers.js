@@ -4,7 +4,7 @@ const OUTPUT_TOKENS = 2_000;
 const MAX_RESPONSE_BYTES = 250_000;
 const encoder = new TextEncoder();
 
-/** @typedef {{ id: string, label: string, model: string, vision: boolean, configured: boolean, reason?: string, inputRate: number, outputRate: number, requestRate: number, imageRate: number, maxInputTokens: number }} AgentProvider */
+/** @typedef {{ id: string, label: string, model: string, vision: boolean, configured: boolean, reason?: string, notice?: string, inputRate: number, outputRate: number, requestRate: number, imageRate: number, maxInputTokens: number }} AgentProvider */
 /** @typedef {NonNullable<App.Platform['env']>} ProviderEnv */
 
 export class DrawingProviderError extends Error {
@@ -132,26 +132,51 @@ export async function getDrawingProvider(env, id, fetcher = fetch) {
 		return { ...provider, reason: 'The configured Featherless model ID is invalid.' };
 	}
 	try {
-		const detail = await providerJson(
-			`https://api.featherless.ai/v1/models/${provider.model.split('/').map(encodeURIComponent).join('/')}`,
-			{
-				headers: { Authorization: `Bearer ${env.FEATHERLESS_API_KEY}` },
-				signal: AbortSignal.timeout(8_000)
-			},
-			fetcher
-		);
+		const options = {
+			headers: { Authorization: `Bearer ${env.FEATHERLESS_API_KEY}` },
+			signal: AbortSignal.timeout(8_000)
+		};
+		const [detail, plan] = await Promise.all([
+			providerJson(
+				`https://api.featherless.ai/v1/models/${provider.model.split('/').map(encodeURIComponent).join('/')}`,
+				options,
+				fetcher
+			),
+			providerJson('https://api.featherless.ai/v1/plan', options, fetcher)
+		]);
 		if (
 			detail.id !== provider.model ||
 			detail.status !== 'active' ||
-			detail.available_on_current_plan !== true ||
 			detail.features?.tool_use !== true
 		) {
 			return {
 				...provider,
-				reason:
-					'The Featherless model must be active, available on your plan, and support native tools.'
+				reason: 'The Featherless model must be active and support native tools.'
 			};
 		}
+		// The catalog flag can conflict with authenticated plan entitlements. It is not
+		// an inference authorization result; the provider still authorizes each request.
+		const sizeAllowed =
+			plan.max_model_size === null ||
+			(typeof plan.max_model_size === 'number' &&
+				Number.isFinite(plan.max_model_size) &&
+				plan.max_model_size > 0 &&
+				typeof detail.parameter_size === 'number' &&
+				Number.isFinite(detail.parameter_size) &&
+				detail.parameter_size > 0 &&
+				detail.parameter_size <= plan.max_model_size * 1_000_000_000);
+		if (!sizeAllowed)
+			return {
+				...provider,
+				reason:
+					'The configured model size could not be confirmed within the authenticated Featherless plan limits.'
+			};
+		const planContext = plan.max_context_length === null ? Infinity : plan.max_context_length;
+		if (planContext !== Infinity && (!Number.isSafeInteger(planContext) || planContext < 16_384))
+			return {
+				...provider,
+				reason: 'The Featherless plan context limit could not be verified or is below 16K.'
+			};
 		const rates = ['prompt', 'completion', 'request', 'image'].map((key) => {
 			const value = detail.pricing?.[key];
 			return (typeof value === 'string' && value.trim()) || typeof value === 'number'
@@ -174,12 +199,16 @@ export async function getDrawingProvider(env, id, fetcher = fetch) {
 			...provider,
 			configured: true,
 			reason: undefined,
+			notice:
+				detail.available_on_current_plan !== true
+					? 'Catalog access metadata conflicts with the authenticated plan. Model and tool execution remain unverified.'
+					: undefined,
 			vision: detail.vision_supported === true || detail.features?.image_input === true,
 			inputRate: rates[0] * 1_000_000,
 			outputRate: rates[1] * 1_000_000,
 			requestRate: rates[2],
 			imageRate: rates[3],
-			maxInputTokens: Math.min(80_000, detail.context_length - OUTPUT_TOKENS)
+			maxInputTokens: Math.min(80_000, Math.min(detail.context_length, planContext) - OUTPUT_TOKENS)
 		};
 	} catch {
 		return {
@@ -200,7 +229,8 @@ export async function listDrawingProviders(env, fetcher = fetch) {
 				model: p.model,
 				vision: p.vision,
 				configured: p.configured,
-				reason: p.reason
+				reason: p.reason,
+				notice: p.notice
 			};
 		})
 	);
