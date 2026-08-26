@@ -31,9 +31,9 @@
 				},
 				{
 					id: 'calendar',
-					name: 'swyxcal',
+					name: 'Cal',
 					description: 'Team scheduling. Bookings paused.',
-					href: 'https://cal.swyx.io/app',
+					href: '/tools/cal',
 					reload: true,
 					badge: 'Invited team'
 				}

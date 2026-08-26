@@ -67,16 +67,24 @@ test('guest has workspace and independently authorized team links, honest disclo
 	);
 	await expect(page.getByRole('region', { name: 'Your AI usage' })).toHaveCount(0);
 	await expect(cabinet.getByRole('link', { name: /^Tool logs/ })).toHaveCount(0);
-	await expect(cabinet.getByRole('link', { name: /^swyxcal/ })).toHaveAttribute(
-		'href',
-		'https://cal.swyx.io/app'
-	);
+	await expect(cabinet.getByRole('link', { name: /^Cal / })).toHaveAttribute('href', '/tools/cal');
 	await expect(cabinet.getByRole('link', { name: /^Cap / })).toHaveAttribute(
 		'data-sveltekit-reload',
 		'true'
 	);
 	await cabinet.getByRole('link', { name: /^Big text box/ }).click();
 	await expect(page.getByRole('textbox', { name: 'Write anything' })).toBeVisible();
+});
+
+test('Cal shortcut leads through the tools namespace without an owner-only gate', async ({
+	page
+}) => {
+	const shortcut = await page.request.get('/cal?from=bookmark', { maxRedirects: 0 });
+	expect(shortcut.status()).toBe(308);
+	expect(shortcut.headers().location).toBe('/tools/cal?from=bookmark');
+	const tool = await page.request.get('/tools/cal?from=bookmark', { maxRedirects: 0 });
+	expect(tool.status()).toBe(302);
+	expect(tool.headers().location).toBe('https://cal.swyx.io/app?from=bookmark');
 });
 
 test('public calendar disclosures distinguish Tools login and preserve existing privacy details', async ({
