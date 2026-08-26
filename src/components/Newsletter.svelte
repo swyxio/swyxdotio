@@ -1,4 +1,4 @@
-<section class="plain-section site-card w-full" id="newsletter">
+<section class="plain-section site-card newsletter-card w-full" id="newsletter">
 	<h3 class="mb-2 text-xl font-bold">Subscribe to the newsletter</h3>
 	<p class="mb-3">
 		Join &gt;10,000 subscribers getting occasional updates on new posts and projects.
@@ -27,3 +27,22 @@
 		<a href="https://dx.tips/">DevRel/DevTools newsletter</a>.
 	</p>
 </section>
+
+<style>
+	.newsletter-card {
+		border-left: 3px solid var(--page-gold);
+		background: var(--page-surface);
+	}
+
+	.newsletter-card h3 {
+		font-size: 1.55rem;
+		font-weight: 600;
+	}
+
+	.newsletter-card form :global(button) {
+		border-color: var(--page-accent);
+		background: var(--page-accent);
+		color: var(--page-surface);
+		text-decoration: none;
+	}
+</style>

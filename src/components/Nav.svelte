@@ -50,27 +50,35 @@
 	<div class="nav-bar">
 		<a class="brand-link no-underline" href="/">swyx.io</a>
 
-		<div class="nav-links">
-			{#each navItems as item}
-				<a class:active={isActive(item.href)} href={item.href}>{item.label}</a>
-			{/each}
-			<a href="/rss.xml" data-sveltekit-reload>rss</a>
-			<button class="theme-button" aria-label="Toggle Dark Mode" on:click={toggleDarkMode}>
-				{isDark ? 'light' : 'dark'}
+		<div class="nav-actions">
+			<div class="nav-links">
+				{#each navItems as item}
+					<a class:active={isActive(item.href)} href={item.href}>{item.label}</a>
+				{/each}
+				<a href="/rss.xml" data-sveltekit-reload>rss</a>
+			</div>
+			<button
+				class="theme-button nav-theme"
+				aria-label="Toggle Dark Mode"
+				aria-pressed={isDark}
+				on:click={toggleDarkMode}
+			>
+				<span aria-hidden="true">{isDark ? '☼' : '☾'}</span>
+				<span class="theme-label">{isDark ? 'light' : 'dark'}</span>
+			</button>
+
+			<button
+				class="menu-button"
+				type="button"
+				aria-label="Open navigation menu"
+				aria-expanded={isMenuOpen}
+				aria-controls="mobile-navigation"
+				on:click={() => (isMenuOpen = true)}
+			>
+				<span aria-hidden="true"></span>
+				Menu
 			</button>
 		</div>
-
-		<button
-			class="menu-button"
-			type="button"
-			aria-label="Open navigation menu"
-			aria-expanded={isMenuOpen}
-			aria-controls="mobile-navigation"
-			on:click={() => (isMenuOpen = true)}
-		>
-			<span aria-hidden="true"></span>
-			Menu
-		</button>
 	</div>
 </nav>
 
@@ -140,10 +148,17 @@
 	}
 
 	.brand-link {
-		color: var(--page-accent);
-		font-size: 1.05rem;
-		font-weight: 800;
+		color: var(--page-ink);
+		font-family: var(--font-display);
+		font-size: 1.34rem;
+		font-weight: 600;
 		letter-spacing: -0.02em;
+	}
+
+	.nav-actions {
+		display: flex;
+		align-items: center;
+		gap: 0.45rem;
 	}
 
 	.nav-links {
@@ -180,6 +195,15 @@
 		background: transparent;
 		font: inherit;
 		cursor: pointer;
+	}
+
+	.nav-theme {
+		display: inline-flex;
+		min-height: 2.2rem;
+		align-items: center;
+		gap: 0.35rem;
+		border-color: var(--page-border);
+		color: var(--page-gold);
 	}
 
 	.menu-button {
@@ -319,12 +343,17 @@
 		font-size: 1rem;
 		font-weight: 750;
 		text-transform: capitalize;
+		white-space: nowrap;
 	}
 
 	.drawer-section small {
+		max-width: 8.8rem;
+		overflow: hidden;
 		color: var(--page-muted);
 		font-family: var(--font-mono);
 		font-size: 0.72rem;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 	.drawer-footer {
@@ -351,13 +380,23 @@
 		}
 	}
 
-	@media (max-width: 640px) {
+	@media (max-width: 780px) {
 		nav {
 			padding-block: 0.65rem;
 		}
 
 		.nav-links {
 			display: none;
+		}
+
+		.theme-label {
+			display: none;
+		}
+
+		.nav-theme {
+			min-width: 2.2rem;
+			justify-content: center;
+			font-size: 1.1rem;
 		}
 
 		.menu-button,

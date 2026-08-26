@@ -38,7 +38,7 @@
 </main>
 
 {#if !immersiveTool}
-	<footer class="site-shell site-panel mb-8 mt-8 p-4">
+	<footer class="site-shell site-panel literary-footer mb-8 mt-8 p-4">
 		<p class="plain-muted text-sm">
 			<a href="/">Home</a> · <a href="/about">About</a> · <a href="/podcasts">Podcasts</a> ·
 			<a href="/subscribe">Newsletter</a> ·
@@ -56,6 +56,7 @@
 				{/key}
 			{/if}
 		</p>
+		<p class="clacks-tribute"><span aria-hidden="true">✶</span> GNU Terry Pratchett</p>
 	</footer>
 {/if}
 
@@ -65,3 +66,22 @@
 		<SelectionShare />
 	{/key}
 {/if}
+
+<style>
+	.literary-footer {
+		position: relative;
+		border-top: 2px solid var(--page-gold);
+	}
+
+	.clacks-tribute {
+		margin: 0.9rem 0 0;
+		color: var(--page-gold);
+		font-family: var(--font-mono);
+		font-size: 0.72rem;
+		letter-spacing: 0.04em;
+	}
+
+	.clacks-tribute span {
+		margin-right: 0.35rem;
+	}
+</style>

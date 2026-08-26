@@ -2,23 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+	font-family: 'Newsreader';
+	src: url('./lib/og/assets/fonts/Newsreader-Semibold-static.ttf') format('truetype');
+	font-style: normal;
+	font-weight: 600;
+	font-display: swap;
+}
+
 :root {
-	/* Match the reference site's deliberately simple, system-native typesetting. */
 	--font-body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+	--font-display: 'Newsreader', Georgia, 'Times New Roman', serif;
 	--font-mono:
 		ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
-	--page-bg: #f3f4f6;
-	--page-surface: #f9fafb;
-	--page-section-bg: #f0f1f3;
-	--page-row-hover: #f1f2f4;
-	--page-text: #1f2937;
-	--page-muted: #6b7280;
-	--page-link: #2563eb;
-	--page-border: #e5e7eb;
-	--page-accent: #c0392b;
-	--page-accent-soft: #fae7e5;
+	--page-bg: #f5f0e7;
+	--page-surface: #fbf8f2;
+	--page-section-bg: #f0e9dc;
+	--page-row-hover: #f3ecdf;
+	--page-text: #292a24;
+	--page-muted: #6c675d;
+	--page-link: #974337;
+	--page-border: #ddd2c1;
+	--page-accent: #9e4235;
+	--page-accent-soft: #f3e5dc;
+	--page-gold: #907041;
+	--page-paper: #f4eee3;
+	--page-ink: #333a31;
 	--site-gutter: 1.25rem;
-	--site-max-width: 900px;
+	--site-max-width: 1040px;
 	font-family: var(--font-body);
 	font-size: 16px;
 	line-height: 1.55;
@@ -27,16 +38,19 @@
 }
 
 .dark {
-	--page-bg: #090909;
-	--page-surface: #101011;
-	--page-section-bg: #17181a;
-	--page-row-hover: #15161a;
-	--page-text: #e8e8e8;
-	--page-muted: #aaaaaa;
-	--page-link: #8bc5ff;
-	--page-border: #26282d;
-	--page-accent: #ff6b5e;
-	--page-accent-soft: #3c201e;
+	--page-bg: #111523;
+	--page-surface: #171b2a;
+	--page-section-bg: #1d2131;
+	--page-row-hover: #222534;
+	--page-text: #f0e8d9;
+	--page-muted: #c0b6a5;
+	--page-link: #e7c985;
+	--page-border: #383747;
+	--page-accent: #dfbd78;
+	--page-accent-soft: #342d2b;
+	--page-gold: #e5c684;
+	--page-paper: #21222d;
+	--page-ink: #f0e8d9;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -159,19 +173,19 @@ a:hover {
 }
 
 .site-nav-shell {
-	--site-max-width: 100rem;
+	--site-max-width: 1160px;
 }
 
 .site-panel {
 	border: 1px solid var(--page-border);
-	border-radius: 0.45rem;
+	border-radius: 0.6rem;
 	background: var(--page-surface);
-	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.03);
+	box-shadow: 0 1px 2px color-mix(in srgb, var(--page-ink) 5%, transparent);
 }
 
 .site-card {
 	border: 1px solid var(--page-border);
-	border-radius: 0.45rem;
+	border-radius: 0.65rem;
 	background: var(--page-surface);
 	padding: clamp(1rem, 2vw, 1.5rem);
 }
@@ -475,8 +489,14 @@ article.prose code {
 	--tw-prose-invert-pre-bg: rgba(127, 127, 127, 0.18);
 }
 .site-main h1 {
+	font-family: var(--font-display);
+	font-weight: 600;
 	font-size: clamp(1.8rem, 1.2rem + 3vw, 2.8rem);
 	line-height: 1.15;
+}
+.site-main h2,
+.site-main h3 {
+	font-family: var(--font-display);
 }
 article.prose h1 a,
 h2 a,
