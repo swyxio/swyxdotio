@@ -68,6 +68,13 @@
 		<p class="plain-muted">
 			Your drawings sync to your Google account’s workspace. Other accounts have their own.
 		</p>
+		<details class="account-identity">
+			<summary>Account identity</summary>
+			<p>Google account ID: <code>{data.user.id}</code></p>
+			<p>
+				{data.user.isOwner ? 'Site owner' : 'Personal account'} · permissions are checked on the server.
+			</p>
+		</details>
 		{#if data.next !== '/tools'}<a class="plain-button continue" href={data.next}
 				>Continue to your tool →</a
 			>{/if}
@@ -197,6 +204,14 @@
 		font-size: 0.875rem;
 		color: var(--page-muted);
 		overflow-wrap: anywhere;
+	}
+	.account-identity {
+		font-size: 0.8rem;
+		overflow-wrap: anywhere;
+		color: var(--page-muted);
+	}
+	.account-identity summary {
+		cursor: pointer;
 	}
 	.google-signin {
 		display: inline-flex;
