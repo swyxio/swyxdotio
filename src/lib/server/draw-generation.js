@@ -6,14 +6,21 @@ import {
 	DEFAULT_DRAW_GENERATION_MODEL,
 	DRAW_GENERATION_MODELS,
 	MAX_DRAW_GENERATION_REQUEST_BYTES,
+	MAX_DRAW_GENERATION_PROMPT_LENGTH,
+	getDrawGenerationReferenceLimit,
 	estimateDrawGenerationModelCost,
 	getDrawGenerationModel,
 	resolveDrawGenerationModelSettings
 } from '../draw-generation-models.js';
 import { chargeDrawingAgentBudget } from './draw-agent-budget.js';
 import { DrawingGenerationError, getDrawingGenerationAdapter } from './draw-generation-provider.js';
+import {
+	generationLogMetadata,
+	generationLogError,
+	observeGeneration
+} from './tools-generation-observation.js';
+import { readCreativeBody } from '../../../workers/draw/creative-library.js';
 
-const MAX_PROMPT_LENGTH = 1_000;
 const IMAGE_MIME_TYPE = /^image\/(?:png|jpeg|webp|avif|gif)$/;
 const REQUEST_ID = /^[A-Za-z0-9_-]{1,128}$/;
 
@@ -110,8 +117,16 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 	/** @type {FormData} */
 	let form;
 	try {
-		form = await event.request.formData();
-	} catch {
+		const bytes = await readCreativeBody(event.request, MAX_DRAW_GENERATION_REQUEST_BYTES);
+		form = await new Response(bytes, {
+			headers: { 'Content-Type': event.request.headers.get('content-type') ?? '' }
+		}).formData();
+	} catch (error) {
+		if (error instanceof Error && 'status' in error && error.status === 413)
+			return privateJson(
+				{ error: 'The combined reference upload exceeds 12 MB.' },
+				{ status: 413 }
+			);
 		return privateJson({ error: 'The image-editing request is invalid.' }, { status: 400 });
 	}
 	const fields = [...form.keys()];
@@ -130,15 +145,16 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 					'clientJobId'
 				].includes(field)
 		) ||
-		new Set(fields).size !== fields.length
+		new Set(fields.filter((field) => field !== 'image')).size !==
+			fields.filter((field) => field !== 'image').length
 	) {
 		return privateJson({ error: 'The image-editing request is invalid.' }, { status: 400 });
 	}
 	const promptInput = form.get('prompt');
-	const prompt = typeof promptInput === 'string' ? promptInput.trim() : '';
-	if (!prompt || prompt.length > MAX_PROMPT_LENGTH) {
+	const prompt = typeof promptInput === 'string' ? promptInput : '';
+	if (!prompt.trim() || prompt.length > MAX_DRAW_GENERATION_PROMPT_LENGTH) {
 		return privateJson(
-			{ error: 'Enter editing instructions under 1,000 characters.' },
+			{ error: 'Enter editing instructions of at most 32,000 characters.' },
 			{ status: 422 }
 		);
 	}
@@ -157,6 +173,30 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 			{ status: 422 }
 		);
 	}
+	const imageParts = form.getAll('image');
+	const referenceLimit = getDrawGenerationReferenceLimit(model);
+	if (imageParts.length > referenceLimit || (referenceLimit > 0 && imageParts.length === 0))
+		return privateJson(
+			{
+				error:
+					referenceLimit === 0
+						? 'Text-to-image generation does not accept an image upload.'
+						: `Attach one to ${referenceLimit} reference images for this model.`
+			},
+			{ status: 422 }
+		);
+	if (
+		imageParts.some(
+			(image) => !(image instanceof Blob) || !IMAGE_MIME_TYPE.test(image.type) || image.size === 0
+		)
+	)
+		return privateJson(
+			{ error: 'Select valid PNG, JPEG, WebP, AVIF, or GIF images.' },
+			{ status: 422 }
+		);
+	const images = /** @type {Blob[]} */ (imageParts);
+	if (images.reduce((size, image) => size + image.size, 0) > MAX_DRAW_GENERATION_REQUEST_BYTES)
+		return privateJson({ error: 'The combined reference upload exceeds 12 MB.' }, { status: 413 });
 	const adapter = getDrawingGenerationAdapter(model);
 	const context = { env: event.platform?.env ?? {}, fetcher: fetchProvider };
 	if (!adapter.configured(context.env))
@@ -218,30 +258,6 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 			);
 		}
 	}
-	const image = form.get('image');
-	if (model.kind === 'text-to-image') {
-		if (image !== null) {
-			return privateJson(
-				{ error: 'Text-to-image generation does not accept an image upload.' },
-				{ status: 422 }
-			);
-		}
-	} else {
-		if (
-			typeof image === 'string' ||
-			!image ||
-			!IMAGE_MIME_TYPE.test(image.type) ||
-			image.size === 0
-		) {
-			return privateJson(
-				{ error: 'Select a valid PNG, JPEG, WebP, AVIF, or GIF image.' },
-				{ status: 422 }
-			);
-		}
-		if (image.size > MAX_DRAW_GENERATION_REQUEST_BYTES) {
-			return privateJson({ error: 'The selected image is too large to edit.' }, { status: 413 });
-		}
-	}
 
 	const reservation = await reserveToolsAiUsage(
 		event,
@@ -249,16 +265,17 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 		'media',
 		model.id,
 		estimateToolsMediaReservation(estimateDrawGenerationModelCost(model, modelSettings)),
-		run
+		run,
+		generationLogMetadata(model, modelSettings, images.length)
 	);
 	if (reservation instanceof Response) return reservation;
 	let submitted;
 	try {
-		submitted = await adapter.submit(
-			{ model, prompt, settings: modelSettings, image: image instanceof Blob ? image : undefined },
-			context
-		);
+		submitted = await adapter.submit({ model, prompt, settings: modelSettings, images }, context);
 	} catch (error) {
+		await observeGeneration(event, user.id, reservation.id, {
+			errorCode: generationLogError(error, 'submission_uncertain')
+		});
 		await finishToolsAiUsage(event, user.id, reservation.id, 'failed');
 		return generationError(error, 'Generation could not be started.');
 	}
@@ -270,7 +287,13 @@ export async function editDrawingImage(event, fetchProvider = fetch) {
 		adapter: model.adapter
 	});
 	if (!registered.ok) {
-		await adapter.cancel({ model, requestId: submitted.requestId }, context).catch(() => {});
+		await observeGeneration(event, user.id, reservation.id, { errorCode: 'registration_failed' });
+		await adapter
+			.cancel({ model, requestId: submitted.requestId }, context)
+			.then((cancelled) =>
+				observeGeneration(event, user.id, reservation.id, { cancellation: cancelled.cancellation })
+			)
+			.catch(() => {});
 		return privateJson(
 			{
 				code: 'job_registration_failed',
@@ -338,6 +361,10 @@ export async function pollDrawingImage(event, fetchProvider = fetch) {
 		);
 	try {
 		const progress = await adapter.status({ model: boundModel, requestId }, context);
+		await observeGeneration(event, user.id, job.id, {
+			status: progress.status,
+			...(progress.status === 'FAILED' ? { errorCode: 'generation_failed' } : {})
+		});
 		if (['COMPLETED', 'FAILED', 'CANCELLED'].includes(progress.status)) {
 			const recorded = await finishToolsAiUsage(
 				event,
@@ -358,6 +385,9 @@ export async function pollDrawingImage(event, fetchProvider = fetch) {
 			);
 		return privateJson(progress);
 	} catch (error) {
+		await observeGeneration(event, user.id, job.id, {
+			errorCode: generationLogError(error, 'progress_unavailable')
+		});
 		return generationError(error, 'Generation progress is temporarily unavailable.');
 	}
 }
@@ -405,12 +435,19 @@ export async function cancelDrawingImage(event, fetchProvider = fetch) {
 		);
 	try {
 		const cancelled = await adapter.cancel({ model: boundModel, requestId }, context);
+		await observeGeneration(event, user.id, job.id, {
+			cancellation: cancelled.cancellation,
+			...(cancelled.cancellation === 'confirmed' ? { status: 'CANCELLED' } : {})
+		});
 		if (cancelled.cancellation === 'confirmed') {
 			const recorded = await finishToolsAiUsage(event, user.id, job.id, 'cancelled');
 			if (!recorded.ok) return recorded;
 		}
 		return privateJson(cancelled);
 	} catch (error) {
+		await observeGeneration(event, user.id, job.id, {
+			errorCode: generationLogError(error, 'cancellation_unavailable')
+		});
 		return generationError(
 			error,
 			'The queued generation could not be cancelled. It may still complete and be charged.'

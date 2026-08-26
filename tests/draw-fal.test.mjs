@@ -145,7 +145,7 @@ test('binary uploads authenticate privately, submit fal queue jobs, and keep cre
 	assert.equal(init?.method, 'POST');
 	assert.equal(new Headers(init?.headers).get('Authorization'), `Key ${FAL_KEY}`);
 	assert.deepEqual(JSON.parse(/** @type {string} */ (init?.body)), {
-		prompt: 'Improve the lighting',
+		prompt: '  Improve the lighting  ',
 		image_urls: [SOURCE_IMAGE],
 		sync_mode: true,
 		num_images: 1,
@@ -767,7 +767,7 @@ test('the drawing editor fails closed when its Worker secret is absent', async (
 test('multipart uploads reject invalid content, prompts, model names, and the 12 MB ceiling', async () => {
 	const image = new File(['source'], 'source.png', { type: 'image/png' });
 	const duplicate = createForm({ image, prompt: 'Edit' });
-	duplicate.append('image', image);
+	duplicate.append('prompt', 'Duplicate prompt');
 	const cases = [
 		[{ body: '{}', contentType: 'application/json' }, 415],
 		[{ contentLength: String(MAX_DRAW_FAL_REQUEST_BYTES + 1) }, 413],
@@ -775,7 +775,7 @@ test('multipart uploads reject invalid content, prompts, model names, and the 12
 		[{ form: duplicate }, 400],
 		[{ form: createForm({ image, prompt: 'Edit', extra: 'nope' }) }, 400],
 		[{ form: createForm({ image, prompt: ' ' }) }, 422],
-		[{ form: createForm({ image, prompt: 'a'.repeat(1_001) }) }, 422],
+		[{ form: createForm({ image, prompt: 'a'.repeat(32_001) }) }, 422],
 		[{ form: createForm({ image: 'not-a-file', prompt: 'Edit' }) }, 422],
 		[
 			{
@@ -1193,4 +1193,250 @@ test('accepted cancellation remains a request, with no false refund or terminal 
 	assert.deepEqual(await progress.json(), { status: 'CANCELLED' });
 	const summary = await ledgerRequest(ledger, 'summary', { userId: 'owner-google-sub' });
 	assert.equal((await summary.json()).usage.estimatedReservedTodayUsd, 0.05);
+});
+
+test('generation API lifecycle reaches logs once with server-selected metadata and canonical run/job IDs', async (context) => {
+	let now = Date.now();
+	context.mock.method(Date, 'now', () => now);
+	const started = now;
+	const ledger = createTestAiLedger();
+	const form = createForm({
+		image: new File(['source'], 'PRIVATE-FILENAME.png', { type: 'image/png' }),
+		prompt: 'PRIVATE-PROMPT',
+		runId: 'experiment-burst',
+		clientJobId: 'candidate-1'
+	});
+	const submitted = await editDrawingImage(await createEvent({ ledger, form }), async () =>
+		providerResponse({ request_id: REQUEST_ID }, 202)
+	);
+	assert.equal(submitted.status, 202);
+	const query = `?requestId=${REQUEST_ID}&model=${DEFAULT_DRAW_FAL_MODEL.id}`;
+	const progress = () => createEvent({ ledger, seedJob: false, method: 'GET', query });
+	now += 2000;
+	assert.equal(
+		(
+			await pollDrawingImage(await progress(), async () =>
+				providerResponse({ status: 'IN_PROGRESS', logs: [{ message: 'PRIVATE-PROVIDER-LOG' }] })
+			)
+		).status,
+		200
+	);
+	now += 1000;
+	await cancelDrawingImage(
+		await createEvent({ ledger, seedJob: false, method: 'DELETE', query }),
+		async () => new Response(null, { status: 202 })
+	);
+	now += 2000;
+	let calls = 0;
+	const completed = await pollDrawingImage(await progress(), async () =>
+		providerResponse(calls++ === 0 ? { status: 'COMPLETED' } : { images: [{ url: EDITED_IMAGE }] })
+	);
+	assert.equal(completed.status, 200);
+	const readLogs = async () =>
+		(
+			await ledgerRequest(ledger, 'activity-logs', { userId: 'owner-google-sub', filters: {} })
+		).json();
+	const result = await readLogs();
+	assert.equal(result.summary.aiRequests, 1);
+	assert.equal(result.entries.length, 1);
+	const generation = result.entries[0].generation;
+	assert.equal(generation.runId, 'experiment-burst');
+	assert.equal(generation.clientJobId, 'candidate-1');
+	assert.equal(generation.providerRequestId, REQUEST_ID);
+	assert.equal(generation.adapter, 'fal');
+	assert.equal(generation.modelMaker, DEFAULT_DRAW_FAL_MODEL.provider);
+	assert.equal(generation.modality, 'image-edit');
+	assert.equal(generation.referenceCount, 1);
+	assert.equal(generation.requestedOutputs, 1);
+	assert.equal(generation.providerStatus, 'COMPLETED');
+	assert.equal(generation.cancellation, 'requested');
+	assert.equal(generation.observedElapsedMs, 5000);
+	assert.equal(generation.finishedObservedAt, new Date(started + 5000).toISOString());
+	assert.doesNotMatch(
+		JSON.stringify(result),
+		/PRIVATE|source.png|test-only-provider-secret|data:image/
+	);
+	now += 2000;
+	calls = 0;
+	await pollDrawingImage(await progress(), async () =>
+		providerResponse(calls++ === 0 ? { status: 'COMPLETED' } : { images: [{ url: EDITED_IMAGE }] })
+	);
+	const again = await readLogs();
+	assert.equal(again.summary.aiRequests, 1);
+	assert.equal(again.entries[0].generation.finishedObservedAt, generation.finishedObservedAt);
+});
+
+test('uncertain submit and best-effort observation failure never leak provider text or break delivery', async (context) => {
+	const ledger = createTestAiLedger();
+	const failed = await editDrawingImage(await createEvent({ ledger }), async () => {
+		throw new Error('PRIVATE upstream error');
+	});
+	assert.equal(failed.status, 502);
+	let result = await (
+		await ledgerRequest(ledger, 'activity-logs', { userId: 'owner-google-sub', filters: {} })
+	).json();
+	assert.equal(result.entries[0].generation.errorCode, 'submission_uncertain');
+	assert.equal(result.entries[0].generation.providerStatus, null);
+	assert.equal(result.entries[0].status, 'failed');
+	assert.doesNotMatch(JSON.stringify(result), /PRIVATE/);
+	const warnings = [];
+	context.mock.method(console, 'warn', (value) => warnings.push(value));
+	const isolated = createTestAiLedger();
+	const original = isolated.namespace.get;
+	isolated.namespace.get = (name) => {
+		const stub = original(name);
+		return {
+			fetch: (request) =>
+				new URL(request.url).pathname === '/ai/generation-observe'
+					? Response.json({ error: 'unavailable' }, { status: 503 })
+					: stub.fetch(request)
+		};
+	};
+	const submitted = await editDrawingImage(await createEvent({ ledger: isolated }), async () =>
+		providerResponse({ request_id: REQUEST_ID }, 202)
+	);
+	assert.equal(submitted.status, 202);
+	let calls = 0;
+	const completed = await pollDrawingImage(
+		await createEvent({
+			ledger: isolated,
+			seedJob: false,
+			method: 'GET',
+			query: `?requestId=${REQUEST_ID}&model=${DEFAULT_DRAW_FAL_MODEL.id}`
+		}),
+		async () =>
+			providerResponse(
+				calls++ === 0 ? { status: 'COMPLETED' } : { images: [{ url: EDITED_IMAGE }] }
+			)
+	);
+	assert.equal(completed.status, 200);
+	assert.equal((await completed.json()).image, EDITED_IMAGE);
+	assert.ok(warnings.length > 0);
+	for (const warning of warnings)
+		assert.deepEqual(JSON.parse(warning), {
+			event: 'generation_observation_unavailable',
+			count: 1
+		});
+});
+
+test('ordered multi-image references and a 32k prompt reach GPT Image 2 without clipping or role reordering', async () => {
+	const form = createForm({
+		prompt: 'p'.repeat(32_000),
+		model: 'gpt-image-2',
+		settings: JSON.stringify({ image_size: { width: 1280, height: 720 } })
+	});
+	for (let index = 0; index < 16; index++)
+		form.append('image', new File([`reference-${index}`], `${index}.png`, { type: 'image/png' }));
+	const ledger = createTestAiLedger();
+	let payload;
+	const response = await editDrawingImage(
+		await createEvent({ form, ledger, owner: false }),
+		async (_url, init) => {
+			payload = JSON.parse(init.body);
+			return providerResponse({ request_id: REQUEST_ID }, 202);
+		}
+	);
+	assert.equal(response.status, 202);
+	assert.equal(payload.prompt, 'p'.repeat(32_000));
+	assert.deepEqual(payload.image_size, { width: 1280, height: 720 });
+	assert.deepEqual(
+		payload.image_urls.map((value) => Buffer.from(value.split(',')[1], 'base64').toString()),
+		Array.from({ length: 16 }, (_, index) => `reference-${index}`)
+	);
+	assert.equal(ledger.calls.filter((call) => call.path === '/ai/admit').length, 1);
+	const metadata = ledger.calls.find((call) => call.path === '/ai/admit').body.generation;
+	assert.equal(metadata.referenceCount, 16);
+	assert.equal(metadata.width, 1280);
+	assert.equal(metadata.height, 720);
+	assert.equal(JSON.stringify(ledger.calls).includes('reference-15'), false);
+});
+
+test('unsupported reference counts and 32k prompt overflow are rejected before any quota or provider admission', async () => {
+	for (const [model, count, prompt] of [
+		['gpt-image-2', 17, 'Edit'],
+		['gpt-image-2', 0, 'Edit'],
+		['nano-banana-2', 15, 'Edit'],
+		['reve-2-1', 2, 'Edit'],
+		['veo-3-1-video', 2, 'Edit'],
+		['flux-klein-9b-generate', 1, 'Edit'],
+		['gpt-image-2', 1, 'p'.repeat(32_001)]
+	]) {
+		const form = createForm({ model, prompt });
+		for (let index = 0; index < count; index++)
+			form.append('image', new File(['source'], `${index}.png`, { type: 'image/png' }));
+		const ledger = createTestAiLedger();
+		const response = await editDrawingImage(
+			await createEvent({ form, ledger, owner: false }),
+			async () => assert.fail('Invalid reference count reached provider')
+		);
+		assert.equal(response.status, 422, `${model}: ${count}`);
+		assert.deepEqual(ledger.calls, []);
+	}
+});
+
+test('aggregate multipart body limit is enforced on streamed requests with absent or dishonest Content-Length', async () => {
+	for (const contentLength of [undefined, '1']) {
+		const form = createForm({ prompt: 'Edit', model: 'gpt-image-2' });
+		for (let index = 0; index < 2; index++)
+			form.append(
+				'image',
+				new File([new Uint8Array(6_000_000)], `${index}.png`, { type: 'image/png' })
+			);
+		const ledger = createTestAiLedger();
+		const event = await createEvent({ form, ledger, contentLength, owner: false });
+		assert.equal(event.request.headers.get('content-length'), contentLength ?? null);
+		const response = await editDrawingImage(event, async () =>
+			assert.fail('Oversized body reached provider')
+		);
+		assert.equal(response.status, 413);
+		assert.deepEqual(ledger.calls, []);
+	}
+});
+
+test('array-input endpoints retain ordered references while scalar image and video endpoints retain their single-image fields', async () => {
+	for (const [model, key, count] of [
+		['hidream-o1', 'reference_image_urls', 2],
+		['qwen-image-edit-2511', 'image_urls', 2],
+		['reve-2-1', 'image_url', 1],
+		['veo-3-1-video', 'image_url', 1]
+	]) {
+		const form = createForm({ model, prompt: 'Use the attached references' });
+		for (let index = 0; index < count; index++)
+			form.append('image', new File([`image-${index}`], `${index}.png`, { type: 'image/png' }));
+		let payload;
+		const result = await editDrawingImage(await createEvent({ form }), async (_url, init) => {
+			payload = JSON.parse(init.body);
+			return providerResponse({ request_id: REQUEST_ID }, 202);
+		});
+		assert.equal(result.status, 202, model);
+		const values = Array.from(
+			{ length: count },
+			(_, index) => `data:image/png;base64,${Buffer.from(`image-${index}`).toString('base64')}`
+		);
+		assert.deepEqual(payload[key], key === 'image_url' ? values[0] : values, model);
+	}
+});
+
+test('GPT custom output size is bounded and cannot smuggle nested settings or apply to other models', () => {
+	const model = getDrawFalModel('gpt-image-2');
+	assert.deepEqual(
+		resolveDrawFalModelSettings(model, { image_size: { width: 1280, height: 720 } }).image_size,
+		{ width: 1280, height: 720 }
+	);
+	assert.deepEqual(getDrawFalModelOverrides(model, { image_size: { width: 1280, height: 720 } }), {
+		image_size: { width: 1280, height: 720 }
+	});
+	for (const value of [
+		{ width: 1281, height: 720 },
+		{ width: 1280, height: 0 },
+		{ width: 4096, height: 4096 },
+		{ width: 1280, height: 720, image_url: 'https://private.example' },
+		{ width: '1280', height: 720 }
+	])
+		assert.throws(() => resolveDrawFalModelSettings(model, { image_size: value }));
+	assert.throws(() =>
+		resolveDrawFalModelSettings(getDrawFalModel('seedream-5-pro'), {
+			image_size: { width: 1280, height: 720 }
+		})
+	);
 });

@@ -82,3 +82,44 @@ test('binary upload budgets count raw image bytes, UTF-8 fields, and multipart h
 		estimateDrawingGenerationUploadBytes({ ...request, prompt: 'a'.repeat(1000) }) > 2_009_000
 	);
 });
+
+test('reference preparation obeys its allocated share of a multi-image upload instead of the full request ceiling', async (t) => {
+	const { prepareDrawingGenerationImage } = await import('../src/lib/draw-generation-image.js');
+	const originalBitmap = globalThis.createImageBitmap;
+	const originalCanvas = globalThis.OffscreenCanvas;
+	let closed = false;
+	globalThis.createImageBitmap = async () => ({
+		width: 640,
+		height: 360,
+		close() {
+			closed = true;
+		}
+	});
+	globalThis.OffscreenCanvas = class {
+		getContext() {
+			return { drawImage() {} };
+		}
+		async convertToBlob() {
+			return new Blob([new Uint8Array(1000)], { type: 'image/webp' });
+		}
+	};
+	t.after(() => {
+		globalThis.createImageBitmap = originalBitmap;
+		globalThis.OffscreenCanvas = originalCanvas;
+	});
+	const prepared = await prepareDrawingGenerationImage({
+		dataURL: `data:image/webp;base64,${'a'.repeat(30_000)}`,
+		prompt: 'Keep this subject',
+		model: DRAW_FAL_MODELS[0],
+		maxUploadBytes: 15_000
+	});
+	assert.equal(
+		prepared.optimized,
+		true,
+		'the original fits12MB but not its allocated reference budget'
+	);
+	assert.equal(prepared.blob.size, 1000);
+	assert.equal(prepared.originalWidth, 640);
+	assert.equal(prepared.originalHeight, 360);
+	assert.equal(closed, true);
+});

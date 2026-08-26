@@ -1,3 +1,4 @@
+import { logEstimateMoney } from '../src/lib/tools-logs-view.js';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
@@ -5,7 +6,9 @@ import {
 	logQuery,
 	logMoney,
 	logStatus,
-	mergeLogEntries
+	mergeLogEntries,
+	logDuration,
+	logRunFilters
 } from '../src/lib/tools-logs-view.js';
 import { TOOLS_LOG_FILTER_DEFAULTS } from '../src/lib/tools-activity.js';
 import { recordToolActivity } from '../src/lib/tools-activity-client.js';
@@ -38,12 +41,18 @@ test('analytics filters round-trip as minimal bookmarks without private identity
 		account: 'google_123',
 		q: 'request-42',
 		day: '2026-08-26',
-		opens: 'hide'
+		opens: 'hide',
+		adapter: 'fal',
+		modality: 'image-to-video',
+		run: 'generation-run-42'
 	});
 	const filters = logFilters(query);
 	assert.deepEqual(logFilters(logQuery(filters)), filters);
 	assert.equal(filters.account, 'google_123');
 	assert.equal(filters.model, 'fal-ai/test');
+	assert.equal(filters.adapter, 'fal');
+	assert.equal(filters.modality, 'image-to-video');
+	assert.equal(filters.run, 'generation-run-42');
 	assert.equal(logQuery({ ...TOOLS_LOG_FILTER_DEFAULTS }).toString(), '');
 	assert.equal(
 		logQuery({ ...filters, before: 'cursor', snapshot: '2026-08-26T00:00:00.000Z' }).has(
@@ -65,7 +74,10 @@ test('invalid, duplicate, and private URL filters are discarded independently', 
 			q: 'x'.repeat(101),
 			action: 'read.private',
 			account: 'someone@example.com',
-			snapshot: 'not-a-bookmark'
+			snapshot: 'not-a-bookmark',
+			adapter: 'not/a/provider',
+			modality: 'private-content',
+			run: 'x'.repeat(129)
 		})
 	);
 	assert.deepEqual(filters, { ...TOOLS_LOG_FILTER_DEFAULTS, kind: 'ai' });
@@ -130,4 +142,48 @@ test('blocked activity reports failure without retrying or interrupting the loca
 		),
 		false
 	);
+});
+
+test('generation timing preserves unavailable observations and recorded zero distinctly', () => {
+	assert.equal(logDuration(null), 'Unavailable');
+	assert.equal(logDuration(undefined), 'Unavailable');
+	assert.equal(logDuration(-1), 'Unavailable');
+	assert.equal(logDuration(NaN), 'Unavailable');
+	assert.equal(logDuration(0), '0 ms');
+	assert.equal(logDuration(6150), '6.2 s');
+	assert.equal(logDuration(125000), '2m 5s');
+});
+
+test('run drilldown preserves period and account identity while clearing partial-job filters', () => {
+	const filters = {
+		...TOOLS_LOG_FILTER_DEFAULTS,
+		days: '30',
+		scope: 'all',
+		account: 'wrong-account',
+		status: 'failed',
+		model: 'old-model',
+		q: 'single-job',
+		day: '2026-08-26',
+		adapter: 'fal',
+		modality: 'image-edit'
+	};
+	const run = { id: 'shared-run-id', account: { id: 'actual-account' } };
+	assert.deepEqual(logRunFilters(filters, run), {
+		...TOOLS_LOG_FILTER_DEFAULTS,
+		days: '30',
+		scope: 'all',
+		account: 'actual-account',
+		kind: 'ai',
+		tool: 'draw',
+		action: 'draw.ai.media',
+		run: 'shared-run-id'
+	});
+	assert.equal(logRunFilters({ ...filters, scope: 'mine' }, run).account, 'all');
+});
+
+test('catalog estimates preserve sub-cent differences while missing costs remain unavailable', () => {
+	assert.equal(logEstimateMoney(0.006), '$0.006');
+	assert.equal(logEstimateMoney(0.012), '$0.012');
+	assert.equal(logEstimateMoney(1.2), '$1.20');
+	assert.equal(logEstimateMoney(null), 'Unavailable');
 });

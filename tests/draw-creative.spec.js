@@ -24,11 +24,12 @@ async function openShowOnboarding(page) {
 		await page.getByRole('button', { name: 'Choose drawing mode and tools', exact: true }).click();
 	}
 	await page
-		.getByRole('button', { name: 'Open show onboarding, sources and examples', exact: true })
+		.getByRole('button', { name: 'Open assets and creative workspace', exact: true })
 		.click();
 	const workspace = page.getByRole('dialog', { name: 'Creative workspace', exact: true });
 	await expect(workspace).toBeVisible();
 	await expect(workspace.getByText('Loading your private library…')).toHaveCount(0);
+	await workspace.getByRole('button', { name: 'Show brief', exact: true }).click();
 	return workspace;
 }
 
@@ -443,8 +444,31 @@ test('saved thumbnail versions open the shared composer with only explicitly sel
 		.getByRole('button', { name: 'Create 4 editable layouts · no AI cost', exact: true })
 		.click();
 	await workspace.getByRole('button', { name: 'Open in shared Generate', exact: true }).click();
-	await expect(workspace.getByRole('alert')).toContainText('currently accepts one reference image');
+	await expect(workspace).not.toBeVisible();
+	await expect(panel.getByRole('region', { name: 'Thumbnail composer' })).toBeVisible();
+	await expect(panel.locator('.reference-card')).toHaveCount(2);
+	expect(paid).toEqual([]);
+
+	// Declining a replacement must not change the covered tool's presentation.
+	const thumbnailContext = panel.getByRole('textbox', { name: 'Thumbnail context' });
+	const retainedThumbnailContext = await thumbnailContext.inputValue();
+	await page.getByRole('button', { name: 'Open assets and creative workspace' }).click();
+	await workspace.getByRole('button', { name: 'Compose', exact: true }).click();
+	await workspace
+		.getByRole('group', { name: 'References selected for a future model run' })
+		.getByLabel('second-reference.png', { exact: true })
+		.uncheck();
+	await workspace
+		.getByRole('button', { name: 'Create 4 editable layouts · no AI cost', exact: true })
+		.click();
+	page.once('dialog', (dialog) => dialog.dismiss());
+	await workspace.getByRole('button', { name: 'Open in shared Generate', exact: true }).click();
 	await expect(workspace).toBeVisible();
+	await workspace.getByRole('button', { name: 'Close creative workspace' }).click();
+	await panel.getByRole('button', { name: 'Expand image tools', exact: true }).click();
+	await expect(thumbnailContext).toHaveValue(retainedThumbnailContext);
+	await expect(panel.locator('.reference-card')).toHaveCount(2);
+	await expect(prompt).not.toBeVisible();
 	expect(paid).toEqual([]);
 });
 

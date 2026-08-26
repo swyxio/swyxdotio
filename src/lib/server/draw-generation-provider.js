@@ -6,7 +6,7 @@ export { DrawingGenerationError } from './draw-generation-error.js';
 /**
  * @typedef {{ model: { id: string, adapter: string }, requestId: string }} GenerationJob
  * @typedef {{ env: Record<string, any>, fetcher: typeof fetch }} ProviderContext
- * @typedef {{ model: { id: string, adapter: string }, prompt: string, image?: Blob, settings: Record<string, unknown> }} GenerationInput
+ * @typedef {{ model: { id: string, adapter: string }, prompt: string, image?: Blob, images?: Blob[], settings: Record<string, unknown> }} GenerationInput
  * @typedef {{
  *   configured: (env: Record<string, any>) => boolean,
  *   submit: (input: GenerationInput, context: ProviderContext) => Promise<{ requestId: string, queuePosition?: number }>,

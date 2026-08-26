@@ -1,5 +1,7 @@
 <script>
 	import { onMount, tick } from 'svelte';
+	import ToolsGenerationRuns from '$lib/ToolsGenerationRuns.svelte';
+	import ToolsGenerationDetail from '$lib/ToolsGenerationDetail.svelte';
 	import {
 		TOOLS_ACTIVITY_ACTIONS,
 		TOOLS_ACTIVITY_TOOLS,
@@ -11,7 +13,8 @@
 		logMoney,
 		logTime,
 		logStatus,
-		mergeLogEntries
+		mergeLogEntries,
+		logRunFilters
 	} from '$lib/tools-logs-view.js';
 	/** @type {import('./$types').PageData} */
 	export let data;
@@ -33,9 +36,10 @@
 	let exportStatus = '';
 	let updatedAt = '';
 	let searchDraft = '';
+	let runDraft = '';
 	let accountChanged = false;
 	let advancedOpen = false;
-	/** @type {'tools'|'models'|'actions'|'accounts'} */
+	/** @type {'tools'|'models'|'actions'|'accounts'|'adapters'|'modalities'} */
 	let breakdown = 'tools';
 	/** @type {AbortController | undefined} */
 	let pending;
@@ -52,7 +56,10 @@
 		account: 'Account',
 		q: 'Search',
 		day: 'Day',
-		opens: 'Opens'
+		opens: 'Opens',
+		adapter: 'Provider',
+		modality: 'Mode',
+		run: 'Run'
 	};
 	$: total = logs ? logs.summary.aiRequests + logs.summary.toolActions : 0;
 	$: maxDaily = Math.max(1, ...(logs?.daily.map((day) => day.aiRequests + day.toolActions) ?? []));
@@ -63,6 +70,12 @@
 		...new Set([
 			...(logs?.breakdowns.models.map((row) => row.key) ?? []),
 			...(filters.model !== 'all' ? [filters.model] : [])
+		])
+	];
+	$: adapterOptions = [
+		...new Set([
+			...(logs?.breakdowns.adapters?.map((row) => row.key) ?? []),
+			...(filters.adapter !== 'all' ? [filters.adapter] : [])
 		])
 	];
 	$: accountOptions = logs?.breakdowns.accounts ?? [];
@@ -93,6 +106,7 @@
 			if (breakdown === 'accounts') breakdown = 'tools';
 		}
 		searchDraft = filters.q;
+		runDraft = filters.run === 'all' ? '' : filters.run;
 		void refresh();
 	}
 
@@ -100,12 +114,12 @@
 		change({ ...TOOLS_LOG_FILTER_DEFAULTS, days: filters.days, scope: filters.scope });
 	}
 
-	/** @param {'all'|'ai'|'failed'|'pending'} view */
+	/** @param {'all'|'ai'|'media'|'failed'|'pending'} view */
 	function quickView(view) {
 		change({
-			kind: view === 'ai' ? 'ai' : 'all',
+			kind: view === 'ai' || view === 'media' ? 'ai' : 'all',
 			status: view === 'failed' || view === 'pending' ? view : 'all',
-			action: 'all',
+			action: view === 'media' ? 'draw.ai.media' : 'all',
 			model: 'all'
 		});
 	}
@@ -138,10 +152,21 @@
 
 	/** @param {import('$lib/tools-logs-view.js').ToolLogBreakdown} row */
 	function drillDown(row) {
-		const key = { tools: 'tool', models: 'model', actions: 'action', accounts: 'account' }[
-			breakdown
-		];
+		const key = {
+			tools: 'tool',
+			models: 'model',
+			actions: 'action',
+			accounts: 'account',
+			adapters: 'adapter',
+			modalities: 'modality'
+		}[breakdown];
 		change({ [key]: row.key });
+	}
+
+	/** @param {import('$lib/tools-logs-view.js').ToolLogGenerationRun} run */
+	function inspectRun(run) {
+		if (filters.scope === 'all' && !run.account?.id) return;
+		change(logRunFilters(filters, run));
 	}
 
 	/** @param {import('$lib/tools-logs-view.js').ToolLogEntry} entry @param {HTMLButtonElement} button */
@@ -278,9 +303,17 @@
 				filters.account = 'all';
 			}
 			searchDraft = filters.q;
-			advancedOpen = ['source', 'model', 'action', 'account', 'day'].some(
-				(key) => filters[/** @type {keyof typeof filters} */ (key)] !== defaults[key]
-			);
+			runDraft = filters.run === 'all' ? '' : filters.run;
+			advancedOpen = [
+				'source',
+				'model',
+				'action',
+				'account',
+				'day',
+				'adapter',
+				'modality',
+				'run'
+			].some((key) => filters[/** @type {keyof typeof filters} */ (key)] !== defaults[key]);
 			void refresh();
 		};
 		const switched = (/** @type {StorageEvent} */ event) => {
@@ -332,8 +365,14 @@
 			on:click={() => quickView('all')}>All activity</button
 		>
 		<button
-			aria-pressed={filters.kind === 'ai' && filters.status === 'all'}
+			aria-pressed={filters.kind === 'ai' && filters.status === 'all' && filters.action === 'all'}
 			on:click={() => quickView('ai')}>AI only</button
+		>
+		<button
+			aria-pressed={filters.kind === 'ai' &&
+				filters.action === 'draw.ai.media' &&
+				filters.status === 'all'}
+			on:click={() => quickView('media')}>Media</button
 		>
 		<button aria-pressed={filters.status === 'failed'} on:click={() => quickView('failed')}
 			>Failures</button
@@ -351,7 +390,8 @@
 	</div>
 	<form
 		class="filters"
-		on:submit|preventDefault={() => change({ q: searchDraft.trim() })}
+		on:submit|preventDefault={() =>
+			change({ q: searchDraft.trim(), run: runDraft.trim() || 'all' })}
 		aria-label="Filter activity"
 	>
 		<div class="filter-row">
@@ -400,7 +440,7 @@
 					type="search"
 					bind:value={searchDraft}
 					maxlength="100"
-					placeholder="Request ID, action, model, or tool"
+					placeholder="Request / run ID, action, model, or tool"
 				/></label
 			>
 			<button type="submit">Search</button>
@@ -446,6 +486,30 @@
 						></label
 					>{/if}
 				<label
+					>Hosting provider<select bind:value={filters.adapter} on:change={() => change({})}
+						><option value="all">All providers</option>{#each adapterOptions as adapter}<option
+								value={adapter}>{adapter}</option
+							>{/each}</select
+					></label
+				>
+				<label
+					>Generation mode<select bind:value={filters.modality} on:change={() => change({})}
+						><option value="all">All modes</option><option value="text-to-image"
+							>Text to image</option
+						><option value="image-edit">Image edit</option><option value="image-to-video"
+							>Image to video</option
+						></select
+					></label
+				>
+				<label
+					>Run ID<input
+						bind:value={runDraft}
+						maxlength="128"
+						placeholder="All runs"
+						on:change={() => change({ run: runDraft.trim() || 'all' })}
+					/></label
+				>
+				<label
 					>Day · UTC<input
 						type="date"
 						bind:value={filters.day}
@@ -454,8 +518,8 @@
 				>
 			</div>
 			<p class="small muted">
-				Model and account choices show the top 20 in this view. Search matches metadata only, never
-				prompts or account emails.
+				Model, provider, and account choices show the top 20 in this view. Search includes request,
+				provider-request, run, and client-job IDs; never prompts or account emails.
 			</p>
 		{/if}
 	</form>
@@ -564,11 +628,21 @@
 							>Models</button
 						><button aria-pressed={breakdown === 'actions'} on:click={() => (breakdown = 'actions')}
 							>Actions</button
+						><button
+							aria-pressed={breakdown === 'adapters'}
+							on:click={() => (breakdown = 'adapters')}>Providers</button
+						><button
+							aria-pressed={breakdown === 'modalities'}
+							on:click={() => (breakdown = 'modalities')}>Modes</button
 						>{#if data.user.isOwner && filters.scope === 'all'}<button
 								aria-pressed={breakdown === 'accounts'}
 								on:click={() => (breakdown = 'accounts')}>Accounts</button
 							>{/if}
 					</div>
+					{#if breakdown === 'adapters' || breakdown === 'modalities'}<p class="small muted">
+							Recorded media metadata only; historical requests without a provider or mode are
+							excluded.
+						</p>{/if}
 					<div class="breakdown-label small muted">
 						<span>Click to filter</span><span>Events</span><span>Failed</span><span
 							>Est. reserved</span
@@ -599,6 +673,14 @@
 					</div>
 				</section>
 			</div>
+		{/if}
+		{#if logs.generationRuns?.length || filters.action === 'draw.ai.media' || filters.run !== 'all'}
+			<ToolsGenerationRuns
+				runs={logs.generationRuns ?? []}
+				showAccounts={filters.scope === 'all'}
+				limit={logs.breakdownLimit}
+				onSelect={inspectRun}
+			/>
 		{/if}
 		<div class="activity-heading">
 			<div>
@@ -663,6 +745,10 @@
 							<dd>{selected.account.email || selected.account.name || selected.account.id}</dd>
 						</div>{/if}
 				</dl>
+				{#if selected.action === 'draw.ai.media'}<ToolsGenerationDetail
+						generation={selected.generation}
+						requestStatus={selected.status}
+					/>{/if}
 				<div class="detail-actions">
 					<button on:click={() => change({ action: selected?.action ?? 'all' })}
 						>Filter this action</button
@@ -744,6 +830,9 @@
 									>{entry.source === 'browser'
 										? 'Browser-reported'
 										: 'Server-recorded'}{#if entry.model}<small class="model">{entry.model}</small
+										>{/if}{#if entry.generation}<small
+											>{entry.generation.adapter ?? 'Provider unavailable'} · {entry.generation
+												.modality ?? 'Mode unavailable'}</small
 										>{/if}</td
 								>{#if filters.scope === 'all'}<td class="account-cell"
 										><strong>{entry.account?.name || 'Google account'}</strong><small
@@ -784,8 +873,10 @@
 			</p>
 			<p>
 				Reservations are allowance estimates, not provider bills. Failed AI attempts retain their
-				reservation. Actual billed cost, token counts, and request latency are unavailable.
-				Percentages use all matching recorded events, not complete real-world usage.
+				reservation. Actual billed cost, token counts, and provider execution latency are
+				unavailable. Media timings are observed server wall time, including queue and polling; not
+				GPU execution, cold-start, or warm-idle time. Percentages use all matching recorded events,
+				not complete real-world usage.
 			</p>
 			<p>
 				You can view your own records. The site owner can view everyone’s metadata, including
@@ -1098,6 +1189,7 @@
 	}
 	.breakdown-tabs {
 		display: flex;
+		flex-wrap: wrap;
 		gap: 0.35rem;
 		margin: 0.6rem 0;
 	}
