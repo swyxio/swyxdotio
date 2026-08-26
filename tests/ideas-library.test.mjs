@@ -186,3 +186,18 @@ test('Ideas uses a compact masthead, readable archive type, and touch-sized cont
 	assert.match(source, /class="entry-category" title=\{item.venues\}>\{item.category\}/);
 	assert.match(source, /class="ideas-stage"/);
 });
+
+test('archive view-count batches include only registered article content', async () => {
+	const source = await readFile(
+		new URL('../src/routes/ideas/+page.svelte', import.meta.url),
+		'utf8'
+	);
+	const loader = source.slice(
+		source.indexOf('async function loadReadCounts('),
+		source.indexOf('function toggleReadCountVisibility(')
+	);
+	// A talk with no video (for example, fullstack-heaps) is not an article.
+	// Including it makes the read-count endpoint reject the whole batch.
+	assert.match(loader, /\.filter\(\(item\) => item\.type === 'blog'\)/);
+	assert.doesNotMatch(loader, /!isExternalItem\(item\)/);
+});
