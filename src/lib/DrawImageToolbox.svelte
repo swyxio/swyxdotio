@@ -1,4 +1,5 @@
 <script>
+	import { tick } from 'svelte';
 	import { DRAW_IMAGE_TOOLS, processImageTool } from '$lib/draw-image-tools.js';
 	import { prepareDrawingFalImage } from '$lib/draw-fal-image.js';
 	import { runDrawingFalGeneration } from '$lib/draw-fal-queue.js';
@@ -61,7 +62,7 @@
 		onDragStart
 	} = $props();
 
-	const PROMPT_PRESETS = [
+	const IMAGE_EDIT_PROMPT_PRESETS = [
 		{
 			label: 'Remove distractions',
 			prompt:
@@ -85,6 +86,55 @@
 			prompt: 'Turn this image into a polished studio product mockup with professional lighting.'
 		}
 	];
+	const VIDEO_PROMPT_PRESETS = [
+		{
+			label: 'Animate subject',
+			prompt:
+				'Animate the main subject with subtle, natural movement while preserving their identity, clothing, and surroundings.'
+		},
+		{
+			label: 'Camera orbit',
+			prompt:
+				'Slowly orbit the camera around the subject with cinematic, physically realistic movement and stable composition.'
+		},
+		{
+			label: 'Talking portrait',
+			prompt:
+				'The subject looks into the camera and speaks naturally, with realistic facial expressions and synchronized audio.'
+		},
+		{
+			label: 'Slow motion',
+			prompt:
+				'Bring the scene to life in smooth cinematic slow motion, preserving the subject and original visual style.'
+		},
+		{
+			label: 'Product reveal',
+			prompt:
+				'Reveal the product with a slow premium camera push, elegant lighting changes, and crisp commercial motion.'
+		}
+	];
+	const TEXT_TO_IMAGE_PROMPT_PRESETS = [
+		{
+			label: 'Product hero',
+			prompt:
+				'Create a premium studio product photograph with dramatic lighting, a clean background, and clear negative space.'
+		},
+		{
+			label: 'YouTube thumbnail',
+			prompt:
+				'Create a bold, high-contrast YouTube thumbnail composition with one clear focal point and room for a short headline.'
+		},
+		{
+			label: 'Illustration',
+			prompt:
+				'Create a polished editorial illustration with a distinctive visual style, intentional composition, and rich color.'
+		},
+		{
+			label: 'Cinematic scene',
+			prompt:
+				'Create a cinematic, photorealistic scene with compelling depth, atmospheric lighting, and careful composition.'
+		}
+	];
 	const FAL_WORKFLOW_FOLDERS = /** @type {const} */ ([
 		{ kind: 'text-to-image', label: 'Text to image' },
 		{ kind: 'image-edit', label: 'Image editing' },
@@ -104,6 +154,12 @@
 	let blurStrength = $state(14);
 	let focusDepth = $state(0.55);
 	let modelPickerOpen = $state(false);
+	let modelSearchQuery = $state('');
+	let expandedModelWorkflowKinds = $state(/** @type {string[]} */ ([]));
+	let toolboxMinimized = $state(false);
+	let modelPickerRoot = $state(/** @type {HTMLDivElement | null} */ (null));
+	let modelPickerButton = $state(/** @type {HTMLButtonElement | null} */ (null));
+	let modelSearchInput = $state(/** @type {HTMLInputElement | null} */ (null));
 	let activeVideoGenerationId = $state('');
 	let operationProgress = $state(0);
 	let operationError = $state('');
@@ -120,9 +176,29 @@
 	const orderedFalModels = $derived(
 		[...DRAW_FAL_MODELS].sort((left, right) => left.priceUsd - right.priceUsd)
 	);
+	const visibleFalModels = $derived.by(() => {
+		const search = modelSearchQuery.trim().toLowerCase();
+		if (!search) return orderedFalModels;
+		const terms = search.split(/\s+/);
+		return orderedFalModels.filter((model) => {
+			const workflow = FAL_WORKFLOW_FOLDERS.find((folder) => folder.kind === model.kind)?.label;
+			const searchable = [
+				model.label,
+				model.provider,
+				model.workflow,
+				model.description,
+				model.badge,
+				model.weights === 'open' ? 'open weights' : 'closed models',
+				workflow
+			]
+				.join(' ')
+				.toLowerCase();
+			return terms.every((term) => searchable.includes(term));
+		});
+	});
 	const falWorkflowFolders = $derived(
 		FAL_WORKFLOW_FOLDERS.map((folder) => {
-			const models = orderedFalModels.filter((model) => model.kind === folder.kind);
+			const models = visibleFalModels.filter((model) => model.kind === folder.kind);
 			return {
 				...folder,
 				models,
@@ -137,6 +213,26 @@
 		orderedFalModels.filter((model) => selectedFalModelIds.includes(model.id))
 	);
 	const selectedFalModel = $derived(selectedFalModels[0] ?? DEFAULT_DRAW_FAL_MODEL);
+	const selectedWorkflowKind = $derived(
+		selectedFalModels.length > 0 &&
+			selectedFalModels.every((model) => model.kind === selectedFalModels[0].kind)
+			? selectedFalModels[0].kind
+			: null
+	);
+	const activePromptPresets = $derived(
+		selectedWorkflowKind === 'image-to-video'
+			? VIDEO_PROMPT_PRESETS
+			: selectedWorkflowKind === 'text-to-image'
+				? TEXT_TO_IMAGE_PROMPT_PRESETS
+				: IMAGE_EDIT_PROMPT_PRESETS
+	);
+	const generationButtonLabel = $derived(
+		selectedWorkflowKind === 'image-to-video'
+			? 'Generate AI video'
+			: selectedWorkflowKind === 'text-to-image'
+				? 'Generate AI image'
+				: 'Generate AI image edit'
+	);
 	const selectedWorkflowParameters = $derived.by(() => {
 		return FAL_WORKFLOW_FOLDERS.flatMap((folder) => {
 			const models = selectedFalModels.filter((model) => model.kind === folder.kind);
@@ -246,6 +342,47 @@
 		if (model.referenceImages === 1) return '1 reference image';
 		if (model.referenceImages === null) return 'Multiple reference images';
 		return `Up to ${model.referenceImages} reference images`;
+	}
+
+	/** @param {boolean} open @param {boolean} [restoreFocus] */
+	function setModelPickerOpen(open, restoreFocus = false) {
+		if (open) {
+			expandedModelWorkflowKinds = selectedFalModels.length
+				? [...new Set(selectedFalModels.map((model) => model.kind))]
+				: ['image-edit'];
+		}
+		modelPickerOpen = open;
+		if (!open) modelSearchQuery = '';
+		void tick().then(() => {
+			if (open && modelPickerOpen) modelSearchInput?.focus();
+			if (!open && restoreFocus) modelPickerButton?.focus();
+		});
+	}
+
+	/** @param {PointerEvent} event */
+	function dismissModelPickerOutside(event) {
+		if (!modelPickerOpen || !(event.target instanceof Node)) return;
+		if (!modelPickerRoot?.contains(event.target)) setModelPickerOpen(false);
+	}
+
+	/** @param {KeyboardEvent} event */
+	function handleModelPickerKeys(event) {
+		if (!modelPickerOpen) return;
+		if (event.key === 'Escape') {
+			event.preventDefault();
+			event.stopPropagation();
+			setModelPickerOpen(false, true);
+			return;
+		}
+		if (
+			event.key === 'Enter' &&
+			event.target === modelSearchInput &&
+			visibleFalModels.length === 1
+		) {
+			event.preventDefault();
+			selectedFalModelIds = [visibleFalModels[0].id];
+			setModelPickerOpen(false, true);
+		}
 	}
 
 	/** @param {string} key @param {unknown} value */
@@ -724,24 +861,41 @@
 	}
 </script>
 
-<div class="image-toolbox" aria-label="AI image toolbox">
-	<button
-		type="button"
-		class="toolbox-heading drag-handle"
-		aria-label="Move image tools"
-		onpointerdown={(event) => onDragStart?.(event)}
-	>
-		<strong>Image tools</strong>
-		<span>
-			{action === 'fal'
-				? uploadsSelectedImage
-					? 'Uploads this image to fal.ai'
-					: 'Prompt only · no image upload'
-				: action
-					? 'Runs privately on your device'
-					: 'Choose a tool'}
-		</span>
-	</button>
+<svelte:window onpointerdown={dismissModelPickerOutside} onkeydown={handleModelPickerKeys} />
+
+<div class="image-toolbox" class:minimized={toolboxMinimized} aria-label="AI image toolbox">
+	<div class="toolbox-heading">
+		<button
+			type="button"
+			class="drag-handle"
+			aria-label="Move image tools"
+			onpointerdown={(event) => onDragStart?.(event)}
+		>
+			<strong>Image tools</strong>
+			<span>
+				{action === 'fal'
+					? uploadsSelectedImage
+						? 'Uploads this image to fal.ai'
+						: 'Prompt only · no image upload'
+					: action
+						? 'Runs privately on your device'
+						: 'Choose a tool'}
+			</span>
+		</button>
+		<button
+			type="button"
+			class="toolbox-minimize"
+			aria-label={toolboxMinimized ? 'Expand image tools' : 'Minimize image tools'}
+			aria-expanded={!toolboxMinimized}
+			disabled={processing || processingFal || backgroundProcessing}
+			onclick={() => {
+				toolboxMinimized = !toolboxMinimized;
+				if (toolboxMinimized) setModelPickerOpen(false);
+			}}
+		>
+			{toolboxMinimized ? '+' : '−'}
+		</button>
+	</div>
 
 	<div class="tool-grid" aria-label="Image editing tools">
 		<button
@@ -879,7 +1033,13 @@
 			{#if processingFal}
 				<div class="fal-generation-progress" role="status" aria-live="polite">
 					<strong>{operationStatus}</strong>
-					<span>Your result will appear on the canvas and in session history.</span>
+					<span>
+						{selectedWorkflowKind === 'image-to-video'
+							? 'Your video will appear below and in session history, not on the canvas.'
+							: selectedWorkflowKind === null
+								? 'Images appear on the canvas; videos appear below. All results stay in history.'
+								: 'Your result will appear on the canvas and in session history.'}
+					</span>
 					<progress
 						aria-label="AI generation progress"
 						max="100"
@@ -887,7 +1047,7 @@
 					></progress>
 				</div>
 			{/if}
-			<div class="fal-model-picker">
+			<div class="fal-model-picker" bind:this={modelPickerRoot}>
 				<label for="drawing-ai-workflow">Models and workflows</label>
 				<button
 					id="drawing-ai-workflow"
@@ -897,7 +1057,8 @@
 					aria-expanded={modelPickerOpen}
 					aria-controls="drawing-ai-models"
 					disabled={processing || processingFal}
-					onclick={() => (modelPickerOpen = !modelPickerOpen)}
+					bind:this={modelPickerButton}
+					onclick={() => setModelPickerOpen(!modelPickerOpen)}
 				>
 					<span>
 						{selectedFalModels.length === 1
@@ -910,27 +1071,61 @@
 				</button>
 				{#if modelPickerOpen}
 					<div id="drawing-ai-models" class="fal-model-menu" aria-label="Available AI models">
+						<div class="fal-model-search">
+							<input
+								type="search"
+								aria-label="Search AI models"
+								placeholder="Search models, providers, or rankings"
+								bind:value={modelSearchQuery}
+								bind:this={modelSearchInput}
+							/>
+							{#if modelSearchQuery}
+								<button
+									type="button"
+									aria-label="Clear AI model search"
+									onclick={() => {
+										modelSearchQuery = '';
+										modelSearchInput?.focus();
+									}}>×</button
+								>
+							{/if}
+						</div>
 						<div class="fal-model-menu-heading">
-							<span>Cheapest first · {selectedFalModels.length} selected</span>
+							<span>
+								{modelSearchQuery.trim()
+									? `${visibleFalModels.length} matching · ${selectedFalModels.length} selected`
+									: `Cheapest first · ${selectedFalModels.length} selected`}
+							</span>
 							<button
 								type="button"
 								class="fal-model-select-all"
-								onclick={() => {
-									selectedFalModelIds =
-										selectedFalModels.length === orderedFalModels.length
-											? []
-											: orderedFalModels.map((model) => model.id);
-								}}
+								disabled={visibleFalModels.length === 0}
+								onclick={() =>
+									selectFalModels(
+										visibleFalModels,
+										!visibleFalModels.every((model) => selectedFalModelIds.includes(model.id))
+									)}
 							>
-								{selectedFalModels.length === orderedFalModels.length ? 'Clear all' : 'Select all'}
+								{visibleFalModels.length > 0 &&
+								visibleFalModels.every((model) => selectedFalModelIds.includes(model.id))
+									? modelSearchQuery.trim()
+										? 'Clear results'
+										: 'Clear all'
+									: modelSearchQuery.trim()
+										? 'Select results'
+										: 'Select all'}
 							</button>
 						</div>
 						<div class="fal-model-cards">
+							{#if visibleFalModels.length === 0}
+								<p class="fal-model-empty">No models match “{modelSearchQuery.trim()}”.</p>
+							{/if}
 							{#each falWorkflowFolders as folder (folder.kind)}
 								<details
 									class="fal-model-folder"
 									aria-label="{folder.label} models"
-									open={folder.kind === 'image-edit'}
+									open={Boolean(modelSearchQuery.trim()) ||
+										expandedModelWorkflowKinds.includes(folder.kind)}
 								>
 									<summary class="fal-model-folder-heading">
 										<strong>{folder.label}</strong>
@@ -1012,7 +1207,7 @@
 															aria-label="Use only {model.label} · {model.workflow}"
 															onclick={() => {
 																selectedFalModelIds = [model.id];
-																modelPickerOpen = false;
+																setModelPickerOpen(false);
 															}}
 														>
 															Only
@@ -1025,6 +1220,29 @@
 								</details>
 							{/each}
 						</div>
+					</div>
+				{/if}
+				{#if !modelPickerOpen && selectedFalModels.length > 1}
+					<div class="selected-model-chips" aria-label="Selected AI models">
+						{#each selectedFalModels.slice(0, 4) as model (model.id)}
+							<button
+								type="button"
+								aria-label="Remove {model.label} from selected models"
+								disabled={processing || processingFal}
+								onclick={() => toggleFalModel(model.id)}
+							>
+								{model.label} <span aria-hidden="true">×</span>
+							</button>
+						{/each}
+						{#if selectedFalModels.length > 4}
+							<button
+								type="button"
+								aria-label="Show all selected AI models"
+								onclick={() => setModelPickerOpen(true)}
+							>
+								+{selectedFalModels.length - 4} more
+							</button>
+						{/if}
 					</div>
 				{/if}
 				{#if selectedFalModels.length === 1}
@@ -1124,7 +1342,11 @@
 			{/each}
 			<textarea
 				aria-label="AI image editing prompt"
-				placeholder="Describe how you want to edit this image…"
+				placeholder={selectedWorkflowKind === 'image-to-video'
+					? 'Describe the motion, camera movement, and sound…'
+					: selectedWorkflowKind === 'text-to-image'
+						? 'Describe the image you want to create…'
+						: 'Describe how you want to edit this image…'}
 				rows="2"
 				maxlength="1000"
 				bind:value={prompt}
@@ -1137,8 +1359,15 @@
 					void applyFalEdit();
 				}}
 			></textarea>
-			<div class="prompt-presets" aria-label="Editable image prompt presets">
-				{#each PROMPT_PRESETS as preset (preset.label)}
+			<div
+				class="prompt-presets"
+				aria-label={selectedWorkflowKind === 'image-to-video'
+					? 'Editable video prompt presets'
+					: selectedWorkflowKind === 'text-to-image'
+						? 'Editable image generation prompt presets'
+						: 'Editable image prompt presets'}
+			>
+				{#each activePromptPresets as preset (preset.label)}
 					<button
 						type="button"
 						disabled={processing || processingFal}
@@ -1164,12 +1393,16 @@
 					<button
 						type="button"
 						class="fal-action"
-						aria-label="Generate AI image edit"
+						aria-label={generationButtonLabel}
 						aria-keyshortcuts="Meta+Enter Control+Enter"
 						disabled={processing || !prompt.trim() || !selectedFalModels.length}
 						onclick={() => void applyFalEdit()}
 					>
-						Generate <kbd aria-hidden="true">⌘↵</kbd>
+						{selectedWorkflowKind === 'image-to-video'
+							? 'Generate video'
+							: selectedWorkflowKind === 'text-to-image'
+								? 'Generate image'
+								: 'Generate'} <kbd aria-hidden="true">⌘↵</kbd>
 					</button>
 				{/if}
 			</div>
@@ -1295,15 +1528,27 @@
 		min-width: 0;
 	}
 
+	.image-toolbox.minimized > :not(.toolbox-heading) {
+		display: none;
+	}
+
 	.toolbox-heading {
+		position: sticky;
+		top: 0;
+		z-index: 2;
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
-		gap: 8px;
+		gap: 6px;
+		padding: 2px 0;
+		background: #fff;
 		font-size: 11px;
 	}
 
 	.drag-handle {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
 		width: 100%;
 		padding: 2px 0;
 		border: 0;
@@ -1315,6 +1560,25 @@
 
 	.drag-handle:active {
 		cursor: grabbing;
+	}
+
+	.toolbox-minimize {
+		flex: none;
+		width: 25px;
+		height: 25px;
+		padding: 0;
+		border: 0;
+		border-radius: 6px;
+		background: transparent;
+		color: #71717a;
+		font-size: 16px;
+		cursor: pointer;
+	}
+
+	.toolbox-minimize:hover,
+	.toolbox-minimize:focus-visible {
+		background: #f4f4f5;
+		color: #3f3f46;
 	}
 
 	.toolbox-heading span,
@@ -1601,6 +1865,39 @@
 		background: #fff;
 	}
 
+	.fal-model-search {
+		position: relative;
+		margin-bottom: 7px;
+	}
+
+	.fal-model-search input {
+		box-sizing: border-box;
+		width: 100%;
+		height: 31px;
+		padding: 0 27px 0 8px;
+		border: 1px solid #e3e3e9;
+		border-radius: 6px;
+		background: #fff;
+		color: #27272a;
+		font: inherit;
+		font-size: 10px;
+		outline-color: #7768e5;
+	}
+
+	.fal-model-search button {
+		position: absolute;
+		top: 4px;
+		right: 4px;
+		width: 22px;
+		height: 22px;
+		border: 0;
+		border-radius: 4px;
+		background: transparent;
+		color: #71717a;
+		font-size: 15px;
+		cursor: pointer;
+	}
+
 	.fal-model-menu-heading {
 		display: flex;
 		align-items: center;
@@ -1626,6 +1923,36 @@
 		gap: 4px;
 		max-height: 285px;
 		overflow-y: auto;
+	}
+
+	.fal-model-empty {
+		margin: 0;
+		padding: 14px 5px;
+		color: #71717a;
+		font-size: 10px;
+		text-align: center;
+	}
+
+	.selected-model-chips {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 5px;
+		margin-top: 7px;
+	}
+
+	.selected-model-chips button {
+		max-width: 100%;
+		padding: 4px 7px;
+		border: 1px solid #ded9ff;
+		border-radius: 999px;
+		background: #f7f5ff;
+		color: #5142ab;
+		font-size: 9px;
+		cursor: pointer;
+	}
+
+	.selected-model-chips button span {
+		font-size: 11px;
 	}
 
 	.fal-model-folder {

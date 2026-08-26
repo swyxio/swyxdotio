@@ -309,6 +309,114 @@ test('the selected image chooser stays compact and never stretches previews on n
 	expect(cloudBounds.height).toBeLessThan(430);
 });
 
+test('model discovery filters workflows and dismisses cleanly without losing a batch', async ({
+	page
+}) => {
+	const toolbox = await pasteSelectedImage(page);
+	await toolbox.getByRole('button', { name: 'AI prompt', exact: true }).click();
+	const picker = toolbox.getByRole('button', { name: 'AI model and workflow selector' });
+	await picker.click();
+	const search = toolbox.getByRole('searchbox', { name: 'Search AI models' });
+	await expect(search).toBeFocused();
+
+	await search.fill('minimax open video');
+	await expect(toolbox.locator('.fal-model-folder')).toHaveCount(1);
+	const videoFolder = toolbox.locator('.fal-model-folder[aria-label="Image to video models"]');
+	await expect(videoFolder).toHaveAttribute('open', '');
+	await expect(videoFolder.getByRole('checkbox')).toHaveCount(1);
+	await expect(toolbox.getByText('1 matching · 1 selected')).toBeVisible();
+	await search.press('Enter');
+	await expect(picker).toContainText('MiniMax H3');
+	await expect(search).toHaveCount(0);
+	await expect(picker).toBeFocused();
+
+	await picker.click();
+	await expect(videoFolder).toHaveAttribute('open', '');
+	await expect(
+		toolbox.locator('.fal-model-folder[aria-label="Image editing models"]')
+	).not.toHaveAttribute('open', '');
+	const reopenedSearch = toolbox.getByRole('searchbox', { name: 'Search AI models' });
+	await reopenedSearch.fill('grok video');
+	await expect(toolbox.getByText('2 matching · 1 selected')).toBeVisible();
+	await toolbox.getByRole('button', { name: 'Select results', exact: true }).click();
+	await expect(toolbox.getByText('2 matching · 3 selected')).toBeVisible();
+	await reopenedSearch.press('Escape');
+	await expect(picker).toBeFocused();
+	const selected = toolbox.locator('[aria-label="Selected AI models"]');
+	await expect(selected.getByRole('button')).toHaveCount(3);
+	await selected
+		.getByRole('button', { name: 'Remove Grok Imagine Video 1.5 from selected models' })
+		.click();
+	await expect(toolbox.getByText(/2 generations/)).toBeVisible();
+
+	await picker.click();
+	await toolbox.getByRole('textbox', { name: 'AI image editing prompt' }).click();
+	await expect(toolbox.getByRole('searchbox', { name: 'Search AI models' })).toHaveCount(0);
+	await expect(toolbox).toBeVisible();
+
+	await picker.click();
+	const emptySearch = toolbox.getByRole('searchbox', { name: 'Search AI models' });
+	await emptySearch.fill('no provider exists');
+	await expect(toolbox.getByText('No models match “no provider exists”.')).toBeVisible();
+	await expect(toolbox.getByRole('button', { name: 'Select results', exact: true })).toBeDisabled();
+});
+
+test('generation presets and accessible actions follow the selected workflow', async ({ page }) => {
+	await mockSignedInPersonalTools(page);
+	const toolbox = await pasteSelectedImage(page);
+	await toolbox.getByRole('button', { name: 'AI prompt', exact: true }).click();
+	const prompt = toolbox.getByRole('textbox', { name: 'AI image editing prompt' });
+	await expect(toolbox.getByRole('button', { name: 'Improve lighting' })).toBeVisible();
+	await expect(toolbox.getByRole('button', { name: 'Camera orbit' })).toHaveCount(0);
+
+	await chooseOnlyModel(toolbox, 'flux-klein-9b-generate');
+	await expect(prompt).toHaveAttribute('placeholder', 'Describe the image you want to create…');
+	await expect(toolbox.getByRole('button', { name: 'Remove distractions' })).toHaveCount(0);
+	await toolbox.getByRole('button', { name: 'YouTube thumbnail' }).click();
+	await expect(prompt).toHaveValue(/thumbnail/i);
+	await expect(toolbox.getByRole('button', { name: 'Generate AI image' })).toBeEnabled();
+
+	await chooseOnlyModel(toolbox, 'grok-imagine-video');
+	await expect(prompt).toHaveAttribute(
+		'placeholder',
+		'Describe the motion, camera movement, and sound…'
+	);
+	await expect(toolbox.getByRole('button', { name: 'Sketch' })).toHaveCount(0);
+	await expect(toolbox.getByRole('button', { name: 'Animate subject' })).toBeVisible();
+	await expect(toolbox.getByRole('button', { name: 'Talking portrait' })).toBeVisible();
+	await toolbox.getByRole('button', { name: 'Camera orbit' }).click();
+	await expect(prompt).toHaveValue(/orbit/i);
+	await expect(toolbox.getByRole('button', { name: 'Generate AI video' })).toBeEnabled();
+});
+
+test('the image toolbox minimizes without deselecting artwork or losing the active draft', async ({
+	page
+}) => {
+	const toolbox = await pasteSelectedImage(page);
+	await toolbox.getByRole('button', { name: 'AI prompt', exact: true }).click();
+	await chooseOnlyModel(toolbox, 'flux-2');
+	const prompt = toolbox.getByRole('textbox', { name: 'AI image editing prompt' });
+	await prompt.fill('Keep this workflow and prompt while I inspect the canvas');
+	const original = await selectedSceneImage(page);
+
+	await toolbox.getByRole('button', { name: 'Minimize image tools' }).click();
+	await expect(toolbox).toBeVisible();
+	await expect(prompt).not.toBeVisible();
+	await expect(
+		toolbox.getByRole('button', { name: 'Magic Select', exact: true })
+	).not.toBeVisible();
+	const collapsedBounds = await toolbox.boundingBox();
+	if (!collapsedBounds) throw new Error('The minimized toolbox is not visible.');
+	expect(collapsedBounds.height).toBeLessThan(65);
+	expect((await selectedSceneImage(page)).fileId).toBe(original.fileId);
+
+	await toolbox.getByRole('button', { name: 'Expand image tools' }).click();
+	await expect(prompt).toHaveValue('Keep this workflow and prompt while I inspect the canvas');
+	await expect(
+		toolbox.getByRole('button', { name: 'AI model and workflow selector' })
+	).toContainText('FLUX.2 [dev]');
+});
+
 test('the floating image toolbox can be dragged without losing the selected tool', async ({
 	page
 }) => {
@@ -734,14 +842,14 @@ test('text-to-image never uploads the selected image and generated video stays o
 	await toolbox
 		.getByRole('textbox', { name: 'AI image editing prompt' })
 		.fill('Create an alpine landscape');
-	await toolbox.getByRole('button', { name: 'Generate AI image edit' }).click();
+	await toolbox.getByRole('button', { name: 'Generate AI image' }).click();
 	await expect.poll(async () => (await selectedSceneImage(page)).fileId).not.toBe(original.fileId);
 	expect(requests[0]).toEqual({ model: 'flux-klein-9b-generate', hasImage: false });
 
 	const beforeVideo = await selectedSceneImage(page);
 	await chooseOnlyModel(toolbox, 'grok-imagine-video');
 	await expect(toolbox.getByText('Uploads this image to fal.ai')).toBeVisible();
-	await toolbox.getByRole('button', { name: 'Generate AI image edit' }).click();
+	await toolbox.getByRole('button', { name: 'Generate AI video' }).click();
 	await expect(toolbox.getByRole('region', { name: 'Generated video preview' })).toBeVisible();
 	await expect(toolbox.getByRole('link', { name: 'Download video' })).toHaveAttribute(
 		'href',
@@ -818,7 +926,7 @@ test('each selected modality exposes supported model settings, accurate pricing,
 	await toolbox
 		.getByRole('textbox', { name: 'AI image editing prompt' })
 		.fill('Slow cinematic camera orbit');
-	await toolbox.getByRole('button', { name: 'Generate AI image edit' }).click();
+	await toolbox.getByRole('button', { name: 'Generate AI video' }).click();
 	await expect(toolbox.getByRole('region', { name: 'Generated video preview' })).toBeVisible();
 	expect(uploaded?.model).toBe('veo-3-1-video');
 	expect(uploaded?.settings).toEqual({
