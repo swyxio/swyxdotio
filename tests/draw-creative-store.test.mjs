@@ -7,6 +7,7 @@ import {
 	validateCreativeAsset
 } from '../src/lib/server/draw-creative-store.js';
 import { CREATIVE_LIMITS, readCreativeBody } from '../workers/draw/creative-library.js';
+import { referenceCatalog, emptyFewShot } from '../src/lib/draw-creative-examples.js';
 
 const SECRET = 'creative-store-test-secret-longer-than-32-bytes';
 const ALICE = '111111111111111111111';
@@ -824,4 +825,134 @@ test('metadata quota counts UTF-8 bytes and inline binary data is rejected in an
 		}
 	});
 	assert.equal(settings.status, 400);
+});
+
+test('personal few-shot selections and prepublish metadata survive kit drafts without changing pinned briefs or crossing tenants', async () => {
+	const store = environment();
+	const example = referenceCatalog.examples.find((item) => item.thumbnailText);
+	const fewShot = {
+		...emptyFewShot(),
+		examples: [{ id: example.id, fields: ['title'], note: 'Private editorial feedback.' }]
+	};
+	const kit = await create(store, 'kits', { name: 'House examples', fewShot });
+	const videoMetadata = {
+		id: 'abcdefghijk',
+		url: 'https://www.youtube.com/watch?v=abcdefghijk',
+		title: 'Private prepublish title',
+		description: 'Private episode description.',
+		channelId: 'UC' + 'a'.repeat(22),
+		channelTitle: 'My channel',
+		thumbnailUrl: 'https://i.ytimg.com/vi/abcdefghijk/hqdefault.jpg',
+		duration: 'PT1H2M3S',
+		publishedAt: '2026-08-26T00:00:00Z',
+		privacyStatus: 'unlisted',
+		provenance: 'youtube-data-api',
+		retrievedAt: '2026-08-26T01:00:00Z'
+	};
+	const brief = await create(store, 'briefs', {
+		name: 'Next episode',
+		kitId: kit.id,
+		kitRevision: 1,
+		description: 'My editable description.',
+		fewShot,
+		videoMetadata
+	});
+	const nextFewShot = {
+		...fewShot,
+		examples: [{ ...fewShot.examples[0], fields: ['title', 'hook'], note: 'New house feedback.' }]
+	};
+	const update = await request(store, `/records/kits/${kit.id}`, {
+		method: 'PUT',
+		body: { revision: 1, data: { ...kit.data, fewShot: nextFewShot } }
+	});
+	assert.equal(update.status, 200);
+	assert.deepEqual(
+		(await (await request(store, `/records/kits/${kit.id}/revisions/1`)).json()).data.fewShot,
+		fewShot
+	);
+	assert.deepEqual(
+		(await (await request(store, `/records/kits/${kit.id}/revisions/2`)).json()).data.fewShot,
+		nextFewShot
+	);
+	const restored = await (await request(store, `/records/briefs/${brief.id}`)).json();
+	assert.deepEqual(restored.data.fewShot, fewShot);
+	assert.deepEqual(restored.data.videoMetadata, videoMetadata);
+	assert.equal(restored.data.description, 'My editable description.');
+	assert.equal(restored.data.kitRevision, 1);
+	for (const path of [`/records/briefs/${brief.id}`, `/records/kits/${kit.id}/revisions/1`])
+		assert.equal((await request(store, path, { user: BOB })).status, 404);
+	const otherLibrary = await (await request(store, '/library', { user: BOB })).text();
+	for (const secret of [
+		'Private editorial feedback',
+		'Private prepublish title',
+		'abcdefghijk',
+		'My editable description'
+	])
+		assert.equal(otherLibrary.includes(secret), false);
+	const revised = await request(store, `/records/briefs/${brief.id}`, {
+		method: 'PUT',
+		body: { revision: 1, data: { ...restored.data, description: 'Revised editable copy.' } }
+	});
+	assert.equal(revised.status, 200);
+	assert.deepEqual(
+		(await revised.json()).data.videoMetadata,
+		videoMetadata,
+		'editing the brief must not overwrite source-backed metadata'
+	);
+});
+
+test('stored few-shot/metadata fields enforce their explicit shapes and limits without allowing inline media', async () => {
+	const store = environment();
+	const id = referenceCatalog.examples[0].id;
+	const selection = { ...emptyFewShot(), examples: [{ id, fields: ['title'] }] };
+	for (const fewShot of [
+		{
+			...selection,
+			examples: referenceCatalog.examples
+				.slice(0, 7)
+				.map((example) => ({ id: example.id, fields: ['title'] }))
+		},
+		{ ...selection, examples: [{ id, fields: ['other'] }] },
+		{ ...selection, examples: [{ id, fields: ['title'], note: 'x'.repeat(1001) }] },
+		{
+			...selection,
+			examples: [{ id, fields: ['title'], imageUrl: 'https://private.example/image.png' }]
+		},
+		{ ...selection, examples: [{ id, fields: ['title'], note: 'data:image/png;base64,AAAA' }] }
+	])
+		assert.equal(
+			(
+				await request(store, '/records/kits', {
+					method: 'POST',
+					body: { data: { name: 'Invalid selection', fewShot } }
+				})
+			).status,
+			400
+		);
+	const minimal = {
+		id: 'abcdefghijk',
+		url: 'https://www.youtube.com/watch?v=abcdefghijk',
+		title: 'Title only',
+		provenance: 'youtube-oembed',
+		retrievedAt: '2026-08-26T01:00:00Z'
+	};
+	const brief = await create(store, 'briefs', { name: 'Limited metadata', videoMetadata: minimal });
+	assert.equal('description' in brief.data.videoMetadata, false);
+	assert.equal('privacyStatus' in brief.data.videoMetadata, false);
+	for (const videoMetadata of [
+		{ ...minimal, description: 'x'.repeat(20001) },
+		{ ...minimal, privacyStatus: 'guessed-unlisted' },
+		{ ...minimal, url: 'javascript:alert(1)' },
+		{ ...minimal, imageData: 'data:image/png;base64,AAAA' },
+		{ ...minimal, provenance: 'guessed-from-channel' }
+	])
+		assert.equal(
+			(
+				await request(store, '/records/briefs', {
+					method: 'POST',
+					body: { data: { name: 'Invalid metadata', videoMetadata } }
+				})
+			).status,
+			400
+		);
 });

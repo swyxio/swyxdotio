@@ -74,8 +74,11 @@ test('account disclosure retains identity, dismisses conventionally, and adapts 
 }) => {
 	await signIn(page);
 	await expect(page.getByRole('navigation', { name: 'Your tools' }).getByRole('link')).toHaveCount(
-		5
+		6
 	);
+	const cap = page.getByRole('link', { name: /^Cap / });
+	await expect(cap).toHaveAttribute('href', '/tools/cap');
+	await expect(cap).toHaveAttribute('data-sveltekit-reload', 'true');
 	const account = page.locator('.account-menu > summary');
 	await account.focus();
 	await page.keyboard.press('Enter');
@@ -94,6 +97,7 @@ test('account disclosure retains identity, dismisses conventionally, and adapts 
 		3
 	);
 	await expect(page.getByRole('link', { name: /Podcast studio/ })).toHaveCount(0);
+	await expect(page.getByRole('link', { name: /^Cap / })).toHaveCount(0);
 	await account.click();
 	await expect(page.getByText(TEST_TOOLS_MEMBER.email, { exact: true })).toBeVisible();
 	await page.getByRole('button', { name: 'Sign out', exact: true }).click();
@@ -166,7 +170,7 @@ for (const [name, width, height] of viewports) {
 			email: 'long.account.with.a.very.long.address@example.com'
 		});
 		const cabinet = page.getByRole('navigation', { name: 'Your tools' });
-		await expect(cabinet.getByRole('link')).toHaveCount(5);
+		await expect(cabinet.getByRole('link')).toHaveCount(6);
 		await expect
 			.poll(() =>
 				cabinet
@@ -203,6 +207,9 @@ for (const [name, width, height] of viewports) {
 		expect(panel.x).toBeGreaterThanOrEqual(0);
 		expect(panel.x + panel.width).toBeLessThanOrEqual(width);
 		await page.keyboard.press('Escape');
+		await expect(page.locator('.workshop-rules')).toHaveCount(0);
+		await authenticateTools(page, TEST_TOOLS_MEMBER);
+		await page.reload();
 		await page.getByText('The rules of the workshop', { exact: true }).click();
 		await expect(page.getByRole('complementary', { name: 'Funded AI usage notice' })).toBeVisible();
 		await expect(page.locator('.workshop-rules')).toContainText('$20 site-wide guard');
@@ -212,3 +219,28 @@ for (const [name, width, height] of viewports) {
 		);
 	});
 }
+
+test('owner usage is uncapped and quiet while member notices remain visible', async ({ page }) => {
+	await signIn(page);
+	const usage = page.getByRole('complementary', { name: 'Usage summary' });
+	await expect(usage).toContainText("Today's usage");
+	await expect(usage).toContainText('$0.05');
+	await expect(usage).not.toContainText('/ $2.00');
+	await expect(usage).not.toContainText(' / 20');
+	await expect(usage).not.toContainText(' / 5');
+	await expect(page.locator('.workshop-rules')).toHaveCount(0);
+	await expect(page.getByText('AI is funded by swyx.io, rate limited, and logged.')).toHaveCount(0);
+	await page.goto('/tools/box');
+	await expect(page.getByRole('textbox', { name: 'Write anything' })).toBeVisible();
+	await expect(page.locator('.logging-note')).toHaveCount(0);
+	await authenticateTools(page, TEST_TOOLS_MEMBER);
+	await page.reload();
+	await expect(page.locator('.logging-note')).toBeVisible();
+	await page.goto('/tools');
+	await expect(page.getByRole('complementary', { name: 'Usage allowance' })).toContainText(
+		'$0.05 / $2.00'
+	);
+	await expect(
+		page.getByText('AI is funded by swyx.io, rate limited, and logged.', { exact: true }).first()
+	).toBeVisible();
+});

@@ -304,7 +304,7 @@ test('account switching keeps browser caches separate and removes owner-only too
 	);
 });
 
-test('all accounts see funded AI limits and logging before using the assistant', async ({
+test('members and guests see funded AI limits and logging before using the assistant', async ({
 	page
 }) => {
 	await page.goto('/tools');

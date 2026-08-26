@@ -10,15 +10,15 @@ import { estimateToolsMediaReservation } from './tools-ai-policy.js';
 /** @typedef {import('./draw-generation-history.js').DrawingImageGeneration} Generation */
 /** @typedef {{id:string,prompt:string,modelId:string,adapterId:string,modelSettings:Record<string,unknown>,referenceImages:import('./draw-generation-history.js').DrawingGenerationReference[],parentGenerationId?:string,context?:Record<string,unknown>}} DrawingGenerationRecipe */
 /** @typedef {{id:string,runId:string,recipe:DrawingGenerationRecipe,status:'pending'|'running'|'completed'|'failed'|'stopped',message:string,requestId?:string,elapsedMs?:number,error?:string,generation?:Generation}} DrawingGenerationJob */
-/** @typedef {{id:string,createdAt:number,pageKey:string,limitUsd:number,jobs:DrawingGenerationJob[]}} DrawingGenerationRun */
+/** @typedef {{id:string,createdAt:number,pageKey:string,limitUsd:number|null,jobs:DrawingGenerationJob[]}} DrawingGenerationRun */
 
 /** A run owns immutable recipe snapshots; tool/mode changes never rewrite them.
- * @param {{pageKey:string,recipes:DrawingGenerationRecipe[],limitUsd:number,id?:string}} options
+ * @param {{pageKey:string,recipes:DrawingGenerationRecipe[],limitUsd:number|null,id?:string}} options
  * @returns {DrawingGenerationRun}
  */
 export function createDrawingGenerationRun(options) {
 	if (!options.pageKey || !options.recipes.length) throw new Error('Choose at least one model.');
-	if (!Number.isFinite(options.limitUsd) || options.limitUsd <= 0)
+	if (options.limitUsd !== null && (!Number.isFinite(options.limitUsd) || options.limitUsd <= 0))
 		throw new Error('Choose a positive run spending limit.');
 	const id = options.id ?? crypto.randomUUID();
 	const recipes = structuredClone(options.recipes);
@@ -37,7 +37,7 @@ export function createDrawingGenerationRun(options) {
 		const effective = resolveDrawGenerationModelSettings(model, recipe.modelSettings);
 		reserved += estimateToolsMediaReservation(estimateDrawGenerationModelCost(model, effective));
 	}
-	if (reserved > options.limitUsd + 0.000001)
+	if (options.limitUsd !== null && reserved > options.limitUsd + 0.000001)
 		throw new Error(
 			`This batch reserves ~$${reserved.toFixed(3)}, above your $${options.limitUsd.toFixed(2)} run limit.`
 		);

@@ -454,6 +454,12 @@ There is no password-login endpoint or legacy session fallback.
 - Cloud AI is **site-funded for every signed-in account**, with durable admission
   limits enforced before provider calls: 20 assistant turns/hour, 5 media jobs/hour,
   $2/day per account and $20/day site-wide in conservative estimated reservations.
+  These caps apply to non-owner accounts. The server-configured Google owner is
+  exempt from account/site quotas, assistant spending caps, and generation-run
+  caps; owner spending does not consume the shared non-owner allowance. The
+  exemption is bound to `TOOLS_OWNER_GOOGLE_SUB`, never an email or client flag.
+  Owner UI suppresses funding, logging, provider-sharing and budget notices, but
+  activity remains logged and actual errors and data-loss warnings remain visible.
   These estimates are not exact provider billing caps. Failed attempts retain their
   reservations. Provider job IDs are bound to their originating Google account.
 - AI admission/status logs contain account ID, request ID, model, timestamp, status

@@ -244,6 +244,12 @@
 	);
 	const workspaceActions = $derived([
 		{
+			id: 'sources',
+			label: 'Sources & examples',
+			ariaLabel: 'Open show onboarding, sources and examples',
+			active: creativeOpen
+		},
+		{
 			id: 'templates',
 			label: 'Templates',
 			ariaLabel: 'Open drawing templates and library',
@@ -344,12 +350,13 @@
 		if (action === 'templates') openWorkspaceSection(workspaceSection);
 		if (action === 'assistant') drawingAssistant?.showAssistant();
 		if (action === 'assets') void openCreativeWorkspace('assets');
+		if (action === 'sources') void openCreativeWorkspace('start');
 		if (action === 'generate') void openGenerationComposer();
 		if (action === 'export') void openCreativeWorkspace('export');
 	}
 
 	async function openCreativeWorkspace(
-		/** @type {'assets' | 'kits' | 'sources' | 'compose' | 'versions' | 'export'} */ view
+		/** @type {'start' | 'examples' | 'assets' | 'kits' | 'sources' | 'compose' | 'versions' | 'export'} */ view
 	) {
 		prepareWorkspaceSurface('creative');
 		await creativeWorkspace?.show(view);
@@ -594,10 +601,10 @@
 			{
 				id: 'action-compose-thumbnail',
 				label: 'Create a thumbnail',
-				description: 'Choose your brand kit, source brief, and editable layout',
+				description: 'Start a show brief with source metadata, curated examples and editable layouts',
 				category: 'Actions',
 				keywords: ['thumbnail', 'aie', 'latent space', 'compose'],
-				run: () => openCreativeWorkspace('compose')
+				run: () => openCreativeWorkspace('start')
 			},
 			{
 				id: 'action-generation-history',
@@ -1207,7 +1214,8 @@
 						});
 			const generationModel = model;
 			const agentBudget = operation.getBudget();
-			if (!agentBudget) throw new Error('The assistant spending authorization is unavailable.');
+			if (!toolsUser?.isOwner && !agentBudget)
+				throw new Error('The assistant spending authorization is unavailable.');
 			const generated = await runDrawingGeneration({
 				userId: toolsUser?.id,
 				image: prepared?.blob,
@@ -1215,8 +1223,7 @@
 				model: model.id,
 				signal: operation.signal,
 				providerSafetyDefaults: true,
-				agentBudget,
-				onBudget: operation.updateBudget,
+				...(!toolsUser?.isOwner ? { agentBudget, onBudget: operation.updateBudget } : {}),
 				cancelOnAbort: true,
 				onProgress: (progress) =>
 					operation.onProgress(
@@ -2423,6 +2430,7 @@
 		{backgroundInset}
 		onOpen={() => prepareWorkspaceSurface('assistant')}
 		authenticated={toolsAuthenticated}
+		isOwner={!!toolsUser?.isOwner}
 		userId={toolsUser?.id}
 		pageId={`${STORAGE_KEY}:${activePageId}`}
 		executeCommand={executeAgentCommand}
@@ -2542,6 +2550,7 @@
 			captureUpdate={captureImmediately}
 			{cloudAvailable}
 			authenticated={toolsAuthenticated}
+			isOwner={!!toolsUser?.isOwner}
 			userId={toolsUser?.id}
 			backgroundProcessing={isRemovingBackground}
 			generations={imageGenerations}
@@ -2677,7 +2686,7 @@
 				</div>
 				{#if recoveryNotice}<p class="page-logging" role="status">{recoveryNotice}</p>{/if}
 
-				{#if toolsAuthenticated}<p class="page-logging">
+				{#if toolsAuthenticated && !toolsUser?.isOwner}<p class="page-logging">
 						<a href="/tools/logs">Tool activity is logged</a> · visible to you and swyx; drawing contents
 						stay private.
 					</p>{/if}
@@ -2807,10 +2816,10 @@
 		<button
 			type="button"
 			class="creative-library-entry"
-			onclick={() => void openCreativeWorkspace('assets')}
+			onclick={() => void openCreativeWorkspace('start')}
 		>
-			Assets & creative workspace
-			<span>Brand kits · sources · editable versions</span>
+			Sources & examples
+			<span>Start a show · learn from real videos · reuse your house style</span>
 		</button>
 
 		{#if workspaceSection === 'presets'}

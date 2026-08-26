@@ -4,7 +4,7 @@ import { authenticateTools, TEST_TOOLS_OWNER, TEST_TOOLS_MEMBER } from './helper
 /** @param {import('@playwright/test').Page} page */
 async function authenticate(page) {
 	const origin = new URL(page.url()).origin;
-	await authenticateTools(page);
+	await authenticateTools(page, TEST_TOOLS_MEMBER);
 	await page.reload();
 }
 
@@ -142,6 +142,7 @@ test('authenticated floating assistant uses viewport vision, sandboxed commands,
 }) => {
 	await page.goto('/tools/draw');
 	await authenticate(page);
+	/** @type {any[]} */
 	/** @type {any[]} */
 	const requests = [];
 	await page.route('**/tools/api/draw/agent', async (route) => {
@@ -404,6 +405,7 @@ test('assistant sandbox cannot execute network, JavaScript, or host-shell comman
 	await page.goto('/tools/draw');
 	await authenticate(page);
 	/** @type {any[]} */
+	/** @type {any[]} */
 	const requests = [];
 	await page.route('**/tools/api/draw/agent', async (route) => {
 		if (route.request().method() === 'GET') return route.continue();
@@ -551,4 +553,58 @@ test('assistant arranges shapes and connects them with native Excalidraw arrow b
 	expect(scene.elements.some((element) => element.type === 'text' && element.text === 'next')).toBe(
 		true
 	);
+});
+
+test('owner assistant omits spending authorization and warnings but retains request errors', async ({
+	page
+}) => {
+	await page.goto('/tools/draw');
+	await authenticateTools(page, TEST_TOOLS_OWNER);
+	await page.reload();
+	/** @type {any[]} */
+	const requests = [];
+	await page.route('**/tools/api/draw/agent', async (route) => {
+		if (route.request().method() === 'GET')
+			return route.fulfill({
+				json: {
+					providers: [
+						{
+							id: 'cloudflare',
+							label: 'Cloudflare AI',
+							model: 'Qwen',
+							vision: false,
+							configured: true,
+							notice: 'Provider sharing warning'
+						}
+					]
+				}
+			});
+		requests.push(route.request().postDataJSON());
+		await route.fulfill({
+			status: 503,
+			json: { error: 'Fixture provider is temporarily unavailable.' }
+		});
+	});
+	await page.getByRole('button', { name: 'Open drawing assistant' }).click();
+	const assistant = page.getByRole('region', { name: 'Drawing assistant' });
+	await expect(assistant.getByRole('combobox', { name: 'Drawing model' })).toBeEnabled();
+	await expect(assistant.getByRole('combobox', { name: 'Assistant spending limit' })).toHaveCount(
+		0
+	);
+	await expect(
+		assistant.getByRole('complementary', { name: 'Funded AI usage notice' })
+	).toHaveCount(0);
+	await expect(assistant.locator('.assistant-disclosure')).toHaveCount(0);
+	await expect(assistant.getByText('Provider sharing warning')).toHaveCount(0);
+	await assistant
+		.getByRole('textbox', { name: 'Message drawing assistant' })
+		.fill('Draw a small square');
+	await assistant.getByRole('button', { name: 'Send', exact: true }).click();
+	await expect(assistant.getByRole('alert')).toContainText(
+		'Fixture provider is temporarily unavailable.'
+	);
+	expect(requests).toHaveLength(1);
+	expect(requests[0]).not.toHaveProperty('budget');
+	expect(requests[0]).not.toHaveProperty('budgetCap');
+	await expect(assistant.getByRole('button', { name: 'Retry', exact: true })).toBeVisible();
 });

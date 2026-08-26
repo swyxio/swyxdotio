@@ -238,10 +238,13 @@ test('autonomous drawing-agent edits preserve provider-managed safety defaults',
 		});
 		/** @type {Record<string, unknown> | undefined} */
 		let payload;
-		const response = await editDrawingImage(await createEvent({ form }), async (_url, init) => {
-			payload = JSON.parse(/** @type {string} */ (init?.body));
-			return providerResponse({ request_id: REQUEST_ID }, 202);
-		});
+		const response = await editDrawingImage(
+			await createEvent({ owner: false, form }),
+			async (_url, init) => {
+				payload = JSON.parse(/** @type {string} */ (init?.body));
+				return providerResponse({ request_id: REQUEST_ID }, 202);
+			}
+		);
 		assert.equal(response.status, 202);
 		const authorization = await response.json();
 		assert.equal(typeof authorization.agentBudget, 'string');
@@ -267,17 +270,26 @@ test('autonomous provider jobs require a signed shared budget and reject overspe
 		providerCalls++;
 		return providerResponse({ request_id: REQUEST_ID }, 202);
 	};
-	const missing = await editDrawingImage(await createEvent({ form: createForm(base) }), provider);
+	const missing = await editDrawingImage(
+		await createEvent({ owner: false, form: createForm(base) }),
+		provider
+	);
 	assert.equal(missing.status, 402);
 	const grant = await createDrawingAgentBudget(0.25, SESSION_SECRET);
 	const almostSpent = await chargeDrawingAgentBudget(grant, 0.2, SESSION_SECRET);
 	const exceeded = await editDrawingImage(
-		await createEvent({ form: createForm({ ...base, agentBudget: almostSpent.token }) }),
+		await createEvent({
+			owner: false,
+			form: createForm({ ...base, agentBudget: almostSpent.token })
+		}),
 		provider
 	);
 	assert.equal(exceeded.status, 402);
 	const tampered = await editDrawingImage(
-		await createEvent({ form: createForm({ ...base, agentBudget: `${grant}tampered` }) }),
+		await createEvent({
+			owner: false,
+			form: createForm({ ...base, agentBudget: `${grant}tampered` })
+		}),
 		provider
 	);
 	assert.equal(tampered.status, 402);
@@ -558,14 +570,14 @@ test('agent spending limits use parameter-adjusted provider prices before paid s
 		providerSafetyDefaults: '1',
 		agentBudget: await createDrawingAgentBudget(1, SESSION_SECRET)
 	});
-	const accepted = await editDrawingImage(await createEvent({ form }), async () => {
+	const accepted = await editDrawingImage(await createEvent({ owner: false, form }), async () => {
 		calls++;
 		return providerResponse({ request_id: REQUEST_ID }, 202);
 	});
 	assert.equal(accepted.status, 202);
 	assert.equal((await accepted.json()).spendingUsd, 0.8);
 	form.set('settings', JSON.stringify({ duration: '4s', generate_audio: true }));
-	const rejected = await editDrawingImage(await createEvent({ form }), async () => {
+	const rejected = await editDrawingImage(await createEvent({ owner: false, form }), async () => {
 		calls++;
 		return providerResponse({ request_id: REQUEST_ID }, 202);
 	});
@@ -948,7 +960,7 @@ test('media submission fails closed without a ledger or after durable funded quo
 	const ledger = createTestAiLedger();
 	for (let index = 0; index < 5; index++)
 		await ledgerRequest(ledger, 'admit', {
-			userId: 'owner-google-sub',
+			userId: 'other-google-sub',
 			kind: 'media',
 			model: 'flux-2',
 			estimatedReservedUsd: 0.05
@@ -957,10 +969,13 @@ test('media submission fails closed without a ledger or after durable funded quo
 		[null, 503],
 		[ledger, 429]
 	]) {
-		const response = await editDrawingImage(await createEvent({ ledger: value }), async () => {
-			called = true;
-			return providerResponse({ request_id: REQUEST_ID });
-		});
+		const response = await editDrawingImage(
+			await createEvent({ owner: false, ledger: value }),
+			async () => {
+				called = true;
+				return providerResponse({ request_id: REQUEST_ID });
+			}
+		);
 		assert.equal(response.status, expected);
 	}
 	assert.equal(called, false);
@@ -998,7 +1013,11 @@ test('manual concurrent generation reserves one run budget before provider submi
 	};
 	const events = await Promise.all(
 		Array.from({ length: 4 }, (_, index) =>
-			createEvent({ ledger, form: createForm({ ...base, clientJobId: `job-${index}` }) })
+			createEvent({
+				owner: false,
+				ledger,
+				form: createForm({ ...base, clientJobId: `job-${index}` })
+			})
 		)
 	);
 	const responses = await Promise.all(events.map((event) => editDrawingImage(event, provider)));
@@ -1006,7 +1025,11 @@ test('manual concurrent generation reserves one run budget before provider submi
 	assert.equal(responses.filter((response) => response.status === 402).length, 2);
 	assert.equal(calls, 2);
 	const duplicate = await editDrawingImage(
-		await createEvent({ ledger, form: createForm({ ...base, clientJobId: 'job-0' }) }),
+		await createEvent({
+			owner: false,
+			ledger,
+			form: createForm({ ...base, clientJobId: 'job-0' })
+		}),
 		provider
 	);
 	assert.equal(duplicate.status, 409);
@@ -1019,6 +1042,7 @@ test('manual concurrent generation reserves one run budget before provider submi
 	]) {
 		const response = await editDrawingImage(
 			await createEvent({
+				owner: false,
 				ledger,
 				form: createForm({ prompt: base.prompt, model: base.model, ...fields })
 			}),
@@ -1027,6 +1051,70 @@ test('manual concurrent generation reserves one run budget before provider submi
 		assert.equal(response.status, 422);
 	}
 	assert.equal(calls, 2);
+});
+
+test('owner media has no account or run cap, retains replay protection, and cannot grant that exemption to members', async () => {
+	const ledger = createTestAiLedger();
+	let calls = 0;
+	const provider = async () => providerResponse({ request_id: `owner-job-${++calls}` }, 202);
+	const fields = {
+		image: new File(['source'], 'source.png', { type: 'image/png' }),
+		prompt: 'Animate the scene',
+		model: 'veo-3-1-video',
+		runId: 'owner-run',
+		runLimitUsd: 'null',
+		providerSafetyDefaults: '1'
+	};
+	for (let index = 0; index < 8; index++) {
+		const response = await editDrawingImage(
+			await createEvent({
+				ledger,
+				form: createForm({ ...fields, clientJobId: `job-${index}` })
+			}),
+			provider
+		);
+		assert.equal(response.status, 202);
+		assert.equal((await response.json()).agentBudget, undefined);
+	}
+	const repeated = await editDrawingImage(
+		await createEvent({
+			ledger,
+			form: createForm({ ...fields, clientJobId: 'job-0' })
+		}),
+		provider
+	);
+	assert.equal(repeated.status, 409);
+	assert.equal((await repeated.json()).code, 'job_already_submitted');
+	const member = await editDrawingImage(
+		await createEvent({
+			owner: false,
+			ledger,
+			form: createForm({ ...fields, clientJobId: 'member-job' })
+		}),
+		provider
+	);
+	assert.equal(member.status, 422);
+	const impersonation = await editDrawingImage(
+		await createEvent({
+			owner: false,
+			ledger,
+			form: createForm({ ...fields, clientJobId: 'member-job', isOwner: 'true' })
+		}),
+		provider
+	);
+	assert.equal(impersonation.status, 400);
+	assert.equal(calls, 8);
+	const usage = ledger.database
+		.prepare(
+			"SELECT COUNT(*) AS count, SUM(reserved_micros) AS reserved FROM tools_ai_usage WHERE user_id = 'owner-google-sub'"
+		)
+		.get();
+	assert.equal(usage.count, 8);
+	assert.ok(usage.reserved > 2_000_000);
+	assert.equal(
+		ledger.database.prepare('SELECT limit_micros FROM tools_ai_generation_runs').get().limit_micros,
+		0
+	);
 });
 
 test('shared route authenticates and registers a fake adapter, then polls its original binding after catalog routing changes', async () => {

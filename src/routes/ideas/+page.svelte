@@ -261,7 +261,8 @@
 		const keys = [
 			...new Set(
 				visibleItems
-					.filter((item) => !isExternalItem(item))
+					// Speaking entries without a video are still not registered article counters.
+					.filter((item) => item.type === 'blog')
 					.map((item) => item.slug)
 					.filter((slug) => slug && !requestedReadKeys.has(slug))
 			)

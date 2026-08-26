@@ -190,7 +190,7 @@ function hasCompletedToolReview(messages) {
 
 /**
  * One bounded model turn. Browser-side tools remain outside the Worker and its
- * secrets; every signed-in account uses the same durable funded-usage limits.
+ * secrets; all requests are logged, and non-owner accounts have funded-usage limits.
  * @param {Pick<import('@sveltejs/kit').RequestEvent, 'cookies' | 'platform' | 'request' | 'url'>} event
  */
 export async function runDrawingAgent(event) {
@@ -292,20 +292,25 @@ export async function runDrawingAgent(event) {
 			{ status: error instanceof DrawingProviderError ? error.status : 503 }
 		);
 	}
-	/** @type {string} */
+	/** @type {string | undefined} */
 	let budget;
-	try {
-		budget = body.budget
-			? body.budget
-			: await createDrawingAgentBudget(body.budgetCap ?? 1, sessionSecret);
-		await chargeDrawingAgentBudget(budget, stepReserve, sessionSecret);
-	} catch (error) {
-		return privateJson(
-			{
-				error: error instanceof Error ? error.message : 'The assistant spending limit was reached.'
-			},
-			{ status: 402 }
-		);
+	if (!user.isOwner) {
+		try {
+			budget = body.budget
+				? body.budget
+				: await createDrawingAgentBudget(body.budgetCap ?? 1, sessionSecret);
+			if (typeof budget !== 'string')
+				throw new Error('The assistant spending authorization is invalid.');
+			await chargeDrawingAgentBudget(budget, stepReserve, sessionSecret);
+		} catch (error) {
+			return privateJson(
+				{
+					error:
+						error instanceof Error ? error.message : 'The assistant spending limit was reached.'
+				},
+				{ status: 402 }
+			);
+		}
 	}
 	if (provider.vision && body.screenshot) {
 		messages.push({
@@ -407,19 +412,22 @@ export async function runDrawingAgent(event) {
 			);
 		}
 	}
-	try {
-		const charged = await chargeDrawingAgentBudget(budget, modelCostUsd, sessionSecret);
-		response.budget = charged.token;
-		response.spendingUsd = charged.spendingUsd;
-		response.modelCostUsd = modelCostUsd;
-	} catch (error) {
-		await finishToolsAiUsage(event, user.id, reservation.id, 'failed');
-		return privateJson(
-			{
-				error: error instanceof Error ? error.message : 'The assistant spending limit was reached.'
-			},
-			{ status: 402 }
-		);
+	response.modelCostUsd = modelCostUsd;
+	if (budget) {
+		try {
+			const charged = await chargeDrawingAgentBudget(budget, modelCostUsd, sessionSecret);
+			response.budget = charged.token;
+			response.spendingUsd = charged.spendingUsd;
+		} catch (error) {
+			await finishToolsAiUsage(event, user.id, reservation.id, 'failed');
+			return privateJson(
+				{
+					error:
+						error instanceof Error ? error.message : 'The assistant spending limit was reached.'
+				},
+				{ status: 402 }
+			);
+		}
 	}
 	const recorded = await finishToolsAiUsage(event, user.id, reservation.id, 'succeeded');
 	if (!recorded.ok) return recorded;
