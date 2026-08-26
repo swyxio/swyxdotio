@@ -19,19 +19,32 @@
 	 *  authenticated?: boolean,
 	 *  userId?: string,
 	 *  pageId: string,
+	 *  open?: boolean,
+	 *  minimized?: boolean,
+	 *  running?: boolean,
+	 *  showLauncher?: boolean,
+	 *  onOpen?: () => void,
 	 *  executeCommand: (args: string[], options: CommandOptions) => Promise<unknown>,
 	 *  captureViewport: () => Promise<string | undefined>
 	 * }} */
-	let { authenticated = false, userId, pageId, executeCommand, captureViewport } = $props();
+	let {
+		authenticated = false,
+		userId,
+		pageId,
+		executeCommand,
+		captureViewport,
+		open = $bindable(false),
+		minimized = $bindable(false),
+		running = $bindable(false),
+		showLauncher = true,
+		onOpen = () => {}
+	} = $props();
 
 	const HISTORY_PREFIX = 'swyx-excalidraw:assistant:';
 	const MAX_HISTORY_MESSAGES = 36;
-	let open = $state(false);
-	let minimized = $state(false);
 	let prompt = $state('');
 	/** @type {AgentMessage[]} */
 	let messages = $state([]);
-	let running = $state(false);
 	let status = $state('');
 	let error = $state('');
 	let rounds = $state(0);
@@ -94,7 +107,8 @@
 		void tick().then(() => transcript?.scrollTo({ top: transcript.scrollHeight }));
 	}
 
-	function showAssistant() {
+	export function showAssistant() {
+		onOpen();
 		open = true;
 		minimized = false;
 		void tick().then(() => composer?.focus());
@@ -362,6 +376,7 @@
 	onMount(() => {
 		/** @param {KeyboardEvent} event */
 		const shortcut = (event) => {
+			if (event.defaultPrevented) return;
 			if (event.key.toLowerCase() === 'j') {
 				if ((!event.metaKey && !event.ctrlKey) || event.shiftKey || event.altKey) return;
 				event.preventDefault();
@@ -370,12 +385,13 @@
 				return;
 			}
 			if (event.key === 'Escape' && open && !minimized && !running) {
+				event.preventDefault();
 				minimized = true;
 			}
 		};
-		window.addEventListener('keydown', shortcut, { capture: true });
+		window.addEventListener('keydown', shortcut);
 		return () => {
-			window.removeEventListener('keydown', shortcut, { capture: true });
+			window.removeEventListener('keydown', shortcut);
 			stop();
 			worker?.terminate();
 		};
@@ -383,24 +399,26 @@
 </script>
 
 {#if !open || minimized}
-	<button
-		type="button"
-		class="assistant-launcher"
-		class:working={running}
-		aria-label="Open drawing assistant"
-		title="Drawing assistant (⌘/Ctrl+J)"
-		onclick={showAssistant}
-	>
-		<svg aria-hidden="true" viewBox="0 0 20 20" fill="none">
-			<path
-				d="M10 2.5 11.8 7.2 16.5 9 11.8 10.8 10 15.5 8.2 10.8 3.5 9 8.2 7.2 10 2.5ZM15.3 12.8l.95 2.5 2.5.95-2.5.95-.95 2.5-.95-2.5-2.5-.95 2.5-.95.95-2.5Z"
-				stroke="currentColor"
-				stroke-width="1.35"
-				stroke-linejoin="round"
-			/>
-		</svg>
-		<span>{running ? 'Agent working…' : 'AI assistant'}</span>
-	</button>
+	{#if showLauncher}
+		<button
+			type="button"
+			class="assistant-launcher"
+			class:working={running}
+			aria-label="Open drawing assistant"
+			title="Drawing assistant (⌘/Ctrl+J)"
+			onclick={showAssistant}
+		>
+			<svg aria-hidden="true" viewBox="0 0 20 20" fill="none">
+				<path
+					d="M10 2.5 11.8 7.2 16.5 9 11.8 10.8 10 15.5 8.2 10.8 3.5 9 8.2 7.2 10 2.5ZM15.3 12.8l.95 2.5 2.5.95-2.5.95-.95 2.5-.95-2.5-2.5-.95 2.5-.95.95-2.5Z"
+					stroke="currentColor"
+					stroke-width="1.35"
+					stroke-linejoin="round"
+				/>
+			</svg>
+			<span>{running ? 'Agent working…' : 'AI assistant'}</span>
+		</button>
+	{/if}
 {:else}
 	<section
 		class="assistant-window"
@@ -665,12 +683,12 @@
 		border-color: #aaa5f6;
 	}
 	.assistant-window {
-		right: 20px;
-		bottom: 80px;
+		right: 14px;
+		top: 126px;
 		display: flex;
 		flex-direction: column;
 		width: min(410px, calc(100vw - 24px));
-		height: min(580px, calc(100dvh - 105px));
+		height: min(640px, calc(100dvh - 195px));
 		overflow: hidden;
 		border: 1px solid #e6e5eb;
 		border-radius: 17px;
@@ -920,9 +938,11 @@
 			bottom: 58px;
 		}
 		.assistant-window {
-			right: 12px;
+			top: auto;
+			right: 10px;
+			width: calc(100vw - 20px);
 			bottom: 68px;
-			height: min(540px, calc(100dvh - 95px));
+			height: min(640px, calc(100dvh - 204px));
 		}
 	}
 </style>

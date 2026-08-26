@@ -28,6 +28,14 @@
 	import DrawAgent from '$lib/DrawAgent.svelte';
 	import { DRAW_THINKING_WORKFLOWS } from '$lib/draw-thinking.js';
 	import DrawImageToolbox from '$lib/DrawImageToolbox.svelte';
+	import DrawWorkspaceNav from '$lib/DrawWorkspaceNav.svelte';
+	import DrawStartingPoints from '$lib/DrawStartingPoints.svelte';
+	import {
+		getDrawingStartingMode,
+		drawingStartingModeKey,
+		isNewBlankDrawing,
+		shouldShowDrawingStart
+	} from '$lib/draw-starting-modes.js';
 
 	// Set once after the server identifies the account, before reading any drawing data.
 	let STORAGE_KEY = $state('');
@@ -56,8 +64,19 @@
 	let canvas;
 	/** @type {import('@excalidraw/excalidraw/types').ExcalidrawImperativeAPI | null} */
 	let editor = $state.raw(null);
-	/** @type {{ prepareWorkflow: (id: string) => void } | undefined} */
+	/** @type {{ prepareWorkflow: (id: string) => void, showAssistant: () => void } | undefined} */
 	let drawingAssistant = $state();
+	let assistantOpen = $state(false);
+	let assistantMinimized = $state(false);
+	let assistantRunning = $state(false);
+	let startingMode = $state(getDrawingStartingMode('thinking'));
+	let workspaceMenuOpen = $state(false);
+	let sceneReady = $state(false);
+	let blankScene = $state(false);
+	let startingPointsRestoreFailed = $state(false);
+	let startingPointsRequested = $state(false);
+	/** @type {string[]} */
+	let dismissedStartingPages = $state([]);
 	/** @type {typeof import('@excalidraw/excalidraw').convertToExcalidrawElements | null} */
 	let convertElements = null;
 	/** @type {typeof import('@excalidraw/excalidraw').newElementWith | null} */
@@ -113,7 +132,7 @@
 	let saveTimer;
 	/** @type {{ pageId: string, scene: DrawingScene } | undefined} */
 	let pendingSave;
-	let isSwitchingPage = false;
+	let isSwitchingPage = $state(false);
 	let isLibraryOpen = $state(false);
 	let selectedImageId = $state('');
 	let selectedImageDataUrl = $state('');
@@ -146,6 +165,86 @@
 	const activeBackgroundMode = $derived(
 		BACKGROUND_MODES.find((mode) => mode.id === backgroundMode) ?? BACKGROUND_MODES[0]
 	);
+	const showStartingPoints = $derived(
+		shouldShowDrawingStart({
+			ready: sceneReady && !isSwitchingPage,
+			restoreFailed: startingPointsRestoreFailed,
+			blank: blankScene || startingPointsRequested,
+			dismissed: !startingPointsRequested && dismissedStartingPages.includes(activePageId),
+			surfaceOpen:
+				isLibraryOpen ||
+				(assistantOpen && !assistantMinimized) ||
+				Boolean(activeImageToolId) ||
+				isCommandPaletteOpen ||
+				workspaceMenuOpen ||
+				isPageMenuOpen
+		})
+	);
+	const workspaceActions = $derived([
+		{
+			id: 'templates',
+			label: 'Templates',
+			ariaLabel: 'Open drawing templates and library',
+			active: isLibraryOpen
+		},
+		{
+			id: 'assistant',
+			label: 'Assistant',
+			ariaLabel: 'Open drawing assistant',
+			active: assistantOpen && !assistantMinimized,
+			busy: assistantRunning
+		}
+	]);
+
+	function dismissStartingPoints() {
+		startingPointsRequested = false;
+		if (!dismissedStartingPages.includes(activePageId))
+			dismissedStartingPages = [...dismissedStartingPages, activePageId];
+	}
+
+	/** UI-only: never changes the active tool, scene, selection, draft, or undo history. */
+	function changeStartingMode(/** @type {string} */ id) {
+		startingMode = getDrawingStartingMode(id);
+		workspaceSection = startingMode.section;
+		try {
+			localStorage.setItem(drawingStartingModeKey(STORAGE_KEY), JSON.stringify(startingMode.id));
+		} catch {}
+	}
+
+	/** Keep controllers mounted; opening a surface only changes which one is in front. */
+	function prepareWorkspaceSurface(/** @type {'library' | 'assistant' | 'start'} */ surface) {
+		workspaceMenuOpen = false;
+		isPageMenuOpen = false;
+		startingPointsRequested = false;
+		if (surface !== 'assistant') assistantMinimized = true;
+		if (surface !== 'library' && isLibraryOpen)
+			editor?.toggleSidebar({ name: 'default', force: false });
+	}
+
+	function openWorkspaceAction(/** @type {string} */ action) {
+		if (action === 'templates') openWorkspaceSection(workspaceSection);
+		if (action === 'assistant') drawingAssistant?.showAssistant();
+	}
+
+	function browseStartingPoints() {
+		prepareWorkspaceSurface('start');
+		startingPointsRequested = true;
+	}
+
+	function runStartingCommand(/** @type {string} */ id) {
+		const command = workspaceCommands.find((command) => command.id === id);
+		if (!command) return;
+		dismissStartingPoints();
+		void command.run();
+	}
+
+	function handleCanvasPointer(/** @type {PointerEvent} */ event) {
+		if (
+			event.target instanceof Element &&
+			event.target.closest('canvas.excalidraw__canvas.interactive')
+		)
+			dismissStartingPoints();
+	}
 
 	/** @param {PointerEvent} event */
 	function startDraggingImageTools(event) {
@@ -372,6 +471,8 @@
 			const value = localStorage.getItem(key);
 			return value ? JSON.parse(value) : undefined;
 		} catch {
+			if (key === STORAGE_KEY || key === `${STORAGE_KEY}:${activePageId}`)
+				startingPointsRestoreFailed = true;
 			return undefined;
 		}
 	}
@@ -507,6 +608,7 @@
 		} catch (error) {
 			cloudAvailable = false;
 			saveStatus = 'local';
+			if (!needsSignIn) startingPointsRestoreFailed = true;
 			if (!needsSignIn) console.warn('Drawing pages are using browser-only storage.', error);
 			pages = stored?.pages?.length ? stored.pages : [{ id: 'default', name: 'Page 1' }];
 			activePageId = pages.some((page) => page.id === stored?.activePageId)
@@ -573,6 +675,8 @@
 				}
 			}
 			activePageId = page.id;
+			startingPointsRequested = false;
+			blankScene = isNewBlankDrawing(scene);
 			storePages();
 			localStorage.removeItem(`${STORAGE_KEY}:${page.id}`);
 			localStorage.setItem(STORAGE_KEY, JSON.stringify(scene));
@@ -1267,7 +1371,7 @@
 	/** @param {string} id */
 	function prepareThinkingWorkflow(id) {
 		// A navigation action only: no inference, page switch, or scene mutation.
-		if (window.innerWidth <= 960) editor?.toggleSidebar({ name: 'default', force: false });
+		prepareWorkspaceSurface('assistant');
 		drawingAssistant?.prepareWorkflow(id);
 	}
 
@@ -1298,6 +1402,7 @@
 
 	/** @param {'presets' | 'designs' | 'components' | 'memes'} section */
 	function openWorkspaceSection(section) {
+		prepareWorkspaceSurface('library');
 		workspaceSection = section;
 		isPageMenuOpen = false;
 		editor?.updateScene({ appState: { openSidebar: { name: 'default', tab: 'workspace' } } });
@@ -1574,8 +1679,14 @@
 	 */
 	function saveScene(elements, appState, files) {
 		const nextLibraryOpen = appState.openSidebar?.name === 'default';
+		if (nextLibraryOpen && !isLibraryOpen) prepareWorkspaceSurface('library');
 		if (isLibraryOpen !== nextLibraryOpen) isLibraryOpen = nextLibraryOpen;
 		if (!activePageId || isSwitchingPage) return;
+		if (!appState.isLoading) {
+			sceneReady = true;
+			blankScene = elements.length === 0;
+			if (!blankScene || appState.activeTool.type !== 'selection') dismissStartingPoints();
+		}
 		const selectedIds = Object.entries(appState.selectedElementIds)
 			.filter(([, selected]) => selected)
 			.map(([id]) => id);
@@ -1664,6 +1775,8 @@
 				LIBRARY_STORAGE_KEY = `${STORAGE_KEY}:library`;
 				INSTALLED_LIBRARY_STORAGE_KEY = `${LIBRARY_STORAGE_KEY}:installed-defaults`;
 				BACKGROUND_MODE_STORAGE_KEY = `${STORAGE_KEY}:background-mode`;
+				startingMode = getDrawingStartingMode(readStorage(drawingStartingModeKey(STORAGE_KEY)));
+				workspaceSection = startingMode.section;
 				try {
 					localStorage.setItem(TOOLS_ACCOUNT_EVENT_KEY, toolsUser?.id ?? 'guest');
 				} catch {}
@@ -1700,6 +1813,7 @@
 			]);
 
 			if (destroyed) return;
+			blankScene = isNewBlankDrawing(initialScene);
 
 			convertElements = convertToExcalidrawElements;
 			updateElement = newElementWith;
@@ -1795,6 +1909,7 @@
 		void mountEditor();
 		const accountUpdated = () => {
 			accountChanged = true;
+			sceneReady = false;
 			pendingSave = undefined;
 			if (saveTimer) clearTimeout(saveTimer);
 			backgroundAbort?.abort();
@@ -1870,17 +1985,41 @@
 	data-storage-key={STORAGE_KEY}
 	role="application"
 	aria-label="Drawing canvas"
+	onpointerdowncapture={handleCanvasPointer}
 	bind:this={canvas}
 ></div>
 
 {#if editor && activePageId}
 	<DrawAgent
 		bind:this={drawingAssistant}
+		bind:open={assistantOpen}
+		bind:minimized={assistantMinimized}
+		bind:running={assistantRunning}
+		showLauncher={false}
+		onOpen={() => prepareWorkspaceSurface('assistant')}
 		authenticated={toolsAuthenticated}
 		userId={toolsUser?.id}
 		pageId={`${STORAGE_KEY}:${activePageId}`}
 		executeCommand={executeAgentCommand}
 		captureViewport={() => captureVisibleDrawingViewport(canvas)}
+	/>
+	<DrawWorkspaceNav
+		mode={startingMode}
+		actions={workspaceActions}
+		onMode={changeStartingMode}
+		onAction={openWorkspaceAction}
+		onStartingPoints={browseStartingPoints}
+		bind:menuOpen={workspaceMenuOpen}
+		libraryOpen={isLibraryOpen}
+	/>
+{/if}
+
+{#if showStartingPoints}
+	<DrawStartingPoints
+		mode={startingMode}
+		onMode={changeStartingMode}
+		onCommand={runStartingCommand}
+		onDismiss={dismissStartingPoints}
 	/>
 {/if}
 
@@ -2031,7 +2170,7 @@
 {/if}
 
 {#if pages.length > 0}
-	<div class="page-picker">
+	<div class="page-picker" class:library-open={isLibraryOpen}>
 		<button
 			type="button"
 			class="page-toggle"
@@ -2176,27 +2315,6 @@
 			</section>
 		{/if}
 	</div>
-{/if}
-
-{#if editor && presets.length > 0 && !isLibraryOpen}
-	<button
-		type="button"
-		class="compact-library-toggle"
-		aria-label="Open drawing templates and library"
-		title="Open presets, components, and meme templates"
-		onclick={() => openWorkspaceSection('presets')}
-	>
-		<svg aria-hidden="true" viewBox="0 0 20 20" fill="none">
-			<path
-				d="M4 4h5v5H4V4Zm7 0h5v5h-5V4ZM4 11h5v5H4v-5Zm9.5 0v5m-2.5-2.5h5"
-				stroke="currentColor"
-				stroke-width="1.6"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-			/>
-		</svg>
-		<span>Templates</span>
-	</button>
 {/if}
 
 {#if presets.length > 0 && uiComponents.length > 0}
@@ -2523,13 +2641,12 @@
 
 	.image-tools {
 		position: fixed;
-		top: 72px;
-		left: 50%;
+		top: 126px;
+		right: 14px;
 		z-index: 1001;
 		width: min(405px, calc(100vw - 28px));
-		max-height: calc(100dvh - 95px);
+		max-height: calc(100dvh - 195px);
 		padding: 12px;
-		transform: translateX(-50%);
 		border: 1px solid rgb(0 0 0 / 9%);
 		border-radius: 12px;
 		background: #fff;
@@ -2703,8 +2820,7 @@
 		color: #1d1d1d;
 	}
 
-	.page-toggle,
-	.compact-library-toggle {
+	.page-toggle {
 		display: flex;
 		align-items: center;
 		gap: 8px;
@@ -2718,12 +2834,6 @@
 		font-size: 13px;
 		font-weight: 550;
 		cursor: pointer;
-	}
-
-	.compact-library-toggle {
-		display: none;
-		position: fixed;
-		z-index: 1000;
 	}
 
 	.page-toggle {
@@ -2753,7 +2863,6 @@
 	}
 
 	.page-toggle svg,
-	.compact-library-toggle svg,
 	.page-action svg,
 	.add-page svg {
 		flex: none;
@@ -2824,9 +2933,7 @@
 	}
 
 	.workspace-content {
-		max-height: calc(100dvh - 150px);
 		padding: 0 6px 12px;
-		overflow-y: auto;
 	}
 
 	.preset-heading,
@@ -3197,6 +3304,12 @@
 
 	:global(.swyx-workspace-sidebar-tab) {
 		width: 100%;
+		min-height: 0;
+		overflow-y: auto;
+		overscroll-behavior: contain;
+	}
+	:global(.draw-canvas .sidebar-tabs-root) {
+		min-height: 0;
 	}
 
 	.command-backdrop {
@@ -3295,20 +3408,17 @@
 	}
 
 	@media (max-width: 960px) {
+		.page-picker.library-open {
+			display: none;
+		}
 		.page-picker {
 			top: 72px;
 			left: 12px;
 		}
 
-		.compact-library-toggle {
-			top: 72px;
-			right: 64px;
-			display: flex;
-			min-height: 40px;
-		}
-
 		.page-toggle {
-			min-height: 40px;
+			min-height: 44px;
+			max-width: min(180px, calc(100vw - 235px));
 		}
 
 		.page-menu {
@@ -3336,8 +3446,12 @@
 			max-width: 96px;
 		}
 		.image-tools {
-			top: 124px;
-			max-height: min(420px, calc(100dvh - 150px));
+			top: auto;
+			right: 10px;
+			bottom: 68px;
+			left: 10px;
+			width: auto;
+			max-height: calc(100dvh - 204px);
 		}
 
 		.page-picker {
@@ -3345,15 +3459,10 @@
 			left: 10px;
 		}
 
-		.compact-library-toggle {
-			top: 70px;
-			right: 59px;
-		}
-
 		.page-toggle {
-			height: 40px;
+			height: 44px;
 			padding: 0 10px;
-			max-width: min(180px, calc(100vw - 125px));
+			max-width: calc(100vw - 235px);
 		}
 
 		.page-menu {

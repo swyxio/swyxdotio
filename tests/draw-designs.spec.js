@@ -195,6 +195,7 @@ test('design workflows remain reachable and artboard controls stay contained on 
 }) => {
 	await page.setViewportSize({ width: 390, height: 844 });
 	await page.goto('/draw');
+	await page.getByRole('button', { name: 'Choose drawing mode and tools' }).click();
 	await page.getByRole('button', { name: 'Open drawing templates and library' }).click();
 	await page.getByRole('tab', { name: 'Design', exact: true }).click();
 	await page.getByRole('button', { name: 'Insert Article launch banner design' }).click();
