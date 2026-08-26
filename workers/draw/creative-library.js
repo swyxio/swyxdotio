@@ -195,6 +195,19 @@ const generation = shape(
 	},
 	['id', 'prompt', 'modelId']
 );
+const fewShotSelection = shape(
+	{
+		catalogVersion: text(50, 1),
+		examples: list(
+			shape(
+				{ id: text(80, 1), fields: list(choice(['title', 'hook', 'visual']), 3), note: text(1000) },
+				['id', 'fields']
+			),
+			6
+		)
+	},
+	['catalogVersion', 'examples']
+);
 const schemas = {
 	kits: shape(
 		{
@@ -204,6 +217,7 @@ const schemas = {
 			colors: shape({ background: color, foreground: color, accent: color }),
 			fontFamily: font,
 			fontNotes: text(4000),
+			fewShot: fewShotSelection,
 			assetIds: list(id),
 			referenceIds: list(id),
 			negativeReferenceIds: list(id),
@@ -219,6 +233,25 @@ const schemas = {
 			title: text(500),
 			hook: text(300),
 			hints: text(20000),
+			description: text(20000),
+			fewShot: fewShotSelection,
+			videoMetadata: shape(
+				{
+					id: text(11, 11),
+					url: httpsUrl,
+					title: text(500),
+					description: text(20000),
+					channelId: text(100),
+					channelTitle: text(200),
+					thumbnailUrl: httpsUrl,
+					duration: text(100),
+					publishedAt: text(50),
+					privacyStatus: choice(['public', 'unlisted', 'private']),
+					provenance: choice(['youtube-data-api', 'youtube-oembed']),
+					retrievedAt: text(50)
+				},
+				['id', 'url', 'title', 'provenance', 'retrievedAt']
+			),
 			transcript: text(500000),
 			sourceUrl: httpsUrl,
 			channelId: optionalId,

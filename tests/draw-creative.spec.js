@@ -9,6 +9,7 @@ import {
 	chunkCreativeTranscript,
 	validateCreativeQuotes
 } from '../src/lib/draw-creative-sources.js';
+import { referenceCatalog, SHOW_PRESETS } from '../src/lib/draw-creative-examples.js';
 
 const api = '/tools/api/draw/creative';
 const logoPath = fileURLToPath(
@@ -16,6 +17,31 @@ const logoPath = fileURLToPath(
 );
 const logoName = 'latent-space-hex-gradient.png';
 const portraitPath = fileURLToPath(new URL('../static/swyx.jpg', import.meta.url));
+
+/** @param {import('@playwright/test').Page} page */
+async function openShowOnboarding(page) {
+	if ((page.viewportSize()?.width ?? 1280) <= 650) {
+		await page.getByRole('button', { name: 'Choose drawing mode and tools', exact: true }).click();
+	}
+	await page
+		.getByRole('button', { name: 'Open show onboarding, sources and examples', exact: true })
+		.click();
+	const workspace = page.getByRole('dialog', { name: 'Creative workspace', exact: true });
+	await expect(workspace).toBeVisible();
+	await expect(workspace.getByText('Loading your private library…')).toHaveCount(0);
+	return workspace;
+}
+
+/** @param {import('@playwright/test').Locator} workspace @param {string} exampleId */
+function exampleCard(workspace, exampleId) {
+	const example = referenceCatalog.examples.find((item) => item.id === exampleId);
+	if (!example) throw new Error(`Missing reference fixture ${exampleId}`);
+	return workspace.locator('.example-grid article').filter({
+		has: workspace
+			.page()
+			.getByRole('link', { name: `Watch reference: ${example.title}`, exact: true })
+	});
+}
 
 test.use({ actionTimeout: 15_000 });
 
@@ -751,4 +777,511 @@ test('source workflow saves exact evidence, resumes bounded extraction, retains 
 		expect(browserErrors).toEqual([]);
 		expect(content(await scene(page))).toEqual(before);
 	});
+});
+
+test('show-first onboarding applies only chosen fields, saves six examples, and uses active house revisions', async ({
+	page
+}) => {
+	test.setTimeout(120_000);
+	await page.setViewportSize({ width: 1440, height: 1000 });
+	const otherAi = await preventAi(page);
+	/** @type {any[]} */ const providerCalls = [];
+	/** @type {string[]} */ const writes = [];
+	/** @type {string[]} */ const pageErrors = [];
+	page.on('pageerror', (error) => pageErrors.push(error.message));
+	page.on('request', (request) => {
+		if (
+			new URL(request.url()).pathname.startsWith(`${api}/`) &&
+			!['GET', 'HEAD'].includes(request.method())
+		)
+			writes.push(request.url());
+	});
+	await page.route('**/tools/api/draw/creative-source', async (route) => {
+		const body = route.request().postDataJSON();
+		providerCalls.push(body);
+		if (body.action === 'video') {
+			await route.fulfill({
+				json: {
+					video: {
+						id: 'dQw4w9WgXcQ',
+						url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+						title: 'Imported source title',
+						description: 'Imported description must remain unchecked.',
+						channelTitle: 'Public source channel',
+						privacyStatus: 'unlisted'
+					},
+					provenance: 'youtube-data-api',
+					retrievedAt: '2026-08-26T00:00:00.000Z',
+					warnings: ['Metadata only; no captions retrieved.']
+				}
+			});
+			return;
+		}
+		if (body.action === 'analyze') {
+			const parsed = parseCreativeTranscript(body.sourceText),
+				chunks = chunkCreativeTranscript(parsed),
+				chunk = chunks[body.chunkIndex];
+			const quotes = validateCreativeQuotes(
+				[{ segmentId: chunk.segments[0].id, text: chunk.segments[0].text }],
+				parsed,
+				[chunk]
+			);
+			await route.fulfill({
+				json: {
+					quotes,
+					chunkIndex: chunk.index,
+					coverage: { status: 'complete', analyzedChunks: 1, totalChunks: chunks.length }
+				}
+			});
+			return;
+		}
+		if (body.action === 'titles') {
+			await route.fulfill({
+				json: {
+					titles: [
+						{
+							id: 't0',
+							title: 'The checkpoint approach to reliable agents',
+							hook: 'CHECK EVERY STEP',
+							evidenceIds: body.evidence.map((/** @type {{id:string}} */ quote) => quote.id),
+							provenance: 'generated',
+							reviewRequired: true
+						}
+					],
+					directions: [],
+					coverage: { status: 'evidence-only', evidenceCount: body.evidence.length }
+				}
+			});
+			return;
+		}
+		await route.abort('blockedbyclient');
+	});
+	const user = await signIn(page),
+		before = content(await scene(page));
+	/** @returns {Promise<import('../src/lib/draw-creative-client').CreativeLibrary>} */
+	const readLibrary = async () => {
+		const result = await page.request.get(`${api}/library`, {
+			headers: { 'X-Tools-User': user.id }
+		});
+		expect(result.ok()).toBe(true);
+		return result.json();
+	};
+	let workspace = await openShowOnboarding(page);
+	const ls = referenceCatalog.channels.find((channel) => channel.slug === 'latent-space');
+	const aie = referenceCatalog.channels.find((channel) => channel.slug === 'ai-engineer');
+	const dwarkesh = referenceCatalog.channels.find((channel) => channel.slug === 'dwarkesh-patel');
+	if (!ls || !aie || !dwarkesh) throw new Error('Required channel fixtures unavailable.');
+	const sample = referenceCatalog.examples.find((example) => example.id === ls.latestIds[0]);
+	if (!sample?.thumbnailText) throw new Error('Expected a visually transcribed LS fixture.');
+	const sampleHook = sample.thumbnailText;
+
+	await test.step('new users start with a show and selective field changes are local and undoable', async () => {
+		await expect(
+			workspace.getByRole('heading', { name: 'Start with the show.', exact: true })
+		).toBeVisible();
+		await expect(workspace.getByRole('region', { name: 'Show brief onboarding' })).toBeVisible();
+		await expect(workspace.getByRole('textbox', { name: 'Search personal assets' })).toHaveCount(0);
+		expect(writes).toEqual([]);
+		expect(providerCalls).toEqual([]);
+		await workspace
+			.getByRole('textbox', { name: 'Show / brief name', exact: true })
+			.fill('My own upcoming show');
+		await workspace
+			.getByRole('textbox', { name: 'Episode title', exact: true })
+			.fill('My own episode title');
+		await workspace
+			.getByRole('textbox', { name: 'Show thumbnail hook', exact: true })
+			.fill('MY OWN HOOK');
+		await workspace
+			.getByRole('textbox', { name: 'Editorial hints', exact: true })
+			.fill('Keep my exact claims and guests.');
+		await workspace
+			.getByRole('heading', { name: 'Start with the show.', exact: true })
+			.scrollIntoViewIfNeeded();
+		await expect
+			.poll(() =>
+				workspace
+					.locator('.starter-references img')
+					.first()
+					.evaluate((image) => /** @type {HTMLImageElement} */ (image).naturalWidth)
+			)
+			.toBeGreaterThan(0);
+		await page.screenshot({ path: '/tmp/draw-onboarding-desktop.png' });
+		const fields = workspace
+			.locator('.house-panel')
+			.getByRole('group', { name: 'Fill only these fields' });
+		await fields.getByRole('checkbox', { name: 'House-prompt draft', exact: true }).uncheck();
+		await workspace
+			.getByRole('button', { name: 'Apply selected starter fields', exact: true })
+			.click();
+		await expect(
+			workspace.getByRole('textbox', { name: 'Editorial hints', exact: true })
+		).toHaveValue(SHOW_PRESETS[0].hints);
+		await expect(
+			workspace.getByRole('textbox', { name: 'Show / brief name', exact: true })
+		).toHaveValue('My own upcoming show');
+		await expect(
+			workspace.getByRole('textbox', { name: 'Episode title', exact: true })
+		).toHaveValue('My own episode title');
+		await expect(
+			workspace.getByRole('textbox', { name: 'Show thumbnail hook', exact: true })
+		).toHaveValue('MY OWN HOOK');
+		await workspace.getByRole('button', { name: 'Undo field changes', exact: true }).click();
+		await expect(
+			workspace.getByRole('textbox', { name: 'Editorial hints', exact: true })
+		).toHaveValue('Keep my exact claims and guests.');
+		await workspace.getByRole('button', { name: 'Close creative workspace' }).click();
+		workspace = await openShowOnboarding(page);
+		await expect(
+			workspace.getByRole('textbox', { name: 'Show / brief name', exact: true })
+		).toHaveValue('My own upcoming show');
+		expect(writes).toEqual([]);
+		expect(providerCalls).toEqual([]);
+		expect(content(await scene(page))).toEqual(before);
+	});
+
+	await test.step('all seven channels have their actual Latest and Popular memberships; demo copying is selective', async () => {
+		await workspace
+			.getByRole('button', { name: 'Choose reference examples →', exact: true })
+			.click();
+		for (const channel of referenceCatalog.channels) {
+			await workspace
+				.locator('.channel-tabs')
+				.getByRole('button', { name: channel.name, exact: true })
+				.click();
+			for (const [button, ids] of [
+				['Latest 5', channel.latestIds],
+				['Most viewed 5', channel.topIds]
+			]) {
+				await workspace
+					.getByRole('button', { name: /** @type {string} */ (button), exact: true })
+					.click();
+				await expect(workspace.locator('.example-grid article')).toHaveCount(5);
+				const hrefs = await workspace
+					.locator('.example-grid .thumbnail')
+					.evaluateAll((links) => links.map((link) => link.getAttribute('href')));
+				expect(hrefs).toEqual(
+					/** @type {string[]} */ (ids).map(
+						(id) => referenceCatalog.examples.find((example) => example.id === id)?.url
+					)
+				);
+			}
+		}
+		await workspace
+			.locator('.channel-tabs')
+			.getByRole('button', { name: 'ThePrimeagen', exact: true })
+			.click();
+		await workspace.getByRole('button', { name: 'Latest 5', exact: true }).click();
+		await expect(
+			workspace
+				.locator('.example-grid article')
+				.first()
+				.getByRole('checkbox', { name: 'Hook', exact: true })
+		).toBeDisabled();
+		await workspace
+			.locator('.channel-tabs')
+			.getByRole('button', { name: ls.name, exact: true })
+			.click();
+		await exampleCard(workspace, sample.id)
+			.getByRole('button', { name: 'Try as a demo brief', exact: true })
+			.click();
+		const review = workspace.getByRole('region', { name: 'Review demo field changes' });
+		await review.getByRole('checkbox', { name: 'Demo name', exact: true }).uncheck();
+		await review.getByRole('checkbox', { name: 'Example title', exact: true }).uncheck();
+		await review.getByRole('button', { name: 'Apply selected demo fields', exact: true }).click();
+		await expect(
+			workspace.getByRole('textbox', { name: 'Show thumbnail hook', exact: true })
+		).toHaveValue(sampleHook);
+		await expect(
+			workspace.getByRole('textbox', { name: 'Episode title', exact: true })
+		).toHaveValue('My own episode title');
+		await expect(
+			workspace.getByRole('textbox', { name: 'Show / brief name', exact: true })
+		).toHaveValue('My own upcoming show');
+		await workspace.getByRole('button', { name: 'Undo field changes', exact: true }).click();
+		await expect(
+			workspace.getByRole('textbox', { name: 'Show thumbnail hook', exact: true })
+		).toHaveValue('MY OWN HOOK');
+		expect(writes).toEqual([]);
+		expect(providerCalls).toEqual([]);
+	});
+
+	await test.step('six explicit role selections persist and a seventh is rejected without changing the draft', async () => {
+		await workspace.getByRole('button', { name: 'Examples', exact: true }).click();
+		for (const id of ls.latestIds)
+			await exampleCard(workspace, id)
+				.getByRole('checkbox', { name: 'Title', exact: true })
+				.check();
+		await exampleCard(workspace, sample.id)
+			.getByRole('checkbox', { name: 'Hook', exact: true })
+			.check();
+		await workspace
+			.locator('.channel-tabs')
+			.getByRole('button', { name: aie.name, exact: true })
+			.click();
+		await exampleCard(workspace, aie.latestIds[0])
+			.getByRole('checkbox', { name: 'Title', exact: true })
+			.check();
+		await exampleCard(workspace, aie.latestIds[1])
+			.getByRole('checkbox', { name: 'Title', exact: true })
+			.click();
+		await expect(workspace.getByRole('alert')).toContainText('exceeds six examples');
+		await expect(
+			exampleCard(workspace, aie.latestIds[1]).getByRole('checkbox', { name: 'Title', exact: true })
+		).not.toBeChecked();
+		await workspace.getByRole('button', { name: 'Selected (6)', exact: true }).click();
+		await expect(workspace.locator('.example-grid article')).toHaveCount(6);
+		await exampleCard(workspace, sample.id)
+			.getByRole('checkbox', { name: 'Hook', exact: true })
+			.uncheck();
+		await exampleCard(workspace, sample.id)
+			.getByRole('checkbox', { name: 'Hook', exact: true })
+			.check();
+		await expect(workspace.getByRole('alert')).toHaveCount(0);
+		const search = workspace.getByRole('searchbox', { name: 'Search reference examples' });
+		await search.fill(sample.title);
+		await expect(workspace.locator('.example-grid article')).toHaveCount(1);
+		await expect(exampleCard(workspace, sample.id)).toBeVisible();
+		await search.fill('No matching reference example 000000');
+		await expect(workspace.locator('.example-grid article')).toHaveCount(0);
+		await expect(workspace.getByText('No matching examples. Try a different title.')).toBeVisible();
+		await search.clear();
+		await expect(workspace.locator('.example-grid article')).toHaveCount(6);
+		await workspace.locator('.example-grid article').first().scrollIntoViewIfNeeded();
+		await page.screenshot({ path: '/tmp/draw-onboarding-examples.png' });
+		await workspace.getByRole('button', { name: '← Back to show brief', exact: true }).click();
+		await workspace.getByText('What will be sent to the shared prompt?', { exact: true }).click();
+		const prompt = workspace.locator('.prompt-review pre');
+		await expect(prompt).toContainText(sample.title);
+		await expect(prompt).toContainText(sampleHook);
+		await expect(prompt).toContainText('These entries supply text only');
+		await expect(prompt).toContainText('do not assume their thumbnail images were attached');
+		const verticalScrollers = await workspace.evaluate((root) =>
+			[...root.querySelectorAll('*')]
+				.filter(
+					(element) =>
+						element.clientHeight > 0 &&
+						element.scrollHeight > element.clientHeight + 2 &&
+						['auto', 'scroll'].includes(getComputedStyle(element).overflowY)
+				)
+				.map((element) => element.tagName)
+		);
+		expect(verticalScrollers).toEqual(['MAIN']);
+		await workspace.getByRole('button', { name: 'Save show brief', exact: true }).click();
+		await expect(workspace.getByRole('status')).toContainText('Brief saved privately');
+		const saved = (await readLibrary()).records.briefs[0];
+		expect(saved.data.fewShot.catalogVersion).toBe(referenceCatalog.retrievedAt);
+		expect(saved.data.fewShot.examples).toHaveLength(6);
+		expect(
+			saved.data.fewShot.examples.find((/** @type {{id:string}} */ item) => item.id === sample.id)
+				.fields
+		).toEqual(['title', 'hook']);
+		await workspace.getByRole('button', { name: 'Close creative workspace' }).click();
+		await page.reload();
+		workspace = await openShowOnboarding(page);
+		await expect(
+			workspace.getByRole('heading', { name: 'What are we making next?', exact: true })
+		).toBeVisible();
+		await workspace
+			.getByRole('region', { name: 'Continue a saved show' })
+			.getByRole('button', { name: /My own upcoming show/ })
+			.click();
+		await expect(workspace.locator('.chosen-examples article')).toHaveCount(6);
+		await expect(
+			workspace.getByRole('textbox', { name: 'Episode title', exact: true })
+		).toHaveValue('My own episode title');
+	});
+
+	await test.step('new and saved show navigation never silently discards a draft', async () => {
+		const name = workspace.getByRole('textbox', { name: 'Show / brief name', exact: true });
+		const savedShow = workspace
+			.getByRole('region', { name: 'Continue a saved show' })
+			.getByRole('button', { name: /My own upcoming show/ });
+		await workspace.getByRole('button', { name: '+ New show', exact: true }).click();
+		await expect(name).toHaveValue('');
+		await name.fill('Unsaved next episode');
+		page.once('dialog', (dialog) => dialog.dismiss());
+		await workspace.getByRole('button', { name: '+ New show', exact: true }).click();
+		await expect(name).toHaveValue('Unsaved next episode');
+		page.once('dialog', (dialog) => dialog.dismiss());
+		await savedShow.click();
+		await expect(name).toHaveValue('Unsaved next episode');
+		page.once('dialog', (dialog) => dialog.accept());
+		await savedShow.click();
+		await expect(name).toHaveValue('My own upcoming show');
+		await expect(workspace.locator('.chosen-examples article')).toHaveCount(6);
+		await name.fill('Unsaved changes to current show');
+		await savedShow.click();
+		await expect(name).toHaveValue('Unsaved changes to current show');
+		await name.fill('My own upcoming show');
+	});
+
+	await test.step('metadata is previewed, then only checked fields apply and the source URL becomes canonical', async () => {
+		const supplied = 'https://youtu.be/dQw4w9WgXcQ?si=discard-this';
+		await workspace
+			.getByRole('textbox', { name: 'Upcoming video URL', exact: true })
+			.fill(supplied);
+		await workspace.getByRole('button', { name: 'Import metadata', exact: true }).click();
+		const review = workspace.getByRole('region', { name: 'Review imported video metadata' });
+		await expect(review).toContainText('Imported source title');
+		await expect(
+			workspace.getByRole('textbox', { name: 'Episode title', exact: true })
+		).toHaveValue('My own episode title');
+		await review.getByRole('checkbox', { name: 'Brief name', exact: true }).uncheck();
+		await review.getByRole('checkbox', { name: 'Video description', exact: true }).uncheck();
+		await review
+			.getByRole('button', { name: 'Apply selected metadata fields', exact: true })
+			.click();
+		await expect(
+			workspace.getByRole('textbox', { name: 'Episode title', exact: true })
+		).toHaveValue('Imported source title');
+		await expect(
+			workspace.getByRole('textbox', { name: 'Show / brief name', exact: true })
+		).toHaveValue('My own upcoming show');
+		await expect(
+			workspace.getByRole('textbox', { name: 'Show thumbnail hook', exact: true })
+		).toHaveValue('MY OWN HOOK');
+		await expect(
+			workspace.getByRole('textbox', { name: 'Upcoming video URL', exact: true })
+		).toHaveValue('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+		await workspace.getByRole('button', { name: 'Save show brief', exact: true }).click();
+		await expect(workspace.getByRole('status')).toContainText('Brief saved privately');
+		const saved = (await readLibrary()).records.briefs[0].data;
+		expect(saved.description).toBe('');
+		expect(saved.videoMetadata.id).toBe('dQw4w9WgXcQ');
+		await workspace.getByRole('button', { name: 'Undo field changes', exact: true }).click();
+		await expect(
+			workspace.getByRole('textbox', { name: 'Upcoming video URL', exact: true })
+		).toHaveValue(supplied);
+		await expect(
+			workspace.getByRole('textbox', { name: 'Episode title', exact: true })
+		).toHaveValue('My own episode title');
+	});
+
+	await test.step('title requests contain selected text demonstrations and no image payloads', async () => {
+		await workspace
+			.getByRole('button', { name: 'Add transcript & extract quotes', exact: true })
+			.click();
+		await workspace
+			.getByLabel('Transcript', { exact: true })
+			.fill('Alice: Reliable agents need explicit checkpoints.');
+		await workspace.getByRole('button', { name: 'Extract quotes', exact: true }).click();
+		await expect(workspace.getByRole('status')).toContainText('Evidence saved: 1/1 chunks');
+		await workspace.getByRole('checkbox', { name: /Use quote .* for titles/ }).check();
+		await workspace
+			.getByRole('button', { name: 'Suggest titles from selected quotes', exact: true })
+			.click();
+		await expect(workspace.locator('.title-option')).toHaveCount(1);
+		const request = providerCalls.find((call) => call.action === 'titles');
+		expect(request.fewShot.examples).toHaveLength(6);
+		expect(request.fewShot.catalogVersion).toBe(referenceCatalog.retrievedAt);
+		expect(
+			request.fewShot.examples.find((/** @type {{id:string}} */ item) => item.id === sample.id)
+				.fields
+		).toEqual(['title', 'hook']);
+		expect(request.images).toBeUndefined();
+		expect(request.referenceImages).toBeUndefined();
+		expect(JSON.stringify(request)).not.toContain('data:image');
+		expect(JSON.stringify(request)).not.toContain('thumbnailUrl');
+	});
+
+	await test.step('house example drafts stay inactive until promoted and applying a house uses its active revision', async () => {
+		await workspace.getByRole('button', { name: 'Brand kits', exact: true }).click();
+		await workspace.getByLabel('Kit name', { exact: true }).fill('Reusable editorial house');
+		await workspace
+			.getByLabel('House prompt', { exact: true })
+			.fill('FIRST HOUSE: keep verified claims separate from inspiration.');
+		await workspace.getByRole('button', { name: 'Choose house examples', exact: true }).click();
+		await workspace
+			.locator('.channel-tabs')
+			.getByRole('button', { name: dwarkesh.name, exact: true })
+			.click();
+		await exampleCard(workspace, dwarkesh.latestIds[0])
+			.getByRole('checkbox', { name: 'Title', exact: true })
+			.check();
+		await workspace.getByRole('button', { name: '← Back to house draft', exact: true }).click();
+		await workspace.getByRole('button', { name: 'Save new kit', exact: true }).click();
+		await expect(workspace.getByRole('status')).toContainText('House revision 1 saved and active');
+		await workspace
+			.getByLabel('House prompt', { exact: true })
+			.fill('SECOND HOUSE: two selected title examples.');
+		await workspace.getByRole('button', { name: 'Choose house examples', exact: true }).click();
+		await workspace
+			.locator('.channel-tabs')
+			.getByRole('button', { name: dwarkesh.name, exact: true })
+			.click();
+		await exampleCard(workspace, dwarkesh.latestIds[1])
+			.getByRole('checkbox', { name: 'Title', exact: true })
+			.check();
+		await workspace.getByRole('button', { name: '← Back to house draft', exact: true }).click();
+		await workspace.getByRole('button', { name: 'Save house revision draft', exact: true }).click();
+		await expect(workspace.getByRole('status')).toContainText('House revision 2 saved as a draft');
+		await workspace.getByRole('button', { name: 'Show brief', exact: true }).click();
+		await workspace
+			.getByRole('combobox', { name: 'Saved house kit', exact: true })
+			.selectOption({ label: 'Reusable editorial house · house v1' });
+		await workspace.getByRole('button', { name: 'Use active house revision', exact: true }).click();
+		await expect(workspace.getByRole('status')).toContainText('house revision 1');
+		await expect(workspace.locator('.chosen-examples article')).toHaveCount(1);
+		await workspace.getByRole('button', { name: 'Save show brief', exact: true }).click();
+		await expect(workspace.getByRole('status')).toContainText('Brief saved privately');
+		let saved = (await readLibrary()).records.briefs[0].data;
+		expect(saved.kitRevision).toBe(1);
+		expect(saved.fewShot.examples.map((/** @type {{id:string}} */ item) => item.id)).toEqual([
+			dwarkesh.latestIds[0]
+		]);
+		await workspace.getByRole('button', { name: 'Brand kits', exact: true }).click();
+		const revision = workspace
+			.locator('details')
+			.filter({ has: page.locator('summary').filter({ hasText: /^Revision 2$/ }) });
+		await revision.locator('summary').click();
+		await revision.getByRole('button', { name: 'Use revision 2 as house default' }).click();
+		await expect(workspace.getByRole('status')).toContainText(
+			'House revision 2 is now the default'
+		);
+		await workspace.getByRole('button', { name: 'Show brief', exact: true }).click();
+		await workspace
+			.getByRole('combobox', { name: 'Saved house kit', exact: true })
+			.selectOption({ label: 'Reusable editorial house · house v2' });
+		await workspace.getByRole('button', { name: 'Use active house revision', exact: true }).click();
+		await expect(workspace.locator('.chosen-examples article')).toHaveCount(2);
+		await workspace.getByRole('button', { name: 'Save show brief', exact: true }).click();
+		await expect(workspace.getByRole('status')).toContainText('Brief saved privately');
+		saved = (await readLibrary()).records.briefs[0].data;
+		expect(saved.kitRevision).toBe(2);
+		expect(saved.fewShot.examples).toHaveLength(2);
+		expect(otherAi).toEqual([]);
+		expect(pageErrors).toEqual([]);
+		expect(content(await scene(page))).toEqual(before);
+	});
+});
+
+test('390px show onboarding and public examples remain readable with visible dismissal', async ({
+	page
+}) => {
+	await page.setViewportSize({ width: 390, height: 844 });
+	const requests = await preventAi(page);
+	await signIn(page);
+	const workspace = await openShowOnboarding(page);
+	await expect(
+		workspace.getByRole('heading', { name: 'Start with the show.', exact: true })
+	).toBeVisible();
+	await page.screenshot({ path: '/tmp/draw-onboarding-mobile.png' });
+	for (const section of ['Show brief', 'Examples']) {
+		await workspace.getByRole('button', { name: section, exact: true }).click();
+		const width = await workspace
+			.locator('main')
+			.evaluate((main) => ({ scroll: main.scrollWidth, client: main.clientWidth }));
+		expect(width.scroll, `${section} should not overflow`).toBeLessThanOrEqual(width.client + 1);
+		await expect(
+			workspace.getByRole('button', { name: 'Close creative workspace' })
+		).toBeInViewport();
+		await expect(
+			workspace.getByRole('button', { name: 'Back to canvas', exact: true })
+		).toBeInViewport();
+	}
+	await expect(workspace.locator('.example-grid article')).toHaveCount(5);
+	await page.keyboard.press('Escape');
+	await expect(workspace).not.toBeVisible();
+	expect(requests).toEqual([]);
 });

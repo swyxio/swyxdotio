@@ -15,6 +15,16 @@
 	} from './draw-creative-client';
 	import { CREATIVE_DIRECTIONS, CREATIVE_FORMATS } from './draw-creative-layout.js';
 	import DrawCreativePreview from './DrawCreativePreview.svelte';
+	import DrawShowBrief from './DrawShowBrief.svelte';
+	import DrawReferenceExamples from './DrawReferenceExamples.svelte';
+	import {
+		emptyFewShot,
+		fewShotPrompt,
+		referenceCatalog,
+		showPreset,
+		type FewShotSelection,
+		type ReferenceExample
+	} from './draw-creative-examples.js';
 	import {
 		parseCreativeTranscript,
 		planCreativeSourceRun,
@@ -25,7 +35,15 @@
 	} from './draw-creative-sources.js';
 	import { TOOLS_AI_POLICY } from './tools-ai-policy.js';
 
-	type View = 'assets' | 'kits' | 'sources' | 'compose' | 'versions' | 'export';
+	type View =
+		| 'start'
+		| 'examples'
+		| 'assets'
+		| 'kits'
+		| 'sources'
+		| 'compose'
+		| 'versions'
+		| 'export';
 	let {
 		user,
 		onInsert,
@@ -52,7 +70,7 @@
 		}) => void | Promise<void>;
 	}>();
 	let open = $state(false);
-	let view = $state<View>('assets');
+	let view = $state<View>('start');
 	let library = $state(emptyCreativeLibrary());
 	let loading = $state(false);
 	let loaded = $state(false);
@@ -70,6 +88,34 @@
 	let kitRevisions = $state<any[]>([]);
 	let brief = $state(newBriefDraft());
 	let briefId = $state('');
+	let briefSavedSnapshot = JSON.stringify(newBriefDraft());
+	let exampleTarget = $state<'brief' | 'house'>('brief');
+	let importPreview = $state<any>(null);
+	let importFields = $state<string[]>(['name', 'title', 'description']);
+	let demoPreview = $state<ReferenceExample | null>(null);
+	let demoFields = $state<string[]>(['name', 'title', 'hook']);
+	let fieldUndo = $state<{
+		brief: Record<string, any>;
+		kit: Record<string, any>;
+		kitId: string;
+	} | null>(null);
+	let housePrompt = $state('');
+	const firstRun = $derived(!library.records.briefs.length && !library.records.kits.length);
+	const briefFewShot = $derived(brief.fewShot ?? emptyFewShot());
+	const titleExamplePreview = $derived.by(() => {
+		try {
+			return fewShotPrompt(briefFewShot, ['title', 'hook']);
+		} catch (cause) {
+			return cause instanceof Error ? cause.message : 'Review unavailable examples.';
+		}
+	});
+	const promptPreview = $derived.by(() => {
+		try {
+			return compileCreativePrompt(housePrompt, brief, CREATIVE_DIRECTIONS[0], feedbackText);
+		} catch (cause) {
+			return cause instanceof Error ? cause.message : 'Review unavailable examples.';
+		}
+	});
 	let selectedCompositionId = $state('');
 	let versionBriefId = $state('');
 	let feedbackText = $state('');
@@ -135,11 +181,13 @@
 	let exportFormat = $state('png');
 	let exportScope = $state('artboard');
 	const tabs: { id: View; label: string }[] = [
-		{ id: 'assets', label: 'Assets' },
-		{ id: 'kits', label: 'Brand kits' },
+		{ id: 'start', label: 'Show brief' },
+		{ id: 'examples', label: 'Examples' },
 		{ id: 'sources', label: 'Sources' },
 		{ id: 'compose', label: 'Compose' },
 		{ id: 'versions', label: 'Versions' },
+		{ id: 'kits', label: 'Brand kits' },
+		{ id: 'assets', label: 'Assets' },
 		{ id: 'export', label: 'Export' }
 	];
 	const compositions = $derived(
@@ -183,7 +231,7 @@
 		return new CreativeClient(user.id, lifetime.signal);
 	};
 
-	export async function show(section: View = 'assets') {
+	export async function show(section: View = 'start') {
 		if (!open)
 			returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
 		view = section;
@@ -243,6 +291,125 @@
 	function toggle(values: string[], id: string) {
 		return values.includes(id) ? values.filter((value) => value !== id) : [...values, id];
 	}
+	function patchBrief(fields: Record<string, any>) {
+		if ('sourceUrl' in fields && fields.sourceUrl !== brief.sourceUrl) {
+			importPreview = null;
+			delete brief.videoMetadata;
+		}
+		Object.assign(brief, fields);
+	}
+	function applyFields(fields: Record<string, any>, kitFields: Record<string, any> = {}) {
+		fieldUndo = {
+			brief: Object.fromEntries(
+				Object.keys(fields).map((key) => [key, $state.snapshot(brief[key])])
+			),
+			kit: Object.fromEntries(
+				Object.keys(kitFields).map((key) => [key, $state.snapshot((kit as any)[key])])
+			),
+			kitId
+		};
+		Object.assign(brief, fields);
+		Object.assign(kit, kitFields);
+		status =
+			'Selected fields filled in this draft. Nothing was saved, inserted or sent to a model.';
+	}
+	function undoFields() {
+		if (!fieldUndo) return;
+		Object.assign(brief, fieldUndo.brief);
+		Object.assign(kit, fieldUndo.kit);
+		kitId = fieldUndo.kitId;
+		fieldUndo = null;
+		status = 'Field changes undone.';
+	}
+	function applyStarter(id: string, fields: string[]) {
+		const preset = showPreset(id);
+		const patch: Record<string, any> = {};
+		if (fields.includes('name')) patch.name = preset.nameExample;
+		if (fields.includes('hints')) patch.hints = preset.hints;
+		const kitPatch = fields.includes('house')
+			? {
+					name: preset.name,
+					brand: preset.brand,
+					prompt: preset.prompt,
+					fewShot: $state.snapshot(briefFewShot)
+				}
+			: {};
+		// Applying starter text never edits an existing saved kit. Review/save explicitly.
+		applyFields(patch, kitPatch);
+		if (fields.includes('house')) {
+			kitId = '';
+			kitRevisions = [];
+		}
+	}
+	async function importMetadata() {
+		if (!user) return;
+		const owner = user.id;
+		const url = brief.sourceUrl;
+		const result = await creativeSourceRequest(
+			owner,
+			{ action: 'video', video: url },
+			lifetime.signal
+		);
+		if (lifetime.signal.aborted || user?.id !== owner || brief.sourceUrl !== url) return;
+		importPreview = result;
+		status =
+			'Metadata retrieved. Review and apply only the fields you want; no transcript or image was imported.';
+	}
+	function applyMetadata() {
+		if (!importPreview) return;
+		const video = importPreview.video;
+		const fields: Record<string, any> = {};
+		if (importFields.includes('name')) fields.name = video.title.slice(0, 120);
+		if (importFields.includes('title')) fields.title = video.title;
+		if (importFields.includes('description') && video.description !== undefined)
+			fields.description = video.description;
+		if (!Object.keys(fields).length) return;
+		fields.videoMetadata = {
+			...video,
+			provenance: importPreview.provenance,
+			retrievedAt: importPreview.retrievedAt
+		};
+		fields.sourceUrl = video.url;
+		applyFields(fields);
+		importPreview = null;
+	}
+	function applyDemo() {
+		if (!demoPreview) return;
+		const fields: Record<string, any> = {};
+		if (demoFields.includes('name')) fields.name = `Demo · ${demoPreview.title}`.slice(0, 120);
+		if (demoFields.includes('title')) fields.title = demoPreview.title;
+		if (demoFields.includes('hook') && demoPreview.thumbnailText)
+			fields.hook = demoPreview.thumbnailText;
+		applyFields(fields);
+		demoPreview = null;
+		view = 'start';
+	}
+	function updateExamples(selection: FewShotSelection) {
+		if (exampleTarget === 'house') kit.fewShot = selection;
+		else brief.fewShot = selection;
+		status = `${selection.examples.length} examples selected for the ${exampleTarget === 'house' ? 'house draft' : 'show draft'}. Save to retain them. No images attached.`;
+	}
+	async function restoreHousePrompt() {
+		housePrompt = '';
+		if (!brief.kitId || !brief.kitRevision) return;
+		const id = briefId,
+			key = brief.kitId,
+			revision = brief.kitRevision;
+		try {
+			const snapshot = await client().request(`/records/kits/${key}/revisions/${revision}`);
+			if (
+				!lifetime.signal.aborted &&
+				briefId === id &&
+				brief.kitId === key &&
+				brief.kitRevision === revision
+			)
+				housePrompt = snapshot.data.prompt ?? '';
+		} catch {
+			if (briefId === id)
+				error =
+					'The pinned house prompt could not be loaded. Reload the library before generating.';
+		}
+	}
 	async function saveKit() {
 		const record = await client().save('kits', $state.snapshot(kit), selectedKit);
 		replaceRecord(record);
@@ -280,13 +447,25 @@
 		replaceRecord(record);
 		briefId = record.id;
 		brief.name = record.data.name;
+		briefSavedSnapshot = JSON.stringify({ ...data, name: record.data.name });
 		status = 'Brief saved privately.';
 		return record;
 	}
+	function canReplaceBrief() {
+		return (
+			JSON.stringify($state.snapshot(brief)) === briefSavedSnapshot ||
+			window.confirm(
+				'Discard unsaved changes to this show brief? Save it first to keep your changes.'
+			)
+		);
+	}
 	function chooseBrief(record: CreativeRecord) {
+		if (record.id === briefId) return true;
+		if (!canReplaceBrief()) return false;
 		operation?.abort();
 		briefId = record.id;
 		brief = { ...newBriefDraft(), ...$state.snapshot(record.data) };
+		briefSavedSnapshot = JSON.stringify($state.snapshot(brief));
 		sourceQuotes = brief.analysis?.quotes ?? [];
 		sourceTitles = brief.analysis?.titles ?? [];
 		sourceChunks = brief.analysis?.chunks ?? [];
@@ -300,11 +479,22 @@
 		nextVideoPage = '';
 		parentCompositionId = '';
 		selectedCompositionId = '';
+		fieldUndo = null;
+		importPreview = null;
+		demoPreview = null;
+		void restoreHousePrompt();
+		return true;
 	}
 	function newSourceBrief() {
+		if (!canReplaceBrief()) return;
 		operation?.abort();
 		briefId = '';
 		brief = newBriefDraft();
+		briefSavedSnapshot = JSON.stringify($state.snapshot(brief));
+		housePrompt = '';
+		fieldUndo = null;
+		importPreview = null;
+		demoPreview = null;
 		sourceQuotes = [];
 		sourceTitles = [];
 		sourceChunks = [];
@@ -320,11 +510,17 @@
 	}
 	async function attachKit() {
 		if (!selectedKit) return;
-		pinKit(selectedKit);
+		await pinKit(selectedKit);
 	}
-	function pinKit(record: CreativeRecord) {
+	async function pinKit(record: CreativeRecord) {
+		const snapshot = await client().request(
+			`/records/kits/${record.id}/revisions/${record.activeRevision}`
+		);
+		if (lifetime.signal.aborted) return;
 		brief.kitId = record.id;
 		brief.kitRevision = record.activeRevision;
+		brief.fewShot = snapshot.data.fewShot ?? emptyFewShot();
+		housePrompt = snapshot.data.prompt ?? '';
 		composeKitId = record.id;
 		status = `Brief pinned to ${record.data.name}, house revision ${record.activeRevision}. Assets are not automatically attached.`;
 	}
@@ -417,6 +613,11 @@
 		briefId = record.id;
 		brief.name = record.data.name;
 		brief.analysis = record.data.analysis;
+		briefSavedSnapshot = JSON.stringify({
+			...data,
+			name: record.data.name,
+			analysis: record.data.analysis
+		});
 		sourceFingerprint = fingerprint;
 		sourceChunks = chunks;
 		sourceQuotes = quotes;
@@ -550,6 +751,7 @@
 				{
 					action: 'titles',
 					sourceText: text,
+					fewShot: $state.snapshot(briefFewShot),
 					hints: brief.hints,
 					evidence,
 					sourceUrl: url || undefined
@@ -827,7 +1029,7 @@
 		if (!selectedComposition) return;
 		const composition = selectedComposition;
 		const source = library.records.briefs.find((record) => record.id === composition.data.briefId);
-		if (source && source.id !== briefId) chooseBrief(source);
+		if (source && source.id !== briefId && !chooseBrief(source)) return;
 		parentCompositionId = composition.id;
 		brief.hook = composition.data.headline;
 		brief.kitId = composition.data.kitId;
@@ -872,8 +1074,8 @@
 	<div class="workspace-shell">
 		<header>
 			<div>
-				<span class="eyebrow">YOUR CREATIVE LIBRARY</span>
-				<h2>Make the next version.</h2>
+				<span class="eyebrow">THUMBNAIL WORKSPACE</span>
+				<h2>Shows & examples</h2>
 			</div>
 			<button class="close" aria-label="Close creative workspace" onclick={close}>×</button>
 		</header>
@@ -888,6 +1090,7 @@
 					aria-current={view === tab.id ? 'page' : undefined}
 					onclick={() => {
 						view = tab.id;
+						if (tab.id === 'examples') exampleTarget = 'brief';
 					}}>{tab.label}</button
 				>{/each}
 		</nav>
@@ -903,7 +1106,65 @@
 				{error} <button disabled={busy} onclick={() => void refresh()}>Reload library</button>
 			</div>{/if}
 		<main bind:this={content}>
-			{#if !user && view !== 'export'}
+			{#if fieldUndo}<div class="notice field-change">
+					Draft fields updated. <button disabled={busy} onclick={undoFields}
+						>Undo field changes</button
+					>
+				</div>{/if}
+			{#if importPreview}<section
+					class="notice import-review"
+					aria-label="Review imported video metadata"
+				>
+					<h3>Review this video's metadata</h3>
+					<strong>{importPreview.video.title}</strong>
+					<p>
+						{importPreview.video.channelTitle ?? 'Channel unavailable'} · {importPreview.provenance} ·
+						{importPreview.retrievedAt?.slice(0, 10)}
+					</p>
+					{#each importPreview.warnings ?? [] as warning}<p>{warning}</p>{/each}
+					<fieldset>
+						<legend>Fill only these fields</legend
+						>{#each [{ id: 'name', label: 'Brief name' }, { id: 'title', label: 'Episode title' }, { id: 'description', label: 'Video description' }] as field}<label
+								class="check"
+								><input
+									type="checkbox"
+									disabled={field.id === 'description' &&
+										importPreview.video.description === undefined}
+									checked={importFields.includes(field.id)}
+									onchange={() => (importFields = toggle(importFields, field.id))}
+								/>{field.label}</label
+							>{/each}
+					</fieldset>
+					{#if importPreview.video.description}<details>
+							<summary>Video description</summary>
+							<pre>{importPreview.video.description}</pre>
+						</details>{/if}<button onclick={applyMetadata}>Apply selected metadata fields</button
+					><button onclick={() => (importPreview = null)}>Keep my draft unchanged</button>
+				</section>{/if}
+			{#if demoPreview}<section class="notice import-review" aria-label="Review demo field changes">
+					<h3>Try this reference as a demo</h3>
+					<p>
+						This copies another video's content into selected fields for exploration. It is not a
+						claim about your next episode.
+					</p>
+					<strong>{demoPreview.title}</strong>
+					<fieldset>
+						<legend>Fill only these fields</legend
+						>{#each [{ id: 'name', label: 'Demo name' }, { id: 'title', label: 'Example title' }, { id: 'hook', label: 'Observed thumbnail hook' }] as field}<label
+								class="check"
+								><input
+									type="checkbox"
+									disabled={field.id === 'hook' && !demoPreview.thumbnailText}
+									checked={demoFields.includes(field.id)}
+									onchange={() => (demoFields = toggle(demoFields, field.id))}
+								/>{field.label}</label
+							>{/each}
+					</fieldset>
+					<button onclick={applyDemo}>Apply selected demo fields</button><button
+						onclick={() => (demoPreview = null)}>Cancel demo</button
+					>
+				</section>{/if}
+			{#if !user && !['start', 'examples', 'export'].includes(view)}
 				<div class="empty">
 					<h3>Your own assets. Your own house style.</h3>
 					<p>
@@ -920,6 +1181,67 @@
 					</div>
 				</div>
 			{:else if loading}<p class="empty">Loading your private library…</p>
+			{:else if view === 'start'}
+				{#if !user}<p class="notice">
+						Explore public examples and draft fields here. <a href="/tools?next=/tools/draw"
+							>Sign in</a
+						> to import metadata and save your own show; guest drafts are not automatically uploaded.
+					</p>{/if}
+				<DrawShowBrief
+					signedIn={Boolean(user)}
+					draft={brief}
+					{firstRun}
+					briefs={library.records.briefs}
+					kits={library.records.kits}
+					{busy}
+					currentBriefId={briefId}
+					fewShot={briefFewShot}
+					{promptPreview}
+					onPatch={patchBrief}
+					onContinue={chooseBrief}
+					onNew={newSourceBrief}
+					onPreset={applyStarter}
+					onImport={() => void perform(importMetadata)}
+					onExamples={() => {
+						exampleTarget = 'brief';
+						view = 'examples';
+					}}
+					onSources={() => (view = 'sources')}
+					onKit={() => (view = 'kits')}
+					onUseKit={(id) =>
+						void perform(async () => {
+							const record = library.records.kits.find((item) => item.id === id);
+							if (record) await pinKit(record);
+						})}
+					onSave={() =>
+						void perform(async () => {
+							await saveBrief();
+						})}
+					onCompose={() => (view = 'compose')}
+				/>
+			{:else if view === 'examples'}
+				<div class="actions">
+					<button onclick={() => (view = exampleTarget === 'house' ? 'kits' : 'start')}
+						>← Back to {exampleTarget === 'house' ? 'house draft' : 'show brief'}</button
+					><span
+						>Editing examples for: {exampleTarget === 'house'
+							? 'house-prompt draft'
+							: 'current show draft'}</span
+					>
+				</div>
+				<DrawReferenceExamples
+					selection={exampleTarget === 'house' ? kit.fewShot : briefFewShot}
+					{busy}
+					onChange={updateExamples}
+					onDemo={(example) => {
+						demoPreview = example;
+						content?.scrollTo({ top: 0 });
+					}}
+					onSaveImage={user && library.assetsAvailable
+						? (example) =>
+								void perform(() => saveThumbnailReference(example.videoId, example.title))
+						: undefined}
+				/>
 			{:else if view === 'assets'}
 				<section class="section-head">
 					<div>
@@ -1067,6 +1389,21 @@
 									/>{asset.name}</label
 								>{/each}
 						</fieldset>
+						<div class="notice">
+							<strong
+								>{kit.fewShot?.examples.length ?? 0} curated few-shot examples in this house draft</strong
+							>
+							<p>
+								Saved with the revision. Using the active house copies these text-example selections
+								into the show; no images are automatically attached.
+							</p>
+							<button
+								onclick={() => {
+									exampleTarget = 'house';
+									view = 'examples';
+								}}>Choose house examples</button
+							>
+						</div>
 						<div class="actions">
 							<button
 								class="primary"
@@ -1205,6 +1542,22 @@
 									>Suggest titles from selected quotes</button
 								>
 							</div>
+							{#if briefFewShot.examples.length}<details>
+									<summary
+										>{briefFewShot.examples.length} selected examples · title-prompt preview</summary
+									>
+									<p>
+										Only title/hook demonstrations are included in this text request. They are not
+										evidence about this episode; images are not attached.
+									</p>
+									<pre>{titleExamplePreview}</pre>
+									<button
+										onclick={() => {
+											exampleTarget = 'brief';
+											view = 'examples';
+										}}>Change examples</button
+									>
+								</details>{/if}
 							{#if totalChunks}<p>
 									Coverage: {processedChunks.length}/{totalChunks} chunks · {processedChunks.length <
 									totalChunks
@@ -1372,7 +1725,7 @@
 									disabled={busy || !composeKitId}
 									onclick={() => {
 										const record = library.records.kits.find((item) => item.id === composeKitId);
-										if (record) pinKit(record);
+										if (record) void perform(() => pinKit(record));
 									}}>Pin house revision</button
 								>
 							</div>
