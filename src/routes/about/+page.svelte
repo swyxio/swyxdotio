@@ -1,4 +1,5 @@
 <script>
+	import SponsorshipOption from '$lib/about/SponsorshipOption.svelte';
 	import SocialMeta from '../../components/SocialMeta.svelte';
 	import { getPageSocialMeta } from '$lib/social-meta';
 	import LetterSection from '$lib/about/LetterSection.svelte';
@@ -204,29 +205,31 @@
 			Want to support what I’m building and reach the people building with AI? I work with sponsors
 			through <strong>AI Engineer</strong> and <strong>Latent Space</strong>.
 		</p>
-		<h3>AI Engineer — meet the builders</h3>
-		<p>
-			Technical conferences, expos, and workshops for AI engineers, founders, and technical leaders.
-			<strong>15,000+ in-person AI engineers</strong>,
-			<strong>100,000+ newsletter subscribers</strong>, and
-			<strong>10M+ talk &amp; workshop views in 2025</strong>.
-			<a href="https://ai.engineer/about">More about the AIE audience ↗</a>
-		</p>
-		<p>
-			<a href="mailto:sponsorships@ai.engineer">Sponsor AI Engineer →</a>
-		</p>
-		<h3>Latent Space — be part of the conversation</h3>
-		<p>
-			Our technical AI newsletter, podcast, and community have passed <strong
-				>200,000 subscribers</strong
-			>
-			and <strong>10M viewers across all channels</strong>. The podcast has ranked in the
-			<strong>Top 30 for US Technology on Apple Podcasts</strong>.
-			<a href="https://www.latent.space/about">More about the Latent Space audience ↗</a>
-		</p>
-		<p>
-			<a href="mailto:business@latent.space">Sponsor Latent Space →</a>
-		</p>
+		<SponsorshipOption
+			name="AI Engineer"
+			logo="/assets/ai-engineer-logo.svg"
+			monochrome
+			description="Conferences, expos & workshops for the people building AI."
+			contact="sponsorships@ai.engineer"
+			source="https://ai.engineer/about"
+			stats={[
+				{ value: '15,000+', label: 'In-person AI engineers' },
+				{ value: '100,000+', label: 'Newsletter subscribers' },
+				{ value: '10M+', label: 'Talk & workshop views in 2025' }
+			]}
+		/>
+		<SponsorshipOption
+			name="Latent Space"
+			logo="/assets/latent-space-hex-gradient.png"
+			description="Technical AI conversations, in your inbox and headphones."
+			contact="business@latent.space"
+			source="https://www.latent.space/about"
+			stats={[
+				{ value: '200,000+', label: 'Subscribers across all channels' },
+				{ value: '10M+', label: 'Viewers across all channels' },
+				{ value: 'Top 30', label: 'US Technology on Apple Podcasts (historical ranking)' }
+			]}
+		/>
 		<svelte:fragment slot="commentary"
 			><p>
 				If you’re building something useful for AI engineers, these are the two places where I can
