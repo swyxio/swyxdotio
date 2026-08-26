@@ -1,5 +1,6 @@
 <script>
 	import { onMount, tick } from 'svelte';
+	import ToolsAiNotice from '$lib/ToolsAiNotice.svelte';
 	import {
 		DEFAULT_DRAW_AGENT_BUDGET_USD,
 		MAX_DRAW_AGENT_ROUNDS,
@@ -16,11 +17,12 @@
 
 	/** @type {{
 	 *  authenticated?: boolean,
+	 *  userId?: string,
 	 *  pageId: string,
 	 *  executeCommand: (args: string[], options: CommandOptions) => Promise<unknown>,
 	 *  captureViewport: () => Promise<string | undefined>
 	 * }} */
-	let { authenticated = false, pageId, executeCommand, captureViewport } = $props();
+	let { authenticated = false, userId, pageId, executeCommand, captureViewport } = $props();
 
 	const HISTORY_PREFIX = 'swyx-excalidraw:assistant:';
 	const MAX_HISTORY_MESSAGES = 36;
@@ -225,7 +227,7 @@
 				const response = await fetch('/tools/api/draw/agent', {
 					method: 'POST',
 					credentials: 'same-origin',
-					headers: { 'Content-Type': 'application/json' },
+					headers: { 'Content-Type': 'application/json', 'X-Tools-User': userId ?? 'guest' },
 					body: JSON.stringify({
 						messages: conversation,
 						...(screenshot ? { screenshot } : {}),
@@ -488,6 +490,7 @@
 				<a href="/tools?next=/draw">Sign in to use the assistant</a>
 			</div>
 		{:else}
+			<ToolsAiNotice />
 			<div class="assistant-disclosure">
 				Visible canvas screenshots are sent to Cloudflare AI. Image generation may also upload
 				selected images to fal.ai.

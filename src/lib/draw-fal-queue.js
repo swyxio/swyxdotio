@@ -35,6 +35,7 @@ async function readResponse(response) {
 /**
  * @param {{
  *  image?: Blob,
+ *  userId?: string,
  *  prompt: string,
  *  model: string,
  *  signal: AbortSignal,
@@ -79,6 +80,7 @@ export async function runDrawingFalGeneration(options) {
 		await fetcher('/tools/api/draw/edit', {
 			method: 'POST',
 			credentials: 'same-origin',
+			headers: options.userId ? { 'X-Tools-User': options.userId } : undefined,
 			body: form,
 			signal
 		})
@@ -104,6 +106,7 @@ export async function runDrawingFalGeneration(options) {
 		void fetcher(`/tools/api/draw/edit?${query}`, {
 			method: 'DELETE',
 			credentials: 'same-origin',
+			headers: options.userId ? { 'X-Tools-User': options.userId } : undefined,
 			keepalive: true
 		}).catch(() => {});
 	};
@@ -120,6 +123,7 @@ export async function runDrawingFalGeneration(options) {
 				update = await readResponse(
 					await fetcher(`/tools/api/draw/edit?${query}`, {
 						credentials: 'same-origin',
+						headers: options.userId ? { 'X-Tools-User': options.userId } : undefined,
 						signal: pollingSignal
 					})
 				);

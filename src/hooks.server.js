@@ -8,7 +8,7 @@
 // Cloudflare Cache API ignores `stale-while-revalidate` on cache.put().
 //
 // In dev / non-Cloudflare runtimes `caches` is undefined and we no-op.
-import { readContentCacheGeneration } from '$lib/content-manifest';
+import { readContentCacheGeneration } from './lib/content-manifest.js';
 
 // Security headers applied to all SSR/dynamic responses. On Cloudflare Workers
 // the `_headers` file only covers static-asset responses (served by the asset
@@ -63,7 +63,8 @@ export async function handle({ event, resolve }) {
 	// `caches.default` is Cloudflare-specific; undefined in dev / non-CF runtimes.
 	const cache = /** @type {any} */ (globalThis.caches)?.default;
 	const cacheUrl = new URL(event.request.url);
-	const cacheable = event.request.method === 'GET' && !!cache;
+	const privateTools = cacheUrl.pathname === '/tools' || cacheUrl.pathname.startsWith('/tools/');
+	const cacheable = !privateTools && event.request.method === 'GET' && !!cache;
 	const preservePublicCache =
 		isVersionedOgRequest(cacheUrl) ||
 		isPublicReadCountRequest(cacheUrl) ||
@@ -94,6 +95,11 @@ export async function handle({ event, resolve }) {
 	}
 
 	const response = await resolve(event);
+	if (privateTools) {
+		response.headers.set('Cache-Control', 'private, no-store');
+		response.headers.set('Referrer-Policy', 'no-referrer');
+		response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+	}
 
 	if (cacheUrl.pathname === '/box' || cacheUrl.pathname === '/draw') {
 		response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');

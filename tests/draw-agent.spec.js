@@ -1,19 +1,14 @@
 import { expect, test } from '@playwright/test';
+import { authenticateTools, TEST_TOOLS_OWNER, TEST_TOOLS_MEMBER } from './helpers/tools-auth.js';
 
 /** @param {import('@playwright/test').Page} page */
 async function authenticate(page) {
 	const origin = new URL(page.url()).origin;
-	const response = await page.request.post(`${origin}/tools/api/session`, {
-		headers: { Origin: origin },
-		data: { password: 'draw-test-password' }
-	});
-	expect(response.ok()).toBe(true);
+	await authenticateTools(page);
 	await page.reload();
 }
 
-test('drawing assistant and model endpoint require the existing private tools session', async ({
-	page
-}) => {
+test('drawing assistant and model endpoint require the Google tools session', async ({ page }) => {
 	await page.goto('/draw');
 	await page.getByRole('button', { name: 'Open drawing assistant' }).click();
 	await expect(page.getByRole('link', { name: 'Sign in to use the assistant' })).toHaveAttribute(
@@ -92,7 +87,12 @@ test('authenticated floating assistant uses viewport vision, sandboxed commands,
 		.poll(() =>
 			page.evaluate(() => {
 				const scene = /** @type {{ elements: any[] }} */ (
-					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+					JSON.parse(
+						localStorage.getItem(
+							document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+								'swyx-excalidraw:guest'
+						) ?? '{"elements":[]}'
+					)
 				);
 				return scene.elements.some(
 					(/** @type {any} */ element) => element.type === 'rectangle' && element.width === 220
@@ -101,7 +101,12 @@ test('authenticated floating assistant uses viewport vision, sandboxed commands,
 		)
 		.toBe(true);
 	const addedElementId = await page.evaluate(() => {
-		const scene = JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}');
+		const scene = JSON.parse(
+			localStorage.getItem(
+				document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+					'swyx-excalidraw:guest'
+			) ?? '{"elements":[]}'
+		);
 		return scene.elements.findLast(
 			(/** @type {any} */ element) => element.type === 'rectangle' && element.width === 220
 		)?.id;
@@ -129,7 +134,12 @@ test('authenticated floating assistant uses viewport vision, sandboxed commands,
 	await expect
 		.poll(() =>
 			page.evaluate((expectedId) => {
-				const scene = JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}');
+				const scene = JSON.parse(
+					localStorage.getItem(
+						document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+							'swyx-excalidraw:guest'
+					) ?? '{"elements":[]}'
+				);
 				return scene.elements.some(
 					(/** @type {any} */ element) => element.id === expectedId && !element.isDeleted
 				);
@@ -163,7 +173,11 @@ test('essay workflows prepare requests, protect drafts and preserve bound copies
 	await page.getByRole('button', { name: 'Insert Claim, evidence, objection preset' }).click();
 	/** @returns {Promise<{ elements: any[] }>} */
 	const readScene = () =>
-		page.evaluate(() => JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}'));
+		page.evaluate(() => {
+			const key = document.querySelector('.draw-canvas')?.getAttribute('data-storage-key');
+			if (!key) throw new Error('The drawing account scope is not ready.');
+			return JSON.parse(localStorage.getItem(key) ?? '{"elements":[]}');
+		});
 	await expect.poll(async () => (await readScene()).elements.length).toBeGreaterThan(8);
 	const before = (await readScene()).elements;
 	let calls = 0;
@@ -337,7 +351,12 @@ test('assistant arranges shapes and connects them with native Excalidraw arrow b
 		.poll(() =>
 			page.evaluate((color) => {
 				const scene = /** @type {{ elements: any[] }} */ (
-					JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+					JSON.parse(
+						localStorage.getItem(
+							document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+								'swyx-excalidraw:guest'
+						) ?? '{"elements":[]}'
+					)
 				);
 				const rectangles = scene.elements.filter(
 					(element) =>
@@ -361,7 +380,12 @@ test('assistant arranges shapes and connects them with native Excalidraw arrow b
 		.toMatchObject({ y: [140, 140] });
 	const scene = /** @type {{ elements: any[] }} */ (
 		await page.evaluate(() =>
-			JSON.parse(localStorage.getItem('swyx-excalidraw') ?? '{"elements":[]}')
+			JSON.parse(
+				localStorage.getItem(
+					document.querySelector('.draw-canvas')?.getAttribute('data-storage-key') ||
+						'swyx-excalidraw:guest'
+				) ?? '{"elements":[]}'
+			)
 		)
 	);
 	const rectangles = scene.elements.filter(

@@ -34,10 +34,20 @@ test('classifies fetch routes without retaining path or query values', () => {
 		['https://swyx.io/og/article/private-slug.png', 'og_image'],
 		['https://swyx.io/podcast/private-show/rss.xml', 'syndication'],
 		['https://swyx.io/tools/podcast', 'tools_page'],
+		[
+			'https://swyx.io/tools/auth/google/callback?code=private-oauth-code&state=private-state',
+			'tools_page'
+		],
 		['https://swyx.io/', 'home_page'],
 		['https://swyx.io/private-article?selection=private', 'content_page']
 	];
-	for (const [url, expected] of cases) assert.equal(classifyRoute(fetchTrace(url)), expected);
+	for (const [url, expected] of cases) {
+		assert.equal(classifyRoute(fetchTrace(url)), expected);
+		assert.doesNotMatch(
+			JSON.stringify(faultBucket(fetchTrace(url))),
+			/private|secret|selection|oauth-code|state/
+		);
+	}
 
 	const bucket = faultBucket(fetchTrace(cases[0][0]));
 	assert.deepEqual(Object.keys(bucket).sort(), [
