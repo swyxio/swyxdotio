@@ -2,7 +2,13 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { resolveArticleCard } from '../src/lib/og/article.js';
-import { formatCardDate, getPageCard, titleSize, truncateTitle } from '../src/lib/og/cards.js';
+import {
+	formatCardDate,
+	getArticleCard,
+	getPageCard,
+	titleSize,
+	truncateTitle
+} from '../src/lib/og/cards.js';
 import { fetchCardImage } from '../src/lib/og/images.js';
 import { renderNotebookTemplate } from '../src/lib/og/template.js';
 
@@ -67,6 +73,15 @@ test('article card resolution rejects invalid, unknown, and private slugs', () =
 
 test('invalid dates are omitted', () => {
 	assert.equal(formatCardDate('not-a-date'), undefined);
+});
+
+test('bounded article labels preserve astral Unicode at the truncation boundary', () => {
+	const label = `${'a'.repeat(39)}🚀tail`;
+	assert.equal(getArticleCard({ title: 'Title', category: label }).label, `${'a'.repeat(39)}🚀`);
+	assert.equal(
+		getArticleCard({ title: 'Title', category: '🚀'.repeat(100) }).label,
+		'🚀'.repeat(40)
+	);
 });
 
 test('frontmatter images require bounded successful HTTPS image responses', async () => {

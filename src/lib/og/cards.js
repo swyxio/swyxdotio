@@ -94,7 +94,9 @@ export function getArticleCard(article, image) {
 		kind: 'article',
 		title,
 		description: extractContentDescription('', article.description || article.subtitle || ''),
-		label: `${article.category || 'note'}`.slice(0, 40),
+		label: Array.from(`${article.category || 'note'}`.slice(0, 80))
+			.slice(0, 40)
+			.join(''),
 		date: formatCardDate(article.date),
 		image,
 		imageAlt,
