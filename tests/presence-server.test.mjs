@@ -77,3 +77,60 @@ test('presence room reciprocates valid close frames without echoing the peer rea
 
 	assert.deepEqual(replies, [[1000, '']]);
 });
+
+test('connection telemetry is exact and affected sockets are counted once across hibernation', async () => {
+	const increments = [];
+	const pending = [];
+	const database = {
+		prepare() {
+			return {
+				bind(...args) {
+					increments.push(args);
+					return { async run() {} };
+				}
+			};
+		}
+	};
+	const ctx = {
+		getWebSockets: () => [],
+		waitUntil(promise) {
+			pending.push(promise);
+		}
+	};
+	const room = new PresenceRoom(ctx, { READ_COUNTERS: database });
+	const oldWarn = console.warn;
+	console.warn = () => {};
+	try {
+		for (let i = 0; i < 3; i++) {
+			room.report('attempts');
+			room.report('connections');
+		}
+		let attachment = { id: 'test-only' };
+		const socket = {
+			deserializeAttachment: () => attachment,
+			serializeAttachment(value) {
+				attachment = value;
+			},
+			close() {}
+		};
+		for (const instance of [room, new PresenceRoom(ctx, { READ_COUNTERS: database })]) {
+			instance.rateStates.set('test-only', {
+				tokens: 0,
+				replenishedAt: Date.now() + 60000,
+				violations: 0
+			});
+			instance.webSocketMessage(socket, '');
+			instance.webSocketMessage(socket, '');
+		}
+		await Promise.all(pending);
+		const total = (kind) =>
+			increments.filter((row) => row[1] === kind).reduce((n, row) => n + row[2], 0);
+		assert.equal(total('connections'), 3);
+		assert.equal(total('attempts'), 3);
+		assert.equal(total('rateLimitedConnections'), 1);
+		assert.ok(increments.every((row) => row.length === 3 && typeof row[0] === 'number'));
+		assert.doesNotMatch(JSON.stringify(increments), /test-only/);
+	} finally {
+		console.warn = oldWarn;
+	}
+});

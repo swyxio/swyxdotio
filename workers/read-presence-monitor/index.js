@@ -159,12 +159,22 @@ export async function readPresenceCounts(database, capturedAt, lookbackMinutes) 
 		)
 		.bind(window.start, window.end)
 		.all();
-	const counts = { roomFull: 0, malformed: 0, rateLimited: 0 };
+	const counts = {
+		roomFull: 0,
+		malformed: 0,
+		rateLimited: 0,
+		attempts: /** @type {number | null} */ (null),
+		connections: /** @type {number | null} */ (null),
+		rateLimitedConnections: /** @type {number | null} */ (null)
+	};
 	for (const row of rows.results ?? []) {
 		const key = `${row.kind}`;
 		if (key === 'roomFull') counts.roomFull = Number(row.count ?? 0);
 		if (key === 'malformed') counts.malformed = Number(row.count ?? 0);
 		if (key === 'rateLimited') counts.rateLimited = Number(row.count ?? 0);
+		if (key === 'attempts') counts.attempts = Number(row.count ?? 0);
+		if (key === 'connections') counts.connections = Number(row.count ?? 0);
+		if (key === 'rateLimitedConnections') counts.rateLimitedConnections = Number(row.count ?? 0);
 	}
 	return counts;
 }

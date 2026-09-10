@@ -14,6 +14,7 @@ test('page registry covers every public non-article card variant', () => {
 		['identity', 'identity', 'collection', 'audio', 'portfolio', 'newsletter']
 	);
 	assert.equal(getPageCard('tools'), null);
+	assert.equal(getPageCard('toString'), null);
 	assert.equal(getPageCard('now')?.kind, 'identity');
 	assert.equal(getPageCard('now')?.annotation, 'a note from the present');
 });
@@ -69,14 +70,18 @@ test('invalid dates are omitted', () => {
 });
 
 test('frontmatter images require bounded successful HTTPS image responses', async () => {
+	const png = Buffer.from(
+		'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jR1kAAAAASUVORK5CYII=',
+		'base64'
+	);
 	const image = await fetchCardImage(
 		'https://images.example/card.png',
 		async () =>
-			new Response(new Uint8Array([137, 80, 78, 71]), {
-				headers: { 'content-type': 'image/png', 'content-length': '4' }
+			new Response(png, {
+				headers: { 'content-type': 'image/png' }
 			})
 	);
-	assert.equal(image, 'data:image/png;base64,iVBORw==');
+	assert.equal(image, `data:image/png;base64,${png.toString('base64')}`);
 	assert.equal(await fetchCardImage('http://images.example/card.png', fetch), undefined);
 	assert.equal(
 		await fetchCardImage(
