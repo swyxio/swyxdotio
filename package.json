@@ -72,6 +72,7 @@
 		"@leeoniya/ufuzzy": "^1.0.8",
 		"date-fns": "^2.30.0",
 		"fflate": "0.8.3",
+		"image-size": "^2.0.2",
 		"jose": "^6.2.10",
 		"just-bash": "3.4.2",
 		"marked": "^12.0.0",

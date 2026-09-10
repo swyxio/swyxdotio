@@ -98,7 +98,10 @@ test('presence count query binds the completed bucket window', async () => {
 	assert.deepEqual(await readPresenceCounts(database, capturedAt, 60), {
 		roomFull: 0,
 		malformed: 0,
-		rateLimited: 4
+		rateLimited: 4,
+		attempts: null,
+		connections: null,
+		rateLimitedConnections: null
 	});
 	assert.match(sql, /bucket_start >= \?1 AND bucket_start < \?2/);
 	assert.deepEqual(bindings, [
@@ -242,7 +245,8 @@ test('monitor flags insufficient samples and elevated exceededResources', () => 
 		config
 	});
 	assert.equal(analysis.status, 'alert');
-	assert.match(analysis.alerts.join('\n'), /Calibration remains statistically inactive/);
+	assert.match(analysis.notices.join('\n'), /Calibration remains statistically inactive/);
+	assert.equal(analysis.alerts.length, 1);
 	assert.match(analysis.alerts.join('\n'), /exceededResources is elevated/);
 });
 
@@ -310,4 +314,6 @@ test('rendered monitor report includes public read checks and alerts', () => {
 	assert.match(report, /Current calibration window: 7\/20 samples/);
 	assert.match(report, /Presence WebSocket smoke: open ok, welcome ok, close clean/);
 	assert.match(report, /Calibration remains statistically inactive/);
+	assert.equal(analysis.status, 'ok');
+	assert.deepEqual(analysis.alerts, []);
 });

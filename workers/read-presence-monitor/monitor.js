@@ -62,9 +62,10 @@ export function monitorConfig(env) {
  */
 export function analyzeMonitor(input) {
 	const alerts = [];
+	const notices = [];
 
 	if (input.calibrationSampleCount < input.config.minSampleCount) {
-		alerts.push(
+		notices.push(
 			`Calibration remains statistically inactive: ${input.calibrationSampleCount}/${input.config.minSampleCount} D1 samples in the current window`
 		);
 	}
@@ -104,7 +105,9 @@ export function analyzeMonitor(input) {
 		alerts.push(`Presence malformed-frame closes detected: ${input.presenceCounts.malformed}`);
 	}
 	if (input.presenceCounts.rateLimited > 0) {
-		alerts.push(`Presence rate-limit events detected: ${input.presenceCounts.rateLimited}`);
+		alerts.push(
+			`Presence rate-limited messages detected (lower bound): ${input.presenceCounts.rateLimited}`
+		);
 	}
 
 	if (input.calibrationStatus === 'delivery_anomaly') {
@@ -113,7 +116,8 @@ export function analyzeMonitor(input) {
 
 	return {
 		status: alerts.length ? 'alert' : 'ok',
-		alerts
+		alerts,
+		notices
 	};
 }
 
@@ -127,7 +131,7 @@ export function analyzeMonitor(input) {
  *  smoke: { readBatchOk: boolean; presenceHttpOk: boolean; publicReads: Record<string, number>; };
  *  presenceSocket: { openOk: boolean; welcomeOk: boolean; closeOk: boolean; failureStage: string | null; closeCode: number | null; durationMs: number; };
  *  worker: { requests: number | null; errors: number | null; exceededResources: number | null; clientDisconnected: number | null; };
- *  presence: { roomFull: number; malformed: number; rateLimited: number; };
+ *  presence: { roomFull: number; malformed: number; rateLimited: number; attempts?: number | null; connections?: number | null; rateLimitedConnections?: number | null; };
  *  analysis: ReturnType<typeof analyzeMonitor>;
  * }} snapshot
  */
@@ -152,12 +156,14 @@ export function renderMonitorReport(snapshot) {
 - Lookback: ${snapshot.config.lookbackMinutes} minutes
 - D1 totals: ${snapshot.totals.readCount.toLocaleString('en-US')} reads, ${snapshot.totals.sampleCount.toLocaleString('en-US')} samples
 - Current calibration window: ${snapshot.calibrationSampleCount.toLocaleString('en-US')}/${snapshot.config.minSampleCount.toLocaleString('en-US')} samples
+- Calibration readiness: ${snapshot.analysis.notices.join(' | ') || 'minimum sample threshold met; precision and freshness still require review'}
 - Latest calibration row: ${snapshot.calibration.status ?? 'none'}${snapshot.calibration.captured_at ? ` at ${new Date(snapshot.calibration.captured_at * 1000).toISOString()}` : ''}
 - Public read smoke: ${snapshot.smoke.readBatchOk ? 'ok' : 'failed'}
 - Presence HTTP smoke: ${snapshot.smoke.presenceHttpOk ? 'ok' : 'failed'}
 - Presence WebSocket smoke: ${presenceSocket}
 - Main Worker window: ${workerWindow}
-- Presence anomalies: room-full ${snapshot.presence.roomFull}, malformed ${snapshot.presence.malformed}, rate-limited ${snapshot.presence.rateLimited}
+- Presence anomalies (checkpoint lower bounds): room-full ${snapshot.presence.roomFull}, malformed ${snapshot.presence.malformed}, rate-limited messages ${snapshot.presence.rateLimited}
+- Presence connection counts: attempts ${snapshot.presence.attempts ?? 'unavailable'}, admitted ${snapshot.presence.connections ?? 'unavailable'}, first rate limit on connection ${snapshot.presence.rateLimitedConnections ?? (snapshot.presence.connections !== null && snapshot.presence.connections !== undefined ? 0 : 'unavailable')}. These count events in this hour, not a matched connection cohort.
 - Public reads checked: ${Object.entries(snapshot.smoke.publicReads)
 		.map(([key, value]) => `${key}=${value}`)
 		.join(', ')}

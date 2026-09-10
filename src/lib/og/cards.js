@@ -63,7 +63,7 @@ export function formatCardDate(value) {
  */
 export function getPageCard(key) {
 	const pageKey = /** @type {keyof typeof PAGE_SOCIAL_CARDS} */ (key);
-	const base = PAGE_SOCIAL_CARDS[pageKey];
+	const base = Object.hasOwn(PAGE_SOCIAL_CARDS, pageKey) ? PAGE_SOCIAL_CARDS[pageKey] : null;
 	if (!base) return null;
 	const title = truncateTitle(base.title);
 	return {
@@ -94,7 +94,7 @@ export function getArticleCard(article, image) {
 		kind: 'article',
 		title,
 		description: extractContentDescription('', article.description || article.subtitle || ''),
-		label: article.category || 'note',
+		label: `${article.category || 'note'}`.slice(0, 40),
 		date: formatCardDate(article.date),
 		image,
 		imageAlt,

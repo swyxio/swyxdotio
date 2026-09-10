@@ -1,8 +1,14 @@
 import { error } from '@sveltejs/kit';
 import { getPageCard } from '$lib/og/cards.js';
-import { renderNotebookCard } from '$lib/og/render.js';
+import { notebookCardHead, renderNotebookCard } from '$lib/og/render.js';
 
 export const prerender = false;
+
+/** @type {import('./$types').RequestHandler} */
+export function HEAD({ params }) {
+	if (!getPageCard(params.key)) throw error(404, 'Unknown OG page');
+	return notebookCardHead();
+}
 
 /** @type {import('./$types').RequestHandler} */
 export async function GET({ params }) {

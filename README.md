@@ -243,10 +243,17 @@ The site owns its social images rather than depending on Tailgraph or another ho
 - `/og/article/[slug].png?v=<updated-at>-<design-version>` resolves only public articles from the
   persisted content manifest. Unknown, private, and malformed slugs return 404.
 - Article `image`/`cover_image` values may enhance the template. Only HTTPS JPEG, PNG, and WebP
-  inputs up to 4 MB are accepted, with a 2.5-second fetch timeout. A bad image falls back to the
+  inputs up to 4 MB, two megapixels, and 2048 pixels per edge are accepted. A 2.5-second deadline
+  covers both headers and the streamed body. A bad or oversized image falls back to the
   no-image card rather than failing the request.
 - Generated PNGs are 1200×630, capped below 5 MB, and cached for one year as immutable. A complete
-  rendering failure returns `src/lib/og/assets/notebook-fallback.png` with `X-OG-Fallback: 1`.
+  rendering failure returns `src/lib/og/assets/notebook-fallback.png` with `X-OG-Fallback: 1`
+  and a 60-second cache TTL so a transient failure does not poison the card for a year.
+- HEAD validates the public card without fetching its cover or rasterizing a PNG. OG cache keys
+  ignore query strings because card inputs come only from the manifest/registry; Worker version
+  and content generation still invalidate the cache. Arbitrary `v` values cannot bypass it.
+- Cache-miss renders emit bounded `og_render` start/completion/fallback records with card kind,
+  image-present flag, elapsed time, and byte count. They never log card content or URLs.
 
 Every public page should use `src/components/SocialMeta.svelte`; do not add route-local duplicate
 Open Graph tags. Non-article pages use `og:type=website`, articles use `article`, and all metadata
@@ -262,8 +269,9 @@ curl -fsS "https://swyx.io/og/page/home.png?v=spotcheck" -o /tmp/swyx-og.png
 file /tmp/swyx-og.png
 ```
 
-Use a fresh version query when spot-checking so an older immutable edge entry cannot hide the new
-renderer. After deployment, also test a fresh X draft and LinkedIn Post Inspector; previously
+Deployment version and content generation invalidate internal OG cache entries. A fresh version
+query refreshes downstream social caches, but does not bypass the Worker's internal cache.
+After deployment, also test a fresh X draft and LinkedIn Post Inspector; previously
 shared URLs may retain network-owned caches.
 
 The focused unit suite validates registry coverage, metadata versioning, input rejection, image

@@ -210,22 +210,33 @@ Each snapshot stores:
 - optional Cloudflare main-Worker request/error/status data for the last
   `MONITOR_LOOKBACK_MINUTES` window when `CLOUDFLARE_ANALYTICS_TOKEN` is set;
 - aggregate presence anomaly totals from `presence_monitor_hourly` for
-  `roomFull`, malformed-frame closes, and rate-limit events. Because those
+  `roomFull`, malformed-frame closes, and rate-limited **messages**. Because those
   counters are hourly and flushed at logarithmic checkpoints, the monitor reads
   completed, non-overlapping buckets. Current-hour events appear in the next
   scheduled snapshot instead of being
   skipped at a rolling-window boundary. Counts are exact at each checkpoint and
   conservative lower bounds between checkpoints.
+- Exact `attempts`, `connections`, and `rateLimitedConnections` events in the same
+  hourly table. Attempts are valid upgrades reaching the Durable Object; connections
+  are admitted sockets; rateLimitedConnections counts the first rate-limited message
+  per socket, with a hibernation-persistent marker. No identities enter D1. The first
+  violation can be in a later hour than admission, so hourly ratios are not matched
+  cohorts. No rows before rollout means unavailable coverage, not zero traffic.
+  These small exact counters add two writes per admitted connection and one per
+  first violation; they do not persist each movement/message. Persistence failures
+  emit only `presence.counter_failed` and the finite counter kind.
 
-The monitor alerts on three things by default:
+Calibration below `MONITOR_MIN_SAMPLE_COUNT` (`20`) is explicitly reported as
+statistically inactive in readiness notices. It is not an incident and does not
+increase `alert_count` or trigger the alert webhook.
 
-1. D1 samples since the latest calibration capture below
-   `MONITOR_MIN_SAMPLE_COUNT` (`20` by default), because calibration remains
-   statistically inactive below that per-window threshold.
-2. Elevated main-Worker `exceededResources` if both the count and rate exceed
+The monitor alerts on:
+
+1. Elevated main-Worker `exceededResources` if both the count and rate exceed
    the configured hourly thresholds.
-3. Any failed WebSocket open, welcome, or clean-close lifecycle check.
-4. Any persisted presence anomaly counts in the lookback window.
+2. Any failed public HTTP or WebSocket lifecycle smoke check.
+3. Any persisted presence anomaly counts in the lookback window.
+4. A completed calibration report with a delivery anomaly.
 
 The presence Worker explicitly enables `web_socket_auto_reply_to_close` so the
 runtime reciprocates normal close frames even though the Worker retains its

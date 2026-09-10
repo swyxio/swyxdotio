@@ -72,6 +72,10 @@ export async function handle({ event, resolve }) {
 		isVersionedOgRequest(cacheUrl) ||
 		isPublicReadCountRequest(cacheUrl) ||
 		isPublicCrawlerDiscoveryRequest(cacheUrl);
+	// Card inputs come exclusively from the registry/manifest. Arbitrary query
+	// values (including v) must not force another expensive rasterization.
+	// Worker version + content generation below still invalidate changed cards.
+	if (cacheUrl.pathname.startsWith('/og/')) cacheUrl.search = '';
 	if (
 		cacheUrl.pathname === '/api/listContent.json' ||
 		cacheUrl.pathname === '/api/latestPosts.json' ||

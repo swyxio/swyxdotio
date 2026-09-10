@@ -15,7 +15,15 @@ const POLICY_VIOLATION = 1008;
 const TRY_AGAIN_LATER = 1013;
 const REACTION_INTERVAL_MS = 2_000;
 const RATE_LIMIT_CLOSE_THRESHOLD = 20;
-const PERSISTED_PRESENCE_KINDS = new Set(['roomFull', 'malformed', 'rateLimited']);
+const PERSISTED_PRESENCE_KINDS = new Set([
+	'roomFull',
+	'malformed',
+	'rateLimited',
+	'connections',
+	'attempts',
+	'rateLimitedConnections'
+]);
+const EXACT_PRESENCE_KINDS = new Set(['connections', 'attempts', 'rateLimitedConnections']);
 const UNSENDABLE_CLOSE_CODES = new Set([1004, 1005, 1006]);
 
 function socketAttachment(socket) {
@@ -80,13 +88,15 @@ export class PresenceRoom {
 		}
 		const count = (this.aggregateCounts[kind] ?? 0) + 1;
 		this.aggregateCounts[kind] = count;
-		const persistedDelta = presenceAggregateDelta(count);
+		const persistedDelta = EXACT_PRESENCE_KINDS.has(kind) ? 1 : presenceAggregateDelta(count);
 		// Emit sparse aggregate-only diagnostics. Never include room, peer, country,
 		// position, reaction, URL, user agent, or network identifiers.
-		if (persistedDelta > 0) console.warn('presence.aggregate', { kind, count });
+		if (presenceAggregateDelta(count) > 0) console.warn('presence.aggregate', { kind, count });
 		if (persistedDelta > 0 && PERSISTED_PRESENCE_KINDS.has(kind) && this.env?.READ_COUNTERS) {
 			this.ctx.waitUntil(
-				incrementPresenceCounter(this.env.READ_COUNTERS, kind, persistedDelta, bucketStart)
+				incrementPresenceCounter(this.env.READ_COUNTERS, kind, persistedDelta, bucketStart).catch(
+					() => console.error('presence.counter_failed', { kind })
+				)
 			);
 		}
 	}
@@ -113,6 +123,7 @@ export class PresenceRoom {
 			return new Response('WebSocket upgrade required', { status: 426 });
 		}
 
+		this.report('attempts');
 		if (this.peers.length >= PRESENCE_ROOM_LIMIT) {
 			this.report('roomFull');
 			const pair = new WebSocketPair();
@@ -164,6 +175,12 @@ export class PresenceRoom {
 		this.rateStates.set(peer.id, state);
 		if (!consumePresenceToken(state)) {
 			this.report('rateLimited');
+			// Attachment survives hibernation; count each affected connection once.
+			if (!peer.rateLimitedReported) {
+				peer.rateLimitedReported = true;
+				socket.serializeAttachment(peer);
+				this.report('rateLimitedConnections');
+			}
 			if (state.violations >= RATE_LIMIT_CLOSE_THRESHOLD) {
 				close(socket, POLICY_VIOLATION, 'Rate limit exceeded');
 			}

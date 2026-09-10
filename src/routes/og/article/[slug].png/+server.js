@@ -2,9 +2,16 @@ import { error } from '@sveltejs/kit';
 import { readContentManifest } from '$lib/content-manifest.js';
 import { resolveArticleCard } from '$lib/og/article.js';
 import { fetchCardImage } from '$lib/og/images.js';
-import { renderNotebookCard } from '$lib/og/render.js';
+import { notebookCardHead, renderNotebookCard } from '$lib/og/render.js';
 
 export const prerender = false;
+
+/** @type {import('./$types').RequestHandler} */
+export async function HEAD({ params, platform }) {
+	const manifest = await readContentManifest(platform?.env?.CONTENT_MANIFEST);
+	if (!resolveArticleCard(manifest, params.slug)) throw error(404, 'Unknown article');
+	return notebookCardHead();
+}
 
 /** @type {import('./$types').RequestHandler} */
 export async function GET({ params, platform }) {
