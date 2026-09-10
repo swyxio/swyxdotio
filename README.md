@@ -253,7 +253,8 @@ The site owns its social images rather than depending on Tailgraph or another ho
   ignore query strings because card inputs come only from the manifest/registry; Worker version
   and content generation still invalidate the cache. Arbitrary `v` values cannot bypass it.
 - Cache-miss renders emit bounded `og_render` start/completion/fallback records with card kind,
-  image-present flag, elapsed time, and byte count. They never log card content or URLs.
+  image-present flag, and byte count. Use Cloudflare Tail's `cpuTime` and `wallTime` for timing;
+  the Worker's JavaScript clock can remain fixed during CPU work. Logs contain no card content or URLs.
 
 Every public page should use `src/components/SocialMeta.svelte`; do not add route-local duplicate
 Open Graph tags. Non-article pages use `og:type=website`, articles use `article`, and all metadata

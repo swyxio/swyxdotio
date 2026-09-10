@@ -19,7 +19,6 @@ export function notebookCardHead() {
 
 /** @param {import('./cards').NotebookCard} card */
 export async function renderNotebookCard(card) {
-	const started = Date.now();
 	let stage = 'fonts';
 	try {
 		const fonts = await notebookFonts();
@@ -46,7 +45,6 @@ export async function renderNotebookCard(card) {
 				event: 'og_render',
 				stage: 'complete',
 				kind: card.kind,
-				durationMs: Date.now() - started,
 				bytes: bytes.byteLength
 			})
 		);
@@ -62,8 +60,7 @@ export async function renderNotebookCard(card) {
 				event: 'og_render',
 				stage,
 				outcome: 'fallback',
-				kind: card.kind,
-				durationMs: Date.now() - started
+				kind: card.kind
 			})
 		);
 		return new Response(await read(fallbackPath).arrayBuffer(), {
