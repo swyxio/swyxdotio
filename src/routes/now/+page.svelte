@@ -47,17 +47,6 @@
 	.now-copy :global(h2) {
 		scroll-margin-top: 1.5rem;
 	}
-	.now-copy :global(details) {
-		margin-top: 2rem;
-		padding: 1rem 0;
-		border-block: 1px solid var(--page-border);
-	}
-	.now-copy :global(summary) {
-		min-height: 44px;
-		cursor: pointer;
-		color: var(--page-link);
-		font: 1rem/1.5 var(--font-reading);
-	}
 	footer {
 		margin-top: 2rem;
 		font: italic 1rem/1.75 var(--font-reading);

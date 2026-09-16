@@ -535,14 +535,12 @@
 		margin-top: 0;
 	}
 
-	.about-copy :global(details),
 	.photo-sources :global(details) {
 		margin-block: 1.5rem;
 		padding: 0.75rem 0;
 		border-inline: 0;
 	}
 
-	.about-copy :global(summary),
 	.photo-sources :global(summary) {
 		min-height: 2rem;
 		color: var(--page-link);
