@@ -27,6 +27,8 @@
 	--page-accent: #9e4235;
 	--page-accent-soft: #f3e5dc;
 	--page-gold: #846437;
+	--selection-bg: #f2d58c;
+	--selection-text: #292a24;
 	--control-border: #9a876f;
 	--page-paper: #f4eee3;
 	--page-ink: #333a31;
@@ -52,6 +54,7 @@
 	--page-accent: #dfbd78;
 	--page-accent-soft: #342d2b;
 	--page-gold: #e5c684;
+	--selection-bg: #d7b461;
 	--control-border: #7c7389;
 	--page-paper: #21222d;
 	--page-ink: #f0e8d9;
@@ -112,10 +115,8 @@ code {
 		outline-color: var(--brand-accent);
 	}
 	::selection {
-		background-color: var(--brand-accent);
-	}
-	.dark ::selection {
-		color: #1d1d1d;
+		background-color: var(--selection-bg);
+		color: var(--selection-text);
 	}
 	::marker {
 		color: var(--brand-accent);
@@ -290,6 +291,46 @@ a:hover {
 }
 
 .reading-prose :where(blockquote p:last-child) {
+	margin-bottom: 0;
+}
+
+/* Native expandable notes in reading content. Keep the disclosure marker and
+   keyboard behavior while matching the paper and gold palette in both themes. */
+.reading-prose details {
+	margin-block: 1.4em;
+	padding: 0.85rem 1rem;
+	border: 1px solid color-mix(in srgb, var(--page-gold) 45%, var(--page-border));
+	border-radius: 0.5rem;
+	background: var(--page-surface);
+}
+.reading-prose details > summary {
+	min-height: 44px;
+	margin: -0.85rem -1rem;
+	padding: 0.85rem 1rem;
+	border-radius: 0.5rem;
+	color: var(--page-text);
+	font: 600 0.95rem/1.5 var(--font-body);
+	cursor: pointer;
+}
+.reading-prose details > summary::marker {
+	color: var(--page-gold);
+}
+.reading-prose details > summary:hover {
+	background: var(--page-row-hover);
+}
+.reading-prose details > summary:focus-visible {
+	outline: 2px solid var(--page-gold);
+	outline-offset: 3px;
+}
+.reading-prose details[open] > summary {
+	margin-bottom: 0.85rem;
+	border-bottom: 1px solid var(--page-border);
+	border-radius: 0.5rem 0.5rem 0 0;
+}
+.reading-prose details > summary + * {
+	margin-top: 0;
+}
+.reading-prose details > :last-child:not(summary) {
 	margin-bottom: 0;
 }
 
