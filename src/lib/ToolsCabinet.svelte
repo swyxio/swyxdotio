@@ -1,6 +1,6 @@
 <script>
 	export let isOwner = false;
-	/** @type {Array<{id:string,name:string,description:string,owner?:boolean,tools:Array<{id:string,name:string,description:string,href:string,reload?:boolean,badge?:string}>}>} */
+	/** @type {Array<{id:string,name:string,description:string,owner?:boolean,tools:Array<{id:string,name:string,description:string,href:string,reload?:boolean,badge?:string,image?:string}>}>} */
 	const groups = [
 		{
 			id: 'workspace',
@@ -28,6 +28,15 @@
 					href: '/tools/cap',
 					reload: true,
 					badge: 'Team access'
+				},
+				{
+					id: 'drive',
+					name: 'Drive',
+					description: 'Files, search, and separate team spaces.',
+					href: '/tools/drive',
+					reload: true,
+					badge: 'Team access',
+					image: 'paper.webp'
 				},
 				{
 					id: 'sign',
@@ -85,7 +94,7 @@
 						<a href={tool.href} class="drawer" data-sveltekit-reload={tool.reload}>
 							<span class="drawer-face">
 								<img
-									src={'/assets/tools-cabinet/' + tool.id + '.webp'}
+									src={'/assets/tools-cabinet/' + (tool.image ?? tool.id + '.webp')}
 									alt=""
 									width="420"
 									height="420"
