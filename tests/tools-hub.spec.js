@@ -49,7 +49,15 @@ test('guest has workspace and independently authorized team links, honest disclo
 	await page.goto('/tools?next=%2Ftools%2Fdraw&authError=1');
 	await expect(page.getByRole('alert')).toContainText('Google sign-in did not finish');
 	const cabinet = page.getByRole('navigation', { name: 'Your tools' });
-	await expect(cabinet.getByRole('link')).toHaveCount(5);
+	await expect(cabinet.getByRole('link')).toHaveCount(6);
+	await expect(cabinet.getByRole('link', { name: /^Drive / })).toHaveAttribute(
+		'href',
+		'/tools/drive'
+	);
+	await expect(cabinet.getByRole('link', { name: /^Drive / })).toHaveAttribute(
+		'data-sveltekit-reload',
+		'true'
+	);
 	await expect(cabinet.getByRole('link', { name: /^Sign documents/ })).toHaveAttribute(
 		'href',
 		'/tools/sign'
@@ -82,6 +90,12 @@ test('guest has workspace and independently authorized team links, honest disclo
 	await expect(page.getByRole('textbox', { name: 'Write anything' })).toBeVisible();
 });
 
+test('Drive shortcut opens the independently authorized app', async ({ page }) => {
+	const response = await page.request.get('/tools/drive', { maxRedirects: 0 });
+	expect(response.status()).toBe(302);
+	expect(response.headers().location).toBe('https://drive.swyx.io/');
+});
+
 test('Cal shortcut leads through the tools namespace without an owner-only gate', async ({
 	page
 }) => {
@@ -101,7 +115,7 @@ test('public calendar disclosures distinguish Tools login and preserve existing 
 	await expect(disclosure).toContainText('ordinary Tools sign-in does not grant calendar access');
 	await expect(disclosure).toContainText('new bookings are paused');
 	await expect(page.getByRole('navigation', { name: 'Your tools' }).getByRole('link')).toHaveCount(
-		5
+		6
 	);
 	await disclosure.getByRole('link', { name: 'Calendar access and privacy' }).click();
 	await expect(page).toHaveURL(/\/tools\/privacy#swyxcal$/);
@@ -155,13 +169,13 @@ test('account disclosure retains identity, dismisses conventionally, and adapts 
 	await authenticateTools(page, TEST_TOOLS_MEMBER);
 	await page.reload();
 	await expect(page.getByRole('navigation', { name: 'Your tools' }).getByRole('link')).toHaveCount(
-		5
+		6
 	);
 	await expect(page.getByRole('link', { name: /Podcast studio/ })).toHaveCount(0);
 	await expect(page.getByRole('link', { name: /^Cap / })).toBeVisible();
 	await expect(
 		page.getByRole('region', { name: 'Team swyx', exact: true }).getByRole('link')
-	).toHaveCount(3);
+	).toHaveCount(4);
 	await expect(page.getByRole('link', { name: /^Reclip/ })).toHaveCount(0);
 	await expect((await page.request.get('/tools/podcast')).status()).toBe(403);
 	await expect((await page.request.get('/tools/reclip')).status()).toBe(403);
@@ -239,7 +253,7 @@ for (const [name, width, height] of viewports) {
 			email: 'long.account.with.a.very.long.address@example.com'
 		});
 		const cabinet = page.getByRole('navigation', { name: 'Your tools' });
-		await expect(cabinet.getByRole('link')).toHaveCount(7);
+		await expect(cabinet.getByRole('link')).toHaveCount(8);
 		await expect
 			.poll(() =>
 				cabinet
