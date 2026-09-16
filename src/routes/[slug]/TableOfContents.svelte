@@ -69,19 +69,34 @@
 		list-style: none;
 	}
 	li + li {
-		margin-top: 0.4rem;
+		margin-top: 0.15rem;
 	}
 	.subheading {
 		padding-left: 0.75rem;
 	}
 	a {
 		display: block;
+		padding: 0.3rem 0.6rem;
+		border-radius: 0.3rem;
 		color: var(--page-muted);
+		text-decoration: none;
+		transition:
+			color 150ms,
+			background-color 150ms,
+			box-shadow 150ms;
 	}
-	a:hover,
+	a:hover {
+		background: var(--page-row-hover);
+		color: var(--page-text);
+	}
 	a[aria-current='location'] {
+		background: var(--page-accent-soft);
+		box-shadow: inset 3px 0 var(--page-accent);
 		color: var(--page-link);
-		text-decoration: underline;
-		text-underline-offset: 0.15em;
+		font-weight: 600;
+	}
+	a:focus-visible {
+		outline: 2px solid var(--page-link);
+		outline-offset: -2px;
 	}
 </style>
