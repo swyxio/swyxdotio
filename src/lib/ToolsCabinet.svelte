@@ -30,6 +30,14 @@
 					badge: 'Team access'
 				},
 				{
+					id: 'sign',
+					name: 'Sign documents',
+					description: 'Send, sign, and keep signed PDFs.',
+					href: '/tools/sign',
+					reload: true,
+					badge: 'Team access'
+				},
+				{
 					id: 'calendar',
 					name: 'Cal',
 					description: 'Team scheduling. Bookings paused.',
