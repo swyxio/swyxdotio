@@ -31,6 +31,42 @@ await check('headings get ids (for TOC + anchors)', async () => {
 	assert.match(html, /<h2[^>]*id="hello-world"/);
 });
 
+await check('heading titles are permalinks without visible slug labels', async () => {
+	const html = await renderMarkdown('## Pick a Topic');
+	assert.match(
+		html,
+		/<h2 id="pick-a-topic"><a class="heading-link" href="#pick-a-topic">Pick a Topic<\/a><\/h2>/
+	);
+	assert.doesNotMatch(html, />#pick-a-topic</);
+});
+
+await check('inline TOC uses the rendered IDs, including duplicates and subheadings', async () => {
+	const html = await renderMarkdown('## Table of Contents\n\n## Topic\n\n### Detail\n\n## Topic');
+	const nav = html.match(/<nav[^>]*>([\s\S]*?)<\/nav>/)?.[1];
+	assert.ok(nav);
+	assert.match(nav, /href="#topic">Topic/);
+	assert.match(nav, /data-level="3"><a href="#detail">Detail/);
+	assert.match(nav, /href="#topic-1">Topic/);
+	assert.doesNotMatch(nav, /href="#table-of-contents"/);
+});
+
+await check('TOC is only inserted at an authored Table of Contents heading', async () => {
+	assert.doesNotMatch(await renderMarkdown('## Topic'), /class="article-toc"/);
+	assert.doesNotMatch(await renderMarkdown('## Table of Contents'), /class="article-toc"/);
+});
+
+await check('an authored TOC list is not duplicated', async () => {
+	const html = await renderMarkdown('## Table of Contents\n\n- [Topic](#topic)\n\n## Topic');
+	assert.doesNotMatch(html, /class="article-toc"/);
+	assert.match(html, /<li><a href="#topic">Topic<\/a><\/li>/);
+});
+
+await check('authored heading links are preserved without nested anchors', async () => {
+	const html = await renderMarkdown('## Table of Contents\n\n## [Topic](https://example.com)');
+	assert.match(html, /<h2 id="topic"><a href="https:\/\/example.com">Topic<\/a><\/h2>/);
+	assert.match(html, /<li data-level="2"><a href="#topic">Topic<\/a><\/li>/);
+});
+
 await check('GitHub issue refs autolink', async () => {
 	const html = await renderMarkdown('see #123 for details');
 	assert.match(html, /href="https:\/\/github\.com\/[^"]+\/issues\/123"/);

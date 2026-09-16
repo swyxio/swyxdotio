@@ -8,6 +8,16 @@
 	import Reactions from '../../components/Reactions.svelte';
 	import LatestPosts from '../../components/LatestPosts.svelte';
 	import { page } from '$app/stores';
+	import { Toc } from '@svelte-put/toc';
+	import TableOfContents from './TableOfContents.svelte';
+
+	const toc = new Toc({
+		selector: ':where(h1, h2, h3)',
+		ignore: '#table-of-contents',
+		anchor: false,
+		observe: { strategy: 'self' },
+		scrollMarginTop: '2rem'
+	});
 
 	import utterances, { injectScript } from './loadUtterances';
 	import WebMentions from '../../components/WebMentions.svelte';
@@ -46,73 +56,78 @@
 	{/if}
 </svelte:head>
 
-<article
-	class="prose reading-prose swyxcontent mx-auto w-full items-start justify-center dark:prose-invert"
-	class:has-translations={hasTranslations}
->
-	<header class="article-header">
-		<a class="article-back" href="/ideas">← All writing</a>
-		<h1>{json.title}</h1>
-		{#if json.subtitle}
-			<p class="article-deck">{json.subtitle}</p>
-		{/if}
-		<div class="article-byline">
-			<span>by <a href="/about">swyx</a></span>
-			{#if isCodingCareerLaunch}
-				<a href="https://learninpublic.org/" rel="external"> Open Sourced August 18, 2026 </a>
-			{:else if json.ghMetadata?.issueUrl}
-				<a href={json.ghMetadata.issueUrl} rel="external noreferrer" target="_blank">
+<TableOfContents {toc} />
+
+{#key data.slug}
+	<article
+		use:toc.actions.root
+		class="prose reading-prose swyxcontent mx-auto w-full items-start justify-center dark:prose-invert"
+		class:has-translations={hasTranslations}
+	>
+		<header class="article-header">
+			<a class="article-back" href="/ideas">← All writing</a>
+			<h1>{json.title}</h1>
+			{#if json.subtitle}
+				<p class="article-deck">{json.subtitle}</p>
+			{/if}
+			<div class="article-byline">
+				<span>by <a href="/about">swyx</a></span>
+				{#if isCodingCareerLaunch}
+					<a href="https://learninpublic.org/" rel="external"> Open Sourced August 18, 2026 </a>
+				{:else if json.ghMetadata?.issueUrl}
+					<a href={json.ghMetadata.issueUrl} rel="external noreferrer" target="_blank">
+						<time datetime={new Date(json.date).toISOString()}>
+							{new Date(json.date).toISOString().slice(0, 10)}
+						</time>
+					</a>
+				{:else}
 					<time datetime={new Date(json.date).toISOString()}>
 						{new Date(json.date).toISOString().slice(0, 10)}
 					</time>
-				</a>
-			{:else}
-				<time datetime={new Date(json.date).toISOString()}>
-					{new Date(json.date).toISOString().slice(0, 10)}
-				</time>
-			{/if}
-			{#key data.slug}
-				<ReadCounter pageKey={data.slug} requireDepth />
-			{/key}
-		</div>
-	</header>
-	{#if isCodingCareerLaunch}
-		<BookLaunchCallout />
-	{/if}
+				{/if}
+				{#key data.slug}
+					<ReadCounter pageKey={data.slug} requireDepth />
+				{/key}
+			</div>
+		</header>
+		{#if isCodingCareerLaunch}
+			<BookLaunchCallout />
+		{/if}
 
-	{#if json.disclosure}
-		<p class="mt-4 text-sm text-gray-600 dark:text-gray-400">
-			<a
-				aria-label="What is my disclosure policy?"
-				target="_blank"
-				title="What is my disclosure policy?"
-				rel="noopener noreferrer"
-				href="https://swyx.io/digital-garden-tos/#2-epistemic-disclosure"
-				color="blue"
-			>
-				<span class="relative font-bold"
-					>Disclosure<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="1em"
-						height="1em"
-						class="ml-1 inline"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="#999"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-					>
-						<circle cx="12" cy="12" r="10" />
-						<path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-						<line x1="12" y1="17" x2="12" y2="17" />
-					</svg></span
-				></a
-			>: {json.disclosure}
-		</p>
-	{/if}
-	{@html json.content}
-</article>
+		{#if json.disclosure}
+			<p class="mt-4 text-sm text-gray-600 dark:text-gray-400">
+				<a
+					aria-label="What is my disclosure policy?"
+					target="_blank"
+					title="What is my disclosure policy?"
+					rel="noopener noreferrer"
+					href="https://swyx.io/digital-garden-tos/#2-epistemic-disclosure"
+					color="blue"
+				>
+					<span class="relative font-bold"
+						>Disclosure<svg
+							xmlns="http://www.w3.org/2000/svg"
+							width="1em"
+							height="1em"
+							class="ml-1 inline"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="#999"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						>
+							<circle cx="12" cy="12" r="10" />
+							<path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+							<line x1="12" y1="17" x2="12" y2="17" />
+						</svg></span
+					></a
+				>: {json.disclosure}
+			</p>
+		{/if}
+		{@html json.content}
+	</article>
+{/key}
 
 <div class="site-shell article-endmatter mb-12">
 	{#if json?.tags?.length}

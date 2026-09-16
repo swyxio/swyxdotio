@@ -629,3 +629,32 @@ blockquote {
 	margin-top: -0.219em;
 	display: table;
 }
+
+/* Restore the article's Markdown-style section headings and permalinks. */
+article.prose h2::before {
+	content: '## ';
+}
+article.prose h3::before {
+	content: '### ';
+}
+article.prose h4::before {
+	content: '#### ';
+}
+article.prose :is(h2, h3, h4)::before {
+	color: var(--page-muted);
+}
+article.prose .heading-link:hover,
+article.prose .heading-link:focus-visible {
+	text-decoration: underline !important;
+	text-underline-offset: 0.15em;
+}
+article.prose :is(h1, h2, h3, h4, h5, h6)[id] {
+	scroll-margin-top: 2rem;
+}
+.article-toc {
+	font-family: var(--font-body);
+	font-size: 0.9rem;
+}
+.article-toc li[data-level='3'] {
+	margin-left: 1.25rem;
+}
