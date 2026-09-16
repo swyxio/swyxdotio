@@ -182,5 +182,28 @@ let _marked;
  */
 export async function renderMarkdown(md) {
 	if (!_marked) _marked = createRenderer();
-	return _marked.parse(md ?? '');
+	const html = await _marked.parse(md ?? '');
+	// Build navigation from the rendered IDs so duplicate headings and existing
+	// fragment links use exactly the same destinations as the article.
+	const headings = [...html.matchAll(/^<h([1-6]) id="([^"]+)">([\s\S]*?)<\/h\1>/gm)];
+	const tocItems = headings.filter(
+		([, level, id]) => (level === '2' || level === '3') && id !== 'table-of-contents'
+	);
+	const toc = tocItems.length
+		? `<nav class="article-toc" aria-label="Article table of contents"><ul>${tocItems
+				.map(
+					([, level, id, text]) =>
+						`<li data-level="${level}"><a href="#${id}">${text.replace(/<\/?a\b[^>]*>/gi, '')}</a></li>`
+				)
+				.join('')}</ul></nav>`
+		: '';
+	return html.replace(
+		/^<h([1-6]) id="([^"]+)">([\s\S]*?)<\/h\1>/gm,
+		(heading, level, id, text, offset) => {
+			// Preserve authored links without nesting anchors inside them.
+			const title = /<a\b/i.test(text) ? text : `<a class="heading-link" href="#${id}">${text}</a>`;
+			const hasAuthoredToc = /^\s*<(?:ul|ol|nav)\b/i.test(html.slice(offset + heading.length));
+			return `<h${level} id="${id}">${title}</h${level}>${id === 'table-of-contents' && !hasAuthoredToc ? toc : ''}`;
+		}
+	);
 }
