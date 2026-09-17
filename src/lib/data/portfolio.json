@@ -898,6 +898,18 @@
 		}
 	},
 	{
+		"id": "kepler-ai",
+		"name": "Kepler AI",
+		"website": "https://kepler.ai",
+		"description": "AI for financial research and analysis, with source-linked data and reproducible calculations.",
+		"category": "AI finance",
+		"status": "current",
+		"logo": "/portfolio/kepler-ai.png",
+		"logoSource": "https://kepler.ai/apple-touch-icon.png",
+		"valuation": null,
+		"tier": "Smaller names"
+	},
+	{
 		"id": "astral",
 		"name": "Astral",
 		"website": "https://astral.sh",

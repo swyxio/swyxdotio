@@ -2,6 +2,10 @@
 
 Restores the original four editorial tiers and expands the public valuation search. No private investment records were used. Company announcements and dated press/database marks are distinguished from filing-derived estimates. Raised amounts and cumulative funding are separate from valuations; acquisition prices are excluded from the valuation column. Historical values are not current marks or the value of swyx's holdings.
 
+## Kepler AI — added 2026-09-17
+
+Added at swyx's request as a current investment in the Smaller names group. Description and logo come from [Kepler's official website](https://kepler.ai/) and [apple-touch icon](https://kepler.ai/apple-touch-icon.png), checked September 17, 2026. No public valuation was verified; the valuation remains null. This addition does not change the August 26 review date for the rest of the catalog.
+
 ## Chroma
 
 Added the $75M April 2023 seed valuation. Corroborated by [CB Insights](https://www.cbinsights.com/company/chroma-6/financials) and [the original reporter, Stephanie Palazzolo](https://www.linkedin.com/posts/stephanie-palazzolo_vector-database-chroma-scored-18-million-activity-7049789226158018560-Vvvm).
