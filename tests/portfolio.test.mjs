@@ -13,7 +13,7 @@ const root = new URL('../', import.meta.url);
 const companies = JSON.parse(await readFile(new URL('src/lib/data/portfolio.json', root), 'utf8'));
 
 test('catalog retains all original entries, exits, and individual backings', () => {
-	assert.equal(companies.length, 57);
+	assert.equal(companies.length, 58);
 	assert.equal(new Set(companies.map((company) => company.id)).size, companies.length);
 	assert.deepEqual(
 		companies.filter((company) => company.status === 'exited').map((company) => company.name),
@@ -107,7 +107,8 @@ test('original tiers retain their exact memberships independently of status', ()
 			'100ms',
 			'expand',
 			'catamaran',
-			'replay'
+			'replay',
+			'kepler-ai'
 		],
 		Done: [
 			'astral',
