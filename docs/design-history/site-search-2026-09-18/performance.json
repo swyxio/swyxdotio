@@ -1,0 +1,73 @@
+{
+  "conditions": "Same dependency runtime. Initial JS = eager import closure of SvelteKit app/start/shared layout; excludes page-specific chunks and CSS/fonts. Gzip per file. Lazy JS = dialog closure minus shared shell. HTTP timings = Node fetch to local Vite/Worker platform, warm local manifest, no HTTP response cache.",
+  "before": {
+    "initial": {
+      "rawBytes": 139197,
+      "gzipBytes": 56956
+    },
+    "lazyAdded": {
+      "rawBytes": 0,
+      "gzipBytes": 0
+    },
+    "initialHasDialog": false
+  },
+  "after": {
+    "initial": {
+      "rawBytes": 142066,
+      "gzipBytes": 58128
+    },
+    "lazyAdded": {
+      "rawBytes": 8998,
+      "gzipBytes": 4255
+    },
+    "dialogFile": "_app/immutable/chunks/DI7eQS7w.js",
+    "initialHasDialog": false
+  },
+  "initialDelta": {
+    "rawBytes": 2869,
+    "gzipBytes": 1172
+  },
+  "localWarm": [
+    {
+      "wallMs": 88.87,
+      "server": {
+        "loadMs": 61.61,
+        "searchMs": 1
+      },
+      "total": 3,
+      "status": 200
+    },
+    {
+      "wallMs": 64.28,
+      "server": {
+        "loadMs": 59.74,
+        "searchMs": 1.27
+      },
+      "total": 3,
+      "status": 200
+    },
+    {
+      "wallMs": 57.86,
+      "server": {
+        "loadMs": 55.53,
+        "searchMs": 0.57
+      },
+      "total": 3,
+      "status": 200
+    },
+    {
+      "wallMs": 58.85,
+      "server": {
+        "loadMs": 56.09,
+        "searchMs": 1.11
+      },
+      "total": 3,
+      "status": 200
+    }
+  ],
+  "firstObservedLocalCatalog": {
+    "loadMs": 4494.18,
+    "searchMs": 2.45
+  },
+  "nativePhoneKeyboard": "Not tested; responsive desktop browser and CDP touch emulation only"
+}

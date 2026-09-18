@@ -81,19 +81,6 @@
 			else inputEl?.blur();
 			return;
 		}
-		const target = event.target;
-		if (
-			event.key === '/' &&
-			inputEl &&
-			!(
-				target instanceof Element &&
-				target.closest('input, textarea, select, [contenteditable], [role="textbox"]')
-			)
-		) {
-			event.preventDefault();
-			inputEl.focus();
-			inputEl.select();
-		}
 	}
 
 	const initialCount = data.totalCount ?? data.items.length;

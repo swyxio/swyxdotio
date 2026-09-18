@@ -1,6 +1,9 @@
 <script>
 	import '../tailwind.css';
 	import Nav from '../components/Nav.svelte';
+	import SiteSearch from '../components/SiteSearch.svelte';
+	/** @type {SiteSearch | undefined} */
+	let siteSearch;
 	import ReadCounter from '../components/ReadCounter.svelte';
 	import LivePresence from '../components/LivePresence.svelte';
 	import SelectionShare from '../components/SelectionShare.svelte';
@@ -30,9 +33,10 @@
 
 {#if !immersiveTool}
 	<div class="site-shell site-nav-shell">
-		<Nav />
+		<Nav onSearch={() => siteSearch?.open()} />
 	</div>
 {/if}
+<SiteSearch bind:this={siteSearch} />
 <main id="skip" class="site-main">
 	<slot />
 </main>

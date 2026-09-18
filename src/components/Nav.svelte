@@ -1,5 +1,6 @@
 <script>
 	import { page } from '$app/stores';
+	export let onSearch = () => {};
 
 	let isDark = false;
 	let isMenuOpen = false;
@@ -65,6 +66,29 @@
 	<div class="nav-bar">
 		<a class="brand-link no-underline" href="/">swyx.io</a>
 
+		<div class="search-slot">
+			<a
+				href="/search"
+				role="button"
+				class="search-trigger"
+				aria-label="Search swyx.io"
+				aria-haspopup="dialog"
+				on:click={(event) => {
+					event.preventDefault();
+					onSearch();
+				}}
+				on:keydown={(event) => {
+					if (event.key === ' ') {
+						event.preventDefault();
+						onSearch();
+					}
+				}}
+			>
+				<span aria-hidden="true" class="search-icon">⌕</span>
+				<span class="search-placeholder">Search the notebook…</span>
+				<kbd>/</kbd>
+			</a>
+		</div>
 		<div class="nav-actions">
 			<div class="nav-links">
 				{#each navItems as item}
@@ -175,6 +199,78 @@
 		gap: 1rem;
 	}
 
+	.search-slot {
+		flex: 1;
+		min-width: 0;
+	}
+	.search-trigger {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		width: 100%;
+		min-height: 44px;
+		padding: 8px 12px;
+		border: 1px solid var(--page-border);
+		border-radius: 6px;
+		background: var(--page-surface);
+		color: var(--page-muted);
+		font: 400 13px var(--font-body);
+		text-align: left;
+		text-decoration: none;
+	}
+	.search-placeholder {
+		flex: 1;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.search-icon {
+		font-size: 24px;
+		line-height: 1;
+	}
+	kbd {
+		font: 400 12px var(--font-mono);
+		border: 1px solid var(--page-border);
+		border-radius: 3px;
+		padding: 0 5px;
+	}
+	.brand-link,
+	.nav-actions {
+		flex-shrink: 0;
+	}
+	@media (max-width: 1000px) and (min-width: 781px) {
+		.search-placeholder {
+			font-size: 0;
+		}
+		.search-placeholder::before {
+			content: 'Search';
+			font-size: 13px;
+		}
+		kbd {
+			display: none;
+		}
+		.nav-bar {
+			gap: 12px;
+		}
+	}
+	@media (max-width: 600px) {
+		.search-slot {
+			flex: 0 0 44px;
+			margin-left: auto;
+		}
+		.search-trigger {
+			width: 44px;
+			justify-content: center;
+			padding: 0;
+		}
+		.search-placeholder,
+		kbd {
+			display: none;
+		}
+		.nav-bar {
+			gap: 8px;
+		}
+	}
 	.brand-link {
 		color: var(--page-accent);
 		font-family: var(--font-display);
