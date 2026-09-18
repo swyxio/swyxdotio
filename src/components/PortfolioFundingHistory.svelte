@@ -4,11 +4,14 @@
 	export let rounds;
 	export let companyName;
 	export let expanded = false;
+	export let compact = false;
 </script>
 
 <details class="funding-history" open={expanded}>
 	<summary aria-label={`${companyName}: funding and lead investors`}
-		>Funding &amp; leads · {rounds.length}</summary
+		>{compact
+			? `${rounds.length} ${rounds.length === 1 ? 'round' : 'rounds'}`
+			: `Funding & leads · ${rounds.length}`}</summary
 	>
 	{#each rounds as round}
 		<div class="funding-round">
@@ -44,7 +47,7 @@
 <style>
 	.funding-history {
 		margin-top: 0.35rem;
-		font-size: 0.875rem;
+		font-size: 0.8125rem;
 		line-height: 1.5;
 		overflow-wrap: anywhere;
 		border: 0;

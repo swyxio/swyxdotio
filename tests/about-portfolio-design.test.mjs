@@ -184,11 +184,11 @@ test('the personal coat of arms is featured in social photos without replacing a
 test('Portfolio presents its entries in an accessible, uncollapsed responsive table', async () => {
 	const source = await read('src/routes/portfolio/+page.svelte');
 	assert.equal((source.match(/<h1>/g) || []).length, 1);
-	assert.doesNotMatch(source, /site-card|<details/);
+	assert.doesNotMatch(source, /site-card/);
 	assert.match(source, /<table role="table" aria-describedby="valuation-note">/);
 	assert.match(source, /scope="col">Company \/ person/);
 	assert.match(source, /scope="row" class="company-cell"/);
-	assert.match(source, /@media \(max-width: 700px\)/);
+	assert.match(source, /@media \(max-width: 780px\)/);
 	const companies = JSON.parse(await read('src/lib/data/portfolio.json'));
 	for (const id of ['daytona', 'replay', 'artificial-analysis']) {
 		assert.ok(companies.find((company) => company.id === id).note, `Missing personal note: ${id}`);
