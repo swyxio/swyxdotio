@@ -2,6 +2,7 @@
 	import SocialMeta from '../../components/SocialMeta.svelte';
 	import PortfolioFundingHistory from '../../components/PortfolioFundingHistory.svelte';
 	import PortfolioExitMark from '../../components/PortfolioExitMark.svelte';
+	import PortfolioCompanyDetails from '../../components/PortfolioCompanyDetails.svelte';
 	import { getPageSocialMeta } from '$lib/social-meta';
 	import {
 		PORTFOLIO_TIERS,
@@ -13,7 +14,7 @@
 	/** @type {{ companies: import('$lib/portfolio').PortfolioCompany[], reviewedAt: string }} */
 	export let data;
 	const reviewDate = new Intl.DateTimeFormat('en-US', {
-		month: 'long',
+		month: 'short',
 		day: 'numeric',
 		year: 'numeric',
 		timeZone: 'UTC'
@@ -23,43 +24,62 @@
 	let category = '';
 	let tier = '';
 	let status = '';
-	let sort = '';
+	let sort = 'valuation';
 	let compact = true;
+	let filtersOpen = false;
+	/** @type {import('$lib/portfolio').PortfolioCompany | null} */
+	let selectedCompany = null;
+	/** @type {HTMLButtonElement | undefined} */
+	let filtersButton;
 	$: categories = [...new Set(data.companies.map((company) => company.category))].sort();
 	$: companies = filterPortfolio(data.companies, { query, category, tier, status, sort });
-	$: hasFilters = Boolean(query || category || tier || status || sort);
+	$: activeFilterCount = [category, tier, status].filter(Boolean).length;
+	$: hasFilters = Boolean(query || activeFilterCount);
 	function resetFilters() {
 		query = '';
 		category = '';
 		tier = '';
 		status = '';
-		sort = '';
+	}
+	/** @param {KeyboardEvent} event */
+	function closeFilters(event) {
+		if (event.key === 'Escape' && !event.defaultPrevented && filtersOpen && !selectedCompany) {
+			filtersOpen = false;
+			filtersButton?.focus();
+		}
 	}
 </script>
 
+<svelte:window on:keydown={closeFilters} />
+
 <SocialMeta {...social} />
+<PortfolioCompanyDetails bind:company={selectedCompany} />
 
 <article class="site-shell portfolio-page" class:compact>
 	<header class="portfolio-intro">
-		<p class="eyebrow">The people building what’s next</p>
 		<h1>Advising &amp; investing</h1>
 		<p class="intro-copy">
-			My largest shareholdings are <a href="/why-temporal">Temporal</a> and
-			<a href="/cognition">Cognition</a>. For the last 5ish years, I’ve been advising and investing
-			in startups, having started the
-			<a href="https://dx.tips/angel-101">devtools-angels community</a>.
+			Largest shareholdings: <a href="/why-temporal">Temporal</a> and
+			<a href="/cognition">Cognition</a>.
 		</p>
-		<p class="plain-muted help-copy">
-			I mostly help with devrel and developer community strategy, hiring the first few devrels, and
-			AI product feedback and launch guidance.
-			<a href="#disclosure">Editorial disclosure ↓</a>
-		</p>
+		<details class="investing-context">
+			<summary>About my investing</summary>
+			<p>
+				For the last 5ish years, I’ve been advising and investing in startups, having started the
+				<a href="https://dx.tips/angel-101">devtools-angels community</a>.
+			</p>
+			<p class="plain-muted help-copy">
+				I mostly help with devrel and developer community strategy, hiring the first few devrels,
+				and AI product feedback and launch guidance.
+				<a href="#disclosure">Editorial disclosure ↓</a>
+			</p>
+		</details>
 	</header>
 
 	<section aria-labelledby="directory-heading">
 		<div class="directory-heading">
-			<h2 id="directory-heading">The portfolio</h2>
-			<p class="plain-muted">A selection of companies and people I’ve backed.</p>
+			<h2 id="directory-heading" class="sr-only">The portfolio</h2>
+			<p class="plain-muted">Companies and people I’ve backed.</p>
 		</div>
 		<form
 			class="portfolio-controls"
@@ -68,35 +88,41 @@
 			aria-label="Filter portfolio"
 		>
 			<label class="search-field">
-				<span>Search</span>
-				<input type="search" bind:value={query} placeholder="Company, product, or keyword…" />
+				<span class="sr-only">Search</span>
+				<svg
+					class="search-icon"
+					aria-hidden="true"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="1.5"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 5 5" /></svg
+				>
+				<input
+					type="search"
+					bind:value={query}
+					placeholder="Search companies, products, or keywords…"
+				/>
 			</label>
-			<label>
-				<span>Category</span>
-				<select bind:value={category}>
-					<option value="">All categories</option>
-					{#each categories as option}<option value={option}>{option}</option>{/each}
-				</select>
-			</label>
-			<label>
-				<span>Original tier</span>
-				<select bind:value={tier}>
-					<option value="">All tiers</option>
-					{#each PORTFOLIO_TIERS as option}<option value={option}>{option}</option>{/each}
-				</select>
-			</label>
-			<label>
-				<span>Status</span>
-				<select bind:value={status}>
-					<option value="">All entries</option>
-					<option value="current">Current</option>
-					<option value="exited">Exited</option>
-					<option value="closed">Closed</option>
-					<option value="individual">Individuals</option>
-				</select>
-			</label>
-			<label>
-				<span>Sort by</span>
+			<button
+				type="button"
+				class="filters-toggle"
+				bind:this={filtersButton}
+				aria-expanded={filtersOpen}
+				aria-controls="portfolio-filter-panel"
+				on:click={() => (filtersOpen = !filtersOpen)}
+			>
+				<svg
+					aria-hidden="true"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="1.5"><path d="M4 7h16M7 12h10M10 17h4" /></svg
+				>
+				Filters{#if activeFilterCount}<span class="filter-count">{activeFilterCount}</span
+					>{/if}<span aria-hidden="true">{filtersOpen ? '−' : '+'}</span>
+			</button>
+			<label class="sort-field">
+				<span class="sr-only">Sort by</span>
 				<select bind:value={sort}>
 					<option value="">Original order</option>
 					<option value="name">Name: A–Z</option>
@@ -104,19 +130,50 @@
 					<option value="valuation-asc">Valuation: low–high</option>
 				</select>
 			</label>
+			<div id="portfolio-filter-panel" class="filter-panel" hidden={!filtersOpen}>
+				<label>
+					<span>Category</span>
+					<select bind:value={category}>
+						<option value="">All categories</option>
+						{#each categories as option}<option value={option}>{option}</option>{/each}
+					</select>
+				</label>
+				<label>
+					<span>Original tier</span>
+					<select bind:value={tier}>
+						<option value="">All tiers</option>
+						{#each PORTFOLIO_TIERS as option}<option value={option}>{option}</option>{/each}
+					</select>
+				</label>
+				<label>
+					<span>Status</span>
+					<select bind:value={status}>
+						<option value="">All entries</option>
+						<option value="current">Current</option>
+						<option value="exited">Exited</option>
+						<option value="closed">Closed</option>
+						<option value="individual">Individuals</option>
+					</select>
+				</label>
+				<button type="button" class="reset-filters" disabled={!hasFilters} on:click={resetFilters}
+					>Reset filters</button
+				>
+			</div>
 		</form>
 		<div class="directory-meta">
-			<button
-				type="button"
-				class="view-toggle"
-				aria-pressed={!compact}
-				on:click={() => (compact = !compact)}>{compact ? 'Detailed view' : 'Compact view'}</button
-			>
-			<p role="status" aria-live="polite">{companies.length} of {data.companies.length} entries</p>
-			{#if hasFilters}<button type="button" on:click={resetFilters}>Reset filters</button>{/if}
-			<p class="review-date">
-				Public data checked <time datetime={data.reviewedAt}>{reviewDate}</time>
+			<p role="status" aria-live="polite">
+				{hasFilters ? `${companies.length} of ${data.companies.length}` : data.companies.length} entries
 			</p>
+			{#if hasFilters}<button type="button" on:click={resetFilters}>Reset filters</button>{/if}
+			<p class="review-date">Checked <time datetime={data.reviewedAt}>{reviewDate}</time></p>
+			<div class="view-options" role="group" aria-label="Portfolio density">
+				<button type="button" aria-pressed={compact} on:click={() => (compact = true)}
+					>Compact</button
+				>
+				<button type="button" aria-pressed={!compact} on:click={() => (compact = false)}
+					>Detailed</button
+				>
+			</div>
 		</div>
 
 		<!-- svelte-ignore a11y_no_redundant_roles (preserve table semantics with mobile CSS grid) -->
@@ -131,8 +188,7 @@
 				<tr role="row">
 					<th role="columnheader" scope="col">Company / person</th>
 					<th role="columnheader" scope="col">What they do</th>
-					<th role="columnheader" scope="col">Category</th>
-					<th role="columnheader" scope="col">Status / tier</th>
+					<th role="columnheader" scope="col">Category / status</th>
 					<th
 						role="columnheader"
 						scope="col"
@@ -188,10 +244,14 @@
 									</div>
 								{/if}
 								<div>
-									{#if company.website}<a class="company-name" href={company.website}
-											>{company.name}</a
-										>
-									{:else}<span class="company-name">{company.name}</span>{/if}
+									<button
+										type="button"
+										class="company-name"
+										aria-haspopup="dialog"
+										aria-label={`View details for ${company.name}`}
+										on:click={() => (selectedCompany = company)}
+										>{company.name} <span class="details-hint" aria-hidden="true">›</span></button
+									>
 								</div>
 							</div>
 						</th>
@@ -203,7 +263,8 @@
 									class="related-link"
 									href={company.descriptionSourceUrl}
 									title={company.descriptionSourceTitle}
-									aria-label={`${company.name}: ${company.descriptionSourceTitle}`}>Source&nbsp;↗</a
+									aria-label={`${company.name}: ${company.descriptionSourceTitle}`}
+									>{compact ? '↗' : 'Source ↗'}</a
 								>{/if}
 							{#if !compact && company.note}<span class="company-note">{company.note}</span>{/if}
 							{#if !compact && company.relatedUrl}<a
@@ -212,82 +273,86 @@
 									aria-label={`More on ${company.name}`}>More ↗</a
 								>{/if}
 						</td>
-						<td role="cell" class="category-cell"
-							><span class="category-label">{company.category}</span></td
-						>
-						<td role="cell" class="tier-cell">
-							{#if company.status === 'exited' && company.exit}
-								<span class="exit-label">Exited to</span>
-								<strong class="exit-destination">{company.acquirer}</strong>
-								<a
-									class="exit-announcement"
-									href={company.exit.sourceUrl}
-									title={company.exit.sourceTitle}
-									aria-label={`${company.name} → ${company.acquirer}: ${company.exit.sourceTitle}`}
-									>{compact ? 'Announcement ↗' : 'Read announcement ↗'}</a
-								>
-							{:else}
-								<span class="tier-label">{company.tier}</span>
-								{#if company.acquirer}<span class="company-status">Exited → {company.acquirer}</span
+						<td role="cell" class="category-cell">
+							<span class="category-label">{company.category}</span>
+							<div class="company-context">
+								{#if company.status === 'exited' && company.exit}
+									<span class="exit-label">Exited to</span>
+									<strong class="exit-destination">{company.acquirer}</strong>
+									<a
+										class="exit-announcement"
+										href={company.exit.sourceUrl}
+										title={company.exit.sourceTitle}
+										aria-label={`${company.name} → ${company.acquirer}: ${company.exit.sourceTitle}`}
+										>{compact ? 'Announcement ↗' : 'Read announcement ↗'}</a
 									>
-								{:else if company.status === 'closed'}<span class="company-status">Closed</span>
-								{:else if company.status === 'individual'}<span class="company-status"
-										>Individual backing</span
-									>{/if}
-							{/if}
+								{:else}
+									<span class="tier-label">{company.tier}</span>
+									{#if company.acquirer}<span class="company-status"
+											>Exited → {company.acquirer}</span
+										>
+									{:else if company.status === 'closed'}<span class="company-status">Closed</span>
+									{:else if company.status === 'individual'}<span class="company-status"
+											>Individual backing</span
+										>{/if}
+								{/if}
+							</div>
 						</td>
 						<td role="cell" class="valuation-cell">
-							<span class="mobile-label" aria-hidden="true">Last public valuation</span>
-							{#if company.valuation}
-								<a
-									class="valuation-value"
-									href={company.valuation.sourceUrl}
-									title={`${company.valuation.sourceTitle}${company.valuation.qualifier ? ` · ${company.valuation.qualifier}` : ''}`}
-									aria-label={`${company.name}: ${formatPortfolioValuation(company.valuation)}. ${company.valuation.sourceTitle}`}
-								>
-									{formatPortfolioValuation(company.valuation)}
-									<span aria-hidden="true">↗</span>
-								</a>
-								<time datetime={company.valuation.date}
-									>{company.valuation.dateLabel ??
-										formatValuationDate(company.valuation.date)}</time
-								>
-								{#if !compact && company.valuation.qualifier}<small
-										>{company.valuation.qualifier}</small
-									>{/if}
-							{:else}
-								<span class="unavailable"
-									>{company.status === 'individual'
-										? 'Not applicable'
-										: 'No public figure found'}</span
-								>
-							{/if}
+							<div class="valuation-mark">
+								<span class="mobile-label" aria-hidden="true">Last public valuation</span>
+								{#if company.valuation}
+									<a
+										class="valuation-value"
+										href={company.valuation.sourceUrl}
+										title={`${company.valuation.sourceTitle}${company.valuation.qualifier ? ` · ${company.valuation.qualifier}` : ''}`}
+										aria-label={`${company.name}: ${formatPortfolioValuation(company.valuation)}. ${company.valuation.sourceTitle}`}
+									>
+										{formatPortfolioValuation(company.valuation)}
+										<span aria-hidden="true">↗</span>
+									</a>
+									<time datetime={company.valuation.date}
+										>{company.valuation.dateLabel ??
+											formatValuationDate(company.valuation.date)}</time
+									>
+									{#if !compact && company.valuation.qualifier}<small
+											>{company.valuation.qualifier}</small
+										>{/if}
+								{:else}
+									<span class="unavailable"
+										>{company.status === 'individual'
+											? 'Not applicable'
+											: 'No public figure found'}</span
+									>
+								{/if}
+								{#if !compact && company.valuationRumor}
+									<a
+										class="funding-link rumor-link"
+										href={company.valuationRumor.sourceUrl}
+										title={company.valuationRumor.sourceTitle}
+									>
+										Rumored {formatPortfolioValuation(company.valuationRumor)} ↗
+									</a>
+									<small
+										>{company.valuationRumor.qualifier} ·
+										<time datetime={company.valuationRumor.date}
+											>{formatValuationDate(company.valuationRumor.date)}</time
+										>
+										{#if company.valuationRumor.xUrl}
+											· <a
+												href={company.valuationRumor.xUrl}
+												aria-label={`${company.name}: discussion on X`}>X ↗</a
+											>{/if}
+									</small>
+								{/if}
+							</div>
 							{#if company.fundingRounds?.length}
 								<PortfolioFundingHistory
 									rounds={company.fundingRounds}
 									companyName={company.name}
 									expanded={!compact}
+									{compact}
 								/>
-							{/if}
-							{#if !compact && company.valuationRumor}
-								<a
-									class="funding-link rumor-link"
-									href={company.valuationRumor.sourceUrl}
-									title={company.valuationRumor.sourceTitle}
-								>
-									Rumored {formatPortfolioValuation(company.valuationRumor)} ↗
-								</a>
-								<small
-									>{company.valuationRumor.qualifier} ·
-									<time datetime={company.valuationRumor.date}
-										>{formatValuationDate(company.valuationRumor.date)}</time
-									>
-									{#if company.valuationRumor.xUrl}
-										· <a
-											href={company.valuationRumor.xUrl}
-											aria-label={`${company.name}: discussion on X`}>X ↗</a
-										>{/if}
-								</small>
 							{/if}
 						</td>
 					</tr>
@@ -305,13 +370,14 @@
 			</div>
 		{/if}
 		<p id="valuation-note" class="valuation-note">
-			Valuations are dated public company marks in USD, not the value of my holdings. Filing-derived
-			estimates are labeled; older rounds stay dated and may not reflect today’s value. Linked
-			funding rounds include verified leads where available—“raised” is funding, not valuation.
-			Round history is partial; investor participation alone does not establish a lead. Rumored
-			fundraising targets are shown separately and do not affect valuation sorting. Acquisition
-			prices are not treated as funding valuations. Tiers preserve my original groups, not a
-			financial ranking. Initials stand in where a public logo isn’t available.
+			Public data checked <time datetime={data.reviewedAt}>{reviewDate}</time>. Valuations are dated
+			public company marks in USD, not the value of my holdings. Filing-derived estimates are
+			labeled; older rounds stay dated and may not reflect today’s value. Linked funding rounds
+			include verified leads where available—“raised” is funding, not valuation. Round history is
+			partial; investor participation alone does not establish a lead. Rumored fundraising targets
+			are shown separately and do not affect valuation sorting. Acquisition prices are not treated
+			as funding valuations. Tiers preserve my original groups, not a financial ranking. Initials
+			stand in where a public logo isn’t available.
 		</p>
 	</section>
 
@@ -339,109 +405,113 @@
 </article>
 
 <style>
-	.valuation-sort {
-		color: inherit;
-		font: inherit;
-		font-weight: 600;
-		text-decoration: none;
-	}
-	.valuation-sort:hover {
-		color: var(--page-link);
-		text-decoration: underline;
-	}
-	.view-toggle {
-		font-weight: 600;
-	}
-	.compact tbody th,
-	.compact td {
-		padding-block: 0.65rem;
-	}
-	.compact .company-description {
-		display: -webkit-box;
-		-webkit-box-orient: vertical;
-		-webkit-line-clamp: 2;
-		line-clamp: 2;
-		overflow: hidden;
-	}
-	.compact .portfolio-intro {
-		margin-bottom: 1.75rem;
-	}
-
 	.portfolio-page {
 		--site-max-width: 1160px;
-		margin-block: 2.5rem 4rem;
+		margin-block: 1.5rem 4rem;
 	}
 	.portfolio-intro {
-		max-width: 780px;
-		margin-bottom: 3rem;
-	}
-	.eyebrow {
-		color: var(--page-muted);
-		font: 0.72rem var(--font-mono);
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
-		margin-bottom: 0.8rem;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		align-items: baseline;
+		gap: 0.3rem 1rem;
+		margin-bottom: 1rem;
 	}
 	h1 {
-		font-family: var(--font-display);
-		font-size: clamp(2.4rem, 5vw, 3.6rem);
-		font-weight: 600;
+		grid-column: 1 / -1;
+		font: 600 clamp(2rem, 4vw, 2.75rem)/1.12 var(--font-display);
 		letter-spacing: -0.035em;
-		line-height: 1.12;
-		margin-bottom: 1.15rem;
+		margin-bottom: 0.4rem;
 	}
 	.intro-copy {
-		font-size: 1.08rem;
-		line-height: 1.7;
+		font-size: 1rem;
+		line-height: 1.6;
 	}
-	.help-copy {
-		margin-top: 0.8rem;
-		font-size: 0.95rem;
+	.investing-context {
+		border: 0;
+		padding: 0;
+		border-radius: 0;
+		background: transparent;
+		margin-top: 0.35rem;
+		max-width: 760px;
+	}
+	.investing-context > summary {
+		color: var(--page-muted);
+		font-size: 0.875rem;
+		cursor: pointer;
+		padding: 0;
+		margin: 0;
+		background: transparent;
+		width: fit-content;
+		line-height: 1.8;
+	}
+	.investing-context > summary:hover {
+		color: var(--page-link);
+	}
+	.investing-context[open] {
+		grid-column: 1 / -1;
+	}
+	.investing-context p {
+		margin-top: 0.7rem;
+		font-size: 1rem;
+		line-height: 1.65;
 	}
 	h2 {
-		font-family: var(--font-display);
-		font-size: 1.55rem;
-		font-weight: 600;
+		font: 600 1.5rem var(--font-display);
 	}
 	.directory-heading {
-		display: flex;
-		align-items: baseline;
-		flex-wrap: wrap;
-		gap: 0.3rem 1rem;
-		border-top: 2px solid var(--page-text);
-		padding-top: 1rem;
-		margin-bottom: 1.2rem;
+		position: absolute;
 	}
-	.directory-heading p {
-		font-size: 0.85rem;
+	.directory-heading > p {
+		display: none;
 	}
+	.review-date {
+		margin-left: auto;
+	}
+
 	.portfolio-controls {
 		display: grid;
-		grid-template-columns: minmax(200px, 1fr) 170px 175px 130px 175px;
-		gap: 0.75rem;
+		grid-template-columns: minmax(200px, 1fr) auto 230px;
+		gap: 0.6rem;
+		align-items: start;
 	}
 	.portfolio-controls label {
 		display: grid;
 		gap: 0.35rem;
 		min-width: 0;
 	}
-	.portfolio-controls label > span {
-		font-size: 0.75rem;
+	.portfolio-controls label > span:not(.sr-only) {
+		font-size: 0.8125rem;
 		font-weight: 600;
 		color: var(--page-muted);
 	}
+	.search-field {
+		position: relative;
+	}
+	.search-icon {
+		position: absolute;
+		width: 18px;
+		height: 18px;
+		top: 13px;
+		left: 13px;
+		color: var(--page-muted);
+		pointer-events: none;
+	}
+	.search-field input {
+		padding-left: 2.25rem;
+	}
 	input,
-	select {
+	select,
+	.filters-toggle {
 		width: 100%;
 		min-width: 0;
 		height: 44px;
-		padding: 0.5rem 0.65rem;
+		padding: 0.5rem 0.7rem;
 		font: inherit;
-		font-size: 0.875rem;
+		font-size: 0.9375rem;
 		color: var(--page-text);
 		background: var(--page-surface);
 		border: 1px solid var(--control-border);
-		border-radius: 0.35rem;
+		border-radius: 0.3rem;
 	}
 	input::placeholder {
 		color: var(--page-muted);
@@ -452,57 +522,125 @@
 		text-decoration: underline;
 		text-underline-offset: 3px;
 	}
+	button:disabled {
+		color: var(--page-muted);
+		opacity: 0.6;
+		cursor: default;
+	}
 	input:focus-visible,
 	select:focus-visible,
 	button:focus-visible,
-	a:focus-visible {
+	a:focus-visible,
+	summary:focus-visible {
 		outline: 2px solid var(--page-accent);
 		outline-offset: 3px;
 	}
+	.filters-toggle {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.4rem;
+		text-decoration: none;
+	}
+	.filters-toggle svg {
+		width: 18px;
+		height: 18px;
+	}
+	.filters-toggle[aria-expanded='true'] {
+		border-color: var(--page-text);
+	}
+	.filter-count {
+		font: 600 0.75rem var(--font-mono);
+		background: var(--page-section-bg);
+		padding: 0.1rem 0.35rem;
+		border-radius: 0.25rem;
+	}
+	.filter-panel {
+		grid-column: 1 / -1;
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+		align-items: end;
+		gap: 0.75rem;
+		padding: 1rem;
+		background: var(--page-section-bg);
+		border: 1px solid var(--page-border);
+		border-radius: 0.3rem;
+	}
+	.filter-panel[hidden] {
+		display: none;
+	}
+	.reset-filters {
+		min-height: 44px;
+		padding-inline: 0.5rem;
+		font-size: 0.875rem;
+	}
 	.directory-meta {
 		display: flex;
-		align-items: baseline;
-		flex-wrap: wrap;
-		gap: 0.5rem 1rem;
-		padding-block: 0.85rem;
+		align-items: center;
+		gap: 0.75rem;
+		padding-block: 0.6rem;
 		color: var(--page-muted);
-		font-size: 0.75rem;
+		font-size: 0.8125rem;
+		min-height: 56px;
 	}
-	.review-date {
-		margin-left: auto;
+	.directory-meta > button {
+		min-height: 44px;
+	}
+	.view-options {
+		display: flex;
+		gap: 2px;
+		padding: 2px;
+		border: 1px solid var(--page-border);
+		border-radius: 0.3rem;
+	}
+	.view-options button {
+		min-height: 36px;
+		padding: 0.35rem 0.75rem;
+		border-radius: 0.2rem;
+		color: var(--page-muted);
+		text-decoration: none;
+		font-size: 0.8125rem;
+	}
+	.view-options button[aria-pressed='true'] {
+		background: var(--page-text);
+		color: var(--page-bg);
 	}
 	table {
 		width: 100%;
 		border-collapse: collapse;
 		table-layout: fixed;
-		font-size: 0.875rem;
-	}
-	thead {
-		background: var(--page-section-bg);
+		font-size: 1rem;
 	}
 	thead th {
 		color: var(--page-muted);
-		font-size: 0.7rem;
+		font-size: 0.75rem;
 		font-weight: 500;
-		letter-spacing: 0.025em;
-		padding: 0.7rem 0.8rem;
+		padding: 0.65rem 0.75rem;
 		text-align: left;
 		border-block: 1px solid var(--page-border);
+		background: var(--page-section-bg);
 	}
 	thead th:nth-child(1) {
-		width: 22%;
+		width: 23%;
 	}
 	thead th:nth-child(2) {
-		width: 27%;
+		width: 39%;
 	}
 	thead th:nth-child(3) {
-		width: 13%;
+		width: 17%;
 	}
 	thead th:nth-child(4) {
-		width: 16%;
+		width: 21%;
 	}
-	thead th:nth-child(5) {
-		width: 22%;
+	.valuation-sort {
+		color: inherit;
+		font: inherit;
+		font-weight: 600;
+		text-decoration: none;
+	}
+	.valuation-sort:hover {
+		color: var(--page-link);
+		text-decoration: underline;
 	}
 	tbody tr {
 		border-bottom: 1px solid var(--page-border);
@@ -510,48 +648,27 @@
 	tbody tr:hover {
 		background: var(--page-row-hover);
 	}
-	.exit-row {
-		background: color-mix(in srgb, var(--page-gold) 7%, transparent);
-	}
-	.exit-row .company-identity {
-		gap: 0.45rem;
-	}
-	.exit-label {
-		display: block;
-		font: 0.65rem var(--font-mono);
-		text-transform: uppercase;
-		letter-spacing: 0.08em;
-		color: var(--page-gold);
-	}
-	.exit-destination {
-		display: block;
-		font-size: 1.08rem;
-		font-weight: 650;
-		line-height: 1.4;
-		margin-block: 0.2rem 0.4rem;
-	}
-	.exit-announcement {
-		font-size: 0.75rem;
-		line-height: 1.5;
-		text-underline-offset: 3px;
-	}
 	tbody th,
 	td {
-		padding: 1.1rem 0.8rem;
+		padding: 1rem 0.75rem;
 		vertical-align: top;
 		text-align: left;
 		font-weight: 400;
 	}
+	.compact tbody th,
+	.compact td {
+		padding-block: 0.65rem;
+	}
 	.company-identity {
 		display: flex;
 		align-items: center;
-		gap: 0.7rem;
+		gap: 0.65rem;
 	}
 	.company-logo {
-		flex: 0 0 40px;
-		width: 40px;
-		height: 40px;
-		border-radius: 0.5rem;
+		flex: 0 0 36px;
+		width: 36px;
+		height: 36px;
+		border-radius: 0.4rem;
 		display: grid;
 		place-items: center;
 		background: #fff;
@@ -560,119 +677,163 @@
 		overflow: hidden;
 	}
 	.company-logo img {
-		width: 36px;
-		height: 36px;
-		max-height: 36px;
+		width: 32px;
+		height: 32px;
+		max-height: 32px;
 		object-fit: contain;
 		background: transparent;
-		border-radius: 0.3rem;
 	}
 	.company-logo span {
 		color: #6c675d;
 		font: 0.8rem var(--font-mono);
 	}
 	.company-name {
-		font-size: 0.92rem;
+		font-size: 1rem;
 		font-weight: 650;
 		color: var(--page-text);
 		text-decoration: none;
 	}
-	a.company-name:hover {
+	.company-name:hover {
 		color: var(--page-link);
 		text-decoration: underline;
 	}
-	.company-status {
+	.company-name {
+		text-align: left;
+		min-height: 44px;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+	}
+	.details-hint {
+		color: var(--page-muted);
+		font-weight: 400;
+	}
+	.company-context {
+		margin-top: 0.3rem;
+	}
+	.company-status,
+	.tier-label {
 		display: block;
 		color: var(--page-muted);
-		font-size: 0.7rem;
-		line-height: 1.4;
-		margin-top: 0.25rem;
-	}
-	.tier-label {
-		display: inline-block;
-		color: var(--page-gold);
 		font-size: 0.75rem;
-		font-weight: 600;
+		line-height: 1.5;
 	}
-	.funding-link {
-		display: block;
-		margin-top: 0.35rem;
-		font-size: 0.75rem;
-	}
-	.valuation-cell small time {
-		display: inline;
+	.company-status {
+		margin-top: 0.15rem;
 	}
 	.description-cell {
-		line-height: 1.6;
 		color: var(--page-muted);
+		line-height: 1.5;
+	}
+	.compact .company-description {
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+		overflow: hidden;
+	}
+	.compact .description-cell {
+		position: relative;
+		padding-right: 2.4rem;
+	}
+	.compact .related-link {
+		position: absolute;
+		top: 0.6rem;
+		right: 0.5rem;
+		display: grid;
+		place-items: center;
+		width: 24px;
+		height: 24px;
+		margin: 0;
+		color: var(--page-muted);
+		text-decoration: none;
+		font-size: 1rem;
+	}
+	.compact .related-link:hover {
+		color: var(--page-link);
 	}
 	.company-note {
 		display: block;
-		font-size: 0.75rem;
+		font-size: 0.875rem;
 		font-style: italic;
-		margin-top: 0.25rem;
+		margin-top: 0.3rem;
 	}
 	.related-link {
 		white-space: nowrap;
-		font-size: 0.75rem;
-		margin-left: 0.25rem;
+		font-size: 0.8125rem;
+		margin-left: 0.3rem;
 	}
 	.category-label {
 		display: inline-block;
 		background: var(--page-section-bg);
-		border-radius: 0.3rem;
-		padding: 0.2rem 0.5rem;
-		font-size: 0.7rem;
+		border-radius: 0.25rem;
+		padding: 0.15rem 0.4rem;
+		font-size: 0.75rem;
 		line-height: 1.5;
 	}
-	thead .valuation-column,
+	.valuation-column,
 	.valuation-cell {
 		text-align: right;
 	}
 	.valuation-value {
-		font: 600 1.05rem var(--font-mono);
+		font: 600 1.125rem var(--font-mono);
 		text-decoration: none;
+		white-space: nowrap;
 	}
 	.valuation-value:hover {
 		text-decoration: underline;
 	}
 	.valuation-value span {
-		font-size: 0.7rem;
+		font-size: 0.75rem;
 	}
 	.valuation-cell time,
 	.valuation-cell small {
 		display: block;
 		color: var(--page-muted);
-		font-size: 0.7rem;
+		font-size: 0.75rem;
 		line-height: 1.5;
-		margin-top: 0.2rem;
+		margin-top: 0.15rem;
+	}
+	.valuation-cell small time {
+		display: inline;
+	}
+	.funding-link {
+		display: block;
+		margin-top: 0.35rem;
+		font-size: 0.875rem;
 	}
 	.unavailable {
 		color: var(--page-muted);
-		font-size: 0.75rem;
+		font-size: 0.8125rem;
 	}
 	.mobile-label {
 		display: none;
 	}
+	.exit-row {
+		background: color-mix(in srgb, var(--page-gold) 6%, transparent);
+	}
+	.exit-label {
+		display: block;
+		font: 0.65rem var(--font-mono);
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--page-gold);
+	}
+	.exit-destination {
+		display: block;
+		font-weight: 650;
+		line-height: 1.4;
+		margin-block: 0.1rem;
+	}
+	.exit-announcement {
+		font-size: 0.8125rem;
+	}
 	.valuation-note {
-		font-size: 0.75rem;
+		font-size: 0.8125rem;
 		color: var(--page-muted);
-		line-height: 1.7;
+		line-height: 1.65;
 		margin-top: 1rem;
 		max-width: 850px;
-	}
-	.empty-state {
-		padding: 3rem 1rem;
-		text-align: center;
-		border-bottom: 1px solid var(--page-border);
-	}
-	.empty-state h3 {
-		font-weight: 600;
-		margin-bottom: 0.4rem;
-	}
-	.empty-state p {
-		color: var(--page-muted);
-		font-size: 0.9rem;
 	}
 	.portfolio-notes {
 		display: grid;
@@ -683,55 +844,55 @@
 		border-top: 1px solid var(--page-border);
 	}
 	.portfolio-notes h2 {
-		font-size: 1.2rem;
-		margin-bottom: 0.65rem;
+		margin-bottom: 0.5rem;
 	}
 	.portfolio-notes p {
 		color: var(--page-muted);
-		font-size: 0.85rem;
-		line-height: 1.7;
+		font-size: 1rem;
+		line-height: 1.65;
+	}
+	.empty-state {
+		padding: 2.5rem 1rem;
+		text-align: center;
+		border-bottom: 1px solid var(--page-border);
+	}
+	.empty-state h3 {
+		font-weight: 600;
+	}
+	.empty-state p {
+		color: var(--page-muted);
+		margin-top: 0.4rem;
 	}
 	@media (max-width: 980px) {
-		.portfolio-controls {
-			grid-template-columns: 1fr 1fr;
+		thead th:nth-child(1) {
+			width: 24%;
 		}
-		.search-field {
-			grid-column: 1 / -1;
+		thead th:nth-child(2) {
+			width: 35%;
 		}
-		.portfolio-notes {
-			gap: 1.5rem;
+		thead th:nth-child(3) {
+			width: 19%;
+		}
+		thead th:nth-child(4) {
+			width: 22%;
+		}
+		.valuation-sort {
+			font-size: 0.7rem;
 		}
 	}
-	@media (max-width: 700px) {
-		.compact tbody th,
-		.compact td {
-			padding: 0;
-		}
-		.compact tbody tr {
-			padding-block: 0.85rem;
-		}
+	@media (max-width: 780px) {
 		.portfolio-page {
-			margin-top: 1.75rem;
+			margin-top: 1rem;
 		}
-		.portfolio-intro {
-			margin-bottom: 2rem;
+		.directory-heading {
+			align-items: start;
+			gap: 0.5rem;
 		}
-		.intro-copy {
-			font-size: 1rem;
-		}
-		.portfolio-controls {
-			gap: 0.7rem;
-		}
-		input,
-		select {
-			font-size: 1rem;
-		}
-		.search-field {
-			grid-column: 1 / -1;
+		.directory-heading > p:first-of-type {
+			display: none;
 		}
 		.review-date {
-			margin-left: 0;
-			width: 100%;
+			text-align: left;
 		}
 		table,
 		tbody {
@@ -748,60 +909,161 @@
 		}
 		tbody tr {
 			display: grid;
-			grid-template-columns: minmax(0, 1fr) auto;
-			column-gap: 1rem;
-			padding-block: 1.2rem;
-		}
-		tbody tr:first-child {
-			border-top: 1px solid var(--page-border);
+			grid-template-columns: minmax(0, 1fr) 155px;
+			gap: 0.5rem 1rem;
+			padding-block: 0.85rem;
 		}
 		tbody th,
-		td {
+		td,
+		.compact tbody th,
+		.compact td {
 			padding: 0;
 		}
-		.company-cell,
+		.company-cell {
+			grid-area: 1 / 1;
+		}
+		.valuation-cell {
+			grid-area: 1 / 2 / 4 / 3;
+		}
 		.description-cell {
+			grid-area: 2 / 1;
+		}
+		.compact .description-cell {
+			padding-right: 1.75rem;
+		}
+		.compact .related-link {
+			top: 0;
+			right: 0;
+		}
+		.category-cell {
+			grid-area: 3 / 1;
+		}
+		.company-context {
+			display: inline;
+		}
+		.tier-label {
+			display: inline;
+			margin-left: 0.4rem;
+		}
+		.exit-row .company-context {
+			display: block;
+		}
+		.portfolio-notes {
+			grid-template-columns: 1fr;
+			gap: 1.5rem;
+		}
+		.filter-panel {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+		.reset-filters {
 			grid-column: 1 / -1;
+			justify-self: start;
+		}
+	}
+	@media (max-width: 540px) {
+		h1 {
+			font-size: 2rem;
+		}
+		.portfolio-intro {
+			grid-template-columns: 1fr;
+			gap: 0;
+		}
+		.investing-context {
+			margin-top: 0.25rem;
+		}
+		.review-date {
+			display: none;
+		}
+		.view-options {
+			margin-left: auto;
+		}
+		.portfolio-controls {
+			grid-template-columns: 100px minmax(0, 1fr);
+		}
+		.search-field {
+			grid-column: 1 / -1;
+		}
+		input,
+		select {
+			font-size: 1rem;
+		}
+		.filter-panel {
+			grid-template-columns: 1fr;
+			padding: 0.75rem;
+		}
+		.directory-meta {
+			gap: 0.5rem;
+			flex-wrap: wrap;
+		}
+		.view-options button {
+			min-height: 40px;
+			padding-inline: 0.65rem;
+		}
+		tbody tr {
+			grid-template-columns: minmax(0, 1fr) auto;
+			gap: 0.4rem 0.65rem;
+		}
+		.company-cell {
+			grid-area: 1 / 1;
+		}
+		.valuation-cell {
+			display: contents;
+		}
+		.valuation-mark {
+			grid-area: 1 / 2;
+			text-align: right;
+		}
+		.valuation-cell :global(.funding-history) {
+			grid-area: 3 / 2;
+			text-align: right;
+			margin: 0;
+		}
+		.valuation-cell :global(.funding-history[open]) {
+			grid-area: 4 / 1 / 5 / -1;
+			text-align: left;
+		}
+		.valuation-cell :global(.funding-history > summary) {
+			min-height: 24px;
+		}
+		.description-cell {
+			grid-area: 2 / 1 / 3 / -1;
+			margin-top: 0.15rem;
+		}
+		.category-cell {
+			grid-area: 3 / 1;
+		}
+		.compact .description-cell {
+			padding-right: 2.75rem;
 		}
 		.company-name {
 			font-size: 1rem;
 		}
-		.description-cell {
-			margin-block: 0.8rem;
+		.company-identity {
+			gap: 0.5rem;
 		}
-		.category-cell {
-			grid-area: 3 / 1;
-			padding-top: 0.15rem;
+		.valuation-value {
+			font-size: 1rem;
 		}
-		.tier-cell {
-			grid-area: 4 / 1;
-			padding-top: 0.5rem;
+		.unavailable {
+			display: inline-block;
+			max-width: 110px;
+			font-size: 0.75rem;
 		}
-		.exit-row .category-cell {
-			grid-area: 4 / 1;
+		.valuation-note {
+			font-size: 0.8125rem;
 		}
-		.exit-row .tier-cell {
-			grid-area: 3 / 1;
-			padding-top: 0;
-			margin-bottom: 0.75rem;
+	}
+	@media (pointer: coarse) {
+		.compact .related-link {
+			width: 44px;
+			height: 44px;
 		}
-		.exit-announcement {
-			font-size: 0.875rem;
+		.investing-context > summary,
+		.view-options button {
+			min-height: 44px;
 		}
-		.valuation-cell {
-			grid-area: 5 / 1 / 6 / -1;
-			max-width: none;
-			text-align: left;
-			margin-top: 0.8rem;
-		}
-		.mobile-label {
-			display: block;
-			color: var(--page-muted);
-			font-size: 0.65rem;
-			margin-bottom: 0.25rem;
-		}
-		.portfolio-notes {
-			grid-template-columns: 1fr;
+		.compact .description-cell {
+			padding-right: 3rem;
 		}
 	}
 </style>
