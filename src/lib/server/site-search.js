@@ -213,6 +213,20 @@ export function searchCatalog(
 				limit: catalog.passages.length
 			})
 		);
+		// Longer questions may span several sections and use words the author did
+		// not use. Preserve useful keyword results when semantic retrieval is late.
+		if (!found.hits.length && searchTerms(needle).length > 3)
+			found = /** @type {import('@orama/orama').Results<any>} */ (
+				bm25Search(catalog.engine, {
+					term: searchTerms(needle).join(' '),
+					properties: ['title', 'heading', 'body', 'topics', 'path'],
+					boost: { title: 10, heading: 4, topics: 3, body: 1, path: 1 },
+					tolerance: 0,
+					threshold: 1,
+					limit: catalog.passages.length
+				})
+			);
+
 		if (!found.hits.length && needle.length > 4 && searchTerms(needle).length <= 3)
 			found = /** @type {import('@orama/orama').Results<any>} */ (
 				bm25Search(catalog.engine, {

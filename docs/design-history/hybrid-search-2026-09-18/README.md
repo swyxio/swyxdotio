@@ -4,7 +4,7 @@ The header dialog, /search, and /ideas search use one server engine and one publ
 
 ## Retrieval and destinations
 
-Orama BM25 indexes title, section heading, full article passages, topics, and path. Title/heading/topic/body/path boosts are 10/4/3/1/1. Unicode text and accents remain searchable. Typo tolerance runs only when exact lexical retrieval is empty and the query has at most three meaningful words. Function words do not dominate natural questions or highlighted excerpts.
+Orama BM25 indexes title, section heading, full article passages, topics, and path. Title/heading/topic/body/path boosts are 10/4/3/1/1. Unicode text and accents remain searchable. Typo tolerance runs only when exact lexical retrieval is empty and the query has at most three meaningful words. Function words do not dominate natural questions or highlighted excerpts. If a longer question has no strict lexical match, BM25 permits partial keyword matches so semantic cold starts and outages do not misleadingly look like an empty library.
 
 Passages span up to 210 words with 30 words of overlap. Heading IDs use a per-parse GitHub slugger shared with the article renderer; duplicate and nested headings retain valid destinations. Results deduplicate by document, show escaped highlighted excerpts, and link to the matching section when a local section is available. External sources retain their canonical destination.
 
@@ -20,7 +20,7 @@ Semantic retrieval has a 900 ms deadline. Its budgeted background work remains a
 
 ## Validation
 
-- Forty focused checks cover public projection/privacy, body-only retrieval, duplicates and concurrent heading rendering, Unicode/typos, source facets, stale bodies, hybrid deduplication, atomic cap/UTC rollover, provider failure, archive URL state, and production asset invariants.
+- Forty-one focused checks cover public projection/privacy, body-only retrieval, duplicates and concurrent heading rendering, Unicode/typos, source facets, stale bodies, hybrid deduplication, atomic cap/UTC rollover, provider failure, archive URL state, and production asset invariants.
 - Svelte check: zero errors/warnings. Production build succeeds using pinned package-lock dependencies.
 - Real model calls retrieve CFP Advice / Pick a Topic for “how do I choose a topic for my conference presentation”; the hybrid URL is /cfp-advice#pick-a-topic. Cached semantic evaluation measured 40–48 ms in the operator probe; REST cold-loading is slower and correctly falls back at the deadline.
 - Desktop/mobile light and dark screenshots show the archive, dialog, excerpts and source facets. Actual CSS width 390 px has no horizontal document overflow; full-result facets use two columns and dialog options exceed 44 px. Keyboard opening, focus, and result selection are verified. Native mobile pointer emulation had inconsistent coordinate mapping; physical phone keyboards/touch are not certified by this pass.
