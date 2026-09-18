@@ -1,11 +1,11 @@
 <script>
 	import SocialMeta from '../../components/SocialMeta.svelte';
+	import PortfolioFundingHistory from '../../components/PortfolioFundingHistory.svelte';
 	import PortfolioExitMark from '../../components/PortfolioExitMark.svelte';
 	import { getPageSocialMeta } from '$lib/social-meta';
 	import {
 		PORTFOLIO_TIERS,
 		filterPortfolio,
-		formatValuation,
 		formatPortfolioValuation,
 		formatValuationDate
 	} from '$lib/portfolio';
@@ -230,23 +230,11 @@
 										: 'No public figure found'}</span
 								>
 							{/if}
-							{#if company.funding}
-								<a
-									class="funding-link"
-									href={company.funding.sourceUrl}
-									title={company.funding.sourceTitle}
-								>
-									{#if company.funding.amountUsd !== null}
-										{company.funding.prefix ?? ''}{formatValuation(company.funding.amountUsd)}
-										{company.funding.kind === 'total' ? 'total raised' : 'raised'} ↗
-									{:else}Funding announced ↗{/if}
-								</a>
-								<small
-									>{company.funding.stage} ·
-									<time datetime={company.funding.date}
-										>{company.funding.dateLabel ?? formatValuationDate(company.funding.date)}</time
-									></small
-								>
+							{#if company.fundingRounds?.length}
+								<PortfolioFundingHistory
+									rounds={company.fundingRounds}
+									companyName={company.name}
+								/>
 							{/if}
 							{#if company.valuationRumor}
 								<a
@@ -285,11 +273,12 @@
 		{/if}
 		<p id="valuation-note" class="valuation-note">
 			Valuations are dated public company marks in USD, not the value of my holdings. Filing-derived
-			estimates are labeled; older rounds stay dated and may not reflect today’s value. A linked
-			funding round is shown when available—“raised” is funding, not valuation. Rumored fundraising
-			targets are shown separately and do not affect valuation sorting. Acquisition prices are not
-			treated as funding valuations. Tiers preserve my original groups, not a financial ranking.
-			Initials stand in where a public logo isn’t available.
+			estimates are labeled; older rounds stay dated and may not reflect today’s value. Linked
+			funding rounds include verified leads where available—“raised” is funding, not valuation.
+			Round history is partial; investor participation alone does not establish a lead. Rumored
+			fundraising targets are shown separately and do not affect valuation sorting. Acquisition
+			prices are not treated as funding valuations. Tiers preserve my original groups, not a
+			financial ranking. Initials stand in where a public logo isn’t available.
 		</p>
 	</section>
 
@@ -443,16 +432,16 @@
 		width: 22%;
 	}
 	thead th:nth-child(2) {
-		width: 30%;
+		width: 27%;
 	}
 	thead th:nth-child(3) {
-		width: 15%;
+		width: 13%;
 	}
 	thead th:nth-child(4) {
 		width: 16%;
 	}
 	thead th:nth-child(5) {
-		width: 17%;
+		width: 22%;
 	}
 	tbody tr {
 		border-bottom: 1px solid var(--page-border);
@@ -732,8 +721,10 @@
 			font-size: 0.875rem;
 		}
 		.valuation-cell {
-			grid-area: 3 / 2 / 5 / 3;
-			max-width: 10rem;
+			grid-area: 5 / 1 / 6 / -1;
+			max-width: none;
+			text-align: left;
+			margin-top: 0.8rem;
 		}
 		.mobile-label {
 			display: block;

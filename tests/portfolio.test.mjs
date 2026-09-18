@@ -33,7 +33,7 @@ test('every public valuation has a positive amount, dated source, and no future 
 		const valuation = company.valuation;
 		if (valuation === null) continue;
 		assert.ok(Number.isFinite(valuation.amountUsd) && valuation.amountUsd > 0, company.name);
-		assert.match(valuation.date, /^\d{4}-\d{2}(-\d{2})?$/);
+		assert.match(valuation.date, /^\d{4}(-\d{2}(-\d{2})?)?$/);
 		assert.ok(Date.parse(valuation.date) <= Date.parse('2026-09-17'), company.name);
 		assert.equal(new URL(valuation.sourceUrl).protocol, 'https:');
 		assert.ok(valuation.sourceTitle);
@@ -137,19 +137,64 @@ test('original tiers retain their exact memberships independently of status', ()
 });
 
 test('funding evidence stays distinct from valuations and has its own dated source', () => {
-	const funded = companies.filter((company) => company.funding);
-	for (const { funding } of funded) {
+	const funded = companies.filter((company) => company.fundingRounds?.length);
+	for (const funding of funded.flatMap((company) => company.fundingRounds)) {
 		if (funding.amountUsd !== null)
 			assert.ok(funding.amountUsd > 0 && Number.isFinite(funding.amountUsd));
 		assert.ok(funding.stage && funding.sourceTitle);
 		assert.equal(new URL(funding.sourceUrl).protocol, 'https:');
-		assert.ok(Date.parse(funding.date) <= Date.parse('2026-09-17'));
+		if (funding.date !== null) {
+			assert.match(funding.date, /^\d{4}(-\d{2}(-\d{2})?)?$/);
+			assert.ok(Date.parse(funding.date) <= Date.parse('2026-09-17'));
+		} else assert.ok(funding.dateLabel);
 	}
 	const fixture = [
-		{ ...companies[0], id: 'funding-only', valuation: null, funding: { amountUsd: 1e12 } },
+		{
+			...companies[0],
+			id: 'funding-only',
+			valuation: null,
+			fundingRounds: [{ amountUsd: 1e12, leads: [] }]
+		},
 		{ ...companies[1], id: 'valued', valuation: { amountUsd: 1e6 } }
 	];
 	assert.equal(filterPortfolio(fixture, { sort: 'valuation' })[0].id, 'valued');
+});
+
+test('round history preserves dated lead evidence and never infers leads from participation', () => {
+	for (const company of companies) {
+		assert.equal(company.funding, undefined, company.name);
+		const rounds = company.fundingRounds ?? [];
+		assert.deepEqual(
+			rounds.map((round) => round.date ?? ''),
+			rounds
+				.map((round) => round.date ?? '')
+				.sort()
+				.reverse()
+		);
+		for (const round of rounds) {
+			assert.ok(Array.isArray(round.leads), company.name);
+			assert.equal(new Set(round.leads).size, round.leads.length, company.name);
+			assert.ok(
+				round.leads.every((lead) => typeof lead === 'string' && lead.trim()),
+				company.name
+			);
+			if (round.leadSourceUrl) {
+				assert.equal(new URL(round.leadSourceUrl).protocol, 'https:');
+				assert.ok(round.leadSourceTitle, company.name);
+			}
+		}
+	}
+	const fixture = [
+		{
+			...companies[0],
+			fundingRounds: [
+				{ stage: 'Series B', leads: ['Coatue'] },
+				{ stage: 'Seed', leads: ['Index Ventures'] }
+			]
+		}
+	];
+	assert.equal(filterPortfolio(fixture, { query: 'Index seed' }).length, 1);
+	assert.equal(filterPortfolio(fixture, { query: 'Index series z' }).length, 0);
 });
 
 test('logos are local, nonempty assets with recorded provenance', async () => {
@@ -222,6 +267,7 @@ test('valuation formatting preserves meaningful precision and stable UTC dates',
 	assert.equal(formatValuation(125_000_000), '$125M');
 	assert.equal(formatValuationDate('2026-06-01'), 'Jun 2026');
 	assert.equal(formatValuationDate('2023-04'), 'Apr 2023');
+	assert.equal(formatValuationDate('2019'), '2019');
 	assert.equal(formatValuation(350_000), '$350K');
 	assert.equal(
 		formatPortfolioValuation({ amountUsd: 8_500_000, maxAmountUsd: 10_000_000 }),
@@ -242,7 +288,7 @@ test('research covers every entry with dated public provenance or an explicit id
 		}
 	}
 	const cognition = companies.find((company) => company.id === 'cognition');
-	assert.equal(cognition.funding.prefix, '>');
+	assert.equal(cognition.fundingRounds[0].prefix, '>');
 });
 
 test('rumors have dated sources and cannot replace valuation marks or affect sorting', () => {

@@ -2,9 +2,9 @@
  * Public company marks, not the value of my holdings. A null valuation means
  * no public figure was verified; it must never be treated as zero.
  * @typedef {{ amountUsd: number, maxAmountUsd?: number, date: string, sourceUrl: string, sourceTitle: string, qualifier?: string, prefix?: string, dateLabel?: string, kind?: 'reported' | 'database-reported' | 'filing-derived' }} Valuation
- * @typedef {{ amountUsd: number | null, prefix?: string, date: string, dateLabel?: string, stage: string, kind?: 'round' | 'total', sourceUrl: string, sourceTitle: string }} FundingRound
+ * @typedef {{ amountUsd: number | null, prefix?: string, date: string | null, dateLabel?: string, qualifier?: string, stage: string, kind?: 'round' | 'total', sourceUrl: string, sourceTitle: string, leads: string[], leadSourceUrl?: string, leadSourceTitle?: string }} FundingRound
  * @typedef {{ acquirerLogo: string, acquirerLogoSource: string, sourceUrl: string, sourceTitle: string }} ExitAnnouncement
- * @typedef {{ id: string, name: string, website: string | null, description: string, descriptionSourceUrl?: string | null, descriptionSourceTitle?: string, reviewedAt?: string, category: string, tier: string, status: string, logo: string | null, logoSource: string | null, valuation: Valuation | null, valuationRumor?: Valuation & { xUrl?: string }, funding?: FundingRound, relatedUrl?: string, note?: string, acquirer?: string, exit?: ExitAnnouncement }} PortfolioCompany
+ * @typedef {{ id: string, name: string, website: string | null, description: string, descriptionSourceUrl?: string | null, descriptionSourceTitle?: string, reviewedAt?: string, category: string, tier: string, status: string, logo: string | null, logoSource: string | null, valuation: Valuation | null, valuationRumor?: Valuation & { xUrl?: string }, fundingRounds?: FundingRound[], relatedUrl?: string, note?: string, acquirer?: string, exit?: ExitAnnouncement }} PortfolioCompany
  */
 
 // These are the original editorial groups, not financial rankings or funding stages.
@@ -25,7 +25,8 @@ export function filterPortfolio(
 			company.description,
 			company.category,
 			company.tier,
-			company.acquirer ?? ''
+			company.acquirer ?? '',
+			...(company.fundingRounds ?? []).flatMap((round) => [round.stage, ...round.leads])
 		]
 			.join(' ')
 			.toLocaleLowerCase('en-US');
@@ -57,6 +58,7 @@ export function formatPortfolioValuation(valuation) {
 
 /** @param {string} date */
 export function formatValuationDate(date) {
+	if (date.length === 4) return date;
 	const normalized = date.length === 7 ? `${date}-01` : date;
 	return new Intl.DateTimeFormat('en-US', {
 		month: 'short',
