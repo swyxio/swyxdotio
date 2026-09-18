@@ -1,10 +1,11 @@
 <script>
 	/** @type {import('$lib/portfolio').PortfolioCompany} */
 	export let company;
+	export let compact = false;
 </script>
 
 {#if company.exit}
-	<div class="exit-mark" aria-hidden="true">
+	<div class="exit-mark" class:compact aria-hidden="true">
 		<svg viewBox="0 0 96 96" fill="none">
 			<circle cx="48" cy="45" r="35" fill="#f8efda" />
 			<circle cx="48" cy="45" r="30" stroke="#c39b46" stroke-width="1" />
@@ -34,6 +35,29 @@
 {/if}
 
 <style>
+	.exit-mark.compact {
+		flex-basis: 54px;
+		width: 54px;
+		height: 54px;
+	}
+	.compact .acquirer-mark {
+		inset: 12px 12px 17px;
+	}
+	.compact .acquirer-mark img {
+		width: 28px;
+		height: 28px;
+	}
+	.compact .origin-mark {
+		left: 18px;
+		width: 19px;
+		height: 19px;
+		border-radius: 4px;
+	}
+	.compact .origin-mark img {
+		width: 15px;
+		height: 15px;
+	}
+
 	.exit-mark {
 		position: relative;
 		flex: 0 0 84px;

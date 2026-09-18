@@ -253,6 +253,16 @@ test('sorting leaves the source order alone and keeps unknown valuations last', 
 	assert.equal(sorted[0].id, 'cognition');
 	const unknown = sorted.findIndex((company) => company.valuation === null);
 	assert.ok(sorted.slice(unknown).every((company) => company.valuation === null));
+	const ascending = filterPortfolio(companies, { sort: 'valuation-asc' });
+	const firstUnknown = ascending.findIndex((company) => company.valuation === null);
+	assert.ok(ascending.slice(firstUnknown).every((company) => company.valuation === null));
+	assert.deepEqual(
+		ascending.slice(0, firstUnknown).map((company) => company.valuation.amountUsd),
+		sorted
+			.slice(0, unknown)
+			.map((company) => company.valuation.amountUsd)
+			.reverse()
+	);
 	const alphabetic = filterPortfolio(companies, { sort: 'name' });
 	assert.equal(alphabetic[0].id, '100ms');
 	assert.deepEqual(
