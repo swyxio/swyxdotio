@@ -140,3 +140,58 @@ test('capped or failing inference cannot disable BM25 or bypass reservations', a
 	);
 	db.raw.close();
 });
+
+test('compressed vector snapshots preserve vectors, reject invalid models, and avoid cold D1 scans', async () => {
+	const {
+		encodeVectorSnapshot,
+		decodeVectorSnapshot,
+		VECTOR_SNAPSHOT_KEY,
+		embeddingKey,
+		embeddingText
+	} = await import('../src/lib/server/search-embeddings.js');
+	const items = [
+		{
+			title: 'Conference Advice',
+			slug: 'advice',
+			content: '## Pick a Topic\n\nConference topic selection.'
+		}
+	];
+	const catalog = createSearchIndex(projectSearchCatalog(items), items);
+	const passage = catalog.passages.find((p) => p.anchor === 'pick-a-topic');
+	const vector = Array.from({ length: 384 }, (_, i) => (i === 0 ? 127 : 0));
+	const entries = new Map([[embeddingKey(embeddingText(passage)), vector]]);
+	const encoded = encodeVectorSnapshot(entries);
+	assert.deepEqual(decodeVectorSnapshot(encoded), entries);
+	assert(encoded.length < JSON.stringify([...entries]).length);
+	assert.throws(() => decodeVectorSnapshot('broken'));
+	let scans = 0,
+		calls = 0;
+	const env = {
+		READ_COUNTERS: {
+			prepare() {
+				scans++;
+				throw new Error('D1 should not be scanned for a cached query');
+			}
+		},
+		CONTENT_MANIFEST: {
+			async get(key) {
+				return key === VECTOR_SNAPSHOT_KEY ? encoded : JSON.stringify(vector);
+			}
+		},
+		AI: {
+			async run() {
+				calls++;
+				throw new Error('Cached query should not use inference');
+			}
+		}
+	};
+	const matched = await semanticMatches(catalog, { env }, 'presentation topics');
+	assert.equal(matched[0].id, passage.id);
+	assert.equal(scans, 0);
+	assert.equal(calls, 0);
+	const edited = createSearchIndex(
+		projectSearchCatalog([{ ...items[0], content: '## Changed\n\nNew unrelated body.' }]),
+		[{ ...items[0], content: '## Changed\n\nNew unrelated body.' }]
+	);
+	assert.equal(await semanticMatches(edited, { env }, 'presentation topics'), null);
+});
