@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { toContentListItem, toSearchContentItem } from '../src/lib/content-list.js';
+import { toContentListItem } from '../src/lib/content-list.js';
 
 const post = {
 	type: 'blog',
@@ -22,11 +22,4 @@ test('default content list excludes article bodies and frontmatter', () => {
 	assert.equal(item.description, ' metadata  only');
 	assert.equal(item.isPrivate, true);
 	assert.equal(post.content, 'full article body');
-});
-
-test('lazy search corpus preserves article bodies but excludes frontmatter', () => {
-	const item = toSearchContentItem(post);
-	assert.equal(item.content, 'full article body');
-	assert.equal(item.frontmatter, undefined);
-	assert.equal(item.description, ' metadata  only');
 });

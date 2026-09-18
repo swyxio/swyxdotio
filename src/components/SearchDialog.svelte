@@ -202,7 +202,12 @@
 					<span class="result-title">{result.title}</span><span class="result-meta"
 						>{result.type}{result.year ? ` · ${result.year}` : ''}</span
 					>
-					{#if result.snippet}<span class="result-snippet">{result.snippet}</span>{/if}
+					{#if result.snippet}<span class="result-snippet"
+							>{#if result.snippetParts}{#each result.snippetParts as part}{#if part.matched}<mark
+											>{part.text}</mark
+										>{:else}{part.text}{/if}{/each}{:else}{result.snippet}{/if}</span
+						>{/if}
+					{#if result.section}<span class="result-meta">↳ {result.section}</span>{/if}
 				</a>
 			{/each}
 		</div>
@@ -303,7 +308,10 @@
 		overflow-x: auto;
 		gap: 6px;
 		padding: 12px 16px;
-		scrollbar-width: thin;
+		scrollbar-width: none;
+	}
+	.search-types::-webkit-scrollbar {
+		display: none;
 	}
 	.search-types button {
 		white-space: nowrap;

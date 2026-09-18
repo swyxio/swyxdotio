@@ -1,4 +1,5 @@
 import { Lexer } from 'marked';
+import { searchTerms } from './search-terms.js';
 
 /** @typedef {{ text: string; matched: boolean }} SearchSnippetPart */
 
@@ -72,9 +73,7 @@ export function ideasPlainText(markdown) {
 export function createIdeasSearchSnippet(markdown, query, length = 220) {
 	const text = ideasPlainText(markdown);
 	if (!text) return [];
-	const terms = [...new Set(query.trim().split(/\s+/).filter(Boolean))].sort(
-		(a, b) => b.length - a.length
-	);
+	const terms = [...new Set(searchTerms(query))].sort((a, b) => b.length - a.length);
 	const pattern = terms.map((term) => term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
 	const firstMatch = pattern ? text.search(new RegExp(pattern, 'i')) : -1;
 	let start = Math.max(0, firstMatch - 65);

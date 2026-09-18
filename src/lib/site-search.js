@@ -1,5 +1,5 @@
 import { PAGE_SOCIAL_CARDS } from './social-meta.js';
-/** @typedef {{id:string,title:string,url:string,type:string,snippet:string,year:string,tags:string[]}} SearchResult */
+/** @typedef {{id:string,title:string,url:string,type:string,snippet:string,year:string,tags:string[],source?:string,category?:string,slug?:string,date?:string,snippetParts?:import('./ideas-search-snippet.js').SearchSnippetPart[],section?:string}} SearchResult */
 export const SEARCH_TYPES = [
 	['all', 'Everything'],
 	['page', 'Pages'],

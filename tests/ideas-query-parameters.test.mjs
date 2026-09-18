@@ -96,7 +96,7 @@ test('rapid empty search then All cannot restore the stale query', async () => {
 			await harness.advance(600);
 
 			assert.equal(harness.url().search, '');
-			assert.deepEqual(harness.snapshot(), { filter: '', show: [] });
+			assert.deepEqual(harness.snapshot(), { filter: '', show: [], source: '' });
 			assert.equal(harness.navigations.length, 1);
 			assert.equal(harness.navigations[0].options.replaceState, true);
 		} finally {
@@ -116,7 +116,7 @@ test('Clear search and filters replaces an already pending edit atomically', asy
 		await harness.advance(600);
 
 		assert.equal(harness.url().search, '');
-		assert.deepEqual(harness.snapshot(), { filter: '', show: [] });
+		assert.deepEqual(harness.snapshot(), { filter: '', show: [], source: '' });
 		assert.equal(harness.navigations.length, 1);
 	} finally {
 		harness.unsubscribe();
@@ -142,9 +142,9 @@ test('combined edits preserve durable params, unrelated URL state, and navigatio
 		assert.equal(harness.navigations.length, 1);
 
 		harness.navigate('/ideas?filter=learning&show=Note');
-		assert.deepEqual(harness.snapshot(), { filter: 'learning', show: ['Note'] });
+		assert.deepEqual(harness.snapshot(), { filter: 'learning', show: ['Note'], source: '' });
 		harness.navigate('/ideas');
-		assert.deepEqual(harness.snapshot(), { filter: '', show: [] });
+		assert.deepEqual(harness.snapshot(), { filter: '', show: [], source: '' });
 		await harness.advance(600);
 		assert.equal(harness.url().search, '');
 	} finally {

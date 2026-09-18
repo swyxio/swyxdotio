@@ -97,7 +97,7 @@ test('invalid bounds rejected and changed records rebuild derived index', () => 
 		{ q: 'x'.repeat(121) },
 		{ type: 'secret' },
 		{ page: '0' },
-		{ limit: '31' },
+		{ limit: '101' },
 		{ year: 'x' }
 	])
 		assert.throws(() => parseSearchParams(new URLSearchParams(params)));
@@ -126,4 +126,86 @@ test('legacy canonical destinations follow the existing redirect table', () => {
 	);
 	assert.equal(records.find((r) => r.title === 'Dynamo').url, '/dynamodb-book');
 	assert.equal(records.find((r) => r.title === 'Forms').url, '/no-controlled-forms');
+});
+
+test('body-only matches return bounded passages and exact rendered section destinations', async () => {
+	const { renderMarkdown } = await import('../src/lib/markdown.js');
+	const { searchPassages } = await import('../src/lib/search-passages.js');
+	const content =
+		'## Topic\n\nNothing here.\n\n## Topic\n\nUnicorns understand durable orchestration.\n\n> ### Nested\n>\n> Recursive platypus configuration.';
+	const items = [
+		{ title: 'A neutral title', slug: 'neutral', category: 'essay', content },
+		{ title: 'Hidden', slug: 'hidden', isPrivate: true, content: 'unicorns hidden-only-secret' }
+	];
+	const index = createSearchIndex(projectSearchCatalog(items), items);
+	const result = searchCatalog(index, parseSearchParams(new URLSearchParams({ q: 'unicorns' })));
+	assert.equal(result.results[0].url, '/neutral#topic-1');
+	assert.equal(result.results[0].section, 'Topic');
+	assert(
+		result.results[0].snippetParts.some((p) => p.matched && p.text.toLowerCase() === 'unicorns')
+	);
+	assert(!JSON.stringify(result).includes('hidden-only-secret'));
+	assert(!('content' in result.results[0]));
+	assert(result.results[0].snippet.length < 250);
+	const html = await renderMarkdown(content);
+	for (const passage of searchPassages(content))
+		if (passage.anchor) assert(html.includes(`id="${passage.anchor}"`));
+});
+
+test('concurrent article renders and index construction preserve duplicate heading IDs', async () => {
+	const { renderMarkdown } = await import('../src/lib/markdown.js');
+	const { searchPassages } = await import('../src/lib/search-passages.js');
+	const md = '## Topic\n\n```js\nconst x=1;\n```\n\n## Topic\n\nUnique phrase.';
+	const pending = renderMarkdown(md);
+	searchPassages('## Topic\n\n## Other');
+	const [a, b] = await Promise.all([pending, renderMarkdown(md)]);
+	for (const html of [a, b]) {
+		assert(html.includes('id="topic"'));
+		assert(html.includes('id="topic-1"'));
+		assert(!html.includes('id="topic-2"'));
+	}
+});
+
+test('source facets ignore their own selection and order the strongest query sources first', () => {
+	const all = search('cfp');
+	const filtered = search('cfp', { source: 'swyx.io' });
+	assert.equal(filtered.total, 1);
+	assert.deepEqual(filtered.sourceCounts, all.sourceCounts);
+	assert.equal(filtered.sourceCounts['example.com'], 1);
+	const updated = [{ title: 'Title', slug: 'title', content: 'old rarephrase' }];
+	const records = projectSearchCatalog(updated);
+	const before = cachedSearchIndex(records, updated);
+	const after = cachedSearchIndex(records, [{ ...updated[0], content: 'new zebra' }]);
+	assert.notEqual(before, after);
+	assert.equal(
+		searchCatalog(after, parseSearchParams(new URLSearchParams({ q: 'rarephrase' }))).total,
+		0
+	);
+});
+
+test('semantic candidates share filters, deduplicate documents and use passage links', () => {
+	const items = [
+		{ title: 'Conference Guide', slug: 'guide', content: '## Start\n\nSpeak confidently.' }
+	];
+	const index = createSearchIndex(projectSearchCatalog(items), items);
+	const body = index.passages.find((p) => p.anchor === 'start');
+	const result = searchCatalog(
+		index,
+		parseSearchParams(new URLSearchParams({ q: 'presentations', scope: 'content' })),
+		[
+			{ id: body.id, score: 0.8 },
+			{ id: body.id, score: 0.7 }
+		]
+	);
+	assert.equal(result.mode, 'hybrid');
+	assert.equal(result.total, 1);
+	assert.equal(result.results[0].url, '/guide#start');
+	assert.equal(
+		searchCatalog(
+			index,
+			parseSearchParams(new URLSearchParams({ q: 'presentations', type: 'podcast' })),
+			[{ id: body.id, score: 0.8 }]
+		).total,
+		0
+	);
 });

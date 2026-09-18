@@ -11,7 +11,7 @@ export async function GET({ url, fetch, platform }) {
 	}
 	try {
 		const result = await loadSiteSearch(fetch, platform, params);
-		// Facet vocabulary belongs to the full view, not every typeahead response.
+		// Source counts are shared with the archive; larger year/topic vocabularies stay in the full view.
 		const { years, tags, ...suggestions } = result;
 		return json(suggestions, {
 			headers: {

@@ -11,7 +11,7 @@ function cleanDescription(item) {
 
 /**
  * The default list response powers cards, RSS, and sitemap generation. Article
- * bodies stay in KV until an article or the optional search corpus needs them.
+ * bodies stay in KV until an article or the server search index needs them.
  *
  * @param {Record<string, any>} item
  * @returns {Record<string, any>}
@@ -46,19 +46,5 @@ export function toArchiveContentItem(item) {
 			venue: instance.venue,
 			video: instance.video
 		}))
-	};
-}
-
-/**
- * Full-body search remains available, but the browser only downloads this
- * heavier projection after the reader interacts with the search box.
- *
- * @param {Record<string, any>} item
- * @returns {Record<string, any>}
- */
-export function toSearchContentItem(item) {
-	return {
-		...toContentListItem(item),
-		content: item.content
 	};
 }

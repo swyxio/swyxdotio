@@ -19,6 +19,8 @@ export async function load({ url, fetch, platform, setHeaders }) {
 			total: 0,
 			years: /** @type {string[]} */ ([]),
 			tags: /** @type {string[]} */ ([]),
+			sources: /** @type {string[]} */ ([]),
+			sourceCounts: /** @type {Record<string,number>} */ ({}),
 			unavailable: true
 		};
 	}

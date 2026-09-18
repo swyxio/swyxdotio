@@ -718,3 +718,12 @@ article.prose :is(h1, h2, h3, h4, h5, h6)[id] {
 		--reading-font-size: 1.125rem;
 	}
 }
+
+/* Search excerpts use the same golden highlight as reading selection. */
+.search-page mark,
+.search-dialog mark {
+	background: var(--selection-bg);
+	color: var(--selection-text);
+	border-radius: 2px;
+	padding: 0 1px;
+}
