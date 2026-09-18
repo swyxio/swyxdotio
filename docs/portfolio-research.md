@@ -333,3 +333,15 @@ Added at the owner's request on September 17, 2026. Product description and loca
 Added at the owner's request on September 17, 2026. Product description and local icon come from the official Harbor site. No public valuation is asserted.
 
 - Product: [Harbor](https://www.harborframework.com).
+
+## Exit announcements — checked September 17, 2026
+
+All seven existing exited entries now link to public company or founder announcements. Original exit statuses and historical financing figures are preserved. Gabber and Gel sources describe teams joining LiveKit and Vercel; no acquisition price is inferred. OpenAI sources are the original acquisition announcements, including their closing-condition language. Acquirer icons are local copies of assets from official company websites or documentation, with exact provenance recorded in the catalog.
+
+- [Astral to join OpenAI](https://astral.sh/blog/openai).
+- [OpenAI to acquire Promptfoo](https://openai.com/index/openai-to-acquire-promptfoo/).
+- [Jack Dwyer: Gabber is joining LiveKit](https://www.linkedin.com/posts/jackndwyer_the-news-is-out-gabber-is-joining-livekit-activity-7419100783738040320-4mKG).
+- [ClickUp + Codegen: Putting Software Creation in Every Knowledge Worker’s Hands](https://clickup.com/blog/clickup-codegen-acquisition/).
+- [Brev.dev is being acquired by NVIDIA](https://www.linkedin.com/posts/brevdev_today-brevdev-is-being-acquired-by-nvidia-activity-7219055612230258688-FBwi).
+- [Gel joins Vercel](https://www.geldata.com/blog/gel-joins-vercel).
+- [Fireblocks Acquires Dynamic](https://www.fireblocks.com/blog/fireblocks-acquires-dynamic).

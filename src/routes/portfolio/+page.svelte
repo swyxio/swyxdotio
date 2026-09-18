@@ -1,5 +1,6 @@
 <script>
 	import SocialMeta from '../../components/SocialMeta.svelte';
+	import PortfolioExitMark from '../../components/PortfolioExitMark.svelte';
 	import { getPageSocialMeta } from '$lib/social-meta';
 	import {
 		PORTFOLIO_TIERS,
@@ -125,29 +126,33 @@
 			<tbody role="rowgroup">
 				{#each companies as company (company.id)}
 					<!-- svelte-ignore a11y_no_redundant_roles (preserve table semantics with mobile CSS grid) -->
-					<tr role="row" id={company.id}>
+					<tr role="row" id={company.id} class:exit-row={company.status === 'exited'}>
 						<th role="rowheader" scope="row" class="company-cell">
 							<div class="company-identity">
-								<div class="company-logo" aria-hidden="true">
-									{#if company.logo}
-										<img
-											src={company.logo}
-											alt=""
-											width="36"
-											height="36"
-											loading="lazy"
-											decoding="async"
-										/>
-									{:else}
-										<span title="No public logo available"
-											>{company.name
-												.split(' ')
-												.map((word) => word[0])
-												.slice(0, 2)
-												.join('')}</span
-										>
-									{/if}
-								</div>
+								{#if company.status === 'exited' && company.exit}
+									<PortfolioExitMark {company} />
+								{:else}
+									<div class="company-logo" aria-hidden="true">
+										{#if company.logo}
+											<img
+												src={company.logo}
+												alt=""
+												width="36"
+												height="36"
+												loading="lazy"
+												decoding="async"
+											/>
+										{:else}
+											<span title="No public logo available"
+												>{company.name
+													.split(' ')
+													.map((word) => word[0])
+													.slice(0, 2)
+													.join('')}</span
+											>
+										{/if}
+									</div>
+								{/if}
 								<div>
 									{#if company.website}<a class="company-name" href={company.website}
 											>{company.name}</a
@@ -169,12 +174,25 @@
 							><span class="category-label">{company.category}</span></td
 						>
 						<td role="cell" class="tier-cell">
-							<span class="tier-label">{company.tier}</span>
-							{#if company.acquirer}<span class="company-status">Exited → {company.acquirer}</span>
-							{:else if company.status === 'closed'}<span class="company-status">Closed</span>
-							{:else if company.status === 'individual'}<span class="company-status"
-									>Individual backing</span
-								>{/if}
+							{#if company.status === 'exited' && company.exit}
+								<span class="exit-label">Exited to</span>
+								<strong class="exit-destination">{company.acquirer}</strong>
+								<a
+									class="exit-announcement"
+									href={company.exit.sourceUrl}
+									title={company.exit.sourceTitle}
+									aria-label={`${company.name} → ${company.acquirer}: ${company.exit.sourceTitle}`}
+									>Read announcement ↗</a
+								>
+							{:else}
+								<span class="tier-label">{company.tier}</span>
+								{#if company.acquirer}<span class="company-status">Exited → {company.acquirer}</span
+									>
+								{:else if company.status === 'closed'}<span class="company-status">Closed</span>
+								{:else if company.status === 'individual'}<span class="company-status"
+										>Individual backing</span
+									>{/if}
+							{/if}
 						</td>
 						<td role="cell" class="valuation-cell">
 							<span class="mobile-label" aria-hidden="true">Last public valuation</span>
@@ -411,6 +429,31 @@
 	tbody tr:hover {
 		background: var(--page-row-hover);
 	}
+	.exit-row {
+		background: color-mix(in srgb, var(--page-gold) 7%, transparent);
+	}
+	.exit-row .company-identity {
+		gap: 0.45rem;
+	}
+	.exit-label {
+		display: block;
+		font: 0.65rem var(--font-mono);
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--page-gold);
+	}
+	.exit-destination {
+		display: block;
+		font-size: 1.08rem;
+		font-weight: 650;
+		line-height: 1.4;
+		margin-block: 0.2rem 0.4rem;
+	}
+	.exit-announcement {
+		font-size: 0.75rem;
+		line-height: 1.5;
+		text-underline-offset: 3px;
+	}
 	tbody th,
 	td {
 		padding: 1.1rem 0.8rem;
@@ -645,6 +688,17 @@
 		.tier-cell {
 			grid-area: 4 / 1;
 			padding-top: 0.5rem;
+		}
+		.exit-row .category-cell {
+			grid-area: 4 / 1;
+		}
+		.exit-row .tier-cell {
+			grid-area: 3 / 1;
+			padding-top: 0;
+			margin-bottom: 0.75rem;
+		}
+		.exit-announcement {
+			font-size: 0.875rem;
 		}
 		.valuation-cell {
 			grid-area: 3 / 2 / 5 / 3;
