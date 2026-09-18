@@ -209,3 +209,29 @@ test('semantic candidates share filters, deduplicate documents and use passage l
 		0
 	);
 });
+
+test('long natural questions retain relevant lexical results when semantics is unavailable', () => {
+	const items = [
+		{
+			title: 'CFP Advice',
+			slug: 'cfp',
+			content:
+				'## Pick a Topic\n\nFind your interests.\n\n## Pick a Conference\n\nKnow the conference audience and plan your presentation.'
+		}
+	];
+	const index = createSearchIndex(projectSearchCatalog(items), items);
+	const result = searchCatalog(
+		index,
+		parseSearchParams(
+			new URLSearchParams({
+				q: 'how do I choose a topic for my conference presentation',
+				scope: 'content'
+			})
+		),
+		null
+	);
+	assert.equal(result.mode, 'bm25');
+	assert.equal(result.total, 1);
+	assert.equal(result.results[0].url, '/cfp#pick-a-conference');
+	assert(result.results[0].snippetParts.some((p) => p.matched));
+});
