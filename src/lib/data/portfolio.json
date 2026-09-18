@@ -22,14 +22,40 @@
 		"descriptionSourceUrl": "https://temporal.io",
 		"descriptionSourceTitle": "Temporal: Durable Execution Solutions",
 		"reviewedAt": "2026-09-17",
-		"funding": {
-			"amountUsd": 550000000,
-			"date": "2026-09-14",
-			"stage": "Series E",
-			"kind": "round",
-			"sourceUrl": "https://temporal.io/news/temporal-raises-550m-at-a-12-55b-valuation",
-			"sourceTitle": "Temporal raises $550M Series E"
-		}
+		"fundingRounds": [
+			{
+				"amountUsd": 550000000,
+				"date": "2026-09-14",
+				"stage": "Series E",
+				"kind": "round",
+				"sourceUrl": "https://temporal.io/news/temporal-raises-550m-at-a-12-55b-valuation",
+				"sourceTitle": "Temporal raises $550M Series E",
+				"leads": [
+					"Lightspeed Venture Partners",
+					"Wellington Management",
+					"Growth Equity at Goldman Sachs Alternatives",
+					"Tiger Global"
+				]
+			},
+			{
+				"stage": "Series D",
+				"date": "2026-02-17",
+				"amountUsd": 300000000,
+				"leads": ["Andreessen Horowitz"],
+				"kind": "round",
+				"sourceUrl": "https://temporal.io/news/temporal-raises-300M-to-make-agentic-ai-real-for-companies",
+				"sourceTitle": "Temporal raises $300M Series D"
+			},
+			{
+				"stage": "Series C",
+				"date": "2025-03-31",
+				"amountUsd": 146000000,
+				"leads": ["Tiger Global"],
+				"kind": "round",
+				"sourceUrl": "https://siliconangle.com/2025/03/31/temporal-raises-146m-application-reliability-platform/",
+				"sourceTitle": "Temporal raises $146M for its application reliability platform"
+			}
+		]
 	},
 	{
 		"id": "cognition",
@@ -54,15 +80,38 @@
 		"descriptionSourceUrl": "https://cognition.com/blog/series-e",
 		"descriptionSourceTitle": "Cognition: Do it all with Devin",
 		"reviewedAt": "2026-09-17",
-		"funding": {
-			"amountUsd": 2000000000,
-			"prefix": ">",
-			"date": "2026-09-08",
-			"stage": "Series E",
-			"kind": "round",
-			"sourceUrl": "https://cognition.com/blog/series-e",
-			"sourceTitle": "Cognition: Announcing our Series E"
-		}
+		"fundingRounds": [
+			{
+				"amountUsd": 2000000000,
+				"prefix": ">",
+				"date": "2026-09-08",
+				"stage": "Series E",
+				"kind": "round",
+				"sourceUrl": "https://cognition.com/blog/series-e",
+				"sourceTitle": "Cognition: Announcing our Series E",
+				"leads": ["Andreessen Horowitz", "Accel"]
+			},
+			{
+				"stage": "Series D",
+				"date": "2026-05-27",
+				"amountUsd": 1000000000,
+				"leads": ["Lux Capital", "General Catalyst", "8VC"],
+				"kind": "round",
+				"sourceUrl": "https://cognition.com/blog/series-d",
+				"sourceTitle": "Cognition: More Devins in More Places",
+				"prefix": ">"
+			},
+			{
+				"stage": "Series C",
+				"date": "2025-09-08",
+				"amountUsd": 400000000,
+				"leads": ["Founders Fund"],
+				"kind": "round",
+				"sourceUrl": "https://cognition.com/blog/funding-growth-and-the-next-frontier-of-ai-coding-agents",
+				"sourceTitle": "Cognition: Funding, growth, and the next frontier of AI coding agents",
+				"prefix": ">"
+			}
+		]
 	},
 	{
 		"id": "supabase",
@@ -84,14 +133,35 @@
 		"descriptionSourceUrl": "https://supabase.com",
 		"descriptionSourceTitle": "Supabase: The Postgres Development Platform",
 		"reviewedAt": "2026-09-17",
-		"funding": {
-			"amountUsd": 500000000,
-			"date": "2026-06-04",
-			"stage": "Series F",
-			"kind": "round",
-			"sourceUrl": "https://supabase.com/blog/series-f",
-			"sourceTitle": "Supabase Series F"
-		}
+		"fundingRounds": [
+			{
+				"amountUsd": 500000000,
+				"date": "2026-06-04",
+				"stage": "Series F",
+				"kind": "round",
+				"sourceUrl": "https://supabase.com/blog/series-f",
+				"sourceTitle": "Supabase Series F",
+				"leads": ["GIC"]
+			},
+			{
+				"stage": "Series E",
+				"date": "2025-10-03",
+				"amountUsd": 100000000,
+				"leads": ["Accel", "Peak XV"],
+				"kind": "round",
+				"sourceUrl": "https://supabase.com/blog/series-e",
+				"sourceTitle": "Supabase Series E"
+			},
+			{
+				"stage": "Series A",
+				"date": "2021-10-28",
+				"amountUsd": 30000000,
+				"leads": ["Coatue"],
+				"kind": "round",
+				"sourceUrl": "https://supabase.com/blog/series-a",
+				"sourceTitle": "Supabase $30M Series A"
+			}
+		]
 	},
 	{
 		"id": "railway",
@@ -113,17 +183,31 @@
 			"sourceTitle": "Forge: Railway funding rounds and valuation"
 		},
 		"tier": "Well known names",
-		"funding": {
-			"amountUsd": 100000000,
-			"date": "2026-01-22",
-			"stage": "Series B",
-			"kind": "round",
-			"sourceUrl": "https://blog.railway.com/p/series-b",
-			"sourceTitle": "Railway raises $100M Series B"
-		},
 		"descriptionSourceUrl": "https://railway.com",
 		"descriptionSourceTitle": "Railway: The all-in-one intelligent cloud provider",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": 100000000,
+				"date": "2026-01-22",
+				"stage": "Series B",
+				"kind": "round",
+				"sourceUrl": "https://blog.railway.com/p/series-b",
+				"sourceTitle": "Railway raises $100M Series B",
+				"leads": ["TQ Ventures"],
+				"leadSourceUrl": "https://www.prnewswire.com/news-releases/railway-raises-100-million-series-b-as-ai-pushes-todays-cloud-infrastructure-past-its-limits-302667768.html",
+				"leadSourceTitle": "Railway: $100M Series B company press release"
+			},
+			{
+				"stage": "Series A",
+				"date": "2022-05-31",
+				"amountUsd": 20000000,
+				"leads": ["Redpoint Ventures"],
+				"kind": "round",
+				"sourceUrl": "https://blog.railway.com/p/series-a",
+				"sourceTitle": "Railway raises $20M to radically simplify building software"
+			}
+		]
 	},
 	{
 		"id": "workos",
@@ -145,14 +229,26 @@
 		"descriptionSourceUrl": "https://workos.com",
 		"descriptionSourceTitle": "WorkOS: Enterprise Ready",
 		"reviewedAt": "2026-09-17",
-		"funding": {
-			"amountUsd": 100000000,
-			"date": "2026-03-02",
-			"stage": "Series C",
-			"kind": "round",
-			"sourceUrl": "https://workos.com/blog/series-c",
-			"sourceTitle": "WorkOS raises $100M Series C"
-		}
+		"fundingRounds": [
+			{
+				"amountUsd": 100000000,
+				"date": "2026-03-02",
+				"stage": "Series C",
+				"kind": "round",
+				"sourceUrl": "https://workos.com/blog/series-c",
+				"sourceTitle": "WorkOS raises $100M Series C",
+				"leads": ["Meritech Capital", "Sapphire Ventures"]
+			},
+			{
+				"stage": "Series B",
+				"date": "2022-06-01",
+				"amountUsd": 80000000,
+				"leads": ["Greenoaks"],
+				"kind": "round",
+				"sourceUrl": "https://workos.com/blog/series-b",
+				"sourceTitle": "WorkOS raises $80M in Series B financing, acquires Modulz"
+			}
+		]
 	},
 	{
 		"id": "matx",
@@ -178,14 +274,6 @@
 		"descriptionSourceUrl": "https://matx.com",
 		"descriptionSourceTitle": "MatX: High-throughput chips for LLMs",
 		"reviewedAt": "2026-09-17",
-		"funding": {
-			"amountUsd": 500000000,
-			"date": "2026-02-24",
-			"stage": "Series B",
-			"kind": "round",
-			"sourceUrl": "https://matx.com/research/series_b",
-			"sourceTitle": "MatX One and our $500M Series B"
-		},
 		"valuationRumor": {
 			"amountUsd": 4000000000,
 			"date": "2026-08-27",
@@ -194,7 +282,28 @@
 			"prefix": "≈",
 			"qualifier": "Unconfirmed fundraising target · basis unspecified",
 			"xUrl": "https://x.com/Techmeme/status/2093100339402871232"
-		}
+		},
+		"fundingRounds": [
+			{
+				"amountUsd": 500000000,
+				"date": "2026-02-24",
+				"stage": "Series B",
+				"kind": "round",
+				"sourceUrl": "https://matx.com/research/series_b",
+				"sourceTitle": "MatX One and our $500M Series B",
+				"leads": ["Jane Street", "Situational Awareness LP"]
+			},
+			{
+				"stage": "Series A",
+				"date": "2024-11-22",
+				"amountUsd": 80000000,
+				"leads": ["Spark Capital"],
+				"kind": "round",
+				"sourceUrl": "https://techcrunch.com/2024/11/22/ai-chip-startup-matx-founded-by-google-alums-raises-series-a-at-300m-valuation-sources-say/",
+				"sourceTitle": "TechCrunch: MatX raises Series A",
+				"prefix": "≈"
+			}
+		]
 	},
 	{
 		"id": "artificial-analysis",
@@ -208,18 +317,21 @@
 		"valuation": null,
 		"note": "“Gartner of AI”",
 		"tier": "Well known names",
-		"funding": {
-			"amountUsd": null,
-			"date": "2026-01-08",
-			"stage": "Seed · amount undisclosed",
-			"kind": "round",
-			"dateLabel": "Reported Jan 2026",
-			"sourceUrl": "https://www.latent.space/p/artificialanalysis",
-			"sourceTitle": "Latent Space: Artificial Analysis"
-		},
 		"descriptionSourceUrl": "https://artificialanalysis.ai",
 		"descriptionSourceTitle": "Artificial Analysis: AI Model & API Providers Analysis",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": null,
+				"date": "2026-01-08",
+				"stage": "Seed · amount undisclosed",
+				"kind": "round",
+				"dateLabel": "Reported Jan 2026",
+				"sourceUrl": "https://www.latent.space/p/artificialanalysis",
+				"sourceTitle": "Latent Space: Artificial Analysis",
+				"leads": []
+			}
+		]
 	},
 	{
 		"id": "browserbase",
@@ -242,14 +354,17 @@
 		"descriptionSourceUrl": "https://browserbase.com",
 		"descriptionSourceTitle": "Browserbase: Building the future of web automation",
 		"reviewedAt": "2026-09-17",
-		"funding": {
-			"amountUsd": 40000000,
-			"date": "2025-06-18",
-			"stage": "Series B",
-			"kind": "round",
-			"sourceUrl": "https://www.browserbase.com/blog/series-b-and-beyond",
-			"sourceTitle": "Browserbase: Building the future of web automation"
-		}
+		"fundingRounds": [
+			{
+				"amountUsd": 40000000,
+				"date": "2025-06-18",
+				"stage": "Series B",
+				"kind": "round",
+				"sourceUrl": "https://www.browserbase.com/blog/series-b-and-beyond",
+				"sourceTitle": "Browserbase: Building the future of web automation",
+				"leads": ["Notable Capital"]
+			}
+		]
 	},
 	{
 		"id": "fireworks",
@@ -271,14 +386,36 @@
 		"descriptionSourceUrl": "https://fireworks.ai",
 		"descriptionSourceTitle": "Fireworks: Own Your Specialized Intelligence",
 		"reviewedAt": "2026-09-17",
-		"funding": {
-			"amountUsd": 1505000000,
-			"date": "2026-07-15",
-			"stage": "Series D",
-			"kind": "round",
-			"sourceUrl": "https://fireworks.ai/blog/series-d-announcement",
-			"sourceTitle": "Fireworks announces $1.505B Series D"
-		}
+		"fundingRounds": [
+			{
+				"amountUsd": 1505000000,
+				"date": "2026-07-15",
+				"stage": "Series D",
+				"kind": "round",
+				"sourceUrl": "https://fireworks.ai/blog/series-d-announcement",
+				"sourceTitle": "Fireworks announces $1.505B Series D",
+				"leads": ["Atreides Management", "Index Ventures", "TCV"]
+			},
+			{
+				"stage": "Series C",
+				"date": "2025-10-28",
+				"amountUsd": 250000000,
+				"leads": ["Lightspeed Venture Partners", "Index Ventures", "Evantic"],
+				"kind": "round",
+				"sourceUrl": "https://fireworks.ai/blog/series-c?rp=4",
+				"sourceTitle": "Fireworks raises $250M Series C",
+				"qualifier": "Includes primary and secondary funding"
+			},
+			{
+				"stage": "Series B",
+				"date": "2024-07-11",
+				"amountUsd": 52000000,
+				"leads": ["Sequoia Capital"],
+				"kind": "round",
+				"sourceUrl": "https://fireworks.ai/blog/fireworks-ai-series-b-compound-ai",
+				"sourceTitle": "Fireworks raises $52M Series B"
+			}
+		]
 	},
 	{
 		"id": "e2b",
@@ -299,17 +436,41 @@
 			"sourceTitle": "Aaron Harris: Series A activity, week of July 28, 2025"
 		},
 		"tier": "Well known names",
-		"funding": {
-			"amountUsd": 21000000,
-			"date": "2025-07-28",
-			"stage": "Series A",
-			"kind": "round",
-			"sourceUrl": "https://changelog.e2b.dev/resources/series-a",
-			"sourceTitle": "E2B: We raised $21M to give Fortune 100 cloud for AI agents"
-		},
 		"descriptionSourceUrl": "https://e2b.dev",
 		"descriptionSourceTitle": "E2B: The Enterprise AI Agent Cloud",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": 21000000,
+				"date": "2025-07-28",
+				"stage": "Series A",
+				"kind": "round",
+				"sourceUrl": "https://changelog.e2b.dev/resources/series-a",
+				"sourceTitle": "E2B: We raised $21M to give Fortune 100 cloud for AI agents",
+				"leads": ["Insight Partners"]
+			},
+			{
+				"stage": "Seed",
+				"date": "2024-10",
+				"amountUsd": 11500000,
+				"leads": ["Decibel Partners"],
+				"kind": "round",
+				"sourceUrl": "https://e2b.dev/about",
+				"sourceTitle": "E2B company history",
+				"dateLabel": "Oct 2024"
+			},
+			{
+				"stage": "Pre-seed",
+				"date": "2023-09",
+				"amountUsd": 2500000,
+				"leads": ["Kaya VC"],
+				"kind": "round",
+				"sourceUrl": "https://e2b.dev/about",
+				"sourceTitle": "E2B company history",
+				"dateLabel": "Sep 2023",
+				"prefix": "≈"
+			}
+		]
 	},
 	{
 		"id": "daytona",
@@ -335,14 +496,35 @@
 		"descriptionSourceUrl": "https://daytona.io",
 		"descriptionSourceTitle": "Daytona: Secure Infrastructure for Running AI-Generated Code",
 		"reviewedAt": "2026-09-17",
-		"funding": {
-			"amountUsd": 48270000,
-			"date": "2026-07-31",
-			"stage": "Series B · database-reported",
-			"kind": "round",
-			"sourceUrl": "https://forgeglobal.com/daytona_ipo/",
-			"sourceTitle": "Forge: Daytona July 2026 Series B"
-		}
+		"fundingRounds": [
+			{
+				"amountUsd": 48270000,
+				"date": "2026-07-31",
+				"stage": "Series B · database-reported",
+				"kind": "round",
+				"sourceUrl": "https://forgeglobal.com/daytona_ipo/",
+				"sourceTitle": "Forge: Daytona July 2026 Series B",
+				"leads": []
+			},
+			{
+				"stage": "Series A",
+				"date": "2026-02-05",
+				"amountUsd": 24000000,
+				"leads": ["FirstMark Capital"],
+				"kind": "round",
+				"sourceUrl": "https://www.prnewswire.com/news-releases/daytona-raises-24m-series-a-to-give-every-agent-a-computer-302680740.html",
+				"sourceTitle": "Daytona raises $24M Series A"
+			},
+			{
+				"stage": "Seed",
+				"date": "2024-06-25",
+				"amountUsd": 5000000,
+				"leads": ["Upfront Ventures"],
+				"kind": "round",
+				"sourceUrl": "https://www.daytona.io/dotfiles/daytona-secures-5m-to-simplify-development-environments",
+				"sourceTitle": "Daytona secures $5M to simplify development environments"
+			}
+		]
 	},
 	{
 		"id": "resend",
@@ -363,17 +545,29 @@
 			"sourceTitle": "CB Insights: Resend financials"
 		},
 		"tier": "Well known names",
-		"funding": {
-			"amountUsd": 18000000,
-			"date": "2024-12-04",
-			"stage": "Series A",
-			"kind": "round",
-			"sourceUrl": "https://resend.com/blog/series-a",
-			"sourceTitle": "Resend raises $18M Series A"
-		},
 		"descriptionSourceUrl": "https://resend.com",
 		"descriptionSourceTitle": "Resend: Email for developers",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": 18000000,
+				"date": "2024-12-04",
+				"stage": "Series A",
+				"kind": "round",
+				"sourceUrl": "https://resend.com/blog/series-a",
+				"sourceTitle": "Resend raises $18M Series A",
+				"leads": ["Andreessen Horowitz"]
+			},
+			{
+				"stage": "Seed",
+				"date": "2023-07-18",
+				"amountUsd": 3000000,
+				"leads": [],
+				"kind": "round",
+				"sourceUrl": "https://resend.com/blog/resend-raises-3m-seed-round",
+				"sourceTitle": "Resend raises $3M"
+			}
+		]
 	},
 	{
 		"id": "modal",
@@ -395,14 +589,26 @@
 		"descriptionSourceUrl": "https://modal.com",
 		"descriptionSourceTitle": "Modal: High-performance AI infrastructure",
 		"reviewedAt": "2026-09-17",
-		"funding": {
-			"amountUsd": 355000000,
-			"date": "2026-05-21",
-			"stage": "Series C",
-			"kind": "round",
-			"sourceUrl": "https://modal.com/blog/modal-series-c",
-			"sourceTitle": "Modal raises $355M Series C"
-		}
+		"fundingRounds": [
+			{
+				"amountUsd": 355000000,
+				"date": "2026-05-21",
+				"stage": "Series C",
+				"kind": "round",
+				"sourceUrl": "https://modal.com/blog/modal-series-c",
+				"sourceTitle": "Modal raises $355M Series C",
+				"leads": ["General Catalyst", "Redpoint Ventures"]
+			},
+			{
+				"stage": "Series B",
+				"date": "2025-09-29",
+				"amountUsd": 87000000,
+				"leads": ["Lux Capital"],
+				"kind": "round",
+				"sourceUrl": "https://modal.com/blog/announcing-our-series-b",
+				"sourceTitle": "Modal: Announcing our $87M Series B"
+			}
+		]
 	},
 	{
 		"id": "conductor",
@@ -416,17 +622,20 @@
 		"valuation": null,
 		"relatedUrl": "https://x.com/charlieholtz/status/2039027121901957349",
 		"tier": "Well known names",
-		"funding": {
-			"amountUsd": 22000000,
-			"date": "2026-03-30",
-			"stage": "Series A",
-			"kind": "round",
-			"sourceUrl": "https://www.conductor.build/blog/series-a",
-			"sourceTitle": "Conductor’s Series A"
-		},
 		"descriptionSourceUrl": "https://conductor.build",
 		"descriptionSourceTitle": "Conductor: Run a team of coding agents in the cloud",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": 22000000,
+				"date": "2026-03-30",
+				"stage": "Series A",
+				"kind": "round",
+				"sourceUrl": "https://www.conductor.build/blog/series-a",
+				"sourceTitle": "Conductor’s Series A",
+				"leads": []
+			}
+		]
 	},
 	{
 		"id": "chroma",
@@ -449,7 +658,28 @@
 		"tier": "Well known names",
 		"descriptionSourceUrl": "https://trychroma.com",
 		"descriptionSourceTitle": "Chroma: Open-source search infrastructure for AI",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"stage": "Seed",
+				"date": "2023-04-07",
+				"amountUsd": 18000000,
+				"leads": ["Quiet Capital"],
+				"kind": "round",
+				"sourceUrl": "https://www.trychroma.com/company/seed",
+				"sourceTitle": "Chroma raises $18M seed round"
+			},
+			{
+				"stage": "Pre-seed",
+				"date": "2022-05",
+				"amountUsd": null,
+				"leads": ["AIX Ventures", "Bloomberg Beta", "AI Grant"],
+				"kind": "round",
+				"sourceUrl": "https://www.trychroma.com/company/seed",
+				"sourceTitle": "Chroma raises $18M seed round",
+				"dateLabel": "May 2022"
+			}
+		]
 	},
 	{
 		"id": "restate",
@@ -462,17 +692,20 @@
 		"logoSource": "https://restate.dev/favicon.ico",
 		"valuation": null,
 		"tier": "Well known names",
-		"funding": {
-			"amountUsd": 7000000,
-			"date": "2024-06-10",
-			"stage": "Seed",
-			"kind": "round",
-			"sourceUrl": "https://restate.dev/blog/announcing-restate-1.0-restate-cloud-and-our-seed-funding-round",
-			"sourceTitle": "Announcing Restate 1.0, Restate Cloud, and our seed funding round"
-		},
 		"descriptionSourceUrl": "https://restate.dev",
 		"descriptionSourceTitle": "Restate: The Durable Runtime for your Agents and Backends",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": 7000000,
+				"date": "2024-06-10",
+				"stage": "Seed",
+				"kind": "round",
+				"sourceUrl": "https://restate.dev/blog/announcing-restate-1.0-restate-cloud-and-our-seed-funding-round",
+				"sourceTitle": "Announcing Restate 1.0, Restate Cloud, and our seed funding round",
+				"leads": ["Redpoint Ventures"]
+			}
+		]
 	},
 	{
 		"id": "logan-kilpatrick",
@@ -515,17 +748,20 @@
 		"logoSource": "https://www.datalab.to/images/datalab-icon.svg",
 		"valuation": null,
 		"tier": "You should know",
-		"funding": {
-			"amountUsd": 3500000,
-			"date": "2025-06-17",
-			"stage": "Seed",
-			"kind": "round",
-			"sourceUrl": "https://www.forkable.io/p/datalab-develops-small-ai-models",
-			"sourceTitle": "Paul Sawers: Datalab develops small AI models to power document intelligence in the enterprise"
-		},
 		"descriptionSourceUrl": "https://www.datalab.to/",
 		"descriptionSourceTitle": "Datalab: High-precision document intelligence",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": 3500000,
+				"date": "2025-06-17",
+				"stage": "Seed",
+				"kind": "round",
+				"sourceUrl": "https://www.forkable.io/p/datalab-develops-small-ai-models",
+				"sourceTitle": "Paul Sawers: Datalab develops small AI models to power document intelligence in the enterprise",
+				"leads": ["Pebblebed"]
+			}
+		]
 	},
 	{
 		"id": "viktor",
@@ -548,14 +784,29 @@
 		"descriptionSourceUrl": "https://viktor.com/",
 		"descriptionSourceTitle": "Viktor: AI employee in Slack and Teams",
 		"reviewedAt": "2026-09-17",
-		"funding": {
-			"amountUsd": 75000000,
-			"date": "2026-05-19",
-			"stage": "Series A",
-			"kind": "round",
-			"sourceUrl": "https://viktor.com/blog/viktor-series-a",
-			"sourceTitle": "Viktor: The first AI employee — $75M from Accel"
-		}
+		"fundingRounds": [
+			{
+				"amountUsd": 75000000,
+				"date": "2026-05-19",
+				"stage": "Series A",
+				"kind": "round",
+				"sourceUrl": "https://viktor.com/blog/viktor-series-a",
+				"sourceTitle": "Viktor: The first AI employee — $75M from Accel",
+				"leads": ["Accel"],
+				"leadSourceUrl": "https://www.accel.com/news/welcome-viktor-the-ai-coworker-for-the-modern-workplace",
+				"leadSourceTitle": "Accel welcomes Viktor"
+			},
+			{
+				"amountUsd": 2900000,
+				"date": "2024-06-13",
+				"stage": "Pre-seed",
+				"kind": "round",
+				"leads": ["Daniel Gross", "Nat Friedman"],
+				"sourceUrl": "https://www.prnewswire.com/news-releases/zeta-labs-raises-2-9m-pre-seed-funding-launches-jace---first-ai-agent-capable-of-complex-task-completion-302171252.html",
+				"sourceTitle": "Zeta Labs announces $2.9M pre-seed",
+				"qualifier": "Raised as Zeta Labs, the company behind Viktor"
+			}
+		]
 	},
 	{
 		"id": "brightwave",
@@ -568,17 +819,29 @@
 		"logoSource": "https://www.brightwave.io/favicon.svg",
 		"valuation": null,
 		"tier": "You should know",
-		"funding": {
-			"amountUsd": 15000000,
-			"date": "2024-10-29",
-			"stage": "Series A",
-			"kind": "round",
-			"sourceUrl": "https://markets.financialcontent.com/stocks/article/bizwire-2024-10-29-brightwave-secures-15m-series-a-to-scale-ai-powered-financial-research-platform",
-			"sourceTitle": "Brightwave secures $15M Series A to scale AI-powered financial research platform"
-		},
 		"descriptionSourceUrl": "https://www.tidebreak.io/",
 		"descriptionSourceTitle": "Tidebreak: One engine for work and code",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": 15000000,
+				"date": "2024-10-29",
+				"stage": "Series A",
+				"kind": "round",
+				"sourceUrl": "https://markets.financialcontent.com/stocks/article/bizwire-2024-10-29-brightwave-secures-15m-series-a-to-scale-ai-powered-financial-research-platform",
+				"sourceTitle": "Brightwave secures $15M Series A to scale AI-powered financial research platform",
+				"leads": ["Decibel Partners"]
+			},
+			{
+				"amountUsd": 6000000,
+				"date": "2024-06-11",
+				"stage": "Seed",
+				"kind": "round",
+				"leads": ["Decibel Partners"],
+				"sourceUrl": "https://www.businesswire.com/news/home/20240611417446/en/Brightwave-Secures-%246-Million-Seed-Round-to-Launch-AI-Powered-Financial-Research-Assistant",
+				"sourceTitle": "Brightwave announces $6M seed financing"
+			}
+		]
 	},
 	{
 		"id": "quadratic",
@@ -591,17 +854,31 @@
 		"logoSource": "https://www.quadratichq.com/apple-icon.png?3f818aa4b7854e48",
 		"valuation": null,
 		"tier": "You should know",
-		"funding": {
-			"amountUsd": 5600000,
-			"date": "2024-04-02",
-			"stage": "Seed",
-			"kind": "round",
-			"sourceUrl": "https://www.quadratichq.com/blog/announcing-our-seed-round-funding-and-quadratic-teams",
-			"sourceTitle": "Announcing our $5.6M seed round and Quadratic Teams"
-		},
 		"descriptionSourceUrl": "https://www.quadratichq.com/",
 		"descriptionSourceTitle": "Quadratic: The AI Spreadsheet",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": 5600000,
+				"date": "2024-04-02",
+				"stage": "Seed",
+				"kind": "round",
+				"sourceUrl": "https://www.quadratichq.com/blog/announcing-our-seed-round-funding-and-quadratic-teams",
+				"sourceTitle": "Announcing our $5.6M seed round and Quadratic Teams",
+				"leads": ["GV"]
+			},
+			{
+				"amountUsd": null,
+				"date": null,
+				"stage": "Pre-seed",
+				"kind": "round",
+				"leads": ["Catapult Ventures"],
+				"sourceUrl": "https://www.quadratichq.com/blog/announcing-our-seed-round-funding-and-quadratic-teams",
+				"sourceTitle": "Quadratic seed announcement and earlier pre-seed lead",
+				"qualifier": "Earlier round; lead disclosed in Apr 2024 announcement, amount and date not disclosed",
+				"dateLabel": "Round date not disclosed"
+			}
+		]
 	},
 	{
 		"id": "flutterflow",
@@ -624,14 +901,19 @@
 		"descriptionSourceUrl": "https://flutterflow.io/",
 		"descriptionSourceTitle": "FlutterFlow: Build Better. Launch Faster.",
 		"reviewedAt": "2026-09-17",
-		"funding": {
-			"amountUsd": 25500000,
-			"date": "2024-01-11",
-			"stage": "Series A",
-			"kind": "round",
-			"sourceUrl": "https://techcrunch.com/2024/01/11/flutterflow-attracts-cash-for-its-low-code-mobile-app-dev-platform/",
-			"sourceTitle": "FlutterFlow Series A financing"
-		}
+		"fundingRounds": [
+			{
+				"amountUsd": 25500000,
+				"date": "2024-01-11",
+				"stage": "Series A",
+				"kind": "round",
+				"sourceUrl": "https://techcrunch.com/2024/01/11/flutterflow-attracts-cash-for-its-low-code-mobile-app-dev-platform/",
+				"sourceTitle": "FlutterFlow Series A financing",
+				"leads": ["GV"],
+				"leadSourceUrl": "https://silverwoodpartners.com/technology-private-placement-and-ma-transactions-review-week-ending-jan-14-2024/",
+				"leadSourceTitle": "Silverwood transaction review, Jan 14, 2024"
+			}
+		]
 	},
 	{
 		"id": "circle",
@@ -654,7 +936,38 @@
 		"tier": "You should know",
 		"descriptionSourceUrl": "https://circle.so/",
 		"descriptionSourceTitle": "Circle: A new era for digital businesses",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": 24700000,
+				"date": "2021-12-07",
+				"stage": "Series A",
+				"kind": "round",
+				"leads": ["Tiger Global"],
+				"sourceUrl": "https://techcrunch.com/2021/12/07/circle-comes-around-again-with-fresh-capital-led-by-tiger-global-for-200m-valuation/",
+				"sourceTitle": "Circle Series A"
+			},
+			{
+				"amountUsd": 4000000,
+				"date": "2021-02-16",
+				"stage": "Seed",
+				"kind": "round",
+				"leads": ["Notation Capital"],
+				"sourceUrl": "https://techcrunch.com/2021/02/16/the-creator-movement-is-entering-primetime-and-so-is-circle-with-a-fresh-4m/",
+				"sourceTitle": "Circle seed financing",
+				"qualifier": "Announcement date; closed in late 2020"
+			},
+			{
+				"amountUsd": 1500000,
+				"date": "2020-08-10",
+				"stage": "Seed",
+				"kind": "round",
+				"leads": ["Notation Capital"],
+				"sourceUrl": "https://techcrunch.com/2020/08/10/circle-community-tools-for-creators/",
+				"sourceTitle": "Circle initial seed financing",
+				"qualifier": "Called pre-seed in later company coverage"
+			}
+		]
 	},
 	{
 		"id": "airbyte",
@@ -677,14 +990,35 @@
 		"descriptionSourceUrl": "https://airbyte.com/",
 		"descriptionSourceTitle": "Airbyte: Data Movement for Analytics and AI Agents",
 		"reviewedAt": "2026-09-17",
-		"funding": {
-			"amountUsd": 150000000,
-			"date": "2021-12-20",
-			"stage": "Series B",
-			"kind": "round",
-			"sourceUrl": "https://airbyte.com/blog/a-150m-series-b-to-power-the-movement-of-data",
-			"sourceTitle": "Airbyte raises $150M Series B"
-		}
+		"fundingRounds": [
+			{
+				"amountUsd": 150000000,
+				"date": "2021-12-20",
+				"stage": "Series B",
+				"kind": "round",
+				"sourceUrl": "https://airbyte.com/blog/a-150m-series-b-to-power-the-movement-of-data",
+				"sourceTitle": "Airbyte raises $150M Series B",
+				"leads": ["Altimeter Capital", "Coatue Management"]
+			},
+			{
+				"amountUsd": 26000000,
+				"date": "2021-05-25",
+				"stage": "Series A",
+				"kind": "round",
+				"leads": ["Benchmark"],
+				"sourceUrl": "https://techcrunch.com/2021/05/25/airbyte-announces-26m-series-a-for-open-source-data-connector-platform/",
+				"sourceTitle": "Airbyte Series A"
+			},
+			{
+				"amountUsd": 5200000,
+				"date": "2021-03-02",
+				"stage": "Seed",
+				"kind": "round",
+				"leads": ["Accel"],
+				"sourceUrl": "https://techcrunch.com/2021/03/02/airbyte-raises-5-2m-for-its-open-source-data-integration-platform/",
+				"sourceTitle": "Airbyte seed financing"
+			}
+		]
 	},
 	{
 		"id": "sphere",
@@ -697,17 +1031,31 @@
 		"logoSource": null,
 		"valuation": null,
 		"tier": "You should know",
-		"funding": {
-			"amountUsd": 12500000,
-			"date": "2025-09-22",
-			"stage": "Financing",
-			"kind": "round",
-			"sourceUrl": "https://www.constructcap.com/articles/investing-in-sphere-semi-reinventing-analog-chip-design-for-the-ai-era",
-			"sourceTitle": "Investing in Sphere Semi: Reinventing Analog Chip Design for the AI Era"
-		},
 		"descriptionSourceUrl": "https://www.spheresemi.com/",
 		"descriptionSourceTitle": "Sphere Semi: AI-designed analog chips",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": 12500000,
+				"date": "2025-09-22",
+				"stage": "Financing",
+				"kind": "round",
+				"sourceUrl": "https://www.constructcap.com/articles/investing-in-sphere-semi-reinventing-analog-chip-design-for-the-ai-era",
+				"sourceTitle": "Investing in Sphere Semi: Reinventing Analog Chip Design for the AI Era",
+				"leads": ["ACME Capital", "Future Ventures"]
+			},
+			{
+				"amountUsd": 7500000,
+				"date": null,
+				"stage": "Formation",
+				"kind": "round",
+				"leads": ["Construct Capital"],
+				"sourceUrl": "https://www.constructcap.com/articles/investing-in-sphere-semi-reinventing-analog-chip-design-for-the-ai-era",
+				"sourceTitle": "Construct Capital on Sphere Semi formation financing",
+				"qualifier": "Earlier formation capital; disclosed Sep 2025",
+				"dateLabel": "Round date not disclosed"
+			}
+		]
 	},
 	{
 		"id": "val-town",
@@ -720,17 +1068,30 @@
 		"logoSource": "https://www.val.town/favicon.svg?dot=false",
 		"valuation": null,
 		"tier": "You should know",
-		"funding": {
-			"amountUsd": 5500000,
-			"date": "2024-04-09",
-			"stage": "Seed",
-			"kind": "round",
-			"sourceUrl": "https://blog.val.town/seed",
-			"sourceTitle": "Val Town’s seed round"
-		},
 		"descriptionSourceUrl": "https://www.val.town/",
 		"descriptionSourceTitle": "Val Town: Instant deployments for you and your agents",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": 5500000,
+				"date": "2024-04-09",
+				"stage": "Seed",
+				"kind": "round",
+				"sourceUrl": "https://blog.val.town/seed",
+				"sourceTitle": "Val Town’s seed round",
+				"leads": ["Accel"]
+			},
+			{
+				"amountUsd": 1500000,
+				"date": "2022-08",
+				"stage": "Pre-seed",
+				"kind": "round",
+				"leads": ["Accel"],
+				"sourceUrl": "https://blog.val.town/seed",
+				"sourceTitle": "Val Town seed announcement and earlier pre-seed",
+				"qualifier": "Led by Accel partner Dan Levine; month disclosed"
+			}
+		]
 	},
 	{
 		"id": "stackblitz",
@@ -751,7 +1112,41 @@
 		"tier": "You should know",
 		"descriptionSourceUrl": "https://stackblitz.com/",
 		"descriptionSourceTitle": "StackBlitz: Instant Dev Environments",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": 83500000,
+				"date": "2025-01-23",
+				"stage": "Series B",
+				"kind": "round",
+				"leads": ["Emergence Capital", "GV"],
+				"sourceUrl": "https://www.axios.com/newsletters/axios-pro-rata-bc1423e0-d8ed-11ef-b2b2-5347e082c687",
+				"sourceTitle": "Axios Pro Rata: StackBlitz Series B",
+				"qualifier": "New Series B capital; $105.5M announcement also includes earlier $22M Series A",
+				"leadSourceUrl": "https://www.linkedin.com/posts/emergence-capital-partners_congratulations-to-the-team-fka-stackblitz-activity-7287883913337716737-25nV",
+				"leadSourceTitle": "Emergence Capital on Bolt financing"
+			},
+			{
+				"amountUsd": 7900000,
+				"date": "2022-04-06",
+				"stage": "Seed",
+				"kind": "round",
+				"leads": ["Greylock"],
+				"sourceUrl": "https://blog.stackblitz.com/posts/seed-funding/",
+				"sourceTitle": "StackBlitz seed announcement"
+			},
+			{
+				"amountUsd": 22000000,
+				"date": null,
+				"stage": "Series A",
+				"kind": "round",
+				"leads": [],
+				"sourceUrl": "https://news.bloomberglaw.com/private-equity/ai-speech-to-code-startup-is-in-talks-for-700-million-valuation",
+				"sourceTitle": "Bloomberg: StackBlitz earlier Series A",
+				"qualifier": "Earlier unreported round disclosed Jan 2025; closing date and lead not established",
+				"dateLabel": "Round date not disclosed"
+			}
+		]
 	},
 	{
 		"id": "prime-intellect",
@@ -774,14 +1169,35 @@
 		"descriptionSourceUrl": "https://www.primeintellect.ai/",
 		"descriptionSourceTitle": "Prime Intellect: The Open Superintelligence Stack",
 		"reviewedAt": "2026-09-17",
-		"funding": {
-			"amountUsd": 130000000,
-			"date": "2026-07-08",
-			"stage": "Series A",
-			"kind": "round",
-			"sourceUrl": "https://www.primeintellect.ai/blog/series-a",
-			"sourceTitle": "Prime Intellect: $130M Series A"
-		}
+		"fundingRounds": [
+			{
+				"amountUsd": 130000000,
+				"date": "2026-07-08",
+				"stage": "Series A",
+				"kind": "round",
+				"sourceUrl": "https://www.primeintellect.ai/blog/series-a",
+				"sourceTitle": "Prime Intellect: $130M Series A",
+				"leads": ["Radical Ventures"]
+			},
+			{
+				"amountUsd": 15000000,
+				"date": "2025-02-28",
+				"stage": "Financing",
+				"kind": "round",
+				"leads": ["Founders Fund"],
+				"sourceUrl": "https://www.primeintellect.ai/blog/fundraise",
+				"sourceTitle": "Prime Intellect announces $15M financing"
+			},
+			{
+				"amountUsd": 5500000,
+				"date": "2024-04-23",
+				"stage": "Seed",
+				"kind": "round",
+				"leads": ["Distributed Global", "CoinFund"],
+				"sourceUrl": "https://www.prnewswire.com/news-releases/prime-intellect-secures-5-5m-in-seed-funding-co-led-by-distributed-global-and-coinfund-to-advance-its-decentralized-and-collaborative-ai-ecosystem-302124585.html",
+				"sourceTitle": "Prime Intellect seed financing"
+			}
+		]
 	},
 	{
 		"id": "preference-model",
@@ -809,17 +1225,20 @@
 		"logoSource": "https://cdn.prod.website-files.com/694043d273dceabab479f631/6a55a1a906eabfade48dce1e_69603245cff328dc64a18f61_Base%20Icon%20%5BDO%20NOT%20EDIT%5D%206.png",
 		"valuation": null,
 		"tier": "Smaller names",
-		"funding": {
-			"amountUsd": 11000000,
-			"date": "2026-03-22",
-			"stage": "Seed",
-			"kind": "round",
-			"sourceUrl": "https://littlebird.ai/blog/littlebird-raises-11m-to-build-the-first-full-context-ai",
-			"sourceTitle": "Littlebird raises $11M to build the first full-context AI"
-		},
 		"descriptionSourceUrl": "https://littlebird.ai/",
 		"descriptionSourceTitle": "Littlebird: AI Assistant With a Memory of Your Work",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": 11000000,
+				"date": "2026-03-22",
+				"stage": "Seed",
+				"kind": "round",
+				"sourceUrl": "https://littlebird.ai/blog/littlebird-raises-11m-to-build-the-first-full-context-ai",
+				"sourceTitle": "Littlebird raises $11M to build the first full-context AI",
+				"leads": ["Lotus Studio"]
+			}
+		]
 	},
 	{
 		"id": "clarify",
@@ -832,17 +1251,29 @@
 		"logoSource": "https://www.clarify.ai/_next/static/media/favicon.0mmn2nasvvrs8.png",
 		"valuation": null,
 		"tier": "Smaller names",
-		"funding": {
-			"amountUsd": null,
-			"date": "2026-07-21",
-			"stage": "Financing",
-			"kind": "round",
-			"sourceUrl": "https://www.geekwire.com/2026/seattles-clarify-acquires-s-f-startup-seam-ai-joining-forces-to-challenge-crm-stalwarts/",
-			"sourceTitle": "GeekWire: Clarify acquires Seam AI"
-		},
 		"descriptionSourceUrl": "https://www.clarify.ai/",
 		"descriptionSourceTitle": "Clarify: The Autonomous CRM",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": null,
+				"date": "2026-07-21",
+				"stage": "Financing",
+				"kind": "round",
+				"sourceUrl": "https://www.geekwire.com/2026/seattles-clarify-acquires-s-f-startup-seam-ai-joining-forces-to-challenge-crm-stalwarts/",
+				"sourceTitle": "GeekWire: Clarify acquires Seam AI",
+				"leads": []
+			},
+			{
+				"amountUsd": 15000000,
+				"date": "2025-06-25",
+				"stage": "Series A",
+				"kind": "round",
+				"leads": ["USVP", "Gradient Ventures"],
+				"sourceUrl": "https://www.geekwire.com/2025/seattle-startup-clarify-lands-15m-to-take-on-salesforce-with-ai-native-autonomous-crm/",
+				"sourceTitle": "Clarify Series A"
+			}
+		]
 	},
 	{
 		"id": "phonic",
@@ -855,17 +1286,22 @@
 		"logoSource": "https://phonic.ai/icon.svg?icon.0rsnuu632fkn7.svg",
 		"valuation": null,
 		"tier": "Smaller names",
-		"funding": {
-			"amountUsd": 4000000,
-			"date": "2025-04-03",
-			"stage": "Seed",
-			"kind": "round",
-			"sourceUrl": "https://www.prnewswire.com/news-releases/phonic-launches-end-to-end-speech-to-speech-platform-for-building-reliable-voice-agents-announces-4m-funding-raise-302419143.html",
-			"sourceTitle": "Phonic launches speech-to-speech platform and announces $4M funding"
-		},
 		"descriptionSourceUrl": "https://phonic.ai/",
 		"descriptionSourceTitle": "Phonic: Build voice agents as natural as humans",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": 4000000,
+				"date": "2025-04-03",
+				"stage": "Seed",
+				"kind": "round",
+				"sourceUrl": "https://www.prnewswire.com/news-releases/phonic-launches-end-to-end-speech-to-speech-platform-for-building-reliable-voice-agents-announces-4m-funding-raise-302419143.html",
+				"sourceTitle": "Phonic launches speech-to-speech platform and announces $4M funding",
+				"leads": ["Lux Capital"],
+				"leadSourceUrl": "https://www.linkedin.com/posts/graceisford_excited-to-announce-that-lux-capital-led-activity-7313921957333274626-XPgT",
+				"leadSourceTitle": "Lux partner Grace Isford on Phonic seed financing"
+			}
+		]
 	},
 	{
 		"id": "keycard",
@@ -878,17 +1314,31 @@
 		"logoSource": "https://www.keycard.ai/favicon.svg",
 		"valuation": null,
 		"tier": "Smaller names",
-		"funding": {
-			"amountUsd": 30000000,
-			"date": "2025-10-21",
-			"stage": "Series A",
-			"kind": "round",
-			"sourceUrl": "https://boldstart.vc/news/keycard-solving-the-ai-agent-identity-and-access-problem-welcome-to-boldstart/",
-			"sourceTitle": "Keycard: Solving the AI agent identity and access problem"
-		},
 		"descriptionSourceUrl": "https://www.keycard.ai/",
 		"descriptionSourceTitle": "Keycard: The Control Plane for Autonomous Agents",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": 30000000,
+				"date": "2025-10-21",
+				"stage": "Series A",
+				"kind": "round",
+				"sourceUrl": "https://boldstart.vc/news/keycard-solving-the-ai-agent-identity-and-access-problem-welcome-to-boldstart/",
+				"sourceTitle": "Keycard: Solving the AI agent identity and access problem",
+				"leads": ["Acrew Capital"]
+			},
+			{
+				"amountUsd": 8000000,
+				"date": null,
+				"stage": "Inception",
+				"kind": "round",
+				"leads": ["boldstart ventures", "Andreessen Horowitz"],
+				"sourceUrl": "https://boldstart.vc/news/keycard-solving-the-ai-agent-identity-and-access-problem-welcome-to-boldstart/",
+				"sourceTitle": "boldstart on Keycard inception financing",
+				"qualifier": "Earlier inception round; disclosed Oct 2025",
+				"dateLabel": "Round date not disclosed"
+			}
+		]
 	},
 	{
 		"id": "confident-security",
@@ -901,17 +1351,20 @@
 		"logoSource": "https://confident.security/favicon.svg",
 		"valuation": null,
 		"tier": "Smaller names",
-		"funding": {
-			"amountUsd": 4200000,
-			"date": "2025-07-17",
-			"stage": "Seed",
-			"kind": "round",
-			"sourceUrl": "https://techcrunch.com/2025/07/17/confident-security-the-signal-for-ai-comes-out-of-stealth-with-4-2m/",
-			"sourceTitle": "Confident Security seed funding"
-		},
 		"descriptionSourceUrl": "https://confident.security/",
 		"descriptionSourceTitle": "Confident Security: Verifiably-private Inference API",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": 4200000,
+				"date": "2025-07-17",
+				"stage": "Seed",
+				"kind": "round",
+				"sourceUrl": "https://techcrunch.com/2025/07/17/confident-security-the-signal-for-ai-comes-out-of-stealth-with-4-2m/",
+				"sourceTitle": "Confident Security seed funding",
+				"leads": []
+			}
+		]
 	},
 	{
 		"id": "lightweight-labs",
@@ -939,17 +1392,20 @@
 		"logoSource": "https://www.wordware.ai/Wordware%20Favicon.png",
 		"valuation": null,
 		"tier": "Smaller names",
-		"funding": {
-			"amountUsd": 30000000,
-			"date": "2024-11-25",
-			"stage": "Seed",
-			"kind": "round",
-			"sourceUrl": "https://blog.wordware.ai/seed-round",
-			"sourceTitle": "Wordware raises $30M seed round"
-		},
 		"descriptionSourceUrl": "https://www.wordware.ai/",
 		"descriptionSourceTitle": "Wordware: AI context lab and Sauna",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": 30000000,
+				"date": "2024-11-25",
+				"stage": "Seed",
+				"kind": "round",
+				"sourceUrl": "https://blog.wordware.ai/seed-round",
+				"sourceTitle": "Wordware raises $30M seed round",
+				"leads": ["Spark Capital"]
+			}
+		]
 	},
 	{
 		"id": "polyhive",
@@ -1007,17 +1463,22 @@
 		"logoSource": "https://fireproof.storage/favicon.ico",
 		"valuation": null,
 		"tier": "Smaller names",
-		"funding": {
-			"amountUsd": 1710000,
-			"date": "2024-07-31",
-			"stage": "Pre-seed",
-			"kind": "round",
-			"sourceUrl": "https://www.cbinsights.com/company/fireproof-storage",
-			"sourceTitle": "Fireproof Storage — CBInsights"
-		},
 		"descriptionSourceUrl": "https://fireproof.storage/",
 		"descriptionSourceTitle": "Fireproof cloudless database for realtime apps",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": 1710000,
+				"date": "2024-07-31",
+				"stage": "Pre-seed",
+				"kind": "round",
+				"sourceUrl": "https://www.cbinsights.com/company/fireproof-storage",
+				"sourceTitle": "Fireproof Storage — CBInsights",
+				"leads": ["Engineering Capital"],
+				"leadSourceUrl": "https://thenewstack.io/fireproof-uses-merkle-crdts-to-cut-database-latency/",
+				"leadSourceTitle": "Fireproof Uses Merkle CRDTs to Cut Database Latency"
+			}
+		]
 	},
 	{
 		"id": "arcjet",
@@ -1030,17 +1491,29 @@
 		"logoSource": "https://arcjet.com/favicon.png",
 		"valuation": null,
 		"tier": "Smaller names",
-		"funding": {
-			"amountUsd": 8300000,
-			"date": "2025-10-08",
-			"stage": "Series A",
-			"kind": "round",
-			"sourceUrl": "https://blog.arcjet.com/introducing-arcjets-local-ai-security-model-announcing-series-a-funding/",
-			"sourceTitle": "Introducing Arcjet's local AI security model + announcing Series A funding"
-		},
 		"descriptionSourceUrl": "https://arcjet.com/",
 		"descriptionSourceTitle": "Arcjet — AI agent runtime security",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": 8300000,
+				"date": "2025-10-08",
+				"stage": "Series A",
+				"kind": "round",
+				"sourceUrl": "https://blog.arcjet.com/introducing-arcjets-local-ai-security-model-announcing-series-a-funding/",
+				"sourceTitle": "Introducing Arcjet's local AI security model + announcing Series A funding",
+				"leads": ["Plural", "Ott Kaukver"]
+			},
+			{
+				"amountUsd": 3600000,
+				"date": "2024-09-10",
+				"stage": "Seed",
+				"kind": "round",
+				"leads": ["Andreessen Horowitz"],
+				"sourceUrl": "https://blog.arcjet.com/launching-the-future-of-developer-security-seed-funding-from-a16z/",
+				"sourceTitle": "Arcjet announces $3.6M seed funding"
+			}
+		]
 	},
 	{
 		"id": "cosine",
@@ -1061,17 +1534,31 @@
 			"sourceTitle": "Cosine Stock Price, Funding, Valuation — CBInsights"
 		},
 		"tier": "Smaller names",
-		"funding": {
-			"amountUsd": 8000000,
-			"date": "2026-06-08",
-			"stage": "Total funding disclosed",
-			"kind": "total",
-			"sourceUrl": "https://pathfounders.com/p/cosine-ai-recruits-corporate-heavyweights-to-build-sovereign",
-			"sourceTitle": "Cosine AI recruits corporate heavyweights to build sovereign UK frontier AI model"
-		},
 		"descriptionSourceUrl": "https://cosine.sh/",
 		"descriptionSourceTitle": "Cosine — The Sovereign AI Lab",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": 8000000,
+				"date": "2026-06-08",
+				"stage": "Total funding disclosed",
+				"kind": "total",
+				"sourceUrl": "https://pathfounders.com/p/cosine-ai-recruits-corporate-heavyweights-to-build-sovereign",
+				"sourceTitle": "Cosine AI recruits corporate heavyweights to build sovereign UK frontier AI model",
+				"leads": []
+			},
+			{
+				"amountUsd": 2500000,
+				"date": "2024-08-12",
+				"stage": "Seed",
+				"kind": "round",
+				"leads": ["UpHonest Capital", "SOMA Capital"],
+				"sourceUrl": "https://startuprise.co.uk/cosine-secures-2-5-million-seed-funding/",
+				"sourceTitle": "Cosine secures $2.5 million seed funding",
+				"leadSourceUrl": "https://www.eu-startups.com/2024/08/london-based-cosine-raises-e2-2-million-to-deliver-autonomous-ai-software-developers/",
+				"leadSourceTitle": "Cosine raises €2.2 million for autonomous AI developers"
+			}
+		]
 	},
 	{
 		"id": "responsive",
@@ -1099,17 +1586,20 @@
 		"logoSource": "https://budibase.com/apple-touch-icon.png",
 		"valuation": null,
 		"tier": "Smaller names",
-		"funding": {
-			"amountUsd": 7000000,
-			"date": "2022-11-04",
-			"stage": "Seed II",
-			"kind": "round",
-			"sourceUrl": "https://budibase.com/blog/updates/budibase-raises-7m-to-help-every-company-on-the-planet-build-their-own-tools/",
-			"sourceTitle": "Budibase raises $7M to help every company build their own tools"
-		},
 		"descriptionSourceUrl": "https://budibase.com/",
 		"descriptionSourceTitle": "Budibase — Agents, Workflows & Internal Tools",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": 7000000,
+				"date": "2022-11-04",
+				"stage": "Seed II",
+				"kind": "round",
+				"sourceUrl": "https://budibase.com/blog/updates/budibase-raises-7m-to-help-every-company-on-the-planet-build-their-own-tools/",
+				"sourceTitle": "Budibase raises $7M to help every company build their own tools",
+				"leads": ["SignalFire"]
+			}
+		]
 	},
 	{
 		"id": "100ms",
@@ -1122,17 +1612,29 @@
 		"logoSource": "https://www.100ms.live/favicons/apple-touch-icon.png",
 		"valuation": null,
 		"tier": "Smaller names",
-		"funding": {
-			"amountUsd": 20000000,
-			"date": "2022-03-10",
-			"stage": "Series A",
-			"kind": "round",
-			"sourceUrl": "https://techcrunch.com/2022/03/10/100ms-secures-20m-to-power-next-generation-of-live-video-apps/",
-			"sourceTitle": "100ms secures $20M to power live video apps"
-		},
 		"descriptionSourceUrl": "https://www.100ms.live/",
 		"descriptionSourceTitle": "100ms — Live video infrastructure",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": 20000000,
+				"date": "2022-03-10",
+				"stage": "Series A",
+				"kind": "round",
+				"sourceUrl": "https://techcrunch.com/2022/03/10/100ms-secures-20m-to-power-next-generation-of-live-video-apps/",
+				"sourceTitle": "100ms secures $20M to power live video apps",
+				"leads": ["Alpha Wave Incubation"]
+			},
+			{
+				"amountUsd": 4500000,
+				"date": "2021-10-05",
+				"stage": "Seed",
+				"kind": "round",
+				"leads": ["Accel"],
+				"sourceUrl": "https://economictimes.indiatimes.com/tech/funding/100ms-raises-4-5-million-in-seed-funding-from-accel-others/articleshow/86775774.cms",
+				"sourceTitle": "100ms raises $4.5 million seed funding"
+			}
+		]
 	},
 	{
 		"id": "expand",
@@ -1176,17 +1678,29 @@
 		"valuation": null,
 		"note": "Still alive!",
 		"tier": "Smaller names",
-		"funding": {
-			"amountUsd": 13000000,
-			"date": "2023-06-13",
-			"stage": "Series A",
-			"kind": "round",
-			"sourceUrl": "https://www.replay.io/blog/replay-for-test-suites",
-			"sourceTitle": "Replay for Test Suites: $13M Series A announcement"
-		},
 		"descriptionSourceUrl": "https://www.replay.io/",
 		"descriptionSourceTitle": "Replay QA — AI wrote the app. Replay QA finds what broke.",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": 13000000,
+				"date": "2023-06-13",
+				"stage": "Series A",
+				"kind": "round",
+				"sourceUrl": "https://www.replay.io/blog/replay-for-test-suites",
+				"sourceTitle": "Replay for Test Suites: $13M Series A announcement",
+				"leads": ["IA Ventures"]
+			},
+			{
+				"amountUsd": 5700000,
+				"date": "2021-09-17",
+				"stage": "Seed",
+				"kind": "round",
+				"leads": ["Andreessen Horowitz"],
+				"sourceUrl": "https://www.gunder.com/en/news-insights/client-news/replay-raises-5-7m-series-seed-financing",
+				"sourceTitle": "Replay raises $5.7M Series Seed financing"
+			}
+		]
 	},
 	{
 		"id": "kepler-ai",
@@ -1225,14 +1739,26 @@
 		"descriptionSourceUrl": "https://www.flowengineering.com/",
 		"descriptionSourceTitle": "Flow — Requirements Tool for Agentic Teams",
 		"reviewedAt": "2026-09-17",
-		"funding": {
-			"amountUsd": 23000000,
-			"date": "2025-10-14",
-			"stage": "Series A",
-			"kind": "round",
-			"sourceUrl": "https://www.fenwick.com/insights/experience/fenwick-represents-flow-engineering-in-23m-series-a-funding",
-			"sourceTitle": "Fenwick represents Flow Engineering in $23M Series A funding"
-		}
+		"fundingRounds": [
+			{
+				"amountUsd": 23000000,
+				"date": "2025-10-14",
+				"stage": "Series A",
+				"kind": "round",
+				"sourceUrl": "https://www.fenwick.com/insights/experience/fenwick-represents-flow-engineering-in-23m-series-a-funding",
+				"sourceTitle": "Fenwick represents Flow Engineering in $23M Series A funding",
+				"leads": ["Sequoia Capital"]
+			},
+			{
+				"amountUsd": 8500000,
+				"date": "2022-12-06",
+				"stage": "Seed",
+				"kind": "round",
+				"leads": ["EQT Ventures"],
+				"sourceUrl": "https://www.flowengineering.com/blog/flow-engineering-raises-8-5-m",
+				"sourceTitle": "Flow Engineering raises $8.5M seed funding"
+			}
+		]
 	},
 	{
 		"id": "harbor",
@@ -1261,15 +1787,6 @@
 		"valuation": null,
 		"acquirer": "OpenAI",
 		"tier": "Done",
-		"funding": {
-			"amountUsd": null,
-			"date": "2026-03-19",
-			"dateLabel": "Disclosed Mar 2026; round date unavailable",
-			"stage": "Series B · amount undisclosed",
-			"kind": "round",
-			"sourceUrl": "https://astral.sh/blog/openai",
-			"sourceTitle": "Astral to join OpenAI"
-		},
 		"exit": {
 			"acquirerLogo": "/portfolio/acquirers/openai.png",
 			"acquirerLogoSource": "https://developers.openai.com/favicon.png",
@@ -1278,7 +1795,38 @@
 		},
 		"descriptionSourceUrl": "https://astral.sh/blog/openai",
 		"descriptionSourceTitle": "Astral to join OpenAI",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": null,
+				"date": "2026-03-19",
+				"dateLabel": "Disclosed Mar 2026; round date unavailable",
+				"stage": "Series B · amount undisclosed",
+				"kind": "round",
+				"sourceUrl": "https://astral.sh/blog/openai",
+				"sourceTitle": "Astral to join OpenAI",
+				"leads": ["Andreessen Horowitz"]
+			},
+			{
+				"amountUsd": 4000000,
+				"date": "2023-04-18",
+				"stage": "Seed",
+				"kind": "round",
+				"leads": ["Accel"],
+				"sourceUrl": "https://astral.sh/blog/announcing-astral-the-company-behind-ruff",
+				"sourceTitle": "Announcing Astral, the company behind Ruff"
+			},
+			{
+				"amountUsd": null,
+				"date": null,
+				"stage": "Series A · amount undisclosed",
+				"kind": "round",
+				"leads": ["Accel"],
+				"sourceUrl": "https://astral.sh/blog/openai",
+				"sourceTitle": "Astral to join OpenAI",
+				"dateLabel": "Disclosed Mar 2026; round date unavailable"
+			}
+		]
 	},
 	{
 		"id": "promptfoo",
@@ -1307,7 +1855,27 @@
 		},
 		"descriptionSourceUrl": "https://www.promptfoo.dev/",
 		"descriptionSourceTitle": "Promptfoo: Build secure AI applications",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": 18400000,
+				"date": "2025-07-29",
+				"stage": "Series A",
+				"kind": "round",
+				"leads": ["Insight Partners"],
+				"sourceUrl": "https://www.prnewswire.com/news-releases/promptfoo-raises-18-4-million-series-a-to-build-definitive-ai-security-stack-302513605.html",
+				"sourceTitle": "Promptfoo raises $18.4 million Series A"
+			},
+			{
+				"amountUsd": 5000000,
+				"date": "2024-07-23",
+				"stage": "Seed",
+				"kind": "round",
+				"leads": ["Andreessen Horowitz"],
+				"sourceUrl": "https://www.promptfoo.dev/blog/seed-announcement/",
+				"sourceTitle": "Promptfoo raises $5M to fix AI vulnerabilities"
+			}
+		]
 	},
 	{
 		"id": "gabber",
@@ -1358,14 +1926,17 @@
 		"descriptionSourceUrl": "https://clickup.com/blog/clickup-codegen-acquisition/",
 		"descriptionSourceTitle": "ClickUp + Codegen acquisition",
 		"reviewedAt": "2026-09-17",
-		"funding": {
-			"amountUsd": 16000000,
-			"date": "2023-11-16",
-			"stage": "Seed · before exit",
-			"kind": "round",
-			"sourceUrl": "https://techcrunch.com/2023/11/16/codegen-raises-new-capital-llm-automation-for-software-dev/",
-			"sourceTitle": "Codegen seed financing"
-		}
+		"fundingRounds": [
+			{
+				"amountUsd": 16000000,
+				"date": "2023-11-16",
+				"stage": "Seed · before exit",
+				"kind": "round",
+				"sourceUrl": "https://techcrunch.com/2023/11/16/codegen-raises-new-capital-llm-automation-for-software-dev/",
+				"sourceTitle": "Codegen seed financing",
+				"leads": ["Thrive Capital"]
+			}
+		]
 	},
 	{
 		"id": "brev",
@@ -1395,7 +1966,18 @@
 		},
 		"descriptionSourceUrl": "https://docs.nvidia.com/brev/concepts/overview",
 		"descriptionSourceTitle": "NVIDIA Brev: Core concepts",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": null,
+				"date": "2022-06",
+				"stage": "Pre-seed",
+				"kind": "round",
+				"leads": [],
+				"sourceUrl": "https://www.namaventures.com/silicon-valley-based-brev-dev-closes-a-pre-seed-round-by-nama-ventures/",
+				"sourceTitle": "Brev.dev closes a pre-seed round by Nama Ventures"
+			}
+		]
 	},
 	{
 		"id": "gel",
@@ -1409,14 +1991,6 @@
 		"valuation": null,
 		"acquirer": "Vercel",
 		"tier": "Done",
-		"funding": {
-			"amountUsd": 15000000,
-			"date": "2022-11-07",
-			"stage": "Series A",
-			"kind": "round",
-			"sourceUrl": "https://www.prnewswire.com/news-releases/edgedb-raises-15m-series-a-round-to-bring-its-modernized-relational-database-for-cutting-edge-apps-to-the-cloud-301669752.html",
-			"sourceTitle": "EdgeDB Raises $15M Series A Round"
-		},
 		"exit": {
 			"acquirerLogo": "/portfolio/acquirers/vercel.png",
 			"acquirerLogoSource": "https://assets.vercel.com/image/upload/q_auto/front/favicon/vercel/apple-touch-icon-180x180.png",
@@ -1425,7 +1999,28 @@
 		},
 		"descriptionSourceUrl": "https://www.geldata.com/blog/gel-joins-vercel",
 		"descriptionSourceTitle": "Gel joins Vercel",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": 15000000,
+				"date": "2022-11-07",
+				"stage": "Series A",
+				"kind": "round",
+				"sourceUrl": "https://www.prnewswire.com/news-releases/edgedb-raises-15m-series-a-round-to-bring-its-modernized-relational-database-for-cutting-edge-apps-to-the-cloud-301669752.html",
+				"sourceTitle": "EdgeDB Raises $15M Series A Round",
+				"leads": ["Nava Ventures", "Accel"]
+			},
+			{
+				"amountUsd": null,
+				"date": "2019",
+				"stage": "Seed",
+				"kind": "round",
+				"leads": ["Accel"],
+				"sourceUrl": "https://www.accel.com/news/our-continued-support-of-edgedb-the-modern-database-for-the-modern-developer",
+				"sourceTitle": "Accel: Continued support of EdgeDB",
+				"dateLabel": "2019; exact date unavailable"
+			}
+		]
 	},
 	{
 		"id": "dynamic",
@@ -1456,14 +2051,29 @@
 		"descriptionSourceUrl": "https://www.fireblocks.com/blog/fireblocks-acquires-dynamic",
 		"descriptionSourceTitle": "Fireblocks acquires Dynamic",
 		"reviewedAt": "2026-09-17",
-		"funding": {
-			"amountUsd": 13500000,
-			"date": "2023-12-13",
-			"stage": "Series A · before exit",
-			"kind": "round",
-			"sourceUrl": "https://a16zcrypto.com/posts/article/investing-in-dynamic-labs-again",
-			"sourceTitle": "a16z crypto: Investing again in Dynamic Labs"
-		}
+		"fundingRounds": [
+			{
+				"amountUsd": 13500000,
+				"date": "2023-12-13",
+				"stage": "Series A · before exit",
+				"kind": "round",
+				"sourceUrl": "https://a16zcrypto.com/posts/article/investing-in-dynamic-labs-again",
+				"sourceTitle": "a16z crypto: Investing again in Dynamic Labs",
+				"leads": ["a16z crypto"],
+				"leadSourceUrl": "https://www.dynamic.xyz/blog/series-a",
+				"leadSourceTitle": "Dynamic secures $13.5M in Series A funding"
+			},
+			{
+				"amountUsd": 7500000,
+				"date": "2022-06-28",
+				"stage": "Seed",
+				"kind": "round",
+				"leads": ["a16z crypto"],
+				"sourceUrl": "https://www.theblock.co/news/web3/2022-06-28-dynamic-web3-authentication-crypto-startup-raises-funding-a16z-154562",
+				"sourceTitle": "Dynamic raises $7.5 million seed funding",
+				"dateLabel": "Announced Jun 2022; closed Apr 2022"
+			}
+		]
 	},
 	{
 		"id": "begin",
@@ -1479,7 +2089,19 @@
 		"tier": "Done",
 		"descriptionSourceUrl": "https://www.sanity.io/blog/welcoming-the-begin-team-to-sanity",
 		"descriptionSourceTitle": "Begin team to join Sanity",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": null,
+				"date": "2018-03-07",
+				"stage": "Seed",
+				"kind": "round",
+				"leads": [],
+				"sourceUrl": "https://techcrunch.com/2018/03/07/begin-a-new-app-from-ryan-block-uses-natural-language-to-generate-tasks-from-your-slack/",
+				"sourceTitle": "Begin launches Slack task app",
+				"dateLabel": "Disclosed Mar 2018; round date unavailable"
+			}
+		]
 	},
 	{
 		"id": "dimension",
@@ -1492,17 +2114,20 @@
 		"logoSource": null,
 		"valuation": null,
 		"tier": "Done",
-		"funding": {
-			"amountUsd": 350000,
-			"dateLabel": "Jan 2025 profile",
-			"date": "2025-01-01",
-			"stage": "Total disclosed funding",
-			"kind": "total",
-			"sourceUrl": "https://techcrunch.com/startup-battlefield/company/dimension/",
-			"sourceTitle": "Dimension — TechCrunch Startup Battlefield"
-		},
 		"descriptionSourceUrl": "https://techcrunch.com/startup-battlefield/company/dimension/",
 		"descriptionSourceTitle": "Dimension: Startup Battlefield profile",
-		"reviewedAt": "2026-09-17"
+		"reviewedAt": "2026-09-17",
+		"fundingRounds": [
+			{
+				"amountUsd": 350000,
+				"dateLabel": "Jan 2025 profile",
+				"date": "2025-01-01",
+				"stage": "Total disclosed funding",
+				"kind": "total",
+				"sourceUrl": "https://techcrunch.com/startup-battlefield/company/dimension/",
+				"sourceTitle": "Dimension — TechCrunch Startup Battlefield",
+				"leads": []
+			}
+		]
 	}
 ]
