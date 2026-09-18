@@ -66,11 +66,31 @@ test('combined facets and pagination retain vocabulary', () => {
 	assert.equal(r.total, 1);
 	assert.equal(r.results[0].url, 'https://example.com/cfp-tips');
 	assert(r.years.includes('2020'));
-	assert(r.tags.includes('Speaking'));
+	assert(r.tags.includes('speaking'));
 	const first = search('', { limit: '2' }),
 		second = search('', { limit: '2', page: '2' });
 	assert.equal(first.total, second.total);
 	assert(!first.results.some((x) => second.results.some((y) => y.id === x.id)));
+});
+test('topic filters combine article, podcast and talk topics without case duplicates', () => {
+	const mixed = createSearchIndex(
+		projectSearchCatalog([
+			{ title: 'Article', slug: 'article-ai', tags: ['ai'] },
+			{ title: 'Podcast', category: 'podcast', url: 'https://example.com/ai', tags: [' AI '] },
+			{
+				title: 'Talk',
+				category: 'talk',
+				instances: [{ video: 'https://example.com/talk' }],
+				categories: ['AI', 'ai'],
+				tags: ['Tools']
+			}
+		])
+	);
+	const result = searchCatalog(mixed, parseSearchParams(new URLSearchParams({ tag: 'AI' })));
+	assert.equal(result.total, 3);
+	assert.deepEqual(result.results.map((r) => r.type).sort(), ['article', 'podcast', 'talk']);
+	assert.deepEqual(result.tags, ['ai', 'tools']);
+	assert.deepEqual(result.results.find((r) => r.type === 'talk').tags, ['tools', 'ai']);
 });
 test('invalid bounds rejected and changed records rebuild derived index', () => {
 	for (const params of [
