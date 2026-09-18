@@ -24,6 +24,7 @@
 	let tier = '';
 	let status = '';
 	let sort = '';
+	let compact = true;
 	$: categories = [...new Set(data.companies.map((company) => company.category))].sort();
 	$: companies = filterPortfolio(data.companies, { query, category, tier, status, sort });
 	$: hasFilters = Boolean(query || category || tier || status || sort);
@@ -38,7 +39,7 @@
 
 <SocialMeta {...social} />
 
-<article class="site-shell portfolio-page">
+<article class="site-shell portfolio-page" class:compact>
 	<header class="portfolio-intro">
 		<p class="eyebrow">The people building what’s next</p>
 		<h1>Advising &amp; investing</h1>
@@ -100,10 +101,17 @@
 					<option value="">Original order</option>
 					<option value="name">Name: A–Z</option>
 					<option value="valuation">Valuation: high–low</option>
+					<option value="valuation-asc">Valuation: low–high</option>
 				</select>
 			</label>
 		</form>
 		<div class="directory-meta">
+			<button
+				type="button"
+				class="view-toggle"
+				aria-pressed={!compact}
+				on:click={() => (compact = !compact)}>{compact ? 'Detailed view' : 'Compact view'}</button
+			>
 			<p role="status" aria-live="polite">{companies.length} of {data.companies.length} entries</p>
 			{#if hasFilters}<button type="button" on:click={resetFilters}>Reset filters</button>{/if}
 			<p class="review-date">
@@ -125,7 +133,27 @@
 					<th role="columnheader" scope="col">What they do</th>
 					<th role="columnheader" scope="col">Category</th>
 					<th role="columnheader" scope="col">Status / tier</th>
-					<th role="columnheader" scope="col" class="valuation-column">Last public valuation</th>
+					<th
+						role="columnheader"
+						scope="col"
+						class="valuation-column"
+						aria-sort={sort === 'valuation'
+							? 'descending'
+							: sort === 'valuation-asc'
+								? 'ascending'
+								: 'none'}
+					>
+						<button
+							type="button"
+							class="valuation-sort"
+							on:click={() => (sort = sort === 'valuation' ? 'valuation-asc' : 'valuation')}
+							aria-label={`Sort by valuation: ${sort === 'valuation' ? 'low to high' : 'high to low'}`}
+						>
+							Last public valuation <span aria-hidden="true"
+								>{sort === 'valuation' ? '↓' : sort === 'valuation-asc' ? '↑' : '↕'}</span
+							>
+						</button>
+					</th>
 				</tr>
 			</thead>
 			<!-- svelte-ignore a11y_no_redundant_roles (preserve table semantics with mobile CSS grid) -->
@@ -136,7 +164,7 @@
 						<th role="rowheader" scope="row" class="company-cell">
 							<div class="company-identity">
 								{#if company.status === 'exited' && company.exit}
-									<PortfolioExitMark {company} />
+									<PortfolioExitMark {company} {compact} />
 								{:else}
 									<div class="company-logo" aria-hidden="true">
 										{#if company.logo}
@@ -168,15 +196,17 @@
 							</div>
 						</th>
 						<td role="cell" class="description-cell">
-							{company.description}
+							<span class="company-description" title={compact ? company.description : undefined}
+								>{company.description}</span
+							>
 							{#if company.descriptionSourceUrl}<a
 									class="related-link"
 									href={company.descriptionSourceUrl}
 									title={company.descriptionSourceTitle}
 									aria-label={`${company.name}: ${company.descriptionSourceTitle}`}>Source&nbsp;↗</a
 								>{/if}
-							{#if company.note}<span class="company-note">{company.note}</span>{/if}
-							{#if company.relatedUrl}<a
+							{#if !compact && company.note}<span class="company-note">{company.note}</span>{/if}
+							{#if !compact && company.relatedUrl}<a
 									class="related-link"
 									href={company.relatedUrl}
 									aria-label={`More on ${company.name}`}>More ↗</a
@@ -194,7 +224,7 @@
 									href={company.exit.sourceUrl}
 									title={company.exit.sourceTitle}
 									aria-label={`${company.name} → ${company.acquirer}: ${company.exit.sourceTitle}`}
-									>Read announcement ↗</a
+									>{compact ? 'Announcement ↗' : 'Read announcement ↗'}</a
 								>
 							{:else}
 								<span class="tier-label">{company.tier}</span>
@@ -212,7 +242,7 @@
 								<a
 									class="valuation-value"
 									href={company.valuation.sourceUrl}
-									title={company.valuation.sourceTitle}
+									title={`${company.valuation.sourceTitle}${company.valuation.qualifier ? ` · ${company.valuation.qualifier}` : ''}`}
 									aria-label={`${company.name}: ${formatPortfolioValuation(company.valuation)}. ${company.valuation.sourceTitle}`}
 								>
 									{formatPortfolioValuation(company.valuation)}
@@ -222,7 +252,9 @@
 									>{company.valuation.dateLabel ??
 										formatValuationDate(company.valuation.date)}</time
 								>
-								{#if company.valuation.qualifier}<small>{company.valuation.qualifier}</small>{/if}
+								{#if !compact && company.valuation.qualifier}<small
+										>{company.valuation.qualifier}</small
+									>{/if}
 							{:else}
 								<span class="unavailable"
 									>{company.status === 'individual'
@@ -234,9 +266,10 @@
 								<PortfolioFundingHistory
 									rounds={company.fundingRounds}
 									companyName={company.name}
+									expanded={!compact}
 								/>
 							{/if}
-							{#if company.valuationRumor}
+							{#if !compact && company.valuationRumor}
 								<a
 									class="funding-link rumor-link"
 									href={company.valuationRumor.sourceUrl}
@@ -306,6 +339,34 @@
 </article>
 
 <style>
+	.valuation-sort {
+		color: inherit;
+		font: inherit;
+		font-weight: 600;
+		text-decoration: none;
+	}
+	.valuation-sort:hover {
+		color: var(--page-link);
+		text-decoration: underline;
+	}
+	.view-toggle {
+		font-weight: 600;
+	}
+	.compact tbody th,
+	.compact td {
+		padding-block: 0.65rem;
+	}
+	.compact .company-description {
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+		overflow: hidden;
+	}
+	.compact .portfolio-intro {
+		margin-bottom: 1.75rem;
+	}
+
 	.portfolio-page {
 		--site-max-width: 1160px;
 		margin-block: 2.5rem 4rem;
@@ -642,6 +703,13 @@
 		}
 	}
 	@media (max-width: 700px) {
+		.compact tbody th,
+		.compact td {
+			padding: 0;
+		}
+		.compact tbody tr {
+			padding-block: 0.85rem;
+		}
 		.portfolio-page {
 			margin-top: 1.75rem;
 		}

@@ -38,8 +38,13 @@ export function filterPortfolio(
 		);
 	});
 	if (sort === 'name') result.sort((a, b) => a.name.localeCompare(b.name, 'en-US'));
-	if (sort === 'valuation')
-		result.sort((a, b) => (b.valuation?.amountUsd ?? -1) - (a.valuation?.amountUsd ?? -1));
+	if (sort === 'valuation' || sort === 'valuation-asc')
+		result.sort((a, b) => {
+			if (!a.valuation) return b.valuation ? 1 : 0;
+			if (!b.valuation) return -1;
+			const difference = a.valuation.amountUsd - b.valuation.amountUsd;
+			return sort === 'valuation-asc' ? difference : -difference;
+		});
 	return result;
 }
 
