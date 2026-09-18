@@ -1,6 +1,6 @@
 # Portfolio public research — September 17, 2026
 
-Complete review of 59 companies and two individual backings. Each company received an exact-identity product check and financing/valuation search. This audit supersedes the August 26 review; previous notes remain historical. No private investment records were used.
+Complete review of 59 companies and two individual backings. Each company received an exact-identity product check and financing/valuation search. This audit supersedes the August 26 review; previous notes remain historical. The published catalog uses public supporting links.
 
 Company announcements and original reporting are preferred. Funding is distinct from valuation; older marks remain dated, database marks remain labeled, and Forge COI estimates are approximate. Acquisition prices, modeled enterprise values, unrelated entities are excluded from valuation marks. Uncompleted fundraising talks appear separately as rumors and do not affect sorting. A missing mark is unavailable, never zero.
 
@@ -300,12 +300,12 @@ Public product positioning refreshed. Existing dated financing evidence rechecke
 
 Public product positioning refreshed. Existing dated financing evidence rechecked; no newer company valuation verified.
 
-## Polyhive
+## Spectral Labs (formerly Polyhive)
 
-- [Description source](https://www.soma-demoday.com/).
+- [Description source and SGS-1 launch](https://www.spectrallabs.ai/research/SGS-1).
 - Valuation: no public figure verified.
 
-Historical product source only; current operations and public financing could not be verified.
+The formerly limited Polyhive entry now reflects Spectral Labs and its engineering CAD models. SGS-1 launched publicly on September 15, 2025. Private investor financing details are excluded from the public catalog.
 
 ## Sailplane
 
