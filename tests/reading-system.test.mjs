@@ -51,8 +51,11 @@ test('both reading themes have readable normal text and input boundaries', () =>
 
 test('essays use bounded serif prose with intact metadata and content', () => {
 	const article = source('src/routes/[slug]/+page.svelte');
-	assert.match(css, /--reading-max-width: 40\.5rem/);
-	assert.match(css, /\.reading-prose\s*\{[^}]*1\.125rem\/1\.75 var\(--font-reading\)/);
+	assert.match(css, /--reading-max-width: 42\.5rem/);
+	assert.match(
+		css,
+		/\.reading-prose\s*\{[^}]*var\(--reading-font-size\)\/1\.65 var\(--font-reading\)/
+	);
 	assert.match(article, /--content: minmax\(0, min\(72ch, var\(--reading-max-width\)\)\)/);
 	assert.match(article, /class="article-header"/);
 	assert.match(article, /href="\/ideas">← All writing/);

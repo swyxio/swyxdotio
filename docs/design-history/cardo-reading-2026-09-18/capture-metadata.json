@@ -1,0 +1,74 @@
+[
+  {
+    "name": "desktop",
+    "headingWeight": "700",
+    "height": 899,
+    "overflow": false,
+    "theme": "",
+    "tocOpen": "true",
+    "width": 1440
+  },
+  {
+    "name": "phone",
+    "headingWeight": "700",
+    "height": 843,
+    "overflow": false,
+    "theme": "",
+    "tocOpen": "false",
+    "width": 390
+  },
+  {
+    "name": "tablet",
+    "headingWeight": "700",
+    "height": 1194,
+    "overflow": false,
+    "theme": "",
+    "tocOpen": "true",
+    "width": 834
+  },
+  {
+    "name": "split",
+    "headingWeight": "700",
+    "height": 899,
+    "overflow": false,
+    "theme": "",
+    "tocOpen": "true",
+    "width": 720
+  },
+  {
+    "name": "desktop",
+    "headingWeight": "700",
+    "height": 899,
+    "overflow": false,
+    "theme": "dark",
+    "tocOpen": "true",
+    "width": 1440
+  },
+  {
+    "name": "phone",
+    "headingWeight": "700",
+    "height": 843,
+    "overflow": false,
+    "theme": "dark",
+    "tocOpen": "false",
+    "width": 390
+  },
+  {
+    "name": "tablet",
+    "headingWeight": "700",
+    "height": 1194,
+    "overflow": false,
+    "theme": "dark",
+    "tocOpen": "true",
+    "width": 834
+  },
+  {
+    "name": "split",
+    "headingWeight": "700",
+    "height": 899,
+    "overflow": false,
+    "theme": "dark",
+    "tocOpen": "true",
+    "width": 720
+  }
+]

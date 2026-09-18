@@ -418,13 +418,12 @@
 	}
 	h1 {
 		grid-column: 1 / -1;
-		font: 600 clamp(2rem, 4vw, 2.75rem)/1.12 var(--font-display);
+		font: 600 clamp(1.875rem, 4vw, 2.25rem)/1.2 var(--font-display);
 		letter-spacing: -0.035em;
 		margin-bottom: 0.4rem;
 	}
 	.intro-copy {
-		font-size: 1rem;
-		line-height: 1.6;
+		font: 400 var(--reading-font-size)/1.65 var(--font-reading);
 	}
 	.investing-context {
 		border: 0;
@@ -452,8 +451,7 @@
 	}
 	.investing-context p {
 		margin-top: 0.7rem;
-		font-size: 1rem;
-		line-height: 1.65;
+		font: 400 var(--reading-font-size)/1.65 var(--font-reading);
 	}
 	h2 {
 		font: 600 1.5rem var(--font-display);

@@ -120,11 +120,11 @@
 		text-underline-offset: 0.2em;
 	}
 	.version-text {
-		font: 400 1.125rem/1.65 var(--font-reading);
+		font: 400 var(--reading-font-size)/1.65 var(--font-reading);
 		color: var(--page-text);
 	}
 	.version-text p {
-		margin: 0 0 1em;
+		margin: 0 0 1.3em;
 	}
 	.version-text p:last-child {
 		margin-bottom: 0;
