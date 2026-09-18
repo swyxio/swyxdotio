@@ -2,7 +2,7 @@
 // Replaces the old mdsvex + remark/rehype pipeline with `marked` + `shiki`.
 // Output is a trusted HTML string consumed via {@html ...} in the post page.
 import { Marked } from 'marked';
-import { gfmHeadingId } from 'marked-gfm-heading-id';
+import { headingIds } from './heading-ids.js';
 import { createHighlighter } from 'shiki';
 import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
 import { GH_USER_REPO } from './siteConfig.js';
@@ -166,14 +166,11 @@ const shikiWalk = {
 
 function createRenderer() {
 	const marked = new Marked({ gfm: true, breaks: false });
-	marked.use(gfmHeadingId());
+	marked.use(headingIds());
 	marked.use({ extensions: [shortcodeExtension, ghIssueExtension, ghMentionExtension] });
 	marked.use(shikiWalk);
 	return marked;
 }
-
-/** @type {Marked | undefined} */
-let _marked;
 
 /**
  * Render a markdown string to a trusted HTML string.
@@ -181,8 +178,7 @@ let _marked;
  * @returns {Promise<string>}
  */
 export async function renderMarkdown(md) {
-	if (!_marked) _marked = createRenderer();
-	const html = await _marked.parse(md ?? '');
+	const html = await createRenderer().parse(md ?? '');
 	// Build navigation from the rendered IDs so duplicate headings and existing
 	// fragment links use exactly the same destinations as the article.
 	const headings = [...html.matchAll(/^<h([1-6]) id="([^"]+)">([\s\S]*?)<\/h\1>/gm)];

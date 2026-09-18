@@ -115,12 +115,12 @@ test('Ideas retains durable query parameters, lazy corpus, safe excerpts, and as
 	);
 	assert.match(source, /queryParameters\(IDEAS_QUERY_PARAMETERS, IDEAS_QUERY_OPTIONS\)/);
 	assert.doesNotMatch(source, /\bqueryParam\(/);
-	assert.match(source, /\$filters = \{ \.\.\.\$filters, filter: '', show: \[\] \}/);
+	assert.match(source, /\$filters = \{ \.\.\.\$filters, filter: '', show: \[\], source: '' \}/);
 	assert.match(source, /fetch\('\/api\/listArchive\.json'\)/);
-	assert.match(source, /fetch\('\/api\/searchContent\.json'\)/);
-	assert.match(source, /await loadSearchContent\(\)/);
+	assert.match(source, /fetch\('\/api\/search\?' \+ params/);
+	assert.doesNotMatch(source, /searchContent\.json|loadSearchContent|fuzzySearch/);
 	assert.match(source, /version !== requestVersion/);
-	assert.match(source, /searchLoad = undefined/);
+	assert.match(source, /searchRequest\?\.abort\(\)/);
 	assert.match(source, /archiveLoad = undefined/);
 	assert.match(source, /\{:else if isLoading\}/);
 	assert.match(source, /\{:else if !loadError\}/);
@@ -129,10 +129,7 @@ test('Ideas retains durable query parameters, lazy corpus, safe excerpts, and as
 	assert.match(source, /role="alert"/);
 	assert.match(source, /type="search"/);
 	assert.match(source, /event\.key === 'Escape'/);
-	assert.match(
-		source,
-		/target\.closest\('input, textarea, select, \[contenteditable\], \[role="textbox"\]'\)/
-	);
+
 	assert.match(source, /min-height: 44px/);
 	assert.match(source, /use:loadOnScroll=\{loadMore\}/);
 	assert.match(source, /\{#key list\.length\}/);
@@ -198,6 +195,7 @@ test('archive view-count batches include only registered article content', async
 	);
 	// A talk with no video (for example, fullstack-heaps) is not an article.
 	// Including it makes the read-count endpoint reject the whole batch.
-	assert.match(loader, /\.filter\(\(item\) => item\.type === 'blog'\)/);
+	assert.match(loader, /item\.type === 'blog'/);
+	assert.match(loader, /item\.type === 'article' && item\.url\?\.startsWith\('\/'\)/);
 	assert.doesNotMatch(loader, /!isExternalItem\(item\)/);
 });

@@ -46,11 +46,9 @@
 	/** @type {import('./$types').PageData} */
 	export let data;
 
-	// List metadata stays small; full article bodies are fetched only when search is used.
+	// Search returns bounded passages from the shared server index.
 	/** @type {ArchiveItem[]} */
 	let archiveItems = /** @type {ArchiveItem[]} */ (data.items);
-	/** @type {ArchiveItem[]} */
-	let searchableItems = [];
 
 	const filters = queryParameters(IDEAS_QUERY_PARAMETERS, IDEAS_QUERY_OPTIONS);
 
@@ -77,7 +75,7 @@
 			return;
 		if (event.key === 'Escape' && event.target === inputEl) {
 			event.preventDefault();
-			if ($filters.filter) $filters.filter = '';
+			if ($filters.filter || $filters.source) clearSearch();
 			else inputEl?.blur();
 			return;
 		}
@@ -85,10 +83,6 @@
 
 	const initialCount = data.totalCount ?? data.items.length;
 	let archiveLoaded = archiveItems.length >= initialCount;
-	/** @type {((items: ArchiveItem[], categories: string[] | null, query: string | null) => Promise<ArchiveItem[]>) | undefined} */
-	let searchFn;
-	/** @type {typeof import('$lib/ideas-search-snippet').createIdeasSearchSnippet | undefined} */
-	let createSnippet;
 	/** @type {Promise<void> | undefined} */
 	let archiveLoad;
 	function loadArchiveItems() {
@@ -109,30 +103,6 @@
 		return archiveLoad;
 	}
 
-	/** @type {Promise<void> | undefined} */
-	let searchLoad;
-	function loadSearchContent() {
-		if (searchLoad) return searchLoad;
-		searchLoad = Promise.all([
-			import('./fuzzySearch'),
-			import('$lib/ideas-search-snippet'),
-			fetch('/api/searchContent.json')
-		])
-			.then(async ([fuzzy, snippets, res]) => {
-				if (!res.ok) throw new Error(`failed to load search content (${res.status})`);
-				const content = await res.json();
-				if (!Array.isArray(content)) throw new Error('Search content is unavailable');
-				searchableItems = /** @type {ArchiveItem[]} */ (content);
-				searchFn = /** @type {NonNullable<typeof searchFn>} */ (fuzzy.fuzzySearch);
-				createSnippet = snippets.createIdeasSearchSnippet;
-			})
-			.catch((error) => {
-				searchLoad = undefined;
-				throw error;
-			});
-		return searchLoad;
-	}
-
 	/** @type {ArchiveRow[]} */
 	let list = $filters.filter || $filters.show?.length ? [] : withIdeasYearHeadings(archiveItems);
 	let totalResults = initialCount;
@@ -142,10 +112,17 @@
 	let loadError = '';
 	let requestVersion = 0;
 	let previousFilters = '';
+	let searchTotal = 0;
+	/** @type {string[]} */
+	let searchSources = [];
+	/** @type {Record<string,number>} */
+	let sourceCounts = {};
+	/** @type {AbortController | undefined} */
+	let searchRequest;
 	$: query = $filters.filter?.trim() ?? '';
-	$: filterKey = JSON.stringify([query, $filters.show]);
+	$: filterKey = JSON.stringify([query, $filters.show, $filters.source]);
 	$: if (filterKey) visibleCount = pageSize;
-	$: if (browser) void updateResults(query, $filters.show ?? [], visibleCount);
+	$: if (browser) void updateResults(query, $filters.show ?? [], visibleCount, $filters.source);
 
 	function loadMore() {
 		if (isLoading || loadError || list.length >= totalResults) return;
@@ -159,21 +136,53 @@
 	 * @param {string} searchText
 	 * @param {string[]} categories
 	 * @param {number} limit
+	 * @param {string} [source]
 	 */
-	async function updateResults(searchText, categories, limit) {
+	async function updateResults(searchText, categories, limit, source = $filters.source) {
 		const version = ++requestVersion;
-		const filters = JSON.stringify([searchText, categories]);
+		searchRequest?.abort();
+		if (searchText || source) {
+			await new Promise((resolve) => setTimeout(resolve, 150));
+			if (version !== requestVersion) return;
+		}
+		const filters = JSON.stringify([searchText, categories, source]);
 		if (filters !== previousFilters && (searchText || categories.length)) list = [];
 		previousFilters = filters;
 		loadError = '';
-		isLoading = Boolean(searchText || categories.length || limit > archiveItems.length);
+		isLoading = Boolean(searchText || source || categories.length || limit > archiveItems.length);
 		try {
 			/** @type {ArchiveItem[]} */
 			let results;
-			if (searchText) {
-				await loadSearchContent();
-				if (!searchFn) throw new Error('Search is unavailable');
-				results = await searchFn(searchableItems, categories, searchText);
+			if (searchText || source) {
+				searchRequest?.abort();
+				searchRequest = new AbortController();
+				const params = new URLSearchParams({
+					q: searchText,
+					source,
+					scope: 'content',
+					categories: categories.join(','),
+					limit: '100'
+				});
+				results = [];
+				for (let page = 1; results.length < limit; page++) {
+					params.set('page', String(page));
+					const response = await fetch('/api/search?' + params, { signal: searchRequest.signal });
+					if (!response.ok) throw new Error('Search unavailable');
+					const found = await response.json();
+					if (version !== requestVersion) return;
+					searchTotal = found.total;
+					searchSources = found.sources;
+					sourceCounts = found.sourceCounts;
+					results.push(
+						...found.results.map(
+							(/** @type {import('$lib/site-search').SearchResult} */ result) => ({
+								...result,
+								searchSnippet: result.snippetParts
+							})
+						)
+					);
+					if (results.length >= found.total) break;
+				}
 			} else {
 				if (categories.length || limit > archiveItems.length) await loadArchiveItems();
 				const categoryNames = categories.map((category) => category.toLowerCase());
@@ -183,15 +192,12 @@
 			}
 			if (version !== requestVersion) return;
 			totalResults =
-				searchText || categories.length || archiveLoaded ? results.length : initialCount;
-			list = withIdeasYearHeadings(results.slice(0, limit), !searchText).map((item) =>
-				searchText
-					? {
-							...item,
-							searchSnippet: createSnippet?.(item.content || item.description || '', searchText)
-						}
-					: item
-			);
+				searchText || source
+					? searchTotal
+					: categories.length || archiveLoaded
+						? results.length
+						: initialCount;
+			list = withIdeasYearHeadings(results.slice(0, limit), !(searchText || source));
 		} catch (error) {
 			if (version !== requestVersion) return;
 			loadError = searchText
@@ -205,15 +211,17 @@
 
 	function clearSearch() {
 		$filters.filter = '';
+		$filters.source = '';
 		inputEl?.focus();
 	}
 
 	function clearFilters() {
-		$filters = { ...$filters, filter: '', show: [] };
+		$filters = { ...$filters, filter: '', show: [], source: '' };
 	}
 
 	/** @param {ArchiveItem} item */
 	function itemHref(item) {
+		if (item.url) return item.url;
 		if (item.category === 'talk' && item.instances?.[0]?.video) return item.instances[0].video;
 		return item.category === 'podcast' && item.url ? item.url : `/${item.slug}`;
 	}
@@ -221,6 +229,7 @@
 	/** @param {ArchiveItem} item */
 	function isExternalItem(item) {
 		return (
+			item.url?.startsWith('http') ||
 			(item.category === 'podcast' && !!item.url) ||
 			(item.category === 'talk' && !!item.instances?.[0]?.video)
 		);
@@ -228,18 +237,21 @@
 
 	/** @param {ArchiveItem} item */
 	function itemDate(item) {
-		return new Date(item.date).toISOString().slice(0, 10);
+		const date = new Date(item.date);
+		return Number.isNaN(+date) ? '' : date.toISOString().slice(0, 10);
 	}
 
 	/** @param {ArchiveItem} item */
 	function shortDate(item) {
 		const date = new Date(item.date);
-		return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
+		return Number.isNaN(+date)
+			? 'Undated'
+			: date.toLocaleDateString('en-US', { month: 'short', day: '2-digit', timeZone: 'UTC' });
 	}
 
 	/** @param {ArchiveItem} item */
 	function yearOf(item) {
-		return new Date(item.date).getFullYear();
+		return new Date(item.date).getUTCFullYear();
 	}
 
 	/** @param {ArchiveItem[]} visibleItems */
@@ -249,7 +261,9 @@
 			...new Set(
 				visibleItems
 					// Speaking entries without a video are still not registered article counters.
-					.filter((item) => item.type === 'blog')
+					.filter(
+						(item) => item.type === 'blog' || (item.type === 'article' && item.url?.startsWith('/'))
+					)
 					.map((item) => item.slug)
 					.filter((slug) => slug && !requestedReadKeys.has(slug))
 			)
@@ -383,6 +397,17 @@
 					</label>
 				{/each}
 			</fieldset>
+			{#if query || $filters.source}
+				<label class="source-filter"
+					>Source
+					<select bind:value={$filters.source}>
+						<option value="">All sources</option>
+						{#each searchSources as domain}<option value={domain}
+								>{domain} ({sourceCounts[domain] || 0})</option
+							>{/each}
+					</select>
+				</label>
+			{/if}
 		</div>
 
 		{#if !query && !$filters.show?.length}
@@ -526,6 +551,24 @@
 </div>
 
 <style>
+	.source-filter {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		font: 400 13px var(--font-body);
+		color: var(--page-muted);
+	}
+	.source-filter select {
+		min-height: 44px;
+		max-width: 100%;
+		border: 1px solid var(--page-border);
+		border-radius: 6px;
+		background: var(--page-surface);
+		color: var(--page-text);
+		padding: 8px 12px;
+		font: 400 14px var(--font-body);
+	}
+
 	.ideas-stage {
 		overflow-x: clip;
 	}

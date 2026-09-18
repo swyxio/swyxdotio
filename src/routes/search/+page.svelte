@@ -5,10 +5,11 @@
 	let query = data.q,
 		type = data.type,
 		year = data.year,
-		tag = data.tag;
+		tag = data.tag,
+		source = data.source;
 	let currentData = data;
 	let navigationDraft: string | null = null;
-	const draft = () => JSON.stringify([query, type, year, tag]);
+	const draft = () => JSON.stringify([query, type, year, tag, source]);
 	beforeNavigate(() => {
 		navigationDraft = draft();
 	});
@@ -19,6 +20,7 @@
 			type = data.type;
 			year = data.year;
 			tag = data.tag;
+			source = data.source;
 		}
 		currentData = data;
 		navigationDraft = null;
@@ -29,6 +31,7 @@
 			type: data.type,
 			year: data.year,
 			tag: data.tag,
+			source: data.source,
 			page: String(page)
 		});
 		return `/search?${params}`;
@@ -85,6 +88,13 @@
 						>{/if}</select
 				></label
 			>
+			<label
+				>Source<select name="source" bind:value={source}
+					><option value="">All sources</option>{#each data.sources as domain}<option value={domain}
+							>{domain} ({data.sourceCounts[domain || ''] || 0})</option
+						>{/each}</select
+				></label
+			>
 		</div>
 	</form>
 	{#if data.unavailable}
@@ -92,7 +102,11 @@
 		<ul class="complete-results">
 			{#each COMMON_DESTINATIONS as result}<li>
 					<a href={result.url}>{result.title}</a>
-					<p>{result.snippet}</p>
+					<p>
+						{#if result.snippetParts}{#each result.snippetParts as part}{#if part.matched}<mark
+										>{part.text}</mark
+									>{:else}{part.text}{/if}{/each}{:else}{result.snippet}{/if}
+					</p>
 				</li>{/each}
 		</ul>
 	{:else}
@@ -104,7 +118,11 @@
 			{#each data.results as result (result.id)}<li>
 					<a href={result.url}>{result.title}</a><span
 						>{result.type}{result.year ? ` · ${result.year}` : ''}</span
-					>{#if result.snippet}<p>{result.snippet}</p>{/if}
+					>{#if result.section}<p class="section">↳ {result.section}</p>{/if}{#if result.snippet}<p>
+							{#if result.snippetParts}{#each result.snippetParts as part}{#if part.matched}<mark
+											>{part.text}</mark
+										>{:else}{part.text}{/if}{/each}{:else}{result.snippet}{/if}
+						</p>{/if}
 				</li>{/each}
 		</ul>
 		{#if !data.total}<p>Try a broader phrase or clear a filter.</p>{/if}
@@ -163,7 +181,7 @@
 	}
 	.facets {
 		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
+		grid-template-columns: repeat(4, minmax(0, 1fr));
 		gap: 12px;
 		margin-top: 12px;
 	}
@@ -229,7 +247,7 @@
 			font-size: 30px;
 		}
 		.facets {
-			grid-template-columns: 1fr;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
 		}
 		.search-page {
 			padding-block: 24px;

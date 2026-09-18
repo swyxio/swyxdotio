@@ -1,3 +1,5 @@
+import { dev } from '$app/environment';
+import { semanticMatches, scheduleEmbeddingWarmup } from './search-embeddings.js';
 import redirectSource from '../../../_redirects?raw';
 import { listAllContent } from '../list-all-content.js';
 import {
@@ -18,9 +20,13 @@ export async function loadSiteSearch(fetch, platform, params) {
 		pending = listAllContent(fetch, platform).finally(() => {
 			pending = undefined;
 		});
-	const records = projectSearchCatalog(await pending, redirects);
+	const items = await pending;
+	const records = projectSearchCatalog(items, redirects);
 	const indexed = performance.now();
-	const result = searchCatalog(cachedSearchIndex(records), params);
+	const catalog = cachedSearchIndex(records, items);
+	const semantic = await semanticMatches(catalog, dev ? undefined : platform, params.q);
+	const result = searchCatalog(catalog, params, semantic);
+	if (!dev && params.q) scheduleEmbeddingWarmup(catalog, platform);
 	return {
 		...result,
 		timing: {

@@ -7,6 +7,11 @@ export const IDEAS_QUERY_PARAMETERS = {
 		decode: (value) => value ?? '',
 		defaultValue: ''
 	},
+	source: {
+		encode: (/** @type {string} */ value) => value || undefined,
+		decode: (/** @type {string|null} */ value) => value ?? '',
+		defaultValue: ''
+	},
 	show: {
 		/** @param {string[] | null} values */
 		encode: (values) => (values?.length ? values.join(',') : undefined),

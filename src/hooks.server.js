@@ -78,8 +78,7 @@ export async function handle({ event, resolve }) {
 	if (cacheUrl.pathname.startsWith('/og/')) cacheUrl.search = '';
 	if (
 		cacheUrl.pathname === '/api/listContent.json' ||
-		cacheUrl.pathname === '/api/latestPosts.json' ||
-		cacheUrl.pathname === '/api/searchContent.json'
+		cacheUrl.pathname === '/api/latestPosts.json'
 	) {
 		cacheUrl.search = '';
 	}

@@ -116,7 +116,7 @@ declare namespace App {
 			};
 			CONTENT_MANIFEST?: {
 				get(key: string): Promise<string | null>;
-				put(key: string, value: string): Promise<void>;
+				put(key: string, value: string, options?: { expirationTtl?: number }): Promise<void>;
 			};
 			READ_COUNTERS?: D1Database;
 			READ_IP_RATE_LIMITER?: RateLimit;

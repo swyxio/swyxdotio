@@ -119,8 +119,7 @@ export async function POST({ request, platform, fetch }) {
 		'/llms.txt',
 		'/llms.md',
 		'/api/listContent.json',
-		'/api/latestPosts.json',
-		'/api/searchContent.json'
+		'/api/latestPosts.json'
 	];
 	if (slug) {
 		paths.push(`/${slug}`, `/${slug}.md`, `/api/ideas/${slug}.json`);
