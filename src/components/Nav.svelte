@@ -194,7 +194,7 @@
 		align-items: center;
 		gap: 0.25rem;
 		font-size: 0.875rem;
-		font-family: Georgia, serif;
+		font-family: var(--font-body);
 	}
 
 	.nav-links :global(a),

@@ -205,9 +205,9 @@
 	}
 
 	.article-header {
-		margin-bottom: 1.5rem;
+		margin-bottom: 1.75rem;
 		border-bottom: 1px solid var(--page-border);
-		padding-bottom: 1rem;
+		padding-bottom: 1.125rem;
 	}
 
 	.article-back {
@@ -219,7 +219,9 @@
 	}
 
 	.article-header h1 {
-		margin: 0.35rem 0 0.65rem;
+		margin: 0.35rem 0 0.75rem;
+		font-size: 2.25rem;
+		line-height: 1.2;
 		text-wrap: balance;
 	}
 
@@ -292,6 +294,12 @@
 	article :global(pre) {
 		grid-column: feature;
 		margin-inline: 0;
+	}
+
+	@media (max-width: 760px) {
+		.article-header h1 {
+			font-size: 1.875rem;
+		}
 	}
 
 	@media (min-width: 1040px) {

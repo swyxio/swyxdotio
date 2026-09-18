@@ -347,8 +347,8 @@
 
 	h1 {
 		font-family: var(--font-display);
-		font-size: clamp(2.1rem, 4vw, 3rem);
-		line-height: 1.08;
+		font-size: clamp(1.875rem, 4vw, 2.25rem);
+		line-height: 1.2;
 		letter-spacing: -0.025em;
 	}
 

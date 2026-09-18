@@ -31,7 +31,7 @@
 	}
 	h2 {
 		margin: 0 0 0.75rem;
-		font-size: 1.65rem;
+		font-size: 1.5rem;
 		scroll-margin-top: 1.5rem;
 	}
 	h2 span {
