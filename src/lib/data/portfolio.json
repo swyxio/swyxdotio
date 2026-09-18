@@ -953,17 +953,17 @@
 	},
 	{
 		"id": "polyhive",
-		"name": "Polyhive",
-		"website": null,
-		"description": "AI tools for generating and texturing 3D assets; current public product information is limited.",
+		"name": "Spectral Labs (formerly Polyhive)",
+		"website": "https://www.spectrallabs.ai",
+		"description": "AI models for engineering CAD, including SGS-1, which converts images and 3D meshes into editable parametric geometry.",
 		"category": "AI applications",
 		"status": "current",
 		"logo": null,
 		"logoSource": null,
 		"valuation": null,
 		"tier": "Smaller names",
-		"descriptionSourceUrl": "https://www.soma-demoday.com/",
-		"descriptionSourceTitle": "Soma Fellows F23 Demo Day — Polyhive",
+		"descriptionSourceUrl": "https://www.spectrallabs.ai/research/SGS-1",
+		"descriptionSourceTitle": "Spectral Labs: Introducing SGS-1",
 		"reviewedAt": "2026-09-17"
 	},
 	{
