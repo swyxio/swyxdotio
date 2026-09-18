@@ -76,7 +76,16 @@ export function projectSearchCatalog(items, redirects = /** @type {[string,strin
 					''
 			),
 			year,
-			tags: Array.isArray(item.tags) ? item.tags.map(String) : []
+			tags: [
+				...new Set(
+					[
+						...(Array.isArray(item.tags) ? item.tags : []),
+						...(Array.isArray(item.categories) ? item.categories : [])
+					]
+						.map((tag) => normalizeSearch(String(tag)))
+						.filter(Boolean)
+				)
+			]
 		});
 	}
 	return records;
@@ -122,7 +131,7 @@ export function parseSearchParams(params) {
 		limit > 30
 	)
 		throw new Error('Invalid search pagination');
-	return { q, type, year, tag, page, limit };
+	return { q, type, year, tag: normalizeSearch(tag), page, limit };
 }
 /** @param {ReturnType<typeof createSearchIndex>} catalog @param {ReturnType<typeof parseSearchParams>} params */
 export function searchCatalog(catalog, params) {
