@@ -315,3 +315,21 @@ Primary investor says12.5M recent financing ledAcme/Future and7.5M formation cap
 Exact domain/founder and historical financing search found the company's June13 2023 $13M SeriesA announcement. Dealroom52–78M and Prospeo3.3M are modeled estimates, not priced-round valuations; excluded. Some aggregate pages conflate Replay.io with Replay Technologies; excluded.
 
 - Funding: [Replay for Test Suites: $13M Series A announcement](https://www.replay.io/blog/replay-for-test-suites).
+
+## Prime Intellect
+
+Added at the owner's request on September 17, 2026. Product description and local icon come from the official company site. No public valuation is asserted.
+
+- Product: [Prime Intellect](https://www.primeintellect.ai).
+
+## Flow Engineering
+
+Added at the owner's request on September 17, 2026. Product description and local icon come from the official company site. No public valuation is asserted.
+
+- Product: [Flow Engineering](https://www.flowengineering.com).
+
+## Harbor
+
+Added at the owner's request on September 17, 2026. Product description and local icon come from the official Harbor site. No public valuation is asserted.
+
+- Product: [Harbor](https://www.harborframework.com).
