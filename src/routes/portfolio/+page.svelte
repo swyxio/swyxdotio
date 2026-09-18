@@ -12,6 +12,12 @@
 
 	/** @type {{ companies: import('$lib/portfolio').PortfolioCompany[], reviewedAt: string }} */
 	export let data;
+	const reviewDate = new Intl.DateTimeFormat('en-US', {
+		month: 'long',
+		day: 'numeric',
+		year: 'numeric',
+		timeZone: 'UTC'
+	}).format(new Date(`${data.reviewedAt}T00:00:00Z`));
 	const social = getPageSocialMeta('portfolio');
 	let query = '';
 	let category = '';
@@ -101,7 +107,7 @@
 			<p role="status" aria-live="polite">{companies.length} of {data.companies.length} entries</p>
 			{#if hasFilters}<button type="button" on:click={resetFilters}>Reset filters</button>{/if}
 			<p class="review-date">
-				Public data checked <time datetime={data.reviewedAt}>August 26, 2026</time>
+				Public data checked <time datetime={data.reviewedAt}>{reviewDate}</time>
 			</p>
 		</div>
 
@@ -163,6 +169,12 @@
 						</th>
 						<td role="cell" class="description-cell">
 							{company.description}
+							{#if company.descriptionSourceUrl}<a
+									class="related-link"
+									href={company.descriptionSourceUrl}
+									title={company.descriptionSourceTitle}
+									aria-label={`${company.name}: ${company.descriptionSourceTitle}`}>Source&nbsp;↗</a
+								>{/if}
 							{#if company.note}<span class="company-note">{company.note}</span>{/if}
 							{#if company.relatedUrl}<a
 									class="related-link"
@@ -217,25 +229,44 @@
 										? 'Not applicable'
 										: 'No public figure found'}</span
 								>
-								{#if company.funding}
-									<a
-										class="funding-link"
-										href={company.funding.sourceUrl}
-										title={company.funding.sourceTitle}
+							{/if}
+							{#if company.funding}
+								<a
+									class="funding-link"
+									href={company.funding.sourceUrl}
+									title={company.funding.sourceTitle}
+								>
+									{#if company.funding.amountUsd !== null}
+										{company.funding.prefix ?? ''}{formatValuation(company.funding.amountUsd)}
+										{company.funding.kind === 'total' ? 'total raised' : 'raised'} ↗
+									{:else}Funding announced ↗{/if}
+								</a>
+								<small
+									>{company.funding.stage} ·
+									<time datetime={company.funding.date}
+										>{company.funding.dateLabel ?? formatValuationDate(company.funding.date)}</time
+									></small
+								>
+							{/if}
+							{#if company.valuationRumor}
+								<a
+									class="funding-link rumor-link"
+									href={company.valuationRumor.sourceUrl}
+									title={company.valuationRumor.sourceTitle}
+								>
+									Rumored {formatPortfolioValuation(company.valuationRumor)} ↗
+								</a>
+								<small
+									>{company.valuationRumor.qualifier} ·
+									<time datetime={company.valuationRumor.date}
+										>{formatValuationDate(company.valuationRumor.date)}</time
 									>
-										{#if company.funding.amountUsd !== null}
-											{formatValuation(company.funding.amountUsd)}
-											{company.funding.kind === 'total' ? 'total raised' : 'raised'} ↗
-										{:else}Funding announced ↗{/if}
-									</a>
-									<small
-										>{company.funding.stage} ·
-										<time datetime={company.funding.date}
-											>{company.funding.dateLabel ??
-												formatValuationDate(company.funding.date)}</time
-										></small
-									>
-								{/if}
+									{#if company.valuationRumor.xUrl}
+										· <a
+											href={company.valuationRumor.xUrl}
+											aria-label={`${company.name}: discussion on X`}>X ↗</a
+										>{/if}
+								</small>
 							{/if}
 						</td>
 					</tr>
@@ -254,11 +285,11 @@
 		{/if}
 		<p id="valuation-note" class="valuation-note">
 			Valuations are dated public company marks in USD, not the value of my holdings. Filing-derived
-			estimates are labeled; older rounds stay dated and may not reflect today’s value. Where no
-			valuation was found, a linked funding round is shown when available—“raised” is funding, not
-			valuation. Acquisition prices are not treated as funding valuations. Tiers preserve my
-			original groups, not a financial ranking. Initials stand in where a public logo isn’t
-			available.
+			estimates are labeled; older rounds stay dated and may not reflect today’s value. A linked
+			funding round is shown when available—“raised” is funding, not valuation. Rumored fundraising
+			targets are shown separately and do not affect valuation sorting. Acquisition prices are not
+			treated as funding valuations. Tiers preserve my original groups, not a financial ranking.
+			Initials stand in where a public logo isn’t available.
 		</p>
 	</section>
 

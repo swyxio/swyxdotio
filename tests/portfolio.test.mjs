@@ -34,11 +34,11 @@ test('every public valuation has a positive amount, dated source, and no future 
 		if (valuation === null) continue;
 		assert.ok(Number.isFinite(valuation.amountUsd) && valuation.amountUsd > 0, company.name);
 		assert.match(valuation.date, /^\d{4}-\d{2}(-\d{2})?$/);
-		assert.ok(Date.parse(valuation.date) <= Date.parse('2026-08-26'), company.name);
+		assert.ok(Date.parse(valuation.date) <= Date.parse('2026-09-17'), company.name);
 		assert.equal(new URL(valuation.sourceUrl).protocol, 'https:');
 		assert.ok(valuation.sourceTitle);
 	}
-	assert.equal(companies.find((company) => company.id === 'matx').valuation.prefix, '>');
+	assert.equal(companies.find((company) => company.id === 'matx').valuation.kind, 'filing-derived');
 	assert.match(companies.find((company) => company.id === 'circle').valuation.dateLabel, /^2023/);
 	for (const company of companies.filter(
 		(company) => company.valuation?.kind === 'filing-derived'
@@ -143,7 +143,7 @@ test('funding evidence stays distinct from valuations and has its own dated sour
 			assert.ok(funding.amountUsd > 0 && Number.isFinite(funding.amountUsd));
 		assert.ok(funding.stage && funding.sourceTitle);
 		assert.equal(new URL(funding.sourceUrl).protocol, 'https:');
-		assert.ok(Date.parse(funding.date) <= Date.parse('2026-08-26'));
+		assert.ok(Date.parse(funding.date) <= Date.parse('2026-09-17'));
 	}
 	const fixture = [
 		{ ...companies[0], id: 'funding-only', valuation: null, funding: { amountUsd: 1e12 } },
@@ -188,10 +188,10 @@ test('every exit has a public announcement and a real local acquirer image', asy
 
 test('search matches multiple words across descriptions and composes with category and status', () => {
 	assert.deepEqual(
-		filterPortfolio(companies, { query: '  CLOUD   sandbox ', category: 'AI infrastructure' }).map(
+		filterPortfolio(companies, { query: '  run   code ', category: 'AI infrastructure' }).map(
 			(company) => company.id
 		),
-		['e2b', 'morph']
+		['e2b']
 	);
 	assert.deepEqual(
 		filterPortfolio(companies, { query: 'OpenAI', status: 'exited' }).map((company) => company.id),
@@ -228,4 +228,34 @@ test('valuation formatting preserves meaningful precision and stable UTC dates',
 		'$8.5M–$10M'
 	);
 	assert.equal(formatPortfolioValuation({ amountUsd: 409_010_000, prefix: '≈' }), '≈$409.01M');
+});
+
+test('research covers every entry with dated public provenance or an explicit identity gap', async () => {
+	const audit = await readFile(new URL('docs/portfolio-research-2026-09-17.md', root), 'utf8');
+	for (const company of companies) {
+		assert.equal(company.reviewedAt, '2026-09-17', company.name);
+		assert.ok(audit.includes(`## ${company.name}\n`), company.name);
+		if (company.id === 'catamaran') assert.equal(company.descriptionSourceUrl, null);
+		else {
+			assert.equal(new URL(company.descriptionSourceUrl).protocol, 'https:', company.name);
+			assert.ok(company.descriptionSourceTitle, company.name);
+		}
+	}
+	const cognition = companies.find((company) => company.id === 'cognition');
+	assert.equal(cognition.funding.prefix, '>');
+});
+
+test('rumors have dated sources and cannot replace valuation marks or affect sorting', () => {
+	for (const company of companies.filter((company) => company.valuationRumor)) {
+		const rumor = company.valuationRumor;
+		assert.ok(rumor.amountUsd > 0 && Number.isFinite(rumor.amountUsd));
+		assert.ok(Date.parse(rumor.date) <= Date.parse(company.reviewedAt));
+		assert.equal(new URL(rumor.sourceUrl).protocol, 'https:');
+		assert.match(rumor.qualifier, /Unconfirmed/);
+	}
+	const fixture = [
+		{ ...companies[0], id: 'rumor-only', valuation: null, valuationRumor: { amountUsd: 1e12 } },
+		{ ...companies[1], id: 'valued', valuation: { amountUsd: 1e6 } }
+	];
+	assert.equal(filterPortfolio(fixture, { sort: 'valuation' })[0].id, 'valued');
 });

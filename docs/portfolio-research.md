@@ -1,5 +1,7 @@
 # Portfolio research follow-up — 2026-08-26
 
+Superseded by the [complete September 17, 2026 review](portfolio-research-2026-09-17.md). The notes below are historical.
+
 Restores the original four editorial tiers and expands the public valuation search. No private investment records were used. Company announcements and dated press/database marks are distinguished from filing-derived estimates. Raised amounts and cumulative funding are separate from valuations; acquisition prices are excluded from the valuation column. Historical values are not current marks or the value of swyx's holdings.
 
 ## Kepler AI — added 2026-09-17
