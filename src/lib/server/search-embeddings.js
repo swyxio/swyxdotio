@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { gzipSync, gunzipSync, strToU8, strFromU8 } from 'fflate';
 
 export const EMBEDDING_MODEL = '@cf/baai/bge-small-en-v1.5';
 export const EMBEDDING_VERSION = 'bge-small-cls-v1';
@@ -78,23 +79,62 @@ let refreshedAt = 0;
 let vectorDatabase;
 /** @type {Promise<void>|undefined} */
 let loading;
+export const VECTOR_SNAPSHOT_KEY = `search-vector-snapshot:${EMBEDDING_VERSION}`;
+/** @param {Map<string,number[]>} entries */
+export function encodeVectorSnapshot(entries) {
+	return Buffer.from(
+		gzipSync(strToU8(JSON.stringify({ model: EMBEDDING_VERSION, entries: [...entries] })))
+	).toString('base64');
+}
+/** @param {string} encoded @returns {Map<string,number[]>} */
+export function decodeVectorSnapshot(encoded) {
+	const data = JSON.parse(strFromU8(gunzipSync(new Uint8Array(Buffer.from(encoded, 'base64')))));
+	if (data.model !== EMBEDDING_VERSION || !Array.isArray(data.entries))
+		throw new Error('Invalid search vector snapshot');
+	const next = new Map();
+	for (const [key, vector] of data.entries) {
+		if (typeof key !== 'string' || !/^[a-f0-9]{64}$/.test(key) || !validVector(vector))
+			throw new Error('Invalid cached search vector');
+		next.set(key, vector);
+	}
+	return next;
+}
+/** @param {D1Database} db */
+async function readVectors(db) {
+	const data = await db
+		.prepare('SELECT key,vector FROM search_embeddings WHERE model=?')
+		.bind(EMBEDDING_VERSION)
+		.all();
+	if (!data.success) throw new Error('Search embedding index unavailable');
+	/** @type {Map<string,number[]>} */
+	const next = new Map();
+	for (const row of data.results) {
+		const vector = JSON.parse(String(row.vector));
+		if (validVector(vector)) next.set(String(row.key), vector);
+	}
+	return next;
+}
+/** Publish a derivative cache from the authoritative database. No model call.
+ * @param {Environment} env
+ */
+export async function publishVectorSnapshot(env) {
+	if (!env.READ_COUNTERS || !env.CONTENT_MANIFEST) return null;
+	const next = await readVectors(env.READ_COUNTERS);
+	const encoded = encodeVectorSnapshot(next);
+	await env.CONTENT_MANIFEST.put(VECTOR_SNAPSHOT_KEY, encoded);
+	vectors = next;
+	vectorDatabase = env.READ_COUNTERS;
+	refreshedAt = Date.now();
+	return { indexed: next.size, bytes: encoded.length };
+}
 /** @param {Environment} env */
 async function refresh(env) {
 	const db = env.READ_COUNTERS;
 	if (!db || (db === vectorDatabase && Date.now() - refreshedAt < 60_000)) return;
 	if (!loading)
 		loading = (async () => {
-			const data = await db
-				.prepare('SELECT key,vector FROM search_embeddings WHERE model=?')
-				.bind(EMBEDDING_VERSION)
-				.all();
-			if (!data.success) throw new Error('Search embedding index unavailable');
-			const next = new Map();
-			for (const row of data.results) {
-				const vector = JSON.parse(String(row.vector));
-				if (validVector(vector)) next.set(String(row.key), vector);
-			}
-			vectors = next;
+			const cached = await env.CONTENT_MANIFEST?.get(VECTOR_SNAPSHOT_KEY);
+			vectors = cached ? decodeVectorSnapshot(cached) : await readVectors(db);
 			vectorDatabase = db;
 			refreshedAt = Date.now();
 		})().finally(() => {
@@ -111,8 +151,30 @@ export async function warmEmbeddings(catalog, env) {
 	const missing = catalog.passages
 		.map((p) => ({ text: embeddingText(p), key: embeddingKey(embeddingText(p)) }))
 		.filter((p) => !vectors.has(p.key));
-	const batch = [...new Map(missing.map((p) => [p.key, p])).values()].slice(0, 32);
+	let batch = [...new Map(missing.map((p) => [p.key, p])).values()].slice(0, 32);
 	if (!batch.length) return { remaining: 0, indexed: vectors.size };
+	// A KV snapshot can lag concurrent writers. Consult D1 for these hashes before
+	// charging for inference again; the batched lookup stays below 100 SQL bindings.
+	if (env.READ_COUNTERS) {
+		const existing = await env.READ_COUNTERS.prepare(
+			`SELECT key,vector FROM search_embeddings WHERE model=? AND key IN (${batch.map(() => '?').join(',')})`
+		)
+			.bind(EMBEDDING_VERSION, ...batch.map((p) => p.key))
+			.all();
+		if (!existing.success) throw new Error('Search vector lookup unavailable');
+		for (const row of existing.results) {
+			const vector = JSON.parse(String(row.vector));
+			if (validVector(vector)) vectors.set(String(row.key), vector);
+		}
+		batch = batch.filter((p) => !vectors.has(p.key));
+		if (!batch.length) {
+			await publishVectorSnapshot(env);
+			return {
+				remaining: missing.filter((p) => !vectors.has(p.key)).length,
+				indexed: vectors.size
+			};
+		}
+	}
 	const result = await embed(
 		env,
 		batch.map((p) => p.text)
@@ -128,6 +190,7 @@ export async function warmEmbeddings(catalog, env) {
 		.all();
 	if (!saved.success) throw new Error('Search embeddings could not persist');
 	batch.forEach((p, i) => vectors.set(p.key, result[i]));
+	await publishVectorSnapshot(env);
 	return { remaining: missing.length - batch.length, indexed: vectors.size };
 }
 /** @type {Promise<unknown>|undefined} */
