@@ -553,6 +553,18 @@
 		"tier": "You should know"
 	},
 	{
+		"id": "prime-intellect",
+		"name": "Prime Intellect",
+		"website": "https://www.primeintellect.ai",
+		"description": "Compute, training, inference, and sandboxes for building and improving AI models.",
+		"category": "AI infrastructure",
+		"status": "current",
+		"logo": "/portfolio/prime-intellect.jpg",
+		"logoSource": "https://cdn.prod.website-files.com/66239f0441b09824acb92c75/671b6f6054736f752438334f_Positive.jpg",
+		"valuation": null,
+		"tier": "You should know"
+	},
+	{
 		"id": "preference-model",
 		"name": "Preference Model",
 		"website": "https://preferencemodel.com",
@@ -906,6 +918,30 @@
 		"status": "current",
 		"logo": "/portfolio/kepler-ai.png",
 		"logoSource": "https://kepler.ai/apple-touch-icon.png",
+		"valuation": null,
+		"tier": "Smaller names"
+	},
+	{
+		"id": "flow-engineering",
+		"name": "Flow Engineering",
+		"website": "https://www.flowengineering.com",
+		"description": "Requirements management and AI agents that connect hardware design, simulation, code, and testing.",
+		"category": "Developer tools",
+		"status": "current",
+		"logo": "/portfolio/flow-engineering.svg",
+		"logoSource": "https://cdn.sanity.io/images/oj8dplvw/production/b2c79eb8adcf87d723026ffdcd914ca50373b906-32x32.svg",
+		"valuation": null,
+		"tier": "Smaller names"
+	},
+	{
+		"id": "harbor",
+		"name": "Harbor",
+		"website": "https://www.harborframework.com",
+		"description": "A framework for evaluating and optimizing AI agents in sandboxed environments, from the makers of Terminal-Bench.",
+		"category": "AI infrastructure",
+		"status": "current",
+		"logo": "/portfolio/harbor.ico",
+		"logoSource": "https://www.harborframework.com/favicon.ico",
 		"valuation": null,
 		"tier": "Smaller names"
 	},
