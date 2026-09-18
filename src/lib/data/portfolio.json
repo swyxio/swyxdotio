@@ -964,6 +964,12 @@
 			"kind": "round",
 			"sourceUrl": "https://astral.sh/blog/announcing-astral-the-company-behind-ruff",
 			"sourceTitle": "Announcing Astral, the company behind Ruff"
+		},
+		"exit": {
+			"acquirerLogo": "/portfolio/acquirers/openai.png",
+			"acquirerLogoSource": "https://developers.openai.com/favicon.png",
+			"sourceUrl": "https://astral.sh/blog/openai",
+			"sourceTitle": "Astral to join OpenAI"
 		}
 	},
 	{
@@ -984,7 +990,13 @@
 			"prefix": "≈"
 		},
 		"acquirer": "OpenAI",
-		"tier": "Done"
+		"tier": "Done",
+		"exit": {
+			"acquirerLogo": "/portfolio/acquirers/openai.png",
+			"acquirerLogoSource": "https://developers.openai.com/favicon.png",
+			"sourceUrl": "https://openai.com/index/openai-to-acquire-promptfoo/",
+			"sourceTitle": "OpenAI to acquire Promptfoo"
+		}
 	},
 	{
 		"id": "gabber",
@@ -997,7 +1009,13 @@
 		"logoSource": "https://gabber.dev/favicon.ico",
 		"valuation": null,
 		"acquirer": "LiveKit",
-		"tier": "Done"
+		"tier": "Done",
+		"exit": {
+			"acquirerLogo": "/portfolio/acquirers/livekit.png",
+			"acquirerLogoSource": "https://livekit.com/images/livekit-apple-touch.png",
+			"sourceUrl": "https://www.linkedin.com/posts/jackndwyer_the-news-is-out-gabber-is-joining-livekit-activity-7419100783738040320-4mKG",
+			"sourceTitle": "Jack Dwyer: Gabber is joining LiveKit"
+		}
 	},
 	{
 		"id": "codegen",
@@ -1016,7 +1034,13 @@
 			"qualifier": "Post-money · before exit"
 		},
 		"acquirer": "ClickUp",
-		"tier": "Done"
+		"tier": "Done",
+		"exit": {
+			"acquirerLogo": "/portfolio/acquirers/clickup.png",
+			"acquirerLogoSource": "https://clickup.com/favicons/apple-touch-icon.png",
+			"sourceUrl": "https://clickup.com/blog/clickup-codegen-acquisition/",
+			"sourceTitle": "ClickUp + Codegen: Putting Software Creation in Every Knowledge Worker’s Hands"
+		}
 	},
 	{
 		"id": "brev",
@@ -1037,7 +1061,13 @@
 			"sourceTitle": "Brev Stock Price, Funding, Valuation — CBInsights"
 		},
 		"acquirer": "NVIDIA",
-		"tier": "Done"
+		"tier": "Done",
+		"exit": {
+			"acquirerLogo": "/portfolio/acquirers/nvidia.svg",
+			"acquirerLogoSource": "https://www.nvidia.com/content/dam/en-zz/Solutions/about-nvidia/nvidia-brochure/images/nvidia-logo-black.svg",
+			"sourceUrl": "https://www.linkedin.com/posts/brevdev_today-brevdev-is-being-acquired-by-nvidia-activity-7219055612230258688-FBwi",
+			"sourceTitle": "Brev.dev is being acquired by NVIDIA"
+		}
 	},
 	{
 		"id": "gel",
@@ -1058,6 +1088,12 @@
 			"kind": "round",
 			"sourceUrl": "https://www.prnewswire.com/news-releases/edgedb-raises-15m-series-a-round-to-bring-its-modernized-relational-database-for-cutting-edge-apps-to-the-cloud-301669752.html",
 			"sourceTitle": "EdgeDB Raises $15M Series A Round"
+		},
+		"exit": {
+			"acquirerLogo": "/portfolio/acquirers/vercel.png",
+			"acquirerLogoSource": "https://assets.vercel.com/image/upload/q_auto/front/favicon/vercel/apple-touch-icon-180x180.png",
+			"sourceUrl": "https://www.geldata.com/blog/gel-joins-vercel",
+			"sourceTitle": "Gel joins Vercel"
 		}
 	},
 	{
@@ -1079,7 +1115,13 @@
 			"date": "2024-03-13"
 		},
 		"acquirer": "Fireblocks",
-		"tier": "Done"
+		"tier": "Done",
+		"exit": {
+			"acquirerLogo": "/portfolio/acquirers/fireblocksbrand.png",
+			"acquirerLogoSource": "https://www.fireblocks.com/wp-content/themes/fireblocks-block-theme/assets/favicon.png",
+			"sourceUrl": "https://www.fireblocks.com/blog/fireblocks-acquires-dynamic",
+			"sourceTitle": "Fireblocks Acquires Dynamic"
+		}
 	},
 	{
 		"id": "begin",

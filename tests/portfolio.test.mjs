@@ -161,6 +161,31 @@ test('logos are local, nonempty assets with recorded provenance', async () => {
 	}
 });
 
+test('every exit has a public announcement and a real local acquirer image', async () => {
+	for (const company of companies) {
+		if (company.status !== 'exited') {
+			assert.equal(company.exit, undefined, company.name);
+			continue;
+		}
+		assert.ok(company.acquirer && company.exit.sourceTitle, company.name);
+		assert.equal(new URL(company.exit.sourceUrl).protocol, 'https:');
+		assert.equal(new URL(company.exit.acquirerLogoSource).protocol, 'https:');
+		assert.match(company.exit.acquirerLogo, /^\/portfolio\/acquirers\/[a-z]+\.(png|svg)$/);
+		const bytes = await readFile(new URL(`static${company.exit.acquirerLogo}`, root));
+		assert.ok(bytes.length > 0 && bytes.length < 50_000);
+		if (company.exit.acquirerLogo.endsWith('.png')) {
+			assert.deepEqual([...bytes.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
+		} else {
+			assert.match(bytes.toString(), /<svg /);
+			assert.doesNotMatch(bytes.toString(), /<script|<foreignObject|\bon\w+=/i);
+		}
+	}
+	assert.deepEqual(
+		filterPortfolio(companies, { query: 'OpenAI', status: 'exited' }).map((company) => company.id),
+		['astral', 'promptfoo']
+	);
+});
+
 test('search matches multiple words across descriptions and composes with category and status', () => {
 	assert.deepEqual(
 		filterPortfolio(companies, { query: '  CLOUD   sandbox ', category: 'AI infrastructure' }).map(
