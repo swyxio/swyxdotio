@@ -3,45 +3,72 @@
 		"id": "temporal",
 		"name": "Temporal",
 		"website": "https://temporal.io",
-		"description": "Durable execution for reliable workflows and long-running applications.",
+		"description": "Open-source durable execution and a managed cloud service for workflows, distributed applications, and long-running AI agents.",
 		"category": "Infrastructure",
 		"status": "current",
 		"logo": "/portfolio/temporal.png",
 		"logoSource": "https://temporal.io/apple-touch-icon.png",
 		"valuation": {
-			"amountUsd": 5000000000,
-			"date": "2026-02-17",
-			"sourceUrl": "https://temporal.io/news/temporal-raises-300M-to-make-agentic-ai-real-for-companies",
-			"sourceTitle": "Temporal raises $300M Series D",
-			"qualifier": "Reported valuation"
+			"amountUsd": 12550000000,
+			"date": "2026-09-14",
+			"stage": "Series E",
+			"kind": "reported",
+			"qualifier": "Company-announced valuation",
+			"sourceUrl": "https://temporal.io/news/temporal-raises-550m-at-a-12-55b-valuation",
+			"sourceTitle": "Temporal raises $550M at a $12.55B valuation"
 		},
 		"relatedUrl": "/why-temporal",
-		"tier": "Well known names"
+		"tier": "Well known names",
+		"descriptionSourceUrl": "https://temporal.io",
+		"descriptionSourceTitle": "Temporal: Durable Execution Solutions",
+		"reviewedAt": "2026-09-17",
+		"funding": {
+			"amountUsd": 550000000,
+			"date": "2026-09-14",
+			"stage": "Series E",
+			"kind": "round",
+			"sourceUrl": "https://temporal.io/news/temporal-raises-550m-at-a-12-55b-valuation",
+			"sourceTitle": "Temporal raises $550M Series E"
+		}
 	},
 	{
 		"id": "cognition",
 		"name": "Cognition",
 		"website": "https://cognition.com",
-		"description": "The team behind Devin, an autonomous software engineer.",
+		"description": "The company behind Devin: autonomous software engineering agents across cloud, desktop, and CLI, with code review and security tools.",
 		"category": "AI coding",
 		"status": "current",
 		"logo": "/portfolio/cognition.png",
 		"logoSource": "https://cognition.com/apple-icon.png?apple-icon.0w.tojn~2x_cp.png?dpl=dpl_7cGgTgKZrpXZGMjQmG7VFfLVbJce",
 		"valuation": {
-			"amountUsd": 26000000000,
-			"date": "2026-05-27",
-			"sourceUrl": "https://cognition.com/blog/series-d",
-			"sourceTitle": "Cognition: More Devins in More Places",
-			"qualifier": "Post-money"
+			"amountUsd": 48000000000,
+			"date": "2026-09-08",
+			"stage": "Series E",
+			"kind": "reported",
+			"qualifier": "Company-announced valuation",
+			"sourceUrl": "https://cognition.com/blog/series-e",
+			"sourceTitle": "Cognition: Do it all with Devin — Announcing our Series E"
 		},
 		"relatedUrl": "/cognition",
-		"tier": "Well known names"
+		"tier": "Well known names",
+		"descriptionSourceUrl": "https://cognition.com/blog/series-e",
+		"descriptionSourceTitle": "Cognition: Do it all with Devin",
+		"reviewedAt": "2026-09-17",
+		"funding": {
+			"amountUsd": 2000000000,
+			"prefix": ">",
+			"date": "2026-09-08",
+			"stage": "Series E",
+			"kind": "round",
+			"sourceUrl": "https://cognition.com/blog/series-e",
+			"sourceTitle": "Cognition: Announcing our Series E"
+		}
 	},
 	{
 		"id": "supabase",
 		"name": "Supabase",
 		"website": "https://supabase.com",
-		"description": "An open-source Postgres platform with auth, storage, and realtime APIs.",
+		"description": "Open-source Postgres development platform with authentication, instant data APIs, storage, realtime, vector search, and edge functions.",
 		"category": "Data & databases",
 		"status": "current",
 		"logo": "/portfolio/supabase.ico",
@@ -53,13 +80,24 @@
 			"sourceTitle": "Supabase raises $500M at $10.5B",
 			"qualifier": "Post-money"
 		},
-		"tier": "Well known names"
+		"tier": "Well known names",
+		"descriptionSourceUrl": "https://supabase.com",
+		"descriptionSourceTitle": "Supabase: The Postgres Development Platform",
+		"reviewedAt": "2026-09-17",
+		"funding": {
+			"amountUsd": 500000000,
+			"date": "2026-06-04",
+			"stage": "Series F",
+			"kind": "round",
+			"sourceUrl": "https://supabase.com/blog/series-f",
+			"sourceTitle": "Supabase Series F"
+		}
 	},
 	{
 		"id": "railway",
 		"name": "Railway",
 		"website": "https://railway.com",
-		"description": "Deploy applications, services, and databases without managing infrastructure.",
+		"description": "Cloud platform that deploys, connects, scales, and monitors applications and databases from a repository, with tools for AI agents.",
 		"category": "Infrastructure",
 		"status": "current",
 		"logo": "/portfolio/railway.png",
@@ -82,13 +120,16 @@
 			"kind": "round",
 			"sourceUrl": "https://blog.railway.com/p/series-b",
 			"sourceTitle": "Railway raises $100M Series B"
-		}
+		},
+		"descriptionSourceUrl": "https://railway.com",
+		"descriptionSourceTitle": "Railway: The all-in-one intelligent cloud provider",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "workos",
 		"name": "WorkOS",
 		"website": "https://workos.com",
-		"description": "Enterprise-ready authentication, SSO, directory sync, and authorization.",
+		"description": "Authentication and enterprise identity infrastructure, including SSO, directory sync, permissions, audit logs, and access controls for AI agents.",
 		"category": "Security & identity",
 		"status": "current",
 		"logo": "/portfolio/workos.png",
@@ -100,33 +141,66 @@
 			"sourceTitle": "WorkOS raises $100M Series C, hits $2B valuation",
 			"qualifier": "Reported valuation"
 		},
-		"tier": "Well known names"
+		"tier": "Well known names",
+		"descriptionSourceUrl": "https://workos.com",
+		"descriptionSourceTitle": "WorkOS: Enterprise Ready",
+		"reviewedAt": "2026-09-17",
+		"funding": {
+			"amountUsd": 100000000,
+			"date": "2026-03-02",
+			"stage": "Series C",
+			"kind": "round",
+			"sourceUrl": "https://workos.com/blog/series-c",
+			"sourceTitle": "WorkOS raises $100M Series C"
+		}
 	},
 	{
 		"id": "matx",
 		"name": "MatX",
 		"website": "https://matx.com",
-		"description": "Chips designed for training and running large language models.",
+		"description": "Specialized AI chips for large-language-model training, reinforcement learning, and inference, including the MatX One accelerator.",
 		"category": "Semiconductors",
 		"status": "current",
 		"logo": "/portfolio/matx.png",
 		"logoSource": "https://matx.com/apple-touch-icon.png",
 		"valuation": {
-			"amountUsd": 300000000,
-			"date": "2024-11-22",
-			"sourceUrl": "https://techcrunch.com/2024/11/22/ai-chip-startup-matx-founded-by-google-alums-raises-series-a-at-300m-valuation-sources-say/",
-			"sourceTitle": "MatX Series A at $300M+ valuation",
-			"qualifier": "Series A · newer mark undisclosed",
-			"prefix": ">"
+			"amountUsd": 4650000000,
+			"date": "2026-02-24",
+			"stage": "Series B",
+			"kind": "filing-derived",
+			"qualifier": "Post-money · filing-derived estimate",
+			"sourceUrl": "https://forgeglobal.com/matx_ipo/",
+			"sourceTitle": "Forge: MatX funding rounds and valuation",
+			"prefix": "≈"
 		},
 		"relatedUrl": "https://www.youtube.com/watch?v=qvrdCpLPbuQ",
-		"tier": "Well known names"
+		"tier": "Well known names",
+		"descriptionSourceUrl": "https://matx.com",
+		"descriptionSourceTitle": "MatX: High-throughput chips for LLMs",
+		"reviewedAt": "2026-09-17",
+		"funding": {
+			"amountUsd": 500000000,
+			"date": "2026-02-24",
+			"stage": "Series B",
+			"kind": "round",
+			"sourceUrl": "https://matx.com/research/series_b",
+			"sourceTitle": "MatX One and our $500M Series B"
+		},
+		"valuationRumor": {
+			"amountUsd": 4000000000,
+			"date": "2026-08-27",
+			"sourceUrl": "https://www.streetinsider.com/Reuters/Exclusive-Anthropic%2Bin%2Btalks%2Bwith%2Bchip%2Bstart%2Bup%2BMatX%2Bto%2Bspeed%2Bup%2Bchip%2Bdesign,%2Bsources%2Bsay/26991306.html?classic=1",
+			"sourceTitle": "Reuters: Anthropic in talks with chip startup MatX to speed up chip design",
+			"prefix": "≈",
+			"qualifier": "Unconfirmed fundraising target · basis unspecified",
+			"xUrl": "https://x.com/Techmeme/status/2093100339402871232"
+		}
 	},
 	{
 		"id": "artificial-analysis",
 		"name": "Artificial Analysis",
 		"website": "https://artificialanalysis.ai",
-		"description": "Independent benchmarks and analysis of AI models and providers.",
+		"description": "Independent benchmarks and analysis of AI models, coding agents, multimodal systems, and inference providers, comparing quality, speed, and cost.",
 		"category": "AI infrastructure",
 		"status": "current",
 		"logo": "/portfolio/artificial-analysis.ico",
@@ -142,13 +216,16 @@
 			"dateLabel": "Reported Jan 2026",
 			"sourceUrl": "https://www.latent.space/p/artificialanalysis",
 			"sourceTitle": "Latent Space: Artificial Analysis"
-		}
+		},
+		"descriptionSourceUrl": "https://artificialanalysis.ai",
+		"descriptionSourceTitle": "Artificial Analysis: AI Model & API Providers Analysis",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "browserbase",
 		"name": "Browserbase",
 		"website": "https://browserbase.com",
-		"description": "Cloud browsers and browser automation infrastructure for AI agents.",
+		"description": "Cloud browsers and web automation infrastructure for AI agents, including Stagehand, managed browser agents, and APIs for web data.",
 		"category": "AI infrastructure",
 		"status": "current",
 		"logo": "/portfolio/browserbase.svg",
@@ -161,13 +238,24 @@
 			"qualifier": "Series B"
 		},
 		"relatedUrl": "https://www.latent.space/p/browserbase",
-		"tier": "Well known names"
+		"tier": "Well known names",
+		"descriptionSourceUrl": "https://browserbase.com",
+		"descriptionSourceTitle": "Browserbase: Building the future of web automation",
+		"reviewedAt": "2026-09-17",
+		"funding": {
+			"amountUsd": 40000000,
+			"date": "2025-06-18",
+			"stage": "Series B",
+			"kind": "round",
+			"sourceUrl": "https://www.browserbase.com/blog/series-b-and-beyond",
+			"sourceTitle": "Browserbase: Building the future of web automation"
+		}
 	},
 	{
 		"id": "fireworks",
 		"name": "Fireworks AI",
 		"website": "https://fireworks.ai",
-		"description": "Inference and fine-tuning infrastructure for generative AI models.",
+		"description": "Infrastructure for serving and training specialized AI models, from fine-tuning and reinforcement learning to production inference.",
 		"category": "AI infrastructure",
 		"status": "current",
 		"logo": "/portfolio/fireworks.png",
@@ -179,13 +267,24 @@
 			"sourceTitle": "Fireworks announces Series D",
 			"qualifier": "Reported valuation"
 		},
-		"tier": "Well known names"
+		"tier": "Well known names",
+		"descriptionSourceUrl": "https://fireworks.ai",
+		"descriptionSourceTitle": "Fireworks: Own Your Specialized Intelligence",
+		"reviewedAt": "2026-09-17",
+		"funding": {
+			"amountUsd": 1505000000,
+			"date": "2026-07-15",
+			"stage": "Series D",
+			"kind": "round",
+			"sourceUrl": "https://fireworks.ai/blog/series-d-announcement",
+			"sourceTitle": "Fireworks announces $1.505B Series D"
+		}
 	},
 	{
 		"id": "e2b",
 		"name": "E2B",
 		"website": "https://e2b.dev",
-		"description": "Secure cloud sandboxes where AI agents can run code.",
+		"description": "Isolated cloud microVMs for AI agents to run code, use computers, execute background jobs, and generate reinforcement-learning rollouts.",
 		"category": "AI infrastructure",
 		"status": "current",
 		"logo": "/portfolio/e2b.png",
@@ -195,7 +294,7 @@
 			"date": "2025-07-28",
 			"stage": "Series A",
 			"kind": "reported",
-			"qualifier": "Reported by PostRound",
+			"qualifier": "Series A · investor-reported",
 			"sourceUrl": "https://postround.substack.com/p/series-a-activity-week-of-july-28",
 			"sourceTitle": "Aaron Harris: Series A activity, week of July 28, 2025"
 		},
@@ -205,34 +304,51 @@
 			"date": "2025-07-28",
 			"stage": "Series A",
 			"kind": "round",
-			"sourceUrl": "https://changelog.e2b.dev/blog/series-a",
+			"sourceUrl": "https://changelog.e2b.dev/resources/series-a",
 			"sourceTitle": "E2B: We raised $21M to give Fortune 100 cloud for AI agents"
-		}
+		},
+		"descriptionSourceUrl": "https://e2b.dev",
+		"descriptionSourceTitle": "E2B: The Enterprise AI Agent Cloud",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "daytona",
 		"name": "Daytona",
 		"website": "https://daytona.io",
-		"description": "Isolated, programmable sandboxes for running AI-generated code.",
+		"description": "Programmable, isolated computers for AI agents, with code execution, computer use, persistent state, snapshots, and sandbox forking.",
 		"category": "AI infrastructure",
 		"status": "current",
 		"logo": "/portfolio/daytona.png",
 		"logoSource": "https://framerusercontent.com/images/6WPclDLAHHQgPFeA2DRTW1OXVSU.png",
 		"valuation": {
-			"amountUsd": 125000000,
-			"date": "2026-02-05",
-			"sourceUrl": "https://www.theinformation.com/newsletters/ai-agenda/datadog-figma-back-startup-developing-tools-ai-agents",
-			"sourceTitle": "Datadog and Figma back Daytona",
-			"qualifier": "Post-money · newer mark undisclosed"
+			"amountUsd": 994130000,
+			"date": "2026-07-31",
+			"stage": "Series B",
+			"kind": "filing-derived",
+			"qualifier": "Post-money · filing-derived estimate",
+			"sourceUrl": "https://forgeglobal.com/daytona_ipo/",
+			"sourceTitle": "Forge: Daytona funding rounds and valuation",
+			"prefix": "≈"
 		},
 		"note": "Sandboxes for agents… I know, I know.",
-		"tier": "Well known names"
+		"tier": "Well known names",
+		"descriptionSourceUrl": "https://daytona.io",
+		"descriptionSourceTitle": "Daytona: Secure Infrastructure for Running AI-Generated Code",
+		"reviewedAt": "2026-09-17",
+		"funding": {
+			"amountUsd": 48270000,
+			"date": "2026-07-31",
+			"stage": "Series B · database-reported",
+			"kind": "round",
+			"sourceUrl": "https://forgeglobal.com/daytona_ipo/",
+			"sourceTitle": "Forge: Daytona July 2026 Series B"
+		}
 	},
 	{
 		"id": "resend",
 		"name": "Resend",
 		"website": "https://resend.com",
-		"description": "Email APIs for developers, from transactional messages to broadcasts.",
+		"description": "Developer platform for sending and receiving email, with transactional APIs, marketing broadcasts, audiences, templates, and automations.",
 		"category": "Developer tools",
 		"status": "current",
 		"logo": "/portfolio/resend.png",
@@ -242,7 +358,7 @@
 			"date": "2023-04-20",
 			"stage": "Angel",
 			"kind": "database-reported",
-			"qualifier": "Angel · database-reported",
+			"qualifier": "Historical angel · database-reported; later Series A undisclosed",
 			"sourceUrl": "https://www.cbinsights.com/company/resend/financials",
 			"sourceTitle": "CB Insights: Resend financials"
 		},
@@ -254,13 +370,16 @@
 			"kind": "round",
 			"sourceUrl": "https://resend.com/blog/series-a",
 			"sourceTitle": "Resend raises $18M Series A"
-		}
+		},
+		"descriptionSourceUrl": "https://resend.com",
+		"descriptionSourceTitle": "Resend: Email for developers",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "modal",
 		"name": "Modal",
 		"website": "https://modal.com",
-		"description": "Serverless compute for Python, AI workloads, and GPU applications.",
+		"description": "Serverless CPU and GPU infrastructure for model inference, training, batch jobs, and isolated sandboxes for AI agents.",
 		"category": "Infrastructure",
 		"status": "current",
 		"logo": "/portfolio/modal.svg",
@@ -272,13 +391,24 @@
 			"sourceTitle": "Modal's $355M Series C at a $4.65B valuation",
 			"qualifier": "Post-money"
 		},
-		"tier": "Well known names"
+		"tier": "Well known names",
+		"descriptionSourceUrl": "https://modal.com",
+		"descriptionSourceTitle": "Modal: High-performance AI infrastructure",
+		"reviewedAt": "2026-09-17",
+		"funding": {
+			"amountUsd": 355000000,
+			"date": "2026-05-21",
+			"stage": "Series C",
+			"kind": "round",
+			"sourceUrl": "https://modal.com/blog/modal-series-c",
+			"sourceTitle": "Modal raises $355M Series C"
+		}
 	},
 	{
 		"id": "conductor",
 		"name": "Conductor",
 		"website": "https://conductor.build",
-		"description": "A workspace for running and coordinating multiple coding agents.",
+		"description": "Workspace for teams of AI coding agents, with isolated cloud sandboxes, shared multiplayer sessions, and tools to review and merge changes.",
 		"category": "AI coding",
 		"status": "current",
 		"logo": "/portfolio/conductor.png",
@@ -293,13 +423,16 @@
 			"kind": "round",
 			"sourceUrl": "https://www.conductor.build/blog/series-a",
 			"sourceTitle": "Conductor’s Series A"
-		}
+		},
+		"descriptionSourceUrl": "https://conductor.build",
+		"descriptionSourceTitle": "Conductor: Run a team of coding agents in the cloud",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "chroma",
 		"name": "Chroma",
 		"website": "https://trychroma.com",
-		"description": "Open-source retrieval infrastructure and a vector database for AI.",
+		"description": "Open-source search infrastructure for AI, combining vector, full-text, regex, and metadata search with serverless cloud deployment.",
 		"category": "Data & databases",
 		"status": "current",
 		"logo": "/portfolio/chroma.png",
@@ -309,17 +442,20 @@
 			"date": "2023-04-06",
 			"sourceUrl": "https://www.cbinsights.com/company/chroma-6/financials",
 			"sourceTitle": "CB Insights: Chroma April 2023 valuation",
-			"qualifier": "Seed · database-reported",
-			"kind": "reported"
+			"qualifier": "Historical seed · database-reported",
+			"kind": "database-reported"
 		},
 		"relatedUrl": "https://www.latent.space/p/chroma",
-		"tier": "Well known names"
+		"tier": "Well known names",
+		"descriptionSourceUrl": "https://trychroma.com",
+		"descriptionSourceTitle": "Chroma: Open-source search infrastructure for AI",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "restate",
 		"name": "Restate",
 		"website": "https://restate.dev",
-		"description": "Durable execution for resilient services, workflows, and agents.",
+		"description": "Durable runtime for AI agents and backends, combining resilient services, workflows, state, messaging, queues, and managed cloud deployment.",
 		"category": "Infrastructure",
 		"status": "current",
 		"logo": "/portfolio/restate.ico",
@@ -333,37 +469,46 @@
 			"kind": "round",
 			"sourceUrl": "https://restate.dev/blog/announcing-restate-1.0-restate-cloud-and-our-seed-funding-round",
 			"sourceTitle": "Announcing Restate 1.0, Restate Cloud, and our seed funding round"
-		}
+		},
+		"descriptionSourceUrl": "https://restate.dev",
+		"descriptionSourceTitle": "Restate: The Durable Runtime for your Agents and Backends",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "logan-kilpatrick",
 		"name": "Logan Kilpatrick",
 		"website": null,
-		"description": "Individual backing; company details are not listed.",
+		"description": "Individual backing. Leads Google AI Studio and the Gemini API product team.",
 		"category": "Individuals",
 		"status": "individual",
 		"logo": null,
 		"logoSource": null,
 		"valuation": null,
-		"tier": "Well known names"
+		"tier": "Well known names",
+		"descriptionSourceUrl": "https://blog.google/authors/logan-kilpatrick/",
+		"descriptionSourceTitle": "Logan Kilpatrick: Google author profile",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "matthew-berman",
 		"name": "Matthew Berman",
 		"website": null,
-		"description": "Individual backing; company details are not listed.",
+		"description": "Individual backing. AI educator covering models, tools, and practical applications.",
 		"category": "Individuals",
 		"status": "individual",
 		"logo": null,
 		"logoSource": null,
 		"valuation": null,
-		"tier": "Well known names"
+		"tier": "Well known names",
+		"descriptionSourceUrl": "https://www.youtube.com/@matthew_berman",
+		"descriptionSourceTitle": "Matthew Berman: YouTube channel",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "datalab",
 		"name": "Datalab",
 		"website": "https://datalab.to",
-		"description": "Document parsing and extraction that turns PDFs into structured data.",
+		"description": "Document intelligence models and APIs for OCR, parsing, extraction, and evaluation.",
 		"category": "Data & databases",
 		"status": "current",
 		"logo": "/portfolio/datalab.svg",
@@ -377,13 +522,16 @@
 			"kind": "round",
 			"sourceUrl": "https://www.forkable.io/p/datalab-develops-small-ai-models",
 			"sourceTitle": "Paul Sawers: Datalab develops small AI models to power document intelligence in the enterprise"
-		}
+		},
+		"descriptionSourceUrl": "https://www.datalab.to/",
+		"descriptionSourceTitle": "Datalab: High-precision document intelligence",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "viktor",
 		"name": "Zeta AI / Viktor",
 		"website": "https://viktor.com",
-		"description": "An AI coworker that works with your team and tools in Slack and Teams.",
+		"description": "An AI coworker in Slack and Teams that completes tasks across connected business tools.",
 		"category": "AI applications",
 		"status": "current",
 		"logo": "/portfolio/viktor.png",
@@ -396,13 +544,24 @@
 			"qualifier": "Reported valuation",
 			"dateLabel": "May 2026 · reported Jul 2026"
 		},
-		"tier": "You should know"
+		"tier": "You should know",
+		"descriptionSourceUrl": "https://viktor.com/",
+		"descriptionSourceTitle": "Viktor: AI employee in Slack and Teams",
+		"reviewedAt": "2026-09-17",
+		"funding": {
+			"amountUsd": 75000000,
+			"date": "2026-05-19",
+			"stage": "Series A",
+			"kind": "round",
+			"sourceUrl": "https://viktor.com/blog/viktor-series-a",
+			"sourceTitle": "Viktor: The first AI employee — $75M from Accel"
+		}
 	},
 	{
 		"id": "brightwave",
 		"name": "Brightwave",
 		"website": "https://brightwave.io",
-		"description": "Compliance-ready infrastructure for AI agents, from the financial research team.",
+		"description": "Secure AI agent infrastructure and Tidebreak, an open-source desktop agent for work and code.",
 		"category": "AI infrastructure",
 		"status": "current",
 		"logo": "/portfolio/brightwave.svg",
@@ -416,13 +575,16 @@
 			"kind": "round",
 			"sourceUrl": "https://markets.financialcontent.com/stocks/article/bizwire-2024-10-29-brightwave-secures-15m-series-a-to-scale-ai-powered-financial-research-platform",
 			"sourceTitle": "Brightwave secures $15M Series A to scale AI-powered financial research platform"
-		}
+		},
+		"descriptionSourceUrl": "https://www.tidebreak.io/",
+		"descriptionSourceTitle": "Tidebreak: One engine for work and code",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "quadratic",
 		"name": "Quadratic",
 		"website": "https://quadratichq.com",
-		"description": "A spreadsheet that brings together AI, code, and connected data.",
+		"description": "An AI spreadsheet for connected data, research, charts, and analysis with Python, SQL, and formulas.",
 		"category": "AI applications",
 		"status": "current",
 		"logo": "/portfolio/quadratic.png",
@@ -436,13 +598,16 @@
 			"kind": "round",
 			"sourceUrl": "https://www.quadratichq.com/blog/announcing-our-seed-round-funding-and-quadratic-teams",
 			"sourceTitle": "Announcing our $5.6M seed round and Quadratic Teams"
-		}
+		},
+		"descriptionSourceUrl": "https://www.quadratichq.com/",
+		"descriptionSourceTitle": "Quadratic: The AI Spreadsheet",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "flutterflow",
 		"name": "FlutterFlow",
 		"website": "https://flutterflow.io",
-		"description": "A visual development platform for building Flutter applications.",
+		"description": "A visual Flutter app builder with AI assistance, custom code, and mobile, web, and desktop deployment.",
 		"category": "Developer tools",
 		"status": "current",
 		"logo": "/portfolio/flutterflow.png",
@@ -451,17 +616,28 @@
 			"amountUsd": 170000000,
 			"date": "2024-01-11",
 			"sourceUrl": "https://techcrunch.com/2024/01/11/flutterflow-attracts-cash-for-its-low-code-mobile-app-dev-platform/",
-			"sourceTitle": "FlutterFlow raises Series A",
+			"sourceTitle": "FlutterFlow Series A financing",
 			"qualifier": "Reported valuation",
 			"prefix": "≈"
 		},
-		"tier": "You should know"
+		"tier": "You should know",
+		"descriptionSourceUrl": "https://flutterflow.io/",
+		"descriptionSourceTitle": "FlutterFlow: Build Better. Launch Faster.",
+		"reviewedAt": "2026-09-17",
+		"funding": {
+			"amountUsd": 25500000,
+			"date": "2024-01-11",
+			"stage": "Series A",
+			"kind": "round",
+			"sourceUrl": "https://techcrunch.com/2024/01/11/flutterflow-attracts-cash-for-its-low-code-mobile-app-dev-platform/",
+			"sourceTitle": "FlutterFlow Series A financing"
+		}
 	},
 	{
 		"id": "circle",
 		"name": "Circle",
 		"website": "https://circle.so",
-		"description": "Community software for creators, courses, events, and memberships.",
+		"description": "A branded community platform combining courses, events, paid memberships, and marketing tools.",
 		"category": "Community",
 		"status": "current",
 		"logo": "/portfolio/circle.png",
@@ -472,15 +648,19 @@
 			"sourceUrl": "https://www.thespl.it/p/immigrant-to-250m-ceo-how-circle",
 			"sourceTitle": "The Split: Circle CEO Sid Yadav interview",
 			"qualifier": "Reported valuation",
-			"dateLabel": "2023 · reported Jan 2024"
+			"dateLabel": "2023 · reported Jan 2024",
+			"kind": "reported"
 		},
-		"tier": "You should know"
+		"tier": "You should know",
+		"descriptionSourceUrl": "https://circle.so/",
+		"descriptionSourceTitle": "Circle: A new era for digital businesses",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "airbyte",
 		"name": "Airbyte",
 		"website": "https://airbyte.com",
-		"description": "Open-source data integration and connectors for moving and syncing data.",
+		"description": "Open-source data connectors and replication, with search and tool access for AI agents.",
 		"category": "Data & databases",
 		"status": "current",
 		"logo": "/portfolio/airbyte.png",
@@ -490,15 +670,27 @@
 			"date": "2021-12-20",
 			"sourceUrl": "https://airbyte.com/blog/a-150m-series-b-to-power-the-movement-of-data",
 			"sourceTitle": "Airbyte raises $150M Series B",
-			"qualifier": "Reported valuation"
+			"qualifier": "Company-announced valuation",
+			"kind": "reported"
 		},
-		"tier": "You should know"
+		"tier": "You should know",
+		"descriptionSourceUrl": "https://airbyte.com/",
+		"descriptionSourceTitle": "Airbyte: Data Movement for Analytics and AI Agents",
+		"reviewedAt": "2026-09-17",
+		"funding": {
+			"amountUsd": 150000000,
+			"date": "2021-12-20",
+			"stage": "Series B",
+			"kind": "round",
+			"sourceUrl": "https://airbyte.com/blog/a-150m-series-b-to-power-the-movement-of-data",
+			"sourceTitle": "Airbyte raises $150M Series B"
+		}
 	},
 	{
 		"id": "sphere",
 		"name": "Sphere Semiconductor",
-		"website": null,
-		"description": "Semiconductor company; more details to be announced.",
+		"website": "https://www.spheresemi.com/",
+		"description": "AI-designed analog chips and reusable semiconductor IP, starting with RF and mixed-signal components.",
 		"category": "Semiconductors",
 		"status": "current",
 		"logo": null,
@@ -512,13 +704,16 @@
 			"kind": "round",
 			"sourceUrl": "https://www.constructcap.com/articles/investing-in-sphere-semi-reinventing-analog-chip-design-for-the-ai-era",
 			"sourceTitle": "Investing in Sphere Semi: Reinventing Analog Chip Design for the AI Era"
-		}
+		},
+		"descriptionSourceUrl": "https://www.spheresemi.com/",
+		"descriptionSourceTitle": "Sphere Semi: AI-designed analog chips",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "val-town",
 		"name": "Val Town",
 		"website": "https://val.town",
-		"description": "Write and deploy small TypeScript apps, APIs, and scheduled functions.",
+		"description": "Instant hosting for TypeScript apps, APIs, and automations, with databases and AI agent integrations.",
 		"category": "Developer tools",
 		"status": "current",
 		"logo": "/portfolio/val-town.svg",
@@ -530,15 +725,18 @@
 			"date": "2024-04-09",
 			"stage": "Seed",
 			"kind": "round",
-			"sourceUrl": "https://blog.val.town/blog/seed/",
+			"sourceUrl": "https://blog.val.town/seed",
 			"sourceTitle": "Val Town’s seed round"
-		}
+		},
+		"descriptionSourceUrl": "https://www.val.town/",
+		"descriptionSourceTitle": "Val Town: Instant deployments for you and your agents",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "stackblitz",
 		"name": "StackBlitz / Bolt",
 		"website": "https://stackblitz.com",
-		"description": "Browser-based development and AI app building, powered by WebContainers.",
+		"description": "Browser development environments and Bolt, an AI app builder powered by WebContainers.",
 		"category": "AI coding",
 		"status": "current",
 		"logo": "/portfolio/stackblitz.svg",
@@ -550,37 +748,61 @@
 			"sourceTitle": "Contrary Research: Bolt business breakdown",
 			"qualifier": "Post-money; January 2025 Series B"
 		},
-		"tier": "You should know"
+		"tier": "You should know",
+		"descriptionSourceUrl": "https://stackblitz.com/",
+		"descriptionSourceTitle": "StackBlitz: Instant Dev Environments",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "prime-intellect",
 		"name": "Prime Intellect",
 		"website": "https://www.primeintellect.ai",
-		"description": "Compute, training, inference, and sandboxes for building and improving AI models.",
+		"description": "Compute, reinforcement learning, inference, and sandboxes for training and improving AI models.",
 		"category": "AI infrastructure",
 		"status": "current",
 		"logo": "/portfolio/prime-intellect.jpg",
 		"logoSource": "https://cdn.prod.website-files.com/66239f0441b09824acb92c75/671b6f6054736f752438334f_Positive.jpg",
-		"valuation": null,
-		"tier": "You should know"
+		"valuation": {
+			"amountUsd": 1000000000,
+			"date": "2026-07-08",
+			"sourceUrl": "https://techcrunch.com/2026/07/08/prime-intellect-raises-130m-series-a-to-help-enterprises-build-their-own-ai-agents/",
+			"sourceTitle": "Prime Intellect raises $130M Series A",
+			"qualifier": "Reported valuation",
+			"kind": "reported"
+		},
+		"tier": "You should know",
+		"descriptionSourceUrl": "https://www.primeintellect.ai/",
+		"descriptionSourceTitle": "Prime Intellect: The Open Superintelligence Stack",
+		"reviewedAt": "2026-09-17",
+		"funding": {
+			"amountUsd": 130000000,
+			"date": "2026-07-08",
+			"stage": "Series A",
+			"kind": "round",
+			"sourceUrl": "https://www.primeintellect.ai/blog/series-a",
+			"sourceTitle": "Prime Intellect: $130M Series A"
+		}
 	},
 	{
 		"id": "preference-model",
 		"name": "Preference Model",
 		"website": "https://preferencemodel.com",
-		"description": "Reinforcement-learning environments for automated ML research.",
+		"description": "Reinforcement-learning environments that train AI models to perform machine learning research.",
 		"category": "AI infrastructure",
 		"status": "current",
 		"logo": "/portfolio/preference-model.ico",
 		"logoSource": "https://preferencemodel.com/favicon.ico?favicon.1d4fa6c9.ico",
 		"valuation": null,
-		"tier": "Smaller names"
+		"tier": "Smaller names",
+		"descriptionSourceUrl": "https://preferencemodel.com/",
+		"descriptionSourceTitle": "Preference Model: Automated ML research engineering",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "littlebird",
 		"name": "Littlebird",
 		"website": "https://littlebird.ai",
-		"description": "A personal AI assistant that uses the context of your work.",
+		"description": "A personal AI assistant that remembers work across screens, meetings, messages, and apps.",
 		"category": "AI applications",
 		"status": "current",
 		"logo": "/portfolio/littlebird.png",
@@ -594,13 +816,16 @@
 			"kind": "round",
 			"sourceUrl": "https://littlebird.ai/blog/littlebird-raises-11m-to-build-the-first-full-context-ai",
 			"sourceTitle": "Littlebird raises $11M to build the first full-context AI"
-		}
+		},
+		"descriptionSourceUrl": "https://littlebird.ai/",
+		"descriptionSourceTitle": "Littlebird: AI Assistant With a Memory of Your Work",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "clarify",
 		"name": "Clarify",
 		"website": "https://clarify.ai",
-		"description": "An AI-native CRM that keeps customer relationships and activity up to date.",
+		"description": "An autonomous CRM with AI agents for prospecting, meeting preparation, follow-ups, and pipeline updates.",
 		"category": "AI applications",
 		"status": "current",
 		"logo": "/portfolio/clarify.png",
@@ -608,19 +833,22 @@
 		"valuation": null,
 		"tier": "Smaller names",
 		"funding": {
-			"amountUsd": 15000000,
-			"date": "2025-06-25",
-			"stage": "Series A · newer round undisclosed",
+			"amountUsd": null,
+			"date": "2026-07-21",
+			"stage": "Financing",
 			"kind": "round",
-			"sourceUrl": "https://www.cbinsights.com/company/clarify-4/financials",
-			"sourceTitle": "CB Insights: Clarify financials"
-		}
+			"sourceUrl": "https://www.geekwire.com/2026/seattles-clarify-acquires-s-f-startup-seam-ai-joining-forces-to-challenge-crm-stalwarts/",
+			"sourceTitle": "GeekWire: Clarify acquires Seam AI"
+		},
+		"descriptionSourceUrl": "https://www.clarify.ai/",
+		"descriptionSourceTitle": "Clarify: The Autonomous CRM",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "phonic",
 		"name": "Phonic",
 		"website": "https://phonic.ai",
-		"description": "Voice AI agents for natural, real-time conversations.",
+		"description": "A speech-to-speech voice agent platform combining audio models with reliable tool calling.",
 		"category": "Voice & video",
 		"status": "current",
 		"logo": "/portfolio/phonic.svg",
@@ -634,13 +862,16 @@
 			"kind": "round",
 			"sourceUrl": "https://www.prnewswire.com/news-releases/phonic-launches-end-to-end-speech-to-speech-platform-for-building-reliable-voice-agents-announces-4m-funding-raise-302419143.html",
 			"sourceTitle": "Phonic launches speech-to-speech platform and announces $4M funding"
-		}
+		},
+		"descriptionSourceUrl": "https://phonic.ai/",
+		"descriptionSourceTitle": "Phonic: Build voice agents as natural as humans",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "keycard",
 		"name": "Keycard",
 		"website": "https://www.keycard.ai",
-		"description": "Identity and access controls for AI agents, users, and tools.",
+		"description": "Identity, scoped permissions, runtime access controls, and audit trails for autonomous AI agents.",
 		"category": "Security & identity",
 		"status": "current",
 		"logo": "/portfolio/keycard.svg",
@@ -654,13 +885,16 @@
 			"kind": "round",
 			"sourceUrl": "https://boldstart.vc/news/keycard-solving-the-ai-agent-identity-and-access-problem-welcome-to-boldstart/",
 			"sourceTitle": "Keycard: Solving the AI agent identity and access problem"
-		}
+		},
+		"descriptionSourceUrl": "https://www.keycard.ai/",
+		"descriptionSourceTitle": "Keycard: The Control Plane for Autonomous Agents",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "confident-security",
 		"name": "Confident Security",
 		"website": "https://confident.security",
-		"description": "Confidential inference infrastructure that protects AI data.",
+		"description": "A verifiably private AI inference API built on the open-source OpenPCC standard.",
 		"category": "Security & identity",
 		"status": "current",
 		"logo": "/portfolio/confident-security.svg",
@@ -673,26 +907,32 @@
 			"stage": "Seed",
 			"kind": "round",
 			"sourceUrl": "https://techcrunch.com/2025/07/17/confident-security-the-signal-for-ai-comes-out-of-stealth-with-4-2m/",
-			"sourceTitle": "Confident Security, the Signal for AI, comes out of stealth with $4.2M"
-		}
+			"sourceTitle": "Confident Security seed funding"
+		},
+		"descriptionSourceUrl": "https://confident.security/",
+		"descriptionSourceTitle": "Confident Security: Verifiably-private Inference API",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "lightweight-labs",
 		"name": "Lightweight Labs",
 		"website": "https://instabooks.io",
-		"description": "Accounting software, including Instabooks for QuickBooks Online.",
+		"description": "The makers of Instabooks, a fast accounting interface for QuickBooks Online.",
 		"category": "AI applications",
 		"status": "current",
 		"logo": "/portfolio/lightweight-labs.png",
 		"logoSource": "https://instabooks.io/img/apple-touch-icon.png",
 		"valuation": null,
-		"tier": "Smaller names"
+		"tier": "Smaller names",
+		"descriptionSourceUrl": "https://instabooks.io/about",
+		"descriptionSourceTitle": "Instabooks: About Lightweight Labs",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "wordware",
 		"name": "Wordware",
 		"website": "https://wordware.ai",
-		"description": "The team behind Sauna, an AI assistant built around the context of your work.",
+		"description": "An AI context lab building Sauna, a proactive assistant with persistent work context and memory.",
 		"category": "AI applications",
 		"status": "current",
 		"logo": "/portfolio/wordware.png",
@@ -706,49 +946,61 @@
 			"kind": "round",
 			"sourceUrl": "https://blog.wordware.ai/seed-round",
 			"sourceTitle": "Wordware raises $30M seed round"
-		}
+		},
+		"descriptionSourceUrl": "https://www.wordware.ai/",
+		"descriptionSourceTitle": "Wordware: AI context lab and Sauna",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "polyhive",
 		"name": "Polyhive",
 		"website": null,
-		"description": "Generative AI tools for creating and texturing 3D assets.",
+		"description": "AI tools for generating and texturing 3D assets; current public product information is limited.",
 		"category": "AI applications",
 		"status": "current",
 		"logo": null,
 		"logoSource": null,
 		"valuation": null,
-		"tier": "Smaller names"
+		"tier": "Smaller names",
+		"descriptionSourceUrl": "https://www.soma-demoday.com/",
+		"descriptionSourceTitle": "Soma Fellows F23 Demo Day — Polyhive",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "sailplane",
 		"name": "Sailplane",
 		"website": "https://sailplane.ai",
-		"description": "Research into hierarchical planning for reliable AI agents.",
+		"description": "Autonomous agents for operating AI data centers, built on hierarchical planning research.",
 		"category": "AI infrastructure",
 		"status": "current",
 		"logo": "/portfolio/sailplane.png",
 		"logoSource": "https://www.sailplane.ai/apple-icon.png?2aa3577447c0af88",
 		"valuation": null,
-		"tier": "Smaller names"
+		"tier": "Smaller names",
+		"descriptionSourceUrl": "https://jobs.khoslaventures.com/companies/sailplane/jobs/68687691-machine-learning-engineer",
+		"descriptionSourceTitle": "Sailplane — Machine Learning Engineer, Khosla Ventures",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "morph",
 		"name": "Morph",
 		"website": "https://morph.so",
-		"description": "Cloud sandboxes with instant environment branching for AI agents.",
+		"description": "Cloud virtual machines that can be snapshotted and branched for parallel AI agents.",
 		"category": "AI infrastructure",
 		"status": "current",
 		"logo": "/portfolio/morph.png",
 		"logoSource": "https://www.morph.so/logo.png",
 		"valuation": null,
-		"tier": "Smaller names"
+		"tier": "Smaller names",
+		"descriptionSourceUrl": "https://github.com/morph-labs/morph-python-sdk",
+		"descriptionSourceTitle": "Morph Cloud: Python SDK",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "fireproof",
 		"name": "Fireproof",
 		"website": "https://fireproof.storage",
-		"description": "An embedded, local-first database with realtime synchronization.",
+		"description": "An embedded local-first database with live peer synchronization and portable, cryptographically verified data.",
 		"category": "Data & databases",
 		"status": "current",
 		"logo": "/portfolio/fireproof.ico",
@@ -762,13 +1014,16 @@
 			"kind": "round",
 			"sourceUrl": "https://www.cbinsights.com/company/fireproof-storage",
 			"sourceTitle": "Fireproof Storage — CBInsights"
-		}
+		},
+		"descriptionSourceUrl": "https://fireproof.storage/",
+		"descriptionSourceTitle": "Fireproof cloudless database for realtime apps",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "arcjet",
 		"name": "Arcjet",
 		"website": "https://arcjet.com",
-		"description": "Application security with bot protection, rate limiting, and attack detection.",
+		"description": "Runtime security for AI agents and applications, including prompt injection defense, data-loss prevention, bot protection, and tool controls.",
 		"category": "Security & identity",
 		"status": "current",
 		"logo": "/portfolio/arcjet.png",
@@ -782,13 +1037,16 @@
 			"kind": "round",
 			"sourceUrl": "https://blog.arcjet.com/introducing-arcjets-local-ai-security-model-announcing-series-a-funding/",
 			"sourceTitle": "Introducing Arcjet's local AI security model + announcing Series A funding"
-		}
+		},
+		"descriptionSourceUrl": "https://arcjet.com/",
+		"descriptionSourceTitle": "Arcjet — AI agent runtime security",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "cosine",
 		"name": "Cosine",
 		"website": "https://cosine.sh",
-		"description": "AI software engineering agents for complex coding tasks.",
+		"description": "Sovereign AI models and specialized coding agents for secure and air-gapped environments.",
 		"category": "AI coding",
 		"status": "current",
 		"logo": "/portfolio/cosine.png",
@@ -810,25 +1068,31 @@
 			"kind": "total",
 			"sourceUrl": "https://pathfounders.com/p/cosine-ai-recruits-corporate-heavyweights-to-build-sovereign",
 			"sourceTitle": "Cosine AI recruits corporate heavyweights to build sovereign UK frontier AI model"
-		}
+		},
+		"descriptionSourceUrl": "https://cosine.sh/",
+		"descriptionSourceTitle": "Cosine — The Sovereign AI Lab",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "responsive",
 		"name": "Responsive",
 		"website": "https://responsive.dev",
-		"description": "Open-source, object-store-native databases, including SlateDB and OpenData.",
+		"description": "Open-source databases built on object storage, including SlateDB and OpenData.",
 		"category": "Data & databases",
 		"status": "current",
 		"logo": "/portfolio/responsive.svg",
 		"logoSource": "https://www.responsive.dev/favicon.svg",
 		"valuation": null,
-		"tier": "Smaller names"
+		"tier": "Smaller names",
+		"descriptionSourceUrl": "https://www.responsive.dev/",
+		"descriptionSourceTitle": "Responsive",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "budibase",
 		"name": "Budibase",
 		"website": "https://budibase.com",
-		"description": "An open-source platform for building internal apps and automations.",
+		"description": "An open-source platform for building internal apps, AI agents, and automated business workflows.",
 		"category": "Developer tools",
 		"status": "current",
 		"logo": "/portfolio/budibase.png",
@@ -842,13 +1106,16 @@
 			"kind": "round",
 			"sourceUrl": "https://budibase.com/blog/updates/budibase-raises-7m-to-help-every-company-on-the-planet-build-their-own-tools/",
 			"sourceTitle": "Budibase raises $7M to help every company build their own tools"
-		}
+		},
+		"descriptionSourceUrl": "https://budibase.com/",
+		"descriptionSourceTitle": "Budibase — Agents, Workflows & Internal Tools",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "100ms",
 		"name": "100ms",
 		"website": "https://100ms.live",
-		"description": "Infrastructure and SDKs for live audio and video experiences.",
+		"description": "APIs and SDKs for customizable video calls, live streaming, audio rooms, and virtual events.",
 		"category": "Voice & video",
 		"status": "current",
 		"logo": "/portfolio/100ms.png",
@@ -862,37 +1129,46 @@
 			"kind": "round",
 			"sourceUrl": "https://techcrunch.com/2022/03/10/100ms-secures-20m-to-power-next-generation-of-live-video-apps/",
 			"sourceTitle": "100ms secures $20M to power live video apps"
-		}
+		},
+		"descriptionSourceUrl": "https://www.100ms.live/",
+		"descriptionSourceTitle": "100ms — Live video infrastructure",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "expand",
 		"name": "Expand.ai",
 		"website": "https://expand.ai",
-		"description": "Turn websites into structured data and type-safe APIs.",
+		"description": "A web-fetching API that turns complete pages, tables, and embedded data into Markdown for AI agents.",
 		"category": "Data & databases",
 		"status": "current",
 		"logo": "/portfolio/expand.ico",
 		"logoSource": "https://expand.ai/favicon.ico",
 		"valuation": null,
-		"tier": "Smaller names"
+		"tier": "Smaller names",
+		"descriptionSourceUrl": "https://expand.ai/",
+		"descriptionSourceTitle": "Expand — Feed agents the whole page",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "catamaran",
 		"name": "Catamaran Research",
 		"website": null,
-		"description": "Derek Zaw’s company; further details are not yet listed.",
+		"description": "Company details have not been publicly verified.",
 		"category": "Not announced",
 		"status": "current",
 		"logo": null,
 		"logoSource": null,
 		"valuation": null,
-		"tier": "Smaller names"
+		"tier": "Smaller names",
+		"descriptionSourceUrl": null,
+		"descriptionSourceTitle": null,
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "replay",
 		"name": "Replay",
 		"website": "https://replay.io",
-		"description": "Application replay and AI-powered testing that traces bugs to their root cause.",
+		"description": "AI-powered web-app testing that records execution and reports bugs, root causes, and suggested fixes on pull requests.",
 		"category": "Developer tools",
 		"status": "current",
 		"logo": "/portfolio/replay.ico",
@@ -907,49 +1183,77 @@
 			"kind": "round",
 			"sourceUrl": "https://www.replay.io/blog/replay-for-test-suites",
 			"sourceTitle": "Replay for Test Suites: $13M Series A announcement"
-		}
+		},
+		"descriptionSourceUrl": "https://www.replay.io/",
+		"descriptionSourceTitle": "Replay QA — AI wrote the app. Replay QA finds what broke.",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "kepler-ai",
 		"name": "Kepler AI",
 		"website": "https://kepler.ai",
-		"description": "AI for financial research and analysis, with source-linked data and reproducible calculations.",
+		"description": "Verifiable AI for financial research, combining source-linked filings and transcripts with deterministic calculations.",
 		"category": "AI finance",
 		"status": "current",
 		"logo": "/portfolio/kepler-ai.png",
 		"logoSource": "https://kepler.ai/apple-touch-icon.png",
 		"valuation": null,
-		"tier": "Smaller names"
+		"tier": "Smaller names",
+		"descriptionSourceUrl": "https://kepler.ai/",
+		"descriptionSourceTitle": "Kepler — AI that proves it is right",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "flow-engineering",
 		"name": "Flow Engineering",
 		"website": "https://www.flowengineering.com",
-		"description": "Requirements management and AI agents that connect hardware design, simulation, code, and testing.",
+		"description": "Requirements management and AI systems-engineering agents that connect hardware design, simulation, code, and verification.",
 		"category": "Developer tools",
 		"status": "current",
 		"logo": "/portfolio/flow-engineering.svg",
 		"logoSource": "https://cdn.sanity.io/images/oj8dplvw/production/b2c79eb8adcf87d723026ffdcd914ca50373b906-32x32.svg",
-		"valuation": null,
-		"tier": "Smaller names"
+		"valuation": {
+			"amountUsd": 21000000,
+			"date": "2021-08",
+			"dateLabel": "Aug 2021",
+			"kind": "database-reported",
+			"qualifier": "Historical database mark · basis unspecified",
+			"sourceUrl": "https://www.cbinsights.com/company/the-engineering-company-1/financials",
+			"sourceTitle": "Flow Engineering financials — CBInsights"
+		},
+		"tier": "Smaller names",
+		"descriptionSourceUrl": "https://www.flowengineering.com/",
+		"descriptionSourceTitle": "Flow — Requirements Tool for Agentic Teams",
+		"reviewedAt": "2026-09-17",
+		"funding": {
+			"amountUsd": 23000000,
+			"date": "2025-10-14",
+			"stage": "Series A",
+			"kind": "round",
+			"sourceUrl": "https://www.fenwick.com/insights/experience/fenwick-represents-flow-engineering-in-23m-series-a-funding",
+			"sourceTitle": "Fenwick represents Flow Engineering in $23M Series A funding"
+		}
 	},
 	{
 		"id": "harbor",
 		"name": "Harbor",
 		"website": "https://www.harborframework.com",
-		"description": "A framework for evaluating and optimizing AI agents in sandboxed environments, from the makers of Terminal-Bench.",
+		"description": "An open-source framework for evaluating and optimizing AI agents in parallel sandboxed environments, from the creators of Terminal-Bench.",
 		"category": "AI infrastructure",
 		"status": "current",
 		"logo": "/portfolio/harbor.ico",
 		"logoSource": "https://www.harborframework.com/favicon.ico",
 		"valuation": null,
-		"tier": "Smaller names"
+		"tier": "Smaller names",
+		"descriptionSourceUrl": "https://github.com/harbor-framework/harbor",
+		"descriptionSourceTitle": "Harbor — Official repository",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "astral",
 		"name": "Astral",
 		"website": "https://astral.sh",
-		"description": "Fast Python tooling, including Ruff and uv.",
+		"description": "High-performance open-source Python tooling: Ruff, uv, and the ty type checker.",
 		"category": "Developer tools",
 		"status": "exited",
 		"logo": "/portfolio/astral.png",
@@ -958,25 +1262,29 @@
 		"acquirer": "OpenAI",
 		"tier": "Done",
 		"funding": {
-			"amountUsd": 4000000,
-			"date": "2023-04-18",
-			"stage": "Seed; later rounds undisclosed",
+			"amountUsd": null,
+			"date": "2026-03-19",
+			"dateLabel": "Disclosed Mar 2026; round date unavailable",
+			"stage": "Series B · amount undisclosed",
 			"kind": "round",
-			"sourceUrl": "https://astral.sh/blog/announcing-astral-the-company-behind-ruff",
-			"sourceTitle": "Announcing Astral, the company behind Ruff"
+			"sourceUrl": "https://astral.sh/blog/openai",
+			"sourceTitle": "Astral to join OpenAI"
 		},
 		"exit": {
 			"acquirerLogo": "/portfolio/acquirers/openai.png",
 			"acquirerLogoSource": "https://developers.openai.com/favicon.png",
 			"sourceUrl": "https://astral.sh/blog/openai",
 			"sourceTitle": "Astral to join OpenAI"
-		}
+		},
+		"descriptionSourceUrl": "https://astral.sh/blog/openai",
+		"descriptionSourceTitle": "Astral to join OpenAI",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "promptfoo",
 		"name": "Promptfoo",
 		"website": "https://promptfoo.dev",
-		"description": "Open-source tools for testing, evaluating, and red-teaming AI applications.",
+		"description": "AI security testing, evaluations, and automated red-teaming for applications and agents.",
 		"category": "AI infrastructure",
 		"status": "exited",
 		"logo": "/portfolio/promptfoo.ico",
@@ -996,13 +1304,16 @@
 			"acquirerLogoSource": "https://developers.openai.com/favicon.png",
 			"sourceUrl": "https://openai.com/index/openai-to-acquire-promptfoo/",
 			"sourceTitle": "OpenAI to acquire Promptfoo"
-		}
+		},
+		"descriptionSourceUrl": "https://www.promptfoo.dev/",
+		"descriptionSourceTitle": "Promptfoo: Build secure AI applications",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "gabber",
 		"name": "Gabber",
 		"website": "https://gabber.dev",
-		"description": "Infrastructure for building real-time voice AI applications.",
+		"description": "Visual orchestration for real-time AI apps combining voice, video, screen, and text.",
 		"category": "Voice & video",
 		"status": "exited",
 		"logo": "/portfolio/gabber.png",
@@ -1015,13 +1326,16 @@
 			"acquirerLogoSource": "https://livekit.com/images/livekit-apple-touch.png",
 			"sourceUrl": "https://www.linkedin.com/posts/jackndwyer_the-news-is-out-gabber-is-joining-livekit-activity-7419100783738040320-4mKG",
 			"sourceTitle": "Jack Dwyer: Gabber is joining LiveKit"
-		}
+		},
+		"descriptionSourceUrl": "https://gabber.dev/",
+		"descriptionSourceTitle": "Gabber: Build real-time AI apps",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "codegen",
 		"name": "Codegen",
 		"website": "https://codegen.com",
-		"description": "AI agents that automate software engineering work.",
+		"description": "Autonomous coding agents acquired by ClickUp; the standalone service was retired in January 2026.",
 		"category": "AI coding",
 		"status": "exited",
 		"logo": "/portfolio/codegen.webp",
@@ -1030,7 +1344,7 @@
 			"amountUsd": 60000000,
 			"date": "2023-11-16",
 			"sourceUrl": "https://techcrunch.com/2023/11/16/codegen-raises-new-capital-llm-automation-for-software-dev/",
-			"sourceTitle": "Codegen raises new cash to automate software engineering tasks",
+			"sourceTitle": "Codegen seed financing",
 			"qualifier": "Post-money · before exit"
 		},
 		"acquirer": "ClickUp",
@@ -1040,13 +1354,24 @@
 			"acquirerLogoSource": "https://clickup.com/favicons/apple-touch-icon.png",
 			"sourceUrl": "https://clickup.com/blog/clickup-codegen-acquisition/",
 			"sourceTitle": "ClickUp + Codegen: Putting Software Creation in Every Knowledge Worker’s Hands"
+		},
+		"descriptionSourceUrl": "https://clickup.com/blog/clickup-codegen-acquisition/",
+		"descriptionSourceTitle": "ClickUp + Codegen acquisition",
+		"reviewedAt": "2026-09-17",
+		"funding": {
+			"amountUsd": 16000000,
+			"date": "2023-11-16",
+			"stage": "Seed · before exit",
+			"kind": "round",
+			"sourceUrl": "https://techcrunch.com/2023/11/16/codegen-raises-new-capital-llm-automation-for-software-dev/",
+			"sourceTitle": "Codegen seed financing"
 		}
 	},
 	{
 		"id": "brev",
 		"name": "Brev",
 		"website": "https://brev.nvidia.com",
-		"description": "Cloud GPU development environments for AI and machine learning.",
+		"description": "GPU development environments with preconfigured AI software and shareable one-click deployments.",
 		"category": "Infrastructure",
 		"status": "exited",
 		"logo": "/portfolio/brev.ico",
@@ -1056,7 +1381,7 @@
 			"maxAmountUsd": 10000000,
 			"date": "2021-08-24",
 			"kind": "database-reported",
-			"qualifier": "Database range · before exit",
+			"qualifier": "Database-reported range · before exit",
 			"sourceUrl": "https://www.cbinsights.com/company/brevdev/financials",
 			"sourceTitle": "Brev Stock Price, Funding, Valuation — CBInsights"
 		},
@@ -1067,13 +1392,16 @@
 			"acquirerLogoSource": "https://www.nvidia.com/content/dam/en-zz/Solutions/about-nvidia/nvidia-brochure/images/nvidia-logo-black.svg",
 			"sourceUrl": "https://www.linkedin.com/posts/brevdev_today-brevdev-is-being-acquired-by-nvidia-activity-7219055612230258688-FBwi",
 			"sourceTitle": "Brev.dev is being acquired by NVIDIA"
-		}
+		},
+		"descriptionSourceUrl": "https://docs.nvidia.com/brev/concepts/overview",
+		"descriptionSourceTitle": "NVIDIA Brev: Core concepts",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "gel",
 		"name": "Gel",
 		"website": "https://geldata.com",
-		"description": "The database formerly known as EdgeDB, built on Postgres.",
+		"description": "The Postgres-based database formerly called EdgeDB; its team joined Vercel and the cloud service was wound down.",
 		"category": "Data & databases",
 		"status": "exited",
 		"logo": "/portfolio/gel.png",
@@ -1094,13 +1422,16 @@
 			"acquirerLogoSource": "https://assets.vercel.com/image/upload/q_auto/front/favicon/vercel/apple-touch-icon-180x180.png",
 			"sourceUrl": "https://www.geldata.com/blog/gel-joins-vercel",
 			"sourceTitle": "Gel joins Vercel"
-		}
+		},
+		"descriptionSourceUrl": "https://www.geldata.com/blog/gel-joins-vercel",
+		"descriptionSourceTitle": "Gel joins Vercel",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "dynamic",
 		"name": "Dynamic",
 		"website": "https://dynamic.xyz",
-		"description": "Wallet infrastructure and authentication for crypto applications.",
+		"description": "Embedded wallets, authentication, and onboarding infrastructure for crypto applications.",
 		"category": "Security & identity",
 		"status": "exited",
 		"logo": "/portfolio/dynamic.jpg",
@@ -1121,26 +1452,40 @@
 			"acquirerLogoSource": "https://www.fireblocks.com/wp-content/themes/fireblocks-block-theme/assets/favicon.png",
 			"sourceUrl": "https://www.fireblocks.com/blog/fireblocks-acquires-dynamic",
 			"sourceTitle": "Fireblocks Acquires Dynamic"
+		},
+		"descriptionSourceUrl": "https://www.fireblocks.com/blog/fireblocks-acquires-dynamic",
+		"descriptionSourceTitle": "Fireblocks acquires Dynamic",
+		"reviewedAt": "2026-09-17",
+		"funding": {
+			"amountUsd": 13500000,
+			"date": "2023-12-13",
+			"stage": "Series A · before exit",
+			"kind": "round",
+			"sourceUrl": "https://a16zcrypto.com/posts/article/investing-in-dynamic-labs-again",
+			"sourceTitle": "a16z crypto: Investing again in Dynamic Labs"
 		}
 	},
 	{
 		"id": "begin",
 		"name": "Begin",
 		"website": null,
-		"description": "Serverless app development tooling; the team joined Sanity in 2024.",
+		"description": "Serverless web app tooling and the Architect framework; the team joined Sanity in 2024.",
 		"category": "Developer tools",
 		"status": "closed",
 		"logo": null,
 		"logoSource": null,
 		"valuation": null,
 		"relatedUrl": "https://www.sanity.io/blog/welcoming-the-begin-team-to-sanity",
-		"tier": "Done"
+		"tier": "Done",
+		"descriptionSourceUrl": "https://www.sanity.io/blog/welcoming-the-begin-team-to-sanity",
+		"descriptionSourceTitle": "Begin team to join Sanity",
+		"reviewedAt": "2026-09-17"
 	},
 	{
 		"id": "dimension",
 		"name": "Dimension",
 		"website": null,
-		"description": "A collaborative workspace for software development teams.",
+		"description": "Developer workspace combining collaboration tools.",
 		"category": "Developer tools",
 		"status": "closed",
 		"logo": null,
@@ -1155,6 +1500,9 @@
 			"kind": "total",
 			"sourceUrl": "https://techcrunch.com/startup-battlefield/company/dimension/",
 			"sourceTitle": "Dimension — TechCrunch Startup Battlefield"
-		}
+		},
+		"descriptionSourceUrl": "https://techcrunch.com/startup-battlefield/company/dimension/",
+		"descriptionSourceTitle": "Dimension: Startup Battlefield profile",
+		"reviewedAt": "2026-09-17"
 	}
 ]

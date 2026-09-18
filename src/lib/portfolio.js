@@ -2,9 +2,9 @@
  * Public company marks, not the value of my holdings. A null valuation means
  * no public figure was verified; it must never be treated as zero.
  * @typedef {{ amountUsd: number, maxAmountUsd?: number, date: string, sourceUrl: string, sourceTitle: string, qualifier?: string, prefix?: string, dateLabel?: string, kind?: 'reported' | 'database-reported' | 'filing-derived' }} Valuation
- * @typedef {{ amountUsd: number | null, date: string, dateLabel?: string, stage: string, kind?: 'round' | 'total', sourceUrl: string, sourceTitle: string }} FundingRound
+ * @typedef {{ amountUsd: number | null, prefix?: string, date: string, dateLabel?: string, stage: string, kind?: 'round' | 'total', sourceUrl: string, sourceTitle: string }} FundingRound
  * @typedef {{ acquirerLogo: string, acquirerLogoSource: string, sourceUrl: string, sourceTitle: string }} ExitAnnouncement
- * @typedef {{ id: string, name: string, website: string | null, description: string, category: string, tier: string, status: string, logo: string | null, logoSource: string | null, valuation: Valuation | null, funding?: FundingRound, relatedUrl?: string, note?: string, acquirer?: string, exit?: ExitAnnouncement }} PortfolioCompany
+ * @typedef {{ id: string, name: string, website: string | null, description: string, descriptionSourceUrl?: string | null, descriptionSourceTitle?: string, reviewedAt?: string, category: string, tier: string, status: string, logo: string | null, logoSource: string | null, valuation: Valuation | null, valuationRumor?: Valuation & { xUrl?: string }, funding?: FundingRound, relatedUrl?: string, note?: string, acquirer?: string, exit?: ExitAnnouncement }} PortfolioCompany
  */
 
 // These are the original editorial groups, not financial rankings or funding stages.
