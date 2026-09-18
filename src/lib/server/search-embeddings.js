@@ -75,8 +75,6 @@ async function embed(env, texts) {
 /** @type {Map<string,number[]>} */
 let vectors = new Map();
 let refreshedAt = 0;
-/** @type {D1Database|undefined} */
-let vectorDatabase;
 /** @type {Promise<void>|undefined} */
 let loading;
 export const VECTOR_SNAPSHOT_KEY = `search-vector-snapshot:${EMBEDDING_VERSION}`;
@@ -123,19 +121,17 @@ export async function publishVectorSnapshot(env) {
 	const encoded = encodeVectorSnapshot(next);
 	await env.CONTENT_MANIFEST.put(VECTOR_SNAPSHOT_KEY, encoded);
 	vectors = next;
-	vectorDatabase = env.READ_COUNTERS;
 	refreshedAt = Date.now();
 	return { indexed: next.size, bytes: encoded.length };
 }
 /** @param {Environment} env */
 async function refresh(env) {
 	const db = env.READ_COUNTERS;
-	if (!db || (db === vectorDatabase && Date.now() - refreshedAt < 60_000)) return;
+	if (!db || Date.now() - refreshedAt < 60_000) return;
 	if (!loading)
 		loading = (async () => {
 			const cached = await env.CONTENT_MANIFEST?.get(VECTOR_SNAPSHOT_KEY);
 			vectors = cached ? decodeVectorSnapshot(cached) : await readVectors(db);
-			vectorDatabase = db;
 			refreshedAt = Date.now();
 		})().finally(() => {
 			loading = undefined;
@@ -240,10 +236,11 @@ export async function semanticMatches(catalog, platform, q) {
 	let timer;
 	try {
 		const work = (async () => {
-			await refresh(env);
+			// Independent KV reads overlap; request-scoped binding wrappers do not
+			// invalidate this worker isolate's short-lived public vector cache.
+			const [, query] = await Promise.all([refresh(env), queryVector(env, q)]);
 			const available = catalog.passages.filter((p) => vectors.has(embeddingKey(embeddingText(p))));
 			if (!available.length) return null;
-			const query = await queryVector(env, q);
 			if (!query) return null;
 			return available
 				.map((p) => ({

@@ -147,8 +147,9 @@ test('compressed vector snapshots preserve vectors, reject invalid models, and a
 		decodeVectorSnapshot,
 		VECTOR_SNAPSHOT_KEY,
 		embeddingKey,
-		embeddingText
-	} = await import('../src/lib/server/search-embeddings.js');
+		embeddingText,
+		semanticMatches: isolatedSemanticMatches
+	} = await import('../src/lib/server/search-embeddings.js?cache-isolation');
 	const items = [
 		{
 			title: 'Conference Advice',
@@ -185,7 +186,7 @@ test('compressed vector snapshots preserve vectors, reject invalid models, and a
 			}
 		}
 	};
-	const matched = await semanticMatches(catalog, { env }, 'presentation topics');
+	const matched = await isolatedSemanticMatches(catalog, { env }, 'presentation topics');
 	assert.equal(matched[0].id, passage.id);
 	assert.equal(scans, 0);
 	assert.equal(calls, 0);
@@ -193,5 +194,23 @@ test('compressed vector snapshots preserve vectors, reject invalid models, and a
 		projectSearchCatalog([{ ...items[0], content: '## Changed\n\nNew unrelated body.' }]),
 		[{ ...items[0], content: '## Changed\n\nNew unrelated body.' }]
 	);
-	assert.equal(await semanticMatches(edited, { env }, 'presentation topics'), null);
+	assert.equal(await isolatedSemanticMatches(edited, { env }, 'presentation topics'), null);
+	const nextRequest = {
+		...env,
+		READ_COUNTERS: { ...env.READ_COUNTERS },
+		CONTENT_MANIFEST: {
+			async get(key) {
+				assert.notEqual(
+					key,
+					VECTOR_SNAPSHOT_KEY,
+					'fresh binding wrapper must reuse the isolate cache'
+				);
+				return JSON.stringify(vector);
+			}
+		}
+	};
+	assert.equal(
+		(await isolatedSemanticMatches(catalog, { env: nextRequest }, 'presentation topics'))[0].id,
+		passage.id
+	);
 });
