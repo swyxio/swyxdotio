@@ -114,7 +114,7 @@
 	{#if sources.length}<ol class="sources" aria-label="Answer sources">
 			{#each sources as source}<li>
 					<a href={source.url}
-						>{source.title}{#if source.section}<span> · {source.section}</span>{/if}</a
+						>[{source.id}] {source.title}{#if source.section}<span> · {source.section}</span>{/if}</a
 					>
 				</li>{/each}
 		</ol>{/if}
