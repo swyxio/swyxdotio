@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { SEARCH_TYPES, COMMON_DESTINATIONS } from '$lib/site-search.js';
 	import { beforeNavigate } from '$app/navigation';
+	import SearchAssistant from '../../components/SearchAssistant.svelte';
 	export let data: import('./$types').PageData;
 	let query = data.q,
 		type = data.type,
@@ -97,6 +98,7 @@
 			>
 		</div>
 	</form>
+	<SearchAssistant {query} />
 	{#if data.unavailable}
 		<p role="status">Search is temporarily unavailable. You can still open these common pages.</p>
 		<ul class="complete-results">

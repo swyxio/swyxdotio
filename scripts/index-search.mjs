@@ -20,7 +20,11 @@ if (!account || !db || !namespace) throw new Error('Search bindings not found');
 async function api(path, body) {
 	const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${account}/${path}`, {
 		method: 'POST',
-		headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+		headers: {
+			Authorization: `Bearer ${token}`,
+			'Content-Type': 'application/json',
+			...(path.startsWith('ai/run/') ? { 'cf-aig-gateway-id': 'swyx-shared' } : {})
+		},
 		body: JSON.stringify(body)
 	});
 	const data = await response.json();

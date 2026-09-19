@@ -92,7 +92,11 @@ declare namespace App {
 	interface Platform {
 		env?: {
 			AI?: {
-				run(model: string, input: Record<string, unknown>): Promise<unknown>;
+				run(
+					model: string,
+					input: Record<string, unknown>,
+					options?: { gateway: { id: string; skipCache?: boolean } }
+				): Promise<unknown>;
 			};
 			GA4_MEASUREMENT_ID?: string;
 			GA4_API_SECRET?: string;
@@ -122,6 +126,7 @@ declare namespace App {
 			READ_IP_RATE_LIMITER?: RateLimit;
 			READ_SESSION_RATE_LIMITER?: RateLimit;
 			READ_FUNNEL_RATE_LIMITER?: RateLimit;
+			SEARCH_ASK_RATE_LIMITER?: RateLimit;
 			PRESENCE_ROOMS?: DurableObjectNamespace;
 			DRAW_PAGES?: DurableObjectNamespace;
 			DRAW_ASSETS?: R2Bucket;
