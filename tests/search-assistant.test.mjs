@@ -278,3 +278,28 @@ test('answers use article prose rather than metadata-only talks and related-link
 	assert(sources.every((s) => s.url === '/learn#practice'));
 	assert.match(sources[0].text, /accept corrections/);
 });
+
+test('specific questions favor passages matching the complete query before partial matches', () => {
+	const items = [
+		{
+			title: 'CFP Advice',
+			slug: 'cfp',
+			category: 'essay',
+			content:
+				'# Pick a Topic\n\nPick a topic for your conference talk at the intersection of your interests and what the audience wants.'
+		},
+		{
+			title: 'Conference Talks',
+			slug: 'recording',
+			category: 'essay',
+			content:
+				'# During the Talk\n\nThis conference talk is a talk about recording a conference talk. Check your microphone before the talk.'
+		}
+	];
+	const sources = retrieveAssistantSources(
+		createSearchIndex(projectSearchCatalog(items), items),
+		'How do I pick a topic for my conference talk?'
+	);
+	assert.equal(sources[0].url, '/cfp#pick-a-topic');
+	assert(sources.every((s) => s.title === 'CFP Advice'));
+});
