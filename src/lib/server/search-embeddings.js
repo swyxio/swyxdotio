@@ -1,9 +1,10 @@
+import { reserveAiBudget, MONTHLY_BUDGET_MICROS, AI_GATEWAY_ID } from './ai-budget.js';
 import { createHash } from 'node:crypto';
 import { gzipSync, gunzipSync, strToU8, strFromU8 } from 'fflate';
 
 export const EMBEDDING_MODEL = '@cf/baai/bge-small-en-v1.5';
 export const EMBEDDING_VERSION = 'bge-small-cls-v1';
-export const MONTHLY_BUDGET_MICROS = 10_000_000;
+export { MONTHLY_BUDGET_MICROS };
 // 512 tokens × $0.0202 / million = $0.0000103424. Reserve $0.000020
 // per input, including failures/timeouts. Never refund ambiguous provider work.
 export const INPUT_RESERVATION_MICROS = 20;
@@ -45,17 +46,7 @@ export function cosine(a, b) {
  * @param {D1Database} db @param {number} count @param {Date} [now]
  */
 export async function reserveEmbeddingBudget(db, count, now = new Date()) {
-	const amount = count * INPUT_RESERVATION_MICROS;
-	if (!Number.isInteger(count) || count < 1 || amount > MONTHLY_BUDGET_MICROS) return false;
-	const row = await db
-		.prepare(
-			`INSERT INTO search_embedding_budget(month,reserved_micros)
- VALUES(?,?) ON CONFLICT(month) DO UPDATE SET reserved_micros=reserved_micros+excluded.reserved_micros
- WHERE reserved_micros+excluded.reserved_micros<=? RETURNING reserved_micros`
-		)
-		.bind(now.toISOString().slice(0, 7), amount, MONTHLY_BUDGET_MICROS)
-		.first();
-	return !!row;
+	return reserveAiBudget(db, count * INPUT_RESERVATION_MICROS, 'embeddings', now);
 }
 /** @param {Environment} env @param {string[]} texts @returns {Promise<number[][]|null>} */
 async function embed(env, texts) {
@@ -66,7 +57,11 @@ async function embed(env, texts) {
 	)
 		return null;
 	const response = /** @type {{data?:unknown[]}} */ (
-		await env.AI.run(EMBEDDING_MODEL, { text: texts, pooling: 'cls' })
+		await env.AI.run(
+			EMBEDDING_MODEL,
+			{ text: texts, pooling: 'cls' },
+			{ gateway: { id: AI_GATEWAY_ID } }
+		)
 	);
 	if (response.data?.length !== texts.length || !response.data.every(validVector))
 		throw new Error('Invalid search embedding response');

@@ -94,3 +94,11 @@ bucket_name = "swyxdotio-draw-assets"
 # [[migrations]]
 # tag = "v1"
 # new_classes = ["MyDurableObject"]
+
+[[ratelimits]]
+name = "SEARCH_ASK_RATE_LIMITER"
+namespace_id = "41004"
+
+  [ratelimits.simple]
+  limit = 3
+  period = 60
