@@ -17,16 +17,27 @@ function truncate(text, maxBytes) {
 }
 /** Public catalog already excludes private content. Keep one matching section per document. @param {ReturnType<import('./site-search.js').createSearchIndex>} catalog @param {string} q */
 export function retrieveAssistantSources(catalog, q) {
-	const found = /** @type {import('@orama/orama').Results<any>} */ (
+	let found = /** @type {import('@orama/orama').Results<any>} */ (
 		bm25Search(catalog.engine, {
 			term: searchTerms(normalizeSearch(q)).join(' '),
 			properties: ['title', 'heading', 'body', 'topics', 'path'],
 			boost: { title: 10, heading: 4, topics: 3, body: 1, path: 1 },
-			threshold: 1,
+			threshold: 0,
 			tolerance: 0,
 			limit: catalog.passages.length
 		})
 	);
+	if (!found.hits.length)
+		found = /** @type {import('@orama/orama').Results<any>} */ (
+			bm25Search(catalog.engine, {
+				term: searchTerms(normalizeSearch(q)).join(' '),
+				properties: ['title', 'heading', 'body', 'topics', 'path'],
+				boost: { title: 10, heading: 4, topics: 3, body: 1, path: 1 },
+				threshold: 1,
+				tolerance: 0,
+				limit: catalog.passages.length
+			})
+		);
 	// Answers need published prose rather than podcast descriptions or link lists.
 	const metadata = new Set(
 		catalog.records.map((record) => catalog.passages.find((p) => p.record.id === record.id)?.id)
@@ -46,7 +57,15 @@ export function retrieveAssistantSources(catalog, q) {
 		const count = documents.get(passage.record.id) || 0;
 		if (count >= 2 || sources.length >= 4 || remaining < 100) continue;
 		documents.set(passage.record.id, count + 1);
-		const text = truncate(passage.text, Math.min(1200, remaining));
+		const sectionLead = catalog.passages.find(
+			(p) =>
+				p.record.id === passage.record.id && p.heading === passage.heading && !metadata.has(p.id)
+		);
+		const context =
+			sectionLead && sectionLead.id !== passage.id
+				? truncate(sectionLead.text, 800) + '\n…\n' + truncate(passage.text, 400)
+				: passage.text;
+		const text = truncate(context, Math.min(1200, remaining));
 		remaining -= encoder.encode(text).length;
 		sources.push({
 			id: sources.length + 1,
