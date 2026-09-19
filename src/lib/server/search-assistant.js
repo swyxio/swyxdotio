@@ -57,7 +57,15 @@ export function retrieveAssistantSources(catalog, q) {
 		const count = documents.get(passage.record.id) || 0;
 		if (count >= 2 || sources.length >= 4 || remaining < 100) continue;
 		documents.set(passage.record.id, count + 1);
-		const text = truncate(passage.text, Math.min(1200, remaining));
+		const sectionLead = catalog.passages.find(
+			(p) =>
+				p.record.id === passage.record.id && p.heading === passage.heading && !metadata.has(p.id)
+		);
+		const context =
+			sectionLead && sectionLead.id !== passage.id
+				? truncate(sectionLead.text, 800) + '\n…\n' + truncate(passage.text, 400)
+				: passage.text;
+		const text = truncate(context, Math.min(1200, remaining));
 		remaining -= encoder.encode(text).length;
 		sources.push({
 			id: sources.length + 1,
