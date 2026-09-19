@@ -1,4 +1,7 @@
-import { parseSearchParams, searchCatalog } from './site-search.js';
+import { search as bm25Search } from '@orama/orama';
+import { searchTerms } from '../search-terms.js';
+import { normalizeSearch } from '../site-search.js';
+import { AI_GATEWAY_ID } from './ai-budget.js';
 
 export const ASSISTANT_MODEL = '@cf/qwen/qwen3-30b-a3b-fp8';
 export const ASSISTANT_RESERVATION_MICROS = 800;
@@ -14,25 +17,45 @@ function truncate(text, maxBytes) {
 }
 /** Public catalog already excludes private content. Keep one matching section per document. @param {ReturnType<import('./site-search.js').createSearchIndex>} catalog @param {string} q */
 export function retrieveAssistantSources(catalog, q) {
-	const params = parseSearchParams(new URLSearchParams({ q, limit: '5', scope: 'content' }));
-	const result = searchCatalog(catalog, params);
+	const found = /** @type {import('@orama/orama').Results<any>} */ (
+		bm25Search(catalog.engine, {
+			term: searchTerms(normalizeSearch(q)).join(' '),
+			properties: ['title', 'heading', 'body', 'topics', 'path'],
+			boost: { title: 10, heading: 4, topics: 3, body: 1, path: 1 },
+			threshold: 1,
+			tolerance: 0,
+			limit: catalog.passages.length
+		})
+	);
+	// Answers need published prose rather than podcast descriptions or link lists.
+	const metadata = new Set(
+		catalog.records.map((record) => catalog.passages.find((p) => p.record.id === record.id)?.id)
+	);
+	const eligible = found.hits
+		.map((hit) => catalog.passages[Number(hit.id)])
+		.filter((p) => p.record.type === 'article' && !metadata.has(p.id) && p.text.length >= 40);
+	const substantive = eligible.filter(
+		(p) => !/^(related links|references|further references|resources|links)$/i.test(p.heading)
+	);
+	const passages = substantive.length ? substantive : eligible;
 	/** @type {AssistantSource[]} */
 	const sources = [];
-	let remaining = 5000;
-	for (const hit of result.results) {
-		const candidates = catalog.passages.filter(
-			(p) => p.record.id === hit.id && p.heading === (hit.section || '')
-		);
-		const excerpt = hit.snippet.replace(/^…\s*|\s*…$/g, '');
-		const passage = candidates.find((p) => p.text.includes(excerpt)) || candidates[0];
-		if (!passage?.text || remaining < 100) continue;
-		const text = truncate(passage.text, Math.min(1500, remaining));
+	const documents = new Map();
+	let remaining = 4000;
+	for (const passage of passages) {
+		const count = documents.get(passage.record.id) || 0;
+		if (count >= 2 || sources.length >= 4 || remaining < 100) continue;
+		documents.set(passage.record.id, count + 1);
+		const text = truncate(passage.text, Math.min(1200, remaining));
 		remaining -= encoder.encode(text).length;
 		sources.push({
 			id: sources.length + 1,
-			title: truncate(hit.title, 160),
-			url: hit.url,
-			section: truncate(hit.section || '', 160),
+			title: truncate(passage.record.title, 160),
+			url:
+				passage.anchor && passage.record.url.startsWith('/')
+					? passage.record.url.split('#')[0] + '#' + passage.anchor
+					: passage.record.url,
+			section: truncate(passage.heading || '', 160),
 			text
 		});
 	}
@@ -257,7 +280,7 @@ export async function handleAssistantSearch(request, url, env, options) {
 							top_p: 0.8,
 							stream: true
 						},
-						{ gateway: { id: 'swyx-shared', skipCache: true } }
+						{ gateway: { id: AI_GATEWAY_ID, skipCache: true } }
 					);
 					if (!(output instanceof ReadableStream)) throw new Error('provider-stream');
 					providerReader = output.getReader();

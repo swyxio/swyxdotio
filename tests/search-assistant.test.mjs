@@ -252,3 +252,29 @@ test('provider failure keeps the reservation and does not retry', async () => {
 	assert.equal(calls.length, 1);
 	assert.equal(reservations.length, 1);
 });
+
+test('answers use article prose rather than metadata-only talks and related-link lists', () => {
+	const items = [
+		{
+			title: 'Learn In Public',
+			slug: 'learn',
+			category: 'essay',
+			content:
+				'# Practice\n\nCreate something useful as you learn in public. Share small notes and accept corrections.\n\n# Related links\n\nLearn public learn public learn public other link resources.'
+		},
+		{
+			title: 'Learn In Public',
+			slug: 'talk',
+			category: 'talk',
+			instances: [{ video: 'https://youtube.com/example' }],
+			description: 'Learn public learn public.'
+		}
+	];
+	const sources = retrieveAssistantSources(
+		createSearchIndex(projectSearchCatalog(items), items),
+		'How should I learn in public?'
+	);
+	assert(sources.length);
+	assert(sources.every((s) => s.url === '/learn#practice'));
+	assert.match(sources[0].text, /accept corrections/);
+});
