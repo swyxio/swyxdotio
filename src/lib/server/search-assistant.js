@@ -302,7 +302,8 @@ export async function handleAssistantSearch(request, url, env, options) {
 							.join('\n');
 						if (!data) return;
 						if (data.trim() === '[DONE]') {
-							const text = filter.push('', true);
+							const filtered = filter.push('', true);
+							const text = emitted ? filtered : filtered.trimStart();
 							if (text) {
 								emitted += text.length;
 								send('token', { text });
@@ -313,7 +314,8 @@ export async function handleAssistantSearch(request, url, env, options) {
 						const delta = extractAssistantDelta(JSON.parse(data));
 						generated += delta.length;
 						if (generated > 8000) throw new Error('output-size');
-						const text = filter.push(delta);
+						const filtered = filter.push(delta);
+						const text = emitted ? filtered : filtered.trimStart();
 						if (text) {
 							emitted += text.length;
 							send('token', { text });
@@ -332,7 +334,8 @@ export async function handleAssistantSearch(request, url, env, options) {
 					}
 					if (!ended && buffer.trim()) consume(buffer);
 					if (!ended) {
-						const text = filter.push('', true);
+						const filtered = filter.push('', true);
+						const text = emitted ? filtered : filtered.trimStart();
 						if (text) {
 							emitted += text.length;
 							send('token', { text });
