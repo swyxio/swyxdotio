@@ -86,7 +86,7 @@
 			>
 				<span aria-hidden="true" class="search-icon">⌕</span>
 				<span class="search-placeholder">Search the notebook…</span>
-				<kbd>/</kbd>
+				<kbd>⌘ K</kbd>
 			</a>
 		</div>
 		<div class="nav-actions">

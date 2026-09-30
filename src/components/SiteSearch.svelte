@@ -30,7 +30,17 @@
 	}
 	onMount(() => {
 		function shortcut(event: KeyboardEvent) {
-			if (event.defaultPrevented || event.isComposing || event.repeat || event.altKey) return;
+			if (
+				event.defaultPrevented ||
+				event.isComposing ||
+				event.repeat ||
+				event.altKey ||
+				event.shiftKey ||
+				(!event.metaKey && !event.ctrlKey) ||
+				event.key.toLowerCase() !== 'k' ||
+				event.code !== 'KeyK'
+			)
+				return;
 			const target = event.target;
 			if (
 				target instanceof Element &&
@@ -40,13 +50,8 @@
 			)
 				return;
 			if (document.querySelector('dialog[open], [role="dialog"][aria-modal="true"]')) return;
-			if (
-				(event.key === '/' && !event.metaKey && !event.ctrlKey && !event.shiftKey) ||
-				((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k')
-			) {
-				event.preventDefault();
-				void open();
-			}
+			event.preventDefault();
+			void open();
 		}
 		window.addEventListener('keydown', shortcut, true);
 		return () => window.removeEventListener('keydown', shortcut, true);
