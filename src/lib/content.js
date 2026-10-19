@@ -1,3 +1,4 @@
+import { articleNeighbors } from './article-neighbors.js';
 import { env } from '$env/dynamic/private';
 import grayMatter from 'gray-matter';
 
@@ -302,7 +303,7 @@ export async function listContent(providedFetch, contentManifest, { context } = 
  * @param {string} slug of the file to retrieve
  * @param {import('./content-manifest').ContentManifestStore | undefined} contentManifest
  * @param {{ context?: { waitUntil(promise: Promise<unknown>): void } }} [options]
- * @returns {Promise<import('./types').ContentItem>}
+ * @returns {Promise<import('./types').ContentItem & { neighbors: ReturnType<typeof articleNeighbors> }>}
  */
 export async function getContent(providedFetch, slug, contentManifest, options) {
 	console.log('loading allBlogposts');
@@ -318,7 +319,7 @@ export async function getContent(providedFetch, slug, contentManifest, options) 
 		// youtube/tweet shortcodes and GitHub autolinks are handled as marked extensions
 		const content = await renderMarkdown(blogpost.content ?? '');
 
-		return { ...blogpost, content };
+		return { ...blogpost, content, neighbors: articleNeighbors(allBlogposts, slug) };
 	} else {
 		throw new Error('Blogpost not found for slug: ' + slug);
 	}

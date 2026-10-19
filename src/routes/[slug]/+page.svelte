@@ -10,6 +10,7 @@
 	import { page } from '$app/stores';
 	import { Toc } from '@svelte-put/toc';
 	import TableOfContents from './TableOfContents.svelte';
+	import ArticleIndex from './ArticleIndex.svelte';
 
 	const toc = new Toc({
 		selector: ':where(h1, h2, h3)',
@@ -57,6 +58,8 @@
 </svelte:head>
 
 <TableOfContents {toc} />
+{#key data.slug}<ArticleIndex {data} />{/key}
+<noscript><div class="article-index-fallback"><a href="/ideas">← All writing</a></div></noscript>
 
 {#key data.slug}
 	<article
@@ -65,7 +68,6 @@
 		class:has-translations={hasTranslations}
 	>
 		<header class="article-header">
-			<a class="article-back" href="/ideas">← All writing</a>
 			<h1>{json.title}</h1>
 			{#if json.subtitle}
 				<p class="article-deck">{json.subtitle}</p>
@@ -195,6 +197,7 @@
 
 		max-width: none;
 		margin-block: 1.75rem 1.5rem;
+		font: 400 1.125rem/1.75 var(--font-body);
 		display: grid;
 		grid-template-columns:
 			[full-start] minmax(var(--site-gutter), 1fr)
@@ -204,25 +207,29 @@
 			[full-end];
 	}
 
+	.article-index-fallback {
+		width: min(calc(100% - 2 * var(--site-gutter)), var(--reading-max-width));
+		margin: 1rem auto;
+	}
+
 	.article-header {
 		margin-bottom: 1.75rem;
 		border-bottom: 1px solid var(--page-border);
 		padding-bottom: 1.125rem;
 	}
 
-	.article-back {
-		display: inline-flex;
-		min-height: 2.75rem;
-		align-items: center;
-		font: 400 0.76rem/1.4 var(--font-mono);
-		text-decoration: none;
-	}
-
 	.article-header h1 {
+		font-family: var(--font-body);
+		font-weight: 650;
 		margin: 0.35rem 0 0.75rem;
 		font-size: 2.25rem;
 		line-height: 1.2;
 		text-wrap: balance;
+	}
+
+	:global(.site-main .swyxcontent :where(h2, h3, h4)) {
+		font-family: var(--font-body);
+		font-weight: 650;
 	}
 
 	.article-deck {
