@@ -49,7 +49,7 @@ test('both reading themes have readable normal text and input boundaries', () =>
 	}
 });
 
-test('essays use bounded serif prose with intact metadata and content', () => {
+test('essays use bounded readable prose with intact metadata and content', () => {
 	const article = source('src/routes/[slug]/+page.svelte');
 	assert.match(css, /--reading-max-width: 42\.5rem/);
 	assert.match(
@@ -58,7 +58,8 @@ test('essays use bounded serif prose with intact metadata and content', () => {
 	);
 	assert.match(article, /--content: minmax\(0, min\(72ch, var\(--reading-max-width\)\)\)/);
 	assert.match(article, /class="article-header"/);
-	assert.match(article, /href="\/ideas">← All writing/);
+	assert.match(article, /<ArticleIndex \{data\}/);
+	assert.match(article, /font: 400 1\.125rem\/1\.75 var\(--font-body\)/);
 	assert.match(article, /class:has-translations=\{hasTranslations\}/);
 	assert.match(article, /\{@html json\.content\}/);
 	assert.match(article, /ReadCounter pageKey=\{data\.slug\} requireDepth/);

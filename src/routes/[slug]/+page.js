@@ -35,8 +35,10 @@ export async function load({ params, fetch, setHeaders }) {
 		// stale for a week while revalidating. Edits are purged via /api/revalidate.
 		'cache-control': 'public, max-age=0, s-maxage=86400, stale-while-revalidate=604800'
 	});
+	const json = await pageData.json();
 	return {
-		json: await pageData.json(),
+		json,
+		neighbors: json.neighbors,
 		list,
 		slug,
 		REPO_URL
