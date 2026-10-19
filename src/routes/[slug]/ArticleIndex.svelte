@@ -36,12 +36,16 @@
 	}
 	/** @param {KeyboardEvent} event */
 	function keydown(event) {
-		if (event.key === 'Escape' && open) {
-			open = false;
-			pinned = false;
-			dismissed = hovering;
-			toggle.focus();
-		}
+		if (!open || event.key !== 'Escape' || event.defaultPrevented || event.isComposing) return;
+		if (
+			event.target instanceof Element &&
+			event.target.closest('dialog, [role="dialog"][aria-modal="true"]')
+		)
+			return;
+		open = false;
+		pinned = false;
+		dismissed = hovering;
+		toggle.focus();
 	}
 	/** @param {MouseEvent} event */
 	function outsideClick(event) {
@@ -86,7 +90,7 @@
 		<div class="index-content">
 			<p class="index-label">Explore</p>
 			<a href="/ideas">All writing <span aria-hidden="true">↗</span></a>
-			<a href="/ideas?filter=temporal">Writing by date <span aria-hidden="true">↗</span></a>
+			<a href="/ideas#ideas-results">Writing by date <span aria-hidden="true">↗</span></a>
 			<a href="/">Home <span aria-hidden="true">↗</span></a>
 			<p class="index-label">Featured reads</p>
 			{#each featured as essay (essay.href)}
