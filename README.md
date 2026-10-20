@@ -426,6 +426,8 @@ After deployment:
 
 - `npm run dev` — local dev server
 - `npm run build` — production build (Cloudflare adapter)
+- `npm run lint` — lint JavaScript, TypeScript, and Svelte files
+- `npm run format:check` — check formatting with Prettier
 - `npm run deploy` — build and deploy a clean checkout with its Git commit recorded in Cloudflare
 - `npm run preview` — preview with `wrangler dev`; use this rather than plain Vite when testing
   local KV, D1, R2, Cache API, or Worker bindings
@@ -433,6 +435,12 @@ After deployment:
 - `node --test tests/*.test.mjs` — fast unit and contract tests, including OG and read analytics
 - `node tests/markdown.test.mjs` — markdown renderer regression checks
 - `npm test` — Playwright e2e (requires GH content)
+
+Existing ESLint findings are tracked by file and rule in `eslint-suppressions.json`. Lint fails
+when a rule's count increases in a file or has no baseline; it cannot distinguish individual
+findings when the count stays the same. After fixing findings, run
+`npx eslint . --prune-suppressions` and commit the updated file. The separate formatting check
+currently has a pre-existing backlog.
 
 ## Live URL
 

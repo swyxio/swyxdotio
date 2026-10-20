@@ -51,6 +51,6 @@
 	<meta name="twitter:image:alt" content={imageAlt} />
 
 	{#if structuredDataJson}
-		{@html `<script type="application/ld+json">${structuredDataJson}</script>`}
+		{@html `<script type="application/ld+json">${structuredDataJson}</scr` + 'ipt>'}
 	{/if}
 </svelte:head>
