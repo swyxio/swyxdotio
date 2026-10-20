@@ -2,6 +2,48 @@ import { test, expect } from '@playwright/test';
 
 const articleUrl = 'http://127.0.0.1:4173/america250';
 
+test('contents follows the reading position after large scrolls in either direction', async ({
+	page
+}) => {
+	await page.setViewportSize({ width: 1200, height: 900 });
+	await page.goto(articleUrl);
+	const contents = page.getByRole('navigation', { name: 'Table of contents' });
+	const title = contents.getByRole('link', { name: 'What America has meant to me' });
+	const firstSection = contents.getByRole('link', { name: /Pretraining: My First America Run/ });
+	const lastSection = contents.getByRole('link', { name: 'A parting thought' });
+	await expect(title).toHaveAttribute('aria-current', 'location');
+
+	// A heading visible lower down should not become current before the reader reaches it.
+	await page.locator('#pretraining-my-first-america-run-2007-2010').evaluate((heading) => {
+		window.scrollTo(0, window.scrollY + heading.getBoundingClientRect().top - 400);
+	});
+	await expect(title).toHaveAttribute('aria-current', 'location');
+
+	await page.locator('#a-parting-thought').evaluate((heading) => {
+		window.scrollTo(0, window.scrollY + heading.getBoundingClientRect().top - 32);
+	});
+	await expect(lastSection).toHaveAttribute('aria-current', 'location');
+
+	await page.locator('#pretraining-my-first-america-run-2007-2010').evaluate((heading) => {
+		window.scrollTo(0, window.scrollY + heading.getBoundingClientRect().top - 32);
+	});
+	await expect(firstSection).toHaveAttribute('aria-current', 'location');
+});
+
+test('phone contents highlights the section selected by a link', async ({ page }) => {
+	await page.setViewportSize({ width: 390, height: 844 });
+	await page.goto(articleUrl);
+	await page.getByRole('button', { name: 'Table of Contents' }).click();
+	const lastSection = page
+		.getByRole('navigation', { name: 'Table of contents' })
+		.getByRole('link', {
+			name: 'A parting thought'
+		});
+	await lastSection.click();
+	await expect(page).toHaveURL(/#a-parting-thought$/);
+	await expect(lastSection).toHaveAttribute('aria-current', 'location');
+});
+
 test('phone index and contents expand without covering the article', async ({ page }) => {
 	await page.setViewportSize({ width: 390, height: 844 });
 	await page.goto(articleUrl);

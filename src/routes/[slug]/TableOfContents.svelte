@@ -5,8 +5,44 @@
 	let { toc } = $props();
 	let isOpen = $state(false);
 	let items = $derived([...toc.items.values()]);
+	let activeId = $state('');
+	let updateFrame = 0;
+
+	function scheduleActiveUpdate() {
+		if (updateFrame) return;
+		updateFrame = requestAnimationFrame(() => {
+			updateFrame = 0;
+			let current = items[0]?.id ?? '';
+			for (const item of items) {
+				if (item.element.getBoundingClientRect().top > 80) break;
+				current = item.id;
+			}
+			activeId = current;
+		});
+	}
+
+	$effect(() => {
+		items;
+		isOpen;
+		scheduleActiveUpdate();
+	});
+
+	$effect(() => {
+		if (!toc.root) return;
+		const observer = new ResizeObserver(scheduleActiveUpdate);
+		observer.observe(toc.root);
+		return () => observer.disconnect();
+	});
+
 	onMount(() => {
 		isOpen = window.matchMedia('(min-width: 1200px)').matches;
+		window.addEventListener('scroll', scheduleActiveUpdate, { passive: true });
+		window.addEventListener('resize', scheduleActiveUpdate);
+		return () => {
+			window.removeEventListener('scroll', scheduleActiveUpdate);
+			window.removeEventListener('resize', scheduleActiveUpdate);
+			cancelAnimationFrame(updateFrame);
+		};
 	});
 </script>
 
@@ -24,11 +60,7 @@
 			<ul id="floating-toc-items">
 				{#each items as item (item.id)}
 					<li class:subheading={item.element.tagName === 'H3'}>
-						<a
-							href="#{item.id}"
-							use:toc.actions.link={item}
-							aria-current={toc.activeItem?.id === item.id ? 'location' : undefined}
-						>
+						<a href="#{item.id}" aria-current={activeId === item.id ? 'location' : undefined}>
 							{item.text}
 						</a>
 					</li>
