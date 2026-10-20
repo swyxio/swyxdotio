@@ -80,8 +80,8 @@ test('the compact podcast page retains curated videos, sourced praise, and the c
 		assert.ok(podcasts.includes(author));
 	}
 	assert.match(podcasts, /<blockquote cite=\{item\.source\}/);
-	assert.match(podcasts, /#each data\.shows as show, index/);
-	assert.match(podcasts, /open=\{index !== 0\}/);
+	assert.match(podcasts, /#each shows as show, index/);
+	assert.match(podcasts, /expanded: index !== 0/);
 	assert.match(podcasts, /#each show\.episodes as episode/);
 	assert.doesNotMatch(podcasts, /<iframe\b/);
 });

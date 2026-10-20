@@ -47,10 +47,24 @@ const config = {
 				}
 				output.assetFileNames = '_app/immutable/assets/[name].[hash][extname]';
 			}
+		},
+		{
+			name: 'consolidate-browser-chunks',
+			apply: 'build',
+			configResolved(resolved) {
+				if (resolved.build.ssr) return;
+				const output = resolved.build.rollupOptions.output;
+				for (const entry of Array.isArray(output) ? output : [output]) {
+					if (entry) entry.experimentalMinChunkSize = 16_384;
+				}
+			}
 		}
 	],
 	build: {
 		reportCompressedSize: false
+	},
+	optimizeDeps: {
+		include: ['@imgly/background-removal', '@huggingface/transformers']
 	},
 	worker: {
 		format: 'es',

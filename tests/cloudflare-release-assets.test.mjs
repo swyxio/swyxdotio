@@ -37,3 +37,24 @@ test('production builds reject an unsupported worker output contract', () => {
 test('production builds skip gzip calculations used only for terminal reports', () => {
 	assert.equal(config.build.reportCompressedSize, false);
 });
+
+test('browser builds consolidate tiny chunks without changing server route exports', () => {
+	const plugin = config.plugins.find(({ name }) => name === 'consolidate-browser-chunks');
+	assert.ok(plugin);
+	assert.equal(plugin.apply, 'build');
+
+	const browserOutput = {};
+	plugin.configResolved({ build: { ssr: false, rollupOptions: { output: browserOutput } } });
+	assert.equal(browserOutput.experimentalMinChunkSize, 16_384);
+
+	const serverOutput = {};
+	plugin.configResolved({ build: { ssr: true, rollupOptions: { output: serverOutput } } });
+	assert.equal(serverOutput.experimentalMinChunkSize, undefined);
+
+	const multipleOutputs = [{}, {}];
+	plugin.configResolved({ build: { ssr: false, rollupOptions: { output: multipleOutputs } } });
+	assert.deepEqual(
+		multipleOutputs.map(({ experimentalMinChunkSize }) => experimentalMinChunkSize),
+		[16_384, 16_384]
+	);
+});

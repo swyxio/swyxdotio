@@ -179,7 +179,7 @@ npm run preview:presence
 
 # Production: this order is required for the external binding
 npm run deploy:presence
-npx wrangler deploy -c wrangler.toml
+npm run deploy
 ```
 
 For a fast production smoke test, open the same public page in two normal browser contexts and
@@ -211,7 +211,7 @@ Operational thresholds:
 1. Start with `PUBLIC_PRESENCE_ADMISSION_RATE = "1"` and `PRESENCE_ENABLED = "true"`.
 2. If projected incremental presence cost exceeds $25/month or traffic approaches 1M eligible
    views/day, set the build-time public admission value to `0.1`, build, and deploy the main Worker:
-   `PUBLIC_PRESENCE_ADMISSION_RATE=0.1 npm run build && npx wrangler deploy -c wrangler.toml`.
+   `PUBLIC_PRESENCE_ADMISSION_RATE=0.1 npm run deploy`.
    Keep the matching `wrangler.toml` value as an operational record. Existing rooms remain useful
    while roughly 90% of browsers avoid opening a socket at all.
 3. For emergency shutdown, set `PRESENCE_ENABLED = "false"`, rebuild with public admission `0`,
@@ -402,12 +402,14 @@ npx wrangler d1 migrations apply swyxdotio-read-counters --remote
 npm run deploy:presence
 npm run deploy:calibration
 npm run deploy:monitor
-npx wrangler deploy
+npm run deploy
 ```
 
 After deployment:
 
-1. Record the Git commit and Worker Version ID.
+1. Record the Git commit and Worker Version ID. `npm run deploy` requires a clean Git checkout,
+   builds it, and stores its commit SHA in the Cloudflare version tag and message. Cacheable
+   dynamic responses expose the same SHA as `X-Swyx-Commit`.
 2. Fetch representative HTML, all six page-card endpoints, an article card with and without an
    explicit image, and at least one read-count endpoint using fresh query versions.
 3. Confirm PNG signatures/dimensions, `Cache-Control`, `Content-Type`, and absence of
@@ -424,6 +426,7 @@ After deployment:
 
 - `npm run dev` — local dev server
 - `npm run build` — production build (Cloudflare adapter)
+- `npm run deploy` — build and deploy a clean checkout with its Git commit recorded in Cloudflare
 - `npm run preview` — preview with `wrangler dev`; use this rather than plain Vite when testing
   local KV, D1, R2, Cache API, or Worker bindings
 - `npm run deploy:monitor` — deploy the hourly read/presence monitor Worker

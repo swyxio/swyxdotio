@@ -115,6 +115,10 @@ export async function handle({ event, resolve }) {
 	for (const [k, v] of Object.entries(SECURITY_HEADERS)) {
 		response.headers.set(k, v);
 	}
+	const deployedCommit = cacheable ? event.platform?.env?.CF_VERSION_METADATA?.tag : undefined;
+	if (deployedCommit && /^[a-f0-9]{40}$/i.test(deployedCommit)) {
+		response.headers.set('X-Swyx-Commit', deployedCommit);
+	}
 	// Cached development HTML can outlive its hot-reloaded components and fail hydration.
 	if (dev) response.headers.set('Cache-Control', 'no-store');
 
