@@ -522,13 +522,13 @@
 	}
 	@media (max-width: 1240px) {
 		.chat-launcher {
-			left: auto;
-			right: 0;
+			left: 0;
+			right: auto;
 			top: 50%;
 			bottom: auto;
 			width: var(--site-gutter);
 			padding: 0.6rem 0;
-			border-radius: 5px 0 0 5px;
+			border-radius: 0 5px 5px 0;
 			box-shadow: none;
 			font-size: 0.7rem;
 			line-height: 1;
