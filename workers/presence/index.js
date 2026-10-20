@@ -254,3 +254,5 @@ async function incrementPresenceCounter(database, kind, delta, bucketStart) {
 		.bind(bucketStart, kind, delta)
 		.run();
 }
+
+export { ChatRoom } from './chat-room.js';
