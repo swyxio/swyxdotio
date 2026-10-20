@@ -6,10 +6,10 @@
 
 @font-face {
 	font-family: 'Newsreader';
-	src: url('./lib/og/assets/fonts/Newsreader-Semibold-static.ttf') format('truetype');
+	src: url('/fonts/newsreader-semibold.woff2') format('woff2');
 	font-style: normal;
 	font-weight: 600;
-	font-display: swap;
+	font-display: optional;
 }
 
 :root {
