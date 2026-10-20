@@ -25,13 +25,20 @@ const MODES = new Set(PRESENCE_MODES);
  * @property {number} celebrationAt
  */
 /**
+ * @typedef {{ pageKey: string | null, hidden: boolean, admitted: boolean, connected: boolean,
+ * stopped: boolean, pages: { key: string, path: string | null, title: string, count: number }[],
+ * otherCount: number }} PresenceSummary
+ */
+/**
  * @typedef {{ type: 'welcome', selfId: string, peers: PresencePeer[] }
  * | { type: 'snapshot', peers: PresencePeer[] }
  * | { type: 'join', peer: PresencePeer }
  * | { type: 'move', id: string, x: number, y: number, mode: PresenceMode, now: number }
  * | { type: 'reaction', id: string, reaction: string, now: number }
  * | { type: 'leave', id: string }
- * | { type: 'celebration', id: string, now: number }} PresenceFrame
+ * | { type: 'celebration', id: string, now: number }
+ * | { type: 'sitePage', key: string, count: number, title: string }
+ * | { type: 'siteSnapshotComplete' }} PresenceFrame
  */
 
 /** @param {unknown} value */
@@ -131,6 +138,22 @@ function parsePeer(values, now) {
 export function parsePresenceFrame(input, now = Date.now()) {
 	if (!Array.isArray(input) || input[0] !== 1 || typeof input[1] !== 'string') return null;
 	const type = input[1];
+	if (type === 'g' && input.length === 2) return { type: 'siteSnapshotComplete' };
+	if (type === 'g') {
+		const [, , key, count, title] = input;
+		if (
+			(input.length !== 4 && input.length !== 5) ||
+			typeof key !== 'string' ||
+			!/^[a-z0-9][a-z0-9_-]*$/.test(key) ||
+			typeof count !== 'number' ||
+			!Number.isSafeInteger(count) ||
+			count < 0 ||
+			count > 32 ||
+			(title !== undefined && typeof title !== 'string')
+		)
+			return null;
+		return { type: 'sitePage', key, count, title: title || '' };
+	}
 	if (type === 'w' && typeof input[2] === 'string' && Array.isArray(input[3])) {
 		/** @type {PresencePeer[]} */
 		const peers = [];

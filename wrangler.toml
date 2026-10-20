@@ -72,6 +72,14 @@ namespace_id = "41005"
   limit = 12
   period = 60
 
+[[ratelimits]]
+name = "PRESENCE_CONNECTION_RATE_LIMITER"
+namespace_id = "41007"
+
+  [ratelimits.simple]
+  limit = 60
+  period = 60
+
 [[tail_consumers]]
 service = "swyxdotio-fault-attribution"
 

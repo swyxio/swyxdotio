@@ -43,6 +43,31 @@ test('protocol parser accepts enumerated compact frames and rejects arbitrary da
 	assert.equal(parsePresenceFrame({ event: 'move' }), null);
 });
 
+test('sitewide presence frames reject invalid pages and counts', () => {
+	assert.deepEqual(parsePresenceFrame([1, 'g', 'america250', 2, 'What America means']), {
+		type: 'sitePage',
+		key: 'america250',
+		count: 2,
+		title: 'What America means'
+	});
+	assert.deepEqual(parsePresenceFrame([1, 'g', 'home', 0]), {
+		type: 'sitePage',
+		key: 'home',
+		count: 0,
+		title: ''
+	});
+	assert.deepEqual(parsePresenceFrame([1, 'g']), { type: 'siteSnapshotComplete' });
+	for (const frame of [
+		[1, 'g', '../private', 1],
+		[1, 'g', 'home?secret=1', 1],
+		[1, 'g', 'home', -1],
+		[1, 'g', 'home', 33],
+		[1, 'g', 'home', 1.5],
+		[1, 'g', 'home', 1, {}]
+	])
+		assert.equal(parsePresenceFrame(frame), null);
+});
+
 test('outgoing frames stay compact and reaction values are fixed', () => {
 	assert.equal(positionFrame(4, -2, 'd'), '[1,"p",1,0,"d"]');
 	assert.equal(reactionFrame('👋'), '[1,"r","👋"]');

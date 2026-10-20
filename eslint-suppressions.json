@@ -56,14 +56,6 @@
 			"count": 10
 		}
 	},
-	"src/components/LivePresence.svelte": {
-		"svelte/prefer-svelte-reactivity": {
-			"count": 5
-		},
-		"svelte/require-each-key": {
-			"count": 1
-		}
-	},
 	"src/components/MobileMenu.svelte": {
 		"svelte/infinite-reactive-loop": {
 			"count": 2

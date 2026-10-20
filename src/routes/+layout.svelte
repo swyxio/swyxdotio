@@ -19,6 +19,21 @@
 	$: presenceAdmissionRate = Number(env.PUBLIC_PRESENCE_ADMISSION_RATE ?? 1);
 	$: immersiveTool = $page.url.pathname === '/tools/box' || $page.url.pathname === '/tools/draw';
 	let chatCollapsed = false;
+	/** @type {LivePresence | undefined} */
+	let livePresence;
+	/** @type {import('$lib/presence-client').PresenceSummary} */
+	const noPresence = {
+		pageKey: null,
+		hidden: false,
+		admitted: false,
+		connected: false,
+		stopped: false,
+		pages: [],
+		otherCount: 0
+	};
+	/** @type {import('$lib/presence-client').PresenceSummary} */
+	let presence = noPresence;
+	$: chatPresence = presencePageKey && presence.pageKey === presencePageKey ? presence : noPresence;
 </script>
 
 <svelte:head>
@@ -61,7 +76,14 @@
 	<main id="skip" class="site-main">
 		<slot />
 	</main>
-	<LiveChat bind:collapsed={chatCollapsed} allowSidebar={!immersiveTool} />
+	<LiveChat
+		bind:collapsed={chatCollapsed}
+		allowSidebar={!immersiveTool}
+		presence={chatPresence}
+		onPresenceVisibility={(hidden) => livePresence?.setHidden(hidden)}
+		onPresenceReaction={(reaction) => livePresence?.react(reaction)}
+		onPresenceShare={(event) => livePresence?.requestShare(event)}
+	/>
 
 	{#if !immersiveTool}
 		<footer class="site-shell site-panel literary-footer mb-8 mt-8 p-4">
@@ -82,7 +104,12 @@
 			{/if}
 			{#if presencePageKey}
 				{#key presencePageKey}
-					<LivePresence pageKey={presencePageKey} admissionRate={presenceAdmissionRate} />
+					<LivePresence
+						bind:this={livePresence}
+						pageKey={presencePageKey}
+						admissionRate={presenceAdmissionRate}
+						on:change={(event) => (presence = event.detail)}
+					/>
 				{/key}
 			{/if}
 			<p class="clacks-tribute"><span aria-hidden="true">✶</span> GNU Terry Pratchett</p>
