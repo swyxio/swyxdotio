@@ -44,6 +44,28 @@ test('phone contents highlights the section selected by a link', async ({ page }
 	await expect(lastSection).toHaveAttribute('aria-current', 'location');
 });
 
+test('contents highlights a short final section at the bottom of the page', async ({ page }) => {
+	await page.setViewportSize({ width: 1200, height: 900 });
+	await page.goto(articleUrl);
+	const lastHeading = page.locator('#a-parting-thought');
+	await lastHeading.evaluate((heading) => {
+		while (heading.nextElementSibling) heading.nextElementSibling.remove();
+		heading.insertAdjacentHTML('afterend', '<p style="height: 80px">A short final section.</p>');
+		document.querySelector('.article-endmatter')?.remove();
+		document.querySelector('footer')?.remove();
+	});
+	const lastSection = page
+		.getByRole('navigation', { name: 'Table of contents' })
+		.getByRole('link', {
+			name: 'A parting thought'
+		});
+	await lastSection.click();
+	await expect
+		.poll(() => lastHeading.evaluate((heading) => heading.getBoundingClientRect().top))
+		.toBeGreaterThan(80);
+	await expect(lastSection).toHaveAttribute('aria-current', 'location');
+});
+
 test('phone index and contents expand without covering the article', async ({ page }) => {
 	await page.setViewportSize({ width: 390, height: 844 });
 	await page.goto(articleUrl);

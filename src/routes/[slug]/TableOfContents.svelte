@@ -12,6 +12,11 @@
 		if (updateFrame) return;
 		updateFrame = requestAnimationFrame(() => {
 			updateFrame = 0;
+			const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+			if (maxScroll > 0 && window.scrollY >= maxScroll - 1) {
+				activeId = items.at(-1)?.id ?? '';
+				return;
+			}
 			let current = items[0]?.id ?? '';
 			for (const item of items) {
 				if (item.element.getBoundingClientRect().top > 80) break;
