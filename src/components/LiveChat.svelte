@@ -1,5 +1,6 @@
 <script>
 	import { onMount, tick } from 'svelte';
+	import { afterNavigate } from '$app/navigation';
 
 	/** @type {boolean} */
 	export let collapsed = false;
@@ -31,11 +32,18 @@
 	let reconnectTimer = 0;
 	let expiryTimer = 0;
 	let returnScroll = 0;
+	let returnUrl = '';
 	let hasReturnScroll = false;
 	let destroyed = false;
 	const retentionMs = 48 * 60 * 60 * 1000;
 
 	$: docked = wide && allowSidebar;
+
+	afterNavigate(({ from, to }) => {
+		if (from && to && from.url.href !== to.url.href) {
+			hasReturnScroll = false;
+		}
+	});
 
 	/** @param {unknown} value @returns {value is ChatMessage} */
 	function isMessage(value) {
@@ -139,6 +147,7 @@
 			return;
 		}
 		returnScroll = window.scrollY;
+		returnUrl = window.location.href;
 		hasReturnScroll = !docked;
 		collapsed = false;
 		reconnectAttempt = 0;
@@ -152,7 +161,9 @@
 		collapsed = true;
 		disconnect();
 		await tick();
-		if (hasReturnScroll && !docked) window.scrollTo({ top: returnScroll, behavior: 'instant' });
+		if (hasReturnScroll && !docked && window.location.href === returnUrl) {
+			window.scrollTo({ top: returnScroll, behavior: 'instant' });
+		}
 		hasReturnScroll = false;
 		launcher?.focus({ preventScroll: true });
 	}
@@ -176,8 +187,9 @@
 
 	/** @param {KeyboardEvent} event */
 	function keydown(event) {
-		if (event.key === 'Escape' && !collapsed && !event.defaultPrevented) {
+		if (event.key === 'Escape' && !event.isComposing && !event.defaultPrevented) {
 			event.preventDefault();
+			event.stopPropagation();
 			void closeChat();
 		}
 	}
@@ -212,18 +224,19 @@
 		const onVisibility = () => {
 			if (document.visibilityState === 'visible') expireMessages();
 		};
+		const onHashChange = () => (hasReturnScroll = false);
 		document.addEventListener('visibilitychange', onVisibility);
+		window.addEventListener('hashchange', onHashChange);
 		return () => {
 			destroyed = true;
 			disconnect();
 			window.clearTimeout(expiryTimer);
 			document.removeEventListener('visibilitychange', onVisibility);
+			window.removeEventListener('hashchange', onHashChange);
 			query.removeEventListener('change', updateWide);
 		};
 	});
 </script>
-
-<svelte:window on:keydown={keydown} />
 
 {#if ready}
 	{#if collapsed || !docked}
@@ -238,6 +251,7 @@
 		>
 	{/if}
 	{#if !collapsed}
+		<!-- svelte-ignore a11y_no_noninteractive_element_interactions: Escape dismisses the region when focus is inside it. -->
 		<section
 			id="live-chat"
 			class:chat-docked={docked}
@@ -245,6 +259,7 @@
 			aria-labelledby="chat-title"
 			tabindex="-1"
 			bind:this={panel}
+			on:keydown={keydown}
 		>
 			<div class="chat-titlebar">
 				<div>

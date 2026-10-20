@@ -173,6 +173,62 @@ test('alarm deletes expired rows even with no connected clients and schedules re
 	}
 });
 
+test('failed storage or limiter requests do not start the per-socket cooldown', async () => {
+	let calls = 0;
+	const h = roomHarness({
+		async limit() {
+			calls += 1;
+			return { success: calls !== 1 };
+		}
+	});
+	let failStorage = true;
+	const originalGetAlarm = h.ctx.storage.getAlarm;
+	h.ctx.storage.getAlarm = async () => {
+		if (failStorage) {
+			failStorage = false;
+			throw new Error('temporary storage error');
+		}
+		return originalGetAlarm();
+	};
+	const peer = socket();
+	h.peers.push(peer);
+	const room = new ChatRoom(h.ctx, h.env);
+
+	await room.webSocketMessage(peer, frame('rate-rejected', 'alice', 'hello'));
+	assert.equal(peer.frames.at(-1).requestId, 'rate-rejected');
+	assert.equal(peer.frames.at(-1).type, 'error');
+	await room.webSocketMessage(peer, frame('storage-failed', 'alice', 'hello'));
+	assert.equal(peer.frames.at(-1).requestId, 'storage-failed');
+	assert.equal(peer.frames.at(-1).type, 'error');
+	assert.equal(h.db.prepare('SELECT COUNT(*) AS n FROM chat_messages').get().n, 0);
+	await room.webSocketMessage(peer, frame('retry', 'alice', 'hello'));
+	assert.equal(peer.frames.at(-1).requestId, 'retry');
+	assert.equal(peer.frames.at(-1).type, 'ack');
+	assert.equal(h.db.prepare('SELECT COUNT(*) AS n FROM chat_messages').get().n, 1);
+});
+
+test('a second send cannot overlap a pending send on the same socket', async () => {
+	let resolveLimit;
+	const limitResult = new Promise((resolve) => (resolveLimit = resolve));
+	const h = roomHarness({ limit: () => limitResult });
+	const peer = socket();
+	h.peers.push(peer);
+	const room = new ChatRoom(h.ctx, h.env);
+	const first = room.webSocketMessage(peer, frame('first', 'alice', 'one'));
+	await room.webSocketMessage(peer, frame('overlap', 'alice', 'two'));
+	assert.equal(peer.frames.at(-1).requestId, 'overlap');
+	assert.equal(peer.frames.at(-1).type, 'error');
+	assert.equal(h.db.prepare('SELECT COUNT(*) AS n FROM chat_messages').get().n, 0);
+	resolveLimit({ success: true });
+	await first;
+	assert.equal(peer.frames.at(-1).requestId, 'first');
+	assert.equal(peer.frames.at(-1).type, 'ack');
+	await room.webSocketMessage(peer, frame('too-soon', 'alice', 'three'));
+	assert.equal(peer.frames.at(-1).requestId, 'too-soon');
+	assert.equal(peer.frames.at(-1).type, 'error');
+	assert.equal(h.db.prepare('SELECT COUNT(*) AS n FROM chat_messages').get().n, 1);
+});
+
 test('shared-key message limits survive reconnecting; malformed frame floods close the socket', async () => {
 	let count = 0;
 	const seenKeys = [];

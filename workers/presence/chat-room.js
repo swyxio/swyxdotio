@@ -55,6 +55,9 @@ export class ChatRoom {
 	constructor(ctx, env) {
 		this.ctx = ctx;
 		this.env = env;
+		// Pending handlers keep the object awake, so this transient lock resets
+		// safely if the object is restarted after a failed operation.
+		this.pendingSockets = new WeakSet();
 		this.ctx.storage.sql.exec(`CREATE TABLE IF NOT EXISTS chat_messages (
 			id TEXT PRIMARY KEY,
 			nick TEXT NOT NULL,
@@ -122,7 +125,7 @@ export class ChatRoom {
 			send(socket, { type: 'error', requestId: input.requestId, message: input.error });
 			return;
 		}
-		if (now - attachment.lastMessageAt < MESSAGE_INTERVAL_MS) {
+		if (this.pendingSockets.has(socket) || now - attachment.lastMessageAt < MESSAGE_INTERVAL_MS) {
 			send(socket, {
 				type: 'error',
 				requestId: input.requestId,
@@ -130,9 +133,7 @@ export class ChatRoom {
 			});
 			return;
 		}
-		// Per-socket rate state follows the connection through hibernation.
-		attachment.lastMessageAt = now;
-		socket.serializeAttachment(attachment);
+		this.pendingSockets.add(socket);
 
 		try {
 			if (!attachment.rateKey || !this.env.CHAT_MESSAGE_RATE_LIMITER) throw new Error();
@@ -162,6 +163,15 @@ export class ChatRoom {
 				message.text,
 				message.createdAt
 			);
+			// Only successful sends start the cooldown. Re-read the attachment to
+			// preserve frame-limit updates from any overlapping rejected send.
+			try {
+				const latest = socket.deserializeAttachment() || attachment;
+				latest.lastMessageAt = message.createdAt;
+				socket.serializeAttachment(latest);
+			} catch {
+				// A disconnected sender may no longer have an attachment.
+			}
 			for (const peer of this.ctx.getWebSockets()) send(peer, { type: 'message', message });
 			send(socket, { type: 'ack', requestId: input.requestId, id: message.id });
 		} catch {
@@ -171,6 +181,8 @@ export class ChatRoom {
 				requestId: input.requestId,
 				message: 'Message could not be sent. Please try again.'
 			});
+		} finally {
+			this.pendingSockets.delete(socket);
 		}
 	}
 

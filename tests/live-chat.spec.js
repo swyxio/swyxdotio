@@ -51,7 +51,7 @@ test('mobile chat opens below the article and restores the reader position', asy
 	await page.evaluate(() => window.scrollTo(0, 600));
 	const before = await page.evaluate(() => window.scrollY);
 	await launcher.click();
-	const chat = page.getByRole('region', { name: 'swyx' });
+	const chat = page.getByRole('region', { name: 'swyx', exact: true });
 	await expect(chat).toBeVisible();
 	await expect(chat).toContainText('Messages disappear after 48 hours');
 	await expect(chat).toContainText('Backups may persist up to 30 days');
@@ -77,7 +77,7 @@ test('wide desktop chat leaves the expanded index and reading column clear', asy
 	await page.setViewportSize({ width: 1600, height: 900 });
 	await mockChat(context);
 	await page.goto(`${baseUrl}/learn-in-public`);
-	const chat = page.getByRole('region', { name: 'swyx' });
+	const chat = page.getByRole('region', { name: 'swyx', exact: true });
 	await expect(chat).toBeVisible();
 	const index = page.getByRole('navigation', { name: 'Explore writing' });
 	await index.getByRole('button', { name: 'index' }).click();
@@ -108,8 +108,8 @@ test('two readers receive messages and rejected sends preserve the draft', async
 		first.getByRole('button', { name: 'chat', exact: true }).click(),
 		second.getByRole('button', { name: 'chat', exact: true }).click()
 	]);
-	const firstChat = first.getByRole('region', { name: 'swyx' });
-	const secondChat = second.getByRole('region', { name: 'swyx' });
+	const firstChat = first.getByRole('region', { name: 'swyx', exact: true });
+	const secondChat = second.getByRole('region', { name: 'swyx', exact: true });
 	await expect(firstChat.getByText('Connected')).toBeVisible();
 	await expect(secondChat.getByText('Connected')).toBeVisible();
 	await firstChat.getByLabel('Nickname (unverified)').fill('alice');
@@ -147,4 +147,95 @@ test('an open chat removes a message when its 48 hours are up', async ({ page, c
 	const message = page.getByText('Almost expired');
 	await expect(message).toBeVisible();
 	await expect(message).toHaveCount(0, { timeout: 5000 });
+});
+
+test('closing chat after client-side navigation keeps the new page scroll position', async ({
+	page,
+	context
+}) => {
+	await page.setViewportSize({ width: 390, height: 844 });
+	await mockChat(context);
+	await page.goto(`${baseUrl}/america250`);
+	await page.evaluate(() => {
+		document.documentElement.dataset.clientNavigation = 'yes';
+		window.scrollTo(0, 600);
+	});
+	await page.getByRole('button', { name: 'chat', exact: true }).click();
+	await page.locator('footer').getByRole('link', { name: 'Home', exact: true }).click();
+	await expect(page).toHaveURL(`${baseUrl}/`);
+	await expect(page.locator('h1#me')).toBeVisible();
+	expect(await page.evaluate(() => document.documentElement.dataset.clientNavigation)).toBe('yes');
+	const before = await page.evaluate(() => {
+		window.scrollTo(0, 1100);
+		const panel = /** @type {HTMLElement | null} */ (document.querySelector('#live-chat'));
+		if (!panel) throw new Error('Chat did not remain open');
+		panel.focus({ preventScroll: true });
+		return window.scrollY;
+	});
+	expect(before).toBeGreaterThan(600);
+	await page.keyboard.press('Escape');
+	await expect(page.getByRole('region', { name: 'swyx', exact: true })).toHaveCount(0);
+	expect(await page.evaluate(() => window.scrollY)).toBeCloseTo(before, 0);
+});
+
+test('Escape closes only the focused control and ignores IME composition', async ({
+	page,
+	context
+}) => {
+	await page.setViewportSize({ width: 1600, height: 900 });
+	await mockChat(context);
+	await page.goto(`${baseUrl}/learn-in-public`);
+	const chat = page.getByRole('region', { name: 'swyx', exact: true });
+	const indexToggle = page
+		.getByRole('navigation', { name: 'Explore writing' })
+		.getByRole('button', { name: 'index' });
+	await expect(chat).toBeVisible();
+	await indexToggle.click();
+	await expect(indexToggle).toHaveAttribute('aria-expanded', 'true');
+	await page.keyboard.press('Escape');
+	await expect(indexToggle).toHaveAttribute('aria-expanded', 'false');
+	await expect(chat).toBeVisible();
+	await indexToggle.click();
+	await chat.getByLabel('Message', { exact: true }).focus();
+	await page.evaluate(() => {
+		document.activeElement?.dispatchEvent(
+			new KeyboardEvent('keydown', {
+				key: 'Escape',
+				bubbles: true,
+				cancelable: true,
+				isComposing: true
+			})
+		);
+	});
+	await expect(chat).toBeVisible();
+	await expect(indexToggle).toHaveAttribute('aria-expanded', 'true');
+	await page.keyboard.press('Escape');
+	await expect(chat).toHaveCount(0);
+	await expect(indexToggle).toHaveAttribute('aria-expanded', 'true');
+});
+
+test('closing chat after jumping to an article heading keeps that position', async ({
+	page,
+	context
+}) => {
+	await page.setViewportSize({ width: 390, height: 844 });
+	await mockChat(context);
+	await page.goto(`${baseUrl}/america250`);
+	await page.evaluate(() => window.scrollTo(0, 600));
+	await page.getByRole('button', { name: 'chat', exact: true }).click();
+	const toc = page.getByRole('navigation', { name: 'Table of contents' });
+	await toc.getByRole('button', { name: /Table of Contents/ }).click();
+	await expect(toc.locator('a[href^="#"]').nth(1)).toBeVisible();
+	await toc.locator('a[href^="#"]').nth(1).click();
+	await expect(page).toHaveURL(/#.+/);
+	await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(600);
+	const before = await page.evaluate(() => {
+		const panel = /** @type {HTMLElement | null} */ (document.querySelector('#live-chat'));
+		if (!panel) throw new Error('Chat did not remain open');
+		panel.focus({ preventScroll: true });
+		return window.scrollY;
+	});
+	await page.keyboard.press('Escape');
+	await expect(page.getByRole('region', { name: 'swyx', exact: true })).toHaveCount(0);
+	expect(await page.evaluate(() => window.scrollY)).toBeCloseTo(before, 0);
 });
