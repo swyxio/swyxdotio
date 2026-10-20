@@ -1,8 +1,8 @@
 <script>
 	import { onMount } from 'svelte';
 
-	/** @type {{ toc: import('@svelte-put/toc').Toc }} */
-	let { toc } = $props();
+	/** @type {{ toc: import('@svelte-put/toc').Toc, hasSections: boolean }} */
+	let { toc, hasSections } = $props();
 	let isOpen = $state(false);
 	let items = $derived([...toc.items.values()]);
 	let activeId = $state('');
@@ -51,7 +51,17 @@
 	});
 </script>
 
-{#if items.length > 1}
+<svelte:head>
+	<noscript
+		><style>
+			.floating-toc {
+				display: none !important;
+			}
+		</style></noscript
+	>
+</svelte:head>
+
+{#if hasSections}
 	<nav class="floating-toc" aria-label="Table of contents">
 		<button
 			class="toc-toggle"
@@ -61,17 +71,15 @@
 		>
 			Table of Contents <span aria-hidden="true">{isOpen ? '−' : '+'}</span>
 		</button>
-		{#if isOpen}
-			<ul id="floating-toc-items">
-				{#each items as item (item.id)}
-					<li class:subheading={item.element.tagName === 'H3'}>
-						<a href="#{item.id}" aria-current={activeId === item.id ? 'location' : undefined}>
-							{item.text}
-						</a>
-					</li>
-				{/each}
-			</ul>
-		{/if}
+		<ul id="floating-toc-items" hidden={!isOpen}>
+			{#each items as item (item.id)}
+				<li class:subheading={item.element.tagName === 'H3'}>
+					<a href="#{item.id}" aria-current={activeId === item.id ? 'location' : undefined}>
+						{item.text}
+					</a>
+				</li>
+			{/each}
+		</ul>
 	</nav>
 {/if}
 

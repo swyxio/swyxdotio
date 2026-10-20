@@ -11,6 +11,7 @@
 	import { Toc } from '@svelte-put/toc';
 	import TableOfContents from './TableOfContents.svelte';
 	import ArticleIndex from './ArticleIndex.svelte';
+	import AmericaEssayArt from './AmericaEssayArt.svelte';
 
 	const toc = new Toc({
 		selector: ':where(h1, h2, h3)',
@@ -59,7 +60,7 @@
 
 {#key data.slug}<ArticleIndex {data} />{/key}
 <noscript><div class="article-index-fallback"><a href="/ideas">← All writing</a></div></noscript>
-<TableOfContents {toc} />
+<TableOfContents {toc} hasSections={json.hasSections || isCodingCareerLaunch} />
 
 {#key data.slug}
 	<article
@@ -68,6 +69,7 @@
 		class:has-translations={hasTranslations}
 	>
 		<header class="article-header">
+			{#if data.slug === 'america250'}<AmericaEssayArt />{/if}
 			<h1>{json.title}</h1>
 			{#if json.subtitle}
 				<p class="article-deck">{json.subtitle}</p>
