@@ -145,7 +145,7 @@
 	function finishGesture(event) {
 		if (!gesture || event.pointerId !== gesture.pointerId) return;
 		gesture = null;
-		rememberGeometry();
+		if (matchMedia('(min-width: 1500px)').matches === wideLayout) rememberGeometry();
 		syncViewport();
 	}
 
@@ -335,7 +335,7 @@
 		const onBlur = () => {
 			if (!gesture) return;
 			gesture = null;
-			rememberGeometry();
+			if (matchMedia('(min-width: 1500px)').matches === wideLayout) rememberGeometry();
 			syncViewport();
 		};
 		document.addEventListener('visibilitychange', onVisibility);

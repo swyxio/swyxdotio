@@ -138,6 +138,18 @@ test('narrow and wide layouts remember separate positions without covering the i
 	await expect.poll(async () => (await chat.boundingBox())?.width).toBeCloseTo(narrow.width, 0);
 	await page.setViewportSize({ width: 1600, height: 900 });
 	await expect.poll(async () => (await chat.boundingBox())?.width).toBe(wide.width + 12);
+	await page.setViewportSize({ width: 390, height: 844 });
+	await expect.poll(async () => (await chat.boundingBox())?.y).toBeCloseTo(narrow.y, 0);
+	const handle = await move.boundingBox();
+	if (!handle) throw new Error('Narrow move handle was not visible');
+	await page.mouse.move(handle.x + 20, handle.y + 20);
+	await page.mouse.down();
+	await page.setViewportSize({ width: 1600, height: 900 });
+	await page.mouse.move(500, 200);
+	await page.mouse.up();
+	await page.setViewportSize({ width: 390, height: 844 });
+	await expect.poll(async () => (await chat.boundingBox())?.x).toBeCloseTo(narrow.x, 0);
+	await expect.poll(async () => (await chat.boundingBox())?.y).toBeCloseTo(narrow.y, 0);
 });
 
 test('dragging and resizing persist across reloads and stay within the viewport', async ({
