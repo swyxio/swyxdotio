@@ -109,6 +109,37 @@ test('wide desktop chat leaves the expanded index and reading column clear', asy
 	await expect(page.getByRole('button', { name: 'chat', exact: true })).toBeVisible();
 });
 
+test('narrow and wide layouts remember separate positions without covering the index', async ({
+	page,
+	context
+}) => {
+	await page.setViewportSize({ width: 390, height: 844 });
+	await mockChat(context);
+	await page.goto(`${baseUrl}/learn-in-public`);
+	await page.getByRole('button', { name: 'chat', exact: true }).click();
+	const chat = page.getByRole('region', { name: 'swyx', exact: true });
+	const move = chat.getByRole('button', { name: 'Move chat window' });
+	await move.focus();
+	await page.keyboard.press('ArrowUp');
+	const narrow = await chat.boundingBox();
+	if (!narrow) throw new Error('Narrow chat was not visible');
+	await page.setViewportSize({ width: 1600, height: 900 });
+	await expect.poll(async () => (await chat.boundingBox())?.width).toBe(268);
+	const index = page.getByRole('navigation', { name: 'Explore writing' });
+	await index.getByRole('button', { name: 'index' }).click();
+	await expect(index.getByText('Follow a thread')).toBeVisible();
+	const [wide, indexBox] = await Promise.all([chat.boundingBox(), index.boundingBox()]);
+	if (!wide || !indexBox) throw new Error('Wide chat or index was not visible');
+	expect(wide.x + wide.width).toBeLessThan(indexBox.x);
+	await chat.getByRole('button', { name: 'Resize chat window' }).focus();
+	await page.keyboard.press('ArrowRight');
+	await page.setViewportSize({ width: 390, height: 844 });
+	await expect.poll(async () => (await chat.boundingBox())?.y).toBeCloseTo(narrow.y, 0);
+	await expect.poll(async () => (await chat.boundingBox())?.width).toBeCloseTo(narrow.width, 0);
+	await page.setViewportSize({ width: 1600, height: 900 });
+	await expect.poll(async () => (await chat.boundingBox())?.width).toBe(wide.width + 12);
+});
+
 test('dragging and resizing persist across reloads and stay within the viewport', async ({
 	page,
 	context
@@ -164,6 +195,8 @@ test('dragging and resizing persist across reloads and stay within the viewport'
 	await page.setViewportSize({ width: 390, height: 300 });
 	const compact = await chat.boundingBox();
 	if (!compact) throw new Error('Compact chat was not visible');
+	await expect(chat.getByText(/backups up to 30 days/)).toBeVisible();
+	await expect(chat.getByText(/unverified names/)).toBeVisible();
 	for (const control of [
 		chat.getByLabel('Message', { exact: true }),
 		chat.getByRole('button', { name: /send/ }),

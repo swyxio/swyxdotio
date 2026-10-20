@@ -33,6 +33,7 @@
 	let destroyed = false;
 	const retentionMs = 48 * 60 * 60 * 1000;
 	const geometryKey = 'swyx:chat:geometry:v1';
+	let wideLayout = false;
 	/** @type {Geometry} */
 	let geometry = { x: 0, y: 0, width: 0, height: 0 };
 	/** @type {Geometry} */
@@ -74,13 +75,45 @@
 		return clampGeometry({ x: view.x + 16, y: view.y + view.height - height - 16, width, height });
 	}
 
+	/** @param {boolean} wide */
+	function loadGeometry(wide) {
+		try {
+			const saved = JSON.parse(
+				localStorage.getItem(`${geometryKey}:${wide ? 'wide' : 'standard'}`) || 'null'
+			);
+			if (
+				saved &&
+				['x', 'y', 'width', 'height'].every((key) =>
+					Number.isFinite(/** @type {Record<string, unknown>} */ (saved)[key])
+				)
+			)
+				return saved;
+		} catch {
+			// Use the default window position when storage is unavailable.
+		}
+		return defaultGeometry(wide);
+	}
+
 	function rememberGeometry() {
 		preferredGeometry = { ...geometry };
 		try {
-			localStorage.setItem(geometryKey, JSON.stringify(preferredGeometry));
+			localStorage.setItem(
+				`${geometryKey}:${wideLayout ? 'wide' : 'standard'}`,
+				JSON.stringify(preferredGeometry)
+			);
 		} catch {
 			// The window remains movable when storage is unavailable.
 		}
+	}
+
+	function syncViewport() {
+		if (gesture) return;
+		const wide = matchMedia('(min-width: 1500px)').matches;
+		if (wide !== wideLayout) {
+			wideLayout = wide;
+			preferredGeometry = loadGeometry(wide);
+		}
+		geometry = clampGeometry(preferredGeometry);
 	}
 
 	/** @param {PointerEvent} event @param {'move' | 'resize'} kind */
@@ -113,6 +146,7 @@
 		if (!gesture || event.pointerId !== gesture.pointerId) return;
 		gesture = null;
 		rememberGeometry();
+		syncViewport();
 	}
 
 	/** @param {KeyboardEvent} event @param {'move' | 'resize'} kind */
@@ -283,22 +317,13 @@
 	}
 
 	onMount(() => {
-		const wide = matchMedia('(min-width: 1500px)').matches;
-		collapsed = !wide || !allowSidebar;
-		preferredGeometry = defaultGeometry(wide);
+		wideLayout = matchMedia('(min-width: 1500px)').matches;
+		collapsed = !wideLayout || !allowSidebar;
+		preferredGeometry = loadGeometry(wideLayout);
 		try {
 			nick = localStorage.getItem('swyx:chat:nick:v1') || '';
-			const saved = JSON.parse(localStorage.getItem(geometryKey) || 'null');
-			if (
-				saved &&
-				['x', 'y', 'width', 'height'].every((key) =>
-					Number.isFinite(/** @type {Record<string, unknown>} */ (saved)[key])
-				)
-			) {
-				preferredGeometry = saved;
-			}
 		} catch {
-			// Guest nicknames and the default window position work without browser storage.
+			// Guest nicknames also work without browser storage.
 		}
 		geometry = clampGeometry(preferredGeometry);
 		if (!nick) nick = `reader${Math.floor(1000 + Math.random() * 9000)}`;
@@ -307,28 +332,26 @@
 		const onVisibility = () => {
 			if (document.visibilityState === 'visible') expireMessages();
 		};
-		const onViewportChange = () => {
-			if (!gesture) geometry = clampGeometry(preferredGeometry);
-		};
 		const onBlur = () => {
 			if (!gesture) return;
 			gesture = null;
 			rememberGeometry();
+			syncViewport();
 		};
 		document.addEventListener('visibilitychange', onVisibility);
-		window.addEventListener('resize', onViewportChange);
+		window.addEventListener('resize', syncViewport);
 		window.addEventListener('blur', onBlur);
-		window.visualViewport?.addEventListener('resize', onViewportChange);
-		window.visualViewport?.addEventListener('scroll', onViewportChange);
+		window.visualViewport?.addEventListener('resize', syncViewport);
+		window.visualViewport?.addEventListener('scroll', syncViewport);
 		return () => {
 			destroyed = true;
 			disconnect();
 			window.clearTimeout(expiryTimer);
 			document.removeEventListener('visibilitychange', onVisibility);
-			window.removeEventListener('resize', onViewportChange);
+			window.removeEventListener('resize', syncViewport);
 			window.removeEventListener('blur', onBlur);
-			window.visualViewport?.removeEventListener('resize', onViewportChange);
-			window.visualViewport?.removeEventListener('scroll', onViewportChange);
+			window.visualViewport?.removeEventListener('resize', syncViewport);
+			window.visualViewport?.removeEventListener('scroll', syncViewport);
 		};
 	});
 </script>
@@ -390,10 +413,7 @@
 			</div>
 			<p class="chat-notice">
 				{#if geometry.height < 350}
-					Public · messages disappear after 48 hours.
-					<span class="visually-hidden"
-						>Nicknames are unverified. Backups may persist up to 30 days.</span
-					>
+					Public · unverified names · messages expire after 48h · backups up to 30 days.
 				{:else}
 					Public · nicknames are unverified<br />Messages disappear after 48 hours. Backups may
 					persist up to 30 days.
