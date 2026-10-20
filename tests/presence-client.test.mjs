@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { canonicalPresencePath } from '../src/lib/read-counter.js';
 import {
 	celebrationFrame,
 	countryFlag,
@@ -41,6 +42,38 @@ test('protocol parser accepts enumerated compact frames and rejects arbitrary da
 	assert.equal(parsePresenceFrame([1, 'r', 'peer', '🔥']), null);
 	assert.equal(parsePresenceFrame([1, 'm', 'peer', Infinity, 0, 'd']), null);
 	assert.equal(parsePresenceFrame({ event: 'move' }), null);
+});
+
+test('sitewide presence frames reject invalid pages and counts', () => {
+	assert.deepEqual(parsePresenceFrame([1, 'g', 'article:america250', 2, 'What America means']), {
+		type: 'sitePage',
+		key: 'article:america250',
+		count: 2,
+		title: 'What America means'
+	});
+	assert.deepEqual(parsePresenceFrame([1, 'g', 'page:home', 0]), {
+		type: 'sitePage',
+		key: 'page:home',
+		count: 0,
+		title: ''
+	});
+	assert.deepEqual(parsePresenceFrame([1, 'g']), { type: 'siteSnapshotComplete' });
+	for (const frame of [
+		[1, 'g', 'article:../private', 1],
+		[1, 'g', 'page:home?secret=1', 1],
+		[1, 'g', 'page:home', -1],
+		[1, 'g', 'page:home', 33],
+		[1, 'g', 'page:home', 1.5],
+		[1, 'g', 'page:home', 1, {}]
+	])
+		assert.equal(parsePresenceFrame(frame), null);
+});
+
+test('registered pages and identically named articles have distinct links', () => {
+	assert.equal(canonicalPresencePath('page:home'), '/');
+	assert.equal(canonicalPresencePath('article:home'), '/home');
+	assert.equal(canonicalPresencePath('page:unknown'), null);
+	assert.equal(canonicalPresencePath('article:../private'), null);
 });
 
 test('outgoing frames stay compact and reaction values are fixed', () => {

@@ -43,6 +43,16 @@ export function canonicalReadPath(requestedKey) {
 	return isBlogSlug(requestedKey) ? `/${requestedKey}` : null;
 }
 
+/** @param {string} roomKey */
+export function canonicalPresencePath(roomKey) {
+	const [kind, key, extra] = roomKey.split(':');
+	if (extra || !key) return null;
+	if (kind === 'page' && Object.hasOwn(PAGE_SOCIAL_CARDS, key)) {
+		return PAGE_SOCIAL_CARDS[/** @type {import('./social-meta').PageCardKey} */ (key)].path;
+	}
+	return kind === 'article' && isBlogSlug(key) ? `/${key}` : null;
+}
+
 /**
  * @param {import('./content-manifest').ContentManifest | null} manifest
  * @param {string} requestedKey

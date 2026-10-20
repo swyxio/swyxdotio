@@ -1,10 +1,28 @@
 <script>
 	import { onMount, tick } from 'svelte';
+	import { resolve } from '$app/paths';
+	import { PRESENCE_REACTIONS } from '$lib/presence-client';
 
 	/** @type {boolean} */
 	export let collapsed = false;
 	/** @type {boolean} */
 	export let allowSidebar = true;
+	/** @type {import('$lib/presence-client').PresenceSummary} */
+	export let presence = {
+		pageKey: null,
+		hidden: false,
+		admitted: false,
+		connected: false,
+		stopped: false,
+		pages: [],
+		otherCount: 0
+	};
+	/** @type {(hidden: boolean) => void} */
+	export let onPresenceVisibility = () => {};
+	/** @type {(reaction: string) => void} */
+	export let onPresenceReaction = () => {};
+	/** @type {(event: MouseEvent) => void} */
+	export let onPresenceShare = () => {};
 
 	/** @typedef {{ id: string, nick: string, text: string, createdAt: number }} ChatMessage */
 	/** @typedef {{ x: number, y: number, width: number, height: number }} Geometry */
@@ -22,6 +40,10 @@
 	let log;
 	/** @type {HTMLFormElement | undefined} */
 	let form;
+	/** @type {HTMLElement | undefined} */
+	let readerPanel;
+	/** @type {HTMLButtonElement | undefined} */
+	let readerToggle;
 	let ready = false;
 	let status = 'Connecting';
 	let error = '';
@@ -31,6 +53,16 @@
 	let reconnectTimer = 0;
 	let expiryTimer = 0;
 	let destroyed = false;
+	let showReaders = false;
+	let previousLogScroll = 0;
+	let wasAtLogBottom = true;
+	$: readerStatus = presence.hidden
+		? 'Live readers hidden'
+		: !presence.pageKey || !presence.admitted || presence.stopped
+			? 'Live readers unavailable'
+			: !presence.connected
+				? 'Connecting readers…'
+				: `${presence.otherCount} other ${presence.otherCount === 1 ? 'reader' : 'readers'} online`;
 	const retentionMs = 48 * 60 * 60 * 1000;
 	const geometryKey = 'swyx:chat:geometry:v1';
 	let wideLayout = false;
@@ -297,10 +329,30 @@
 	/** @param {KeyboardEvent} event */
 	function keydown(event) {
 		if (event.key === 'Escape' && !event.isComposing && !event.defaultPrevented) {
+			// Let the share menu handle Escape before dismissing the chat behind it.
+			if (document.querySelector('[data-share-ui][role="menu"]')) return;
 			event.preventDefault();
 			event.stopPropagation();
 			void closeChat();
 		}
+	}
+
+	async function toggleReaders() {
+		if (!showReaders) {
+			previousLogScroll = log?.scrollTop ?? 0;
+			wasAtLogBottom = !log || log.scrollHeight - log.clientHeight - log.scrollTop <= 2;
+			showReaders = true;
+			await tick();
+			const firstControl = /** @type {HTMLElement | null | undefined} */ (
+				readerPanel?.querySelector('a, button:not([disabled])')
+			);
+			(firstControl ?? readerPanel)?.focus({ preventScroll: true });
+			return;
+		}
+		showReaders = false;
+		await tick();
+		if (log) log.scrollTop = wasAtLogBottom ? log.scrollHeight : previousLogScroll;
+		readerToggle?.focus({ preventScroll: true });
 	}
 
 	/** @param {KeyboardEvent} event */
@@ -362,10 +414,17 @@
 			class="chat-launcher"
 			type="button"
 			bind:this={launcher}
+			aria-label="chat"
+			aria-describedby="chat-reader-summary"
 			aria-expanded={!collapsed}
 			aria-controls="live-chat"
-			on:click={openChat}><span aria-hidden="true">#</span> chat</button
+			on:click={openChat}
 		>
+			<span aria-hidden="true">#</span> chat{#if presence.connected}<span aria-hidden="true">
+					· {presence.otherCount} online</span
+				>{/if}
+			<span id="chat-reader-summary" class="visually-hidden">{readerStatus}</span>
+		</button>
 	{/if}
 	{#if !collapsed}
 		<!-- svelte-ignore a11y_no_noninteractive_element_interactions: Escape dismisses the region when focus is inside it. -->
@@ -419,67 +478,137 @@
 					persist up to 30 days.
 				{/if}
 			</p>
-			<div
-				class="chat-log"
-				role="log"
-				aria-label="Recent chat messages"
-				aria-live="polite"
-				bind:this={log}
-			>
-				{#if messages.length === 0}
-					<p class="chat-empty">No recent messages. Say hello!</p>
-				{:else}
-					{#each messages as message (message.id)}
-						<div class="chat-message">
-							<time datetime={new Date(message.createdAt).toISOString()}
-								>{formatTime(message.createdAt)}</time
-							>
-							<span class="chat-nick">&lt;{message.nick}&gt;</span>
-							<span class="chat-text">{message.text}</span>
+			{#if showReaders}
+				<div
+					id="chat-readers"
+					class="chat-readers"
+					role="region"
+					aria-label="Live readers"
+					tabindex="-1"
+					bind:this={readerPanel}
+				>
+					<p class="readers-heading">{readerStatus}</p>
+					{#if presence.hidden}
+						<p>Live readers and your page are hidden.</p>
+						<button type="button" class="reader-action" on:click={() => onPresenceVisibility(false)}
+							>Show live readers</button
+						>
+					{:else if presence.pageKey && presence.admitted}
+						{#if presence.connected}
+							{#if presence.pages.length}
+								<ul class="reader-pages">
+									{#each presence.pages as item (item.key)}
+										<li>
+											<a
+												href={resolve(/** @type {`/${string}`} */ (item.path || '/'))}
+												on:click={() => {
+													showReaders = false;
+													closeChat();
+												}}>{item.title || item.path}</a
+											>
+											<span>{item.count} {item.count === 1 ? 'reader' : 'readers'}</span>
+										</li>
+									{/each}
+								</ul>
+							{:else}
+								<p>No other readers are connected right now.</p>
+							{/if}
+						{/if}
+						<p>Your current public page is visible to other readers. Counts are connected tabs.</p>
+						<div class="reader-reactions" aria-label="Wave to readers on this page">
+							{#each PRESENCE_REACTIONS as reaction (reaction)}
+								<button
+									type="button"
+									disabled={!presence.connected}
+									aria-label={`Send ${reaction}`}
+									on:click={() => onPresenceReaction(reaction)}>{reaction}</button
+								>
+							{/each}
 						</div>
-					{/each}
-				{/if}
-			</div>
-			<form class="chat-form" bind:this={form} on:submit={sendMessage}>
-				<label class="nick-field"
-					>nick <input
-						aria-label="Nickname (unverified)"
-						bind:value={nick}
-						maxlength="24"
-						required
-						autocomplete="nickname"
-					/></label
-				>
-				<label class="message-field"
-					><span class="visually-hidden">Message</span><textarea
-						bind:value={draft}
-						on:keydown={composerKeydown}
-						maxlength="500"
-						required
-						rows="2"
-						placeholder="Write a message…"
-					></textarea></label
-				>
-				<div class="chat-actions">
-					<span>{pending ? 'Sending…' : `${draft.length}/500`}</span>
-					<button
-						type="submit"
-						disabled={status !== 'Connected' || !!pending || !nick.trim() || !draft.trim()}
-						>send ↵</button
-					>
+						<button type="button" class="reader-action" on:click={onPresenceShare}
+							>Share this page ✨</button
+						>
+						<button type="button" class="reader-action" on:click={() => onPresenceVisibility(true)}
+							>Hide live readers</button
+						>
+						<p>Country is approximate and may reflect a VPN.</p>
+					{:else}
+						<p>Live readers are unavailable on this page.</p>
+					{/if}
 				</div>
-				{#if error}<p class="chat-error" role="status">{error}</p>{/if}
-				{#if status === 'Offline'}<button
-						type="button"
-						class="retry"
-						on:click={() => {
-							reconnectAttempt = 0;
-							connect();
-						}}>Retry connection</button
-					>{/if}
-			</form>
+			{:else}
+				<div
+					class="chat-log"
+					role="log"
+					aria-label="Recent chat messages"
+					aria-live="polite"
+					bind:this={log}
+				>
+					{#if messages.length === 0}
+						<p class="chat-empty">No recent messages. Say hello!</p>
+					{:else}
+						{#each messages as message (message.id)}
+							<div class="chat-message">
+								<time datetime={new Date(message.createdAt).toISOString()}
+									>{formatTime(message.createdAt)}</time
+								>
+								<span class="chat-nick">&lt;{message.nick}&gt;</span>
+								<span class="chat-text">{message.text}</span>
+							</div>
+						{/each}
+					{/if}
+				</div>
+				<form class="chat-form" bind:this={form} on:submit={sendMessage}>
+					<label class="nick-field"
+						>nick <input
+							aria-label="Nickname (unverified)"
+							bind:value={nick}
+							maxlength="24"
+							required
+							autocomplete="nickname"
+						/></label
+					>
+					<label class="message-field"
+						><span class="visually-hidden">Message</span><textarea
+							bind:value={draft}
+							on:keydown={composerKeydown}
+							maxlength="500"
+							required
+							rows="2"
+							placeholder="Write a message…"
+						></textarea></label
+					>
+					<div class="chat-actions">
+						<span>{pending ? 'Sending…' : `${draft.length}/500`}</span>
+						<button
+							type="submit"
+							disabled={status !== 'Connected' || !!pending || !nick.trim() || !draft.trim()}
+							>send ↵</button
+						>
+					</div>
+					{#if error}<p class="chat-error" role="status">{error}</p>{/if}
+					{#if status === 'Offline'}<button
+							type="button"
+							class="retry"
+							on:click={() => {
+								reconnectAttempt = 0;
+								connect();
+							}}>Retry connection</button
+						>{/if}
+				</form>
+			{/if}
 			<div class="chat-window-footer">
-				<span aria-hidden="true">drag to move</span>
+				<button
+					type="button"
+					class="reader-toggle"
+					aria-expanded={showReaders}
+					aria-controls="chat-readers"
+					bind:this={readerToggle}
+					on:click={toggleReaders}
+				>
+					<span class:reader-online={presence.connected} aria-hidden="true">●</span>
+					{showReaders ? '← back to chat' : readerStatus}
+				</button>
 				<button
 					type="button"
 					class="chat-resize-handle"
@@ -696,10 +825,90 @@
 		align-items: center;
 		justify-content: space-between;
 		min-height: 36px;
-		padding-left: 0.8rem;
 		border-top: 1px solid #465a4a;
 		color: var(--chat-muted);
 		font-size: 0.68rem;
+	}
+	.reader-toggle {
+		flex: 1;
+		min-width: 0;
+		min-height: 44px;
+		padding: 0.35rem 0.8rem;
+		text-align: left;
+		color: #d1e4cf;
+		cursor: pointer;
+		font: 500 0.72rem/1.25 var(--font-mono);
+	}
+	.reader-toggle span {
+		color: var(--chat-muted);
+	}
+	.reader-toggle .reader-online {
+		color: #a5d5aa;
+	}
+	.chat-readers {
+		flex: 1;
+		min-height: 0;
+		overflow-y: auto;
+		overscroll-behavior: contain;
+		padding: 0.7rem 0.8rem;
+		color: #e0eedc;
+		font: 400 0.75rem/1.5 var(--font-mono);
+	}
+	.chat-readers p {
+		margin: 0.45rem 0;
+		color: var(--chat-muted);
+	}
+	.chat-readers .readers-heading {
+		margin-top: 0;
+		color: #e0eedc;
+		font-weight: 600;
+	}
+	.reader-pages {
+		margin: 0.6rem 0;
+		padding: 0;
+		list-style: none;
+	}
+	.reader-pages li {
+		display: flex;
+		justify-content: space-between;
+		gap: 0.6rem;
+		padding: 0.4rem 0;
+		border-bottom: 1px solid #465a4a;
+	}
+	.reader-pages a {
+		min-width: 0;
+		color: #b8e5bb;
+		overflow-wrap: anywhere;
+		text-decoration: underline;
+	}
+	.reader-pages li span {
+		flex: none;
+		color: var(--chat-muted);
+	}
+	.reader-reactions {
+		display: flex;
+		gap: 0.25rem;
+		margin-top: 0.5rem;
+	}
+	.reader-reactions button {
+		flex: 1;
+		min-width: 0;
+		min-height: 44px;
+		border-radius: 4px;
+		background: #304539;
+		cursor: pointer;
+		font-size: 1rem;
+	}
+	.reader-reactions button:disabled {
+		opacity: 0.5;
+	}
+	.reader-action {
+		display: block;
+		min-height: 44px;
+		color: #b8e5bb;
+		cursor: pointer;
+		text-align: left;
+		font: inherit;
 	}
 	.chat-resize-handle {
 		width: 44px;

@@ -1,8 +1,9 @@
 <script>
-	import { onMount, tick } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
+	import { SvelteMap } from 'svelte/reactivity';
+	import { canonicalPresencePath } from '$lib/read-counter';
 	import {
 		PRESENCE_ADMISSION_PREFIX,
-		PRESENCE_REACTIONS,
 		PRESENCE_SHARE_CELEBRATION_EVENT,
 		PRESENCE_SHARE_REQUEST_EVENT,
 		PRESENCE_VISIBILITY_KEY,
@@ -21,9 +22,12 @@
 	export let pageKey;
 	/** @type {number} */
 	export let admissionRate = 1;
+	const dispatch = createEventDispatcher();
 
 	/** @type {Map<string, import('$lib/presence-client').PresencePeer>} */
-	let peers = new Map();
+	let peers = new SvelteMap();
+	/** @type {Map<string, { count: number, title: string }>} */
+	let sitePages = new SvelteMap();
 	/** @type {WebSocket | null} */
 	let socket = null;
 	/** @type {string | null} */
@@ -37,7 +41,7 @@
 	let hidden = false;
 	let admitted = false;
 	let connected = false;
-	let panelOpen = false;
+	let siteSnapshotComplete = false;
 	let isMobile = false;
 	let reducedMotion = false;
 	let stopped = false;
@@ -46,13 +50,25 @@
 	let reconnectAttempt = 0;
 	let celebrated = false;
 	let destroyed = false;
-	/** @type {HTMLElement | null} */
-	let pill = null;
-	/** @type {HTMLButtonElement | undefined} */
-	let pillButton;
-
 	$: peerList = [...peers.values()].filter((peer) => peer.id !== selfId);
-	$: readerCount = connected ? peerList.length + 1 : 0;
+	$: otherPages = [...sitePages.entries()]
+		.map(([key, value]) => ({
+			key,
+			path: canonicalPresencePath(key),
+			title: value.title,
+			count: Math.max(0, value.count - (key === pageKey ? 1 : 0))
+		}))
+		.filter((item) => item.path && item.count > 0)
+		.sort((a, b) => b.count - a.count || a.key.localeCompare(b.key));
+	$: dispatch('change', {
+		pageKey,
+		hidden,
+		admitted,
+		connected: connected && siteSnapshotComplete,
+		stopped,
+		pages: otherPages,
+		otherCount: otherPages.reduce((sum, item) => sum + item.count, 0)
+	});
 
 	/** @param {import('$lib/presence-client').PresencePeer} peer */
 	function peerPosition(peer) {
@@ -145,18 +161,24 @@
 		}
 		const frame = parsePresenceFrame(raw);
 		if (!frame) return;
-		if (frame.type === 'welcome') {
+		if (frame.type === 'sitePage') {
+			sitePages = new SvelteMap(sitePages);
+			if (frame.count) sitePages.set(frame.key, { count: frame.count, title: frame.title });
+			else sitePages.delete(frame.key);
+		} else if (frame.type === 'siteSnapshotComplete') {
+			siteSnapshotComplete = true;
+		} else if (frame.type === 'welcome') {
 			selfId = frame.selfId;
-			peers = new Map(frame.peers.map((peer) => [peer.id, peer]));
+			peers = new SvelteMap(frame.peers.map((peer) => [peer.id, peer]));
 		} else if (frame.type === 'snapshot') {
-			peers = new Map(peers);
+			peers = new SvelteMap(peers);
 			for (const peer of frame.peers) peers.set(peer.id, peer);
 		} else if (frame.type === 'join') {
-			peers = new Map(peers).set(frame.peer.id, frame.peer);
+			peers = new SvelteMap(peers).set(frame.peer.id, frame.peer);
 		} else if (frame.type === 'move') {
 			const peer = peers.get(frame.id);
 			if (peer)
-				peers = new Map(peers).set(frame.id, {
+				peers = new SvelteMap(peers).set(frame.id, {
 					...peer,
 					x: frame.x,
 					y: frame.y,
@@ -166,16 +188,16 @@
 		} else if (frame.type === 'reaction') {
 			const peer = peers.get(frame.id);
 			if (peer)
-				peers = new Map(peers).set(frame.id, {
+				peers = new SvelteMap(peers).set(frame.id, {
 					...peer,
 					reaction: frame.reaction,
 					reactionAt: frame.now
 				});
 		} else if (frame.type === 'celebration') {
 			const peer = peers.get(frame.id);
-			if (peer) peers = new Map(peers).set(frame.id, { ...peer, celebrationAt: frame.now });
+			if (peer) peers = new SvelteMap(peers).set(frame.id, { ...peer, celebrationAt: frame.now });
 		} else if (frame.type === 'leave') {
-			peers = new Map(peers);
+			peers = new SvelteMap(peers);
 			peers.delete(frame.id);
 		}
 	}
@@ -187,7 +209,9 @@
 		socket = null;
 		if (current && current.readyState < WebSocket.CLOSING)
 			current.close(1000, immediate ? 'disabled' : 'hidden');
-		peers = new Map();
+		peers = new SvelteMap();
+		sitePages = new SvelteMap();
+		siteSnapshotComplete = false;
 		selfId = null;
 	}
 
@@ -218,26 +242,30 @@
 			if (socket !== nextSocket) return;
 			socket = null;
 			connected = false;
-			peers = new Map();
+			peers = new SvelteMap();
+			sitePages = new SvelteMap();
+			siteSnapshotComplete = false;
 			if (event.code === 1013 || event.code === 1008) {
 				stopped = true;
 				return;
 			}
 			if (hidden || document.visibilityState !== 'visible') return;
 			const attempt = reconnectAttempt++;
-			if (attempt >= 8) return;
+			if (attempt >= 8) {
+				stopped = true;
+				return;
+			}
 			window.setTimeout(connect, reconnectDelay(attempt));
 		});
 		nextSocket.addEventListener('error', () => nextSocket.close());
 	}
 
 	/** @param {boolean} nextHidden */
-	function setHidden(nextHidden) {
+	export function setHidden(nextHidden, persist = true) {
 		hidden = nextHidden;
-		panelOpen = false;
 		try {
-			if (hidden) localStorage.setItem(PRESENCE_VISIBILITY_KEY, 'yes');
-			else localStorage.removeItem(PRESENCE_VISIBILITY_KEY);
+			if (persist && hidden) localStorage.setItem(PRESENCE_VISIBILITY_KEY, 'yes');
+			else if (persist) localStorage.removeItem(PRESENCE_VISIBILITY_KEY);
 		} catch {
 			// The in-memory preference still applies when storage is unavailable.
 		}
@@ -249,14 +277,15 @@
 	}
 
 	/** @param {string} reaction */
-	function react(reaction) {
+	export function react(reaction) {
 		const frame = reactionFrame(reaction);
 		if (frame) send(frame);
-		panelOpen = false;
 	}
 
-	function requestShare() {
-		const rect = pill?.getBoundingClientRect();
+	/** @param {MouseEvent} event */
+	export function requestShare(event) {
+		const button = event.currentTarget;
+		const rect = button instanceof HTMLElement ? button.getBoundingClientRect() : null;
 		window.dispatchEvent(
 			new CustomEvent(PRESENCE_SHARE_REQUEST_EVENT, {
 				detail: {
@@ -265,33 +294,6 @@
 				}
 			})
 		);
-		panelOpen = false;
-	}
-
-	/** @param {KeyboardEvent} event */
-	function closePresenceOnEscape(event) {
-		if (!panelOpen || event.defaultPrevented || event.key !== 'Escape') return;
-		if (event.target instanceof Element && event.target.closest('dialog[open]')) return;
-		event.preventDefault();
-		panelOpen = false;
-		pillButton?.focus();
-	}
-
-	async function togglePanel() {
-		panelOpen = !panelOpen;
-		if (panelOpen) {
-			await tick();
-			if (pill && getComputedStyle(pill).position !== 'fixed') {
-				pill.scrollIntoView({ block: 'nearest' });
-			}
-		}
-	}
-
-	/** @param {PointerEvent} event */
-	function closePresenceOutside(event) {
-		if (panelOpen && event.target instanceof Node && !pill?.contains(event.target)) {
-			panelOpen = false;
-		}
 	}
 
 	onMount(() => {
@@ -343,6 +345,10 @@
 			celebrated = true;
 			send(celebrationFrame());
 		};
+		/** @param {StorageEvent} event */
+		const handleStorage = (event) => {
+			if (event.key === PRESENCE_VISIBILITY_KEY) setHidden(event.newValue === 'yes', false);
+		};
 
 		scheduleInitialConnect();
 		document.addEventListener('visibilitychange', handleVisibility);
@@ -352,6 +358,7 @@
 		window.addEventListener('scroll', handleViewport, { passive: true });
 		window.addEventListener('resize', handleViewport);
 		window.addEventListener(PRESENCE_SHARE_CELEBRATION_EVENT, handleCelebration);
+		window.addEventListener('storage', handleStorage);
 		const clockTimer = window.setInterval(() => (clock = Date.now()), 250);
 
 		return () => {
@@ -368,13 +375,12 @@
 			window.removeEventListener('scroll', handleViewport);
 			window.removeEventListener('resize', handleViewport);
 			window.removeEventListener(PRESENCE_SHARE_CELEBRATION_EVENT, handleCelebration);
+			window.removeEventListener('storage', handleStorage);
 			mobileQuery.removeEventListener('change', updateMedia);
 			motionQuery.removeEventListener('change', updateMedia);
 		};
 	});
 </script>
-
-<svelte:window on:keydown={closePresenceOnEscape} on:pointerdown={closePresenceOutside} />
 
 {#if admitted || hidden}
 	<div class:reduced={reducedMotion} class="live-presence" aria-live="polite">
@@ -437,53 +443,6 @@
 					aria-hidden="true">◌</span
 				>
 			{/if}
-
-			<div
-				class="presence-dock"
-				bind:this={pill}
-				role="group"
-				aria-label="Live reader controls"
-				on:contextmenu={(event) => {
-					event.preventDefault();
-					requestShare();
-				}}
-			>
-				<button
-					type="button"
-					class="presence-pill"
-					bind:this={pillButton}
-					aria-expanded={panelOpen}
-					aria-controls="live-reader-panel"
-					on:click={togglePanel}
-				>
-					<span class:online={connected} class="status-dot"></span>
-					{connected ? `${readerCount} here` : 'Live readers'} <span aria-hidden="true">· 👋</span>
-				</button>
-				{#if panelOpen}
-					<div id="live-reader-panel" class="presence-panel">
-						<div class="reaction-row" aria-label="Wave to live readers">
-							{#each PRESENCE_REACTIONS as reaction}
-								<button
-									type="button"
-									on:click={() => react(reaction)}
-									aria-label={`Send ${reaction}`}>{reaction}</button
-								>
-							{/each}
-						</div>
-						<button type="button" class="text-action" on:click={requestShare}
-							>Share this page ✨</button
-						>
-						<button type="button" class="text-action" on:click={() => setHidden(true)}
-							>Hide live readers</button
-						>
-						<p>Country is approximate and may reflect a VPN.</p>
-					</div>
-				{/if}
-			</div>
-		{:else}
-			<button type="button" class="show-presence" on:click={() => setHidden(false)}
-				>Show live readers</button
-			>
 		{/if}
 	</div>
 {/if}
@@ -496,88 +455,6 @@
 		pointer-events: none;
 		font: 600 12px/1.2 var(--font-body);
 		color: var(--page-text);
-	}
-	.presence-dock,
-	.show-presence {
-		position: fixed;
-		right: max(12px, env(safe-area-inset-right));
-		bottom: max(12px, env(safe-area-inset-bottom));
-		pointer-events: auto;
-	}
-	.presence-pill,
-	.show-presence {
-		border: 1px solid var(--page-border);
-		border-radius: 999px;
-		background: color-mix(in srgb, var(--page-surface) 94%, transparent);
-		color: var(--page-text);
-		box-shadow: 0 8px 24px rgb(15 23 42 / 0.13);
-		backdrop-filter: blur(10px);
-		cursor: pointer;
-		padding: 9px 12px;
-	}
-	.show-presence {
-		color: var(--page-muted);
-		font-size: 11px;
-	}
-	.status-dot {
-		display: inline-block;
-		width: 7px;
-		height: 7px;
-		margin-right: 5px;
-		border-radius: 50%;
-		background: var(--page-muted);
-	}
-	.status-dot.online {
-		background: #16a34a;
-		box-shadow: 0 0 0 3px rgb(22 163 74 / 0.14);
-	}
-	.presence-panel {
-		position: absolute;
-		right: 0;
-		bottom: calc(100% + 8px);
-		width: 220px;
-		border: 1px solid var(--page-border);
-		border-radius: 12px;
-		background: var(--page-surface);
-		box-shadow: 0 14px 40px rgb(15 23 42 / 0.18);
-		padding: 10px;
-	}
-	.reaction-row {
-		display: flex;
-		justify-content: space-between;
-		gap: 4px;
-	}
-	.reaction-row button {
-		width: 36px;
-		height: 34px;
-		border: 0;
-		border-radius: 8px;
-		background: var(--page-section-bg);
-		cursor: pointer;
-		font-size: 17px;
-	}
-	.reaction-row button:hover {
-		background: var(--page-accent-soft);
-	}
-	.text-action {
-		display: block;
-		width: 100%;
-		border: 0;
-		border-top: 1px solid var(--page-border);
-		background: transparent;
-		color: var(--page-text);
-		cursor: pointer;
-		margin-top: 8px;
-		padding: 9px 4px 2px;
-		text-align: left;
-		font: inherit;
-	}
-	.presence-panel p {
-		color: var(--page-muted);
-		font-size: 10px;
-		font-weight: 400;
-		line-height: 1.35;
-		margin: 9px 4px 1px;
 	}
 	.remote-cursor {
 		position: fixed;
@@ -708,36 +585,6 @@
 
 		.reading-rail {
 			display: block;
-		}
-		.presence-dock,
-		.show-presence {
-			position: relative;
-			inset: auto;
-		}
-
-		.presence-pill,
-		.show-presence {
-			min-height: 44px;
-			box-shadow: none;
-			padding: 10px 13px;
-		}
-
-		.presence-panel {
-			position: static;
-			width: min(100%, 18rem);
-			margin-top: 0.65rem;
-			box-shadow: none;
-			padding: 0.75rem;
-		}
-
-		.reaction-row button {
-			flex: 1;
-			min-width: 0;
-			height: 44px;
-		}
-
-		.text-action {
-			min-height: 44px;
 		}
 	}
 </style>

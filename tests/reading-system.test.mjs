@@ -66,20 +66,6 @@ test('essays use bounded readable prose with intact metadata and content', () =>
 	assert.match(article, /<SocialMeta \{\.\.\.social\}/);
 });
 
-test('mobile live-reader controls live in the footer and open in normal flow', () => {
-	const layout = source('src/routes/+layout.svelte');
-	const presence = source('src/components/LivePresence.svelte');
-	assert.match(layout, /<footer\b[\s\S]*?<LivePresence\b[\s\S]*?<\/footer>/);
-	const mobile = presence.slice(presence.lastIndexOf('@media'));
-	assert.match(mobile, /\.live-presence\s*\{[^}]*position: relative/);
-	assert.match(mobile, /\.presence-panel\s*\{[^}]*position: static/);
-	assert.match(mobile, /min-height: 44px/);
-	assert.match(presence, /closePresenceOnEscape/);
-	assert.match(presence, /closePresenceOutside/);
-	assert.match(presence, /event\.defaultPrevented/);
-	assert.match(presence, /target\.closest\('dialog\[open\]'\)/);
-});
-
 test('mobile navigation uses native modal focus containment and readable controls', () => {
 	const nav = source('src/components/Nav.svelte');
 	assert.match(nav, /<dialog\b/);

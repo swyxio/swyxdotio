@@ -155,16 +155,23 @@ ledger; the historical estimates are a separate static presentation layer.
 Presence is intentionally playful and approximate. On desktop, admitted readers see ephemeral
 country-labelled cursors. On mobile, the persistent representation is a flag bead on a reading
 progress rail; a tap or drag adds a temporary passive touch cursor without interfering with native
-scrolling. The only room communication is movement, one of `👋 ❤️ 💡 😂 ✨`, and a fixed share
-sparkle. Highlighted quote text, URLs, destinations, IP addresses, and user agents never enter the
-Durable Object.
+scrolling. The sitewide roster counts connected reader tabs by validated public page, with a link
+to each occupied page; the count excludes the current tab and is not a count of unique people.
+Cursor movement, one of `👋 ❤️ 💡 😂 ✨`, and a fixed share sparkle stay within the same page.
+The coordinator receives registered public page keys, public titles, and a daily keyed digest for
+connection limits, never query strings, fragments, highlighted quote text, raw IP addresses, or
+user agents. The digest is an internal socket tag held for the connection's lifetime; it is not
+sent to readers or written to application databases.
 
 The browser waits until the page has been visible for two seconds before connecting. The feature
-is on by default and has a persistent **Hide live readers** preference. Hidden tabs stop sending;
-after 30 hidden seconds the socket closes. Rooms admit at most 32 readers, use WebSocket
-hibernation, and store no application data. Room IDs are resolved from the same finite public-page
-registry and persisted non-private article manifest used by read counts, so tools, APIs, feeds,
-errors, private articles, and arbitrary attacker-controlled keys cannot create rooms.
+is on by default and has a persistent **Hide live readers** preference, which also removes the tab
+from the sitewide roster. Hidden tabs stop sending; after 30 hidden seconds the socket closes. The
+sitewide coordinator admits at most 1,024 sockets, 32 per page, and 64 per keyed address; ingress
+also limits connections to 60 per minute per address. The concurrent cap checks the current and
+previous daily keys, so connections open for more than two calendar days can age out of that cap.
+It uses WebSocket hibernation and writes no reader data to storage. Keys come from the same finite
+public-page registry and persisted non-private article manifest used by read counts, so tools,
+APIs, feeds, errors, private articles, and arbitrary attacker-controlled keys cannot enter the roster.
 
 ### Deploy and develop
 
@@ -182,18 +189,25 @@ npm run deploy:presence
 npm run deploy
 ```
 
-For a fast production smoke test, open the same public page in two normal browser contexts and
-confirm the pill changes from `1 here` to `2 here`. Then verify hiding persists across reloads,
-mobile emulation shows the reading rail, a reaction travels, a highlighted quote opens sharing,
-and the browser network panel contains no selected text in WebSocket frames. An overflowed room
+Deploy the presence Worker before merging a main Worker change that routes into the sitewide
+coordinator: the main branch can deploy automatically. Do not roll the presence Worker back to
+an untagged version while sitewide sockets remain connected; first drain those connections, or
+the old Worker could send page-specific cursor traffic across pages.
+
+For a fast production smoke test, open public pages in two normal browser contexts and confirm
+each sees the other reader and the correct public page. On the same page, confirm a cursor and
+reaction travel. Then verify hiding persists across reloads and removes the reader from the roster,
+mobile emulation shows the reading rail, a highlighted quote opens sharing, and browser WebSocket
+frames contain no selected text, query string, or fragment. An overflowed page or sitewide room
 closes excess clients with `1013`; malformed/abusive frames close with `1008`.
 
 ### Cost envelope and controls
 
 The workload model assumes one admitted socket and an average of 12 compact incoming frames per
 eligible visit. Hibernated idle sockets are not billed for duration, outgoing WebSocket messages
-are free, and incoming messages are billed in 20-message request units. Under July 2026 Cloudflare
-Workers/Durable Objects paid pricing, the planning envelope is:
+are free, and incoming messages are billed in 20-message request units. The following July 2026
+estimates predate the sitewide coordinator and are historical context, not a budget for the new
+roster. Its concentrated traffic, snapshots, and join/leave fanout require fresh measurements:
 
 | Eligible views/day | Estimated total monthly workload cost |
 | -----------------: | ------------------------------------: |

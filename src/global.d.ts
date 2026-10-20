@@ -128,6 +128,7 @@ declare namespace App {
 			READ_FUNNEL_RATE_LIMITER?: RateLimit;
 			SEARCH_ASK_RATE_LIMITER?: RateLimit;
 			PRESENCE_ROOMS?: DurableObjectNamespace;
+			PRESENCE_CONNECTION_RATE_LIMITER?: RateLimit;
 			CHAT_ROOM?: DurableObjectNamespace;
 			CHAT_IP_RATE_LIMITER?: RateLimit;
 			CHAT_ENABLED?: string;
