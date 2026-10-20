@@ -1,6 +1,5 @@
 <script>
 	import { onMount, tick } from 'svelte';
-	import { afterNavigate } from '$app/navigation';
 
 	/** @type {boolean} */
 	export let collapsed = false;
@@ -8,6 +7,7 @@
 	export let allowSidebar = true;
 
 	/** @typedef {{ id: string, nick: string, text: string, createdAt: number }} ChatMessage */
+	/** @typedef {{ x: number, y: number, width: number, height: number }} Geometry */
 	/** @type {ChatMessage[]} */
 	let messages = [];
 	/** @type {WebSocket | null} */
@@ -23,7 +23,6 @@
 	/** @type {HTMLFormElement | undefined} */
 	let form;
 	let ready = false;
-	let wide = false;
 	let status = 'Connecting';
 	let error = '';
 	let nick = '';
@@ -31,19 +30,140 @@
 	let reconnectAttempt = 0;
 	let reconnectTimer = 0;
 	let expiryTimer = 0;
-	let returnScroll = 0;
-	let returnUrl = '';
-	let hasReturnScroll = false;
 	let destroyed = false;
 	const retentionMs = 48 * 60 * 60 * 1000;
+	const geometryKey = 'swyx:chat:geometry:v1';
+	let wideLayout = false;
+	/** @type {Geometry} */
+	let geometry = { x: 0, y: 0, width: 0, height: 0 };
+	/** @type {Geometry} */
+	let preferredGeometry = geometry;
+	/** @type {{ pointerId: number, kind: 'move' | 'resize', x: number, y: number, geometry: Geometry } | null} */
+	let gesture = null;
 
-	$: docked = wide && allowSidebar;
+	function viewport() {
+		const visual = window.visualViewport;
+		return {
+			x: visual?.offsetLeft ?? 0,
+			y: visual?.offsetTop ?? 0,
+			width: visual?.width ?? window.innerWidth,
+			height: visual?.height ?? window.innerHeight
+		};
+	}
 
-	afterNavigate(({ from, to }) => {
-		if (from && to && from.url.href !== to.url.href) {
-			hasReturnScroll = false;
+	/** @param {Geometry} value */
+	function clampGeometry(value) {
+		const view = viewport();
+		const margin = 8;
+		const maxWidth = Math.max(1, view.width - margin * 2);
+		const maxHeight = Math.max(1, view.height - margin * 2);
+		const width = Math.min(maxWidth, Math.max(Math.min(268, maxWidth), value.width));
+		const height = Math.min(maxHeight, Math.max(Math.min(340, maxHeight), value.height));
+		return {
+			x: Math.max(view.x + margin, Math.min(value.x, view.x + view.width - width - margin)),
+			y: Math.max(view.y + margin, Math.min(value.y, view.y + view.height - height - margin)),
+			width,
+			height
+		};
+	}
+
+	/** @param {boolean} wide */
+	function defaultGeometry(wide) {
+		const view = viewport();
+		const width = wide && allowSidebar ? 268 : 336;
+		const height = Math.min(wide && allowSidebar ? 576 : 510, view.height - 16);
+		return clampGeometry({ x: view.x + 16, y: view.y + view.height - height - 16, width, height });
+	}
+
+	/** @param {boolean} wide */
+	function loadGeometry(wide) {
+		try {
+			const saved = JSON.parse(
+				localStorage.getItem(`${geometryKey}:${wide ? 'wide' : 'standard'}`) || 'null'
+			);
+			if (
+				saved &&
+				['x', 'y', 'width', 'height'].every((key) =>
+					Number.isFinite(/** @type {Record<string, unknown>} */ (saved)[key])
+				)
+			)
+				return saved;
+		} catch {
+			// Use the default window position when storage is unavailable.
 		}
-	});
+		return defaultGeometry(wide);
+	}
+
+	function rememberGeometry() {
+		preferredGeometry = { ...geometry };
+		try {
+			localStorage.setItem(
+				`${geometryKey}:${wideLayout ? 'wide' : 'standard'}`,
+				JSON.stringify(preferredGeometry)
+			);
+		} catch {
+			// The window remains movable when storage is unavailable.
+		}
+	}
+
+	function syncViewport() {
+		if (gesture) return;
+		const wide = matchMedia('(min-width: 1500px)').matches;
+		if (wide !== wideLayout) {
+			wideLayout = wide;
+			preferredGeometry = loadGeometry(wide);
+		}
+		geometry = clampGeometry(preferredGeometry);
+	}
+
+	/** @param {PointerEvent} event @param {'move' | 'resize'} kind */
+	function startGesture(event, kind) {
+		if (event.button !== 0 || gesture) return;
+		const handle = /** @type {HTMLElement} */ (event.currentTarget);
+		event.preventDefault();
+		handle.setPointerCapture(event.pointerId);
+		gesture = { pointerId: event.pointerId, kind, x: event.clientX, y: event.clientY, geometry };
+	}
+
+	/** @param {PointerEvent} event */
+	function moveGesture(event) {
+		if (!gesture || event.pointerId !== gesture.pointerId) return;
+		const dx = event.clientX - gesture.x;
+		const dy = event.clientY - gesture.y;
+		geometry = clampGeometry(
+			gesture.kind === 'move'
+				? { ...gesture.geometry, x: gesture.geometry.x + dx, y: gesture.geometry.y + dy }
+				: {
+						...gesture.geometry,
+						width: gesture.geometry.width + dx,
+						height: gesture.geometry.height + dy
+					}
+		);
+	}
+
+	/** @param {PointerEvent} event */
+	function finishGesture(event) {
+		if (!gesture || event.pointerId !== gesture.pointerId) return;
+		gesture = null;
+		if (matchMedia('(min-width: 1500px)').matches === wideLayout) rememberGeometry();
+		syncViewport();
+	}
+
+	/** @param {KeyboardEvent} event @param {'move' | 'resize'} kind */
+	function geometryKeydown(event, kind) {
+		const step = event.shiftKey ? 48 : 12;
+		const dx = event.key === 'ArrowRight' ? step : event.key === 'ArrowLeft' ? -step : 0;
+		const dy = event.key === 'ArrowDown' ? step : event.key === 'ArrowUp' ? -step : 0;
+		if (!dx && !dy) return;
+		event.preventDefault();
+		event.stopPropagation();
+		geometry = clampGeometry(
+			kind === 'move'
+				? { ...geometry, x: geometry.x + dx, y: geometry.y + dy }
+				: { ...geometry, width: geometry.width + dx, height: geometry.height + dy }
+		);
+		rememberGeometry();
+	}
 
 	/** @param {unknown} value @returns {value is ChatMessage} */
 	function isMessage(value) {
@@ -142,18 +262,11 @@
 	}
 
 	async function openChat() {
-		if (!collapsed) {
-			panel?.scrollIntoView({ block: 'start' });
-			return;
-		}
-		returnScroll = window.scrollY;
-		returnUrl = window.location.href;
-		hasReturnScroll = !docked;
+		geometry = clampGeometry(preferredGeometry);
 		collapsed = false;
 		reconnectAttempt = 0;
 		connect();
 		await tick();
-		if (!docked) panel?.scrollIntoView({ block: 'start' });
 		panel?.focus({ preventScroll: true });
 	}
 
@@ -161,10 +274,6 @@
 		collapsed = true;
 		disconnect();
 		await tick();
-		if (hasReturnScroll && !docked && window.location.href === returnUrl) {
-			window.scrollTo({ top: returnScroll, behavior: 'instant' });
-		}
-		hasReturnScroll = false;
 		launcher?.focus({ preventScroll: true });
 	}
 
@@ -208,74 +317,107 @@
 	}
 
 	onMount(() => {
-		const query = matchMedia('(min-width: 1500px)');
-		const updateWide = () => (wide = query.matches);
-		updateWide();
-		query.addEventListener('change', updateWide);
-		collapsed = !query.matches || !allowSidebar;
+		wideLayout = matchMedia('(min-width: 1500px)').matches;
+		collapsed = !wideLayout || !allowSidebar;
+		preferredGeometry = loadGeometry(wideLayout);
 		try {
 			nick = localStorage.getItem('swyx:chat:nick:v1') || '';
 		} catch {
 			// Guest nicknames also work without browser storage.
 		}
+		geometry = clampGeometry(preferredGeometry);
 		if (!nick) nick = `reader${Math.floor(1000 + Math.random() * 9000)}`;
 		ready = true;
 		if (!collapsed) connect();
 		const onVisibility = () => {
 			if (document.visibilityState === 'visible') expireMessages();
 		};
-		const onHashChange = () => (hasReturnScroll = false);
+		const onBlur = () => {
+			if (!gesture) return;
+			gesture = null;
+			if (matchMedia('(min-width: 1500px)').matches === wideLayout) rememberGeometry();
+			syncViewport();
+		};
 		document.addEventListener('visibilitychange', onVisibility);
-		window.addEventListener('hashchange', onHashChange);
+		window.addEventListener('resize', syncViewport);
+		window.addEventListener('blur', onBlur);
+		window.visualViewport?.addEventListener('resize', syncViewport);
+		window.visualViewport?.addEventListener('scroll', syncViewport);
 		return () => {
 			destroyed = true;
 			disconnect();
 			window.clearTimeout(expiryTimer);
 			document.removeEventListener('visibilitychange', onVisibility);
-			window.removeEventListener('hashchange', onHashChange);
-			query.removeEventListener('change', updateWide);
+			window.removeEventListener('resize', syncViewport);
+			window.removeEventListener('blur', onBlur);
+			window.visualViewport?.removeEventListener('resize', syncViewport);
+			window.visualViewport?.removeEventListener('scroll', syncViewport);
 		};
 	});
 </script>
 
 {#if ready}
-	{#if collapsed || !docked}
+	{#if collapsed}
 		<button
 			class="chat-launcher"
 			type="button"
 			bind:this={launcher}
 			aria-expanded={!collapsed}
 			aria-controls="live-chat"
-			on:click={openChat}
-			><span aria-hidden="true">#</span> {collapsed ? 'chat' : 'back to chat'}</button
+			on:click={openChat}><span aria-hidden="true">#</span> chat</button
 		>
 	{/if}
 	{#if !collapsed}
 		<!-- svelte-ignore a11y_no_noninteractive_element_interactions: Escape dismisses the region when focus is inside it. -->
 		<section
 			id="live-chat"
-			class:chat-docked={docked}
 			class="chat"
+			class:chat-compact={geometry.height < 350}
+			style="left: {geometry.x}px; top: {geometry.y}px; width: {geometry.width}px; height: {geometry.height}px"
 			aria-labelledby="chat-title"
 			tabindex="-1"
 			bind:this={panel}
 			on:keydown={keydown}
 		>
+			<span id="chat-window-help" class="visually-hidden"
+				>Use arrow keys to move or resize the window; hold Shift for larger steps.</span
+			>
 			<div class="chat-titlebar">
-				<div>
-					<h2 id="chat-title"><span aria-hidden="true">#</span> swyx</h2>
-					<p class="chat-status">
-						<span class:online={status === 'Connected'} aria-hidden="true">●</span>
-						{status}
-					</p>
-				</div>
+				<h2 id="chat-title" class="visually-hidden">swyx</h2>
+				<button
+					type="button"
+					class="chat-drag-handle"
+					aria-label="Move chat window"
+					aria-describedby="chat-window-help"
+					title="Drag or use arrow keys to move chat"
+					on:pointerdown={(event) => startGesture(event, 'move')}
+					on:pointermove={moveGesture}
+					on:pointerup={finishGesture}
+					on:pointercancel={finishGesture}
+					on:lostpointercapture={finishGesture}
+					on:keydown={(event) => geometryKeydown(event, 'move')}
+				>
+					<span class="chat-grip" aria-hidden="true">⠿</span>
+					<span class="chat-title-copy" aria-hidden="true">
+						<span class="chat-name"><span>#</span> swyx</span>
+						<span class="chat-status">
+							<span class:online={status === 'Connected'} aria-hidden="true">●</span>
+							{status}
+						</span>
+					</span>
+				</button>
+				<span class="visually-hidden" aria-live="polite">{status}</span>
 				<button type="button" class="chat-close" aria-label="Close chat" on:click={closeChat}
 					>×</button
 				>
 			</div>
 			<p class="chat-notice">
-				Public · nicknames are unverified<br />Messages disappear after 48 hours. Backups may
-				persist up to 30 days.
+				{#if geometry.height < 350}
+					Public · unverified names · messages expire after 48h · backups up to 30 days.
+				{:else}
+					Public · nicknames are unverified<br />Messages disappear after 48 hours. Backups may
+					persist up to 30 days.
+				{/if}
 			</p>
 			<div
 				class="chat-log"
@@ -336,6 +478,23 @@
 						}}>Retry connection</button
 					>{/if}
 			</form>
+			<div class="chat-window-footer">
+				<span aria-hidden="true">drag to move</span>
+				<button
+					type="button"
+					class="chat-resize-handle"
+					aria-label="Resize chat window"
+					aria-describedby="chat-window-help"
+					title="Drag or use arrow keys to resize chat"
+					on:pointerdown={(event) => startGesture(event, 'resize')}
+					on:pointermove={moveGesture}
+					on:pointerup={finishGesture}
+					on:pointercancel={finishGesture}
+					on:lostpointercapture={finishGesture}
+					on:keydown={(event) => geometryKeydown(event, 'resize')}
+					><span aria-hidden="true">◢</span></button
+				>
+			</div>
 		</section>
 	{/if}
 {/if}
@@ -361,19 +520,21 @@
 	}
 	.chat {
 		--chat-muted: #b8c3b3;
+		position: fixed;
+		z-index: 60;
 		display: flex;
 		flex-direction: column;
 		box-sizing: border-box;
-		width: min(calc(100% - 2 * var(--site-gutter)), 42.5rem);
-		height: min(34rem, 75dvh);
-		min-height: 22rem;
-		margin: 2rem auto;
+		min-width: 0;
+		min-height: 0;
+		margin: 0;
+		overflow: hidden;
 		border: 1px solid #465a4a;
 		border-radius: 6px;
 		background: #1c2921;
 		color: #f0f1e9;
+		box-shadow: 0 8px 28px rgb(0 0 0 / 0.2);
 		font: 400 0.9rem/1.5 var(--font-mono);
-		scroll-margin-top: 1rem;
 	}
 	.chat:focus {
 		outline: none;
@@ -381,22 +542,45 @@
 	.chat-titlebar {
 		display: flex;
 		justify-content: space-between;
-		align-items: flex-start;
-		padding: 0.7rem 0.8rem 0.55rem;
+		align-items: center;
+		padding: 0.25rem 0.4rem;
 		border-bottom: 1px solid #465a4a;
 	}
-	.chat-titlebar h2 {
-		margin: 0;
+	.chat-drag-handle {
+		display: flex;
+		flex: 1;
+		align-items: center;
+		gap: 0.5rem;
+		min-width: 0;
+		min-height: 44px;
+		padding: 0.2rem 0.4rem;
+		text-align: left;
+		touch-action: none;
+		cursor: grab;
+	}
+	.chat-drag-handle:active {
+		cursor: grabbing;
+	}
+	.chat-grip {
+		color: #91aa92;
+		font-size: 1.2rem;
+	}
+	.chat-title-copy,
+	.chat-name,
+	.chat-status {
+		display: block;
+	}
+	.chat-name {
 		color: #e0eedc;
 		font: 600 1rem/1.2 var(--font-mono);
 	}
-	.chat-titlebar h2 span {
+	.chat-name span {
 		color: #a5d5aa;
 	}
 	.chat-status {
-		margin: 0.25rem 0 0;
+		margin: 0.2rem 0 0;
 		color: var(--chat-muted);
-		font-size: 0.75rem;
+		font: 400 0.75rem/1.2 var(--font-mono);
 	}
 	.chat-status .online {
 		color: #a5d5aa;
@@ -404,7 +588,6 @@
 	.chat-close {
 		min-width: 44px;
 		min-height: 44px;
-		margin: -0.4rem -0.5rem 0 0;
 		color: #e0eedc;
 		font: 1.5rem/1 var(--font-mono);
 		cursor: pointer;
@@ -418,7 +601,7 @@
 	}
 	.chat-log {
 		flex: 1;
-		min-height: 4rem;
+		min-height: 0;
 		overflow: auto;
 		overscroll-behavior: contain;
 		padding: 0.6rem 0.8rem;
@@ -443,7 +626,10 @@
 	}
 	.chat-form {
 		display: grid;
+		flex: 0 1 auto;
 		gap: 0.45rem;
+		min-height: 0;
+		overflow-y: auto;
 		padding: 0.65rem 0.8rem 0.8rem;
 		border-top: 1px solid #465a4a;
 	}
@@ -467,7 +653,7 @@
 	}
 	textarea {
 		display: block;
-		resize: vertical;
+		resize: none;
 		max-height: 8rem;
 	}
 	textarea::placeholder {
@@ -483,7 +669,7 @@
 	}
 	.chat-actions button,
 	.retry {
-		min-height: 36px;
+		min-height: 44px;
 		border: 1px solid #78947a;
 		border-radius: 3px;
 		background: #b8e5bb;
@@ -503,6 +689,37 @@
 	}
 	.retry {
 		justify-self: start;
+	}
+	.chat-window-footer {
+		display: flex;
+		flex: none;
+		align-items: center;
+		justify-content: space-between;
+		min-height: 36px;
+		padding-left: 0.8rem;
+		border-top: 1px solid #465a4a;
+		color: var(--chat-muted);
+		font-size: 0.68rem;
+	}
+	.chat-resize-handle {
+		width: 44px;
+		height: 44px;
+		color: #b8e5bb;
+		font-size: 1rem;
+		touch-action: none;
+		cursor: nwse-resize;
+	}
+	.chat-compact .chat-notice {
+		padding: 0.3rem 0.8rem;
+		font-size: 0.7rem;
+		line-height: 1.2;
+	}
+	.chat-compact .chat-form {
+		gap: 0.2rem;
+		padding: 0.3rem 0.8rem;
+	}
+	.chat-compact textarea {
+		height: 2.4rem;
 	}
 	.visually-hidden {
 		position: absolute;
@@ -534,18 +751,6 @@
 			line-height: 1;
 			writing-mode: vertical-rl;
 			transform: translateY(-50%);
-		}
-	}
-	@media (min-width: 1500px) {
-		.chat-docked {
-			position: fixed;
-			z-index: 40;
-			left: 1rem;
-			bottom: 1rem;
-			width: 268px;
-			height: min(36rem, calc(100dvh - 2rem));
-			margin: 0;
-			box-shadow: 0 8px 28px rgb(0 0 0 / 0.15);
 		}
 	}
 </style>
