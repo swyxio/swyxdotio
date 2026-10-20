@@ -2,6 +2,7 @@
 	import SocialMeta from '../../components/SocialMeta.svelte';
 	import { getPageSocialMeta } from '$lib/social-meta';
 	import { FEATURED_PODCAST_EPISODES } from '$lib/featured-podcast-episodes';
+	import { isValidEpisodePage } from '$lib/podcast-page-validation';
 
 	/** @type {import('./$types').PageData} */
 	export let data;
@@ -34,7 +35,67 @@
 		}
 	];
 
-	$: episodeCount = data.shows.reduce((total, show) => total + show.episodes.length, 0);
+	/** @type {Array<(typeof data.shows)[number] & { expanded: boolean }>} */
+	let shows;
+	$: shows = data.shows.map((show, index) => ({
+		...show,
+		expanded: index !== 0 || show.slug === data.requestedShow
+	}));
+	/** @type {Set<string>} */
+	let loadingShows = new Set();
+	/** @type {Record<string, string>} */
+	let loadErrors = {};
+	$: episodeCount = shows.reduce((total, show) => total + show.episodeCount, 0);
+
+	/** @param {string} slug @param {number} offset */
+	function archivePageUrl(slug, offset) {
+		return `?podcast=${encodeURIComponent(slug)}&offset=${offset}#${slug}-episodes`;
+	}
+
+	/** @param {string} slug */
+	async function loadMoreEpisodes(slug) {
+		const show = shows.find((entry) => entry.slug === slug);
+		if (!show || show.nextOffset === null || loadingShows.has(slug)) return;
+
+		loadingShows = new Set(loadingShows).add(slug);
+		loadErrors = { ...loadErrors, [slug]: '' };
+		try {
+			const response = await fetch(
+				`/api/podcasts/${encodeURIComponent(slug)}?offset=${show.nextOffset}`
+			);
+			if (!response.ok) throw new Error(`Episode archive unavailable (${response.status})`);
+			const next = await response.json();
+			if (!isValidEpisodePage(next, show.nextOffset)) {
+				throw new Error('Episode archive returned invalid data');
+			}
+			shows = shows.map((entry) =>
+				entry.slug === slug
+					? {
+							...entry,
+							episodes: [...entry.episodes, ...next.episodes],
+							nextOffset: next.nextOffset
+						}
+					: entry
+			);
+		} catch (error) {
+			loadErrors = {
+				...loadErrors,
+				[slug]: error instanceof Error ? error.message : 'Could not load more episodes'
+			};
+		} finally {
+			const nextLoadingShows = new Set(loadingShows);
+			nextLoadingShows.delete(slug);
+			loadingShows = nextLoadingShows;
+		}
+	}
+
+	/** @param {MouseEvent} event @param {string} slug */
+	function followArchiveLink(event, slug) {
+		if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+			return;
+		event.preventDefault();
+		void loadMoreEpisodes(slug);
+	}
 </script>
 
 <SocialMeta {...social} />
@@ -107,9 +168,9 @@
 		</p>
 	</div>
 	<div class="show-grid">
-		{#each data.shows as show}
+		{#each shows as show}
 			<a class="show-jump" href={`#${show.slug}`}>
-				<span class="show-jump-count">{show.episodes.length}</span>
+				<span class="show-jump-count">{show.episodeCount}</span>
 				<span>
 					<strong>{show.title}</strong>
 					<small>episodes</small>
@@ -118,12 +179,12 @@
 		{/each}
 	</div>
 
-	{#each data.shows as show, index}
+	{#each shows as show, index (show.slug)}
 		<article id={show.slug} class="podcast-show plain-section">
 			<hr class="plain-rule mb-5" />
 			<div class="show-header">
 				{#if show.imageUrl}
-					<img class="show-artwork" src={show.imageUrl} alt="" loading="lazy" />
+					<img class="show-artwork" src={show.imageUrl} alt="" loading="lazy" decoding="async" />
 				{/if}
 				<div>
 					<p class="archive-kicker">Feed {String(index + 1).padStart(2, '0')}</p>
@@ -132,15 +193,15 @@
 					<p class="feed-actions text-sm">
 						<a href={show.feedUrl}>RSS feed</a>
 						<span aria-hidden="true">·</span>
-						<a href={`#${show.slug}-episodes`}>{show.episodes.length} episodes</a>
+						<a href={`#${show.slug}-episodes`}>{show.episodeCount} episodes</a>
 					</p>
 				</div>
 			</div>
 
-			<details id={`${show.slug}-episodes`} class="episode-details" open={index !== 0}>
+			<details id={`${show.slug}-episodes`} class="episode-details" bind:open={show.expanded}>
 				<summary>
 					<span>Browse episode archive</span>
-					<span class="plain-muted">{show.episodes.length} tracks</span>
+					<span class="plain-muted">{show.episodeCount} tracks</span>
 				</summary>
 				<ol class="episode-list">
 					{#each show.episodes as episode}
@@ -161,12 +222,43 @@
 						</li>
 					{/each}
 				</ol>
+				<div class="episode-pagination">
+					{#if show.previousOffset !== null}
+						<a href={archivePageUrl(show.slug, show.previousOffset)}>Previous episodes</a>
+					{/if}
+					{#if show.nextOffset !== null}
+						<a
+							href={archivePageUrl(show.slug, show.nextOffset)}
+							on:click={(/** @type {MouseEvent} */ event) => followArchiveLink(event, show.slug)}
+							data-sveltekit-reload
+							aria-disabled={loadingShows.has(show.slug)}
+						>
+							{loadingShows.has(show.slug)
+								? 'Loading episodes…'
+								: `Load more episodes (${show.offset + show.episodes.length} of ${show.episodeCount})`}
+						</a>
+					{/if}
+				</div>
+				{#if loadErrors[show.slug]}
+					<p class="episode-error" role="alert">{loadErrors[show.slug]}. Try again.</p>
+				{/if}
 			</details>
 		</article>
 	{/each}
 </section>
 
 <style>
+	.episode-pagination {
+		display: flex;
+		gap: 1rem;
+		margin: 0.75rem;
+	}
+
+	.episode-error {
+		margin: 0 0.75rem 0.75rem;
+		color: var(--page-accent);
+	}
+
 	.podcast-header {
 		margin-bottom: 1.25rem;
 	}

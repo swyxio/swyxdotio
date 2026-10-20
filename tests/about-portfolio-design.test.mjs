@@ -74,7 +74,7 @@ test('World’s Fair photos lead the press kit while older conferences remain un
 	assert.ok(totalBytes < 200_000, 'The featured photos stay lightweight');
 	const html = await renderMarkdown(markdown);
 	assert.match(html, /<details>\s*<summary>More event photos and avatars<\/summary>/);
-	assert.match(html, /<h3 id="earlier-speaking-photos">Earlier speaking photos<\/h3>/);
+	assert.match(html, /<h3 id="earlier-speaking-photos"><a class="heading-link" href="#earlier-speaking-photos">Earlier speaking photos<\/a><\/h3>/);
 	for (const name of ['React Miami', 'React Advanced', 'Niseko headshot', 'Thursday Nights in AI']) {
 		assert.ok(html.includes(name), `Older photo remains available: ${name}`);
 	}
@@ -86,7 +86,7 @@ test('headshots and the first two cartoon avatars are visible without expanding 
 	assert.ok(archiveStart > 0);
 	const visible = html.slice(0, archiveStart);
 	const archive = html.slice(archiveStart);
-	assert.match(visible, /<h3 id="headshots">Headshots &amp; avatars<\/h3>/);
+	assert.match(visible, /<h3 id="headshots"><a class="heading-link" href="#headshots">Headshots &amp; avatars<\/a><\/h3>/);
 	assert.match(visible, /class="photo-preview-grid portrait-previews"/);
 	for (const name of ['headshot-small', 'headshot-niseko', 'headshot-transparent', 'headshot-alternate', 'avatar-one', 'avatar-two']) {
 		assert.ok(visible.includes(`/about-photos/${name}.webp`), `${name} must be visible by default`);

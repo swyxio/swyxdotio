@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { parsePodcastFeed } from '../src/lib/podcast-catalog.js';
+import {
+	PODCAST_EPISODE_PAGE_SIZE,
+	paginatePodcastEpisodes,
+	parsePodcastFeed
+} from '../src/lib/podcast-catalog.js';
 
 const show = {
 	slug: 'test-show',
@@ -55,4 +59,42 @@ test('podcast catalog supports studio duration strings and a single item', () =>
 	assert.equal(result.description, 'Fallback summary');
 	assert.equal(result.episodes.length, 1);
 	assert.equal(result.episodes[0].duration, '13:30');
+});
+
+test('podcast episode pages preserve total counts and stable cursor ordering', () => {
+	const episodes = Array.from({ length: 47 }, (_, index) => ({
+		title: `Episode ${index + 1}`,
+		guid: `episode-${index + 1}`
+	}));
+	const show = { episodes };
+
+	const first = paginatePodcastEpisodes(show);
+	assert.equal(first.episodeCount, 47);
+	assert.equal(first.episodes.length, PODCAST_EPISODE_PAGE_SIZE);
+	assert.equal(first.episodes[0].guid, 'episode-1');
+	assert.equal(first.previousOffset, null);
+	assert.equal(first.nextOffset, 20);
+
+	const second = paginatePodcastEpisodes(show, first.nextOffset);
+	assert.equal(second.episodes[0].guid, 'episode-21');
+	assert.equal(second.previousOffset, 0);
+	assert.equal(second.nextOffset, 40);
+
+	const last = paginatePodcastEpisodes(show, second.nextOffset);
+	assert.equal(last.episodes.length, 7);
+	assert.equal(last.episodes[0].guid, 'episode-41');
+	assert.equal(last.nextOffset, null);
+});
+
+test('podcast pagination rejects invalid offsets and keeps empty feeds usable', () => {
+	const show = { episodes: [{ title: 'One episode' }] };
+	for (const offset of [-1, 1.5, Number.NaN, Number.MAX_SAFE_INTEGER + 1, 2]) {
+		assert.throws(() => paginatePodcastEpisodes(show, offset), /Invalid podcast episode offset/);
+	}
+	assert.deepEqual(paginatePodcastEpisodes({ episodes: [] }), {
+		episodes: [],
+		episodeCount: 0,
+		previousOffset: null,
+		nextOffset: null
+	});
 });

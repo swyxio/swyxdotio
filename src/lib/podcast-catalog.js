@@ -6,6 +6,8 @@ const parser = new XMLParser({
 	trimValues: true
 });
 
+export const PODCAST_EPISODE_PAGE_SIZE = 20;
+
 /**
  * @template T
  * @param {T | T[] | undefined} value
@@ -73,5 +75,26 @@ export function parsePodcastFeed(xml, show) {
 		imageUrl,
 		feedUrl: `/podcast/${show.slug}/rss.xml`,
 		episodes
+	};
+}
+
+/**
+ * @template T
+ * @param {{ episodes: T[] }} show
+ * @param {number} [offset]
+ */
+export function paginatePodcastEpisodes(show, offset = 0) {
+	if (!Number.isSafeInteger(offset) || offset < 0 || offset > show.episodes.length) {
+		throw new RangeError('Invalid podcast episode offset');
+	}
+
+	const episodes = show.episodes.slice(offset, offset + PODCAST_EPISODE_PAGE_SIZE);
+	const nextOffset = offset + episodes.length;
+
+	return {
+		episodes,
+		episodeCount: show.episodes.length,
+		previousOffset: offset > 0 ? Math.max(0, offset - PODCAST_EPISODE_PAGE_SIZE) : null,
+		nextOffset: nextOffset < show.episodes.length ? nextOffset : null
 	};
 }
