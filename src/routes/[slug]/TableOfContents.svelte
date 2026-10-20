@@ -6,12 +6,12 @@
 	let isOpen = $state(false);
 	let items = $derived([...toc.items.values()]);
 	onMount(() => {
-		isOpen = window.matchMedia('(min-width: 640px)').matches;
+		isOpen = window.matchMedia('(min-width: 1200px)').matches;
 	});
 </script>
 
 {#if items.length > 1}
-	<nav class="floating-toc" aria-label="Floating table of contents">
+	<nav class="floating-toc" aria-label="Table of contents">
 		<button
 			class="toc-toggle"
 			aria-expanded={isOpen}
@@ -98,5 +98,12 @@
 	a:focus-visible {
 		outline: 2px solid var(--page-link);
 		outline-offset: -2px;
+	}
+	@media (max-width: 1199px) {
+		.floating-toc {
+			position: static;
+			width: min(calc(100% - 2 * var(--site-gutter)), var(--reading-max-width));
+			margin: 1.25rem auto;
+		}
 	}
 </style>

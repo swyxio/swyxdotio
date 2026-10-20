@@ -57,9 +57,9 @@
 	{/if}
 </svelte:head>
 
-<TableOfContents {toc} />
 {#key data.slug}<ArticleIndex {data} />{/key}
 <noscript><div class="article-index-fallback"><a href="/ideas">← All writing</a></div></noscript>
+<TableOfContents {toc} />
 
 {#key data.slug}
 	<article
