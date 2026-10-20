@@ -48,6 +48,14 @@ test('mobile chat opens below the article and restores the reader position', asy
 	await page.goto(`${baseUrl}/america250`);
 	const launcher = page.getByRole('button', { name: 'chat', exact: true });
 	await expect(launcher).toBeVisible();
+	const [launcherBox, paragraphBox] = await Promise.all([
+		launcher.boundingBox(),
+		page.locator('article.swyxcontent p').first().boundingBox()
+	]);
+	if (!launcherBox || !paragraphBox)
+		throw new Error('Chat shortcut or article text was not visible');
+	expect(launcherBox.width).toBeGreaterThanOrEqual(24);
+	expect(launcherBox.x).toBeGreaterThanOrEqual(paragraphBox.x + paragraphBox.width);
 	await page.evaluate(() => window.scrollTo(0, 600));
 	const before = await page.evaluate(() => window.scrollY);
 	await launcher.click();

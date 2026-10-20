@@ -520,6 +520,22 @@
 		outline: 2px solid #d9f8d7;
 		outline-offset: 2px;
 	}
+	@media (max-width: 1240px) {
+		.chat-launcher {
+			left: auto;
+			right: 0;
+			top: 50%;
+			bottom: auto;
+			width: var(--site-gutter);
+			padding: 0.6rem 0;
+			border-radius: 5px 0 0 5px;
+			box-shadow: none;
+			font-size: 0.7rem;
+			line-height: 1;
+			writing-mode: vertical-rl;
+			transform: translateY(-50%);
+		}
+	}
 	@media (min-width: 1500px) {
 		.chat-docked {
 			position: fixed;

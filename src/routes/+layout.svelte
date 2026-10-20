@@ -97,6 +97,12 @@
 {/if}
 
 <style>
+	@media (max-width: 1240px) {
+		.site-page {
+			--site-gutter: 1.5rem;
+		}
+	}
+
 	@media (min-width: 1500px) {
 		.site-page.chat-space {
 			padding-left: 300px;
