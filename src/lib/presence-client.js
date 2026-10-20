@@ -144,7 +144,7 @@ export function parsePresenceFrame(input, now = Date.now()) {
 		if (
 			(input.length !== 4 && input.length !== 5) ||
 			typeof key !== 'string' ||
-			!/^[a-z0-9][a-z0-9_-]*$/.test(key) ||
+			!/^(?:page|article):[a-z0-9][a-z0-9_-]*$/.test(key) ||
 			typeof count !== 'number' ||
 			!Number.isSafeInteger(count) ||
 			count < 0 ||

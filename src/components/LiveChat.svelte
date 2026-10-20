@@ -40,6 +40,10 @@
 	let log;
 	/** @type {HTMLFormElement | undefined} */
 	let form;
+	/** @type {HTMLElement | undefined} */
+	let readerPanel;
+	/** @type {HTMLButtonElement | undefined} */
+	let readerToggle;
 	let ready = false;
 	let status = 'Connecting';
 	let error = '';
@@ -50,6 +54,8 @@
 	let expiryTimer = 0;
 	let destroyed = false;
 	let showReaders = false;
+	let previousLogScroll = 0;
+	let wasAtLogBottom = true;
 	$: readerStatus = presence.hidden
 		? 'Live readers hidden'
 		: !presence.pageKey || !presence.admitted || presence.stopped
@@ -323,10 +329,30 @@
 	/** @param {KeyboardEvent} event */
 	function keydown(event) {
 		if (event.key === 'Escape' && !event.isComposing && !event.defaultPrevented) {
+			// Let the share menu handle Escape before dismissing the chat behind it.
+			if (document.querySelector('[data-share-ui][role="menu"]')) return;
 			event.preventDefault();
 			event.stopPropagation();
 			void closeChat();
 		}
+	}
+
+	async function toggleReaders() {
+		if (!showReaders) {
+			previousLogScroll = log?.scrollTop ?? 0;
+			wasAtLogBottom = !log || log.scrollHeight - log.clientHeight - log.scrollTop <= 2;
+			showReaders = true;
+			await tick();
+			const firstControl = /** @type {HTMLElement | null | undefined} */ (
+				readerPanel?.querySelector('a, button:not([disabled])')
+			);
+			(firstControl ?? readerPanel)?.focus({ preventScroll: true });
+			return;
+		}
+		showReaders = false;
+		await tick();
+		if (log) log.scrollTop = wasAtLogBottom ? log.scrollHeight : previousLogScroll;
+		readerToggle?.focus({ preventScroll: true });
 	}
 
 	/** @param {KeyboardEvent} event */
@@ -453,7 +479,14 @@
 				{/if}
 			</p>
 			{#if showReaders}
-				<div id="chat-readers" class="chat-readers" role="region" aria-label="Live readers">
+				<div
+					id="chat-readers"
+					class="chat-readers"
+					role="region"
+					aria-label="Live readers"
+					tabindex="-1"
+					bind:this={readerPanel}
+				>
 					<p class="readers-heading">{readerStatus}</p>
 					{#if presence.hidden}
 						<p>Live readers and your page are hidden.</p>
@@ -570,7 +603,8 @@
 					class="reader-toggle"
 					aria-expanded={showReaders}
 					aria-controls="chat-readers"
-					on:click={() => (showReaders = !showReaders)}
+					bind:this={readerToggle}
+					on:click={toggleReaders}
 				>
 					<span class:reader-online={presence.connected} aria-hidden="true">●</span>
 					{showReaders ? '← back to chat' : readerStatus}

@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {
 	isAllowedPresenceRequest,
 	normalizeCountryCode,
+	presenceRoomTitle,
 	resolvePresenceRoom
 } from '../src/lib/presence-server.js';
 import { PresenceRoom } from '../workers/presence/index.js';
@@ -11,6 +12,7 @@ import { PresenceRoom } from '../workers/presence/index.js';
 const manifest = {
 	generatedAt: new Date(),
 	blogposts: [
+		{ slug: 'home', title: 'Home article', isPrivate: false },
 		{ slug: 'public-post', title: 'Public', isPrivate: false },
 		{ slug: 'private-post', title: 'Private', isPrivate: true }
 	]
@@ -18,10 +20,25 @@ const manifest = {
 
 test('presence rooms are restricted to registered pages and public manifest articles', () => {
 	assert.equal(resolvePresenceRoom(manifest, 'home'), 'page:home');
+	assert.equal(resolvePresenceRoom(manifest, 'page:home'), 'page:home');
+	assert.equal(resolvePresenceRoom(manifest, 'article:home'), 'article:home');
 	assert.equal(resolvePresenceRoom(manifest, 'public-post'), 'article:public-post');
+	assert.equal(resolvePresenceRoom(manifest, 'article:public-post'), 'article:public-post');
 	assert.equal(resolvePresenceRoom(manifest, 'private-post'), null);
+	assert.equal(resolvePresenceRoom(manifest, 'article:private-post'), null);
+	assert.equal(resolvePresenceRoom(manifest, 'page:public-post'), null);
+	assert.equal(resolvePresenceRoom(manifest, 'article:made-up-post'), null);
+	assert.equal(resolvePresenceRoom(manifest, 'other:home'), null);
 	assert.equal(resolvePresenceRoom(manifest, '../api'), null);
 	assert.equal(resolvePresenceRoom(manifest, 'made-up-post'), null);
+});
+
+test('room titles distinguish the registered homepage from an article named home', () => {
+	assert.equal(presenceRoomTitle(manifest, 'page:home'), 'Shawn @swyx Wang');
+	assert.equal(presenceRoomTitle(manifest, 'article:home'), 'Home article');
+	assert.equal(presenceRoomTitle(manifest, 'article:public-post'), 'Public');
+	assert.equal(presenceRoomTitle(manifest, 'article:private-post'), '');
+	assert.equal(presenceRoomTitle(manifest, 'page:public-post'), '');
 });
 
 test('country normalization reveals only an ISO-shaped country code', () => {

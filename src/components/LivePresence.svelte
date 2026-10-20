@@ -1,7 +1,7 @@
 <script>
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
-	import { canonicalReadPath } from '$lib/read-counter';
+	import { canonicalPresencePath } from '$lib/read-counter';
 	import {
 		PRESENCE_ADMISSION_PREFIX,
 		PRESENCE_SHARE_CELEBRATION_EVENT,
@@ -54,7 +54,7 @@
 	$: otherPages = [...sitePages.entries()]
 		.map(([key, value]) => ({
 			key,
-			path: canonicalReadPath(key),
+			path: canonicalPresencePath(key),
 			title: value.title,
 			count: Math.max(0, value.count - (key === pageKey ? 1 : 0))
 		}))

@@ -1,10 +1,10 @@
 import { error } from '@sveltejs/kit';
 import { readContentManifest } from '$lib/content-manifest.js';
-import { readAnalyticsTitle } from '$lib/read-counter.js';
 import { admitPresenceConnection } from '$lib/presence-rate.js';
 import {
 	isAllowedPresenceRequest,
 	normalizeCountryCode,
+	presenceRoomTitle,
 	PRESENCE_COUNTRY_HEADER,
 	resolvePresenceRoom
 } from '$lib/presence-server.js';
@@ -46,7 +46,7 @@ export async function GET({ params, platform, request, getClientAddress }) {
 	upstreamUrl.searchParams.set('room', roomName);
 	// The title comes from the same public registry/manifest as the key, not
 	// from arbitrary browser-supplied URL or page data.
-	const title = Array.from(readAnalyticsTitle(manifest, params.key))
+	const title = Array.from(presenceRoomTitle(manifest, roomName))
 		.slice(0, 120)
 		.map((character) => {
 			const code = character.codePointAt(0) ?? 0;

@@ -202,7 +202,7 @@ export class PresenceRoom {
 		if (!roomName || !/^(?:page|article):[a-z0-9][a-z0-9_-]*$/.test(roomName)) {
 			return new Response('Unknown public page', { status: 400 });
 		}
-		const pageKey = roomName.slice(roomName.indexOf(':') + 1);
+		const pageKey = roomName;
 		const pageTitle = Array.from(url.searchParams.get('title') || '')
 			.slice(0, 120)
 			.join('');
@@ -246,10 +246,29 @@ export class PresenceRoom {
 		const pair = new WebSocketPair();
 		const [client, server] = Object.values(pair);
 		const id = this.newId();
+		// Keep the latest validated public title on all sockets for this page. A
+		// new reader with no title inherits it; after the updating reader leaves,
+		// surviving hibernated sockets still advertise the most recent title.
+		const previousTitle = pagePeers
+			.map(socketAttachment)
+			.find((peer) => peer?.pageTitle)?.pageTitle;
+		const currentTitle = pageTitle || previousTitle || '';
+		if (currentTitle) {
+			for (const socket of pagePeers) {
+				const existing = socketAttachment(socket);
+				if (!existing || existing.pageTitle === currentTitle) continue;
+				existing.pageTitle = currentTitle;
+				try {
+					socket.serializeAttachment(existing);
+				} catch {
+					// A socket that closed during the join need not be updated.
+				}
+			}
+		}
 		const peer = {
 			id,
 			pageKey,
-			pageTitle,
+			pageTitle: currentTitle,
 			roomTag: tag,
 			country: normalizePresenceCountry(request.headers.get('x-swyx-presence-country')),
 			color: PRESENCE_COLORS[pagePeers.length % PRESENCE_COLORS.length],

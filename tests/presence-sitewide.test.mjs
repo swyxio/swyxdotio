@@ -93,17 +93,18 @@ test('sitewide counts include each admitted socket while cursors stay within a p
 		const home2 = (await fixture.connect(room, 'page:home', 'Home')).socket;
 		const article = (await fixture.connect(room, 'article:public-post', 'A public article')).socket;
 
-		assert.deepEqual(framesOf(home1, 'g')[0], [1, 'g', 'home', 1, 'Home']);
+		assert.deepEqual(framesOf(home1, 'g')[0], [1, 'g', 'page:home', 1, 'Home']);
 		assert.ok(home1.frames.some((frame) => frame[1] === 'g' && frame.length === 2));
 		assert.ok(
 			article.frames.some(
-				(frame) => JSON.stringify(frame) === JSON.stringify([1, 'g', 'home', 2, 'Home'])
+				(frame) => JSON.stringify(frame) === JSON.stringify([1, 'g', 'page:home', 2, 'Home'])
 			)
 		);
 		assert.ok(
 			article.frames.some(
 				(frame) =>
-					JSON.stringify(frame) === JSON.stringify([1, 'g', 'public-post', 1, 'A public article'])
+					JSON.stringify(frame) ===
+					JSON.stringify([1, 'g', 'article:public-post', 1, 'A public article'])
 			)
 		);
 		assert.equal(framesOf(article, 's').length, 0);
@@ -125,7 +126,7 @@ test('sitewide counts include each admitted socket while cursors stay within a p
 		room.webSocketClose(home1, 1000);
 		assert.ok(
 			article.frames.some(
-				(frame) => JSON.stringify(frame) === JSON.stringify([1, 'g', 'home', 1, 'Home'])
+				(frame) => JSON.stringify(frame) === JSON.stringify([1, 'g', 'page:home', 1, 'Home'])
 			)
 		);
 		assert.equal(framesOf(home2, 'l').length, 1);
@@ -133,9 +134,11 @@ test('sitewide counts include each admitted socket while cursors stay within a p
 		home2.readyState = 3;
 		room.webSocketClose(home2, 1000);
 		assert.ok(
-			article.frames.some((frame) => JSON.stringify(frame) === JSON.stringify([1, 'g', 'home', 0]))
+			article.frames.some(
+				(frame) => JSON.stringify(frame) === JSON.stringify([1, 'g', 'page:home', 0])
+			)
 		);
-		assert.equal(room.sitewideCounts().get('public-post').count, 1);
+		assert.equal(room.sitewideCounts().get('article:public-post').count, 1);
 	} finally {
 		fixture.restore();
 		console.warn = oldWarn;
@@ -172,6 +175,93 @@ test('legacy per-page sockets continue communicating during worker-first rollout
 	}
 });
 
+test('registered page and article with the same slug have separate roster rows and cursors', async () => {
+	const ctx = new FakeContext();
+	const fixture = setup(ctx);
+	const oldWarn = console.warn;
+	console.warn = () => {};
+	try {
+		const room = new PresenceRoom(ctx, {});
+		const page = (await fixture.connect(room, 'page:home', 'Homepage')).socket;
+		const article = (await fixture.connect(room, 'article:home', 'The home essay')).socket;
+		assert.ok(
+			article.frames.some(
+				(frame) => JSON.stringify(frame) === JSON.stringify([1, 'g', 'page:home', 1, 'Homepage'])
+			)
+		);
+		assert.ok(
+			article.frames.some(
+				(frame) =>
+					JSON.stringify(frame) === JSON.stringify([1, 'g', 'article:home', 1, 'The home essay'])
+			)
+		);
+		assert.equal(framesOf(article, 's').length, 0);
+		room.webSocketMessage(page, '[1,"p",0.2,0.4,"d"]');
+		assert.equal(framesOf(article, 'm').length, 0);
+		page.readyState = 3;
+		room.webSocketClose(page, 1000);
+		assert.deepEqual(framesOf(article, 'g').at(-1), [1, 'g', 'page:home', 0]);
+		assert.equal(room.sitewideCounts().get('article:home').count, 1);
+	} finally {
+		fixture.restore();
+		console.warn = oldWarn;
+	}
+});
+
+test('the latest validated page title survives its reader leaving and hibernation', async () => {
+	const ctx = new FakeContext();
+	const fixture = setup(ctx);
+	const oldWarn = console.warn;
+	console.warn = () => {};
+	try {
+		let room = new PresenceRoom(ctx, {});
+		const first = (await fixture.connect(room, 'article:post', 'Original title')).socket;
+		const second = (await fixture.connect(room, 'article:post', 'Updated title')).socket;
+		assert.deepEqual(framesOf(first, 'g').at(-1), [1, 'g', 'article:post', 2, 'Updated title']);
+		ctx.sockets.reverse();
+		room = new PresenceRoom(ctx, {});
+		const third = (await fixture.connect(room, 'article:post', '')).socket;
+		assert.deepEqual(
+			framesOf(third, 'g').find((frame) => frame[2] === 'article:post'),
+			[1, 'g', 'article:post', 3, 'Updated title']
+		);
+		room = new PresenceRoom(ctx, {});
+		second.readyState = 3;
+		room.webSocketClose(second, 1000);
+		assert.deepEqual(framesOf(first, 'g').at(-1), [1, 'g', 'article:post', 2, 'Updated title']);
+		first.readyState = 3;
+		room.webSocketClose(first, 1000);
+		assert.deepEqual(framesOf(third, 'g').at(-1), [1, 'g', 'article:post', 1, 'Updated title']);
+	} finally {
+		fixture.restore();
+		console.warn = oldWarn;
+	}
+});
+
+test('already tagged per-page sockets keep communicating during a second worker-first rollout', async () => {
+	const ctx = new FakeContext();
+	const fixture = setup(ctx);
+	const oldWarn = console.warn;
+	console.warn = () => {};
+	try {
+		let room = new PresenceRoom(ctx, {});
+		const earlier = (await fixture.connect(room, 'page:home', 'Home')).socket;
+		const earlierState = earlier.deserializeAttachment();
+		earlierState.pageKey = 'home';
+		earlier.serializeAttachment(earlierState);
+		room = new PresenceRoom(ctx, {});
+		const current = (await fixture.connect(room, 'page:home', 'Home')).socket;
+		assert.equal(framesOf(current, 's').length, 1);
+		room.webSocketMessage(earlier, '[1,"p",0.1,0.2,"d"]');
+		room.webSocketMessage(current, '[1,"p",0.3,0.4,"d"]');
+		assert.equal(framesOf(current, 'm').length, 1);
+		assert.equal(framesOf(earlier, 'm').length, 1);
+	} finally {
+		fixture.restore();
+		console.warn = oldWarn;
+	}
+});
+
 test('per-page and sitewide limits reject excess sockets, not unrelated pages', async () => {
 	const ctx = new FakeContext();
 	const fixture = setup(ctx);
@@ -191,7 +281,7 @@ test('per-page and sitewide limits reject excess sockets, not unrelated pages', 
 			const socket = new Socket();
 			socket.serializeAttachment({
 				id: `fill${ctx.sockets.length}`,
-				pageKey: 'about',
+				pageKey: 'page:about',
 				roomTag: 'unrelated'
 			});
 			ctx.acceptWebSocket(socket, ['unrelated']);
@@ -267,8 +357,8 @@ test('sitewide frames preserve validated keys and trim public titles to the fram
 		assert.ok(titleFrame[4].length > 0);
 		const longKey = 'a'.repeat(140);
 		const long = (await fixture.connect(room, `article:${longKey}`, 'Title')).socket;
-		const longFrame = framesOf(long, 'g').find((frame) => frame[2] === longKey);
-		assert.deepEqual(longFrame, [1, 'g', longKey, 1]);
+		const longFrame = framesOf(long, 'g').find((frame) => frame[2] === `article:${longKey}`);
+		assert.deepEqual(longFrame, [1, 'g', `article:${longKey}`, 1]);
 		assert.ok(new TextEncoder().encode(JSON.stringify(longFrame)).length < 8_192);
 		const rejected = await fixture.connect(room, 'article:public-post?secret=1');
 		assert.equal(rejected.response.status, 400);

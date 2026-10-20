@@ -15,7 +15,11 @@
 
 	$: publicPageKey = $page.status === 200 ? publicPageKeyForPath($page.url.pathname) : null;
 	$: presencePageKey =
-		$page.status === 200 && typeof $page.data?.slug === 'string' ? $page.data.slug : publicPageKey;
+		$page.status === 200 && typeof $page.data?.slug === 'string'
+			? `article:${$page.data.slug}`
+			: publicPageKey
+				? `page:${publicPageKey}`
+				: null;
 	$: presenceAdmissionRate = Number(env.PUBLIC_PRESENCE_ADMISSION_RATE ?? 1);
 	$: immersiveTool = $page.url.pathname === '/tools/box' || $page.url.pathname === '/tools/draw';
 	let chatCollapsed = false;
