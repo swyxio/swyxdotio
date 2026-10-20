@@ -1,0 +1,537 @@
+{
+	"src/components/Comment.svelte": {
+		"svelte/no-at-html-tags": {
+			"count": 1
+		}
+	},
+	"src/components/Comments.svelte": {
+		"svelte/require-each-key": {
+			"count": 1
+		}
+	},
+	"src/components/FeaturedEssayShelf.svelte": {
+		"svelte/no-navigation-without-resolve": {
+			"count": 2
+		}
+	},
+	"src/components/FeaturedSpeaking.svelte": {
+		"svelte/no-navigation-without-resolve": {
+			"count": 8
+		}
+	},
+	"src/components/FeaturedWriting.svelte": {
+		"svelte/no-navigation-without-resolve": {
+			"count": 10
+		}
+	},
+	"src/components/IndexCard.svelte": {
+		"no-unused-vars": {
+			"count": 1
+		},
+		"svelte/no-navigation-without-resolve": {
+			"count": 3
+		},
+		"svelte/require-each-key": {
+			"count": 2
+		}
+	},
+	"src/components/ItemCard.svelte": {
+		"no-unused-vars": {
+			"count": 1
+		},
+		"svelte/no-navigation-without-resolve": {
+			"count": 5
+		},
+		"svelte/require-each-key": {
+			"count": 1
+		}
+	},
+	"src/components/LatestPosts.svelte": {
+		"svelte/no-navigation-without-resolve": {
+			"count": 2
+		}
+	},
+	"src/components/LiveChat.svelte": {
+		"svelte/no-unused-svelte-ignore": {
+			"count": 10
+		}
+	},
+	"src/components/LivePresence.svelte": {
+		"svelte/prefer-svelte-reactivity": {
+			"count": 5
+		},
+		"svelte/require-each-key": {
+			"count": 1
+		}
+	},
+	"src/components/MobileMenu.svelte": {
+		"svelte/infinite-reactive-loop": {
+			"count": 2
+		},
+		"svelte/no-navigation-without-resolve": {
+			"count": 4
+		}
+	},
+	"src/components/Nav.svelte": {
+		"svelte/no-navigation-without-resolve": {
+			"count": 5
+		},
+		"svelte/require-each-key": {
+			"count": 2
+		}
+	},
+	"src/components/NavLink.svelte": {
+		"svelte/no-navigation-without-resolve": {
+			"count": 1
+		}
+	},
+	"src/components/PortfolioCompanyDetails.svelte": {
+		"svelte/no-navigation-without-resolve": {
+			"count": 7
+		}
+	},
+	"src/components/PortfolioFundingHistory.svelte": {
+		"svelte/no-navigation-without-resolve": {
+			"count": 2
+		},
+		"svelte/require-each-key": {
+			"count": 1
+		}
+	},
+	"src/components/Reactions.svelte": {
+		"svelte/no-navigation-without-resolve": {
+			"count": 1
+		},
+		"svelte/require-each-key": {
+			"count": 1
+		}
+	},
+	"src/components/SearchAssistant.svelte": {
+		"svelte/no-navigation-without-resolve": {
+			"count": 1
+		},
+		"svelte/require-each-key": {
+			"count": 1
+		}
+	},
+	"src/components/SearchDialog.svelte": {
+		"svelte/no-navigation-without-resolve": {
+			"count": 3
+		},
+		"svelte/require-each-key": {
+			"count": 2
+		}
+	},
+	"src/components/SiteSearch.svelte": {
+		"svelte/no-navigation-without-resolve": {
+			"count": 1
+		}
+	},
+	"src/components/SocialMeta.svelte": {
+		"svelte/no-at-html-tags": {
+			"count": 1
+		}
+	},
+	"src/components/WebMentions.svelte": {
+		"svelte/no-at-html-tags": {
+			"count": 1
+		},
+		"svelte/no-navigation-without-resolve": {
+			"count": 3
+		},
+		"svelte/require-each-key": {
+			"count": 1
+		}
+	},
+	"src/global.d.ts": {
+		"no-unused-vars": {
+			"count": 31
+		}
+	},
+	"src/lib/DrawAgent.svelte": {
+		"svelte/no-navigation-without-resolve": {
+			"count": 1
+		}
+	},
+	"src/lib/DrawCreativePreview.svelte": {
+		"svelte/require-each-key": {
+			"count": 2
+		}
+	},
+	"src/lib/DrawCreativeWorkspace.svelte": {
+		"no-unused-vars": {
+			"count": 7
+		},
+		"svelte/no-navigation-without-resolve": {
+			"count": 2
+		},
+		"svelte/require-each-key": {
+			"count": 23
+		}
+	},
+	"src/lib/DrawDesignPreview.svelte": {
+		"svelte/require-each-key": {
+			"count": 2
+		}
+	},
+	"src/lib/DrawGenerationLibrary.svelte": {
+		"no-unused-vars": {
+			"count": 2
+		}
+	},
+	"src/lib/DrawImageToolbox.svelte": {
+		"svelte/no-navigation-without-resolve": {
+			"count": 3
+		},
+		"svelte/no-unused-svelte-ignore": {
+			"count": 1
+		},
+		"svelte/prefer-svelte-reactivity": {
+			"count": 2
+		},
+		"svelte/require-each-key": {
+			"count": 1
+		}
+	},
+	"src/lib/DrawReferenceExamples.svelte": {
+		"no-unused-vars": {
+			"count": 3
+		},
+		"svelte/no-navigation-without-resolve": {
+			"count": 2
+		},
+		"svelte/require-each-key": {
+			"count": 2
+		}
+	},
+	"src/lib/DrawShowBrief.svelte": {
+		"no-unused-vars": {
+			"count": 5
+		},
+		"svelte/require-each-key": {
+			"count": 6
+		}
+	},
+	"src/lib/DrawStartingPoints.svelte": {
+		"no-unused-vars": {
+			"count": 2
+		}
+	},
+	"src/lib/DrawThumbnailComposer.svelte": {
+		"no-unused-vars": {
+			"count": 7
+		},
+		"svelte/no-navigation-without-resolve": {
+			"count": 1
+		},
+		"svelte/require-each-key": {
+			"count": 3
+		}
+	},
+	"src/lib/DrawThumbnailLibrary.svelte": {
+		"no-unused-vars": {
+			"count": 4
+		},
+		"svelte/require-each-key": {
+			"count": 4
+		}
+	},
+	"src/lib/DrawWorkspaceNav.svelte": {
+		"no-unused-vars": {
+			"count": 2
+		}
+	},
+	"src/lib/ToolsAiNotice.svelte": {
+		"svelte/no-navigation-without-resolve": {
+			"count": 2
+		}
+	},
+	"src/lib/ToolsCabinet.svelte": {
+		"svelte/no-navigation-without-resolve": {
+			"count": 1
+		},
+		"svelte/require-each-key": {
+			"count": 2
+		}
+	},
+	"src/lib/ToolsUsageReceipt.svelte": {
+		"svelte/no-navigation-without-resolve": {
+			"count": 1
+		}
+	},
+	"src/lib/about/SponsorshipOption.svelte": {
+		"svelte/no-navigation-without-resolve": {
+			"count": 1
+		},
+		"svelte/require-each-key": {
+			"count": 1
+		}
+	},
+	"src/lib/about/TextVersions.svelte": {
+		"svelte/require-each-key": {
+			"count": 2
+		}
+	},
+	"src/lib/content-list.js": {
+		"no-unused-vars": {
+			"count": 2
+		}
+	},
+	"src/lib/draw-agent-tools.js": {
+		"no-unused-vars": {
+			"count": 5
+		}
+	},
+	"src/lib/draw-creative-client.ts": {
+		"no-unused-vars": {
+			"count": 2
+		}
+	},
+	"src/lib/draw-creative-export.js": {
+		"no-control-regex": {
+			"count": 1
+		}
+	},
+	"src/lib/draw-creative-layout.js": {
+		"no-control-regex": {
+			"count": 1
+		}
+	},
+	"src/lib/draw-creative-scene.ts": {
+		"no-unused-vars": {
+			"count": 2
+		}
+	},
+	"src/lib/draw-generation-models.js": {
+		"no-unused-vars": {
+			"count": 2
+		}
+	},
+	"src/lib/draw-reference-presets.js": {
+		"no-unused-vars": {
+			"count": 1
+		}
+	},
+	"src/lib/heading-ids.js": {
+		"no-useless-escape": {
+			"count": 1
+		}
+	},
+	"src/lib/server/ai-budget.js": {
+		"no-unused-vars": {
+			"count": 1
+		}
+	},
+	"src/lib/server/draw-creative-store.js": {
+		"no-control-regex": {
+			"count": 1
+		}
+	},
+	"src/lib/server/search-assistant.js": {
+		"no-constant-condition": {
+			"count": 1
+		},
+		"no-unused-vars": {
+			"count": 1
+		}
+	},
+	"src/lib/server/tools-logs-export.js": {
+		"no-control-regex": {
+			"count": 1
+		}
+	},
+	"src/lib/tools-activity.js": {
+		"no-control-regex": {
+			"count": 2
+		}
+	},
+	"src/routes/+error.svelte": {
+		"svelte/no-navigation-without-resolve": {
+			"count": 1
+		}
+	},
+	"src/routes/+layout.svelte": {
+		"svelte/no-immutable-reactive-statements": {
+			"count": 1
+		},
+		"svelte/no-navigation-without-resolve": {
+			"count": 7
+		}
+	},
+	"src/routes/+page.svelte": {
+		"svelte/no-navigation-without-resolve": {
+			"count": 13
+		}
+	},
+	"src/routes/[slug]/+page.svelte": {
+		"svelte/no-at-html-tags": {
+			"count": 1
+		},
+		"svelte/no-navigation-without-resolve": {
+			"count": 4
+		},
+		"svelte/require-each-key": {
+			"count": 1
+		}
+	},
+	"src/routes/[slug]/ArticleIndex.svelte": {
+		"svelte/no-navigation-without-resolve": {
+			"count": 7
+		}
+	},
+	"src/routes/about/+page.svelte": {
+		"svelte/no-at-html-tags": {
+			"count": 2
+		},
+		"svelte/no-navigation-without-resolve": {
+			"count": 23
+		},
+		"svelte/require-each-key": {
+			"count": 1
+		}
+	},
+	"src/routes/api/search/+server.js": {
+		"no-unused-vars": {
+			"count": 2
+		}
+	},
+	"src/routes/ideas/+page.svelte": {
+		"svelte/no-navigation-without-resolve": {
+			"count": 1
+		},
+		"svelte/prefer-svelte-reactivity": {
+			"count": 3
+		},
+		"svelte/require-each-key": {
+			"count": 3
+		}
+	},
+	"src/routes/now/+page.svelte": {
+		"svelte/no-at-html-tags": {
+			"count": 1
+		},
+		"svelte/no-navigation-without-resolve": {
+			"count": 2
+		}
+	},
+	"src/routes/podcasts/+page.svelte": {
+		"svelte/no-navigation-without-resolve": {
+			"count": 10
+		},
+		"svelte/prefer-svelte-reactivity": {
+			"count": 2
+		},
+		"svelte/require-each-key": {
+			"count": 4
+		}
+	},
+	"src/routes/portfolio/+page.svelte": {
+		"svelte/no-navigation-without-resolve": {
+			"count": 8
+		},
+		"svelte/require-each-key": {
+			"count": 2
+		}
+	},
+	"src/routes/search/+page.svelte": {
+		"svelte/no-navigation-without-resolve": {
+			"count": 4
+		},
+		"svelte/require-each-key": {
+			"count": 7
+		}
+	},
+	"src/routes/subscribe/+page.svelte": {
+		"svelte/no-navigation-without-resolve": {
+			"count": 5
+		}
+	},
+	"src/routes/tools/+page.svelte": {
+		"no-empty": {
+			"count": 2
+		},
+		"svelte/no-navigation-without-resolve": {
+			"count": 5
+		}
+	},
+	"src/routes/tools/box/+page.svelte": {
+		"svelte/no-navigation-without-resolve": {
+			"count": 2
+		}
+	},
+	"src/routes/tools/draw/+page.svelte": {
+		"no-empty": {
+			"count": 3
+		},
+		"no-unused-vars": {
+			"count": 7
+		},
+		"svelte/no-navigation-without-resolve": {
+			"count": 4
+		}
+	},
+	"src/routes/tools/logs/+page.svelte": {
+		"svelte/no-navigation-without-resolve": {
+			"count": 4
+		},
+		"svelte/require-each-key": {
+			"count": 8
+		}
+	},
+	"src/routes/tools/podcast/+page.svelte": {
+		"no-empty": {
+			"count": 1
+		},
+		"svelte/no-navigation-without-resolve": {
+			"count": 2
+		},
+		"svelte/require-each-key": {
+			"count": 1
+		}
+	},
+	"src/routes/tools/privacy/+page.svelte": {
+		"svelte/no-navigation-without-resolve": {
+			"count": 3
+		}
+	},
+	"tests/draw-agent.live.spec.js": {
+		"no-unused-vars": {
+			"count": 1
+		}
+	},
+	"tests/draw-agent.spec.js": {
+		"no-unused-vars": {
+			"count": 1
+		}
+	},
+	"tests/draw-agent.test.mjs": {
+		"no-unused-vars": {
+			"count": 1
+		}
+	},
+	"tests/draw-creative-store.test.mjs": {
+		"no-unused-vars": {
+			"count": 1
+		}
+	},
+	"tests/draw-designs.spec.js": {
+		"no-unused-vars": {
+			"count": 3
+		}
+	},
+	"tests/search-embeddings.test.mjs": {
+		"no-unused-vars": {
+			"count": 1
+		}
+	},
+	"tests/tools-activity.test.mjs": {
+		"no-unused-vars": {
+			"count": 1
+		}
+	},
+	"workers/presence/chat-room.js": {
+		"no-control-regex": {
+			"count": 2
+		}
+	}
+}
