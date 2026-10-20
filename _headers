@@ -3,3 +3,6 @@
   X-XSS-Protection: 1; mode=block
   X-Content-Type-Options: nosniff
   X-Clacks-Overhead: GNU Terry Pratchett
+
+/fonts/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800

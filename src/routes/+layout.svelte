@@ -20,6 +20,15 @@
 </script>
 
 <svelte:head>
+	{#if !immersiveTool}
+		<link
+			rel="preload"
+			href="/fonts/newsreader-semibold.woff2"
+			as="font"
+			type="font/woff2"
+			crossorigin="anonymous"
+		/>
+	{/if}
 	<link
 		rel="alternate"
 		type="application/rss+xml"
