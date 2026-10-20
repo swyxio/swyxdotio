@@ -134,31 +134,26 @@
 		font: 400 0.9rem/1 var(--font-body);
 	}
 	.index-panel {
-		position: absolute;
-		top: 100%;
-		left: 0;
-		width: min(18rem, calc(100vw - 2 * var(--site-gutter)));
-		max-height: min(70vh, 38rem);
-		overflow-y: auto;
-		border: 1px solid var(--page-border);
-		border-radius: 0.5rem;
-		background: var(--page-surface);
-		box-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
+		position: static;
+		width: 100%;
+		max-height: 0;
+		overflow: hidden;
 		opacity: 0;
 		visibility: hidden;
-		transform: translateY(-0.4rem);
 		transition:
+			max-height 220ms ease,
 			opacity 180ms ease,
-			transform 180ms ease,
 			visibility 180ms;
 	}
 	.index-panel.open {
+		max-height: min(70vh, 38rem);
+		overflow-y: auto;
 		opacity: 1;
 		visibility: visible;
-		transform: translateY(0);
 	}
+
 	.index-content {
-		padding: 0.75rem;
+		padding: 0 0 0.75rem;
 	}
 	.index-label {
 		margin: 0.8rem 0 0.3rem;
@@ -193,7 +188,7 @@
 	@media (min-width: 1200px) {
 		.article-index {
 			position: fixed;
-			top: 9rem;
+			top: min(9rem, 20vh);
 			left: max(1.25rem, calc((100vw - 72.5rem) / 2));
 			width: 13rem;
 			margin: 0;
@@ -213,7 +208,7 @@
 				visibility 180ms;
 		}
 		.index-panel.open {
-			max-height: min(calc(100vh - 13rem), 38rem);
+			max-height: max(0px, min(calc(100vh - min(9rem, 20vh) - 60px), 38rem));
 		}
 		.index-content {
 			padding: 0;

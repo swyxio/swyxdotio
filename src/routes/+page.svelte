@@ -31,63 +31,47 @@
 
 <div class="literary-stage">
 	<div class="site-shell literary-home">
-		<div class="frontispiece">
-			<section class="home-hero" aria-labelledby="me">
-				<div class="author-introduction">
-					<a href="/about" class="portrait-link" aria-label="More about Shawn Wang">
-						<img
-							class="author-portrait"
-							src="/assets/literary/portrait-engraved.webp"
-							alt="Engraved portrait of Shawn Wang"
-							width="116"
-							height="174"
-							fetchpriority="high"
-						/>
-					</a>
-					<div class="author-copy">
-						<h1 id="me">Shawn <span>@swyx</span> Wang</h1>
-						<div class="small-rule" aria-hidden="true"><span>✶</span></div>
-						<p id="bio" class="author-motto"><a href="/learn-in-public">Learn in Public</a></p>
-						<p class="author-details">
-							I write about technology, markets, and networks.<br />Building in public at the
-							frontier of AI.<br />Recovering finance geek. Singaporean in San Francisco.
-						</p>
-						<p class="author-links">
-							<a href="/about">My story</a><span aria-hidden="true"> · </span><a href="/portfolio"
-								>People I bet on</a
-							><span aria-hidden="true"> · </span><a href="/cognition">Cognition</a>
-						</p>
-						<div class="place-line">
-							<span aria-hidden="true">✧</span> SG
-							<span class="place-route" aria-hidden="true">⟷</span>
-							SF <span aria-hidden="true">✧</span>
-						</div>
-					</div>
+		<section class="home-hero" aria-labelledby="me">
+			<div class="hero-copy">
+				<p class="eyebrow">A NOTEBOOK BY SHAWN WANG</p>
+				<h1 id="me">Hey, I’m <span>swyx.</span></h1>
+				<p class="hero-lead">
+					I write about technology, markets, and networks. Building in public at the frontier of AI.
+				</p>
+				<p id="bio" class="hero-detail">
+					Recovering finance geek. Singaporean in San Francisco. <a href="/learn-in-public"
+						>Learning in public</a
+					> along the way.
+				</p>
+				<div class="hero-links">
+					<a href="/about">My story <span aria-hidden="true">↗</span></a><a href="/portfolio"
+						>People I bet on <span aria-hidden="true">↗</span></a
+					><a href="/cognition">Cognition <span aria-hidden="true">↗</span></a>
 				</div>
-				<aside class="field-note" aria-label="A note to self">
-					<div>
-						<p class="note-label">A note to self, and whoever finds it useful</p>
-						<p>
-							Be generous with attention. Build things that outlive you. Leave the library better
-							than you found it.
-						</p>
-					</div>
-					<img
-						class="messenger-bird"
-						src="/assets/literary/messenger-bird.webp"
-						alt=""
-						width="110"
-						height="74"
-						decoding="async"
-					/>
-				</aside>
-			</section>
+			</div>
+			<div class="hero-art">
+				<img
+					src="/assets/personal/two-cities.webp"
+					alt=""
+					width="1100"
+					height="402"
+					fetchpriority="high"
+				/>
+				<p>
+					<span>San Francisco</span><span class="route-line" aria-hidden="true"
+						>✦ · · · · · · · · · ✦</span
+					><span>Singapore</span>
+				</p>
+			</div>
+		</section>
 
-			<FeaturedEssayShelf />
+		<FeaturedEssayShelf />
 
+		<div class="personal-grid">
 			<section class="projects-section" aria-labelledby="projects-heading">
-				<h2 id="projects-heading" class="section-kicker">Currently causing interesting trouble</h2>
-				<a class="project-link latent-project" href="https://latent.space">
+				<p class="eyebrow">MAKING THINGS TOGETHER</p>
+				<h2 id="projects-heading">What I’m building</h2>
+				<a class="project-link" href="https://latent.space">
 					<img
 						class="project-logo"
 						src="/assets/latent-space-hex-gradient.png"
@@ -99,7 +83,7 @@
 						><strong>Latent Space</strong><small
 							>Conversations on AI, technology, and humanity.</small
 						></span
-					><span class="project-arrow" aria-hidden="true">↗</span>
+					><span aria-hidden="true">↗</span>
 				</a>
 				<a class="project-link engineer-project" href="https://ai.engineer">
 					<img
@@ -113,14 +97,25 @@
 						><strong>AI Engineer</strong><small
 							>A gathering place for people building with AI.</small
 						></span
-					><span class="project-arrow" aria-hidden="true">↗</span>
+					><span aria-hidden="true">↗</span>
 				</a>
 				<p class="side-project">
-					After hours: <a href="https://overgrid.swyx.io">a game of OverGrid →</a>
+					After hours: <a href="https://overgrid.swyx.io">a game of OverGrid ↗</a>
 				</p>
 			</section>
-			<div class="book-ribbon"><BookLaunchCallout ribbon /></div>
+			<aside class="personal-note" aria-labelledby="offscreen-heading">
+				<p class="eyebrow">BEYOND THE SCREEN</p>
+				<h2 id="offscreen-heading">A few other interests</h2>
+				<p><span aria-hidden="true">♫</span> <a href="/wicked">Singing, music &amp; musicals</a></p>
+				<p>
+					<span aria-hidden="true">✳</span>
+					<a href="/bouldering">Bouldering &amp; finding the next route</a>
+				</p>
+				<p><span aria-hidden="true">✦</span> Bringing people together</p>
+				<a href="/sg-guide">A personal guide to Singapore ↗</a>
+			</aside>
 		</div>
+		<div class="book-feature"><BookLaunchCallout /></div>
 
 		<div class="reading-desk">
 			<section class="desk-column latest-section" aria-labelledby="latest">
@@ -204,269 +199,196 @@
 <style>
 	.literary-stage {
 		overflow-x: clip;
+		background-image:
+			radial-gradient(circle at 8% 8%, #d6b67b18 0, transparent 24rem),
+			radial-gradient(circle at 93% 28%, #63919712 0, transparent 24rem),
+			radial-gradient(#8a6f4a12 0.6px, transparent 0.7px);
+		background-size:
+			auto,
+			auto,
+			5px 5px;
 	}
 	.literary-home {
 		--site-max-width: 1160px;
-		position: relative;
-		padding-top: 1.1rem;
-	}
-	.literary-home::before {
-		position: absolute;
-		z-index: -1;
-		top: -4rem;
-		left: 50%;
-		width: min(100vw, calc(100% + 14rem));
-		height: 44rem;
-		pointer-events: none;
-		transform: translateX(-50%);
-		content: '';
-	}
-	:global(.dark) .literary-home::before {
-		background: url('/assets/literary/celestial-atlas.webp') center top / cover no-repeat;
-		opacity: 0.18;
-	}
-	.frontispiece {
-		display: grid;
-		grid-template-columns: minmax(0, 1fr) 13.5rem 10rem;
-		grid-template-areas: 'hero projects book' 'essays essays essays';
-		gap: 1.5rem;
-		align-items: start;
-		padding: 1rem 0 1.1rem;
+		padding-top: 2.4rem;
 	}
 	.home-hero {
-		grid-area: hero;
-		min-width: 0;
-	}
-	.author-introduction {
 		display: grid;
-		grid-template-columns: 7.3rem minmax(0, 1fr);
-		gap: 1.2rem;
+		grid-template-columns: minmax(0, 1fr) minmax(19rem, 0.9fr);
+		gap: 2.5rem;
 		align-items: center;
+		padding: 2.2rem 0 2.8rem;
+		border-bottom: 1px solid var(--page-border);
 	}
-	.portrait-link {
-		display: block;
-	}
-	.author-portrait {
-		width: 7.3rem;
-		height: 11rem;
-		object-fit: contain;
-		background: transparent;
-		clip-path: ellipse(46% 45% at 50% 47%);
-	}
-	.author-copy {
-		min-width: 0;
+	.eyebrow {
+		margin: 0 0 0.65rem;
+		color: var(--page-gold);
+		font: 600 0.72rem/1.4 var(--font-body);
+		letter-spacing: 0.1em;
 	}
 	.home-hero h1 {
-		margin: 0;
-		font-size: clamp(1.9rem, 3.1vw, 2.6rem);
-		font-weight: 600;
-		line-height: 1.08;
-		letter-spacing: -0.04em;
+		margin: 0 0 1.1rem;
+		font: 700 clamp(2.5rem, 4vw, 3.8rem)/1.05 var(--font-body);
+		letter-spacing: -0.05em;
 	}
 	.home-hero h1 span {
-		color: inherit;
+		color: var(--page-link);
+	}
+	.hero-lead {
+		max-width: 33rem;
+		margin: 0 0 0.7rem;
+		font-size: 1.2rem;
+		line-height: 1.65;
+	}
+	.hero-detail {
+		max-width: 32rem;
+		margin: 0;
+		color: var(--page-muted);
+		font-size: 1rem;
+		line-height: 1.7;
+	}
+	.hero-links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.7rem 1.5rem;
+		margin-top: 1.35rem;
+		font-size: 0.9rem;
+		font-weight: 600;
+	}
+	.hero-links a,
+	.personal-note a {
+		text-decoration: none;
+	}
+	.hero-links a:hover,
+	.personal-note a:hover {
+		text-decoration: underline;
+	}
+	.hero-art {
+		align-self: center;
+	}
+	.hero-art img {
+		display: block;
+		width: 100%;
+		height: auto;
+		background: transparent;
+	}
+	.hero-art p {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.4rem;
+		margin: 0.2rem 0 0;
+		color: var(--page-muted);
+		font: 600 0.72rem/1.4 var(--font-body);
+		letter-spacing: 0.03em;
+	}
+	.route-line {
+		flex: 1;
+		overflow: hidden;
+		color: var(--page-gold);
+		text-align: center;
 		white-space: nowrap;
 	}
-	.small-rule {
-		display: flex;
-		align-items: center;
-		gap: 0.55rem;
-		width: 7rem;
-		margin: 0.7rem 0 0.35rem;
-		color: var(--page-gold);
-	}
-	.small-rule::before,
-	.small-rule::after {
-		height: 1px;
-		flex: 1;
-		background: currentColor;
-		opacity: 0.6;
-		content: '';
-	}
-	.small-rule span {
-		font-size: 1rem;
-		line-height: 1;
-	}
-	.author-motto {
-		margin: 0 0 0.6rem;
-		font: italic 1.16rem var(--font-display);
-	}
-	.author-motto a {
-		color: var(--page-accent);
-		text-decoration: none;
-	}
-	.author-details {
-		margin: 0;
-		font-family: Georgia, serif;
-		font-size: 0.82rem;
-		line-height: 1.55;
-	}
-	.author-links {
-		margin: 0.55rem 0 0;
-		font-size: 0.72rem;
-	}
-	.author-links a {
-		text-decoration: none;
-	}
-	.author-links > span {
-		margin-inline: 0.28rem;
-		color: var(--page-gold);
-	}
-	.place-line {
-		display: flex;
-		align-items: center;
-		gap: 0.7rem;
-		margin-top: 0.65rem;
-		color: var(--page-gold);
-		font-family: var(--font-display);
-		font-size: 1rem;
-		letter-spacing: 0.06em;
-	}
-	.place-route {
-		width: 3rem;
-		text-align: center;
-	}
-	.field-note {
+	.personal-grid {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) 4.4rem;
-		gap: 0.6rem;
-		align-items: center;
-		margin: 0.6rem 0 0;
+		grid-template-columns: 1fr 1fr;
+		gap: 4rem;
+		margin: 3rem 0;
+		padding-top: 1.6rem;
 		border-top: 1px solid var(--page-border);
-		padding-top: 0.4rem;
 	}
-	.field-note p {
-		margin: 0;
-		font-family: Georgia, serif;
-		font-size: 0.74rem;
-		line-height: 1.45;
-		font-style: italic;
-		color: var(--page-muted);
-	}
-	.field-note .note-label {
-		margin-bottom: 0.25rem;
-		color: var(--page-gold);
-		font: 0.56rem var(--font-mono);
-		letter-spacing: 0.03em;
-		text-transform: uppercase;
-	}
-	.messenger-bird {
-		width: 4.4rem;
-		height: auto;
-		background: transparent;
-	}
-	.section-kicker {
-		margin: 0.2rem 0 0.8rem;
-		font-family: var(--font-mono);
-		font-size: 0.61rem;
-		font-weight: 500;
-		line-height: 1.55;
-		letter-spacing: 0.05em;
-		text-transform: uppercase;
-		color: var(--page-gold);
+	.personal-grid h2,
+	.desk-column h2,
+	.complete-archive h2 {
+		margin: 0 0 1rem;
+		font: 650 1.4rem/1.25 var(--font-body);
+		letter-spacing: -0.025em;
 	}
 	.project-link {
-		position: relative;
 		display: grid;
-		grid-template-columns: 3.4rem minmax(0, 1fr);
-		gap: 0.55rem;
+		grid-template-columns: 3rem minmax(0, 1fr) auto;
+		gap: 0.85rem;
 		align-items: center;
-		min-height: 6.2rem;
-		margin-bottom: 0.65rem;
-		border: 1px solid var(--page-border);
-		padding: 0.55rem;
+		padding: 0.8rem 0;
+		border-bottom: 1px solid var(--page-border);
 		color: var(--page-text);
 		text-decoration: none;
-		background: var(--page-surface);
 	}
-	.project-link strong {
-		display: block;
-		margin-bottom: 0.4rem;
-		font: 1.2rem var(--font-display);
+	.project-link:hover strong {
+		color: var(--page-link);
+		text-decoration: underline;
 	}
+	.project-link strong,
 	.project-link small {
 		display: block;
-		padding-right: 0.45rem;
-		font-family: Georgia, serif;
-		font-size: 0.7rem;
-		line-height: 1.4;
+	}
+	.project-link strong {
+		font-size: 1rem;
+	}
+	.project-link small {
+		color: var(--page-muted);
+		font-size: 0.86rem;
+		line-height: 1.5;
 	}
 	.project-logo {
-		width: 3.4rem;
-		height: auto;
+		width: 3rem;
+		height: 3rem;
 		object-fit: contain;
 		background: transparent;
-	}
-	.latent-project {
-		background: #30382d;
-		border-color: #30382d;
-		color: #f4ecd8;
 	}
 	.engineer-project .project-logo {
 		filter: invert(1);
 	}
-	.project-arrow {
-		position: absolute;
-		bottom: 0.35rem;
-		right: 0.45rem;
-		font-size: 0.75rem;
-	}
-	.side-project {
-		margin: 0.7rem 0 0;
-		font-size: 0.65rem;
-		color: var(--page-muted);
-	}
-	.side-project a {
-		white-space: nowrap;
-		text-decoration: none;
-	}
-	:global(.dark) .project-link {
-		background: transparent;
-		border-color: transparent;
-		padding-left: 0;
-		padding-right: 0;
-	}
 	:global(.dark) .engineer-project .project-logo {
 		filter: none;
 	}
-	.projects-section {
-		grid-area: projects;
+	.side-project {
+		margin: 0.8rem 0 0;
+		color: var(--page-muted);
+		font-size: 0.85rem;
 	}
-	:global(.dark) .field-note {
-		display: none;
+	.personal-note {
+		border-left: 3px solid #b48a3a;
+		padding: 0.1rem 0 0 1.5rem;
 	}
-	.book-ribbon {
-		grid-area: book;
-		position: relative;
+	.personal-note p:not(.eyebrow) {
+		margin: 0.65rem 0;
+		font-size: 0.95rem;
+		line-height: 1.6;
+	}
+	.personal-note p span {
+		display: inline-block;
+		width: 1.75rem;
+		color: var(--page-link);
+	}
+	.personal-note p:nth-of-type(3) span {
+		color: #427d86;
+	}
+	.personal-note > a {
+		display: inline-block;
+		margin-top: 0.6rem;
+		font-size: 0.86rem;
+		font-weight: 600;
+	}
+	.book-feature {
+		margin: 0 0 3rem;
 	}
 	.reading-desk {
 		display: grid;
-		grid-template-columns: 1.1fr 0.9fr 1fr;
-		border: 1px solid var(--page-border);
-		border-radius: 3px;
-		background: #f5eddb;
-		color: #342d21;
-		box-shadow: inset 0 0 40px #c7ae6c16;
-	}
-	:global(.dark) .reading-desk {
-		background: #e8dbb9;
-		border-color: #b59e6c;
+		grid-template-columns: 1fr 1fr 1fr;
+		gap: 2rem;
+		padding: 2rem 0;
+		border-top: 1px solid var(--page-border);
+		border-bottom: 1px solid var(--page-border);
 	}
 	.desk-column {
 		min-width: 0;
-		padding: 1rem;
-	}
-	.desk-column + .desk-column {
-		border-left: 1px solid #b49b7052;
 	}
 	.desk-column h2 {
-		margin: 0 0 0.7rem;
-		font: 1.1rem var(--font-display);
-		color: #342d21;
+		font-size: 1.15rem;
 	}
 	.desk-column h2 span {
-		margin-right: 0.25rem;
-		color: #816f47;
+		color: var(--page-gold);
 	}
 	.compact-list {
 		margin: 0;
@@ -478,188 +400,82 @@
 		grid-template-columns: minmax(0, 1fr) auto;
 		align-items: baseline;
 		gap: 0.6rem;
-		border-bottom: 1px solid #b49b703b;
-		padding: 0.35rem 0;
+		border-bottom: 1px solid var(--page-border);
+		padding: 0.6rem 0;
 	}
 	.compact-row a,
 	.talk-row a {
 		min-width: 0;
-		font-family: Georgia, serif;
-		font-size: 0.74rem;
-		line-height: 1.35;
-		color: inherit;
+		color: var(--page-text);
+		font-size: 0.9rem;
+		line-height: 1.5;
 		text-decoration: none;
+	}
+	.compact-row a:hover,
+	.talk-row a:hover {
+		color: var(--page-link);
+		text-decoration: underline;
 	}
 	.compact-row > span,
 	.compact-row time {
-		font-family: Georgia, serif;
-		font-size: 0.62rem;
-		opacity: 0.7;
+		color: var(--page-muted);
+		font-size: 0.72rem;
 	}
 	.talk-row {
 		display: flex;
-		align-items: baseline;
 		gap: 0.5rem;
-		border-bottom: 1px solid #b49b703b;
-		padding: 0.45rem 0;
+		border-bottom: 1px solid var(--page-border);
+		padding: 0.6rem 0;
 	}
 	.talk-row > span {
-		color: #816f47;
+		color: var(--page-gold);
 	}
 	.desk-more {
 		display: inline-block;
-		margin-top: 0.7rem;
-		font-family: Georgia, serif;
-		font-size: 0.72rem;
-		color: #6d4533;
+		margin-top: 0.8rem;
+		font-size: 0.85rem;
 		text-decoration: none;
 	}
 	.reading-desk :global(.newsletter-card) {
-		--page-text: #342d21;
-		--page-muted: #655b47;
-		--page-accent: #8d4935;
-		--page-surface: #f7eedb;
-		--page-link: #8d4935;
-		--page-border: #b49b7065;
-		border-left: 1px solid #b49b7052;
+		border-left: 1px solid var(--page-border);
+		padding: 0 0 0 1.5rem;
 	}
 	.closing-note {
 		display: flex;
+		flex-wrap: wrap;
 		justify-content: space-between;
 		gap: 1rem;
-		margin: 0.65rem 0 1.1rem;
+		margin: 1.1rem 0 2.5rem;
 		color: var(--page-muted);
-		font:
-			italic 0.68rem Georgia,
-			serif;
+		font-size: 0.8rem;
 	}
 	.closing-note a {
-		flex-shrink: 0;
-		font-style: normal;
 		text-decoration: none;
 	}
 	.complete-archive {
-		border: 0;
-		border-top: 1px solid var(--page-border);
-		padding: 0.8rem 0;
+		padding: 1rem 0;
 	}
 	.complete-archive > h2 {
-		margin: 0;
-		font-family: var(--font-display);
-		font-size: 1.55rem;
-		color: var(--page-text);
+		margin-bottom: 0.25rem;
+		font-size: 1.65rem;
 	}
 	.library-description {
-		margin: 0.25rem 0 1.1rem;
+		margin: 0 0 1.5rem;
 		color: var(--page-muted);
-		font-size: 0.8rem;
+		font-size: 0.9rem;
 	}
 	.archive-grid {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
 		gap: 2rem;
-		margin-top: 1rem;
-	}
-	.archive-grid h2,
-	.more-recent h2 {
-		font: 1.45rem var(--font-display);
 	}
 	.more-recent {
-		margin-top: 1.5rem;
+		margin-top: 2rem;
 	}
-	@media (min-width: 961px) {
-		:global(html:not(.dark)) .small-rule {
-			display: none;
-		}
-		:global(html:not(.dark)) .author-motto {
-			margin-top: 0.6rem;
-		}
-		:global(html:not(.dark)) .home-hero h1 {
-			font-size: 2.35rem;
-		}
-		:global(html:not(.dark)) .home-hero {
-			border: 1px solid var(--page-border);
-			border-radius: 3px;
-			background: #fbf7ed;
-			padding: 1rem;
-		}
-	}
-	@media (max-width: 1100px) and (min-width: 961px) {
-		.frontispiece {
-			grid-template-columns: minmax(0, 1fr) 11rem 9rem;
+	@media (max-width: 800px) {
+		.home-hero {
+			grid-template-columns: 1fr 0.8fr;
 			gap: 1rem;
-		}
-		.author-introduction {
-			grid-template-columns: 5.6rem minmax(0, 1fr);
-			gap: 0.8rem;
-		}
-		.author-portrait {
-			width: 5.6rem;
-			height: 8.4rem;
-		}
-		.home-hero h1 {
-			font-size: 2rem;
-		}
-		.author-details {
-			font-size: 0.76rem;
-		}
-		.project-link {
-			grid-template-columns: 2.6rem minmax(0, 1fr);
-		}
-		.project-logo {
-			width: 2.6rem;
-		}
-	}
-	@media (max-width: 960px) {
-		.frontispiece {
-			grid-template-columns: minmax(0, 1fr) 11rem;
-			grid-template-areas: 'hero book' 'projects book' 'essays essays';
-			gap: 1rem 1.3rem;
-		}
-
-		.projects-section {
-			display: grid;
-			grid-template-columns: 1fr 1fr;
-			gap: 0.6rem;
-		}
-		.section-kicker {
-			grid-column: 1 / -1;
-			margin: 0;
-		}
-		.project-link {
-			margin: 0;
-			grid-template-columns: 2.5rem minmax(0, 1fr);
-		}
-		.project-logo {
-			width: 2.5rem;
-		}
-		.project-link strong {
-			font-size: 1.05rem;
-		}
-		.side-project {
-			grid-column: 1 / -1;
-			margin: 0;
-		}
-
-		.author-introduction {
-			grid-template-columns: 5.5rem minmax(0, 1fr);
-			gap: 0.8rem;
-		}
-		.author-portrait {
-			width: 5.5rem;
-			height: 8.25rem;
-		}
-		.home-hero h1 {
-			font-size: 2rem;
-		}
-		.author-details {
-			font-size: 0.75rem;
-		}
-		.author-links {
-			font-size: 0.68rem;
-		}
-		.field-note {
-			display: none;
 		}
 		.reading-desk {
 			grid-template-columns: 1fr 1fr;
@@ -667,92 +483,47 @@
 		.reading-desk :global(.newsletter-card) {
 			grid-column: 1 / -1;
 			border-left: 0;
-			border-top: 1px solid #b49b7052;
+			border-top: 1px solid var(--page-border);
+			padding: 1.5rem 0 0;
 		}
 	}
 	@media (max-width: 600px) {
 		.literary-home {
-			padding-top: 0.35rem;
+			padding-top: 1rem;
 		}
-		.frontispiece {
-			grid-template-columns: minmax(0, 1fr);
-			grid-template-areas: 'hero' 'essays' 'projects' 'book';
-			padding-top: 0.4rem;
-			gap: 0.9rem;
-		}
-		.author-introduction {
-			grid-template-columns: 4.6rem minmax(0, 1fr);
-			gap: 0.8rem;
-		}
-		.author-portrait {
-			width: 4.6rem;
-			height: 6.9rem;
+		.home-hero {
+			grid-template-columns: 1fr;
+			gap: 1rem;
+			padding: 1.4rem 0 1.8rem;
 		}
 		.home-hero h1 {
-			font-size: 1.65rem;
+			font-size: 2.6rem;
 		}
-		.small-rule {
-			margin: 0.45rem 0 0.3rem;
-			width: 5rem;
+		.hero-lead {
+			font-size: 1.08rem;
+			line-height: 1.65;
 		}
-		.author-motto {
-			font-size: 1rem;
-			margin-bottom: 0.4rem;
+		.hero-detail {
+			font-size: 0.96rem;
 		}
-		.author-details {
-			font-size: 0.71rem;
-			line-height: 1.5;
+		.hero-art {
+			width: min(100%, 24rem);
+			margin: 0.4rem auto 0;
 		}
-		.author-links {
-			font-size: 0.64rem;
-			margin-top: 0.4rem;
+		.personal-grid,
+		.reading-desk,
+		.archive-grid {
+			grid-template-columns: 1fr;
+			gap: 2rem;
 		}
-		.place-line {
-			font-size: 0.83rem;
-			margin-top: 0.5rem;
+		.personal-grid {
+			margin-block: 2rem;
 		}
-		.projects-section {
-			grid-column: 1;
-			gap: 0.5rem;
-		}
-		.section-kicker {
-			font-size: 0.55rem;
-		}
-		.project-link {
-			min-height: 4.5rem;
-			grid-template-columns: 2rem minmax(0, 1fr);
-			gap: 0.35rem;
-			padding: 0.4rem;
-		}
-		.project-logo {
-			width: 2rem;
-		}
-		.project-link strong {
-			font-size: 0.95rem;
-			margin-bottom: 0.2rem;
-		}
-		.project-link small {
-			font-size: 0.61rem;
-		}
-		.side-project {
-			font-size: 0.61rem;
-		}
-
-		.reading-desk {
-			grid-template-columns: minmax(0, 1fr);
-		}
-		.desk-column + .desk-column {
-			border-left: 0;
-			border-top: 1px solid #b49b7052;
-		}
-		.desk-column {
-			padding: 0.9rem;
+		.reading-desk :global(.newsletter-card) {
+			grid-column: auto;
 		}
 		.closing-note {
-			font-size: 0.63rem;
-		}
-		.archive-grid {
-			grid-template-columns: minmax(0, 1fr);
+			line-height: 1.5;
 		}
 	}
 </style>

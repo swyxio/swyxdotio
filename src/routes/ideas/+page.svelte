@@ -589,19 +589,19 @@
 
 	.ideas-header h1 {
 		margin: 0;
-		font: 600 2.25rem/1.1 var(--font-display);
+		font: 700 2.25rem/1.1 var(--font-body);
 	}
 
 	.ideas-deck {
 		margin: 0;
 		color: var(--page-muted);
-		font: 0.95rem/1.5 var(--font-reading);
+		font: 0.95rem/1.6 var(--font-body);
 	}
 
 	.ideas-count {
 		margin: 0;
 		color: var(--page-muted);
-		font: 0.78rem/1.5 var(--font-reading);
+		font: 0.78rem/1.5 var(--font-body);
 		white-space: nowrap;
 	}
 
@@ -763,7 +763,7 @@
 
 	.results-heading h2 {
 		margin: 0;
-		font-family: var(--font-display);
+		font-family: var(--font-body);
 		font-size: 1.23rem;
 		font-weight: 600;
 		line-height: 1.2;
@@ -811,7 +811,7 @@
 		align-items: baseline;
 		gap: 0.75rem;
 		min-height: 44px;
-		padding: 0.42rem 0.25rem;
+		padding: 0.7rem 0.25rem;
 		border-bottom: 1px solid var(--page-border);
 		color: var(--page-text);
 		text-decoration: none;
@@ -847,8 +847,8 @@
 
 	.ideas-title {
 		display: block;
-		font-family: var(--font-reading);
-		font-size: 0.95rem;
+		font-family: var(--font-body);
+		font-size: 1rem;
 		font-weight: 400;
 		line-height: 1.35;
 		overflow-wrap: anywhere;
