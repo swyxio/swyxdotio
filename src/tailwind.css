@@ -233,6 +233,21 @@ a:hover {
 	margin-block: 0 1.3em;
 }
 
+@media (max-width: 760px) {
+	.site-main article.swyxcontent {
+		font-size: 1.0625rem;
+		line-height: 1.7;
+	}
+
+	.swyxcontent :where(p, li, blockquote, h1, h2, h3, h4) {
+		overflow-wrap: anywhere;
+	}
+
+	.swyxcontent :where(p) {
+		margin-block-end: 1.15em;
+	}
+}
+
 .site-main .reading-prose :where(h2, h3, h4) {
 	color: var(--page-text);
 	font-family: var(--font-reading);

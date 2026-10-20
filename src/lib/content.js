@@ -10,6 +10,7 @@ import {
 } from './siteConfig';
 import slugify from 'slugify';
 import { renderMarkdown } from './markdown';
+import { hasArticleSections } from './article-toc.js';
 import { extractContentDescription } from './content-description.js';
 import { isBlogSlug, normalizeBlogSlug } from './slug';
 import {
@@ -319,7 +320,12 @@ export async function getContent(providedFetch, slug, contentManifest, options) 
 		// youtube/tweet shortcodes and GitHub autolinks are handled as marked extensions
 		const content = await renderMarkdown(blogpost.content ?? '');
 
-		return { ...blogpost, content, neighbors: articleNeighbors(allBlogposts, slug) };
+		return {
+			...blogpost,
+			content,
+			hasSections: hasArticleSections(content),
+			neighbors: articleNeighbors(allBlogposts, slug)
+		};
 	} else {
 		throw new Error('Blogpost not found for slug: ' + slug);
 	}

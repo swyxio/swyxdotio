@@ -1,5 +1,6 @@
 <script>
 	import { FEATURED_ESSAYS } from '$lib/featured-essays';
+	import { readingThreadFor } from '$lib/reading-threads';
 
 	/** @type {{ slug: string, neighbors: { newer: { slug: string, title: string }[], older: { slug: string, title: string }[] } }} */
 	export let data;
@@ -11,7 +12,12 @@
 	let root;
 	/** @type {HTMLButtonElement} */
 	let toggle;
-	$: featured = FEATURED_ESSAYS.filter((essay) => essay.href !== `/${data.slug}`).slice(0, 5);
+	$: thread = readingThreadFor(data.slug);
+	$: featured = FEATURED_ESSAYS.filter(
+		(essay) =>
+			essay.href !== `/${data.slug}` &&
+			!thread?.articles.some((article) => article.href === essay.href)
+	).slice(0, 5);
 
 	function enter() {
 		if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
@@ -92,6 +98,17 @@
 			<a href="/ideas">All writing <span aria-hidden="true">↗</span></a>
 			<a href="/ideas#ideas-results">Writing by date <span aria-hidden="true">↗</span></a>
 			<a href="/">Home <span aria-hidden="true">↗</span></a>
+			{#if thread}
+				<p class="index-label">Follow a thread</p>
+				<div class="reading-thread">
+					<p class="thread-title">
+						<span class="thread-stamp" aria-hidden="true">✳</span>{thread.title}
+					</p>
+					{#each thread.articles as article (article.href)}
+						<a href={article.href}>{article.title}</a>
+					{/each}
+				</div>
+			{/if}
 			<p class="index-label">Featured reads</p>
 			{#each featured as essay (essay.href)}
 				<a href={essay.href}>{essay.title}</a>
@@ -166,6 +183,30 @@
 	.index-label:first-child {
 		margin-top: 0.15rem;
 	}
+	.reading-thread {
+		margin-left: 0.45rem;
+		padding-left: 0.65rem;
+		border-left: 2px solid var(--page-accent);
+	}
+	.thread-title {
+		display: flex;
+		align-items: baseline;
+		gap: 0.35rem;
+		margin: 0 0 0.1rem;
+		padding: 0.25rem 0.45rem 0;
+		color: var(--page-link);
+		font: italic 0.9rem/1.4 var(--font-display);
+	}
+	.thread-stamp {
+		display: inline-block;
+		color: var(--page-accent);
+		font: 0.8rem/1 var(--font-body);
+		transform: scale(0.75) rotate(-15deg);
+		transition: transform 220ms ease-out;
+	}
+	.index-panel.open .thread-stamp {
+		transform: scale(1) rotate(0);
+	}
 	.index-content a {
 		display: block;
 		padding: 0.35rem 0.45rem;
@@ -215,6 +256,12 @@
 		}
 		.index-label {
 			padding: 0;
+		}
+		.reading-thread {
+			margin-left: 0;
+		}
+		.thread-title {
+			padding-left: 0;
 		}
 		.index-content a {
 			padding: 0.3rem 0;

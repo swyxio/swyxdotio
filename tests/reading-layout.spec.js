@@ -1,6 +1,104 @@
 import { test, expect } from '@playwright/test';
+import http from 'node:http';
 
 const articleUrl = 'http://127.0.0.1:4173/america250';
+
+test('the phone contents row is in place before the article HTML finishes streaming', async ({
+	page
+}) => {
+	const html = await (await fetch(articleUrl)).text();
+	const section = html.indexOf('<h2 id="pretraining-', html.indexOf('class="article-header"'));
+	if (section < 0) throw new Error('Could not find the first section in the article');
+	let finishStream = () => {};
+	const server = http.createServer((request, response) => {
+		if (request.url === '/america250') {
+			response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+			response.write(html.slice(0, section));
+			finishStream = () => {
+				if (!response.writableEnded) response.end(html.slice(section));
+			};
+			return;
+		}
+		const upstream = http.request(
+			{
+				host: '127.0.0.1',
+				port: 4173,
+				path: request.url,
+				method: request.method,
+				headers: { ...request.headers, host: '127.0.0.1:4173' }
+			},
+			(upstreamResponse) => {
+				response.writeHead(upstreamResponse.statusCode ?? 500, upstreamResponse.headers);
+				upstreamResponse.pipe(response);
+			}
+		);
+		upstream.on('error', () => response.destroy());
+		request.pipe(upstream);
+	});
+	await new Promise((resolve) => server.listen(0, '127.0.0.1', () => resolve(undefined)));
+	const address = server.address();
+	if (!address || typeof address === 'string') throw new Error('Could not start stream server');
+	try {
+		await page.setViewportSize({ width: 390, height: 844 });
+		await page.goto(`http://127.0.0.1:${address.port}/america250`, { waitUntil: 'commit' });
+		const contents = page.getByRole('button', { name: 'Table of Contents' });
+		const title = page.locator('.article-header h1');
+		await expect(contents).toBeVisible();
+		await expect(title).toBeVisible();
+		await page.evaluate(() => document.fonts.ready);
+		const before = await title.boundingBox();
+		finishStream();
+		await expect(page.locator('#pretraining-my-first-america-run-2007-2010')).toBeAttached();
+		await expect(page.locator('article[data-toc-root]')).toBeAttached();
+		const after = await title.boundingBox();
+		if (!before || !after) throw new Error('Article title is not visible');
+		expect(Math.abs(after.y - before.y)).toBeLessThan(1);
+	} finally {
+		finishStream();
+		server.closeAllConnections();
+		server.close();
+	}
+});
+
+test('the phone contents row is already in place before scripts finish loading', async ({
+	page
+}) => {
+	await page.setViewportSize({ width: 390, height: 844 });
+	let releaseScripts = () => {};
+	const scriptsReady = new Promise((resolve) => {
+		releaseScripts = () => resolve(undefined);
+	});
+	await page.route('**/*', async (route) => {
+		if (route.request().resourceType() === 'script') await scriptsReady;
+		await route.continue();
+	});
+	await page.goto(articleUrl, { waitUntil: 'commit' });
+	const contents = page.getByRole('button', { name: 'Table of Contents' });
+	const title = page.locator('.article-header h1');
+	await expect(contents).toBeVisible();
+	await expect(title).toBeVisible();
+	await page.evaluate(() => document.fonts.ready);
+	const before = await title.boundingBox();
+	releaseScripts();
+	await expect(page.locator('article[data-toc-root]')).toBeAttached();
+	await expect(contents).toHaveAttribute('aria-expanded', 'false');
+	const after = await title.boundingBox();
+	if (!before || !after) throw new Error('Article title is not visible');
+	expect(Math.abs(after.y - before.y)).toBeLessThan(1);
+	await contents.click();
+	await expect(
+		page.getByRole('navigation', { name: 'Table of contents' }).getByRole('link', {
+			name: 'A parting thought'
+		})
+	).toBeVisible();
+});
+
+test('an article without section headings does not reserve a contents row', async ({ page }) => {
+	await page.setViewportSize({ width: 390, height: 844 });
+	await page.goto('http://127.0.0.1:4173/aie-singapore-the-agentic-nation');
+	await expect(page.locator('article[data-toc-root]')).toBeAttached();
+	await expect(page.getByRole('button', { name: 'Table of Contents' })).toBeHidden();
+});
 
 test('contents follows the reading position after large scrolls in either direction', async ({
 	page

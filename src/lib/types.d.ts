@@ -1,6 +1,7 @@
 export type ContentItem = {
 	type?: 'blog';
 	content?: string;
+	hasSections?: boolean;
 	frontmatter?: Record<string, unknown>;
 	title: string;
 	subtitle?: string;
