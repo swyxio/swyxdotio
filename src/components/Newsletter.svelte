@@ -96,9 +96,9 @@
 		font-size: 1.1rem;
 	}
 	.compact > p {
-		font-family: Georgia, serif;
-		font-size: 0.74rem;
-		line-height: 1.45;
+		font-family: var(--font-body);
+		font-size: 0.9rem;
+		line-height: 1.6;
 	}
 	.compact form {
 		display: grid;
@@ -109,9 +109,10 @@
 	.compact form :global(button) {
 		min-width: 0;
 		padding: 0.35rem 0.4rem;
-		font-size: 0.7rem;
+		font-size: 0.85rem;
+		min-height: 2.75rem;
 	}
 	.compact .plain-muted {
-		font-size: 0.64rem;
+		font-size: 0.8rem;
 	}
 </style>

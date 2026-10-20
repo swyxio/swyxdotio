@@ -41,15 +41,14 @@
 <style>
 	.floating-toc {
 		position: fixed;
-		right: 1rem;
-		bottom: 4.5rem;
+		right: max(1.25rem, calc((100vw - 72.5rem) / 2));
+		top: min(9rem, 20vh);
 		z-index: 30;
+		display: flex;
+		flex-direction: column;
 		width: min(13rem, calc(100vw - 2rem));
-		padding: 0.75rem;
-		border: 1px solid var(--page-border);
-		border-radius: 0.5rem;
-		background: var(--page-surface);
-		box-shadow: 0 2px 12px rgb(0 0 0 / 0.08);
+		max-height: calc(100vh - min(9rem, 20vh) - 1rem);
+		padding: 0;
 		font: 0.8rem/1.5 var(--font-body);
 	}
 	.toc-toggle {
@@ -57,11 +56,13 @@
 		justify-content: space-between;
 		gap: 0.5rem;
 		width: 100%;
+		min-height: 44px;
 		color: var(--page-link);
 		font-weight: 600;
 		text-align: left;
 	}
 	ul {
+		min-height: 0;
 		max-height: min(20rem, 50vh);
 		margin: 0.75rem 0 0;
 		padding: 0;
@@ -102,8 +103,16 @@
 	@media (max-width: 1199px) {
 		.floating-toc {
 			position: static;
+			max-height: none;
 			width: min(calc(100% - 2 * var(--site-gutter)), var(--reading-max-width));
 			margin: 1.25rem auto;
+			border-top: 1px solid var(--page-border);
+			border-bottom: 1px solid var(--page-border);
+			padding: 0.15rem 0;
+		}
+		ul {
+			margin: 0 0 0.6rem;
+			max-height: none;
 		}
 	}
 </style>

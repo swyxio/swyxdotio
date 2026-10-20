@@ -227,7 +227,7 @@
 		text-wrap: balance;
 	}
 
-	:global(.site-main .swyxcontent :where(h2, h3, h4)) {
+	:global(.site-main article.swyxcontent :where(h2, h3, h4)) {
 		font-family: var(--font-body);
 		font-weight: 650;
 	}

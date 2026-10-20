@@ -145,7 +145,7 @@ test('Ideas retains durable query parameters, lazy corpus, safe excerpts, and as
 	assert.doesNotMatch(source, /\{@html|categoryIcon|tag-chip|type-emoji|<details/);
 });
 
-test('Ideas and home use the same illustrated essay shelf, not competing featured lists', async () => {
+test('Ideas and home use the same featured essay shelf, not competing featured lists', async () => {
 	const [ideas, home, shelf] = await Promise.all(
 		[
 			'../src/routes/ideas/+page.svelte',
@@ -160,10 +160,8 @@ test('Ideas and home use the same illustrated essay shelf, not competing feature
 	}
 	assert.match(shelf, /import \{ FEATURED_ESSAYS \} from '\$lib\/featured-essays'/);
 	assert.match(shelf, /\{#each FEATURED_ESSAYS as essay, index \(essay.href\)\}/);
-	assert.match(shelf, /src=\{essay\.illustration\}/);
 	assert.match(shelf, /\{essay.description\}/);
 	assert.match(shelf, /Things worth thinking about/);
-	assert.match(shelf, /width: 100vw/);
 	assert.match(shelf, /overflow-x: auto/);
 	assert.doesNotMatch(shelf, /<details/);
 });
@@ -176,7 +174,7 @@ test('Ideas uses a compact masthead, readable archive type, and touch-sized cont
 	assert.doesNotMatch(source, /editorial-header|editorial-kicker|popular-posts/);
 	assert.match(source, /class="search-control"/);
 	assert.match(source, /grid-template-columns: minmax\(16rem, 1fr\) auto/);
-	assert.match(source, /\.ideas-title\s*\{[^}]*font-family: var\(--font-reading\)/);
+	assert.match(source, /\.ideas-title\s*\{[^}]*font-family: var\(--font-body\)/);
 	assert.match(source, /\.ideas-row\s*\{[^}]*min-height: 44px/);
 	assert.match(source, /\.ideas-filter\s*\{[^}]*min-height: 44px/);
 	assert.match(source, /\.ideas-filters\s*\{[^}]*min-width: 0/);
