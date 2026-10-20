@@ -10,7 +10,9 @@ const items = Array.from(
 	(_, i) => `<item><title>Episode ${i + 1}</title></item>`
 ).join('');
 const xml = `<rss><channel><title>Test</title>${items}</channel></rss>`;
-const platform = { env: { PODCAST_MEDIA: { get: async () => ({ text: async () => xml }) } } };
+const platform = {
+	env: { PODCAST_MEDIA: { get: async () => ({ etag: 'revision-1', text: async () => xml }) } }
+};
 const url = (query = '') => new URL(`https://example.com/podcasts${query}`);
 
 test('client accepts the final page and rejects invalid or non-advancing cursors', () => {
@@ -32,8 +34,13 @@ test('page loader serves a bounded initial page and a navigable second page', as
 	assert.equal(initial.shows[0].episodeCount, 43);
 	assert.equal(initial.shows[0].episodes.length, 20);
 	assert.equal(initial.shows[0].nextOffset, 20);
+	assert.equal(initial.shows[0].revision, 'revision-1');
 
-	const next = await load({ platform, setHeaders() {}, url: url(`?podcast=${slug}&offset=20`) });
+	const next = await load({
+		platform,
+		setHeaders() {},
+		url: url(`?podcast=${slug}&offset=20&revision=revision-1`)
+	});
 	assert.equal(next.requestedShow, slug);
 	assert.equal(next.shows[0].episodes[0].title, 'Episode 21');
 	assert.equal(next.shows[0].previousOffset, 0);
@@ -42,7 +49,11 @@ test('page loader serves a bounded initial page and a navigable second page', as
 });
 
 test('episode API returns pages and rejects unknown shows and invalid offsets', async () => {
-	const page = await GET({ params: { slug }, platform, url: url('?offset=40') });
+	const page = await GET({
+		params: { slug },
+		platform,
+		url: url('?offset=40&revision=revision-1')
+	});
 	const payload = await page.json();
 	assert.deepEqual(
 		payload.episodes.map(({ title }) => title),
@@ -52,11 +63,19 @@ test('episode API returns pages and rejects unknown shows and invalid offsets', 
 	assert.match(page.headers.get('cache-control'), /s-maxage=300/);
 
 	for (const query of ['?offset=-1', '?offset=1.5', '?offset=99', '?offset=9007199254740992']) {
-		await assert.rejects(() => GET({ params: { slug }, platform, url: url(query) }), {
-			status: 400
-		});
 		await assert.rejects(
-			() => load({ platform, setHeaders() {}, url: url(`?podcast=${slug}&${query.slice(1)}`) }),
+			() => GET({ params: { slug }, platform, url: url(`${query}&revision=revision-1`) }),
+			{
+				status: 400
+			}
+		);
+		await assert.rejects(
+			() =>
+				load({
+					platform,
+					setHeaders() {},
+					url: url(`?podcast=${slug}&${query.slice(1)}&revision=revision-1`)
+				}),
 			{ status: 400 }
 		);
 	}
@@ -66,5 +85,49 @@ test('episode API returns pages and rejects unknown shows and invalid offsets', 
 	await assert.rejects(() => load({ platform, setHeaders() {}, url: url('?podcast=unknown') }), {
 		status: 404
 	});
-	await assert.rejects(() => GET({ params: { slug }, url: url() }), { status: 503 });
+	await assert.rejects(() => GET({ params: { slug }, url: url('?revision=revision-1') }), {
+		status: 503
+	});
+	await assert.rejects(() => GET({ params: { slug }, platform, url: url('?offset=20') }), {
+		status: 400
+	});
+	await assert.rejects(
+		() => load({ platform, setHeaders() {}, url: url('?offset=20&revision=revision-1') }),
+		{ status: 400 }
+	);
+	await assert.rejects(
+		() => load({ platform, setHeaders() {}, url: url(`?podcast=${slug}&offset=20`) }),
+		{ status: 400 }
+	);
+});
+
+test('a changed feed cannot mix episodes from two revisions', async () => {
+	const changedPlatform = {
+		env: { PODCAST_MEDIA: { get: async () => ({ etag: 'revision-2', text: async () => xml }) } }
+	};
+	await assert.rejects(
+		() =>
+			GET({
+				params: { slug },
+				platform: changedPlatform,
+				url: url('?offset=20&revision=revision-1')
+			}),
+		{ status: 409 }
+	);
+	await assert.rejects(
+		() =>
+			load({
+				platform: changedPlatform,
+				setHeaders() {},
+				url: url(`?podcast=${slug}&offset=20&revision=revision-1`)
+			}),
+		(error) => {
+			assert.equal(error.status, 303);
+			assert.match(
+				error.location,
+				new RegExp(`^/podcasts\\?podcast=${slug}&changed=1&refresh=\\d+#${slug}-episodes$`)
+			);
+			return true;
+		}
+	);
 });

@@ -47,9 +47,9 @@
 	let loadErrors = {};
 	$: episodeCount = shows.reduce((total, show) => total + show.episodeCount, 0);
 
-	/** @param {string} slug @param {number} offset */
-	function archivePageUrl(slug, offset) {
-		return `?podcast=${encodeURIComponent(slug)}&offset=${offset}#${slug}-episodes`;
+	/** @param {string} slug @param {number} offset @param {string} revision */
+	function archivePageUrl(slug, offset, revision) {
+		return `?podcast=${encodeURIComponent(slug)}&offset=${offset}&revision=${encodeURIComponent(revision)}#${slug}-episodes`;
 	}
 
 	/** @param {string} slug */
@@ -61,8 +61,14 @@
 		loadErrors = { ...loadErrors, [slug]: '' };
 		try {
 			const response = await fetch(
-				`/api/podcasts/${encodeURIComponent(slug)}?offset=${show.nextOffset}`
+				`/api/podcasts/${encodeURIComponent(slug)}?offset=${show.nextOffset}&revision=${encodeURIComponent(show.revision)}`
 			);
+			if (response.status === 409) {
+				window.location.assign(
+					`/podcasts?podcast=${encodeURIComponent(slug)}&changed=1&refresh=${Date.now()}#${slug}-episodes`
+				);
+				return;
+			}
 			if (!response.ok) throw new Error(`Episode archive unavailable (${response.status})`);
 			const next = await response.json();
 			if (!isValidEpisodePage(next, show.nextOffset)) {
@@ -203,6 +209,11 @@
 					<span>Browse episode archive</span>
 					<span class="plain-muted">{show.episodeCount} tracks</span>
 				</summary>
+				{#if data.archiveChanged && show.slug === data.requestedShow}
+					<p class="episode-error" role="status">
+						The archive changed, so we’re showing its latest episodes.
+					</p>
+				{/if}
 				<ol class="episode-list">
 					{#each show.episodes as episode}
 						<li>
@@ -224,11 +235,13 @@
 				</ol>
 				<div class="episode-pagination">
 					{#if show.previousOffset !== null}
-						<a href={archivePageUrl(show.slug, show.previousOffset)}>Previous episodes</a>
+						<a href={archivePageUrl(show.slug, show.previousOffset, show.revision)}
+							>Previous episodes</a
+						>
 					{/if}
 					{#if show.nextOffset !== null}
 						<a
-							href={archivePageUrl(show.slug, show.nextOffset)}
+							href={archivePageUrl(show.slug, show.nextOffset, show.revision)}
 							on:click={(/** @type {MouseEvent} */ event) => followArchiveLink(event, show.slug)}
 							data-sveltekit-reload
 							aria-disabled={loadingShows.has(show.slug)}
