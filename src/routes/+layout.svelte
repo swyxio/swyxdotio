@@ -6,6 +6,7 @@
 	let siteSearch;
 	import ReadCounter from '../components/ReadCounter.svelte';
 	import LivePresence from '../components/LivePresence.svelte';
+	import LiveChat from '../components/LiveChat.svelte';
 	import SelectionShare from '../components/SelectionShare.svelte';
 	import { env } from '$env/dynamic/public';
 	import { page } from '$app/stores';
@@ -17,6 +18,7 @@
 		$page.status === 200 && typeof $page.data?.slug === 'string' ? $page.data.slug : publicPageKey;
 	$: presenceAdmissionRate = Number(env.PUBLIC_PRESENCE_ADMISSION_RATE ?? 1);
 	$: immersiveTool = $page.url.pathname === '/tools/box' || $page.url.pathname === '/tools/draw';
+	let chatCollapsed = false;
 </script>
 
 <svelte:head>
@@ -38,43 +40,55 @@
 	<link rel="webmention" href="https://webmention.io/www.swyx.io/webmention" />
 	<link rel="pingback" href="https://webmention.io/www.swyx.io/xmlrpc" />
 	<link rel="alternate" type="text/plain" title="AI discovery index" href="/llms.txt" />
+	<noscript
+		><style>
+			@media (min-width: 1500px) {
+				.site-page.chat-space {
+					padding-left: 0 !important;
+				}
+			}
+		</style></noscript
+	>
 </svelte:head>
 
-{#if !immersiveTool}
-	<div class="site-shell site-nav-shell">
-		<Nav onSearch={() => siteSearch?.open()} />
-	</div>
-{/if}
-<SiteSearch bind:this={siteSearch} />
-<main id="skip" class="site-main">
-	<slot />
-</main>
+<div class="site-page" class:chat-space={!chatCollapsed && !immersiveTool}>
+	{#if !immersiveTool}
+		<div class="site-shell site-nav-shell">
+			<Nav onSearch={() => siteSearch?.open()} />
+		</div>
+	{/if}
+	<SiteSearch bind:this={siteSearch} />
+	<main id="skip" class="site-main">
+		<slot />
+	</main>
+	<LiveChat bind:collapsed={chatCollapsed} allowSidebar={!immersiveTool} />
 
-{#if !immersiveTool}
-	<footer class="site-shell site-panel literary-footer mb-8 mt-8 p-4">
-		<p class="plain-muted text-sm">
-			<a href="/">Home</a> · <a href="/about">About</a> · <a href="/podcasts">Podcasts</a> ·
-			<a href="/subscribe">Newsletter</a> ·
-			<a href="/rss.xml" rel="external" data-sveltekit-reload>RSS</a> ·
-			<a href="/portfolio">Portfolio</a> ·
-			<a href={'https://twitter.com/intent/follow?screen_name=' + MY_TWITTER_HANDLE}>Twitter</a> ·
-			<a href={REPO_URL}>GitHub</a> · <a href={MY_YOUTUBE}>YouTube</a>
-		</p>
-		{#if publicPageKey}
-			<p class="plain-muted mt-4 text-sm">
-				{#key publicPageKey}
-					<ReadCounter pageKey={publicPageKey} />
-				{/key}
+	{#if !immersiveTool}
+		<footer class="site-shell site-panel literary-footer mb-8 mt-8 p-4">
+			<p class="plain-muted text-sm">
+				<a href="/">Home</a> · <a href="/about">About</a> · <a href="/podcasts">Podcasts</a> ·
+				<a href="/subscribe">Newsletter</a> ·
+				<a href="/rss.xml" rel="external" data-sveltekit-reload>RSS</a> ·
+				<a href="/portfolio">Portfolio</a> ·
+				<a href={'https://twitter.com/intent/follow?screen_name=' + MY_TWITTER_HANDLE}>Twitter</a> ·
+				<a href={REPO_URL}>GitHub</a> · <a href={MY_YOUTUBE}>YouTube</a>
 			</p>
-		{/if}
-		{#if presencePageKey}
-			{#key presencePageKey}
-				<LivePresence pageKey={presencePageKey} admissionRate={presenceAdmissionRate} />
-			{/key}
-		{/if}
-		<p class="clacks-tribute"><span aria-hidden="true">✶</span> GNU Terry Pratchett</p>
-	</footer>
-{/if}
+			{#if publicPageKey}
+				<p class="plain-muted mt-4 text-sm">
+					{#key publicPageKey}
+						<ReadCounter pageKey={publicPageKey} />
+					{/key}
+				</p>
+			{/if}
+			{#if presencePageKey}
+				{#key presencePageKey}
+					<LivePresence pageKey={presencePageKey} admissionRate={presenceAdmissionRate} />
+				{/key}
+			{/if}
+			<p class="clacks-tribute"><span aria-hidden="true">✶</span> GNU Terry Pratchett</p>
+		</footer>
+	{/if}
+</div>
 
 {#if presencePageKey}
 	{#key presencePageKey}
@@ -83,6 +97,18 @@
 {/if}
 
 <style>
+	@media (min-width: 1500px) {
+		.site-page.chat-space {
+			padding-left: 300px;
+		}
+		.site-page.chat-space :global(.article-index) {
+			left: max(calc(300px + 1.25rem), calc(300px + (100vw - 300px - 72.5rem) / 2));
+		}
+		.site-page.chat-space :global(.floating-toc) {
+			right: max(1.25rem, calc((100vw - 300px - 72.5rem) / 2));
+		}
+	}
+
 	.literary-footer {
 		--site-max-width: 1160px;
 		position: relative;

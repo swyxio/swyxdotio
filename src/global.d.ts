@@ -128,6 +128,9 @@ declare namespace App {
 			READ_FUNNEL_RATE_LIMITER?: RateLimit;
 			SEARCH_ASK_RATE_LIMITER?: RateLimit;
 			PRESENCE_ROOMS?: DurableObjectNamespace;
+			CHAT_ROOM?: DurableObjectNamespace;
+			CHAT_IP_RATE_LIMITER?: RateLimit;
+			CHAT_ENABLED?: string;
 			DRAW_PAGES?: DurableObjectNamespace;
 			DRAW_ASSETS?: R2Bucket;
 			YOUTUBE_API_KEY?: string;
