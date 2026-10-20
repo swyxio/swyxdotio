@@ -16,7 +16,7 @@
 		selector: ':where(h1, h2, h3)',
 		ignore: '#table-of-contents',
 		anchor: false,
-		observe: { strategy: 'self' },
+		observe: false,
 		scrollMarginTop: '2rem'
 	});
 
