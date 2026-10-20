@@ -1,5 +1,13 @@
 import { test, expect } from '@playwright/test';
 
+test('the display font preload is limited to pages with the site navigation', async ({ page }) => {
+	const preload = page.locator('link[rel="preload"][href="/fonts/newsreader-semibold.woff2"]');
+	await page.goto('http://127.0.0.1:4173/america250');
+	await expect(preload).toHaveCount(1);
+	await page.goto('http://127.0.0.1:4173/tools/box');
+	await expect(preload).toHaveCount(0);
+});
+
 test('the preloaded fonts render on a normal connection', async ({ page }) => {
 	await page.goto('http://127.0.0.1:4173/america250');
 	await page.evaluate(() => document.fonts.ready);
@@ -22,8 +30,10 @@ test('the preloaded fonts render on a normal connection', async ({ page }) => {
 for (const width of [390, 1200]) {
 	test(`late fonts do not change visible text at ${width}px`, async ({ page }) => {
 		await page.setViewportSize({ width, height: 900 });
-		let releaseFonts;
+		let releaseFonts = () => {};
+		/** @type {Promise<void>} */
 		const fontsReady = new Promise((resolve) => (releaseFonts = resolve));
+		/** @type {string[]} */
 		const delayedFonts = [];
 		await page.route(
 			/\/fonts\/(inter-normal-400-700-latin|newsreader-semibold)\.woff2$/,
@@ -41,6 +51,7 @@ for (const width of [390, 1200]) {
 		// Let the optional font display window expire before releasing the responses.
 		await page.waitForTimeout(500);
 		expect(delayedFonts).toHaveLength(2);
+		/** @param {import('@playwright/test').Locator} locator */
 		const textWidth = (locator) =>
 			locator.evaluate((element) => {
 				const range = document.createRange();
