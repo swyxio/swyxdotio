@@ -207,7 +207,12 @@
 	}
 
 	async function setMode(next: typeof mode) {
-		if (next === mode || busy || feedPending.size || topicEditId || !(await saveNote())) return;
+		if (next === mode || busy || feedPending.size || topicEditId) return;
+		busy = true;
+		if (!(await saveNote())) {
+			busy = false;
+			return;
+		}
 		resetScrollIntent();
 		mode = next;
 		expandedId = '';
@@ -218,6 +223,7 @@
 		} catch {
 			// The current session still works when browser storage is unavailable.
 		}
+		busy = false;
 	}
 
 	function rememberDecision(batch: string, itemId: string, status: Status, appliedStatus: Status) {

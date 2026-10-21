@@ -432,6 +432,54 @@ test('a failed note save remains recoverable before a filtered topic change', as
 	expect((await getBatch(page, batch)).items[0].note).toBe('Keep this unsaved note');
 });
 
+test('switching review modes cannot open a hidden topic editor during a note save', async ({
+	page
+}) => {
+	await page.goto('/tools');
+	const origin = await authenticateTools(page);
+	const suffix = crypto.randomUUID();
+	const batch = await makeBatch(page, origin, `Mode and topic ${suffix}`, [
+		{ title: 'Selected page', url: `https://example.test/${suffix}/selected` },
+		{ title: 'Other page', url: `https://example.test/${suffix}/other` }
+	]);
+	const item = (await getBatch(page, batch)).items[0];
+	let releaseSave = () => {};
+	const gate = new Promise((resolve) => {
+		releaseSave = () => resolve(undefined);
+	});
+	await page.route(`**/tools/tabs/api/batches/${batch.id}/items/${item.id}`, async (route) => {
+		if (
+			route.request().method() === 'PATCH' &&
+			Object.hasOwn(route.request().postDataJSON(), 'note')
+		)
+			await gate;
+		await route.continue();
+	});
+	await page.goto(`/tools/tabs?batch=${batch.id}`);
+	await page.getByRole('button', { name: 'Selected page', exact: true }).click();
+	await page.getByLabel('Your note').fill('Save before switching');
+	const noteRequest = page.waitForRequest(
+		(request) => request.method() === 'PATCH' && request.url().endsWith(`/items/${item.id}`)
+	);
+	await page.getByRole('button', { name: 'Swipe', exact: true }).click();
+	await noteRequest;
+	try {
+		await expect(page.getByRole('button', { name: 'Edit topic for Other page' })).toBeDisabled();
+	} finally {
+		releaseSave();
+	}
+	await expect(page.getByRole('button', { name: 'Swipe', exact: true })).toHaveAttribute(
+		'aria-pressed',
+		'true'
+	);
+	await expect(page.getByRole('button', { name: 'Tap', exact: true })).toBeEnabled();
+	await page.getByRole('button', { name: 'Edit topic for Selected page' }).click();
+	await expect(page.getByRole('textbox', { name: 'Topic', exact: true })).toBeVisible();
+	await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+	await expect(page.getByRole('button', { name: 'Tap', exact: true })).toBeEnabled();
+	expect((await getBatch(page, batch)).items[0].note).toBe('Save before switching');
+});
+
 test('full URLs remain visible and wrap in every review mode', async ({ page }) => {
 	await page.goto('/tools');
 	const origin = await authenticateTools(page);
