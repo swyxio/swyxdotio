@@ -58,6 +58,7 @@
 	let noteSaving = false;
 	let noteError = '';
 	let loading = true;
+	let batchListFailed = false;
 	let itemLoading = false;
 	let itemUnavailable = false;
 	let busy = false;
@@ -686,6 +687,7 @@
 				method: 'POST',
 				body: payload
 			});
+			batchListFailed = false;
 			// A failed refresh must not make a successful import look unsuccessful.
 			try {
 				const list = await api<{ batches: Batch[] }>('/tools/tabs/api/batches');
@@ -745,6 +747,7 @@
 				if (initial) await switchBatch(initial.id);
 				else loading = false;
 			} catch (caught) {
+				batchListFailed = true;
 				error = `Could not load your batches: ${errorText(caught)}`;
 				loading = false;
 			}
@@ -771,594 +774,880 @@
 />
 
 <div class="library-shell">
-	<header class="library-header">
-		<div>
-			<a class="back" href={resolve('/tools')}>← Your tools</a>
-			<p class="eyebrow">YOUR PERSONAL READING PILE</p>
+	<aside class="library-sidebar" aria-label="Library controls">
+		<header class="library-header">
+			<div class="header-links">
+				<a class="back" href={resolve('/tools')}>← Your tools</a>
+				<a class="account" href={resolve('/tools')}
+					>{data.user.name || data.user.email || 'Account'} <span>↗</span></a
+				>
+			</div>
 			<h1>Tab Library</h1>
-			<p class="intro">A calmer place for everything you meant to come back to.</p>
-		</div>
-		<a class="account" href={resolve('/tools')}
-			>{data.user.name || data.user.email || 'Account'} <span>↗</span></a
-		>
-	</header>
+			<p class="intro">Saved pages from your reading across the web.</p>
+		</header>
 
-	<div class="toolbar">
-		<label
-			>Batch
-			<select
-				value={batchId}
-				disabled={busy || loading || !batches.length || feedPending.size > 0}
-				on:change={(event) => {
-					const select = event.currentTarget;
-					const id = select.value;
-					select.value = batchId;
-					void switchBatch(id);
-				}}
-			>
-				{#if !batches.length}<option value="">No batches yet</option>{/if}
-				{#each batches as batch (batch.id)}<option value={batch.id}
-						>{batch.name}{batch.count != null ? ` · ${batch.count}` : ''}</option
-					>{/each}
-			</select>
-		</label>
-		<details class="filters" bind:open={filtersOpen}>
-			<summary>Filters <span aria-hidden="true">{filtersOpen ? '−' : '+'}</span></summary>
-			<div class="filter-fields">
+		<div class="toolbar">
+			<label
+				>Batch
+				<select
+					value={batchId}
+					disabled={busy || loading || !batches.length || feedPending.size > 0}
+					on:change={(event) => {
+						const select = event.currentTarget;
+						const id = select.value;
+						select.value = batchId;
+						void switchBatch(id);
+					}}
+				>
+					{#if !batches.length}<option value=""
+							>{loading
+								? 'Loading batches…'
+								: batchListFailed
+									? 'Batches unavailable'
+									: 'No batches yet'}</option
+						>{/if}
+					{#each batches as batch (batch.id)}<option value={batch.id}
+							>{batch.name}{batch.count != null ? ` · ${batch.count}` : ''}</option
+						>{/each}
+				</select>
+			</label>
+			<details class="filters" bind:open={filtersOpen}>
+				<summary>Filters <span aria-hidden="true">{filtersOpen ? '−' : '+'}</span></summary>
+				<div class="filter-fields">
+					<label
+						>Find a page<input
+							type="search"
+							placeholder="Search titles, URLs, topics"
+							disabled={feedPending.size > 0 || note !== savedNote || noteSaving}
+							bind:value={query}
+						/></label
+					>
+					<label
+						>Topic<select
+							bind:value={topic}
+							disabled={feedPending.size > 0 || note !== savedNote || noteSaving}
+							><option value="all">All topics</option>{#each topics as name (name)}<option
+									value={name}>{name}</option
+								>{/each}</select
+						></label
+					>
+					<label
+						>Status<select
+							bind:value={statusFilter}
+							disabled={feedPending.size > 0 || note !== savedNote || noteSaving}
+							><option value="unread">Unread</option><option value="followup">Follow up</option
+							><option value="read">Read</option><option value="archived">Archived</option><option
+								value="all">All statuses</option
+							></select
+						></label
+					>
+					{#if windows.length}
+						<label
+							>Captured window
+							<select
+								bind:value={windowFilter}
+								disabled={feedPending.size > 0 || note !== savedNote || noteSaving}
+							>
+								<option value="all">All windows</option>
+								{#each windows as windowId, index (windowId)}<option value={windowId}
+										>Window {index + 1}</option
+									>{/each}
+							</select>
+						</label>
+					{/if}
+				</div>
+			</details>
+		</div>
+
+		<details class="import-panel">
+			<summary>＋ Add a batch</summary>
+			<div class="import-body">
+				<p>
+					Paste URLs, one per line, or import a Chrome capture JSON file. Each import becomes a
+					separate batch.
+				</p>
+				<p>
+					<a
+						href="https://github.com/swyxio/chrometaboverflow/tree/main/extension"
+						target="_blank"
+						rel="noopener noreferrer">Set up the Chrome exporter ↗</a
+					> to download a snapshot. It never closes tabs.
+				</p>
 				<label
-					>Find a page<input
-						type="search"
-						placeholder="Search titles, URLs, topics"
-						disabled={feedPending.size > 0 || note !== savedNote || noteSaving}
-						bind:value={query}
+					>Batch name <input
+						type="text"
+						maxlength="120"
+						placeholder="e.g. October reading"
+						bind:value={importName}
 					/></label
 				>
 				<label
-					>Topic<select
-						bind:value={topic}
-						disabled={feedPending.size > 0 || note !== savedNote || noteSaving}
-						><option value="all">All topics</option>{#each topics as name (name)}<option
-								value={name}>{name}</option
-							>{/each}</select
-					></label
+					>URLs or capture JSON <textarea
+						rows="4"
+						placeholder="https://example.com/article"
+						bind:value={importText}
+					></textarea></label
 				>
 				<label
-					>Status<select
-						bind:value={statusFilter}
-						disabled={feedPending.size > 0 || note !== savedNote || noteSaving}
-						><option value="unread">Unread</option><option value="followup">Follow up</option
-						><option value="read">Read</option><option value="archived">Archived</option><option
-							value="all">All statuses</option
-						></select
-					></label
+					>Or choose a JSON file <input
+						bind:this={fileInput}
+						type="file"
+						accept="application/json,.json"
+						on:change={(event) => (importFile = event.currentTarget.files?.[0] || null)}
+					/></label
 				>
-				{#if windows.length}
-					<label
-						>Captured window
-						<select
-							bind:value={windowFilter}
-							disabled={feedPending.size > 0 || note !== savedNote || noteSaving}
-						>
-							<option value="all">All windows</option>
-							{#each windows as windowId, index (windowId)}<option value={windowId}
-									>Window {index + 1}</option
-								>{/each}
-						</select>
-					</label>
-				{/if}
+				<p class="hint">
+					A file takes precedence over pasted text. This saves the batch; it does not close browser
+					tabs.
+				</p>
+				<button
+					class="primary"
+					disabled={importing || busy || feedPending.size > 0}
+					on:click={importBatch}>{importing ? 'Saving…' : 'Save new batch'}</button
+				>
 			</div>
 		</details>
-	</div>
+	</aside>
 
-	<details class="import-panel">
-		<summary>＋ Add a batch</summary>
-		<div class="import-body">
-			<p>
-				Paste URLs, one per line, or import a Chrome capture JSON file. Each import becomes a
-				separate batch.
-			</p>
-			<p>
-				<a
-					href="https://github.com/swyxio/chrometaboverflow/tree/main/extension"
-					target="_blank"
-					rel="noopener noreferrer">Set up the Chrome exporter ↗</a
-				> to download a snapshot. It never closes tabs.
-			</p>
-			<label
-				>Batch name <input
-					type="text"
-					maxlength="120"
-					placeholder="e.g. October reading"
-					bind:value={importName}
-				/></label
-			>
-			<label
-				>URLs or capture JSON <textarea
-					rows="4"
-					placeholder="https://example.com/article"
-					bind:value={importText}
-				></textarea></label
-			>
-			<label
-				>Or choose a JSON file <input
-					bind:this={fileInput}
-					type="file"
-					accept="application/json,.json"
-					on:change={(event) => (importFile = event.currentTarget.files?.[0] || null)}
-				/></label
-			>
-			<p class="hint">
-				A file takes precedence over pasted text. This saves the batch; it does not close browser
-				tabs.
-			</p>
-			<button
-				class="primary"
-				disabled={importing || busy || feedPending.size > 0}
-				on:click={importBatch}>{importing ? 'Saving…' : 'Save new batch'}</button
-			>
-		</div>
-	</details>
+	<section class="library-main" aria-label="Review pages">
+		{#if error}<div class="alert" role="alert">
+				{error} <button aria-label="Dismiss error" on:click={() => (error = '')}>×</button>
+			</div>{/if}
+		{#if message && mode === 'swipe'}<div class="notice" role="status">
+				{message}{#if undo}<button disabled={busy} on:click={undoDecision}>Undo</button>{/if}
+			</div>{/if}
 
-	{#if error}<div class="alert" role="alert">
-			{error} <button aria-label="Dismiss error" on:click={() => (error = '')}>×</button>
-		</div>{/if}
-	{#if message && mode === 'swipe'}<div class="notice" role="status">
-			{message}{#if undo}<button disabled={busy} on:click={undoDecision}>Undo</button>{/if}
-		</div>{/if}
-
-	{#if loading}<div class="empty">
-			<span class="empty-icon">◌</span>
-			<h2>Loading your library…</h2>
-		</div>
-	{:else if !batches.length}<div class="empty">
-			<span class="empty-icon">✳</span>
-			<h2>Room to think.</h2>
-			<p>Add a batch to start your reading pile.</p>
-		</div>
-	{:else}
-		<div class="mode-bar">
-			<div class="mode-switch" role="group" aria-label="Review mode">
-				{#each ['tap', 'scroll', 'swipe'] as option (option)}
-					<button
-						type="button"
-						aria-pressed={mode === option}
-						disabled={busy || feedPending.size > 0}
-						on:click={() => void setMode(option as typeof mode)}
-						>{option.charAt(0).toUpperCase() + option.slice(1)}</button
-					>
-				{/each}
+		{#if loading}<div class="empty">
+				<span class="empty-icon">◌</span>
+				<h2>Loading your library…</h2>
 			</div>
-			<p>
-				{mode === 'scroll'
-					? 'Scroll past an unread page to archive it; bookmark to follow up.'
-					: mode === 'tap'
-						? 'Browse your feed and bookmark pages to follow up.'
-						: 'Swipe left to archive, right to follow up.'}
-			</p>
-		</div>
-		<div class="queue-head">
-			<div>
-				<span class="eyebrow">YOUR QUEUE</span>
-				<p>
-					<strong>{mode === 'swipe' ? filtered.length : feedItems.length}</strong>
-					{(mode === 'swipe' ? filtered.length : feedItems.length) === 1 ? 'page' : 'pages'} in this view
-					<span>·</span>
-					{unreadCount} unread in batch
-				</p>
+		{:else if !batches.length && batchListFailed}<div class="empty">
+				<span class="empty-icon">!</span>
+				<h2>Library unavailable.</h2>
+				<p>Refresh the page to try loading your batches again.</p>
 			</div>
-			{#if mode === 'swipe'}<span class="swipe-hint">← Archive &nbsp; · &nbsp; Follow up →</span
-				>{/if}
-		</div>
-		{#if mode !== 'swipe'}
-			<div class="feed" aria-label="Pages in this view">
-				{#each renderedFeed as item (item.id)}
-					<article class="feed-item" data-feed-item={item.id}>
-						<div class="feed-meta">
-							<span>{item.domain || 'Saved page'} · {item.group || 'Reading pile'}</span><span
-								>{feedPending.has(item.id)
-									? 'Saving…'
-									: item.status === 'followup'
-										? 'Follow up'
-										: item.status === 'archived'
-											? 'Archived'
-											: item.status === 'read'
-												? 'Read'
-												: 'Unread'}</span
-							>
-						</div>
-						<button
-							class="feed-title"
-							type="button"
-							on:click={() => void showFeedItem(item.id)}
-							disabled={busy}>{item.title || item.url}</button
-						>
-						<p class="feed-url">{item.url}</p>
-						{#if item.summary && expandedId !== item.id}<p class="feed-excerpt">
-								{item.summary}
-							</p>{/if}
-						{#if expandedId === item.id && selectedId === item.id}
-							<section class="feed-content" aria-label="Saved content">
-								{#if itemLoading}<p class="card-loading">Loading saved content…</p>
-								{:else}
-									{#if currentSummary}<div class="summary">
-											<h3>{summaryPreview ? 'Summary preview' : 'Summary'}</h3>
-											<p class="provenance">{sourceLabel()}</p>
-											<p class="summary-text">{currentSummary}</p>
-										</div>
-									{:else}<div class="no-summary">
-											{itemUnavailable
-												? 'Saved content could not be loaded. Please try again.'
-												: page.text
-													? 'Saved page text is available below.'
-													: 'Title and URL saved. No page text or summary is available.'}
-										</div>{/if}
-									{#if page.sourceNote || page.sourceTruncated}<p class="provenance">
-											{page.sourceNote || ''}{page.sourceTruncated
-												? ' · Saved page text was truncated.'
-												: ''}
-										</p>{/if}
-									{#if page.text}<details class="page-text">
-											<summary>Read saved page text</summary>
-											<div>{page.text}</div>
-										</details>{/if}
-									<label class="note-label" for="feed-note-{item.id}"
-										>Your note <span
-											>{noteSaving
-												? 'Saving…'
-												: note !== savedNote
-													? 'Unsaved'
-													: note
-														? 'Saved'
-														: 'Optional'}</span
-										></label
-									>
-									<textarea
-										id="feed-note-{item.id}"
-										maxlength="10000"
-										rows="3"
-										placeholder="What do you want to remember?"
-										bind:value={note}
-										on:input={scheduleNote}
-									></textarea>
-									{#if noteError}<div class="note-error" role="alert">
-											{noteError} <button on:click={() => void saveNote()}>Retry save</button>
-											<button
-												on:click={() => {
-													note = savedNote;
-													noteError = '';
-												}}>Discard unsaved edit</button
-											>
-										</div>{/if}
-								{/if}
-								{#if safeLink(item.url)}
-									<div class="preview-actions">
-										{#if previewId !== item.id}<button
-												type="button"
-												on:click={() => {
-													resetScrollIntent();
-													previewId = item.id;
-												}}>Preview original</button
-											>{:else}<button
-												type="button"
-												on:click={() => {
-													resetScrollIntent();
-													previewId = '';
-												}}>Close preview</button
-											>{/if}
-										<a
-											href={safeLink(item.url) || undefined}
-											target="_blank"
-											rel="external noopener noreferrer">Open original ↗</a
-										>
-									</div>
-									{#if previewId === item.id}<p class="hint">
-											Some sites block previews. Use Open original if this page does not load.
-										</p>
-										<iframe
-											title="Original page preview"
-											src={safeLink(item.url) || undefined}
-											sandbox="allow-scripts"
-											referrerpolicy="no-referrer"
-										></iframe>{/if}
-								{/if}
-							</section>
-						{/if}
-						<div class="feed-actions">
-							<button
-								type="button"
-								disabled={busy || feedPending.has(item.id)}
-								on:click={() => {
-									resetScrollIntent();
-									queueFeedDecision(item.id, item.status === 'followup' ? 'unread' : 'followup');
-								}}
-								aria-label={item.status === 'followup'
-									? 'Remove bookmark'
-									: 'Bookmark for follow-up'}
-								aria-pressed={item.status === 'followup'}
-								>{item.status === 'followup' ? '★ Bookmarked' : '☆ Bookmark'}</button
-							>
-							<button
-								type="button"
-								disabled={busy || feedPending.has(item.id)}
-								on:click={() => {
-									resetScrollIntent();
-									queueFeedDecision(item.id, item.status === 'archived' ? 'unread' : 'archived');
-								}}>{item.status === 'archived' ? 'Return to unread' : 'Archive'}</button
-							>
-						</div>
-					</article>
-				{/each}
-				{#if renderedFeed.length < feedItems.length}
-					<div class="feed-more" use:loadMoreWhenVisible>
-						<button type="button" on:click={() => (feedLimit += 40)}>Show more pages</button>
-					</div>
-				{/if}
-				{#if !feedItems.length}<div class="empty">
-						<span class="empty-icon">✓</span>
-						<h2>Nothing in this view.</h2>
-						<p>Try another topic or status, or add a batch.</p>
-					</div>{/if}
+		{:else if !batches.length}<div class="empty">
+				<span class="empty-icon">✳</span>
+				<h2>Room to think.</h2>
+				<p>Add a batch to start your reading pile.</p>
 			</div>
-			{#if error || message || feedPending.size}<div class="feed-feedback" role="status">
-					<span
-						>{error ||
-							(feedPending.size
-								? `Saving ${feedPending.size} ${feedPending.size === 1 ? 'decision' : 'decisions'}…`
-								: message)}</span
-					>{#if undo}<button disabled={busy || feedPending.size > 0} on:click={undoDecision}
-							>Undo{undoHistory.length > 1 ? ` (${undoHistory.length})` : ''}</button
-						>{/if}
-				</div>{/if}
 		{:else}
-			<div class="review-layout">
-				<aside class="queue" aria-label="Pages in this view">
-					{#each filtered as item (item.id)}<button
-							class:active={item.id === selectedId}
-							on:click={() => openItem(item.id)}
-							disabled={busy}
-							><span>{item.domain || 'Saved page'} · {item.group || 'Reading pile'}</span><strong
-								>{item.title || item.url}</strong
-							><small
-								>{item.status === 'followup'
-									? 'Follow up'
-									: item.status === 'read'
-										? 'Read'
-										: item.status === 'archived'
-											? 'Archived'
-											: 'Unread'}</small
-							></button
-						>{/each}
-					{#if !filtered.length}<p class="queue-empty">No pages match these filters.</p>{/if}
-				</aside>
-				{#if selected}
-					<!-- Pointer swipes are optional: equivalent labelled buttons are below. -->
-					<article
-						class="card"
-						on:pointerdown={swipeStart}
-						on:pointerup={swipeEnd}
-						on:pointercancel={() => (touchStart = null)}
-					>
-						<div class="card-top">
-							<span class="topic-pill">{selected.group || 'Reading pile'}</span><span
-								>{selected.status === 'followup'
-									? 'Follow up'
-									: selected.status === 'read'
-										? 'Read'
-										: selected.status === 'archived'
-											? 'Archived'
-											: 'Unread'}</span
-							>
-						</div>
-						<p class="domain">
-							{selected.domain || 'Saved page'}{selected.lastOpened
-								? ` · ${formatDate(selected.lastOpened)}`
-								: ''}
-						</p>
-						<h2>{selected.title || selected.url}</h2>
-						{#if safeLink(selected.url)}<a
-								class="source"
-								href={safeLink(selected.url) || undefined}
-								target="_blank"
-								rel="external noopener noreferrer">Open original ↗</a
-							>{:else}<p class="source">Non-web address saved</p>{/if}
-						<p class="source-detail">{selected.url}</p>
-						{#if safeLink(selected.url)}
-							<div class="preview-actions">
-								{#if previewId !== selected.id}
-									<button type="button" on:click={() => (previewId = selectedId)}
-										>Preview original</button
-									>
-								{:else}
-									<button type="button" on:click={() => (previewId = '')}>Close preview</button>
-								{/if}
-							</div>
-							{#if previewId === selected.id}
-								<p class="hint">
-									Some sites block previews. Use Open original if this page does not load.
-								</p>
-								<iframe
-									class="original-preview"
-									title="Original page preview"
-									src={safeLink(selected.url) || undefined}
-									sandbox="allow-scripts"
-									referrerpolicy="no-referrer"
-								></iframe>
-							{/if}
-						{/if}
-						{#if !filtered.some((item) => item.id === selectedId)}
-							<div class="filter-alert">
-								This page is outside the current filters.
-								{#if filtered.length}<button
-										disabled={busy}
-										on:click={() => openItem(filtered[0].id)}>Review first matching page →</button
-									>{/if}
-							</div>
-						{/if}
-						{#if selected.tabGroups?.length}<p class="hint">
-								Chrome groups: {selected.tabGroups.join(', ')}
-							</p>{/if}
-						{#if selected.capturedWindowIds?.length}<p class="hint">
-								Captured in {selected.capturedWindowIds
-									.map((id) => `Window ${windows.indexOf(id) + 1}`)
-									.join(', ')}
-							</p>{/if}
-						{#if selected.duplicateCount && selected.duplicateCount > 1}<p class="hint">
-								{selected.duplicateCount} copies captured in this batch
-							</p>{/if}
-						{#if itemLoading}<p class="card-loading">Loading saved content…</p>
-						{:else}
-							{#if currentSummary}<section class="summary">
-									<h3>{summaryPreview ? 'Summary preview' : 'Summary'}</h3>
-									<p class="provenance">{sourceLabel()}</p>
-									<p class="summary-text">{currentSummary}</p>
-								</section>
-							{:else}<div class="no-summary">
-									{itemUnavailable
-										? 'Saved content could not be loaded. Please try again.'
-										: page.text
-											? 'Saved page text is available below.'
-											: 'Title and URL saved. No page text or summary is available.'}
-								</div>{/if}
-							{#if page.sourceNote || page.sourceTruncated}<p class="provenance">
-									{page.sourceNote || ''}{page.sourceTruncated
-										? ' · Saved page text was truncated.'
-										: ''}
-								</p>{/if}
-							{#if page.text}<details class="page-text">
-									<summary>Read saved page text</summary>
-									<div>{page.text}</div>
-								</details>{/if}
-							<label class="note-label" for="note"
-								>Your note <span
-									>{noteSaving
-										? 'Saving…'
-										: note !== savedNote
-											? 'Unsaved'
-											: note
-												? 'Saved'
-												: 'Optional'}</span
-								></label
-							>
-							<textarea
-								id="note"
-								maxlength="10000"
-								rows="3"
-								placeholder="What do you want to remember?"
-								bind:value={note}
-								on:input={scheduleNote}
-							></textarea>
-							{#if noteError}<div class="note-error" role="alert">
-									{noteError} <button on:click={() => void saveNote()}>Retry save</button>
-									<button
-										on:click={() => {
-											note = savedNote;
-											noteError = '';
-										}}>Discard unsaved edit</button
-									>
-								</div>{/if}
-						{/if}
-						<div class="decisions">
+			<div class="feed-controls">
+				<div class="mode-bar">
+					<div class="mode-switch" role="group" aria-label="Review mode">
+						{#each ['tap', 'scroll', 'swipe'] as option (option)}
 							<button
-								class="decision read"
-								disabled={busy || itemLoading}
-								on:click={() => chooseStatus('archived')}><span>←</span> Archive</button
-							><button
-								class="decision follow"
-								disabled={busy || itemLoading}
-								on:click={() => chooseStatus('followup')}>Follow up <span>→</span></button
+								type="button"
+								aria-pressed={mode === option}
+								disabled={busy || feedPending.size > 0}
+								on:click={() => void setMode(option as typeof mode)}
+								>{option.charAt(0).toUpperCase() + option.slice(1)}</button
 							>
-						</div>
-						{#if selected.status !== 'unread'}<button
-								class="return-unread"
-								disabled={busy || itemLoading}
-								on:click={() => chooseStatus('unread')}>Return to unread</button
-							>{/if}
-					</article>
-				{:else}<div class="empty card">
-						<span class="empty-icon">✓</span>
-						<h2>{filtered.length ? 'Pick a page.' : 'Nothing in this view.'}</h2>
+						{/each}
+					</div>
+					<p>
+						{mode === 'scroll'
+							? 'Scroll past an unread page to archive it; bookmark to follow up.'
+							: mode === 'tap'
+								? 'Browse your feed and bookmark pages to follow up.'
+								: 'Swipe left to archive, right to follow up.'}
+					</p>
+				</div>
+				<div class="queue-head">
+					<div>
+						<span class="eyebrow">YOUR QUEUE</span>
 						<p>
-							{filtered.length
-								? 'Choose a page from the list to continue.'
-								: 'Try another topic or status, or add a batch.'}
+							<strong>{mode === 'swipe' ? filtered.length : feedItems.length}</strong>
+							{(mode === 'swipe' ? filtered.length : feedItems.length) === 1 ? 'page' : 'pages'} in this
+							view
+							<span>·</span>
+							{unreadCount} unread in batch
 						</p>
-						{#if filtered.length}<button class="primary" on:click={() => openItem(filtered[0].id)}
-								>Start reviewing</button
+					</div>
+					{#if mode === 'swipe'}<span class="swipe-hint">← Archive &nbsp; · &nbsp; Follow up →</span
+						>{/if}
+				</div>
+			</div>
+			{#if mode !== 'swipe'}
+				<div class="feed" aria-label="Pages in this view">
+					{#each renderedFeed as item (item.id)}
+						<article
+							class="feed-item"
+							class:expanded={expandedId === item.id}
+							data-feed-item={item.id}
+						>
+							<span class="feed-source-mark" aria-hidden="true"
+								>{(item.domain || 'S').slice(0, 1).toUpperCase()}</span
+							>
+							<div class="feed-entry">
+								<div class="feed-meta">
+									<span>{item.domain || 'Saved page'} · {item.group || 'Reading pile'}</span><span
+										>{feedPending.has(item.id)
+											? 'Saving…'
+											: item.status === 'followup'
+												? 'Follow up'
+												: item.status === 'archived'
+													? 'Archived'
+													: item.status === 'read'
+														? 'Read'
+														: 'Unread'}</span
+									>
+								</div>
+								<button
+									class="feed-title"
+									type="button"
+									on:click={() => void showFeedItem(item.id)}
+									disabled={busy}>{item.title || item.url}</button
+								>
+								{#if item.summary && expandedId !== item.id}<p class="feed-excerpt">
+										{item.summary}
+									</p>{/if}
+								{#if expandedId === item.id && selectedId === item.id}
+									<section class="feed-content" aria-label="Saved content">
+										<p class="feed-url">{item.url}</p>
+										{#if itemLoading}<p class="card-loading">Loading saved content…</p>
+										{:else}
+											{#if currentSummary}<div class="summary">
+													<h3>{summaryPreview ? 'Summary preview' : 'Summary'}</h3>
+													<p class="provenance">{sourceLabel()}</p>
+													<p class="summary-text">{currentSummary}</p>
+												</div>
+											{:else}<div class="no-summary">
+													{itemUnavailable
+														? 'Saved content could not be loaded. Please try again.'
+														: page.text
+															? 'Saved page text is available below.'
+															: 'Title and URL saved. No page text or summary is available.'}
+												</div>{/if}
+											{#if page.sourceNote || page.sourceTruncated}<p class="provenance">
+													{page.sourceNote || ''}{page.sourceTruncated
+														? ' · Saved page text was truncated.'
+														: ''}
+												</p>{/if}
+											{#if page.text}<details class="page-text">
+													<summary>Read saved page text</summary>
+													<div>{page.text}</div>
+												</details>{/if}
+											<label class="note-label" for="feed-note-{item.id}"
+												>Your note <span
+													>{noteSaving
+														? 'Saving…'
+														: note !== savedNote
+															? 'Unsaved'
+															: note
+																? 'Saved'
+																: 'Optional'}</span
+												></label
+											>
+											<textarea
+												id="feed-note-{item.id}"
+												maxlength="10000"
+												rows="3"
+												placeholder="What do you want to remember?"
+												bind:value={note}
+												on:input={scheduleNote}
+											></textarea>
+											{#if noteError}<div class="note-error" role="alert">
+													{noteError} <button on:click={() => void saveNote()}>Retry save</button>
+													<button
+														on:click={() => {
+															note = savedNote;
+															noteError = '';
+														}}>Discard unsaved edit</button
+													>
+												</div>{/if}
+										{/if}
+										{#if safeLink(item.url)}
+											<div class="preview-actions">
+												{#if previewId !== item.id}<button
+														type="button"
+														on:click={() => {
+															resetScrollIntent();
+															previewId = item.id;
+														}}>Preview original</button
+													>{:else}<button
+														type="button"
+														on:click={() => {
+															resetScrollIntent();
+															previewId = '';
+														}}>Close preview</button
+													>{/if}
+												<a
+													href={safeLink(item.url) || undefined}
+													target="_blank"
+													rel="external noopener noreferrer">Open original ↗</a
+												>
+											</div>
+											{#if previewId === item.id}<p class="hint">
+													Some sites block previews. Use Open original if this page does not load.
+												</p>
+												<iframe
+													title="Original page preview"
+													src={safeLink(item.url) || undefined}
+													sandbox="allow-scripts"
+													referrerpolicy="no-referrer"
+												></iframe>{/if}
+										{/if}
+									</section>
+								{/if}
+								<div class="feed-actions">
+									<button
+										type="button"
+										disabled={busy || feedPending.has(item.id)}
+										on:click={() => {
+											resetScrollIntent();
+											queueFeedDecision(
+												item.id,
+												item.status === 'followup' ? 'unread' : 'followup'
+											);
+										}}
+										aria-label={item.status === 'followup'
+											? 'Remove bookmark'
+											: 'Bookmark for follow-up'}
+										aria-pressed={item.status === 'followup'}
+										>{item.status === 'followup' ? '★ Bookmarked' : '☆ Bookmark'}</button
+									>
+									<button
+										type="button"
+										disabled={busy || feedPending.has(item.id)}
+										on:click={() => {
+											resetScrollIntent();
+											queueFeedDecision(
+												item.id,
+												item.status === 'archived' ? 'unread' : 'archived'
+											);
+										}}>{item.status === 'archived' ? 'Return to unread' : 'Archive'}</button
+									>
+								</div>
+							</div>
+						</article>
+					{/each}
+					{#if renderedFeed.length < feedItems.length}
+						<div class="feed-more" use:loadMoreWhenVisible>
+							<button type="button" on:click={() => (feedLimit += 40)}>Show more pages</button>
+						</div>
+					{/if}
+					{#if !feedItems.length}<div class="empty">
+							<span class="empty-icon">✓</span>
+							<h2>Nothing in this view.</h2>
+							<p>Try another topic or status, or add a batch.</p>
+						</div>{/if}
+				</div>
+				{#if error || message || feedPending.size}<div class="feed-feedback" role="status">
+						<span
+							>{error ||
+								(feedPending.size
+									? `Saving ${feedPending.size} ${feedPending.size === 1 ? 'decision' : 'decisions'}…`
+									: message)}</span
+						>{#if undo}<button disabled={busy || feedPending.size > 0} on:click={undoDecision}
+								>Undo{undoHistory.length > 1 ? ` (${undoHistory.length})` : ''}</button
 							>{/if}
 					</div>{/if}
-			</div>
+			{:else}
+				<div class="review-layout">
+					<aside class="queue" aria-label="Pages in this view">
+						{#each filtered as item (item.id)}<button
+								class:active={item.id === selectedId}
+								on:click={() => openItem(item.id)}
+								disabled={busy}
+								><span>{item.domain || 'Saved page'} · {item.group || 'Reading pile'}</span><strong
+									>{item.title || item.url}</strong
+								><small
+									>{item.status === 'followup'
+										? 'Follow up'
+										: item.status === 'read'
+											? 'Read'
+											: item.status === 'archived'
+												? 'Archived'
+												: 'Unread'}</small
+								></button
+							>{/each}
+						{#if !filtered.length}<p class="queue-empty">No pages match these filters.</p>{/if}
+					</aside>
+					{#if selected}
+						<!-- Pointer swipes are optional: equivalent labelled buttons are below. -->
+						<article
+							class="card"
+							on:pointerdown={swipeStart}
+							on:pointerup={swipeEnd}
+							on:pointercancel={() => (touchStart = null)}
+						>
+							<div class="card-top">
+								<span class="topic-pill">{selected.group || 'Reading pile'}</span><span
+									>{selected.status === 'followup'
+										? 'Follow up'
+										: selected.status === 'read'
+											? 'Read'
+											: selected.status === 'archived'
+												? 'Archived'
+												: 'Unread'}</span
+								>
+							</div>
+							<p class="domain">
+								{selected.domain || 'Saved page'}{selected.lastOpened
+									? ` · ${formatDate(selected.lastOpened)}`
+									: ''}
+							</p>
+							<h2>{selected.title || selected.url}</h2>
+							{#if safeLink(selected.url)}<a
+									class="source"
+									href={safeLink(selected.url) || undefined}
+									target="_blank"
+									rel="external noopener noreferrer">Open original ↗</a
+								>{:else}<p class="source">Non-web address saved</p>{/if}
+							<p class="source-detail">{selected.url}</p>
+							{#if safeLink(selected.url)}
+								<div class="preview-actions">
+									{#if previewId !== selected.id}
+										<button type="button" on:click={() => (previewId = selectedId)}
+											>Preview original</button
+										>
+									{:else}
+										<button type="button" on:click={() => (previewId = '')}>Close preview</button>
+									{/if}
+								</div>
+								{#if previewId === selected.id}
+									<p class="hint">
+										Some sites block previews. Use Open original if this page does not load.
+									</p>
+									<iframe
+										class="original-preview"
+										title="Original page preview"
+										src={safeLink(selected.url) || undefined}
+										sandbox="allow-scripts"
+										referrerpolicy="no-referrer"
+									></iframe>
+								{/if}
+							{/if}
+							{#if !filtered.some((item) => item.id === selectedId)}
+								<div class="filter-alert">
+									This page is outside the current filters.
+									{#if filtered.length}<button
+											disabled={busy}
+											on:click={() => openItem(filtered[0].id)}>Review first matching page →</button
+										>{/if}
+								</div>
+							{/if}
+							{#if selected.tabGroups?.length}<p class="hint">
+									Chrome groups: {selected.tabGroups.join(', ')}
+								</p>{/if}
+							{#if selected.capturedWindowIds?.length}<p class="hint">
+									Captured in {selected.capturedWindowIds
+										.map((id) => `Window ${windows.indexOf(id) + 1}`)
+										.join(', ')}
+								</p>{/if}
+							{#if selected.duplicateCount && selected.duplicateCount > 1}<p class="hint">
+									{selected.duplicateCount} copies captured in this batch
+								</p>{/if}
+							{#if itemLoading}<p class="card-loading">Loading saved content…</p>
+							{:else}
+								{#if currentSummary}<section class="summary">
+										<h3>{summaryPreview ? 'Summary preview' : 'Summary'}</h3>
+										<p class="provenance">{sourceLabel()}</p>
+										<p class="summary-text">{currentSummary}</p>
+									</section>
+								{:else}<div class="no-summary">
+										{itemUnavailable
+											? 'Saved content could not be loaded. Please try again.'
+											: page.text
+												? 'Saved page text is available below.'
+												: 'Title and URL saved. No page text or summary is available.'}
+									</div>{/if}
+								{#if page.sourceNote || page.sourceTruncated}<p class="provenance">
+										{page.sourceNote || ''}{page.sourceTruncated
+											? ' · Saved page text was truncated.'
+											: ''}
+									</p>{/if}
+								{#if page.text}<details class="page-text">
+										<summary>Read saved page text</summary>
+										<div>{page.text}</div>
+									</details>{/if}
+								<label class="note-label" for="note"
+									>Your note <span
+										>{noteSaving
+											? 'Saving…'
+											: note !== savedNote
+												? 'Unsaved'
+												: note
+													? 'Saved'
+													: 'Optional'}</span
+									></label
+								>
+								<textarea
+									id="note"
+									maxlength="10000"
+									rows="3"
+									placeholder="What do you want to remember?"
+									bind:value={note}
+									on:input={scheduleNote}
+								></textarea>
+								{#if noteError}<div class="note-error" role="alert">
+										{noteError} <button on:click={() => void saveNote()}>Retry save</button>
+										<button
+											on:click={() => {
+												note = savedNote;
+												noteError = '';
+											}}>Discard unsaved edit</button
+										>
+									</div>{/if}
+							{/if}
+							<div class="decisions">
+								<button
+									class="decision read"
+									disabled={busy || itemLoading}
+									on:click={() => chooseStatus('archived')}><span>←</span> Archive</button
+								><button
+									class="decision follow"
+									disabled={busy || itemLoading}
+									on:click={() => chooseStatus('followup')}>Follow up <span>→</span></button
+								>
+							</div>
+							{#if selected.status !== 'unread'}<button
+									class="return-unread"
+									disabled={busy || itemLoading}
+									on:click={() => chooseStatus('unread')}>Return to unread</button
+								>{/if}
+						</article>
+					{:else}<div class="empty card">
+							<span class="empty-icon">✓</span>
+							<h2>{filtered.length ? 'Pick a page.' : 'Nothing in this view.'}</h2>
+							<p>
+								{filtered.length
+									? 'Choose a page from the list to continue.'
+									: 'Try another topic or status, or add a batch.'}
+							</p>
+							{#if filtered.length}<button class="primary" on:click={() => openItem(filtered[0].id)}
+									>Start reviewing</button
+								>{/if}
+						</div>{/if}
+				</div>
+			{/if}
 		{/if}
-	{/if}
+	</section>
 </div>
 
 <style>
-	.mode-bar {
+	.library-shell {
+		--ink: var(--page-text);
+		--muted: var(--page-muted);
+		--line: var(--page-border);
+		--accent: var(--page-accent);
+		display: grid;
+		grid-template-columns: 16.5rem minmax(0, 1fr);
+		width: min(calc(100% - 2 * var(--site-gutter)), 1160px);
+		min-height: 68vh;
+		margin: 0 auto;
+		border: 1px solid var(--line);
+		border-radius: 12px;
+		background: var(--page-surface);
+		color: var(--ink);
+		font-family: var(--font-body);
+	}
+	.library-sidebar {
+		min-width: 0;
+		padding: 1.25rem;
+		border-right: 1px solid var(--line);
+		background: var(--page-bg);
+		border-radius: 12px 0 0 12px;
+	}
+	.library-main {
+		min-width: 0;
+		padding: 1.5rem 1.75rem 2rem;
+	}
+	.header-links {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 0.5rem;
+		margin-bottom: 0.85rem;
+	}
+	.back,
+	.account {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+		color: var(--accent);
+		font-size: 0.8rem;
+		font-weight: 700;
+		text-decoration: none;
+	}
+	.back {
+		white-space: nowrap;
+	}
+	.account {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.library-header h1 {
+		margin: 0;
+		font-family: var(--font-display);
+		font-size: 2rem;
+		font-weight: 600;
+		letter-spacing: -0.035em;
+		line-height: 1.05;
+	}
+	.intro {
+		margin: 0.45rem 0 1.25rem;
+		color: var(--muted);
+		font-size: 0.9rem;
+		line-height: 1.4;
+	}
+	.toolbar,
+	.filter-fields {
+		display: grid;
+		gap: 0.8rem;
+	}
+	.toolbar label,
+	.import-body label {
+		display: grid;
+		gap: 0.3rem;
+		color: var(--ink);
+		font-size: 0.83rem;
+		font-weight: 700;
+	}
+	.filters {
+		margin: 0;
+		padding: 0;
+		border: 0;
+	}
+	.filters > summary {
+		display: none;
+	}
+	.toolbar select,
+	.toolbar input,
+	.import-body input,
+	.import-body textarea,
+	.feed-content textarea,
+	.card textarea {
+		width: 100%;
+		min-width: 0;
+		border: 1px solid var(--line);
+		border-radius: 7px;
+		background: var(--page-surface);
+		color: var(--ink);
+		font: 400 1rem/1.4 var(--font-body);
+	}
+	.toolbar select,
+	.toolbar input,
+	.import-body input {
+		min-height: 44px;
+		padding: 0.55rem 0.65rem;
+	}
+	.import-body textarea,
+	.feed-content textarea,
+	.card textarea {
+		min-height: 84px;
+		padding: 0.7rem;
+		resize: vertical;
+	}
+	button:focus-visible,
+	select:focus-visible,
+	input:focus-visible,
+	textarea:focus-visible,
+	summary:focus-visible,
+	a:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
+	}
+	.import-panel {
+		margin: 1rem 0 0;
+		padding: 0;
+		border: 0;
+	}
+	.import-panel > summary {
 		display: flex;
 		align-items: center;
-		gap: 1rem;
-		flex-wrap: wrap;
-		margin-top: 1.4rem;
+		justify-content: center;
+		min-height: 44px;
+		padding: 0.5rem 0.75rem;
+		border: 1px solid var(--accent);
+		border-radius: 7px;
+		background: var(--accent);
+		color: var(--page-surface);
+		font-size: 0.9rem;
+		font-weight: 700;
+		cursor: pointer;
+		list-style: none;
 	}
-	.mode-bar p {
-		color: var(--muted);
-		font-size: 0.8rem;
+	.import-panel > summary::-webkit-details-marker,
+	.filters > summary::-webkit-details-marker {
+		display: none;
+	}
+	.import-body {
+		display: grid;
+		gap: 0.8rem;
+		margin-top: 0.75rem;
+		font-size: 0.88rem;
+		line-height: 1.45;
+	}
+	.import-body p {
 		margin: 0;
+	}
+	.hint {
+		color: var(--muted);
+		font-size: 0.85rem;
+		line-height: 1.45;
+	}
+	.primary {
+		justify-self: start;
+		min-height: 44px;
+		padding: 0.6rem 0.9rem;
+		border: 0;
+		border-radius: 7px;
+		background: var(--accent);
+		color: var(--page-surface);
+		font-weight: 700;
+		cursor: pointer;
+	}
+	.alert,
+	.notice {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		margin: 0 0 1rem;
+		padding: 0.75rem 1rem;
+		border: 1px solid var(--line);
+		border-radius: 8px;
+		background: var(--page-accent-soft);
+		color: var(--ink);
+		font-size: 0.9rem;
+	}
+	.alert button,
+	.notice button,
+	.note-error button {
+		min-height: 44px;
+		padding: 0 0.3rem;
+		border: 0;
+		background: none;
+		color: var(--accent);
+		font-weight: 700;
+		text-decoration: underline;
+		cursor: pointer;
+	}
+	.feed-controls {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		gap: 0.5rem 1rem;
+		align-items: center;
+		padding-bottom: 1rem;
+		border-bottom: 1px solid var(--line);
+	}
+	.mode-bar {
+		display: contents;
 	}
 	.mode-switch {
 		display: inline-flex;
-		gap: 0.2rem;
+		justify-self: start;
 		padding: 0.2rem;
-		background: #efedf5;
-		border-radius: 11px;
+		border-radius: 8px;
+		background: var(--page-section-bg);
 	}
 	.mode-switch button {
+		min-width: 5rem;
 		min-height: 44px;
-		padding: 0.5rem 0.95rem;
+		padding: 0.5rem 0.85rem;
 		border: 0;
-		border-radius: 8px;
-		color: var(--ink);
+		border-radius: 6px;
 		background: transparent;
+		color: var(--ink);
+		font-size: 0.95rem;
 		font-weight: 700;
 		cursor: pointer;
 	}
 	.mode-switch button[aria-pressed='true'] {
-		background: white;
+		background: var(--page-accent-soft);
 		color: var(--accent);
-		box-shadow: 0 1px 5px #2924441a;
+	}
+	.mode-bar p {
+		grid-column: 1 / -1;
+		grid-row: 2;
+		margin: 0;
+		color: var(--muted);
+		font-size: 0.9rem;
+		line-height: 1.4;
+	}
+	.queue-head {
+		grid-column: 2;
+		grid-row: 1;
+		text-align: right;
+	}
+	.queue-head p {
+		margin: 0;
+		color: var(--muted);
+		font-size: 0.85rem;
+	}
+	.queue-head p strong {
+		color: var(--ink);
+	}
+	.queue-head p span {
+		padding: 0 0.2rem;
+	}
+	.queue-head .eyebrow {
+		display: none;
+	}
+	.swipe-hint {
+		color: var(--muted);
+		font-size: 0.8rem;
 	}
 	.feed {
-		max-width: 740px;
-		margin: 0 auto;
-		background: white;
-		border: 1px solid var(--line);
-		border-radius: 16px;
-		overflow: hidden;
+		min-width: 0;
 	}
 	.feed-item {
-		padding: 1.2rem;
+		display: grid;
+		grid-template-columns: 2rem minmax(0, 1fr);
+		gap: 0.8rem;
+		min-width: 0;
+		padding: 1rem 0;
 		border-bottom: 1px solid var(--line);
 	}
-	.feed-item:last-child {
-		border-bottom: 0;
+	.feed-item.expanded {
+		margin-inline: -0.65rem;
+		padding-inline: 0.65rem;
+		border-radius: 8px;
+		background: var(--page-row-hover);
+	}
+	.feed-source-mark {
+		display: grid;
+		place-items: center;
+		width: 2rem;
+		height: 2rem;
+		border-radius: 5px;
+		background: var(--accent);
+		color: var(--page-surface);
+		font-family: var(--font-display);
+		font-size: 1.15rem;
+		font-weight: 600;
+	}
+	.feed-entry {
+		min-width: 0;
 	}
 	.feed-meta {
 		display: flex;
 		justify-content: space-between;
+		align-items: baseline;
 		gap: 1rem;
 		color: var(--muted);
-		font-size: 0.72rem;
-		font-weight: 700;
+		font-size: 0.83rem;
+		line-height: 1.4;
+		overflow-wrap: anywhere;
+	}
+	.feed-meta span:last-child {
+		flex: none;
+		color: var(--accent);
+		font-weight: 600;
 	}
 	.feed-title {
 		display: block;
 		width: 100%;
-		padding: 0.55rem 0 0.15rem;
+		min-height: 44px;
+		padding: 0.1rem 0;
 		border: 0;
 		background: none;
 		color: var(--ink);
-		font-size: 1.05rem;
-		font-weight: 750;
-		line-height: 1.35;
+		font: 600 clamp(1.25rem, 2vw, 1.5rem)/1.17 var(--font-display);
+		letter-spacing: -0.02em;
 		text-align: left;
 		overflow-wrap: anywhere;
 		cursor: pointer;
@@ -1367,9 +1656,9 @@
 		color: var(--accent);
 	}
 	.feed-url {
-		margin: 0.3rem 0 0;
+		margin: 0 0 0.8rem;
 		color: var(--muted);
-		font-size: 0.72rem;
+		font-size: 0.8rem;
 		overflow-wrap: anywhere;
 	}
 	.feed-excerpt {
@@ -1378,74 +1667,70 @@
 		-webkit-line-clamp: 3;
 		line-clamp: 3;
 		overflow: hidden;
-		margin: 0.65rem 0 0;
-		color: #4d5262;
-		font-size: 0.85rem;
-		line-height: 1.5;
+		margin: 0.15rem 0 0;
+		color: var(--muted);
+		font-size: 1rem;
+		line-height: 1.45;
 		white-space: pre-wrap;
 		overflow-wrap: anywhere;
-	}
-	.feed-more {
-		padding: 1rem;
-		text-align: center;
-	}
-	.feed-more button {
-		min-height: 44px;
-		padding: 0.6rem 1rem;
-		border: 1px solid #e2dfec;
-		border-radius: 9px;
-		background: #f9f8fc;
-		color: var(--accent);
-		font-weight: 750;
-		cursor: pointer;
-	}
-	.feed-content textarea {
-		width: 100%;
-		min-height: 80px;
-		resize: vertical;
-		border: 1px solid #dedde4;
-		border-radius: 10px;
-		padding: 0.8rem;
-		font-size: 0.88rem;
-		line-height: 1.5;
 	}
 	.feed-actions,
 	.preview-actions {
 		display: flex;
-		gap: 0.6rem;
-		align-items: center;
 		flex-wrap: wrap;
-		margin-top: 0.75rem;
+		align-items: center;
+		gap: 0.5rem;
+		margin-top: 0.55rem;
 	}
 	.feed-actions button,
 	.preview-actions button,
 	.preview-actions a,
+	.feed-more button,
 	.feed-feedback button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
 		min-height: 44px;
 		padding: 0.55rem 0.8rem;
-		border: 1px solid #e2dfec;
-		border-radius: 9px;
-		background: #f9f8fc;
-		color: #554ac1;
-		font-size: 0.8rem;
-		font-weight: 750;
+		border: 1px solid var(--line);
+		border-radius: 7px;
+		background: var(--page-surface);
+		color: var(--ink);
+		font-size: 0.9rem;
+		font-weight: 650;
 		text-decoration: none;
 		cursor: pointer;
 	}
-	.preview-actions a {
-		display: inline-flex;
-		align-items: center;
+	.feed-actions button {
+		padding-inline: 0.5rem;
+		border-color: transparent;
+		background: transparent;
 	}
 	.feed-actions button[aria-pressed='true'] {
-		background: #efedff;
+		background: var(--accent);
+		color: var(--page-surface);
+	}
+	.feed-actions button:hover,
+	.preview-actions button:hover,
+	.preview-actions a:hover {
+		border-color: var(--accent);
+	}
+	.feed-content {
+		margin-top: 0.8rem;
+		padding-top: 0.8rem;
+		border-top: 1px solid var(--line);
 	}
 	.feed-content iframe,
 	.original-preview {
 		width: 100%;
 		height: min(65dvh, 650px);
 		border: 1px solid var(--line);
-		border-radius: 10px;
-		background: #fff;
+		border-radius: 7px;
+		background: var(--page-surface);
+	}
+	.feed-more {
+		padding: 1rem 0;
+		text-align: center;
 	}
 	.feed-feedback {
 		position: sticky;
@@ -1455,403 +1740,190 @@
 		align-items: center;
 		justify-content: space-between;
 		gap: 1rem;
-		max-width: 740px;
-		margin: 0.75rem auto 0;
-		padding: 0.55rem 0.8rem;
-		border-radius: 11px;
-		background: #383169;
-		color: white;
-		box-shadow: 0 4px 18px #29244422;
-		font-size: 0.82rem;
-	}
-	.library-shell {
-		--ink: #202438;
-		--muted: #6d7282;
-		--line: #e5e5e6;
-		--accent: #554bd0;
-		max-width: 1200px;
-		margin: 0 auto;
-		padding: clamp(1.25rem, 3vw, 2.5rem);
-		background: #f9f8f4;
-		border-radius: 18px;
-		color: var(--ink);
-		font-family: Inter, system-ui, sans-serif;
-	}
-	.library-header {
-		display: flex;
-		align-items: flex-start;
-		justify-content: space-between;
-		gap: 1rem;
-		margin-bottom: 1.8rem;
-	}
-	.back,
-	.account {
-		font-size: 0.83rem;
-		font-weight: 700;
-		color: var(--accent);
-		text-decoration: none;
-	}
-	.account {
-		border: 1px solid #e2e0ed;
-		border-radius: 999px;
-		padding: 0.55rem 0.85rem;
-		white-space: nowrap;
-	}
-	.account span {
-		margin-left: 0.25rem;
-	}
-	.eyebrow {
-		font-size: 0.68rem;
-		letter-spacing: 0.11em;
-		font-weight: 800;
-		color: #79768c;
-	}
-	.library-header .eyebrow {
-		margin: 1.6rem 0 0.4rem;
-	}
-	.library-header h1 {
-		font-family: Georgia, serif;
-		font-size: clamp(2.5rem, 5vw, 4rem);
-		letter-spacing: -0.055em;
-		line-height: 1;
-		margin: 0;
-	}
-	.intro {
-		color: var(--muted);
-		margin: 0.65rem 0 0;
-		font-size: 0.95rem;
-	}
-	.toolbar {
-		display: grid;
-		grid-template-columns: 1.25fr 1.3fr 1fr 1fr 1fr;
-		gap: 0.7rem;
-		padding: 1rem;
-		background: #f4f3f6;
-		border-radius: 16px;
-	}
-	.filters,
-	.filter-fields {
-		display: contents;
-	}
-	.filters > summary {
-		display: none;
-	}
-	.toolbar label,
-	.import-body label {
-		display: grid;
-		gap: 0.3rem;
-		font-size: 0.7rem;
-		font-weight: 800;
-		color: #696a79;
-	}
-	.toolbar select,
-	.toolbar input,
-	.import-body input,
-	.import-body textarea {
-		width: 100%;
-		border: 1px solid #dedde4;
-		background: white;
-		border-radius: 9px;
-		padding: 0.7rem;
-		color: var(--ink);
-		font-size: 0.88rem;
-		font-weight: 500;
-		min-width: 0;
-	}
-	.toolbar select:focus,
-	.toolbar input:focus,
-	textarea:focus,
-	.import-body input:focus {
-		outline: 2px solid #a9a1fa;
-		outline-offset: 1px;
-	}
-	.import-panel {
-		margin: 0.8rem 0;
-		color: var(--accent);
-		font-size: 0.85rem;
-	}
-	.import-panel summary {
-		cursor: pointer;
-		font-weight: 750;
-		padding: 0.35rem 0;
-	}
-	.import-body {
-		display: grid;
-		gap: 0.8rem;
-		max-width: 650px;
 		margin-top: 0.75rem;
-		padding: 1rem;
-		border: 1px solid var(--line);
-		border-radius: 14px;
-		background: white;
-		color: var(--ink);
-	}
-	.import-body p {
-		margin: 0;
-		font-size: 0.83rem;
-		line-height: 1.5;
-	}
-	.hint {
-		font-size: 0.75rem;
-		color: var(--muted);
-	}
-	.primary {
-		justify-self: start;
-		background: var(--accent);
-		color: white;
-		border: 0;
-		border-radius: 9px;
-		padding: 0.7rem 1rem;
-		font-weight: 750;
-	}
-	.alert,
-	.notice {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 1rem;
-		padding: 0.75rem 1rem;
-		border-radius: 10px;
-		margin: 1rem 0;
-		font-size: 0.85rem;
-	}
-	.alert {
-		background: #fff0ed;
-		color: #9a2b20;
-	}
-	.notice {
-		background: #efedff;
-		color: #433b9b;
-	}
-	.alert button,
-	.notice button,
-	.note-error button {
-		font-weight: 800;
-		text-decoration: underline;
-		background: none;
-		border: 0;
-		color: inherit;
-		cursor: pointer;
-	}
-	.queue-head {
-		display: flex;
-		align-items: end;
-		justify-content: space-between;
-		margin: 1.9rem 0 0.8rem;
-	}
-	.queue-head p {
-		margin: 0.25rem 0 0;
-		font-size: 0.82rem;
-		color: var(--muted);
-	}
-	.queue-head p strong {
-		color: var(--ink);
-	}
-	.queue-head p span {
-		padding: 0 0.25rem;
-	}
-	.swipe-hint {
-		font-size: 0.75rem;
-		color: var(--muted);
-		font-weight: 650;
+		padding: 0.55rem 0.8rem;
+		border-radius: 8px;
+		background: var(--ink);
+		color: var(--page-surface);
+		box-shadow: 0 4px 18px #0003;
+		font-size: 0.9rem;
 	}
 	.review-layout {
 		display: grid;
-		grid-template-columns: minmax(210px, 300px) minmax(0, 1fr);
+		grid-template-columns: minmax(180px, 230px) minmax(0, 1fr);
 		gap: 1rem;
 		align-items: start;
+		margin-top: 1rem;
 	}
 	.queue {
 		display: grid;
-		gap: 0.45rem;
+		gap: 0.35rem;
 		max-height: 75vh;
 		overflow: auto;
 	}
 	.queue button {
 		display: grid;
-		gap: 0.35rem;
-		text-align: left;
-		background: #fff;
+		gap: 0.25rem;
+		min-height: 44px;
+		padding: 0.75rem;
 		border: 1px solid var(--line);
-		border-radius: 12px;
-		padding: 0.85rem;
-		cursor: pointer;
+		border-radius: 7px;
+		background: var(--page-surface);
 		color: var(--ink);
+		text-align: left;
+		cursor: pointer;
 	}
 	.queue button.active {
-		border-color: #8b80ec;
-		background: #f4f2ff;
+		background: var(--page-accent-soft);
+		border-color: var(--accent);
 	}
 	.queue button span,
 	.queue button small {
-		font-size: 0.68rem;
-		color: var(--muted);
 		overflow: hidden;
+		color: var(--muted);
+		font-size: 0.78rem;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
 	.queue button strong {
-		font-size: 0.85rem;
+		font-size: 0.95rem;
 		line-height: 1.35;
 	}
 	.queue-empty {
 		padding: 1rem;
 		color: var(--muted);
-		font-size: 0.85rem;
 	}
 	.card {
-		background: white;
-		border: 1px solid #e5e3eb;
-		border-radius: 18px;
-		padding: clamp(1.2rem, 3vw, 2rem);
-		box-shadow: 0 8px 32px #2924440c;
+		padding: clamp(1rem, 3vw, 1.75rem);
+		border: 1px solid var(--line);
+		border-radius: 10px;
+		background: var(--page-surface);
 		touch-action: pan-y;
 	}
 	.card-top {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
+		gap: 0.5rem;
 		color: var(--muted);
-		font-size: 0.72rem;
+		font-size: 0.83rem;
 		font-weight: 700;
 	}
 	.topic-pill {
-		background: #f0eeff;
-		color: #554ac1;
-		border-radius: 999px;
-		padding: 0.4rem 0.65rem;
+		color: var(--accent);
 	}
 	.domain {
-		font-size: 0.78rem;
+		margin: 1rem 0 0.3rem;
 		color: var(--muted);
-		font-weight: 700;
-		margin: 1.4rem 0 0.5rem;
+		font-size: 0.85rem;
 	}
 	.card h2 {
-		font-family: Georgia, serif;
+		margin: 0.25rem 0 0.9rem;
+		font-family: var(--font-display);
+		font-size: clamp(1.75rem, 3vw, 2.4rem);
 		font-weight: 600;
-		font-size: clamp(1.8rem, 3vw, 2.65rem);
-		line-height: 1.08;
+		line-height: 1.1;
 		letter-spacing: -0.035em;
-		margin: 0.3rem 0 1rem;
 		overflow-wrap: anywhere;
 	}
 	.source {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
 		color: var(--accent);
-		font-size: 0.85rem;
-		font-weight: 750;
-		text-decoration: none;
-	}
-	.source:hover {
-		text-decoration: underline;
+		font-weight: 700;
 	}
 	.source-detail {
-		font-size: 0.72rem;
-		color: var(--muted);
-		overflow-wrap: anywhere;
 		margin-top: 0.35rem;
+		color: var(--muted);
+		font-size: 0.8rem;
+		overflow-wrap: anywhere;
 	}
 	.filter-alert {
 		margin-top: 1rem;
 		padding: 0.8rem;
-		border-radius: 9px;
-		background: #f1efff;
-		color: #554ac1;
-		font-size: 0.8rem;
+		border-radius: 7px;
+		background: var(--page-accent-soft);
+		font-size: 0.9rem;
 	}
 	.filter-alert button {
+		display: block;
+		min-height: 44px;
 		border: 0;
 		background: none;
-		color: inherit;
-		font-weight: 800;
+		color: var(--accent);
+		font-weight: 700;
 		text-decoration: underline;
 		cursor: pointer;
-		padding: 0.35rem 0 0;
-		display: block;
 	}
 	.summary {
-		margin: 1.5rem 0;
-		padding: 1.15rem;
-		background: #f7f6fb;
-		border-radius: 12px;
+		margin: 0.8rem 0;
 	}
 	.summary h3 {
-		font-size: 0.82rem;
-		margin: 0 0 0.35rem;
+		margin: 0 0 0.3rem;
+		font-size: 0.9rem;
+		font-weight: 700;
 	}
 	.provenance {
-		font-size: 0.7rem;
-		color: var(--muted);
 		margin: 0.3rem 0 0.7rem;
+		color: var(--muted);
+		font-size: 0.8rem;
 	}
 	.summary-text {
-		font-size: 0.88rem;
-		line-height: 1.65;
-		white-space: pre-wrap;
 		margin: 0;
+		font-size: 1rem;
+		line-height: 1.55;
+		white-space: pre-wrap;
 		overflow-wrap: anywhere;
 	}
 	.no-summary {
-		background: #faf8f2;
-		border-radius: 10px;
-		color: #70664e;
-		font-size: 0.83rem;
-		padding: 1rem;
-		margin: 1.5rem 0;
+		margin: 1rem 0;
+		color: var(--muted);
+		font-size: 0.95rem;
 	}
 	.page-text {
-		border-top: 1px solid var(--line);
-		border-bottom: 1px solid var(--line);
-		padding: 0.9rem 0;
 		margin: 1rem 0;
+		padding: 0.6rem 0;
+		border: 0;
+		border-block: 1px solid var(--line);
 	}
 	.page-text summary {
-		cursor: pointer;
+		min-height: 44px;
+		padding-top: 0.55rem;
 		color: var(--accent);
-		font-size: 0.83rem;
-		font-weight: 750;
+		font-size: 0.9rem;
+		font-weight: 700;
+		cursor: pointer;
 	}
 	.page-text div {
-		white-space: pre-wrap;
-		overflow-wrap: anywhere;
 		max-height: 400px;
 		overflow: auto;
-		font-size: 0.85rem;
-		line-height: 1.6;
-		padding: 0.8rem 0;
+		padding: 0.5rem 0;
+		font-size: 1rem;
+		line-height: 1.55;
+		white-space: pre-wrap;
+		overflow-wrap: anywhere;
 	}
 	.note-label {
 		display: flex;
 		justify-content: space-between;
-		margin: 1.35rem 0 0.5rem;
-		font-size: 0.8rem;
-		font-weight: 800;
+		margin: 1rem 0 0.4rem;
+		font-size: 0.9rem;
+		font-weight: 700;
 	}
 	.note-label span {
-		font-size: 0.7rem;
-		font-weight: 500;
 		color: var(--muted);
-	}
-	.card textarea {
-		width: 100%;
-		resize: vertical;
-		min-height: 80px;
-		border: 1px solid #dedde4;
-		border-radius: 10px;
-		padding: 0.8rem;
-		color: var(--ink);
-		font-size: 0.88rem;
-		line-height: 1.5;
+		font-size: 0.8rem;
+		font-weight: 400;
 	}
 	.note-error {
-		font-size: 0.75rem;
-		color: #9a2b20;
 		margin-top: 0.5rem;
+		color: var(--accent);
+		font-size: 0.85rem;
 	}
 	.card-loading {
-		font-size: 0.85rem;
+		margin: 1rem 0;
 		color: var(--muted);
-		margin: 2rem 0;
 	}
 	.decisions {
 		display: grid;
@@ -1860,26 +1932,26 @@
 		margin-top: 1.35rem;
 	}
 	.decision {
-		border-radius: 11px;
-		border: 1px solid #e2dfec;
-		background: #f9f8fc;
-		color: #4d4664;
-		padding: 0.9rem 0.75rem;
-		font-size: 0.88rem;
-		font-weight: 800;
+		min-height: 44px;
+		padding: 0.75rem;
+		border: 1px solid var(--line);
+		border-radius: 7px;
+		background: var(--page-surface);
+		color: var(--ink);
+		font-weight: 700;
 		cursor: pointer;
 	}
-	.decision span {
-		font-size: 1.1rem;
-		padding: 0 0.2rem;
-	}
 	.decision.follow {
-		background: #554bd0;
-		border-color: #554bd0;
-		color: #fff;
+		background: var(--accent);
+		border-color: var(--accent);
+		color: var(--page-surface);
+	}
+	.decision span {
+		padding: 0 0.2rem;
+		font-size: 1.1rem;
 	}
 	.decision:hover:not(:disabled) {
-		filter: brightness(0.96);
+		filter: brightness(0.95);
 	}
 	button:disabled {
 		opacity: 0.5;
@@ -1887,109 +1959,44 @@
 	}
 	.return-unread {
 		display: block;
-		margin: 0.9rem auto 0;
-		background: none;
+		min-height: 44px;
+		margin: 0.4rem auto 0;
 		border: 0;
-		color: var(--muted);
-		font-size: 0.77rem;
+		background: none;
+		color: var(--accent);
+		font-size: 0.85rem;
 		text-decoration: underline;
 		cursor: pointer;
 	}
 	.empty {
-		text-align: center;
 		padding: 4rem 1rem;
 		color: var(--muted);
+		text-align: center;
 	}
 	.empty h2 {
 		color: var(--ink);
+		font-family: var(--font-display);
 		font-size: 1.6rem;
 	}
 	.empty p {
-		font-size: 0.9rem;
+		font-size: 1rem;
 	}
 	.empty-icon {
+		color: var(--accent);
 		font-size: 2rem;
-		color: #a69ce9;
 	}
 	.empty .primary {
 		margin: 1rem auto 0;
 	}
-	@media (max-width: 760px) {
+	@media (max-width: 1020px) and (min-width: 761px) {
 		.library-shell {
+			grid-template-columns: 14rem minmax(0, 1fr);
+		}
+		.library-sidebar {
 			padding: 1rem;
 		}
-		.library-header {
-			margin-bottom: 0.75rem;
-		}
-		.library-header .eyebrow {
-			display: none;
-		}
-		.library-header h1 {
-			font-size: 2.1rem;
-			margin-top: 0.6rem;
-		}
-		.intro {
-			display: none;
-		}
-		.account {
-			max-width: 45%;
-			overflow: hidden;
-			text-overflow: ellipsis;
-		}
-		.toolbar {
-			grid-template-columns: 1fr;
-			gap: 0.2rem;
-			padding: 0.6rem;
-		}
-		.filters {
-			display: block;
-			margin: 0;
-			padding: 0;
-			border: 0;
-			background: transparent;
-		}
-		.filters > summary {
-			display: flex;
-			align-items: center;
-			gap: 0.4rem;
-			min-height: 44px;
-			color: var(--accent);
-			font-size: 0.8rem;
-			font-weight: 750;
-			cursor: pointer;
-		}
-		.filter-fields {
-			display: grid;
-			grid-template-columns: 1fr 1fr;
-			gap: 0.55rem;
-			padding-bottom: 0.35rem;
-		}
-		.filter-fields label:first-child {
-			grid-column: span 2;
-		}
-		.import-panel {
-			margin: 0.2rem 0;
-			border: 0;
-			padding: 0;
-		}
-		.import-panel summary {
-			min-height: 40px;
-			display: flex;
-			align-items: center;
-		}
-		.mode-bar {
-			margin-top: 0.4rem;
-			gap: 0.5rem;
-		}
-		.mode-bar p {
-			font-size: 0.72rem;
-		}
-		.feed-item {
-			padding: 0.85rem;
-		}
-		.feed-excerpt {
-			-webkit-line-clamp: 2;
-			line-clamp: 2;
+		.library-main {
+			padding-inline: 1.25rem;
 		}
 		.review-layout {
 			display: flex;
@@ -2002,26 +2009,140 @@
 			max-height: 240px;
 			grid-template-columns: 1fr 1fr;
 		}
-		.queue button {
-			padding: 0.7rem;
+	}
+	@media (max-width: 760px) {
+		.library-shell {
+			display: block;
+			border-radius: 10px;
 		}
-		.queue-head {
-			margin: 0.65rem 0 0.5rem;
+		.library-sidebar {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) auto;
+			gap: 0.35rem 0.75rem;
+			padding: 0.85rem 1rem 0.45rem;
+			border-right: 0;
+			border-bottom: 1px solid var(--line);
+			border-radius: 10px 10px 0 0;
 		}
-		.queue-head .eyebrow {
+		.library-header {
+			grid-column: 1 / -1;
+		}
+		.header-links {
+			margin-bottom: 0.35rem;
+		}
+		.library-header h1 {
+			font-size: 1.8rem;
+		}
+		.intro {
 			display: none;
 		}
-		.card {
-			padding: 1.2rem;
+		.toolbar {
+			display: contents;
+		}
+		.toolbar > label {
+			grid-column: 1 / -1;
+		}
+		.filters {
+			grid-column: 1;
+		}
+		.filters > summary {
+			display: flex;
+			align-items: center;
+			gap: 0.4rem;
+			min-height: 44px;
+			color: var(--accent);
+			font-size: 0.9rem;
+			font-weight: 700;
+			cursor: pointer;
+			list-style: none;
+		}
+		.filters[open] {
+			grid-column: 1 / -1;
+		}
+		.filter-fields {
+			grid-template-columns: 1fr 1fr;
+			gap: 0.65rem;
+			padding-bottom: 0.4rem;
+		}
+		.filter-fields label:first-child {
+			grid-column: 1 / -1;
+		}
+		.import-panel {
+			grid-column: 2;
+			align-self: start;
+			margin: 0;
+		}
+		.import-panel[open] {
+			grid-column: 1 / -1;
+		}
+		.import-panel > summary {
+			padding: 0.4rem 0.65rem;
+		}
+		.library-main {
+			padding: 0.9rem 1rem 1.5rem;
+		}
+		.feed-controls {
+			grid-template-columns: 1fr;
+			gap: 0.45rem;
+			padding-bottom: 0.7rem;
+		}
+		.mode-switch {
+			width: 100%;
+		}
+		.mode-switch button {
+			flex: 1;
+			min-width: 0;
+		}
+		.mode-bar p {
+			grid-column: 1;
+			grid-row: 2;
+			font-size: 0.85rem;
+		}
+		.queue-head {
+			grid-column: 1;
+			grid-row: 3;
+			text-align: left;
+		}
+		.queue-head p {
+			font-size: 0.8rem;
 		}
 		.swipe-hint {
-			font-size: 0.67rem;
+			display: none;
 		}
-		.card h2 {
-			font-size: 2rem;
+		.feed-item {
+			grid-template-columns: 1.75rem minmax(0, 1fr);
+			gap: 0.65rem;
+			padding: 0.8rem 0;
 		}
-		.import-body {
-			padding: 0.8rem;
+		.feed-source-mark {
+			width: 1.75rem;
+			height: 1.75rem;
+			font-size: 1rem;
+		}
+		.feed-title {
+			font-size: 1.25rem;
+		}
+		.feed-excerpt {
+			-webkit-line-clamp: 3;
+			line-clamp: 3;
+			font-size: 1rem;
+		}
+		.feed-actions {
+			gap: 0.25rem;
+		}
+		.review-layout {
+			display: flex;
+			flex-direction: column-reverse;
+		}
+		.review-layout > * {
+			width: 100%;
+		}
+		.queue {
+			max-height: 240px;
+			grid-template-columns: 1fr 1fr;
+		}
+		.card {
+			padding: 1rem;
 		}
 	}
 	@media (max-width: 400px) {
@@ -2029,15 +2150,7 @@
 			grid-template-columns: 1fr;
 		}
 		.account {
-			font-size: 0.72rem;
-		}
-		.decision {
-			font-size: 0.8rem;
-		}
-	}
-	@media (prefers-reduced-motion: no-preference) {
-		.decision {
-			transition: filter 120ms ease;
+			max-width: 48%;
 		}
 	}
 </style>
