@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { beforeNavigate } from '$app/navigation';
 	import { resolve } from '$app/paths';
 
 	type Status = 'unread' | 'read' | 'followup' | 'archived';
+	type UndoEntry = { batchId: string; itemId: string; status: Status; appliedStatus: Status };
 	type Batch = { id: string; name: string; capturedAt?: string | null; count?: number };
 	type Item = {
 		id: string;
@@ -66,19 +67,41 @@
 	let topic = 'all';
 	let statusFilter = 'unread';
 	let windowFilter = 'all';
+	let filtersOpen = false;
 	let itemRequest = 0;
 	let importText = '';
 	let importName = '';
 	let importFile: File | null = null;
 	let fileInput: HTMLInputElement;
 	let importing = false;
-	let undo: { batchId: string; itemId: string; status: Status } | null = null;
+	let undo: UndoEntry | null = null;
+	let undoHistory: UndoEntry[] = [];
 	let touchStart: { x: number; y: number; id: number } | null = null;
+	let mode: 'tap' | 'scroll' | 'swipe' = 'tap';
+	let expandedId = '';
+	let previewId = '';
+	let feedIds: string[] = [];
+	let feedLimit = 40;
+	let feedKey = '';
+	let feedPending = new Set<string>();
+	let feedErrorId = '';
+	let feedWrites: Promise<void> = Promise.resolve();
+	let seenInFeed = new Set<string>();
+	let visibleInFeed = new Set<string>();
+	let scrollIntentUntil = 0;
+	let lastScrollY = 0;
+	let touchY: number | null = null;
+	let feedFrame = 0;
 
 	$: selected = items.find((item) => item.id === selectedId);
 	$: topics = [...new Set(items.map((item) => item.group || 'Reading pile'))].sort();
 	$: windows = [...new Set(items.flatMap((item) => item.capturedWindowIds || []))];
 	$: filtered = items.filter((item) => matches(item, query, topic, statusFilter, windowFilter));
+	$: nextFeedKey = JSON.stringify([batchId, query, topic, statusFilter, windowFilter]);
+	$: if (feedKey !== nextFeedKey) resetFeed(nextFeedKey, filtered);
+	$: feedById = new Map(items.map((item) => [item.id, item]));
+	$: feedItems = feedIds.map((id) => feedById.get(id)).filter((item): item is Item => !!item);
+	$: renderedFeed = feedItems.slice(0, feedLimit);
 	$: unreadCount = items.filter((item) => item.status === 'unread').length;
 	$: summaryDetails = page.summary ? page : selected;
 	$: currentSummary = summaryDetails?.summary || '';
@@ -135,6 +158,197 @@
 		return `/tools/tabs/api/batches/${encodeURIComponent(batch)}/items/${encodeURIComponent(id)}`;
 	}
 
+	function resetScrollIntent() {
+		scrollIntentUntil = 0;
+		seenInFeed = new Set();
+		if (feedFrame) cancelAnimationFrame(feedFrame);
+		feedFrame = 0;
+		if (typeof window !== 'undefined') {
+			lastScrollY = window.scrollY;
+			void tick().then(snapshotVisibleFeedItems);
+		}
+	}
+
+	function resetFeed(key: string, current: Item[]) {
+		feedKey = key;
+		feedIds = current.map((item) => item.id);
+		feedLimit = 40;
+		expandedId = '';
+		previewId = '';
+		resetScrollIntent();
+	}
+
+	async function setMode(next: typeof mode) {
+		if (next === mode || busy || feedPending.size || !(await saveNote())) return;
+		resetScrollIntent();
+		mode = next;
+		expandedId = '';
+		previewId = '';
+		resetFeed(nextFeedKey, filtered);
+		try {
+			localStorage.setItem('tab-library-mode', next);
+		} catch {
+			// The current session still works when browser storage is unavailable.
+		}
+	}
+
+	function rememberDecision(batch: string, itemId: string, status: Status, appliedStatus: Status) {
+		undoHistory = [...undoHistory, { batchId: batch, itemId, status, appliedStatus }];
+		undo = undoHistory[undoHistory.length - 1];
+	}
+
+	function queueFeedDecision(id: string, status: Status, automatic = false) {
+		const item = items.find((entry) => entry.id === id);
+		if (!item || feedPending.has(id) || (automatic && item.status !== 'unread')) return;
+		const batch = batchId;
+		feedPending = new Set([...feedPending, id]);
+		feedWrites = feedWrites.then(async () => {
+			try {
+				const current = items.find((entry) => entry.id === id);
+				if (!current || batch !== batchId || (automatic && current.status !== 'unread')) return;
+				const previous = current.status;
+				const saved = await api<{ status: Status; note: string }>(itemPath(batch, id), {
+					method: 'PATCH',
+					body: JSON.stringify({ status, ...(automatic ? { expectedStatus: 'unread' } : {}) })
+				});
+				if (batch !== batchId) return;
+				if (feedErrorId === id) {
+					feedErrorId = '';
+					error = '';
+				}
+				items = items.map((entry) =>
+					entry.id === id ? { ...entry, status: saved.status || status } : entry
+				);
+				if (previous !== status) rememberDecision(batch, id, previous, saved.status || status);
+				message =
+					status === 'followup'
+						? 'Saved for follow-up.'
+						: status === 'archived'
+							? 'Archived.'
+							: 'Returned to unread.';
+			} catch (caught) {
+				// Another device may have decided this item. Reload without overwriting it.
+				if (automatic) {
+					try {
+						const latest = await api<{ status?: Status }>(itemPath(batch, id));
+						if (latest.status && batch === batchId)
+							items = items.map((entry) =>
+								entry.id === id ? { ...entry, status: latest.status || entry.status } : entry
+							);
+					} catch {
+						// The original save error is the useful one to show.
+					}
+				}
+				feedErrorId = id;
+				error = `Could not save “${item.title || item.url}”: ${errorText(caught)}. Use its action button to retry.`;
+			} finally {
+				feedPending = new Set([...feedPending].filter((entry) => entry !== id));
+			}
+		});
+	}
+
+	function snapshotVisibleFeedItems() {
+		const visibleItems: string[] = [];
+		for (const element of document.querySelectorAll<HTMLElement>('[data-feed-item]')) {
+			const rect = element.getBoundingClientRect();
+			const visible = Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0);
+			if (visible >= Math.min(120, rect.height / 2) && element.dataset.feedItem)
+				visibleItems.push(element.dataset.feedItem);
+		}
+		visibleInFeed = new Set(visibleItems);
+	}
+
+	function loadMoreWhenVisible(element: HTMLElement) {
+		if (typeof IntersectionObserver === 'undefined') return;
+		const observer = new IntersectionObserver(
+			(entries) => {
+				if (entries.some((entry) => entry.isIntersecting))
+					feedLimit = Math.min(feedLimit + 40, feedItems.length);
+			},
+			{ rootMargin: '500px 0px' }
+		);
+		observer.observe(element);
+		return { destroy: () => observer.disconnect() };
+	}
+
+	function armScroll() {
+		if (mode !== 'scroll' || busy) return;
+		// Wheel/touch events may arrive after compositor scrolling has moved the page.
+		// Use the last viewport snapshot, not just the geometry in this event.
+		seenInFeed = new Set([...seenInFeed, ...visibleInFeed]);
+		scrollIntentUntil = performance.now() + 2000;
+	}
+
+	function wheelScroll(event: WheelEvent) {
+		if (event.deltaY > 0) armScroll();
+		else resetScrollIntent();
+	}
+
+	function startTouchScroll(event: TouchEvent) {
+		touchY = event.touches[0]?.clientY ?? null;
+		if (mode === 'scroll') {
+			snapshotVisibleFeedItems();
+			lastScrollY = window.scrollY;
+		}
+	}
+
+	function moveTouchScroll(event: TouchEvent) {
+		const y = event.touches[0]?.clientY;
+		if (y == null || touchY == null) return;
+		if (touchY - y > 2) armScroll();
+		else if (y - touchY > 2) resetScrollIntent();
+		touchY = y;
+	}
+
+	function keyboardScroll(event: KeyboardEvent) {
+		if (
+			event.target instanceof Element &&
+			event.target.closest('input, textarea, select, button, a, [contenteditable]')
+		)
+			return;
+		if (['ArrowDown', 'PageDown', ' ', 'End'].includes(event.key)) armScroll();
+		else if (['ArrowUp', 'PageUp', 'Home'].includes(event.key)) resetScrollIntent();
+	}
+
+	function onScroll() {
+		if (feedFrame) cancelAnimationFrame(feedFrame);
+		feedFrame = requestAnimationFrame(() => {
+			feedFrame = 0;
+			const nowY = window.scrollY;
+			const movingDown = nowY > lastScrollY;
+			if (nowY < lastScrollY) {
+				scrollIntentUntil = 0;
+				seenInFeed = new Set();
+			}
+			const armed = mode === 'scroll' && !busy && performance.now() <= scrollIntentUntil;
+			if (armed && movingDown) {
+				for (const element of document.querySelectorAll<HTMLElement>('[data-feed-item]')) {
+					const id = element.dataset.feedItem;
+					if (id && seenInFeed.has(id) && element.getBoundingClientRect().bottom <= 0) {
+						seenInFeed = new Set([...seenInFeed].filter((seen) => seen !== id));
+						queueFeedDecision(id, 'archived', true);
+					}
+				}
+			}
+			lastScrollY = nowY;
+			snapshotVisibleFeedItems();
+			if (armed && movingDown) seenInFeed = new Set([...seenInFeed, ...visibleInFeed]);
+		});
+	}
+
+	async function showFeedItem(id: string) {
+		resetScrollIntent();
+		if (expandedId === id) {
+			if (safeLink(items.find((item) => item.id === id)?.url || '')) previewId = id;
+			return;
+		}
+		await openItem(id);
+		if (selectedId === id) {
+			expandedId = id;
+			previewId = '';
+		}
+	}
+
 	function scheduleNote() {
 		noteError = '';
 		clearTimeout(noteTimer);
@@ -187,6 +401,7 @@
 		const item = items.find((entry) => entry.id === id);
 		if (!item) return;
 		const request = ++itemRequest;
+		previewId = '';
 		selectedId = id;
 		page = {};
 		itemUnavailable = false;
@@ -223,7 +438,8 @@
 	}
 
 	async function switchBatch(id: string) {
-		if (busy || !id) return;
+		if (busy || feedPending.size || !id) return;
+		resetScrollIntent();
 		busy = true;
 		error = '';
 		if (!(await saveNote())) {
@@ -245,6 +461,8 @@
 			statusFilter = 'unread';
 			windowFilter = 'all';
 			undo = null;
+			undoHistory = [];
+			feedErrorId = '';
 			selectedId = '';
 			page = {};
 			note = savedNote = '';
@@ -279,7 +497,7 @@
 			items = items.map((item) =>
 				item.id === id ? { ...item, status: saved.status || status } : item
 			);
-			undo = { batchId, itemId: id, status: previous };
+			if (previous !== status) rememberDecision(batchId, id, previous, saved.status || status);
 			message =
 				status === 'followup'
 					? 'Saved for follow-up.'
@@ -310,7 +528,8 @@
 	}
 
 	async function undoDecision() {
-		if (!undo || busy || undo.batchId !== batchId) return;
+		if (!undo || busy || feedPending.size || undo.batchId !== batchId) return;
+		resetScrollIntent();
 		busy = true;
 		error = '';
 		if (!(await saveNote())) {
@@ -321,14 +540,15 @@
 		try {
 			const saved = await api<{ status: Status; note: string }>(itemPath(batchId, entry.itemId), {
 				method: 'PATCH',
-				body: JSON.stringify({ status: entry.status })
+				body: JSON.stringify({ status: entry.status, expectedStatus: entry.appliedStatus })
 			});
 			items = items.map((item) =>
 				item.id === entry.itemId ? { ...item, status: saved.status || entry.status } : item
 			);
-			undo = null;
+			undoHistory = undoHistory.slice(0, -1);
+			undo = undoHistory[undoHistory.length - 1] || null;
 			message = 'Decision undone.';
-			await loadItem(entry.itemId);
+			if (mode === 'swipe') await loadItem(entry.itemId);
 		} catch (caught) {
 			error = `Could not undo: ${errorText(caught)}`;
 		} finally {
@@ -337,7 +557,13 @@
 	}
 
 	function swipeStart(event: PointerEvent) {
-		if (event.pointerType !== 'touch' || busy || itemLoading || !(event.target instanceof Element))
+		if (
+			mode !== 'swipe' ||
+			event.pointerType !== 'touch' ||
+			busy ||
+			itemLoading ||
+			!(event.target instanceof Element)
+		)
 			return;
 		if (event.target.closest('button, a, textarea, input, select, details')) return;
 		touchStart = { x: event.clientX, y: event.clientY, id: event.pointerId };
@@ -481,21 +707,35 @@
 	}
 
 	beforeNavigate(({ cancel }) => {
-		if (note !== savedNote || noteSaving) {
+		if (note !== savedNote || noteSaving || feedPending.size) {
 			cancel();
-			noteError = 'Save your note before leaving this page.';
+			if (feedPending.size) error = 'Wait for your decisions to finish saving before leaving.';
+			else noteError = 'Save your note before leaving this page.';
 			void saveNote();
 		}
 	});
 
 	function beforeUnload(event: BeforeUnloadEvent) {
-		if (note !== savedNote || noteSaving) {
+		if (note !== savedNote || noteSaving || feedPending.size) {
 			event.preventDefault();
 			event.returnValue = '';
 		}
 	}
 
 	onMount(() => {
+		const desktop = window.matchMedia('(min-width: 761px)');
+		filtersOpen = desktop.matches;
+		function handleViewportChange(event: MediaQueryListEvent) {
+			resetScrollIntent();
+			filtersOpen = event.matches;
+		}
+		desktop.addEventListener('change', handleViewportChange);
+		try {
+			const savedMode = localStorage.getItem('tab-library-mode');
+			if (savedMode === 'tap' || savedMode === 'scroll' || savedMode === 'swipe') mode = savedMode;
+		} catch {
+			// A stored preference is optional.
+		}
 		void (async () => {
 			try {
 				const result = await api<{ batches: Batch[] }>('/tools/tabs/api/batches');
@@ -509,7 +749,11 @@
 				loading = false;
 			}
 		})();
-		return () => clearTimeout(noteTimer);
+		return () => {
+			desktop.removeEventListener('change', handleViewportChange);
+			clearTimeout(noteTimer);
+			if (feedFrame) cancelAnimationFrame(feedFrame);
+		};
 	});
 </script>
 
@@ -517,7 +761,14 @@
 	<title>Tab Library · swyx tools</title>
 	<meta name="robots" content="noindex, nofollow" />
 </svelte:head>
-<svelte:window on:beforeunload={beforeUnload} />
+<svelte:window
+	on:beforeunload={beforeUnload}
+	on:wheel|passive={wheelScroll}
+	on:touchstart|passive={startTouchScroll}
+	on:touchmove|passive={moveTouchScroll}
+	on:keydown={keyboardScroll}
+	on:scroll={onScroll}
+/>
 
 <div class="library-shell">
 	<header class="library-header">
@@ -537,7 +788,7 @@
 			>Batch
 			<select
 				value={batchId}
-				disabled={busy || loading || !batches.length}
+				disabled={busy || loading || !batches.length || feedPending.size > 0}
 				on:change={(event) => {
 					const select = event.currentTarget;
 					const id = select.value;
@@ -551,38 +802,52 @@
 					>{/each}
 			</select>
 		</label>
-		<label
-			>Find a page<input
-				type="search"
-				placeholder="Search titles, URLs, topics"
-				bind:value={query}
-			/></label
-		>
-		<label
-			>Topic<select bind:value={topic}
-				><option value="all">All topics</option>{#each topics as name (name)}<option value={name}
-						>{name}</option
-					>{/each}</select
-			></label
-		>
-		<label
-			>Status<select bind:value={statusFilter}
-				><option value="unread">Unread</option><option value="followup">Follow up</option><option
-					value="read">Read</option
-				><option value="archived">Archived</option><option value="all">All statuses</option></select
-			></label
-		>
-		{#if windows.length}
-			<label
-				>Captured window
-				<select bind:value={windowFilter}>
-					<option value="all">All windows</option>
-					{#each windows as windowId, index (windowId)}<option value={windowId}
-							>Window {index + 1}</option
-						>{/each}
-				</select>
-			</label>
-		{/if}
+		<details class="filters" bind:open={filtersOpen}>
+			<summary>Filters <span aria-hidden="true">{filtersOpen ? '−' : '+'}</span></summary>
+			<div class="filter-fields">
+				<label
+					>Find a page<input
+						type="search"
+						placeholder="Search titles, URLs, topics"
+						disabled={feedPending.size > 0 || note !== savedNote || noteSaving}
+						bind:value={query}
+					/></label
+				>
+				<label
+					>Topic<select
+						bind:value={topic}
+						disabled={feedPending.size > 0 || note !== savedNote || noteSaving}
+						><option value="all">All topics</option>{#each topics as name (name)}<option
+								value={name}>{name}</option
+							>{/each}</select
+					></label
+				>
+				<label
+					>Status<select
+						bind:value={statusFilter}
+						disabled={feedPending.size > 0 || note !== savedNote || noteSaving}
+						><option value="unread">Unread</option><option value="followup">Follow up</option
+						><option value="read">Read</option><option value="archived">Archived</option><option
+							value="all">All statuses</option
+						></select
+					></label
+				>
+				{#if windows.length}
+					<label
+						>Captured window
+						<select
+							bind:value={windowFilter}
+							disabled={feedPending.size > 0 || note !== savedNote || noteSaving}
+						>
+							<option value="all">All windows</option>
+							{#each windows as windowId, index (windowId)}<option value={windowId}
+									>Window {index + 1}</option
+								>{/each}
+						</select>
+					</label>
+				{/if}
+			</div>
+		</details>
 	</div>
 
 	<details class="import-panel">
@@ -626,8 +891,10 @@
 				A file takes precedence over pasted text. This saves the batch; it does not close browser
 				tabs.
 			</p>
-			<button class="primary" disabled={importing || busy} on:click={importBatch}
-				>{importing ? 'Saving…' : 'Save new batch'}</button
+			<button
+				class="primary"
+				disabled={importing || busy || feedPending.size > 0}
+				on:click={importBatch}>{importing ? 'Saving…' : 'Save new batch'}</button
 			>
 		</div>
 	</details>
@@ -635,7 +902,7 @@
 	{#if error}<div class="alert" role="alert">
 			{error} <button aria-label="Dismiss error" on:click={() => (error = '')}>×</button>
 		</div>{/if}
-	{#if message}<div class="notice" role="status">
+	{#if message && mode === 'swipe'}<div class="notice" role="status">
 			{message}{#if undo}<button disabled={busy} on:click={undoDecision}>Undo</button>{/if}
 		</div>{/if}
 
@@ -649,174 +916,554 @@
 			<p>Add a batch to start your reading pile.</p>
 		</div>
 	{:else}
+		<div class="mode-bar">
+			<div class="mode-switch" role="group" aria-label="Review mode">
+				{#each ['tap', 'scroll', 'swipe'] as option (option)}
+					<button
+						type="button"
+						aria-pressed={mode === option}
+						disabled={busy || feedPending.size > 0}
+						on:click={() => void setMode(option as typeof mode)}
+						>{option.charAt(0).toUpperCase() + option.slice(1)}</button
+					>
+				{/each}
+			</div>
+			<p>
+				{mode === 'scroll'
+					? 'Scroll past an unread page to archive it; bookmark to follow up.'
+					: mode === 'tap'
+						? 'Browse your feed and bookmark pages to follow up.'
+						: 'Swipe left to archive, right to follow up.'}
+			</p>
+		</div>
 		<div class="queue-head">
 			<div>
 				<span class="eyebrow">YOUR QUEUE</span>
 				<p>
-					<strong>{filtered.length}</strong>
-					{filtered.length === 1 ? 'page' : 'pages'} in this view <span>·</span>
+					<strong>{mode === 'swipe' ? filtered.length : feedItems.length}</strong>
+					{(mode === 'swipe' ? filtered.length : feedItems.length) === 1 ? 'page' : 'pages'} in this view
+					<span>·</span>
 					{unreadCount} unread in batch
 				</p>
 			</div>
-			<span class="swipe-hint">← Archive &nbsp; · &nbsp; Follow up →</span>
+			{#if mode === 'swipe'}<span class="swipe-hint">← Archive &nbsp; · &nbsp; Follow up →</span
+				>{/if}
 		</div>
-		<div class="review-layout">
-			<aside class="queue" aria-label="Pages in this view">
-				{#each filtered as item (item.id)}<button
-						class:active={item.id === selectedId}
-						on:click={() => openItem(item.id)}
-						disabled={busy}
-						><span>{item.domain || 'Saved page'} · {item.group || 'Reading pile'}</span><strong
-							>{item.title || item.url}</strong
-						><small
-							>{item.status === 'followup'
-								? 'Follow up'
-								: item.status === 'read'
-									? 'Read'
-									: item.status === 'archived'
-										? 'Archived'
-										: 'Unread'}</small
-						></button
-					>{/each}
-				{#if !filtered.length}<p class="queue-empty">No pages match these filters.</p>{/if}
-			</aside>
-			{#if selected}
-				<!-- Pointer swipes are optional: equivalent labelled buttons are below. -->
-				<article
-					class="card"
-					on:pointerdown={swipeStart}
-					on:pointerup={swipeEnd}
-					on:pointercancel={() => (touchStart = null)}
-				>
-					<div class="card-top">
-						<span class="topic-pill">{selected.group || 'Reading pile'}</span><span
-							>{selected.status === 'followup'
-								? 'Follow up'
-								: selected.status === 'read'
-									? 'Read'
-									: selected.status === 'archived'
-										? 'Archived'
-										: 'Unread'}</span
-						>
-					</div>
-					<p class="domain">
-						{selected.domain || 'Saved page'}{selected.lastOpened
-							? ` · ${formatDate(selected.lastOpened)}`
-							: ''}
-					</p>
-					<h2>{selected.title || selected.url}</h2>
-					{#if safeLink(selected.url)}<a
-							class="source"
-							href={safeLink(selected.url) || undefined}
-							target="_blank"
-							rel="external noopener noreferrer">Open original ↗</a
-						>{:else}<p class="source">Non-web address saved</p>{/if}
-					<p class="source-detail">{selected.url}</p>
-					{#if !filtered.some((item) => item.id === selectedId)}
-						<div class="filter-alert">
-							This page is outside the current filters.
-							{#if filtered.length}<button disabled={busy} on:click={() => openItem(filtered[0].id)}
-									>Review first matching page →</button
-								>{/if}
-						</div>
-					{/if}
-					{#if selected.tabGroups?.length}<p class="hint">
-							Chrome groups: {selected.tabGroups.join(', ')}
-						</p>{/if}
-					{#if selected.capturedWindowIds?.length}<p class="hint">
-							Captured in {selected.capturedWindowIds
-								.map((id) => `Window ${windows.indexOf(id) + 1}`)
-								.join(', ')}
-						</p>{/if}
-					{#if selected.duplicateCount && selected.duplicateCount > 1}<p class="hint">
-							{selected.duplicateCount} copies captured in this batch
-						</p>{/if}
-					{#if itemLoading}<p class="card-loading">Loading saved content…</p>
-					{:else}
-						{#if currentSummary}<section class="summary">
-								<h3>{summaryPreview ? 'Summary preview' : 'Summary'}</h3>
-								<p class="provenance">{sourceLabel()}</p>
-								<p class="summary-text">{currentSummary}</p>
-							</section>
-						{:else}<div class="no-summary">
-								{itemUnavailable
-									? 'Saved content could not be loaded. Please try again.'
-									: page.text
-										? 'Saved page text is available below.'
-										: 'Title and URL saved. No page text or summary is available.'}
-							</div>{/if}
-						{#if page.sourceNote || page.sourceTruncated}<p class="provenance">
-								{page.sourceNote || ''}{page.sourceTruncated
-									? ' · Saved page text was truncated.'
-									: ''}
-							</p>{/if}
-						{#if page.text}<details class="page-text">
-								<summary>Read saved page text</summary>
-								<div>{page.text}</div>
-							</details>{/if}
-						<label class="note-label" for="note"
-							>Your note <span
-								>{noteSaving
+		{#if mode !== 'swipe'}
+			<div class="feed" aria-label="Pages in this view">
+				{#each renderedFeed as item (item.id)}
+					<article class="feed-item" data-feed-item={item.id}>
+						<div class="feed-meta">
+							<span>{item.domain || 'Saved page'} · {item.group || 'Reading pile'}</span><span
+								>{feedPending.has(item.id)
 									? 'Saving…'
-									: note !== savedNote
-										? 'Unsaved'
-										: note
-											? 'Saved'
-											: 'Optional'}</span
-							></label
-						>
-						<textarea
-							id="note"
-							maxlength="10000"
-							rows="3"
-							placeholder="What do you want to remember?"
-							bind:value={note}
-							on:input={scheduleNote}
-						></textarea>
-						{#if noteError}<div class="note-error" role="alert">
-								{noteError} <button on:click={() => void saveNote()}>Retry save</button>
-								<button
-									on:click={() => {
-										note = savedNote;
-										noteError = '';
-									}}>Discard unsaved edit</button
-								>
-							</div>{/if}
-					{/if}
-					<div class="decisions">
+									: item.status === 'followup'
+										? 'Follow up'
+										: item.status === 'archived'
+											? 'Archived'
+											: item.status === 'read'
+												? 'Read'
+												: 'Unread'}</span
+							>
+						</div>
 						<button
-							class="decision read"
-							disabled={busy || itemLoading}
-							on:click={() => chooseStatus('archived')}><span>←</span> Archive</button
-						><button
-							class="decision follow"
-							disabled={busy || itemLoading}
-							on:click={() => chooseStatus('followup')}>Follow up <span>→</span></button
+							class="feed-title"
+							type="button"
+							on:click={() => void showFeedItem(item.id)}
+							disabled={busy}>{item.title || item.url}</button
 						>
+						<p class="feed-url">{item.url}</p>
+						{#if item.summary && expandedId !== item.id}<p class="feed-excerpt">
+								{item.summary}
+							</p>{/if}
+						{#if expandedId === item.id && selectedId === item.id}
+							<section class="feed-content" aria-label="Saved content">
+								{#if itemLoading}<p class="card-loading">Loading saved content…</p>
+								{:else}
+									{#if currentSummary}<div class="summary">
+											<h3>{summaryPreview ? 'Summary preview' : 'Summary'}</h3>
+											<p class="provenance">{sourceLabel()}</p>
+											<p class="summary-text">{currentSummary}</p>
+										</div>
+									{:else}<div class="no-summary">
+											{itemUnavailable
+												? 'Saved content could not be loaded. Please try again.'
+												: page.text
+													? 'Saved page text is available below.'
+													: 'Title and URL saved. No page text or summary is available.'}
+										</div>{/if}
+									{#if page.sourceNote || page.sourceTruncated}<p class="provenance">
+											{page.sourceNote || ''}{page.sourceTruncated
+												? ' · Saved page text was truncated.'
+												: ''}
+										</p>{/if}
+									{#if page.text}<details class="page-text">
+											<summary>Read saved page text</summary>
+											<div>{page.text}</div>
+										</details>{/if}
+									<label class="note-label" for="feed-note-{item.id}"
+										>Your note <span
+											>{noteSaving
+												? 'Saving…'
+												: note !== savedNote
+													? 'Unsaved'
+													: note
+														? 'Saved'
+														: 'Optional'}</span
+										></label
+									>
+									<textarea
+										id="feed-note-{item.id}"
+										maxlength="10000"
+										rows="3"
+										placeholder="What do you want to remember?"
+										bind:value={note}
+										on:input={scheduleNote}
+									></textarea>
+									{#if noteError}<div class="note-error" role="alert">
+											{noteError} <button on:click={() => void saveNote()}>Retry save</button>
+											<button
+												on:click={() => {
+													note = savedNote;
+													noteError = '';
+												}}>Discard unsaved edit</button
+											>
+										</div>{/if}
+								{/if}
+								{#if safeLink(item.url)}
+									<div class="preview-actions">
+										{#if previewId !== item.id}<button
+												type="button"
+												on:click={() => {
+													resetScrollIntent();
+													previewId = item.id;
+												}}>Preview original</button
+											>{:else}<button
+												type="button"
+												on:click={() => {
+													resetScrollIntent();
+													previewId = '';
+												}}>Close preview</button
+											>{/if}
+										<a
+											href={safeLink(item.url) || undefined}
+											target="_blank"
+											rel="external noopener noreferrer">Open original ↗</a
+										>
+									</div>
+									{#if previewId === item.id}<p class="hint">
+											Some sites block previews. Use Open original if this page does not load.
+										</p>
+										<iframe
+											title="Original page preview"
+											src={safeLink(item.url) || undefined}
+											sandbox="allow-scripts"
+											referrerpolicy="no-referrer"
+										></iframe>{/if}
+								{/if}
+							</section>
+						{/if}
+						<div class="feed-actions">
+							<button
+								type="button"
+								disabled={busy || feedPending.has(item.id)}
+								on:click={() => {
+									resetScrollIntent();
+									queueFeedDecision(item.id, item.status === 'followup' ? 'unread' : 'followup');
+								}}
+								aria-label={item.status === 'followup'
+									? 'Remove bookmark'
+									: 'Bookmark for follow-up'}
+								aria-pressed={item.status === 'followup'}
+								>{item.status === 'followup' ? '★ Bookmarked' : '☆ Bookmark'}</button
+							>
+							<button
+								type="button"
+								disabled={busy || feedPending.has(item.id)}
+								on:click={() => {
+									resetScrollIntent();
+									queueFeedDecision(item.id, item.status === 'archived' ? 'unread' : 'archived');
+								}}>{item.status === 'archived' ? 'Return to unread' : 'Archive'}</button
+							>
+						</div>
+					</article>
+				{/each}
+				{#if renderedFeed.length < feedItems.length}
+					<div class="feed-more" use:loadMoreWhenVisible>
+						<button type="button" on:click={() => (feedLimit += 40)}>Show more pages</button>
 					</div>
-					{#if selected.status !== 'unread'}<button
-							class="return-unread"
-							disabled={busy || itemLoading}
-							on:click={() => chooseStatus('unread')}>Return to unread</button
-						>{/if}
-				</article>
-			{:else}<div class="empty card">
-					<span class="empty-icon">✓</span>
-					<h2>{filtered.length ? 'Pick a page.' : 'Nothing in this view.'}</h2>
-					<p>
-						{filtered.length
-							? 'Choose a page from the list to continue.'
-							: 'Try another topic or status, or add a batch.'}
-					</p>
-					{#if filtered.length}<button class="primary" on:click={() => openItem(filtered[0].id)}
-							>Start reviewing</button
+				{/if}
+				{#if !feedItems.length}<div class="empty">
+						<span class="empty-icon">✓</span>
+						<h2>Nothing in this view.</h2>
+						<p>Try another topic or status, or add a batch.</p>
+					</div>{/if}
+			</div>
+			{#if error || message || feedPending.size}<div class="feed-feedback" role="status">
+					<span
+						>{error ||
+							(feedPending.size
+								? `Saving ${feedPending.size} ${feedPending.size === 1 ? 'decision' : 'decisions'}…`
+								: message)}</span
+					>{#if undo}<button disabled={busy || feedPending.size > 0} on:click={undoDecision}
+							>Undo{undoHistory.length > 1 ? ` (${undoHistory.length})` : ''}</button
 						>{/if}
 				</div>{/if}
-		</div>
+		{:else}
+			<div class="review-layout">
+				<aside class="queue" aria-label="Pages in this view">
+					{#each filtered as item (item.id)}<button
+							class:active={item.id === selectedId}
+							on:click={() => openItem(item.id)}
+							disabled={busy}
+							><span>{item.domain || 'Saved page'} · {item.group || 'Reading pile'}</span><strong
+								>{item.title || item.url}</strong
+							><small
+								>{item.status === 'followup'
+									? 'Follow up'
+									: item.status === 'read'
+										? 'Read'
+										: item.status === 'archived'
+											? 'Archived'
+											: 'Unread'}</small
+							></button
+						>{/each}
+					{#if !filtered.length}<p class="queue-empty">No pages match these filters.</p>{/if}
+				</aside>
+				{#if selected}
+					<!-- Pointer swipes are optional: equivalent labelled buttons are below. -->
+					<article
+						class="card"
+						on:pointerdown={swipeStart}
+						on:pointerup={swipeEnd}
+						on:pointercancel={() => (touchStart = null)}
+					>
+						<div class="card-top">
+							<span class="topic-pill">{selected.group || 'Reading pile'}</span><span
+								>{selected.status === 'followup'
+									? 'Follow up'
+									: selected.status === 'read'
+										? 'Read'
+										: selected.status === 'archived'
+											? 'Archived'
+											: 'Unread'}</span
+							>
+						</div>
+						<p class="domain">
+							{selected.domain || 'Saved page'}{selected.lastOpened
+								? ` · ${formatDate(selected.lastOpened)}`
+								: ''}
+						</p>
+						<h2>{selected.title || selected.url}</h2>
+						{#if safeLink(selected.url)}<a
+								class="source"
+								href={safeLink(selected.url) || undefined}
+								target="_blank"
+								rel="external noopener noreferrer">Open original ↗</a
+							>{:else}<p class="source">Non-web address saved</p>{/if}
+						<p class="source-detail">{selected.url}</p>
+						{#if safeLink(selected.url)}
+							<div class="preview-actions">
+								{#if previewId !== selected.id}
+									<button type="button" on:click={() => (previewId = selectedId)}
+										>Preview original</button
+									>
+								{:else}
+									<button type="button" on:click={() => (previewId = '')}>Close preview</button>
+								{/if}
+							</div>
+							{#if previewId === selected.id}
+								<p class="hint">
+									Some sites block previews. Use Open original if this page does not load.
+								</p>
+								<iframe
+									class="original-preview"
+									title="Original page preview"
+									src={safeLink(selected.url) || undefined}
+									sandbox="allow-scripts"
+									referrerpolicy="no-referrer"
+								></iframe>
+							{/if}
+						{/if}
+						{#if !filtered.some((item) => item.id === selectedId)}
+							<div class="filter-alert">
+								This page is outside the current filters.
+								{#if filtered.length}<button
+										disabled={busy}
+										on:click={() => openItem(filtered[0].id)}>Review first matching page →</button
+									>{/if}
+							</div>
+						{/if}
+						{#if selected.tabGroups?.length}<p class="hint">
+								Chrome groups: {selected.tabGroups.join(', ')}
+							</p>{/if}
+						{#if selected.capturedWindowIds?.length}<p class="hint">
+								Captured in {selected.capturedWindowIds
+									.map((id) => `Window ${windows.indexOf(id) + 1}`)
+									.join(', ')}
+							</p>{/if}
+						{#if selected.duplicateCount && selected.duplicateCount > 1}<p class="hint">
+								{selected.duplicateCount} copies captured in this batch
+							</p>{/if}
+						{#if itemLoading}<p class="card-loading">Loading saved content…</p>
+						{:else}
+							{#if currentSummary}<section class="summary">
+									<h3>{summaryPreview ? 'Summary preview' : 'Summary'}</h3>
+									<p class="provenance">{sourceLabel()}</p>
+									<p class="summary-text">{currentSummary}</p>
+								</section>
+							{:else}<div class="no-summary">
+									{itemUnavailable
+										? 'Saved content could not be loaded. Please try again.'
+										: page.text
+											? 'Saved page text is available below.'
+											: 'Title and URL saved. No page text or summary is available.'}
+								</div>{/if}
+							{#if page.sourceNote || page.sourceTruncated}<p class="provenance">
+									{page.sourceNote || ''}{page.sourceTruncated
+										? ' · Saved page text was truncated.'
+										: ''}
+								</p>{/if}
+							{#if page.text}<details class="page-text">
+									<summary>Read saved page text</summary>
+									<div>{page.text}</div>
+								</details>{/if}
+							<label class="note-label" for="note"
+								>Your note <span
+									>{noteSaving
+										? 'Saving…'
+										: note !== savedNote
+											? 'Unsaved'
+											: note
+												? 'Saved'
+												: 'Optional'}</span
+								></label
+							>
+							<textarea
+								id="note"
+								maxlength="10000"
+								rows="3"
+								placeholder="What do you want to remember?"
+								bind:value={note}
+								on:input={scheduleNote}
+							></textarea>
+							{#if noteError}<div class="note-error" role="alert">
+									{noteError} <button on:click={() => void saveNote()}>Retry save</button>
+									<button
+										on:click={() => {
+											note = savedNote;
+											noteError = '';
+										}}>Discard unsaved edit</button
+									>
+								</div>{/if}
+						{/if}
+						<div class="decisions">
+							<button
+								class="decision read"
+								disabled={busy || itemLoading}
+								on:click={() => chooseStatus('archived')}><span>←</span> Archive</button
+							><button
+								class="decision follow"
+								disabled={busy || itemLoading}
+								on:click={() => chooseStatus('followup')}>Follow up <span>→</span></button
+							>
+						</div>
+						{#if selected.status !== 'unread'}<button
+								class="return-unread"
+								disabled={busy || itemLoading}
+								on:click={() => chooseStatus('unread')}>Return to unread</button
+							>{/if}
+					</article>
+				{:else}<div class="empty card">
+						<span class="empty-icon">✓</span>
+						<h2>{filtered.length ? 'Pick a page.' : 'Nothing in this view.'}</h2>
+						<p>
+							{filtered.length
+								? 'Choose a page from the list to continue.'
+								: 'Try another topic or status, or add a batch.'}
+						</p>
+						{#if filtered.length}<button class="primary" on:click={() => openItem(filtered[0].id)}
+								>Start reviewing</button
+							>{/if}
+					</div>{/if}
+			</div>
+		{/if}
 	{/if}
 </div>
 
 <style>
+	.mode-bar {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		flex-wrap: wrap;
+		margin-top: 1.4rem;
+	}
+	.mode-bar p {
+		color: var(--muted);
+		font-size: 0.8rem;
+		margin: 0;
+	}
+	.mode-switch {
+		display: inline-flex;
+		gap: 0.2rem;
+		padding: 0.2rem;
+		background: #efedf5;
+		border-radius: 11px;
+	}
+	.mode-switch button {
+		min-height: 44px;
+		padding: 0.5rem 0.95rem;
+		border: 0;
+		border-radius: 8px;
+		color: var(--ink);
+		background: transparent;
+		font-weight: 700;
+		cursor: pointer;
+	}
+	.mode-switch button[aria-pressed='true'] {
+		background: white;
+		color: var(--accent);
+		box-shadow: 0 1px 5px #2924441a;
+	}
+	.feed {
+		max-width: 740px;
+		margin: 0 auto;
+		background: white;
+		border: 1px solid var(--line);
+		border-radius: 16px;
+		overflow: hidden;
+	}
+	.feed-item {
+		padding: 1.2rem;
+		border-bottom: 1px solid var(--line);
+	}
+	.feed-item:last-child {
+		border-bottom: 0;
+	}
+	.feed-meta {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		color: var(--muted);
+		font-size: 0.72rem;
+		font-weight: 700;
+	}
+	.feed-title {
+		display: block;
+		width: 100%;
+		padding: 0.55rem 0 0.15rem;
+		border: 0;
+		background: none;
+		color: var(--ink);
+		font-size: 1.05rem;
+		font-weight: 750;
+		line-height: 1.35;
+		text-align: left;
+		overflow-wrap: anywhere;
+		cursor: pointer;
+	}
+	.feed-title:hover {
+		color: var(--accent);
+	}
+	.feed-url {
+		margin: 0.3rem 0 0;
+		color: var(--muted);
+		font-size: 0.72rem;
+		overflow-wrap: anywhere;
+	}
+	.feed-excerpt {
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 3;
+		line-clamp: 3;
+		overflow: hidden;
+		margin: 0.65rem 0 0;
+		color: #4d5262;
+		font-size: 0.85rem;
+		line-height: 1.5;
+		white-space: pre-wrap;
+		overflow-wrap: anywhere;
+	}
+	.feed-more {
+		padding: 1rem;
+		text-align: center;
+	}
+	.feed-more button {
+		min-height: 44px;
+		padding: 0.6rem 1rem;
+		border: 1px solid #e2dfec;
+		border-radius: 9px;
+		background: #f9f8fc;
+		color: var(--accent);
+		font-weight: 750;
+		cursor: pointer;
+	}
+	.feed-content textarea {
+		width: 100%;
+		min-height: 80px;
+		resize: vertical;
+		border: 1px solid #dedde4;
+		border-radius: 10px;
+		padding: 0.8rem;
+		font-size: 0.88rem;
+		line-height: 1.5;
+	}
+	.feed-actions,
+	.preview-actions {
+		display: flex;
+		gap: 0.6rem;
+		align-items: center;
+		flex-wrap: wrap;
+		margin-top: 0.75rem;
+	}
+	.feed-actions button,
+	.preview-actions button,
+	.preview-actions a,
+	.feed-feedback button {
+		min-height: 44px;
+		padding: 0.55rem 0.8rem;
+		border: 1px solid #e2dfec;
+		border-radius: 9px;
+		background: #f9f8fc;
+		color: #554ac1;
+		font-size: 0.8rem;
+		font-weight: 750;
+		text-decoration: none;
+		cursor: pointer;
+	}
+	.preview-actions a {
+		display: inline-flex;
+		align-items: center;
+	}
+	.feed-actions button[aria-pressed='true'] {
+		background: #efedff;
+	}
+	.feed-content iframe,
+	.original-preview {
+		width: 100%;
+		height: min(65dvh, 650px);
+		border: 1px solid var(--line);
+		border-radius: 10px;
+		background: #fff;
+	}
+	.feed-feedback {
+		position: sticky;
+		bottom: 0.5rem;
+		z-index: 2;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		max-width: 740px;
+		margin: 0.75rem auto 0;
+		padding: 0.55rem 0.8rem;
+		border-radius: 11px;
+		background: #383169;
+		color: white;
+		box-shadow: 0 4px 18px #29244422;
+		font-size: 0.82rem;
+	}
 	.library-shell {
 		--ink: #202438;
 		--muted: #6d7282;
@@ -881,6 +1528,13 @@
 		padding: 1rem;
 		background: #f4f3f6;
 		border-radius: 16px;
+	}
+	.filters,
+	.filter-fields {
+		display: contents;
+	}
+	.filters > summary {
+		display: none;
 	}
 	.toolbar label,
 	.import-body label {
@@ -1265,10 +1919,17 @@
 			padding: 1rem;
 		}
 		.library-header {
-			margin-bottom: 1.25rem;
+			margin-bottom: 0.75rem;
 		}
 		.library-header .eyebrow {
-			margin-top: 1.2rem;
+			display: none;
+		}
+		.library-header h1 {
+			font-size: 2.1rem;
+			margin-top: 0.6rem;
+		}
+		.intro {
+			display: none;
 		}
 		.account {
 			max-width: 45%;
@@ -1276,13 +1937,59 @@
 			text-overflow: ellipsis;
 		}
 		.toolbar {
+			grid-template-columns: 1fr;
+			gap: 0.2rem;
+			padding: 0.6rem;
+		}
+		.filters {
+			display: block;
+			margin: 0;
+			padding: 0;
+			border: 0;
+			background: transparent;
+		}
+		.filters > summary {
+			display: flex;
+			align-items: center;
+			gap: 0.4rem;
+			min-height: 44px;
+			color: var(--accent);
+			font-size: 0.8rem;
+			font-weight: 750;
+			cursor: pointer;
+		}
+		.filter-fields {
+			display: grid;
 			grid-template-columns: 1fr 1fr;
 			gap: 0.55rem;
-			padding: 0.75rem;
+			padding-bottom: 0.35rem;
 		}
-		.toolbar label:first-child,
-		.toolbar label:nth-child(2) {
+		.filter-fields label:first-child {
 			grid-column: span 2;
+		}
+		.import-panel {
+			margin: 0.2rem 0;
+			border: 0;
+			padding: 0;
+		}
+		.import-panel summary {
+			min-height: 40px;
+			display: flex;
+			align-items: center;
+		}
+		.mode-bar {
+			margin-top: 0.4rem;
+			gap: 0.5rem;
+		}
+		.mode-bar p {
+			font-size: 0.72rem;
+		}
+		.feed-item {
+			padding: 0.85rem;
+		}
+		.feed-excerpt {
+			-webkit-line-clamp: 2;
+			line-clamp: 2;
 		}
 		.review-layout {
 			display: flex;
@@ -1299,7 +2006,10 @@
 			padding: 0.7rem;
 		}
 		.queue-head {
-			margin-top: 1.3rem;
+			margin: 0.65rem 0 0.5rem;
+		}
+		.queue-head .eyebrow {
+			display: none;
 		}
 		.card {
 			padding: 1.2rem;

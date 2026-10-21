@@ -38,26 +38,36 @@ export async function PATCH(event) {
 	}
 	const hasStatus = Object.hasOwn(body || {}, 'status');
 	const hasNote = Object.hasOwn(body || {}, 'note');
+	const hasExpectedStatus = Object.hasOwn(body || {}, 'expectedStatus');
+	const statuses = ['unread', 'read', 'followup', 'archived'];
 	if (
 		(!hasStatus && !hasNote) ||
-		(hasStatus && !['unread', 'read', 'followup', 'archived'].includes(body.status)) ||
+		(hasStatus && !statuses.includes(body.status)) ||
+		(hasExpectedStatus && (!hasStatus || !statuses.includes(body.expectedStatus))) ||
 		(hasNote && (typeof body.note !== 'string' || body.note.length > 10000))
 	)
 		throw error(400, 'Invalid status or note.');
 	const result = await db
 		.prepare(
 			`UPDATE items SET status = COALESCE(?, status), note = COALESCE(?, note), updated_at = ?
-		WHERE batch_id = ? AND id = ?`
+		WHERE batch_id = ? AND id = ? AND (? IS NULL OR status = ?)`
 		)
 		.bind(
 			hasStatus ? body.status : null,
 			hasNote ? body.note : null,
 			new Date().toISOString(),
 			event.params.batch,
-			event.params.id
+			event.params.id,
+			hasExpectedStatus ? body.expectedStatus : null,
+			hasExpectedStatus ? body.expectedStatus : null
 		)
 		.run();
-	if (!result.meta.changes) throw error(404, 'Page not found in this batch.');
-	const saved = await getItem(db, event.params.batch, event.params.id);
-	return json({ status: saved.status, note: saved.note, updatedAt: saved.updatedAt });
+	const saved = await db
+		.prepare('SELECT status, note, updated_at FROM items WHERE batch_id = ? AND id = ?')
+		.bind(event.params.batch, event.params.id)
+		.first();
+	if (!saved) throw error(404, 'Page not found in this batch.');
+	if (!result.meta.changes)
+		throw error(409, 'This page changed on another device. Refresh the batch.');
+	return json({ status: saved.status, note: saved.note, updatedAt: saved.updated_at });
 }

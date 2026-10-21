@@ -26,7 +26,7 @@ async function makeBatch(page, origin, name, tabs) {
 /**
  * @param {import('@playwright/test').Page} page
  * @param {{id: string}} batch
- * @returns {Promise<{items: Array<{url: string, status: string, note: string}>}>}
+ * @returns {Promise<{items: Array<{id: string, url: string, status: string, note: string}>}>}
  */
 async function getBatch(page, batch) {
 	const response = await page.request.get(`/tools/tabs/api/batches/${batch.id}`, {
@@ -34,6 +34,17 @@ async function getBatch(page, batch) {
 	});
 	expect(response.status()).toBe(200);
 	return response.json();
+}
+
+/** @param {import('@playwright/test').Page} page */
+async function useSwipeMode(page) {
+	await page.getByRole('button', { name: 'Swipe', exact: true }).click();
+}
+
+/** @param {import('@playwright/test').Page} page */
+async function openFilters(page) {
+	const filters = page.locator('details.filters');
+	if ((await filters.getAttribute('open')) === null) await filters.locator('summary').click();
 }
 
 test('private tab library requires owner sign-in', async ({ page }) => {
@@ -48,6 +59,327 @@ test('private tab library requires owner sign-in', async ({ page }) => {
 		headers: { 'X-Tools-User': TEST_TOOLS_MEMBER.id }
 	});
 	expect(memberApi.status()).toBe(403);
+});
+
+test('a stale scroll decision cannot replace a newer bookmark', async ({ page }) => {
+	await page.goto('/tools');
+	const origin = await authenticateTools(page);
+	const suffix = crypto.randomUUID();
+	const batch = await makeBatch(page, origin, `QA concurrent ${suffix}`, [
+		{ title: 'Concurrent page', url: `https://example.test/${suffix}/concurrent` }
+	]);
+	const item = (await getBatch(page, batch)).items[0];
+	const path = `/tools/tabs/api/batches/${batch.id}/items/${item.id}`;
+	const headers = { Origin: origin, 'X-Tools-User': TEST_TOOLS_OWNER.id };
+	const bookmark = await page.request.patch(path, {
+		headers,
+		data: { status: 'followup', note: 'Keep this bookmark' }
+	});
+	expect(bookmark.status()).toBe(200);
+	const staleArchive = await page.request.patch(path, {
+		headers,
+		data: { status: 'archived', expectedStatus: 'unread' }
+	});
+	expect(staleArchive.status()).toBe(409);
+	expect((await getBatch(page, batch)).items[0]).toMatchObject({
+		status: 'followup',
+		note: 'Keep this bookmark'
+	});
+});
+
+test('feed decisions and notes persist, and only intentional scroll-past archives', async ({
+	page
+}) => {
+	await page.goto('/tools');
+	const origin = await authenticateTools(page);
+	const suffix = crypto.randomUUID();
+	const urls = Array.from({ length: 10 }, (_, index) => `https://example.test/${suffix}/${index}`);
+	const first = await makeBatch(
+		page,
+		origin,
+		`QA feed ${suffix}`,
+		urls.map((url, index) => ({ title: `Feed page ${index + 1}`, url }))
+	);
+	const second = await makeBatch(page, origin, `QA duplicate ${suffix}`, [
+		{ title: 'Feed page 1', url: urls[0] }
+	]);
+	await page.goto(`/tools/tabs?batch=${first.id}`);
+	await expect(page.getByRole('button', { name: 'Tap', exact: true })).toHaveAttribute(
+		'aria-pressed',
+		'true'
+	);
+	await expect(page.locator('details.filters')).not.toHaveAttribute('open');
+	await page.getByRole('button', { name: 'Tap', exact: true }).click();
+	/** @param {string} title */
+	const feedCard = (title) =>
+		page.locator('article[data-feed-item]').filter({
+			has: page.getByRole('button', { name: title, exact: true })
+		});
+	const firstCard = feedCard('Feed page 1');
+	await expect(firstCard).toBeVisible();
+	await firstCard.getByRole('button', { name: 'Bookmark for follow-up' }).click();
+	await firstCard.getByRole('button', { name: 'Feed page 1', exact: true }).click();
+	await firstCard.getByLabel('Your note').fill('An idea to keep');
+	await expect
+		.poll(async () => (await getBatch(page, first)).items[0].note)
+		.toBe('An idea to keep');
+	await page.getByRole('button', { name: 'Scroll', exact: true }).click();
+	await openFilters(page);
+	const search = page.getByRole('searchbox', { name: 'Find a page' });
+	await search.fill('Feed page 4');
+	await search.fill('');
+	await expect
+		.poll(async () => (await getBatch(page, first)).items.map((item) => item.status))
+		.toEqual(['followup', ...Array.from({ length: 9 }, () => 'unread')]);
+	const middleCard = feedCard('Feed page 5');
+	await middleCard.scrollIntoViewIfNeeded();
+	await middleCard.hover();
+	await page.mouse.wheel(0, -500);
+	await page.evaluate(
+		() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+	);
+	expect((await getBatch(page, first)).items.map((item) => item.status)).toEqual([
+		'followup',
+		...Array.from({ length: 9 }, () => 'unread')
+	]);
+
+	const secondCard = feedCard('Feed page 2');
+	/** @param {import('@playwright/test').Locator} card */
+	async function scrollPast(card) {
+		await card.scrollIntoViewIfNeeded();
+		const box = await card.boundingBox();
+		if (!box) throw new Error('The feed card is not visible.');
+		await card.hover();
+		await page.mouse.wheel(0, Math.ceil(box.y + box.height + 10));
+	}
+	await scrollPast(secondCard);
+	await expect
+		.poll(
+			async () => (await getBatch(page, first)).items.find((item) => item.url === urls[1])?.status
+		)
+		.toBe('archived');
+	await scrollPast(feedCard('Feed page 3'));
+	await expect
+		.poll(
+			async () => (await getBatch(page, first)).items.find((item) => item.url === urls[2])?.status
+		)
+		.toBe('archived');
+	await page.getByRole('button', { name: /^Undo/ }).click();
+	await expect
+		.poll(
+			async () => (await getBatch(page, first)).items.find((item) => item.url === urls[2])?.status
+		)
+		.toBe('unread');
+	expect((await getBatch(page, first)).items.find((item) => item.url === urls[1])?.status).toBe(
+		'archived'
+	);
+	await page.getByRole('button', { name: /^Undo/ }).click();
+	await expect
+		.poll(
+			async () => (await getBatch(page, first)).items.find((item) => item.url === urls[1])?.status
+		)
+		.toBe('unread');
+	await scrollPast(secondCard);
+	await expect
+		.poll(
+			async () => (await getBatch(page, first)).items.find((item) => item.url === urls[1])?.status
+		)
+		.toBe('archived');
+	const saved = await getBatch(page, first);
+	expect(saved.items.find((item) => item.url === urls[0])).toMatchObject({
+		status: 'followup',
+		note: 'An idea to keep'
+	});
+	expect((await getBatch(page, second)).items[0]).toMatchObject({ status: 'unread', note: '' });
+
+	await page.goto(`/tools/tabs?batch=${first.id}`);
+	await page.getByRole('button', { name: 'Tap', exact: true }).click();
+	await openFilters(page);
+	await page.getByRole('combobox', { name: 'Status', exact: true }).selectOption('archived');
+	await expect(feedCard('Feed page 2')).toBeVisible();
+	await page.getByRole('combobox', { name: 'Status', exact: true }).selectOption('followup');
+	await feedCard('Feed page 1').getByRole('button', { name: 'Feed page 1', exact: true }).click();
+	await expect(feedCard('Feed page 1').getByLabel('Your note')).toHaveValue('An idea to keep');
+});
+
+test('desktop filters are available without opening the disclosure', async ({ page }) => {
+	await page.setViewportSize({ width: 1280, height: 900 });
+	await page.goto('/tools');
+	const origin = await authenticateTools(page);
+	const suffix = crypto.randomUUID();
+	const batch = await makeBatch(page, origin, `QA desktop ${suffix}`, [
+		{ title: 'Desktop page', url: `https://example.test/${suffix}/desktop` }
+	]);
+	await page.goto(`/tools/tabs?batch=${batch.id}`);
+	await expect(page.locator('details.filters')).toHaveAttribute('open');
+	await expect(page.getByRole('searchbox', { name: 'Find a page' })).toBeVisible();
+	await expect(page.getByRole('combobox', { name: 'Topic', exact: true })).toBeVisible();
+	await expect(page.getByRole('combobox', { name: 'Status', exact: true })).toBeVisible();
+});
+
+test('filters stay accessible when changing from a mobile to a desktop viewport', async ({
+	page
+}) => {
+	await page.goto('/tools');
+	const origin = await authenticateTools(page);
+	const suffix = crypto.randomUUID();
+	const batch = await makeBatch(page, origin, `QA resize ${suffix}`, [
+		{ title: 'Resize page', url: `https://example.test/${suffix}/resize` }
+	]);
+	await page.goto(`/tools/tabs?batch=${batch.id}`);
+	await expect(page.getByRole('button', { name: 'Tap', exact: true })).toBeVisible();
+	await expect(page.locator('details.filters')).not.toHaveAttribute('open');
+	await page.setViewportSize({ width: 1280, height: 900 });
+	await expect(page.getByRole('searchbox', { name: 'Find a page' })).toBeVisible();
+	await expect(page.getByRole('combobox', { name: 'Status', exact: true })).toBeVisible();
+	await page.setViewportSize({ width: 390, height: 844 });
+	await expect(page.locator('details.filters summary')).toBeVisible();
+	expect((await getBatch(page, batch)).items[0].status).toBe('unread');
+});
+
+test('a large synthetic batch can be browsed to its last page', async ({ page }) => {
+	test.setTimeout(60_000);
+	await page.goto('/tools');
+	const origin = await authenticateTools(page);
+	const suffix = crypto.randomUUID();
+	const batch = await makeBatch(
+		page,
+		origin,
+		`QA large ${suffix}`,
+		Array.from({ length: 727 }, (_, index) => ({
+			title: `Long feed ${index + 1}`,
+			url: `https://example.test/${suffix}/${index}`
+		}))
+	);
+	await page.goto(`/tools/tabs?batch=${batch.id}`);
+	await page.getByRole('button', { name: 'Tap', exact: true }).click();
+	const cards = page.locator('article[data-feed-item]');
+	await expect(cards).toHaveCount(40);
+	for (let step = 0; step < 30 && (await cards.count()) < 727; step++) {
+		const before = await cards.count();
+		await page.getByRole('button', { name: 'Show more pages' }).scrollIntoViewIfNeeded();
+		await expect.poll(() => cards.count()).toBeGreaterThan(before);
+	}
+	await expect(cards).toHaveCount(727);
+	const lastCard = cards.last();
+	await lastCard.scrollIntoViewIfNeeded();
+	await expect(lastCard.getByRole('button', { name: 'Long feed 727', exact: true })).toBeVisible();
+	await lastCard.getByRole('button', { name: 'Bookmark for follow-up' }).click();
+	await expect.poll(async () => (await getBatch(page, batch)).items[726].status).toBe('followup');
+	expect((await getBatch(page, batch)).items[0].status).toBe('unread');
+});
+
+test('scroll mode archives a page passed by an actual mobile touch gesture', async ({ page }) => {
+	await page.goto('/tools');
+	const origin = await authenticateTools(page);
+	const suffix = crypto.randomUUID();
+	const batch = await makeBatch(
+		page,
+		origin,
+		`QA touch scroll ${suffix}`,
+		Array.from({ length: 12 }, (_, index) => ({
+			title: `Touch feed ${index + 1}`,
+			url: `https://example.test/${suffix}/touch-${index}`
+		}))
+	);
+	await page.goto(`/tools/tabs?batch=${batch.id}`);
+	await page.getByRole('button', { name: 'Scroll', exact: true }).click();
+	const firstCard = page.locator('article[data-feed-item]').first();
+	await firstCard.evaluate((element) => element.scrollIntoView({ block: 'start' }));
+	await page.evaluate(
+		() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+	);
+	const cdp = await page.context().newCDPSession(page);
+	await cdp.send('Input.dispatchTouchEvent', {
+		type: 'touchStart',
+		touchPoints: [{ x: 190, y: 700 }]
+	});
+	for (const y of [620, 520, 420, 320, 220, 120]) {
+		await cdp.send('Input.dispatchTouchEvent', {
+			type: 'touchMove',
+			touchPoints: [{ x: 190, y }]
+		});
+		await page.waitForTimeout(30);
+	}
+	await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+	await expect
+		.poll(async () => {
+			const box = await firstCard.boundingBox();
+			return box ? box.y + box.height : Infinity;
+		})
+		.toBeLessThanOrEqual(0);
+	await expect.poll(async () => (await getBatch(page, batch)).items[0].status).toBe('archived');
+});
+
+test('undo reports a conflict instead of overwriting a newer decision', async ({ page }) => {
+	await page.goto('/tools');
+	const origin = await authenticateTools(page);
+	const suffix = crypto.randomUUID();
+	const batch = await makeBatch(page, origin, `QA undo conflict ${suffix}`, [
+		{ title: 'Conflict page', url: `https://example.test/${suffix}/conflict` }
+	]);
+	await page.goto(`/tools/tabs?batch=${batch.id}`);
+	await page.getByRole('button', { name: 'Tap', exact: true }).click();
+	await page.getByRole('button', { name: 'Bookmark for follow-up' }).click();
+	await expect.poll(async () => (await getBatch(page, batch)).items[0].status).toBe('followup');
+	const item = (await getBatch(page, batch)).items[0];
+	const changed = await page.request.patch(`/tools/tabs/api/batches/${batch.id}/items/${item.id}`, {
+		headers: { Origin: origin, 'X-Tools-User': TEST_TOOLS_OWNER.id },
+		data: { status: 'read' }
+	});
+	expect(changed.status()).toBe(200);
+	await page.getByRole('button', { name: /^Undo/ }).click();
+	await expect(page.getByRole('alert')).toContainText('Could not undo');
+	expect((await getBatch(page, batch)).items[0].status).toBe('read');
+});
+
+test('opens saved content before attempting an isolated preview with an original link', async ({
+	page
+}) => {
+	await page.goto('/tools');
+	const origin = await authenticateTools(page);
+	const suffix = crypto.randomUUID();
+	const url = `https://example.test/${suffix}/preview`;
+	const batch = await makeBatch(page, origin, `QA preview ${suffix}`, [
+		{ title: 'Preview page', url }
+	]);
+	await page.route(`**/tools/tabs/api/batches/${batch.id}/items/*`, async (route) => {
+		if (route.request().method() !== 'GET') return route.continue();
+		const response = await route.fetch();
+		const result = await response.json();
+		result.page = { summary: 'A previously saved summary.', text: 'Previously saved page text.' };
+		await route.fulfill({ response, json: result });
+	});
+	let externalRequests = 0;
+	await page.route(url, async (route) => {
+		externalRequests++;
+		await route.fulfill({
+			status: 200,
+			headers: { 'x-frame-options': 'DENY' },
+			contentType: 'text/html',
+			body: '<p>This site blocks embedding.</p>'
+		});
+	});
+	await page.goto(`/tools/tabs?batch=${batch.id}`);
+	await page.getByRole('button', { name: 'Tap', exact: true }).click();
+	const card = page.locator('article[data-feed-item]').filter({
+		has: page.getByRole('button', { name: 'Preview page', exact: true })
+	});
+	const title = card.getByRole('button', { name: 'Preview page', exact: true });
+	await title.click();
+	await expect(card).toContainText('A previously saved summary.');
+	await expect(card.locator('iframe')).toHaveCount(0);
+	expect(externalRequests).toBe(0);
+	await title.click();
+	const iframe = card.locator('iframe');
+	await expect(iframe).toBeVisible();
+	await expect.poll(() => externalRequests).toBe(1);
+	const sandbox = await iframe.getAttribute('sandbox');
+	expect(sandbox).not.toBeNull();
+	expect(sandbox).not.toContain('allow-same-origin');
+	await expect(iframe).toHaveAttribute('referrerpolicy', 'no-referrer');
+	await expect(card.getByRole('link', { name: /Open original/ })).toBeVisible();
+	await expect(card.getByRole('link', { name: /Open original/ })).toHaveAttribute('href', url);
 });
 
 test('mobile triage saves notes, swipes, undo, import and batch isolation', async ({ page }) => {
@@ -65,6 +397,7 @@ test('mobile triage saves notes, swipes, undo, import and batch isolation', asyn
 	]);
 
 	await page.goto(`/tools/tabs?batch=${first.id}`);
+	await useSwipeMode(page);
 	await expect(page.getByRole('button', { name: /Open swyx\.irc chat/ })).toHaveCount(0);
 	const card = page.locator('article.card');
 	await expect(card.getByRole('heading', { name: 'Alpha page' })).toBeVisible();
@@ -125,6 +458,7 @@ test('mobile triage saves notes, swipes, undo, import and batch isolation', asyn
 	await page.getByRole('button', { name: 'Undo' }).click();
 	await expect(card.getByRole('heading', { name: 'Bravo page' })).toBeVisible();
 
+	await openFilters(page);
 	await page.getByRole('combobox', { name: 'Status', exact: true }).selectOption('archived');
 	await card.getByRole('heading', { name: 'Bravo page' }).waitFor();
 	await card.getByRole('button', { name: 'Review first matching page' }).click();
@@ -159,6 +493,17 @@ test('mobile triage saves notes, swipes, undo, import and batch isolation', asyn
 		status: 'archived',
 		note: 'Remember Alpha'
 	});
+	await page.goto(`/tools/tabs?batch=${second.id}`);
+	await useSwipeMode(page);
+	await openFilters(page);
+	await page.getByRole('combobox', { name: 'Status', exact: true }).selectOption('followup');
+	await page
+		.getByRole('complementary', { name: 'Pages in this view' })
+		.getByRole('button', { name: /Alpha page/ })
+		.click();
+	await expect(page.locator('article.card').getByLabel('Your note')).toHaveValue(
+		'Second batch note'
+	);
 
 	await page.getByText('＋ Add a batch').click();
 	await page.getByLabel('Batch name').fill(`QA import ${suffix}`);
@@ -194,6 +539,7 @@ test('a failed note save blocks triage and can be retried', async ({ page }) => 
 		{ title: 'Next page', url: `https://example.test/${suffix}/next` }
 	]);
 	await page.goto(`/tools/tabs?batch=${batch.id}`);
+	await useSwipeMode(page);
 	const card = page.locator('article.card');
 	await expect(card.getByRole('heading', { name: 'Note test' })).toBeVisible();
 	/** @param {import('@playwright/test').Route} route */
@@ -231,6 +577,7 @@ test('a delayed page load does not expose an editable stale note', async ({ page
 		{ title: 'Second page', url: `https://example.test/${suffix}/second` }
 	]);
 	await page.goto(`/tools/tabs?batch=${batch.id}`);
+	await useSwipeMode(page);
 	const card = page.locator('article.card');
 	await expect(card.getByRole('heading', { name: 'First page' })).toBeVisible();
 	await card.getByLabel('Your note').fill('A saved thought');
