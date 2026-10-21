@@ -475,13 +475,13 @@
 			class="chat-launcher"
 			type="button"
 			bind:this={launcher}
-			aria-label="chat"
+			aria-label="Open swyx.irc chat"
 			aria-describedby="chat-reader-summary"
 			aria-expanded={!collapsed}
 			aria-controls="live-chat"
 			on:click={openChat}
 		>
-			<span aria-hidden="true">#</span> chat{#if presence.connected}<span aria-hidden="true">
+			<span aria-hidden="true">#</span> swyx.irc{#if presence.connected}<span aria-hidden="true">
 					· {presence.otherCount} online</span
 				>{/if}
 			{#if unread}<span class="unread-badge" aria-hidden="true">{unread > 99 ? '99+' : unread}</span
@@ -507,7 +507,7 @@
 				>Use arrow keys to move or resize the window; hold Shift for larger steps.</span
 			>
 			<div class="chat-titlebar">
-				<h2 id="chat-title" class="visually-hidden">swyx</h2>
+				<h2 id="chat-title" class="visually-hidden">swyx.irc</h2>
 				<button
 					type="button"
 					class="chat-drag-handle"
@@ -523,7 +523,7 @@
 				>
 					<span class="chat-grip" aria-hidden="true">⠿</span>
 					<span class="chat-title-copy" aria-hidden="true">
-						<span class="chat-name"><span>#</span> swyx</span>
+						<span class="chat-name"><span>#</span> swyx.irc</span>
 						<span class="chat-status">
 							<span class:online={status === 'Connected'} aria-hidden="true">●</span>
 							{status}

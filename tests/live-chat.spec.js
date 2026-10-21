@@ -46,8 +46,8 @@ test('quick messages fill the composer without sending or erasing a draft', asyn
 	await page.setViewportSize({ width: 390, height: 844 });
 	await mockChat(context);
 	await page.goto(`${baseUrl}/america250`);
-	await page.getByRole('button', { name: 'chat', exact: true }).click();
-	const chat = page.getByRole('region', { name: 'swyx', exact: true });
+	await page.getByRole('button', { name: 'Open swyx.irc chat', exact: true }).click();
+	const chat = page.getByRole('region', { name: 'swyx.irc', exact: true });
 	const composer = chat.getByLabel('Message', { exact: true });
 	const log = chat.getByRole('log', { name: 'Recent chat messages' });
 	await chat.getByRole('button', { name: 'Add Hey everyone! 👋 to message' }).click();
@@ -71,7 +71,7 @@ test('mobile chat floats over the article without moving the reader', async ({ p
 	await page.setViewportSize({ width: 390, height: 844 });
 	await mockChat(context);
 	await page.goto(`${baseUrl}/america250`);
-	const launcher = page.getByRole('button', { name: 'chat', exact: true });
+	const launcher = page.getByRole('button', { name: 'Open swyx.irc chat', exact: true });
 	await expect(launcher).toBeVisible();
 	const [launcherBox, paragraphBox] = await Promise.all([
 		launcher.boundingBox(),
@@ -94,7 +94,7 @@ test('mobile chat floats over the article without moving the reader', async ({ p
 	await page.evaluate(() => window.scrollTo(0, 600));
 	const before = await page.evaluate(() => window.scrollY);
 	await launcher.click();
-	const chat = page.getByRole('region', { name: 'swyx', exact: true });
+	const chat = page.getByRole('region', { name: 'swyx.irc', exact: true });
 	await expect(chat).toBeVisible();
 	await expect(chat).toContainText('Messages disappear after 48 hours');
 	await expect(chat).toContainText('Backups may persist up to 30 days');
@@ -119,7 +119,7 @@ test('wide desktop chat leaves the expanded index and reading column clear', asy
 	await page.setViewportSize({ width: 1600, height: 900 });
 	await mockChat(context);
 	await page.goto(`${baseUrl}/learn-in-public`);
-	const chat = page.getByRole('region', { name: 'swyx', exact: true });
+	const chat = page.getByRole('region', { name: 'swyx.irc', exact: true });
 	await expect(chat).toBeVisible();
 	const index = page.getByRole('navigation', { name: 'Explore writing' });
 	await index.getByRole('button', { name: 'index' }).click();
@@ -134,7 +134,7 @@ test('wide desktop chat leaves the expanded index and reading column clear', asy
 	expect(chatBox.x + chatBox.width).toBeLessThan(indexBox.x);
 	expect(indexBox.x + indexBox.width).toBeLessThan(articleBox.x);
 	await chat.getByRole('button', { name: 'Close chat' }).click();
-	await expect(page.getByRole('button', { name: 'chat', exact: true })).toBeVisible();
+	await expect(page.getByRole('button', { name: 'Open swyx.irc chat', exact: true })).toBeVisible();
 });
 
 test('narrow and wide layouts remember separate positions without covering the index', async ({
@@ -144,8 +144,8 @@ test('narrow and wide layouts remember separate positions without covering the i
 	await page.setViewportSize({ width: 390, height: 844 });
 	await mockChat(context);
 	await page.goto(`${baseUrl}/learn-in-public`);
-	await page.getByRole('button', { name: 'chat', exact: true }).click();
-	const chat = page.getByRole('region', { name: 'swyx', exact: true });
+	await page.getByRole('button', { name: 'Open swyx.irc chat', exact: true }).click();
+	const chat = page.getByRole('region', { name: 'swyx.irc', exact: true });
 	const move = chat.getByRole('button', { name: 'Move chat window' });
 	await move.focus();
 	await page.keyboard.press('ArrowUp');
@@ -187,8 +187,8 @@ test('dragging and resizing persist across reloads and stay within the viewport'
 	await page.setViewportSize({ width: 1100, height: 850 });
 	await mockChat(context);
 	await page.goto(`${baseUrl}/america250`);
-	await page.getByRole('button', { name: 'chat', exact: true }).click();
-	const chat = page.getByRole('region', { name: 'swyx', exact: true });
+	await page.getByRole('button', { name: 'Open swyx.irc chat', exact: true }).click();
+	const chat = page.getByRole('region', { name: 'swyx.irc', exact: true });
 	const move = chat.getByRole('button', { name: 'Move chat window' });
 	const resize = chat.getByRole('button', { name: 'Resize chat window' });
 	await chat.getByLabel('Message', { exact: true }).fill('Draft stays in place');
@@ -215,7 +215,7 @@ test('dragging and resizing persist across reloads and stay within the viewport'
 	expect(resized.height).toBeCloseTo(moved.height + 30, 0);
 	await expect(chat.getByLabel('Message', { exact: true })).toHaveValue('Draft stays in place');
 	await page.reload();
-	await page.getByRole('button', { name: 'chat', exact: true }).click();
+	await page.getByRole('button', { name: 'Open swyx.irc chat', exact: true }).click();
 	const restored = await chat.boundingBox();
 	if (!restored) throw new Error('Saved chat was not restored');
 	for (const key of /** @type {const} */ (['x', 'y', 'width', 'height'])) {
@@ -277,8 +277,8 @@ test('touch gestures move and resize the chat without scrolling the article', as
 	await mockChat(context);
 	const page = await context.newPage();
 	await page.goto(`${baseUrl}/america250`);
-	await page.getByRole('button', { name: 'chat', exact: true }).click();
-	const chat = page.getByRole('region', { name: 'swyx', exact: true });
+	await page.getByRole('button', { name: 'Open swyx.irc chat', exact: true }).click();
+	const chat = page.getByRole('region', { name: 'swyx.irc', exact: true });
 	const moveBox = await chat.getByRole('button', { name: 'Move chat window' }).boundingBox();
 	const before = await chat.boundingBox();
 	if (!moveBox || !before) throw new Error('Touch move handle not found');
@@ -318,11 +318,11 @@ test('two readers receive messages and rejected sends preserve the draft', async
 		second.goto(`${baseUrl}/learn-in-public`)
 	]);
 	await Promise.all([
-		first.getByRole('button', { name: 'chat', exact: true }).click(),
-		second.getByRole('button', { name: 'chat', exact: true }).click()
+		first.getByRole('button', { name: 'Open swyx.irc chat', exact: true }).click(),
+		second.getByRole('button', { name: 'Open swyx.irc chat', exact: true }).click()
 	]);
-	const firstChat = first.getByRole('region', { name: 'swyx', exact: true });
-	const secondChat = second.getByRole('region', { name: 'swyx', exact: true });
+	const firstChat = first.getByRole('region', { name: 'swyx.irc', exact: true });
+	const secondChat = second.getByRole('region', { name: 'swyx.irc', exact: true });
 	await expect(firstChat.getByRole('button', { name: 'Move chat window' })).toContainText(
 		'Connected'
 	);
@@ -360,7 +360,7 @@ test('an open chat removes a message when its 48 hours are up', async ({ page, c
 		);
 	});
 	await page.goto(`${baseUrl}/america250`);
-	await page.getByRole('button', { name: 'chat', exact: true }).click();
+	await page.getByRole('button', { name: 'Open swyx.irc chat', exact: true }).click();
 	const message = page.getByText('Almost expired');
 	await expect(message).toBeVisible();
 	await expect(message).toHaveCount(0, { timeout: 5000 });
@@ -377,7 +377,7 @@ test('closing chat after client-side navigation keeps the new page scroll positi
 		document.documentElement.dataset.clientNavigation = 'yes';
 		window.scrollTo(0, 600);
 	});
-	await page.getByRole('button', { name: 'chat', exact: true }).click();
+	await page.getByRole('button', { name: 'Open swyx.irc chat', exact: true }).click();
 	await page.getByRole('link', { name: 'swyx.io', exact: true }).click();
 	await expect(page).toHaveURL(`${baseUrl}/`);
 	await expect(page.locator('h1#me')).toBeVisible();
@@ -391,7 +391,7 @@ test('closing chat after client-side navigation keeps the new page scroll positi
 	});
 	expect(before).toBeGreaterThan(600);
 	await page.keyboard.press('Escape');
-	await expect(page.getByRole('region', { name: 'swyx', exact: true })).toHaveCount(0);
+	await expect(page.getByRole('region', { name: 'swyx.irc', exact: true })).toHaveCount(0);
 	expect(await page.evaluate(() => window.scrollY)).toBeCloseTo(before, 0);
 });
 
@@ -402,7 +402,7 @@ test('Escape closes only the focused control and ignores IME composition', async
 	await page.setViewportSize({ width: 1600, height: 900 });
 	await mockChat(context);
 	await page.goto(`${baseUrl}/learn-in-public`);
-	const chat = page.getByRole('region', { name: 'swyx', exact: true });
+	const chat = page.getByRole('region', { name: 'swyx.irc', exact: true });
 	const indexToggle = page
 		.getByRole('navigation', { name: 'Explore writing' })
 		.getByRole('button', { name: 'index' });
@@ -439,7 +439,7 @@ test('closing chat after jumping to an article heading keeps that position', asy
 	await mockChat(context);
 	await page.goto(`${baseUrl}/america250`);
 	await page.evaluate(() => window.scrollTo(0, 600));
-	await page.getByRole('button', { name: 'chat', exact: true }).click();
+	await page.getByRole('button', { name: 'Open swyx.irc chat', exact: true }).click();
 	const toc = page.getByRole('navigation', { name: 'Table of contents' });
 	await toc.getByRole('button', { name: /Table of Contents/ }).click();
 	await expect(toc.locator('a[href^="#"]').nth(1)).toBeVisible();
@@ -453,6 +453,6 @@ test('closing chat after jumping to an article heading keeps that position', asy
 		return window.scrollY;
 	});
 	await page.keyboard.press('Escape');
-	await expect(page.getByRole('region', { name: 'swyx', exact: true })).toHaveCount(0);
+	await expect(page.getByRole('region', { name: 'swyx.irc', exact: true })).toHaveCount(0);
 	expect(await page.evaluate(() => window.scrollY)).toBeCloseTo(before, 0);
 });
