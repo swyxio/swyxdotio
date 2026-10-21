@@ -1,5 +1,6 @@
 <script>
 	import { createEventDispatcher, onMount } from 'svelte';
+	import { afterNavigate } from '$app/navigation';
 	import { SvelteMap } from 'svelte/reactivity';
 	import { canonicalPresencePath } from '$lib/read-counter';
 	import { capturePresenceAnchor, resolvePresenceAnchor } from '$lib/presence-anchor';
@@ -51,6 +52,8 @@
 	let localTouch = null;
 	/** @type {{ x: number, y: number } | null} */
 	let lastPointer = null;
+	let followScrollArmed = false;
+	let armFollowFrame = 0;
 	let hidden = false;
 	let admitted = false;
 	let connected = false;
@@ -433,6 +436,14 @@
 		);
 	}
 
+	// SvelteKit resets the scroll position before afterNavigate. Wait one
+	// frame for that reset's scroll event before accepting subsequent scrolls.
+	afterNavigate(() => {
+		followScrollArmed = false;
+		window.cancelAnimationFrame(armFollowFrame);
+		armFollowFrame = window.requestAnimationFrame(() => (followScrollArmed = true));
+	});
+
 	onMount(() => {
 		// An unrelated navigation must not cause a later surprise jump.
 		if (pendingReaderFollow() && pendingReaderFollow()?.pageKey !== pageKey) clearReaderFollow();
@@ -477,8 +488,10 @@
 				if (!socket && !hidden) scheduleInitialConnect();
 			}
 		};
-		const handleViewport = () => {
+		/** @param {Event} event */
+		const handleViewport = (event) => {
 			viewportTick += 1;
+			if (event.type === 'scroll' && followScrollArmed) cancelPendingFollow();
 			sendViewportPosition();
 		};
 		const cancelPendingFollow = () => {
@@ -528,6 +541,7 @@
 			window.clearTimeout(handleTouch.fadeTimer);
 			window.clearTimeout(nickTimer);
 			window.clearTimeout(positionTimer);
+			window.cancelAnimationFrame(armFollowFrame);
 			window.clearInterval(clockTimer);
 			document.removeEventListener('visibilitychange', handleVisibility);
 			window.removeEventListener('pointermove', handlePointerMove);

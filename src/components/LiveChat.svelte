@@ -121,18 +121,15 @@
 		};
 	}
 
-	/** Keep the persistent reader pill visible when restoring an older saved window. */
+	/** Keep the persistent reader pill clear when restoring an older saved window. */
 	/** @param {Geometry} value */
 	function restoreGeometry(value) {
 		const box = clampGeometry(value);
 		const view = viewport();
 		const safeBottom = view.y + view.height - 68;
-		if (
-			box.x + box.width > view.x + view.width - 200 &&
-			box.y + box.height > safeBottom &&
-			box.height + 76 <= view.height
-		) {
-			box.y = safeBottom - box.height;
+		if (box.x + box.width > view.x + view.width - 200 && box.y + box.height > safeBottom) {
+			box.height = Math.min(box.height, Math.max(1, safeBottom - view.y - 8));
+			box.y = Math.min(box.y, safeBottom - box.height);
 		}
 		return box;
 	}
@@ -141,7 +138,7 @@
 	function defaultGeometry(wide) {
 		const view = viewport();
 		const width = wide && allowSidebar ? 268 : 336;
-		const bottom = !wide && view.width < 500 && view.height >= 420 ? 68 : 16;
+		const bottom = !wide && view.width < 500 ? 68 : 16;
 		const height = Math.min(wide && allowSidebar ? 576 : 510, view.height - bottom - 8);
 		return clampGeometry({
 			x: view.x + 16,
@@ -570,6 +567,7 @@
 			id="live-chat"
 			class="chat"
 			class:chat-compact={geometry.height < 350}
+			class:chat-tiny={geometry.height < 260}
 			style="left: {geometry.x}px; top: {geometry.y}px; width: {geometry.width}px; height: {geometry.height}px"
 			aria-labelledby="chat-title"
 			tabindex="-1"
@@ -840,7 +838,7 @@
 <style>
 	.chat-launcher {
 		position: fixed;
-		z-index: 59;
+		z-index: 61;
 		right: max(0.75rem, env(safe-area-inset-right));
 		bottom: max(0.75rem, env(safe-area-inset-bottom));
 		min-height: 44px;
@@ -1257,6 +1255,20 @@
 	}
 	.chat-compact textarea {
 		height: 2.4rem;
+	}
+	.chat-tiny .chat-notice {
+		padding-block: 0.15rem;
+	}
+	.chat-tiny .chat-log {
+		min-height: 0;
+		padding-block: 0;
+	}
+	.chat-tiny .chat-form {
+		gap: 0;
+		padding-block: 0.15rem;
+	}
+	.chat-tiny .quick-messages button {
+		min-height: 28px;
 	}
 	.visually-hidden {
 		position: absolute;

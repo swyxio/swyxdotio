@@ -141,6 +141,26 @@ test('resizing to mobile keeps the open chat clear of the live reader count', as
 		.toBe(true);
 });
 
+test('the reader count stays accessible on a short screen', async ({ page, context }) => {
+	await page.setViewportSize({ width: 390, height: 300 });
+	await mockChat(context);
+	await page.goto(`${baseUrl}/america250`);
+	await page.getByRole('button', { name: 'Open swyx.irc chat', exact: true }).click();
+	const chat = page.getByRole('region', { name: 'swyx.irc', exact: true });
+	const launcher = page.getByRole('button', { name: 'Close swyx.irc chat', exact: true });
+	const [panel, pill] = await Promise.all([chat.boundingBox(), launcher.boundingBox()]);
+	if (!panel || !pill) throw new Error('Chat or live reader count was not visible');
+	expect(panel.y).toBeGreaterThanOrEqual(0);
+	expect(panel.y + panel.height).toBeLessThanOrEqual(pill.y);
+	await chat.getByRole('button', { name: 'Move chat window' }).focus();
+	await page.keyboard.press('Shift+ArrowDown');
+	const moved = await chat.boundingBox();
+	if (!moved) throw new Error('Chat disappeared while moving it');
+	expect(moved.y + moved.height).toBeGreaterThan(pill.y);
+	await launcher.click();
+	await expect(chat).toHaveCount(0);
+});
+
 test('wide desktop chat leaves the expanded index and reading column clear', async ({
 	page,
 	context

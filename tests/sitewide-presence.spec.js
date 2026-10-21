@@ -164,6 +164,8 @@ test('following a named reader jumps to their cursor across pages and on the sam
 		await expect.poll(() => readers.position('Bob')?.y || 0).toBeGreaterThan(0.01);
 		const destination = readers.position('Bob');
 		if (!destination) throw new Error('Missing Bob’s cursor position');
+		// The router's initial scroll reset must not cancel the queued follow.
+		await page.evaluate(() => window.scrollTo(0, 1000));
 		await findBob.click();
 		await expect(page).toHaveURL(/\/learn-in-public$/);
 		await expect(page.locator('.remote-cursor').filter({ hasText: 'Bob' })).toBeVisible({
@@ -249,6 +251,106 @@ test('following a named reader jumps to their cursor across pages and on the sam
 		expect(await page.evaluate(() => window.scrollY)).toBe(0);
 	} finally {
 		await otherContext.close();
+	}
+});
+
+test('scrolling cancels a pending cross-page follow', async ({ browser, page, context }) => {
+	await page.setViewportSize({ width: 1100, height: 850 });
+	const readers = mockReaders();
+	await readers.install(context);
+	await page.goto(`${baseUrl}/america250`);
+	const chat = await openChat(page);
+	const otherContext = await browser.newContext({ viewport: { width: 1100, height: 850 } });
+	try {
+		await readers.install(otherContext);
+		await otherContext.addInitScript(() => localStorage.setItem('swyx:chat:nick:v1', 'Bob'));
+		const other = await otherContext.newPage();
+		await other.goto(`${baseUrl}/learn-in-public`);
+		const findBob = chat
+			.getByRole('region', { name: 'Readers and their pages' })
+			.getByRole('link', { name: 'Find Bob on Learn in Public' });
+		await expect(findBob).toBeVisible({ timeout: 10_000 });
+		await other.evaluate(() => window.scrollTo(0, 3500));
+		await other.mouse.move(500, 300);
+		await expect.poll(() => readers.position('Bob')?.y || 0).toBeGreaterThan(0.1);
+		await findBob.click();
+		await expect(page).toHaveURL(/\/learn-in-public$/);
+		// Native scrollbar drags emit the same scroll event. Headless Chromium
+		// on macOS hides the scrollbar, so change the viewport directly here.
+		await page.evaluate(
+			() =>
+				new Promise((resolve) => {
+					requestAnimationFrame(() => requestAnimationFrame(resolve));
+				})
+		);
+		await page.evaluate(() => window.scrollTo(0, 1100));
+		const chosenScroll = await page.evaluate(() => window.scrollY);
+		expect(chosenScroll).toBeGreaterThan(100);
+		await expect.poll(() => readers.count(), { timeout: 10_000 }).toBe(2);
+		await expect(
+			page.locator('.remote-cursor, .offscreen-marker').filter({ hasText: 'Bob' })
+		).toBeVisible({
+			timeout: 10_000
+		});
+		expect(await page.evaluate(() => window.scrollY)).toBe(chosenScroll);
+	} finally {
+		await otherContext.close();
+	}
+});
+
+test('textless media anchors identify public sources without query strings', async ({
+	page,
+	context
+}) => {
+	await page.setViewportSize({ width: 1100, height: 850 });
+	const readers = mockReaders();
+	await readers.install(context);
+	await context.addInitScript(() => localStorage.setItem('swyx:chat:nick:v1', 'Alice'));
+	await page.goto(`${baseUrl}/learn-in-public`);
+	await expect.poll(() => readers.count(), { timeout: 10_000 }).toBe(1);
+	await page.evaluate(() => {
+		const article = document.querySelector('article.reading-prose');
+		if (!article) throw new Error('Article missing');
+		article.insertAdjacentHTML(
+			'afterbegin',
+			`<img id="test-image" src="/media-a.png?visitor=one#start" style="width:200px;height:100px;display:block">
+			<figure id="test-figure" style="width:200px;height:100px;padding:25px"><img id="test-figure-image" src="/figure-a.png?visitor=one#start" style="width:80px;height:40px"></figure>
+			<video id="test-video" style="width:200px;height:100px;display:block"><source id="test-source" src="/video-a.mp4?visitor=one#start"></video>`
+		);
+	});
+	for (const [container, media, original, changed] of [
+		['#test-image', '#test-image', '/media-a.png', '/media-b.png'],
+		['#test-figure', '#test-figure-image', '/figure-a.png', '/figure-b.png'],
+		['#test-video', '#test-source', '/video-a.mp4', '/video-b.mp4']
+	]) {
+		const target = page.locator(container);
+		await target.scrollIntoViewIfNeeded();
+		const box = await target.boundingBox();
+		if (!box) throw new Error(`Missing ${container}`);
+		const index = await target.evaluate((element, selector) => {
+			const article = document.querySelector('article.reading-prose');
+			return article ? [...article.querySelectorAll(selector)].indexOf(element) : -1;
+		}, articleBlocks);
+		await page.mouse.move(box.x + 5, box.y + 5);
+		await expect
+			.poll(() => readers.position('Alice')?.anchor?.[0], { timeout: 10_000 })
+			.toBe(index);
+		const before = readers.position('Alice')?.anchor;
+		if (!before) throw new Error(`Missing ${container} anchor`);
+		await page
+			.locator(media)
+			.evaluate(
+				(element, path) => element.setAttribute('src', `${path}?visitor=two#end`),
+				original
+			);
+		await page.mouse.move(box.x + 15, box.y + 5);
+		await expect.poll(() => readers.position('Alice')?.anchor?.[1]).not.toBe(before[1]);
+		expect(readers.position('Alice')?.anchor?.[3]).toBe(before[3]);
+		await page
+			.locator(media)
+			.evaluate((element, path) => element.setAttribute('src', `${path}?visitor=two#end`), changed);
+		await page.mouse.move(box.x + 20, box.y + 5);
+		await expect.poll(() => readers.position('Alice')?.anchor?.[3]).not.toBe(before[3]);
 	}
 });
 

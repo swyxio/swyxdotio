@@ -1,16 +1,49 @@
 // Public content blocks are accompanied by a fingerprint so changed markup
 // falls back to the ordinary document position instead of the wrong passage.
 const BLOCKS = 'h1,h2,h3,h4,h5,h6,p,li,pre,blockquote,figure,img,table,video';
+const MEDIA = 'img,video,audio,source,iframe,embed,object,image,use';
 
 function contentRoot() {
 	return document.querySelector('article.reading-prose') || document.querySelector('main#skip');
+}
+
+/** @param {string} source */
+function publicMediaSource(source) {
+	try {
+		if (!source || source.startsWith('#')) return '';
+		const url = new URL(source, location.href);
+		if (!['http:', 'https:'].includes(url.protocol)) return '';
+		// Query strings and fragments can contain visitor-specific information.
+		return `${url.origin}${url.pathname}`;
+	} catch {
+		return '';
+	}
 }
 
 /** @param {Element} block @param {Element} root */
 function blockFingerprint(block, root) {
 	let text;
 	if (root.matches('article.reading-prose')) {
-		text = `${block.tagName}:${(block.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 512)}`;
+		const content = (block.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 512);
+		if (content) {
+			text = `${block.tagName}:${content}`;
+		} else {
+			const media = [...(block.matches(MEDIA) ? [block] : []), ...block.querySelectorAll(MEDIA)];
+			const sources = media.flatMap((element) =>
+				['src', 'srcset', 'poster', 'data', 'href'].flatMap((attribute) => {
+					const raw = element.getAttribute(attribute);
+					if (!raw || (attribute === 'srcset' && raw.includes('data:'))) return [];
+					const values = attribute === 'srcset' ? raw.split(',') : [raw];
+					return values.flatMap((value) => {
+						const source = publicMediaSource(value.trim().split(/\s+/, 1)[0]);
+						return source ? [`${element.tagName}:${attribute}:${source}`] : [];
+					});
+				})
+			);
+			// Empty blocks with no public source cannot be matched reliably.
+			if (!sources.length) return null;
+			text = `${block.tagName}:${sources.join('|')}`;
+		}
 	} else {
 		// A listing can contain the visitor's search query. Identify public page
 		// blocks structurally rather than hashing potentially private input.
@@ -68,13 +101,15 @@ export function capturePresenceAnchor(x, y, readingDepth) {
 	const index = Array.prototype.indexOf.call(blocks, block);
 	const rect = block.getBoundingClientRect();
 	if (index < 0 || index > 65_535 || rect.width <= 0 || rect.height <= 0) return null;
+	const fingerprint = blockFingerprint(block, article);
+	if (fingerprint === null) return null;
 	const fraction = (/** @type {number} */ value) =>
 		Math.round(Math.max(0, Math.min(1, value)) * 10_000);
 	return [
 		index,
 		fraction((x - rect.left) / rect.width),
 		fraction((y - rect.top) / rect.height),
-		blockFingerprint(block, article)
+		fingerprint
 	];
 }
 
