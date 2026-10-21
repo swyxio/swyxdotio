@@ -63,6 +63,14 @@
 			owner: true,
 			tools: [
 				{
+					id: 'tabs',
+					name: 'Tab bankruptcy',
+					description: 'Review saved tabs and notes.',
+					href: '/tools/tabs',
+					badge: 'Site owner',
+					image: 'paper.webp'
+				},
+				{
 					id: 'podcast',
 					name: 'Podcast studio',
 					description: 'Publish to your existing feeds.',

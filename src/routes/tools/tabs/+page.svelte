@@ -1,0 +1,1333 @@
+<script lang="ts">
+	import { onMount } from 'svelte';
+	import { beforeNavigate } from '$app/navigation';
+	import { resolve } from '$app/paths';
+
+	type Status = 'unread' | 'read' | 'followup' | 'archived';
+	type Batch = { id: string; name: string; capturedAt?: string | null; count?: number };
+	type Item = {
+		id: string;
+		url: string;
+		title: string;
+		domain?: string;
+		group?: string;
+		status: Status;
+		note: string;
+		duplicateCount?: number;
+		tabGroups?: string[];
+		capturedWindowIds?: string[];
+		summary?: string | null;
+		summarySource?: string | null;
+		summaryMethod?: string | null;
+		summaryCoverage?: string | null;
+		summaryPreview?: boolean;
+		cacheState?: string;
+		wordCount?: number;
+		lastOpened?: string | null;
+	};
+	type Page = {
+		text?: string;
+		summary?: string | null;
+		summarySource?: string | null;
+		summaryMethod?: string | null;
+		summaryCoverage?: string | null;
+		summaryPreview?: boolean;
+		sourceNote?: string;
+		sourceTruncated?: boolean;
+	};
+	type TabInput = {
+		url: string;
+		title: string;
+		windowId?: string;
+		group?: string;
+		tabGroup?: string;
+	};
+
+	export let data: { user: { id: string; email?: string; name?: string } };
+
+	let batches: Batch[] = [];
+	let batchId = '';
+	let items: Item[] = [];
+	let selectedId = '';
+	let page: Page = {};
+	let note = '';
+	let savedNote = '';
+	let noteTimer: ReturnType<typeof setTimeout> | undefined;
+	let notePromise: Promise<boolean> | null = null;
+	let noteSaving = false;
+	let noteError = '';
+	let loading = true;
+	let itemLoading = false;
+	let itemUnavailable = false;
+	let busy = false;
+	let error = '';
+	let message = '';
+	let query = '';
+	let topic = 'all';
+	let statusFilter = 'unread';
+	let windowFilter = 'all';
+	let itemRequest = 0;
+	let importText = '';
+	let importName = '';
+	let importFile: File | null = null;
+	let fileInput: HTMLInputElement;
+	let importing = false;
+	let undo: { batchId: string; itemId: string; status: Status } | null = null;
+	let touchStart: { x: number; y: number; id: number } | null = null;
+
+	$: selected = items.find((item) => item.id === selectedId);
+	$: topics = [...new Set(items.map((item) => item.group || 'Reading pile'))].sort();
+	$: windows = [...new Set(items.flatMap((item) => item.capturedWindowIds || []))];
+	$: filtered = items.filter((item) => matches(item, query, topic, statusFilter, windowFilter));
+	$: unreadCount = items.filter((item) => item.status === 'unread').length;
+	$: summaryDetails = page.summary ? page : selected;
+	$: currentSummary = summaryDetails?.summary || '';
+	$: summarySource = summaryDetails?.summarySource || '';
+	$: summaryCoverage = summaryDetails?.summaryCoverage || '';
+	$: summaryMethod = summaryDetails?.summaryMethod || '';
+	$: summaryPreview = summaryDetails?.summaryPreview || false;
+
+	function matches(
+		item: Item,
+		search: string,
+		selectedTopic: string,
+		selectedStatus: string,
+		selectedWindow: string
+	) {
+		const term = search.trim().toLowerCase();
+		const itemTopic = item.group || 'Reading pile';
+		const itemWindows = item.capturedWindowIds || [];
+		if (selectedTopic !== 'all' && itemTopic !== selectedTopic) return false;
+		if (selectedStatus !== 'all' && item.status !== selectedStatus) return false;
+		if (selectedWindow !== 'all' && !itemWindows.includes(selectedWindow)) return false;
+		return (
+			!term ||
+			`${item.title} ${item.url} ${item.domain || ''} ${item.group || ''}`
+				.toLowerCase()
+				.includes(term)
+		);
+	}
+
+	function errorText(value: unknown): string {
+		return value instanceof Error ? value.message : 'Something went wrong. Please try again.';
+	}
+
+	async function api<T>(
+		path: string,
+		options: { method?: string; body?: string; headers?: Record<string, string> } = {}
+	): Promise<T> {
+		const headers = new Headers(options.headers);
+		headers.set('X-Tools-User', data.user.id);
+		if (options.body) headers.set('Content-Type', 'application/json');
+		const response = await fetch(path, {
+			...options,
+			headers,
+			cache: 'no-store',
+			credentials: 'same-origin'
+		});
+		const body = await response.json().catch(() => ({}));
+		if (!response.ok)
+			throw new Error(body?.error || body?.message || `Request failed (${response.status}).`);
+		return body as T;
+	}
+
+	function itemPath(batch: string, id: string) {
+		return `/tools/tabs/api/batches/${encodeURIComponent(batch)}/items/${encodeURIComponent(id)}`;
+	}
+
+	function scheduleNote() {
+		noteError = '';
+		clearTimeout(noteTimer);
+		noteTimer = setTimeout(() => void saveNote(), 700);
+	}
+
+	async function saveNote(): Promise<boolean> {
+		clearTimeout(noteTimer);
+		if (notePromise) return notePromise;
+		if (!selectedId || note === savedNote) return true;
+		const id = selectedId;
+		const batch = batchId;
+		noteSaving = true;
+		noteError = '';
+		notePromise = (async () => {
+			try {
+				while (note !== savedNote && id === selectedId && batch === batchId) {
+					const snapshot = note;
+					await api<{ status: Status; note: string }>(itemPath(batch, id), {
+						method: 'PATCH',
+						body: JSON.stringify({ note: snapshot })
+					});
+					savedNote = snapshot;
+					items = items.map((item) => (item.id === id ? { ...item, note: snapshot } : item));
+				}
+				return true;
+			} catch (caught) {
+				noteError = `Note not saved: ${errorText(caught)}`;
+				return false;
+			} finally {
+				noteSaving = false;
+				notePromise = null;
+			}
+		})();
+		return notePromise;
+	}
+
+	async function openItem(id: string) {
+		if (busy || id === selectedId) return;
+		busy = true;
+		if (!(await saveNote())) {
+			busy = false;
+			return;
+		}
+		await loadItem(id);
+		busy = false;
+	}
+
+	async function loadItem(id: string) {
+		const item = items.find((entry) => entry.id === id);
+		if (!item) return;
+		const request = ++itemRequest;
+		selectedId = id;
+		page = {};
+		itemUnavailable = false;
+		note = item.note || '';
+		savedNote = note;
+		noteError = '';
+		itemLoading = true;
+		try {
+			const result = await api<{ item?: Item; page?: Page; status?: Status; note?: string }>(
+				itemPath(batchId, id)
+			);
+			if (request !== itemRequest) return;
+			page = result.page || {};
+			const loadedNote = typeof result.note === 'string' ? result.note : item.note || '';
+			note = savedNote = loadedNote;
+			items = items.map((entry) =>
+				entry.id === id
+					? {
+							...entry,
+							...(result.item || {}),
+							status: result.status || entry.status,
+							note: loadedNote
+						}
+					: entry
+			);
+		} catch (caught) {
+			if (request === itemRequest) {
+				itemUnavailable = true;
+				error = `Could not load page: ${errorText(caught)}`;
+			}
+		} finally {
+			if (request === itemRequest) itemLoading = false;
+		}
+	}
+
+	async function switchBatch(id: string) {
+		if (busy || !id) return;
+		busy = true;
+		error = '';
+		if (!(await saveNote())) {
+			busy = false;
+			return;
+		}
+		try {
+			const result = await api<{ batch: Batch; items: Item[] }>(
+				`/tools/tabs/api/batches/${encodeURIComponent(id)}`
+			);
+			batchId = id;
+			items = result.items.map((item) => ({
+				...item,
+				status: item.status || 'unread',
+				note: item.note || ''
+			}));
+			topic = 'all';
+			query = '';
+			statusFilter = 'unread';
+			windowFilter = 'all';
+			undo = null;
+			selectedId = '';
+			page = {};
+			note = savedNote = '';
+			const first = items.find((item) => item.status === 'unread');
+			if (first) await loadItem(first.id);
+		} catch (caught) {
+			error = `Could not load batch: ${errorText(caught)}`;
+		} finally {
+			busy = false;
+			loading = false;
+		}
+	}
+
+	async function chooseStatus(status: Status) {
+		if (!selected || busy || itemLoading) return;
+		busy = true;
+		error = '';
+		message = '';
+		const id = selected.id;
+		const previous = selected.status;
+		const before = items.filter((item) => matches(item, query, topic, statusFilter, windowFilter));
+		const index = before.findIndex((item) => item.id === id);
+		if (!(await saveNote())) {
+			busy = false;
+			return;
+		}
+		try {
+			const saved = await api<{ status: Status; note: string }>(itemPath(batchId, id), {
+				method: 'PATCH',
+				body: JSON.stringify({ status })
+			});
+			items = items.map((item) =>
+				item.id === id ? { ...item, status: saved.status || status } : item
+			);
+			undo = { batchId, itemId: id, status: previous };
+			message =
+				status === 'followup'
+					? 'Saved for follow-up.'
+					: status === 'archived'
+						? 'Archived.'
+						: status === 'read'
+							? 'Marked as read.'
+							: 'Marked unread.';
+			const remaining = items
+				.filter((item) => matches(item, query, topic, statusFilter, windowFilter))
+				.filter((item) => item.id !== id);
+			const nextId =
+				index < 0
+					? remaining[0]?.id
+					: before.slice(index + 1).find((item) => remaining.some((entry) => entry.id === item.id))
+							?.id || remaining[0]?.id;
+			if (nextId) await loadItem(nextId);
+			else {
+				selectedId = '';
+				page = {};
+				note = savedNote = '';
+			}
+		} catch (caught) {
+			error = `Could not save decision: ${errorText(caught)}`;
+		} finally {
+			busy = false;
+		}
+	}
+
+	async function undoDecision() {
+		if (!undo || busy || undo.batchId !== batchId) return;
+		busy = true;
+		error = '';
+		if (!(await saveNote())) {
+			busy = false;
+			return;
+		}
+		const entry = undo;
+		try {
+			const saved = await api<{ status: Status; note: string }>(itemPath(batchId, entry.itemId), {
+				method: 'PATCH',
+				body: JSON.stringify({ status: entry.status })
+			});
+			items = items.map((item) =>
+				item.id === entry.itemId ? { ...item, status: saved.status || entry.status } : item
+			);
+			undo = null;
+			message = 'Decision undone.';
+			await loadItem(entry.itemId);
+		} catch (caught) {
+			error = `Could not undo: ${errorText(caught)}`;
+		} finally {
+			busy = false;
+		}
+	}
+
+	function swipeStart(event: PointerEvent) {
+		if (event.pointerType !== 'touch' || busy || itemLoading || !(event.target instanceof Element))
+			return;
+		if (event.target.closest('button, a, textarea, input, select, details')) return;
+		touchStart = { x: event.clientX, y: event.clientY, id: event.pointerId };
+	}
+
+	function swipeEnd(event: PointerEvent) {
+		if (!touchStart || event.pointerId !== touchStart.id) return;
+		const dx = event.clientX - touchStart.x;
+		const dy = event.clientY - touchStart.y;
+		touchStart = null;
+		if (Math.abs(dx) >= 75 && Math.abs(dx) > Math.abs(dy) * 1.5)
+			void chooseStatus(dx < 0 ? 'archived' : 'followup');
+	}
+
+	function safeLink(raw: string): string | null {
+		try {
+			const url = new URL(raw);
+			return ['http:', 'https:'].includes(url.protocol) ? url.href : null;
+		} catch {
+			return null;
+		}
+	}
+
+	function formatDate(value?: string | null): string {
+		return value && Number.isFinite(Date.parse(value))
+			? new Date(value).toLocaleDateString(undefined, {
+					year: 'numeric',
+					month: 'short',
+					day: 'numeric'
+				})
+			: '';
+	}
+
+	function sourceLabel(): string {
+		const base =
+			summarySource === 'page-text'
+				? 'Based on saved page text'
+				: summarySource === 'title-only'
+					? 'Based on title only'
+					: 'Source not recorded';
+		const coverage =
+			(
+				{
+					partial: 'Partial',
+					'post-only': 'Post only',
+					'local-extract': 'Local extract'
+				} as Record<string, string>
+			)[summaryCoverage] || summaryCoverage;
+		return [summaryPreview ? 'Preview' : '', base, coverage, summaryMethod]
+			.filter(Boolean)
+			.join(' · ');
+	}
+
+	function parseTabs(value: unknown): TabInput[] {
+		const source = Array.isArray(value)
+			? value
+			: value && typeof value === 'object'
+				? 'tabs' in value
+					? value.tabs
+					: 'items' in value
+						? value.items
+						: null
+				: null;
+		if (!Array.isArray(source))
+			throw new Error('JSON must be an array or contain a tabs or items array.');
+		return source.map((entry: unknown) => {
+			if (typeof entry === 'string') return { url: entry.trim(), title: entry.trim() };
+			if (!entry || typeof entry !== 'object' || !('url' in entry) || typeof entry.url !== 'string')
+				throw new Error('Each tab needs a URL.');
+			const tab = entry as {
+				url: string;
+				title?: unknown;
+				windowId?: unknown;
+				group?: unknown;
+				tabGroup?: unknown;
+			};
+			const group = typeof tab.group === 'string' ? tab.group : undefined;
+			const tabGroup = typeof tab.tabGroup === 'string' ? tab.tabGroup : undefined;
+			return {
+				url: tab.url.trim(),
+				title:
+					typeof tab.title === 'string' && tab.title.trim() ? tab.title.trim() : tab.url.trim(),
+				...(tab.windowId != null ? { windowId: String(tab.windowId) } : {}),
+				...(group ? { group } : {}),
+				...(tabGroup ? { tabGroup } : {})
+			};
+		});
+	}
+
+	async function importBatch() {
+		if (busy || importing) return;
+		error = '';
+		message = '';
+		importing = true;
+		try {
+			if (!(await saveNote())) return;
+			let tabs: TabInput[];
+			if (importFile) {
+				if (importFile.size > 2_000_000) throw new Error('The file must be 2 MB or smaller.');
+				tabs = parseTabs(JSON.parse(await importFile.text()));
+			} else {
+				const raw = importText.trim();
+				if (raw.startsWith('[') || raw.startsWith('{')) tabs = parseTabs(JSON.parse(raw));
+				else
+					tabs = raw
+						.split(/\r?\n/)
+						.map((url) => url.trim())
+						.filter(Boolean)
+						.map((url) => ({ url, title: url }));
+			}
+			if (!tabs.length || tabs.some((tab) => !tab.url)) throw new Error('Add at least one URL.');
+			if (tabs.length > 3_000) throw new Error('A batch can contain at most 3,000 tabs.');
+			const payload = JSON.stringify({
+				name: importName.trim() || `Capture ${new Date().toLocaleDateString()}`,
+				tabs
+			});
+			if (new TextEncoder().encode(payload).length > 2_000_000)
+				throw new Error('The batch must be 2 MB or smaller.');
+			const result = await api<{ batch: Batch }>('/tools/tabs/api/batches', {
+				method: 'POST',
+				body: payload
+			});
+			// A failed refresh must not make a successful import look unsuccessful.
+			try {
+				const list = await api<{ batches: Batch[] }>('/tools/tabs/api/batches');
+				batches = list.batches;
+			} catch {
+				batches = [result.batch, ...batches];
+			}
+			importText = '';
+			importName = '';
+			importFile = null;
+			if (fileInput) fileInput.value = '';
+			await switchBatch(result.batch.id);
+			message = 'New batch saved.';
+		} catch (caught) {
+			error = `Could not import: ${errorText(caught)}`;
+		} finally {
+			importing = false;
+		}
+	}
+
+	beforeNavigate(({ cancel }) => {
+		if (note !== savedNote || noteSaving) {
+			cancel();
+			noteError = 'Save your note before leaving this page.';
+			void saveNote();
+		}
+	});
+
+	function beforeUnload(event: BeforeUnloadEvent) {
+		if (note !== savedNote || noteSaving) {
+			event.preventDefault();
+			event.returnValue = '';
+		}
+	}
+
+	onMount(() => {
+		void (async () => {
+			try {
+				const result = await api<{ batches: Batch[] }>('/tools/tabs/api/batches');
+				batches = result.batches;
+				const requested = new URLSearchParams(location.search).get('batch');
+				const initial = batches.find((batch) => batch.id === requested) || batches[0];
+				if (initial) await switchBatch(initial.id);
+				else loading = false;
+			} catch (caught) {
+				error = `Could not load your batches: ${errorText(caught)}`;
+				loading = false;
+			}
+		})();
+		return () => clearTimeout(noteTimer);
+	});
+</script>
+
+<svelte:head>
+	<title>Tab Library · swyx tools</title>
+	<meta name="robots" content="noindex, nofollow" />
+</svelte:head>
+<svelte:window on:beforeunload={beforeUnload} />
+
+<div class="library-shell">
+	<header class="library-header">
+		<div>
+			<a class="back" href={resolve('/tools')}>← Your tools</a>
+			<p class="eyebrow">YOUR PERSONAL READING PILE</p>
+			<h1>Tab Library</h1>
+			<p class="intro">A calmer place for everything you meant to come back to.</p>
+		</div>
+		<a class="account" href={resolve('/tools')}
+			>{data.user.name || data.user.email || 'Account'} <span>↗</span></a
+		>
+	</header>
+
+	<div class="toolbar">
+		<label
+			>Batch
+			<select
+				value={batchId}
+				disabled={busy || loading || !batches.length}
+				on:change={(event) => {
+					const select = event.currentTarget;
+					const id = select.value;
+					select.value = batchId;
+					void switchBatch(id);
+				}}
+			>
+				{#if !batches.length}<option value="">No batches yet</option>{/if}
+				{#each batches as batch (batch.id)}<option value={batch.id}
+						>{batch.name}{batch.count != null ? ` · ${batch.count}` : ''}</option
+					>{/each}
+			</select>
+		</label>
+		<label
+			>Find a page<input
+				type="search"
+				placeholder="Search titles, URLs, topics"
+				bind:value={query}
+			/></label
+		>
+		<label
+			>Topic<select bind:value={topic}
+				><option value="all">All topics</option>{#each topics as name (name)}<option value={name}
+						>{name}</option
+					>{/each}</select
+			></label
+		>
+		<label
+			>Status<select bind:value={statusFilter}
+				><option value="unread">Unread</option><option value="followup">Follow up</option><option
+					value="read">Read</option
+				><option value="archived">Archived</option><option value="all">All statuses</option></select
+			></label
+		>
+		{#if windows.length}
+			<label
+				>Captured window
+				<select bind:value={windowFilter}>
+					<option value="all">All windows</option>
+					{#each windows as windowId, index (windowId)}<option value={windowId}
+							>Window {index + 1}</option
+						>{/each}
+				</select>
+			</label>
+		{/if}
+	</div>
+
+	<details class="import-panel">
+		<summary>＋ Add a batch</summary>
+		<div class="import-body">
+			<p>
+				Paste URLs, one per line, or import a Chrome capture JSON file. Each import becomes a
+				separate batch.
+			</p>
+			<p>
+				<a
+					href="https://github.com/swyxio/chrometaboverflow/tree/main/extension"
+					target="_blank"
+					rel="noopener noreferrer">Set up the Chrome exporter ↗</a
+				> to download a snapshot. It never closes tabs.
+			</p>
+			<label
+				>Batch name <input
+					type="text"
+					maxlength="120"
+					placeholder="e.g. October reading"
+					bind:value={importName}
+				/></label
+			>
+			<label
+				>URLs or capture JSON <textarea
+					rows="4"
+					placeholder="https://example.com/article"
+					bind:value={importText}
+				></textarea></label
+			>
+			<label
+				>Or choose a JSON file <input
+					bind:this={fileInput}
+					type="file"
+					accept="application/json,.json"
+					on:change={(event) => (importFile = event.currentTarget.files?.[0] || null)}
+				/></label
+			>
+			<p class="hint">
+				A file takes precedence over pasted text. This saves the batch; it does not close browser
+				tabs.
+			</p>
+			<button class="primary" disabled={importing || busy} on:click={importBatch}
+				>{importing ? 'Saving…' : 'Save new batch'}</button
+			>
+		</div>
+	</details>
+
+	{#if error}<div class="alert" role="alert">
+			{error} <button aria-label="Dismiss error" on:click={() => (error = '')}>×</button>
+		</div>{/if}
+	{#if message}<div class="notice" role="status">
+			{message}{#if undo}<button disabled={busy} on:click={undoDecision}>Undo</button>{/if}
+		</div>{/if}
+
+	{#if loading}<div class="empty">
+			<span class="empty-icon">◌</span>
+			<h2>Loading your library…</h2>
+		</div>
+	{:else if !batches.length}<div class="empty">
+			<span class="empty-icon">✳</span>
+			<h2>Room to think.</h2>
+			<p>Add a batch to start your reading pile.</p>
+		</div>
+	{:else}
+		<div class="queue-head">
+			<div>
+				<span class="eyebrow">YOUR QUEUE</span>
+				<p>
+					<strong>{filtered.length}</strong>
+					{filtered.length === 1 ? 'page' : 'pages'} in this view <span>·</span>
+					{unreadCount} unread in batch
+				</p>
+			</div>
+			<span class="swipe-hint">← Archive &nbsp; · &nbsp; Follow up →</span>
+		</div>
+		<div class="review-layout">
+			<aside class="queue" aria-label="Pages in this view">
+				{#each filtered as item (item.id)}<button
+						class:active={item.id === selectedId}
+						on:click={() => openItem(item.id)}
+						disabled={busy}
+						><span>{item.domain || 'Saved page'} · {item.group || 'Reading pile'}</span><strong
+							>{item.title || item.url}</strong
+						><small
+							>{item.status === 'followup'
+								? 'Follow up'
+								: item.status === 'read'
+									? 'Read'
+									: item.status === 'archived'
+										? 'Archived'
+										: 'Unread'}</small
+						></button
+					>{/each}
+				{#if !filtered.length}<p class="queue-empty">No pages match these filters.</p>{/if}
+			</aside>
+			{#if selected}
+				<!-- Pointer swipes are optional: equivalent labelled buttons are below. -->
+				<article
+					class="card"
+					on:pointerdown={swipeStart}
+					on:pointerup={swipeEnd}
+					on:pointercancel={() => (touchStart = null)}
+				>
+					<div class="card-top">
+						<span class="topic-pill">{selected.group || 'Reading pile'}</span><span
+							>{selected.status === 'followup'
+								? 'Follow up'
+								: selected.status === 'read'
+									? 'Read'
+									: selected.status === 'archived'
+										? 'Archived'
+										: 'Unread'}</span
+						>
+					</div>
+					<p class="domain">
+						{selected.domain || 'Saved page'}{selected.lastOpened
+							? ` · ${formatDate(selected.lastOpened)}`
+							: ''}
+					</p>
+					<h2>{selected.title || selected.url}</h2>
+					{#if safeLink(selected.url)}<a
+							class="source"
+							href={safeLink(selected.url) || undefined}
+							target="_blank"
+							rel="external noopener noreferrer">Open original ↗</a
+						>{:else}<p class="source">Non-web address saved</p>{/if}
+					<p class="source-detail">{selected.url}</p>
+					{#if !filtered.some((item) => item.id === selectedId)}
+						<div class="filter-alert">
+							This page is outside the current filters.
+							{#if filtered.length}<button disabled={busy} on:click={() => openItem(filtered[0].id)}
+									>Review first matching page →</button
+								>{/if}
+						</div>
+					{/if}
+					{#if selected.tabGroups?.length}<p class="hint">
+							Chrome groups: {selected.tabGroups.join(', ')}
+						</p>{/if}
+					{#if selected.capturedWindowIds?.length}<p class="hint">
+							Captured in {selected.capturedWindowIds
+								.map((id) => `Window ${windows.indexOf(id) + 1}`)
+								.join(', ')}
+						</p>{/if}
+					{#if selected.duplicateCount && selected.duplicateCount > 1}<p class="hint">
+							{selected.duplicateCount} copies captured in this batch
+						</p>{/if}
+					{#if itemLoading}<p class="card-loading">Loading saved content…</p>
+					{:else}
+						{#if currentSummary}<section class="summary">
+								<h3>{summaryPreview ? 'Summary preview' : 'Summary'}</h3>
+								<p class="provenance">{sourceLabel()}</p>
+								<p class="summary-text">{currentSummary}</p>
+							</section>
+						{:else}<div class="no-summary">
+								{itemUnavailable
+									? 'Saved content could not be loaded. Please try again.'
+									: page.text
+										? 'Saved page text is available below.'
+										: 'Title and URL saved. No page text or summary is available.'}
+							</div>{/if}
+						{#if page.sourceNote || page.sourceTruncated}<p class="provenance">
+								{page.sourceNote || ''}{page.sourceTruncated
+									? ' · Saved page text was truncated.'
+									: ''}
+							</p>{/if}
+						{#if page.text}<details class="page-text">
+								<summary>Read saved page text</summary>
+								<div>{page.text}</div>
+							</details>{/if}
+						<label class="note-label" for="note"
+							>Your note <span
+								>{noteSaving
+									? 'Saving…'
+									: note !== savedNote
+										? 'Unsaved'
+										: note
+											? 'Saved'
+											: 'Optional'}</span
+							></label
+						>
+						<textarea
+							id="note"
+							maxlength="10000"
+							rows="3"
+							placeholder="What do you want to remember?"
+							bind:value={note}
+							on:input={scheduleNote}
+						></textarea>
+						{#if noteError}<div class="note-error" role="alert">
+								{noteError} <button on:click={() => void saveNote()}>Retry save</button>
+								<button
+									on:click={() => {
+										note = savedNote;
+										noteError = '';
+									}}>Discard unsaved edit</button
+								>
+							</div>{/if}
+					{/if}
+					<div class="decisions">
+						<button
+							class="decision read"
+							disabled={busy || itemLoading}
+							on:click={() => chooseStatus('archived')}><span>←</span> Archive</button
+						><button
+							class="decision follow"
+							disabled={busy || itemLoading}
+							on:click={() => chooseStatus('followup')}>Follow up <span>→</span></button
+						>
+					</div>
+					{#if selected.status !== 'unread'}<button
+							class="return-unread"
+							disabled={busy || itemLoading}
+							on:click={() => chooseStatus('unread')}>Return to unread</button
+						>{/if}
+				</article>
+			{:else}<div class="empty card">
+					<span class="empty-icon">✓</span>
+					<h2>{filtered.length ? 'Pick a page.' : 'Nothing in this view.'}</h2>
+					<p>
+						{filtered.length
+							? 'Choose a page from the list to continue.'
+							: 'Try another topic or status, or add a batch.'}
+					</p>
+					{#if filtered.length}<button class="primary" on:click={() => openItem(filtered[0].id)}
+							>Start reviewing</button
+						>{/if}
+				</div>{/if}
+		</div>
+	{/if}
+</div>
+
+<style>
+	.library-shell {
+		--ink: #202438;
+		--muted: #6d7282;
+		--line: #e5e5e6;
+		--accent: #554bd0;
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: clamp(1.25rem, 3vw, 2.5rem);
+		background: #f9f8f4;
+		border-radius: 18px;
+		color: var(--ink);
+		font-family: Inter, system-ui, sans-serif;
+	}
+	.library-header {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 1rem;
+		margin-bottom: 1.8rem;
+	}
+	.back,
+	.account {
+		font-size: 0.83rem;
+		font-weight: 700;
+		color: var(--accent);
+		text-decoration: none;
+	}
+	.account {
+		border: 1px solid #e2e0ed;
+		border-radius: 999px;
+		padding: 0.55rem 0.85rem;
+		white-space: nowrap;
+	}
+	.account span {
+		margin-left: 0.25rem;
+	}
+	.eyebrow {
+		font-size: 0.68rem;
+		letter-spacing: 0.11em;
+		font-weight: 800;
+		color: #79768c;
+	}
+	.library-header .eyebrow {
+		margin: 1.6rem 0 0.4rem;
+	}
+	.library-header h1 {
+		font-family: Georgia, serif;
+		font-size: clamp(2.5rem, 5vw, 4rem);
+		letter-spacing: -0.055em;
+		line-height: 1;
+		margin: 0;
+	}
+	.intro {
+		color: var(--muted);
+		margin: 0.65rem 0 0;
+		font-size: 0.95rem;
+	}
+	.toolbar {
+		display: grid;
+		grid-template-columns: 1.25fr 1.3fr 1fr 1fr 1fr;
+		gap: 0.7rem;
+		padding: 1rem;
+		background: #f4f3f6;
+		border-radius: 16px;
+	}
+	.toolbar label,
+	.import-body label {
+		display: grid;
+		gap: 0.3rem;
+		font-size: 0.7rem;
+		font-weight: 800;
+		color: #696a79;
+	}
+	.toolbar select,
+	.toolbar input,
+	.import-body input,
+	.import-body textarea {
+		width: 100%;
+		border: 1px solid #dedde4;
+		background: white;
+		border-radius: 9px;
+		padding: 0.7rem;
+		color: var(--ink);
+		font-size: 0.88rem;
+		font-weight: 500;
+		min-width: 0;
+	}
+	.toolbar select:focus,
+	.toolbar input:focus,
+	textarea:focus,
+	.import-body input:focus {
+		outline: 2px solid #a9a1fa;
+		outline-offset: 1px;
+	}
+	.import-panel {
+		margin: 0.8rem 0;
+		color: var(--accent);
+		font-size: 0.85rem;
+	}
+	.import-panel summary {
+		cursor: pointer;
+		font-weight: 750;
+		padding: 0.35rem 0;
+	}
+	.import-body {
+		display: grid;
+		gap: 0.8rem;
+		max-width: 650px;
+		margin-top: 0.75rem;
+		padding: 1rem;
+		border: 1px solid var(--line);
+		border-radius: 14px;
+		background: white;
+		color: var(--ink);
+	}
+	.import-body p {
+		margin: 0;
+		font-size: 0.83rem;
+		line-height: 1.5;
+	}
+	.hint {
+		font-size: 0.75rem;
+		color: var(--muted);
+	}
+	.primary {
+		justify-self: start;
+		background: var(--accent);
+		color: white;
+		border: 0;
+		border-radius: 9px;
+		padding: 0.7rem 1rem;
+		font-weight: 750;
+	}
+	.alert,
+	.notice {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		padding: 0.75rem 1rem;
+		border-radius: 10px;
+		margin: 1rem 0;
+		font-size: 0.85rem;
+	}
+	.alert {
+		background: #fff0ed;
+		color: #9a2b20;
+	}
+	.notice {
+		background: #efedff;
+		color: #433b9b;
+	}
+	.alert button,
+	.notice button,
+	.note-error button {
+		font-weight: 800;
+		text-decoration: underline;
+		background: none;
+		border: 0;
+		color: inherit;
+		cursor: pointer;
+	}
+	.queue-head {
+		display: flex;
+		align-items: end;
+		justify-content: space-between;
+		margin: 1.9rem 0 0.8rem;
+	}
+	.queue-head p {
+		margin: 0.25rem 0 0;
+		font-size: 0.82rem;
+		color: var(--muted);
+	}
+	.queue-head p strong {
+		color: var(--ink);
+	}
+	.queue-head p span {
+		padding: 0 0.25rem;
+	}
+	.swipe-hint {
+		font-size: 0.75rem;
+		color: var(--muted);
+		font-weight: 650;
+	}
+	.review-layout {
+		display: grid;
+		grid-template-columns: minmax(210px, 300px) minmax(0, 1fr);
+		gap: 1rem;
+		align-items: start;
+	}
+	.queue {
+		display: grid;
+		gap: 0.45rem;
+		max-height: 75vh;
+		overflow: auto;
+	}
+	.queue button {
+		display: grid;
+		gap: 0.35rem;
+		text-align: left;
+		background: #fff;
+		border: 1px solid var(--line);
+		border-radius: 12px;
+		padding: 0.85rem;
+		cursor: pointer;
+		color: var(--ink);
+	}
+	.queue button.active {
+		border-color: #8b80ec;
+		background: #f4f2ff;
+	}
+	.queue button span,
+	.queue button small {
+		font-size: 0.68rem;
+		color: var(--muted);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.queue button strong {
+		font-size: 0.85rem;
+		line-height: 1.35;
+	}
+	.queue-empty {
+		padding: 1rem;
+		color: var(--muted);
+		font-size: 0.85rem;
+	}
+	.card {
+		background: white;
+		border: 1px solid #e5e3eb;
+		border-radius: 18px;
+		padding: clamp(1.2rem, 3vw, 2rem);
+		box-shadow: 0 8px 32px #2924440c;
+		touch-action: pan-y;
+	}
+	.card-top {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		color: var(--muted);
+		font-size: 0.72rem;
+		font-weight: 700;
+	}
+	.topic-pill {
+		background: #f0eeff;
+		color: #554ac1;
+		border-radius: 999px;
+		padding: 0.4rem 0.65rem;
+	}
+	.domain {
+		font-size: 0.78rem;
+		color: var(--muted);
+		font-weight: 700;
+		margin: 1.4rem 0 0.5rem;
+	}
+	.card h2 {
+		font-family: Georgia, serif;
+		font-weight: 600;
+		font-size: clamp(1.8rem, 3vw, 2.65rem);
+		line-height: 1.08;
+		letter-spacing: -0.035em;
+		margin: 0.3rem 0 1rem;
+		overflow-wrap: anywhere;
+	}
+	.source {
+		color: var(--accent);
+		font-size: 0.85rem;
+		font-weight: 750;
+		text-decoration: none;
+	}
+	.source:hover {
+		text-decoration: underline;
+	}
+	.source-detail {
+		font-size: 0.72rem;
+		color: var(--muted);
+		overflow-wrap: anywhere;
+		margin-top: 0.35rem;
+	}
+	.filter-alert {
+		margin-top: 1rem;
+		padding: 0.8rem;
+		border-radius: 9px;
+		background: #f1efff;
+		color: #554ac1;
+		font-size: 0.8rem;
+	}
+	.filter-alert button {
+		border: 0;
+		background: none;
+		color: inherit;
+		font-weight: 800;
+		text-decoration: underline;
+		cursor: pointer;
+		padding: 0.35rem 0 0;
+		display: block;
+	}
+	.summary {
+		margin: 1.5rem 0;
+		padding: 1.15rem;
+		background: #f7f6fb;
+		border-radius: 12px;
+	}
+	.summary h3 {
+		font-size: 0.82rem;
+		margin: 0 0 0.35rem;
+	}
+	.provenance {
+		font-size: 0.7rem;
+		color: var(--muted);
+		margin: 0.3rem 0 0.7rem;
+	}
+	.summary-text {
+		font-size: 0.88rem;
+		line-height: 1.65;
+		white-space: pre-wrap;
+		margin: 0;
+		overflow-wrap: anywhere;
+	}
+	.no-summary {
+		background: #faf8f2;
+		border-radius: 10px;
+		color: #70664e;
+		font-size: 0.83rem;
+		padding: 1rem;
+		margin: 1.5rem 0;
+	}
+	.page-text {
+		border-top: 1px solid var(--line);
+		border-bottom: 1px solid var(--line);
+		padding: 0.9rem 0;
+		margin: 1rem 0;
+	}
+	.page-text summary {
+		cursor: pointer;
+		color: var(--accent);
+		font-size: 0.83rem;
+		font-weight: 750;
+	}
+	.page-text div {
+		white-space: pre-wrap;
+		overflow-wrap: anywhere;
+		max-height: 400px;
+		overflow: auto;
+		font-size: 0.85rem;
+		line-height: 1.6;
+		padding: 0.8rem 0;
+	}
+	.note-label {
+		display: flex;
+		justify-content: space-between;
+		margin: 1.35rem 0 0.5rem;
+		font-size: 0.8rem;
+		font-weight: 800;
+	}
+	.note-label span {
+		font-size: 0.7rem;
+		font-weight: 500;
+		color: var(--muted);
+	}
+	.card textarea {
+		width: 100%;
+		resize: vertical;
+		min-height: 80px;
+		border: 1px solid #dedde4;
+		border-radius: 10px;
+		padding: 0.8rem;
+		color: var(--ink);
+		font-size: 0.88rem;
+		line-height: 1.5;
+	}
+	.note-error {
+		font-size: 0.75rem;
+		color: #9a2b20;
+		margin-top: 0.5rem;
+	}
+	.card-loading {
+		font-size: 0.85rem;
+		color: var(--muted);
+		margin: 2rem 0;
+	}
+	.decisions {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 0.7rem;
+		margin-top: 1.35rem;
+	}
+	.decision {
+		border-radius: 11px;
+		border: 1px solid #e2dfec;
+		background: #f9f8fc;
+		color: #4d4664;
+		padding: 0.9rem 0.75rem;
+		font-size: 0.88rem;
+		font-weight: 800;
+		cursor: pointer;
+	}
+	.decision span {
+		font-size: 1.1rem;
+		padding: 0 0.2rem;
+	}
+	.decision.follow {
+		background: #554bd0;
+		border-color: #554bd0;
+		color: #fff;
+	}
+	.decision:hover:not(:disabled) {
+		filter: brightness(0.96);
+	}
+	button:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+	.return-unread {
+		display: block;
+		margin: 0.9rem auto 0;
+		background: none;
+		border: 0;
+		color: var(--muted);
+		font-size: 0.77rem;
+		text-decoration: underline;
+		cursor: pointer;
+	}
+	.empty {
+		text-align: center;
+		padding: 4rem 1rem;
+		color: var(--muted);
+	}
+	.empty h2 {
+		color: var(--ink);
+		font-size: 1.6rem;
+	}
+	.empty p {
+		font-size: 0.9rem;
+	}
+	.empty-icon {
+		font-size: 2rem;
+		color: #a69ce9;
+	}
+	.empty .primary {
+		margin: 1rem auto 0;
+	}
+	@media (max-width: 760px) {
+		.library-shell {
+			padding: 1rem;
+		}
+		.library-header {
+			margin-bottom: 1.25rem;
+		}
+		.library-header .eyebrow {
+			margin-top: 1.2rem;
+		}
+		.account {
+			max-width: 45%;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+		.toolbar {
+			grid-template-columns: 1fr 1fr;
+			gap: 0.55rem;
+			padding: 0.75rem;
+		}
+		.toolbar label:first-child,
+		.toolbar label:nth-child(2) {
+			grid-column: span 2;
+		}
+		.review-layout {
+			display: flex;
+			flex-direction: column-reverse;
+		}
+		.review-layout > * {
+			width: 100%;
+		}
+		.queue {
+			max-height: 240px;
+			grid-template-columns: 1fr 1fr;
+		}
+		.queue button {
+			padding: 0.7rem;
+		}
+		.queue-head {
+			margin-top: 1.3rem;
+		}
+		.card {
+			padding: 1.2rem;
+		}
+		.swipe-hint {
+			font-size: 0.67rem;
+		}
+		.card h2 {
+			font-size: 2rem;
+		}
+		.import-body {
+			padding: 0.8rem;
+		}
+	}
+	@media (max-width: 400px) {
+		.queue {
+			grid-template-columns: 1fr;
+		}
+		.account {
+			font-size: 0.72rem;
+		}
+		.decision {
+			font-size: 0.8rem;
+		}
+	}
+	@media (prefers-reduced-motion: no-preference) {
+		.decision {
+			transition: filter 120ms ease;
+		}
+	}
+</style>

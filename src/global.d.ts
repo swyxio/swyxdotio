@@ -62,10 +62,18 @@ interface D1PreparedStatement {
 	bind(...values: unknown[]): D1PreparedStatement;
 	first<T = Record<string, unknown>>(): Promise<T | null>;
 	all<T = Record<string, unknown>>(): Promise<{ results: T[]; success: boolean }>;
+	run<T = Record<string, unknown>>(): Promise<{
+		results: T[];
+		success: boolean;
+		meta: { changes: number };
+	}>;
 }
 
 interface D1Database {
 	prepare(query: string): D1PreparedStatement;
+	batch<T = Record<string, unknown>>(
+		statements: D1PreparedStatement[]
+	): Promise<Array<{ results: T[]; success: boolean }>>;
 }
 
 interface RateLimit {
@@ -123,6 +131,7 @@ declare namespace App {
 				put(key: string, value: string, options?: { expirationTtl?: number }): Promise<void>;
 			};
 			READ_COUNTERS?: D1Database;
+			TABS_DB?: D1Database;
 			READ_IP_RATE_LIMITER?: RateLimit;
 			READ_SESSION_RATE_LIMITER?: RateLimit;
 			READ_FUNNEL_RATE_LIMITER?: RateLimit;

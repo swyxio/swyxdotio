@@ -22,6 +22,7 @@
 				: null;
 	$: presenceAdmissionRate = Number(env.PUBLIC_PRESENCE_ADMISSION_RATE ?? 1);
 	$: immersiveTool = $page.url.pathname === '/tools/box' || $page.url.pathname === '/tools/draw';
+	$: privateTabTool = $page.url.pathname === '/tools/tabs';
 	let chatCollapsed = false;
 	let nick = '';
 	/** @type {LiveChat | undefined} */
@@ -73,7 +74,7 @@
 	>
 </svelte:head>
 
-<div class="site-page" class:chat-space={!chatCollapsed && !immersiveTool}>
+<div class="site-page" class:chat-space={!chatCollapsed && !immersiveTool && !privateTabTool}>
 	{#if !immersiveTool}
 		<div class="site-shell site-nav-shell">
 			<Nav onSearch={() => siteSearch?.open()} />
@@ -83,17 +84,19 @@
 	<main id="skip" class="site-main">
 		<slot />
 	</main>
-	<LiveChat
-		bind:this={liveChat}
-		bind:collapsed={chatCollapsed}
-		bind:nick
-		allowSidebar={!immersiveTool}
-		presence={chatPresence}
-		onPresenceVisibility={(hidden) => livePresence?.setHidden(hidden)}
-		onPresenceReaction={(reaction) => livePresence?.react(reaction)}
-		onPresenceShare={(event) => livePresence?.requestShare(event)}
-		onFollowReader={(id, pageKey) => livePresence?.followReader(id, pageKey)}
-	/>
+	{#if !privateTabTool}
+		<LiveChat
+			bind:this={liveChat}
+			bind:collapsed={chatCollapsed}
+			bind:nick
+			allowSidebar={!immersiveTool}
+			presence={chatPresence}
+			onPresenceVisibility={(hidden) => livePresence?.setHidden(hidden)}
+			onPresenceReaction={(reaction) => livePresence?.react(reaction)}
+			onPresenceShare={(event) => livePresence?.requestShare(event)}
+			onFollowReader={(id, pageKey) => livePresence?.followReader(id, pageKey)}
+		/>
+	{/if}
 
 	{#if !immersiveTool}
 		<footer class="site-shell site-panel literary-footer mb-8 mt-8 p-4">

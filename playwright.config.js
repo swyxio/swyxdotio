@@ -2,7 +2,7 @@
 const config = {
 	webServer: {
 		command:
-			'npm run build && npm run preview:draw -- --local --port 4173 --env-file tests/fixtures/draw.dev.vars',
+			'npm run build && npm exec -- wrangler d1 migrations apply TABS_DB --local && npm run preview:draw -- --local --port 4173 --env-file tests/fixtures/draw.dev.vars',
 		port: 4173,
 		timeout: 120_000,
 		reuseExistingServer: !process.env.CI

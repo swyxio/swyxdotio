@@ -159,6 +159,7 @@ export function safeToolsNext(value) {
 			'/tools/draw',
 			'/tools/box',
 			'/tools/podcast',
+			'/tools/tabs',
 			'/tools/reclip',
 			'/tools/logs'
 		].includes(value)
