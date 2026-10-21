@@ -74,6 +74,7 @@
 	$: unreadLabel = `${unread} unread ${unread === 1 ? 'message' : 'messages'}`;
 	let previousLogScroll = 0;
 	let wasAtLogBottom = true;
+	let followLogEnd = true;
 	$: readerStatus = presence.hidden
 		? 'Live readers hidden'
 		: !presence.pageKey || !presence.admitted || presence.stopped
@@ -278,8 +279,23 @@
 	}
 
 	async function scrollLatest() {
+		followLogEnd = true;
 		await tick();
 		if (log) log.scrollTop = log.scrollHeight;
+	}
+
+	function trackLogScroll() {
+		if (log) followLogEnd = log.scrollHeight - log.clientHeight - log.scrollTop <= 2;
+	}
+
+	/** Keep the newest message in view when the window changes size, unless the reader scrolled up. */
+	/** @param {HTMLElement} node */
+	function keepLogPosition(node) {
+		const observer = new ResizeObserver(() => {
+			if (followLogEnd) node.scrollTop = node.scrollHeight;
+		});
+		observer.observe(node);
+		return { destroy: () => observer.disconnect() };
 	}
 
 	/** @param {MessageEvent} event */
@@ -462,6 +478,7 @@
 		}
 		showReaders = false;
 		if (document.visibilityState === 'visible') unread = 0;
+		followLogEnd = wasAtLogBottom;
 		await tick();
 		if (log) log.scrollTop = wasAtLogBottom ? log.scrollHeight : previousLogScroll;
 		readerToggle?.focus({ preventScroll: true });
@@ -790,6 +807,8 @@
 							aria-label="Recent chat messages"
 							aria-live="polite"
 							bind:this={log}
+							on:scroll={trackLogScroll}
+							use:keepLogPosition
 						>
 							{#if messages.length === 0}
 								<p class="chat-empty">No recent messages. Say hello!</p>

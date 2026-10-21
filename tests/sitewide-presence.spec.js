@@ -733,6 +733,35 @@ test('returning from readers restores chat position and shows new messages at th
 		.toBeLessThanOrEqual(1);
 });
 
+test('resizing keeps the latest chat visible without pulling a reader away from older messages', async ({
+	page,
+	context
+}) => {
+	await page.setViewportSize({ width: 1100, height: 850 });
+	const now = Date.now();
+	const history = Array.from({ length: 30 }, (_, index) => ({
+		id: String(index),
+		nick: 'reader',
+		text: `Message ${index}: a longer thought that wraps when the chat becomes narrower.`,
+		createdAt: now
+	}));
+	const readers = mockReaders(history);
+	await readers.install(context);
+	await page.goto(`${baseUrl}/america250`);
+	const chat = await openChat(page);
+	const log = chat.getByRole('log', { name: 'Recent chat messages' });
+	const distanceFromBottom = () =>
+		log.evaluate((element) => element.scrollHeight - element.clientHeight - element.scrollTop);
+	await expect.poll(distanceFromBottom).toBeLessThanOrEqual(1);
+	await page.setViewportSize({ width: 390, height: 844 });
+	await expect.poll(distanceFromBottom).toBeLessThanOrEqual(1);
+
+	await log.evaluate((element) => (element.scrollTop = 0));
+	await expect.poll(() => log.evaluate((element) => element.scrollTop)).toBe(0);
+	await page.setViewportSize({ width: 1100, height: 850 });
+	await expect.poll(() => log.evaluate((element) => element.scrollTop)).toBe(0);
+});
+
 test('a collapsed chat shows a local unread badge and clears it on opening', async ({
 	page,
 	context
