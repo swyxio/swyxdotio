@@ -85,6 +85,9 @@ test('mobile chat floats over the article without moving the reader', async ({ p
 	await expect(chat).toBeVisible();
 	await expect(chat).toContainText('Messages disappear after 48 hours');
 	await expect(chat).toContainText('Backups may persist up to 30 days');
+	await chat.getByText('Details', { exact: true }).click();
+	await expect(chat.getByText(/Backups may persist up to 30 days/)).toBeVisible();
+	await chat.getByText('Details', { exact: true }).click();
 	const panel = await chat.boundingBox();
 	if (!panel) throw new Error('Floating chat was not visible');
 	expect(await chat.evaluate((element) => getComputedStyle(element).position)).toBe('fixed');
@@ -186,6 +189,23 @@ test('wide desktop chat leaves the expanded index and reading column clear', asy
 	await expect(page.getByRole('button', { name: 'Open swyx.irc chat', exact: true })).toBeVisible();
 });
 
+test('wide desktop chat can expand for a roomier conversation and remember that choice', async ({
+	page,
+	context
+}) => {
+	await page.setViewportSize({ width: 1600, height: 900 });
+	await mockChat(context);
+	await page.goto(`${baseUrl}/learn-in-public`);
+	const chat = page.getByRole('region', { name: 'swyx.irc', exact: true });
+	await chat.getByRole('button', { name: 'Expand chat' }).click();
+	await expect.poll(async () => (await chat.boundingBox())?.width).toBe(620);
+	await expect(chat.getByRole('region', { name: 'Readers and their pages' })).toBeVisible();
+	await page.reload();
+	await expect.poll(async () => (await chat.boundingBox())?.width).toBe(620);
+	await chat.getByRole('button', { name: 'Make chat compact' }).click();
+	await expect.poll(async () => (await chat.boundingBox())?.width).toBe(268);
+});
+
 test('narrow and wide layouts remember separate positions without covering the index', async ({
 	page,
 	context
@@ -284,8 +304,10 @@ test('dragging and resizing persist across reloads and stay within the viewport'
 	await page.setViewportSize({ width: 390, height: 300 });
 	const compact = await chat.boundingBox();
 	if (!compact) throw new Error('Compact chat was not visible');
-	await expect(chat.getByText(/backups up to 30 days/)).toBeVisible();
-	await expect(chat.getByText(/unverified names/)).toBeVisible();
+	await expect(chat.locator('summary').filter({ hasText: 'unverified' })).toBeVisible();
+	await chat.getByText('Details', { exact: true }).click();
+	await expect(chat.getByText(/Backups may persist up to 30 days/)).toBeAttached();
+	await chat.getByText('Details', { exact: true }).click();
 	for (const control of [
 		chat.getByLabel('Message', { exact: true }),
 		chat.getByRole('button', { name: /send/ }),
