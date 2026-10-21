@@ -350,7 +350,15 @@ test('textless media anchors identify public sources without query strings', asy
 			.locator(media)
 			.evaluate((element, path) => element.setAttribute('src', `${path}?visitor=two#end`), changed);
 		await page.mouse.move(box.x + 20, box.y + 5);
-		await expect.poll(() => readers.position('Alice')?.anchor?.[3]).not.toBe(before[3]);
+		await expect
+			.poll(() => {
+				const anchor = readers.position('Alice')?.anchor;
+				return Boolean(anchor && anchor[0] === index && anchor[3] !== before[3]);
+			})
+			.toBe(true);
+		await page.locator(media).evaluate((element) => element.removeAttribute('src'));
+		await page.mouse.move(box.x + 25, box.y + 5);
+		await expect.poll(() => readers.position('Alice')?.anchor).toBeNull();
 	}
 });
 
