@@ -27,6 +27,8 @@
 	export let onPresenceReaction = () => {};
 	/** @type {(event: MouseEvent) => void} */
 	export let onPresenceShare = () => {};
+	/** @type {(id: string, pageKey: string) => void} */
+	export let onFollowReader = () => {};
 
 	/** @typedef {{ id: string, nick: string, text: string, createdAt: number }} ChatMessage */
 	/** @typedef {{ x: number, y: number, width: number, height: number }} Geometry */
@@ -78,6 +80,11 @@
 			: !presence.connected
 				? 'Connecting readers…'
 				: `${presence.otherCount} other ${presence.otherCount === 1 ? 'reader' : 'readers'} online`;
+	$: launcherStatus = presence.hidden
+		? 'Readers hidden'
+		: presence.connected
+			? `${presence.otherCount} ${presence.otherCount === 1 ? 'other' : 'others'} here`
+			: 'Live readers';
 	const retentionMs = 48 * 60 * 60 * 1000;
 	const geometryKey = 'swyx:chat:geometry:v1';
 	let wideLayout = false;
@@ -114,12 +121,34 @@
 		};
 	}
 
+	/** Keep the persistent reader pill visible when restoring an older saved window. */
+	/** @param {Geometry} value */
+	function restoreGeometry(value) {
+		const box = clampGeometry(value);
+		const view = viewport();
+		const safeBottom = view.y + view.height - 68;
+		if (
+			box.x + box.width > view.x + view.width - 200 &&
+			box.y + box.height > safeBottom &&
+			box.height + 76 <= view.height
+		) {
+			box.y = safeBottom - box.height;
+		}
+		return box;
+	}
+
 	/** @param {boolean} wide */
 	function defaultGeometry(wide) {
 		const view = viewport();
 		const width = wide && allowSidebar ? 268 : 336;
-		const height = Math.min(wide && allowSidebar ? 576 : 510, view.height - 16);
-		return clampGeometry({ x: view.x + 16, y: view.y + view.height - height - 16, width, height });
+		const bottom = !wide && view.width < 500 && view.height >= 420 ? 68 : 16;
+		const height = Math.min(wide && allowSidebar ? 576 : 510, view.height - bottom - 8);
+		return clampGeometry({
+			x: view.x + 16,
+			y: view.y + view.height - height - bottom,
+			width,
+			height
+		});
 	}
 
 	/** @param {boolean} wide */
@@ -160,7 +189,7 @@
 			wideLayout = wide;
 			preferredGeometry = loadGeometry(wide);
 		}
-		geometry = clampGeometry(preferredGeometry);
+		geometry = restoreGeometry(preferredGeometry);
 	}
 
 	/** @param {PointerEvent} event @param {'move' | 'resize'} kind */
@@ -192,8 +221,10 @@
 	function finishGesture(event) {
 		if (!gesture || event.pointerId !== gesture.pointerId) return;
 		gesture = null;
-		if (matchMedia('(min-width: 1500px)').matches === wideLayout) rememberGeometry();
-		syncViewport();
+		if (matchMedia('(min-width: 1500px)').matches === wideLayout) {
+			rememberGeometry();
+			geometry = clampGeometry(preferredGeometry);
+		} else syncViewport();
 	}
 
 	/** @param {KeyboardEvent} event @param {'move' | 'resize'} kind */
@@ -325,7 +356,7 @@
 	}
 
 	async function openChat() {
-		geometry = clampGeometry(preferredGeometry);
+		geometry = restoreGeometry(preferredGeometry);
 		collapsed = false;
 		if (!showReaders && document.visibilityState === 'visible') unread = 0;
 		reconnectAttempt = 0;
@@ -354,6 +385,28 @@
 			return;
 		showReaders = false;
 		void closeChat();
+	}
+
+	/** @param {MouseEvent} event @param {string} id @param {string} pageKey */
+	function followReader(event, id, pageKey) {
+		if (
+			event.defaultPrevented ||
+			event.button !== 0 ||
+			event.metaKey ||
+			event.ctrlKey ||
+			event.shiftKey ||
+			event.altKey
+		)
+			return;
+		showReaders = false;
+		if (pageKey === presence.pageKey) {
+			event.preventDefault();
+			// Closing the chat can change the reading column on wide screens.
+			void closeChat().then(() => requestAnimationFrame(() => onFollowReader(id, pageKey)));
+		} else {
+			onFollowReader(id, pageKey);
+			void closeChat();
+		}
 	}
 
 	/** @param {SubmitEvent} event */
@@ -448,7 +501,7 @@
 		} catch {
 			// Guest nicknames also work without browser storage.
 		}
-		geometry = clampGeometry(preferredGeometry);
+		geometry = restoreGeometry(preferredGeometry);
 		if (!nick) nick = `reader${Math.floor(1000 + Math.random() * 9000)}`;
 		rememberNick();
 		ready = true;
@@ -462,8 +515,10 @@
 		const onBlur = () => {
 			if (!gesture) return;
 			gesture = null;
-			if (matchMedia('(min-width: 1500px)').matches === wideLayout) rememberGeometry();
-			syncViewport();
+			if (matchMedia('(min-width: 1500px)').matches === wideLayout) {
+				rememberGeometry();
+				geometry = clampGeometry(preferredGeometry);
+			} else syncViewport();
 		};
 		document.addEventListener('visibilitychange', onVisibility);
 		window.addEventListener('resize', syncViewport);
@@ -485,27 +540,29 @@
 </script>
 
 {#if ready}
-	{#if collapsed}
-		<button
-			class="chat-launcher"
-			type="button"
-			bind:this={launcher}
-			aria-label="Open swyx.irc chat"
-			aria-describedby="chat-reader-summary"
-			aria-expanded={!collapsed}
-			aria-controls="live-chat"
-			on:click={openChat}
+	<button
+		class="chat-launcher"
+		type="button"
+		bind:this={launcher}
+		aria-label={collapsed ? 'Open swyx.irc chat' : 'Close swyx.irc chat'}
+		title={collapsed ? 'Open swyx.irc chat' : 'Close swyx.irc chat'}
+		aria-describedby="chat-reader-summary"
+		aria-expanded={!collapsed}
+		aria-controls="live-chat"
+		on:click={() => (collapsed ? openChat() : closeChat())}
+	>
+		<span
+			class:online={presence.connected && !presence.hidden}
+			class="launcher-dot"
+			aria-hidden="true"
+		></span>
+		{launcherStatus} <span aria-hidden="true">· 👋</span>
+		{#if unread}<span class="unread-badge" aria-hidden="true">{unread > 99 ? '99+' : unread}</span
+			>{/if}
+		<span id="chat-reader-summary" class="visually-hidden" aria-live="polite"
+			>{readerStatus}{unread ? `; ${unreadLabel}` : ''}</span
 		>
-			<span aria-hidden="true">#</span> swyx.irc{#if presence.connected}<span aria-hidden="true">
-					· {presence.otherCount} online</span
-				>{/if}
-			{#if unread}<span class="unread-badge" aria-hidden="true">{unread > 99 ? '99+' : unread}</span
-				>{/if}
-			<span id="chat-reader-summary" class="visually-hidden" aria-live="polite"
-				>{readerStatus}{unread ? `; ${unreadLabel}` : ''}</span
-			>
-		</button>
-	{/if}
+	</button>
 	{#if !collapsed}
 		<!-- Escape dismisses the region when focus is inside it. -->
 		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
@@ -587,7 +644,16 @@
 											<span>{item.count} {item.count === 1 ? 'reader' : 'readers'}</span>
 											{#if item.readers.length}
 												<div class="reader-names">
-													{item.readers.map((reader) => reader.nick).join(', ')}
+													{#each item.readers as reader, index (reader.id)}
+														{#if index > 0},
+														{/if}<a
+															href={resolve(/** @type {`/${string}`} */ (item.path || '/'))}
+															aria-label={`Find ${reader.nick} on ${item.title || item.path}`}
+															title={`Find ${reader.nick} on this page`}
+															on:click={(event) => followReader(event, reader.id, item.key)}
+															>{reader.nick}</a
+														>
+													{/each}
 												</div>
 											{/if}
 										</li>
@@ -633,9 +699,16 @@
 								<li>
 									<span class="chat-reading-names">
 										{#if item.readers.length}
-											{item.readers
-												.map((reader) => reader.nick)
-												.join(', ')}{#if item.count > item.readers.length}, +{item.count -
+											{#each item.readers as reader, index (reader.id)}
+												{#if index > 0},
+												{/if}<a
+													href={resolve(/** @type {`/${string}`} */ (item.path || '/'))}
+													aria-label={`Find ${reader.nick} on ${item.title || item.path}`}
+													title={`Find ${reader.nick} on this page`}
+													on:click={(event) => followReader(event, reader.id, item.key)}
+													>{reader.nick}</a
+												>
+											{/each}{#if item.count > item.readers.length}, +{item.count -
 													item.readers.length} more{/if}
 										{:else}
 											{item.count} {item.count === 1 ? 'reader' : 'readers'}
@@ -767,21 +840,31 @@
 <style>
 	.chat-launcher {
 		position: fixed;
-		z-index: 60;
-		left: max(0.75rem, env(safe-area-inset-left));
+		z-index: 59;
+		right: max(0.75rem, env(safe-area-inset-right));
 		bottom: max(0.75rem, env(safe-area-inset-bottom));
 		min-height: 44px;
-		border: 1px solid #384c3e;
-		border-radius: 5px;
-		background: #1d2a22;
-		color: #f0f1e9;
+		border: 1px solid var(--page-border);
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--page-surface) 94%, transparent);
+		color: var(--page-text);
 		padding: 0.55rem 0.8rem;
-		box-shadow: 0 3px 12px rgb(0 0 0 / 0.15);
-		font: 600 0.85rem/1.1 var(--font-mono);
+		box-shadow: 0 8px 24px rgb(15 23 42 / 0.13);
+		backdrop-filter: blur(10px);
+		font: 600 0.8rem/1.1 var(--font-body);
 		cursor: pointer;
 	}
-	.chat-launcher span {
-		color: #a5d5aa;
+	.launcher-dot {
+		display: inline-block;
+		width: 7px;
+		height: 7px;
+		margin-right: 5px;
+		border-radius: 50%;
+		background: var(--page-muted);
+	}
+	.launcher-dot.online {
+		background: #16a34a;
+		box-shadow: 0 0 0 3px rgb(22 163 74 / 0.14);
 	}
 	.chat-launcher .unread-badge {
 		display: inline-grid;
@@ -904,6 +987,9 @@
 		color: #f0f1e9;
 		text-decoration: underline;
 		text-underline-offset: 2px;
+	}
+	.chat-reading .chat-reading-names a {
+		color: #b8e5bb;
 	}
 	.chat-log {
 		flex: 1;
@@ -1183,25 +1269,12 @@
 		white-space: nowrap;
 		border: 0;
 	}
-	.chat :is(button, input, textarea):focus-visible,
-	.chat-launcher:focus-visible {
+	.chat :is(button, input, textarea):focus-visible {
 		outline: 2px solid #d9f8d7;
 		outline-offset: 2px;
 	}
-	@media (max-width: 1240px) {
-		.chat-launcher {
-			left: 0;
-			right: auto;
-			top: 50%;
-			bottom: auto;
-			width: var(--site-gutter);
-			padding: 0.6rem 0;
-			border-radius: 0 5px 5px 0;
-			box-shadow: none;
-			font-size: 0.7rem;
-			line-height: 1;
-			writing-mode: vertical-rl;
-			transform: translateY(-50%);
-		}
+	.chat-launcher:focus-visible {
+		outline: 2px solid var(--page-accent);
+		outline-offset: 2px;
 	}
 </style>

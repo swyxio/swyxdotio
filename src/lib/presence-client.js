@@ -10,7 +10,27 @@ const COUNTRY_CODE = /^[A-Z]{2}$/;
 const COLOR = /^#[0-9a-f]{6}$/i;
 const MODES = new Set(PRESENCE_MODES);
 
+// A follow request stays in this tab's client-side module while SvelteKit
+// changes routes. It is neither sent to the server nor written into the URL.
+/** @type {{ id: string, pageKey: string, expiresAt: number } | null} */
+let pendingReader = null;
+
+/** @param {string} id @param {string} pageKey */
+export function queueReaderFollow(id, pageKey) {
+	pendingReader = { id, pageKey, expiresAt: Date.now() + 15_000 };
+}
+
+export function pendingReaderFollow() {
+	if (pendingReader && pendingReader.expiresAt <= Date.now()) pendingReader = null;
+	return pendingReader;
+}
+
+export function clearReaderFollow() {
+	pendingReader = null;
+}
+
 /** @typedef {'d' | 'r' | 't'} PresenceMode */
+/** @typedef {[number, number, number, number]} PresenceAnchor */
 /**
  * @typedef PresencePeer
  * @property {string} id
@@ -19,6 +39,7 @@ const MODES = new Set(PRESENCE_MODES);
  * @property {number} x
  * @property {number} y
  * @property {PresenceMode} mode
+ * @property {PresenceAnchor | null} anchor
  * @property {number} updatedAt
  * @property {string | null} reaction
  * @property {number} reactionAt
@@ -34,7 +55,7 @@ const MODES = new Set(PRESENCE_MODES);
  * @typedef {{ type: 'welcome', selfId: string, peers: PresencePeer[] }
  * | { type: 'snapshot', peers: PresencePeer[] }
  * | { type: 'join', peer: PresencePeer }
- * | { type: 'move', id: string, x: number, y: number, mode: PresenceMode, now: number }
+ * | { type: 'move', id: string, x: number, y: number, mode: PresenceMode, anchor: PresenceAnchor | null, now: number }
  * | { type: 'reaction', id: string, reaction: string, now: number }
  * | { type: 'leave', id: string }
  * | { type: 'celebration', id: string, now: number }
@@ -103,6 +124,21 @@ export function shouldSendPosition(previous, next, now, minimumInterval, minimum
 	return distance >= minimumMovement;
 }
 
+/** @param {unknown[]} values @param {number} start @returns {PresenceAnchor | null} */
+function parseAnchor(values, start) {
+	const anchor = values.slice(start, start + 4);
+	const limits = [65_535, 10_000, 10_000, 4_294_967_295];
+	return anchor.length === 4 &&
+		anchor.every(
+			(value, index) =>
+				Number.isInteger(value) &&
+				/** @type {number} */ (value) >= 0 &&
+				/** @type {number} */ (value) <= limits[index]
+		)
+		? /** @type {PresenceAnchor} */ (anchor)
+		: null;
+}
+
 /** @param {unknown[]} values @param {number} now */
 function parsePeer(values, now) {
 	const [id, country, color, x, y, mode] = values;
@@ -125,6 +161,7 @@ function parsePeer(values, now) {
 		x: clampUnit(x),
 		y: clampUnit(y),
 		mode,
+		anchor: parseAnchor(values, 6),
 		updatedAt: now,
 		reaction: null,
 		reactionAt: 0,
@@ -221,6 +258,7 @@ export function parsePresenceFrame(input, now = Date.now()) {
 			x: clampUnit(input[3]),
 			y: clampUnit(input[4]),
 			mode: /** @type {PresenceMode} */ (input[5]),
+			anchor: parseAnchor(input, 6),
 			now
 		};
 	}
@@ -243,9 +281,11 @@ export function reconnectDelay(attempt, random = Math.random()) {
 	return Math.round(base * (0.75 + clampUnit(random) * 0.5));
 }
 
-/** @param {number} x @param {number} y @param {PresenceMode} mode */
-export function positionFrame(x, y, mode) {
-	return JSON.stringify([1, 'p', clampUnit(x), clampUnit(y), mode]);
+/** @param {number} x @param {number} y @param {PresenceMode} mode @param {PresenceAnchor | null} [anchor] */
+export function positionFrame(x, y, mode, anchor = null) {
+	const position = [1, 'p', clampUnit(x), clampUnit(y), mode];
+	const validated = anchor && parseAnchor(anchor, 0);
+	return JSON.stringify(validated ? [...position, ...validated] : position);
 }
 
 /** @param {string} reaction */

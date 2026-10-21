@@ -92,7 +92,7 @@ export function parsePresenceClientFrame(raw) {
 
 	if (frame[1] === 'p') {
 		if (
-			frame.length !== 5 ||
+			(frame.length !== 5 && frame.length !== 9) ||
 			typeof frame[2] !== 'number' ||
 			!Number.isFinite(frame[2]) ||
 			typeof frame[3] !== 'number' ||
@@ -101,12 +101,29 @@ export function parsePresenceClientFrame(raw) {
 		) {
 			return null;
 		}
+		if (
+			frame.length === 9 &&
+			(!Number.isInteger(frame[5]) ||
+				frame[5] < 0 ||
+				frame[5] > 65_535 ||
+				!Number.isInteger(frame[6]) ||
+				frame[6] < 0 ||
+				frame[6] > 10_000 ||
+				!Number.isInteger(frame[7]) ||
+				frame[7] < 0 ||
+				frame[7] > 10_000 ||
+				!Number.isInteger(frame[8]) ||
+				frame[8] < 0 ||
+				frame[8] > 4_294_967_295)
+		)
+			return null;
 
 		return {
 			type: 'position',
 			x: Math.round(clampPresenceCoordinate(frame[2]) * 10_000) / 10_000,
 			y: Math.round(clampPresenceCoordinate(frame[3]) * 10_000) / 10_000,
-			mode: frame[4]
+			mode: frame[4],
+			...(frame.length === 9 ? { anchor: frame.slice(5) } : {})
 		};
 	}
 

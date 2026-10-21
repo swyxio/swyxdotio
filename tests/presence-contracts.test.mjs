@@ -28,6 +28,27 @@ test('parses, enumerates, and clamps compact client frames', () => {
 		y: 1,
 		mode: 't'
 	});
+	assert.deepEqual(parsePresenceClientFrame('[1,"p",0.2,0.4,"d",65535,10000,0,4294967295]'), {
+		type: 'position',
+		x: 0.2,
+		y: 0.4,
+		mode: 'd',
+		anchor: [65535, 10000, 0, 4294967295]
+	});
+	for (const anchor of [
+		[0, 0, 0],
+		[-1, 0, 0, 1],
+		[65536, 0, 0, 1],
+		[0, 10001, 0, 1],
+		[0, 0, -1, 1],
+		[0, 0, 0, 4294967296],
+		[0, 0, 0, 0.5]
+	]) {
+		assert.equal(
+			parsePresenceClientFrame(JSON.stringify([1, 'p', 0.2, 0.4, 'd', ...anchor])),
+			null
+		);
+	}
 	assert.deepEqual(parsePresenceClientFrame('[1,"r","👋"]'), {
 		type: 'reaction',
 		reaction: '👋'
@@ -50,6 +71,15 @@ test('rejects oversized input and output frames', () => {
 	assert.equal(
 		presenceFrame([1, 'p', 'deadbeef', 0.5, 0.5, 'd']),
 		'[1,"p","deadbeef",0.5,0.5,"d"]'
+	);
+	assert.ok(
+		new TextEncoder().encode(
+			presenceFrame([
+				1,
+				's',
+				[['a'.repeat(24), 'XX', '#FFFFFF', 1, 1, 'd', 65535, 10000, 10000, 4294967295]]
+			])
+		).length <= PRESENCE_FRAME_LIMIT
 	);
 });
 

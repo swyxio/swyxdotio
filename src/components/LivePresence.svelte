@@ -2,6 +2,7 @@
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import { canonicalPresencePath } from '$lib/read-counter';
+	import { capturePresenceAnchor, resolvePresenceAnchor } from '$lib/presence-anchor';
 	import { PRESENCE_NICK_INTERVAL_MS } from '$lib/presence-contracts';
 	import {
 		PRESENCE_ADMISSION_PREFIX,
@@ -9,12 +10,15 @@
 		PRESENCE_SHARE_REQUEST_EVENT,
 		PRESENCE_VISIBILITY_KEY,
 		celebrationFrame,
+		clearReaderFollow,
 		countryFlag,
 		countryLabel,
 		decideAdmission,
 		nicknameFrame,
+		pendingReaderFollow,
 		parsePresenceFrame,
 		positionFrame,
+		queueReaderFollow,
 		reactionFrame,
 		reconnectDelay,
 		shouldSendPosition
@@ -40,10 +44,13 @@
 	let selfId = null;
 	/** @type {Intl.DisplayNames | null} */
 	let regionNames = null;
-	/** @type {{ x: number, y: number, sentAt: number } | null} */
+	/** @type {{ x: number, y: number, mode: 'd' | 'r' | 't', anchor: import('$lib/presence-client').PresenceAnchor | null, sentAt: number } | null} */
 	let lastPosition = null;
+	let positionTimer = 0;
 	/** @type {{ x: number, y: number } | null} */
 	let localTouch = null;
+	/** @type {{ x: number, y: number } | null} */
+	let lastPointer = null;
 	let hidden = false;
 	let admitted = false;
 	let connected = false;
@@ -90,15 +97,42 @@
 		otherCount: otherPages.reduce((sum, item) => sum + item.count, 0)
 	});
 
-	/** @param {import('$lib/presence-client').PresencePeer} peer */
-	function peerPosition(peer) {
-		viewportTick;
+	/** @param {import('$lib/presence-client').PresencePeer} peer @param {number} viewportVersion */
+	function peerPosition(peer, viewportVersion) {
+		viewportVersion;
+		const anchored = resolvePresenceAnchor(peer.anchor);
+		if (anchored) return anchored;
 		const width = Math.max(document.documentElement.scrollWidth, window.innerWidth);
 		const height = Math.max(document.documentElement.scrollHeight, window.innerHeight);
 		return {
 			x: peer.x * width - window.scrollX,
 			y: peer.y * height - window.scrollY
 		};
+	}
+
+	function completeReaderFollow() {
+		const target = pendingReaderFollow();
+		if (!target || target.pageKey !== pageKey || hidden) return;
+		const peer = peers.get(target.id);
+		if (!peer || peer.id === selfId) return;
+		clearReaderFollow();
+		const position = peerPosition(peer, viewportTick);
+		window.scrollTo({
+			top: Math.max(0, position.y + window.scrollY - window.innerHeight / 2),
+			behavior: 'instant'
+		});
+	}
+
+	/** Jump to a live reader now, or when their destination page has connected. */
+	/** @param {string} id @param {string} targetPageKey */
+	export function followReader(id, targetPageKey) {
+		if (hidden || !admitted || !connected || id === selfId) return;
+		queueReaderFollow(id, targetPageKey);
+		if (targetPageKey === pageKey) {
+			completeReaderFollow();
+			// A departed reader may remain in the roster briefly.
+			clearReaderFollow();
+		}
 	}
 
 	/** @param {string} country @param {string} name */
@@ -136,31 +170,72 @@
 
 	/** @param {number} x @param {number} y @param {'d' | 'r' | 't'} mode @param {number} interval @param {number} movement */
 	function sendPosition(x, y, mode, interval, movement) {
+		if (hidden || document.visibilityState !== 'visible' || socket?.readyState !== WebSocket.OPEN)
+			return;
 		const now = Date.now();
 		const next = { x, y };
-		if (!shouldSendPosition(lastPosition, next, now, interval, movement)) return;
-		send(positionFrame(x, y, mode));
-		lastPosition = { ...next, sentAt: now };
+		window.clearTimeout(positionTimer);
+		if (lastPosition && now - lastPosition.sentAt < interval) {
+			positionTimer = window.setTimeout(
+				() => sendPosition(x, y, mode, interval, movement),
+				interval - (now - lastPosition.sentAt)
+			);
+			return;
+		}
+		const width = Math.max(document.documentElement.scrollWidth, window.innerWidth);
+		const height = Math.max(document.documentElement.scrollHeight, window.innerHeight);
+		const anchor = capturePresenceAnchor(
+			x * width - window.scrollX,
+			y * height - window.scrollY,
+			mode === 'r'
+		);
+		const previousAnchor = lastPosition?.anchor;
+		const anchorChanged =
+			Boolean(anchor) !== Boolean(previousAnchor) ||
+			(anchor &&
+				previousAnchor &&
+				anchor.some((value, index) =>
+					index === 1 || index === 2
+						? Math.abs(value - previousAnchor[index]) >= 30
+						: value !== previousAnchor[index]
+				));
+		if (
+			lastPosition?.mode === mode &&
+			!anchorChanged &&
+			!shouldSendPosition(lastPosition, next, now, interval, movement)
+		)
+			return;
+		if (send(positionFrame(x, y, mode, anchor)))
+			lastPosition = { ...next, mode, anchor, sentAt: now };
 	}
 
 	function sendReadingDepth() {
 		const height = Math.max(document.documentElement.scrollHeight, window.innerHeight);
 		const depth = (window.scrollY + window.innerHeight / 2) / height;
-		sendPosition(0.985, depth, 'r', 1_000, 0.002);
+		sendPosition(0.985, depth, 'r', 1_000, 0.0001);
+	}
+
+	function sendViewportPosition() {
+		if (isMobile || !lastPointer) {
+			sendReadingDepth();
+			return;
+		}
+		const width = Math.max(document.documentElement.scrollWidth, window.innerWidth);
+		const height = Math.max(document.documentElement.scrollHeight, window.innerHeight);
+		sendPosition(
+			(Math.min(window.innerWidth, Math.max(0, lastPointer.x)) + window.scrollX) / width,
+			(Math.min(window.innerHeight, Math.max(0, lastPointer.y)) + window.scrollY) / height,
+			'd',
+			250,
+			0.0001
+		);
 	}
 
 	/** @param {PointerEvent} event */
 	function handlePointerMove(event) {
 		if (isMobile || event.pointerType === 'touch') return;
-		const width = Math.max(document.documentElement.scrollWidth, window.innerWidth);
-		const height = Math.max(document.documentElement.scrollHeight, window.innerHeight);
-		sendPosition(
-			(event.clientX + window.scrollX) / width,
-			(event.clientY + window.scrollY) / height,
-			'd',
-			250,
-			0.01
-		);
+		lastPointer = { x: event.clientX, y: event.clientY };
+		sendViewportPosition();
 	}
 
 	/** @param {TouchEvent} event */
@@ -175,7 +250,7 @@
 			(touch.clientY + window.scrollY) / height,
 			't',
 			250,
-			0.01
+			0.0001
 		);
 		window.clearTimeout(handleTouch.fadeTimer);
 		handleTouch.fadeTimer = window.setTimeout(() => {
@@ -211,6 +286,8 @@
 			siteReaders.delete(frame.id);
 		} else if (frame.type === 'siteSnapshotComplete') {
 			siteSnapshotComplete = true;
+			// Snapshots precede this marker. A missing target has left the page.
+			if (pendingReaderFollow()?.pageKey === pageKey) clearReaderFollow();
 		} else if (frame.type === 'welcome') {
 			selfId = frame.selfId;
 			peers = new SvelteMap(frame.peers.map((peer) => [peer.id, peer]));
@@ -218,8 +295,10 @@
 		} else if (frame.type === 'snapshot') {
 			peers = new SvelteMap(peers);
 			for (const peer of frame.peers) peers.set(peer.id, peer);
+			completeReaderFollow();
 		} else if (frame.type === 'join') {
 			peers = new SvelteMap(peers).set(frame.peer.id, frame.peer);
+			completeReaderFollow();
 		} else if (frame.type === 'move') {
 			const peer = peers.get(frame.id);
 			if (peer)
@@ -228,6 +307,7 @@
 					x: frame.x,
 					y: frame.y,
 					mode: frame.mode,
+					anchor: frame.anchor,
 					updatedAt: frame.now
 				});
 		} else if (frame.type === 'reaction') {
@@ -250,6 +330,8 @@
 	/** @param {boolean} immediate */
 	function disconnect(immediate = false) {
 		connected = false;
+		window.clearTimeout(positionTimer);
+		if (pendingReaderFollow()?.pageKey === pageKey) clearReaderFollow();
 		const current = socket;
 		socket = null;
 		if (current && current.readyState < WebSocket.CLOSING)
@@ -284,10 +366,14 @@
 			lastPosition = null;
 			lastSentNick = '';
 			lastNickAt = 0;
-			if (isMobile) sendReadingDepth();
+			// If no pointer is known yet, publish the viewport instead of the
+			// server's default cursor position.
+			sendViewportPosition();
 		});
 		nextSocket.addEventListener('close', (event) => {
 			if (socket !== nextSocket) return;
+			window.clearTimeout(positionTimer);
+			if (pendingReaderFollow()?.pageKey === pageKey) clearReaderFollow();
 			socket = null;
 			connected = false;
 			peers = new SvelteMap();
@@ -313,6 +399,7 @@
 	/** @param {boolean} nextHidden */
 	export function setHidden(nextHidden, persist = true) {
 		hidden = nextHidden;
+		if (hidden) clearReaderFollow();
 		try {
 			if (persist && hidden) localStorage.setItem(PRESENCE_VISIBILITY_KEY, 'yes');
 			else if (persist) localStorage.removeItem(PRESENCE_VISIBILITY_KEY);
@@ -347,6 +434,8 @@
 	}
 
 	onMount(() => {
+		// An unrelated navigation must not cause a later surprise jump.
+		if (pendingReaderFollow() && pendingReaderFollow()?.pageKey !== pageKey) clearReaderFollow();
 		const mobileQuery = matchMedia('(pointer: coarse), (max-width: 700px)');
 		const motionQuery = matchMedia('(prefers-reduced-motion: reduce)');
 		const updateMedia = () => {
@@ -369,6 +458,7 @@
 		} catch {
 			admitted = decideAdmission(admissionRate, null);
 		}
+		if ((hidden || !admitted) && pendingReaderFollow()?.pageKey === pageKey) clearReaderFollow();
 
 		let hiddenCloseTimer = 0;
 		let connectTimer = 0;
@@ -389,7 +479,20 @@
 		};
 		const handleViewport = () => {
 			viewportTick += 1;
-			if (isMobile) sendReadingDepth();
+			sendViewportPosition();
+		};
+		const cancelPendingFollow = () => {
+			if (pendingReaderFollow()?.pageKey === pageKey) clearReaderFollow();
+		};
+		/** @param {KeyboardEvent} event */
+		const handleScrollKey = (event) => {
+			if (
+				event.target instanceof HTMLElement &&
+				event.target.closest('input, textarea, [contenteditable]')
+			)
+				return;
+			if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key))
+				cancelPendingFollow();
 		};
 		const handleCelebration = () => {
 			if (celebrated) return;
@@ -408,6 +511,9 @@
 		window.addEventListener('touchstart', handleTouch, { passive: true });
 		window.addEventListener('touchmove', handleTouch, { passive: true });
 		window.addEventListener('scroll', handleViewport, { passive: true });
+		window.addEventListener('wheel', cancelPendingFollow, { passive: true });
+		window.addEventListener('touchstart', cancelPendingFollow, { passive: true });
+		window.addEventListener('keydown', handleScrollKey);
 		window.addEventListener('resize', handleViewport);
 		window.addEventListener(PRESENCE_SHARE_CELEBRATION_EVENT, handleCelebration);
 		window.addEventListener('storage', handleStorage);
@@ -421,12 +527,16 @@
 			window.clearTimeout(hiddenCloseTimer);
 			window.clearTimeout(handleTouch.fadeTimer);
 			window.clearTimeout(nickTimer);
+			window.clearTimeout(positionTimer);
 			window.clearInterval(clockTimer);
 			document.removeEventListener('visibilitychange', handleVisibility);
 			window.removeEventListener('pointermove', handlePointerMove);
 			window.removeEventListener('touchstart', handleTouch);
 			window.removeEventListener('touchmove', handleTouch);
 			window.removeEventListener('scroll', handleViewport);
+			window.removeEventListener('wheel', cancelPendingFollow);
+			window.removeEventListener('touchstart', cancelPendingFollow);
+			window.removeEventListener('keydown', handleScrollKey);
 			window.removeEventListener('resize', handleViewport);
 			window.removeEventListener(PRESENCE_SHARE_CELEBRATION_EVENT, handleCelebration);
 			window.removeEventListener('storage', handleStorage);
@@ -441,24 +551,27 @@
 		{#if !hidden}
 			<div class="reading-rail" aria-hidden="true"></div>
 			{#each peerList as peer (peer.id)}
-				{@const position = peerPosition(peer)}
+				{@const position = peerPosition(peer, viewportTick)}
+				{@const readingDepth =
+					(position.y + window.scrollY) /
+					Math.max(document.documentElement.scrollHeight, window.innerHeight)}
 				{@const flag = countryFlag(peer.country)}
 				{@const name = siteReaders.get(peer.id)?.nick || `reader${peer.id.slice(0, 4)}`}
 				{@const label = peerLabel(peer.country, name)}
 				{#if peer.mode === 'r'}
 					<span
 						class="rail-marker"
-						style={`--presence-y:${Math.min(0.94, Math.max(0.06, peer.y))};--presence-color:${peer.color}`}
+						style={`--presence-y:${Math.min(0.94, Math.max(0.06, readingDepth))};--presence-color:${peer.color}`}
 						title={label}
 						aria-label={label}>{flag}<span class="rail-name" aria-hidden="true">{name}</span></span
 					>
-				{:else if position.y < 38 || position.y > innerHeight - 48}
+				{:else if position.y < 0 || position.y > innerHeight - 21}
 					<span
-						class:bottom={position.y > innerHeight - 48}
+						class:bottom={position.y > innerHeight - 21}
 						class="offscreen-marker"
 						style={`--presence-x:${Math.min(innerWidth - 36, Math.max(14, position.x))}px;--presence-color:${peer.color}`}
 						title={label}
-						aria-label={`${label}, ${position.y < 38 ? 'above' : 'below'} the viewport`}
+						aria-label={`${label}, ${position.y < 0 ? 'above' : 'below'} the viewport`}
 						>{flag} {name}</span
 					>
 				{:else}
@@ -472,7 +585,10 @@
 						<svg viewBox="0 0 24 28" aria-hidden="true"
 							><path d="M2 2v21l5.3-5.2 3.7 8.1 4-1.9-3.7-7.8h7.4L2 2Z" /></svg
 						>
-						<span class:flip={position.x > innerWidth - 220} class="country-tag">{flag} {name}</span
+						<span
+							class:above={position.y > innerHeight - 55}
+							class:flip={position.x > innerWidth - 220}
+							class="country-tag">{flag} {name}</span
 						>
 					</span>
 				{/if}
@@ -543,6 +659,10 @@
 	.country-tag.flip {
 		left: auto;
 		right: 0;
+	}
+	.country-tag.above {
+		top: auto;
+		bottom: 16px;
 	}
 	.reading-rail {
 		display: none;

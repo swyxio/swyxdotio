@@ -45,6 +45,30 @@ test('protocol parser accepts enumerated compact frames and rejects arbitrary da
 	assert.equal(parsePresenceFrame({ event: 'move' }), null);
 });
 
+test('article anchors extend frames while old or malformed anchors fall back safely', () => {
+	const anchor = [42, 5000, 7500, 12345678];
+	const position = JSON.parse(positionFrame(0.1, 0.2, 'd', anchor));
+	assert.deepEqual(position, [1, 'p', 0.1, 0.2, 'd', ...anchor]);
+	const move = parsePresenceFrame([1, 'm', 'peer', 0.1, 0.2, 'd', ...anchor]);
+	assert.deepEqual(move?.anchor, anchor);
+	const snapshot = parsePresenceFrame([
+		1,
+		's',
+		[['peer', 'us', '#2563eb', 0.1, 0.2, 'd', ...anchor]]
+	]);
+	assert.deepEqual(snapshot?.peers[0].anchor, anchor);
+	const oldSnapshot = parsePresenceFrame([1, 's', [['peer', 'us', '#2563eb', 0.1, 0.2, 'd']]]);
+	assert.equal(oldSnapshot?.peers[0].anchor, null);
+	assert.equal(parsePresenceFrame([1, 'm', 'peer', 0.1, 0.2, 'd', 42, 5001, -1, 3])?.anchor, null);
+	assert.deepEqual(JSON.parse(positionFrame(0.1, 0.2, 'd', [42, -1, 4, 5])), [
+		1,
+		'p',
+		0.1,
+		0.2,
+		'd'
+	]);
+});
+
 test('sitewide presence frames reject invalid pages and counts', () => {
 	assert.deepEqual(parsePresenceFrame([1, 'g', 'article:america250', 2, 'What America means']), {
 		type: 'sitePage',

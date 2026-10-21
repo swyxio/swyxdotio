@@ -117,6 +117,38 @@ test('nickname and page updates reach the roster while cursor traffic stays page
 	}
 });
 
+test('content anchors stay page-scoped and survive snapshot and hibernation', async () => {
+	const ctx = new FakeContext();
+	const fixture = setup();
+	const oldWarn = console.warn;
+	console.warn = () => {};
+	try {
+		let room = new PresenceRoom(ctx, {});
+		const first = (await fixture.connect(room, 'article:post', 'Post')).socket;
+		const otherPage = (await fixture.connect(room, 'page:home', 'Home')).socket;
+		const samePage = (await fixture.connect(room, 'article:post', 'Post')).socket;
+		const id = first.deserializeAttachment().id;
+		const anchor = [42, 2300, 7500, 4294967295];
+		room.webSocketMessage(first, JSON.stringify([1, 'p', 0.2, 0.4, 'd', ...anchor]));
+		assert.deepEqual(framesOf(samePage, 'm').at(-1), [1, 'm', id, 0.2, 0.4, 'd', ...anchor]);
+		assert.equal(framesOf(otherPage, 'm').length, 0);
+		room = new PresenceRoom(ctx, {});
+		const later = (await fixture.connect(room, 'article:post', 'Post')).socket;
+		assert.deepEqual(
+			framesOf(later, 's')
+				.find((frame) => frame[2][0][0] === id)[2][0]
+				.slice(6),
+			anchor
+		);
+		room.webSocketMessage(first, '[1,"p",0.3,0.5,"d"]');
+		assert.equal(first.deserializeAttachment().anchor, undefined);
+		assert.deepEqual(framesOf(samePage, 'm').at(-1), [1, 'm', id, 0.3, 0.5, 'd']);
+	} finally {
+		fixture.restore();
+		console.warn = oldWarn;
+	}
+});
+
 test('internal chat notice reaches connected readers without message content', async () => {
 	const ctx = new FakeContext();
 	const fixture = setup();

@@ -73,24 +73,11 @@ test('mobile chat floats over the article without moving the reader', async ({ p
 	await page.goto(`${baseUrl}/america250`);
 	const launcher = page.getByRole('button', { name: 'Open swyx.irc chat', exact: true });
 	await expect(launcher).toBeVisible();
-	const [launcherBox, paragraphBox] = await Promise.all([
-		launcher.boundingBox(),
-		page.locator('article.swyxcontent p').first().boundingBox()
-	]);
-	if (!launcherBox || !paragraphBox)
-		throw new Error('Chat shortcut or article text was not visible');
-	expect(launcherBox.width).toBeGreaterThanOrEqual(24);
-	expect(launcherBox.x + launcherBox.width).toBeLessThanOrEqual(paragraphBox.x);
-	const textLeftEdges = await page
-		.locator('article.swyxcontent :is(p, h2, h3, li)')
-		.evaluateAll((elements) =>
-			elements
-				.filter((element) => element.textContent?.trim() && element.getBoundingClientRect().width)
-				.map((element) => element.getBoundingClientRect().left)
-		);
-	for (const left of textLeftEdges) {
-		expect(launcherBox.x + launcherBox.width).toBeLessThanOrEqual(left);
-	}
+	const launcherBox = await launcher.boundingBox();
+	if (!launcherBox) throw new Error('Live reader shortcut was not visible');
+	expect(launcherBox.height).toBeGreaterThanOrEqual(44);
+	expect(390 - (launcherBox.x + launcherBox.width)).toBeLessThanOrEqual(16);
+	expect(844 - (launcherBox.y + launcherBox.height)).toBeLessThanOrEqual(16);
 	await page.evaluate(() => window.scrollTo(0, 600));
 	const before = await page.evaluate(() => window.scrollY);
 	await launcher.click();
@@ -105,11 +92,53 @@ test('mobile chat floats over the article without moving the reader', async ({ p
 	expect(panel.y).toBeGreaterThanOrEqual(0);
 	expect(panel.x + panel.width).toBeLessThanOrEqual(390);
 	expect(panel.y + panel.height).toBeLessThanOrEqual(844);
+	const openLauncher = page.getByRole('button', { name: 'Close swyx.irc chat', exact: true });
+	await expect(openLauncher).toBeVisible();
+	const openLauncherBox = await openLauncher.boundingBox();
+	if (!openLauncherBox) throw new Error('Live reader shortcut was not visible while chat was open');
+	expect(panel.y + panel.height).toBeLessThanOrEqual(openLauncherBox.y);
 	expect(await page.evaluate(() => window.scrollY)).toBeCloseTo(before, 0);
 	await chat.getByRole('button', { name: 'Close chat' }).click();
 	await expect(chat).toHaveCount(0);
 	await expect(launcher).toBeFocused();
 	expect(await page.evaluate(() => window.scrollY)).toBeCloseTo(before, 0);
+});
+
+test('a saved chat position leaves the live reader count visible', async ({ page, context }) => {
+	await page.setViewportSize({ width: 390, height: 844 });
+	await mockChat(context);
+	await context.addInitScript(() => {
+		localStorage.setItem(
+			'swyx:chat:geometry:v1:standard',
+			JSON.stringify({ x: 60, y: 320, width: 320, height: 510 })
+		);
+	});
+	await page.goto(`${baseUrl}/america250`);
+	await page.getByRole('button', { name: 'Open swyx.irc chat', exact: true }).click();
+	const chat = await page.getByRole('region', { name: 'swyx.irc', exact: true }).boundingBox();
+	const launcher = await page.getByRole('button', { name: 'Close swyx.irc chat' }).boundingBox();
+	if (!chat || !launcher) throw new Error('Chat or live reader count was not visible');
+	expect(chat.y + chat.height).toBeLessThanOrEqual(launcher.y);
+});
+
+test('resizing to mobile keeps the open chat clear of the live reader count', async ({
+	page,
+	context
+}) => {
+	await page.setViewportSize({ width: 1100, height: 850 });
+	await mockChat(context);
+	await page.goto(`${baseUrl}/america250`);
+	await page.getByRole('button', { name: 'Open swyx.irc chat', exact: true }).click();
+	await page.setViewportSize({ width: 390, height: 844 });
+	const chat = page.getByRole('region', { name: 'swyx.irc', exact: true });
+	const launcher = page.getByRole('button', { name: 'Close swyx.irc chat', exact: true });
+	await expect
+		.poll(async () => {
+			const box = await chat.boundingBox();
+			const pill = await launcher.boundingBox();
+			return box && pill ? box.y + box.height <= pill.y : false;
+		})
+		.toBe(true);
 });
 
 test('wide desktop chat leaves the expanded index and reading column clear', async ({
