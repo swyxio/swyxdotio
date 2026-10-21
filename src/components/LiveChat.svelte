@@ -1258,17 +1258,55 @@
 	}
 	.chat-tiny .chat-notice {
 		padding-block: 0.15rem;
+		font-size: 0.65rem;
+		line-height: 1.1;
+	}
+	.chat-tiny .chat-titlebar {
+		padding-block: 0;
+	}
+	.chat-tiny :is(.chat-drag-handle, .chat-close) {
+		min-height: 32px;
+	}
+	.chat-tiny :is(.chat-name, .chat-status) {
+		display: inline;
+	}
+	.chat-tiny .chat-status {
+		margin-left: 0.5rem;
+	}
+	.chat-tiny .chat-reading {
+		max-height: 1.3rem;
 	}
 	.chat-tiny .chat-log {
-		min-height: 0;
+		min-height: 2rem;
 		padding-block: 0;
 	}
 	.chat-tiny .chat-form {
 		gap: 0;
-		padding-block: 0.15rem;
+		padding-block: 0;
+	}
+	.chat-tiny .nick-field input {
+		padding-block: 0.1rem;
+		font-size: 0.8rem;
+		line-height: 1.2;
 	}
 	.chat-tiny .quick-messages button {
-		min-height: 28px;
+		min-height: 26px;
+	}
+	.chat-tiny .chat-actions button {
+		min-height: 36px;
+	}
+	.chat-tiny textarea {
+		height: 2rem;
+	}
+	.chat-tiny :is(.chat-window-footer, .reader-toggle) {
+		min-height: 32px;
+	}
+	.chat-tiny .reader-toggle {
+		padding-block: 0;
+	}
+	.chat-tiny .chat-resize-handle {
+		width: 36px;
+		height: 32px;
 	}
 	.visually-hidden {
 		position: absolute;
