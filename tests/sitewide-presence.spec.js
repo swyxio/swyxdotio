@@ -7,7 +7,7 @@ const titles = {
 	'article:learn-in-public': 'Learn in Public'
 };
 
-/** @typedef {{ socket: import('@playwright/test').WebSocketRoute, key: string, id: string, x: number, y: number, mode: string }} MockReader */
+/** @typedef {{ socket: import('@playwright/test').WebSocketRoute, key: string, id: string, nick: string, x: number, y: number, mode: string }} MockReader */
 /** @typedef {{ id: string, nick: string, text: string, createdAt: number }} MockMessage */
 
 /** A shared, in-memory presence service for independent browser contexts.
@@ -38,14 +38,26 @@ function mockReaders(messages = []) {
 		});
 		await context.routeWebSocket('**/api/presence/*', (socket) => {
 			const key = decodeURIComponent(new URL(socket.url()).pathname.split('/').pop() || '');
-			const id = `reader${++sequence}`;
+			const id = `${(++sequence).toString(16).padStart(4, '0')}abcd`;
 			const existing = [...readers.values()];
-			const reader = { socket, key, id, x: 0.4, y: 0.01, mode: 'd' };
+			const reader = {
+				socket,
+				key,
+				id,
+				nick: `reader${id.slice(0, 4)}`,
+				x: 0.4,
+				y: 0.01,
+				mode: 'd'
+			};
 			readers.set(id, reader);
 			send(reader, [1, 'w', id, [row(reader)]]);
 			for (const peer of existing.filter((item) => item.key === key)) {
 				send(reader, [1, 's', [row(peer)]]);
 				send(peer, [1, 'j', ...row(reader)]);
+			}
+			for (const peer of existing) {
+				send(reader, [1, 'u', peer.id, peer.key, peer.nick]);
+				send(peer, [1, 'u', reader.id, reader.key, reader.nick]);
 			}
 			for (const pageKey of new Set([...readers.values()].map((item) => item.key))) {
 				const count = [...readers.values()].filter((item) => item.key === pageKey).length;
@@ -55,6 +67,13 @@ function mockReaders(messages = []) {
 			publish(key);
 			socket.onMessage((raw) => {
 				const frame = JSON.parse(String(raw));
+				if (frame[1] === 'n') {
+					reader.nick = frame[2];
+					for (const peer of readers.values()) {
+						if (peer.id !== id) send(peer, [1, 'u', id, key, reader.nick]);
+					}
+					return;
+				}
 				if (frame[1] !== 'p') return;
 				[reader.x, reader.y, reader.mode] = frame.slice(2);
 				for (const peer of readers.values()) {
@@ -66,6 +85,7 @@ function mockReaders(messages = []) {
 			socket.onClose(() => {
 				readers.delete(id);
 				for (const peer of readers.values()) {
+					send(peer, [1, 'q', id]);
 					if (peer.key === key) send(peer, [1, 'l', id]);
 				}
 				publish(key);
@@ -79,6 +99,7 @@ function mockReaders(messages = []) {
 		/** @param {MockMessage} message */
 		addMessage(message) {
 			messages.push(message);
+			for (const reader of readers.values()) send(reader, [1, 'z', message.id]);
 			for (const socket of chatSockets) socket.send(JSON.stringify({ type: 'message', message }));
 		},
 		/** @param {string} key @param {number} code */
@@ -88,6 +109,7 @@ function mockReaders(messages = []) {
 			// A server-initiated close does not call the mock's page-side onClose.
 			readers.delete(reader.id);
 			for (const peer of readers.values()) {
+				send(peer, [1, 'q', reader.id]);
 				if (peer.key === key) send(peer, [1, 'l', reader.id]);
 			}
 			publish(key);
@@ -113,6 +135,7 @@ test('sitewide readers exclude self, link to other pages, and show same-page cur
 	await page.setViewportSize({ width: 1100, height: 850 });
 	const readers = mockReaders();
 	await readers.install(context);
+	await context.addInitScript(() => localStorage.setItem('swyx:chat:nick:v1', 'Alice'));
 	await page.goto(`${baseUrl}/america250`);
 	const chat = await openChat(page);
 	await expect(chat.getByRole('button', { name: '0 other readers online' })).toBeVisible({
@@ -123,6 +146,7 @@ test('sitewide readers exclude self, link to other pages, and show same-page cur
 	const otherContext = await browser.newContext({ viewport: { width: 1100, height: 850 } });
 	try {
 		await readers.install(otherContext);
+		await otherContext.addInitScript(() => localStorage.setItem('swyx:chat:nick:v1', 'Bob'));
 		const other = await otherContext.newPage();
 		await other.goto(`${baseUrl}/learn-in-public`);
 		await expect(chat.getByRole('button', { name: '1 other reader online' })).toBeVisible({
@@ -136,6 +160,7 @@ test('sitewide readers exclude self, link to other pages, and show same-page cur
 		await expect(pageLink).toHaveAttribute('href', '/learn-in-public');
 		await expect(pageLink).toBeFocused();
 		await expect(roster.getByText('1 reader', { exact: true })).toBeVisible();
+		await expect(roster.getByText('Bob', { exact: true })).toBeVisible();
 		await expect(roster.getByRole('link', { name: 'What America has meant to me' })).toHaveCount(0);
 		const backToChat = chat.getByRole('button', { name: '← back to chat' });
 		for (
@@ -156,9 +181,25 @@ test('sitewide readers exclude self, link to other pages, and show same-page cur
 		await expect.poll(() => readers.count(), { timeout: 10_000 }).toBe(2);
 		await other.mouse.move(200, 200);
 		await expect(page.locator('.remote-cursor')).toBeVisible({ timeout: 10_000 });
+		await expect(page.locator('.remote-cursor')).toContainText('Bob');
+		const otherChat = await openChat(other);
+		await otherChat.getByLabel('Nickname (unverified)').fill('Bea');
+		await expect(page.locator('.remote-cursor')).toContainText('Bea', { timeout: 5_000 });
 
 		const reopened = await openChat(page);
 		await expect(reopened.getByRole('button', { name: '1 other reader online' })).toBeVisible();
+		await reopened.getByRole('button', { name: '1 other reader online' }).click();
+		await expect(
+			reopened.getByRole('region', { name: 'Live readers' }).getByText('Bea', { exact: true })
+		).toBeVisible();
+		await otherChat.getByLabel('Nickname (unverified)').fill('');
+		await expect(
+			reopened.getByRole('region', { name: 'Live readers' }).getByText('Bea', { exact: true })
+		).toHaveCount(0, { timeout: 5_000 });
+		await expect(
+			reopened.getByRole('region', { name: 'Live readers' }).getByText(/^reader[a-z0-9]+$/)
+		).toBeVisible();
+		await reopened.getByRole('button', { name: '← back to chat' }).click();
 		await expect(reopened.getByLabel('Message', { exact: true })).toHaveValue('A draft to keep');
 	} finally {
 		await otherContext.close();
@@ -182,6 +223,58 @@ test('Escape dismisses the share menu before the chat window', async ({ page, co
 	await expect(share).toBeFocused();
 	await page.keyboard.press('Escape');
 	await expect(chat).toHaveCount(0);
+});
+
+test('mobile reading rail labels the other reader', async ({ browser }) => {
+	const readers = mockReaders();
+	const first = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true });
+	const second = await browser.newContext({
+		viewport: { width: 390, height: 844 },
+		hasTouch: true
+	});
+	try {
+		await readers.install(first);
+		await readers.install(second);
+		await first.addInitScript(() => localStorage.setItem('swyx:chat:nick:v1', 'Alice'));
+		await second.addInitScript(() => localStorage.setItem('swyx:chat:nick:v1', 'Bob'));
+		const a = await first.newPage();
+		const b = await second.newPage();
+		await a.goto(`${baseUrl}/america250`);
+		await b.goto(`${baseUrl}/america250`);
+		await expect(a.locator('.rail-marker')).toContainText('Bob', { timeout: 10_000 });
+	} finally {
+		await first.close();
+		await second.close();
+	}
+});
+
+test('a cleared nickname uses the new socket identity after reconnecting', async ({ browser }) => {
+	const readers = mockReaders();
+	const first = await browser.newContext({ viewport: { width: 1100, height: 850 } });
+	const second = await browser.newContext({ viewport: { width: 1100, height: 850 } });
+	try {
+		await readers.install(first);
+		await readers.install(second);
+		await second.addInitScript(() => localStorage.setItem('swyx:chat:nick:v1', 'Bea'));
+		const a = await first.newPage();
+		const b = await second.newPage();
+		await a.goto(`${baseUrl}/america250`);
+		await expect.poll(() => readers.count(), { timeout: 10_000 }).toBe(1);
+		await b.goto(`${baseUrl}/learn-in-public`);
+		const chatA = await openChat(a);
+		await chatA.getByRole('button', { name: '1 other reader online' }).click({ timeout: 10_000 });
+		const roster = chatA.getByRole('region', { name: 'Live readers' });
+		await expect(roster.getByText('Bea', { exact: true })).toBeVisible();
+		const chatB = await openChat(b);
+		await chatB.getByLabel('Nickname (unverified)').fill('');
+		await expect(roster.getByText('reader0002', { exact: true })).toBeVisible({ timeout: 5_000 });
+		await readers.close('article:learn-in-public', 1012);
+		await expect(roster.getByText('reader0003', { exact: true })).toBeVisible({ timeout: 10_000 });
+		await expect(roster.getByText('reader', { exact: true })).toHaveCount(0);
+	} finally {
+		await first.close();
+		await second.close();
+	}
 });
 
 test('returning from readers restores chat position and shows new messages at the bottom', async ({
@@ -213,18 +306,50 @@ test('returning from readers restores chat position and shows new messages at th
 	await log.evaluate((element) => (element.scrollTop = element.scrollHeight));
 	await toggle.click();
 	readers.addMessage({
-		id: 'new',
+		id: '00000000-0000-4000-8000-000000000001',
 		nick: 'reader',
 		text: 'Arrived while viewing readers',
 		createdAt: now
 	});
-	await chat.getByRole('button', { name: '← back to chat' }).click();
+	await expect(
+		chat.getByRole('button', { name: '← back to chat · 1 unread message' })
+	).toBeVisible();
+	await chat.getByRole('button', { name: '← back to chat · 1 unread message' }).click();
 	await expect(log.getByText('Arrived while viewing readers')).toBeVisible();
 	await expect
 		.poll(() =>
 			log.evaluate((element) => element.scrollHeight - element.clientHeight - element.scrollTop)
 		)
 		.toBeLessThanOrEqual(1);
+});
+
+test('a collapsed chat shows a local unread badge and clears it on opening', async ({
+	page,
+	context
+}) => {
+	await page.setViewportSize({ width: 390, height: 844 });
+	const readers = mockReaders([
+		{ id: 'old', nick: 'reader', text: 'History', createdAt: Date.now() }
+	]);
+	await readers.install(context);
+	await page.goto(`${baseUrl}/america250`);
+	const launcher = page.getByRole('button', { name: 'chat', exact: true });
+	await expect(launcher).toBeVisible();
+	await expect.poll(() => readers.count(), { timeout: 10_000 }).toBe(1);
+	await expect(launcher.locator('.unread-badge')).toHaveCount(0);
+	readers.addMessage({
+		id: '00000000-0000-4000-8000-000000000002',
+		nick: 'reader',
+		text: 'New message',
+		createdAt: Date.now()
+	});
+	await expect(launcher.locator('.unread-badge')).toHaveText('1');
+	await expect(launcher).toHaveAccessibleDescription(/1 unread message/);
+	await launcher.click();
+	const chat = page.getByRole('region', { name: 'swyx', exact: true });
+	await expect(chat.getByText('New message')).toBeVisible();
+	await chat.getByRole('button', { name: 'Close chat' }).click();
+	await expect(launcher.locator('.unread-badge')).toHaveCount(0);
 });
 
 test('mobile hide and show live readers synchronizes across open tabs', async ({

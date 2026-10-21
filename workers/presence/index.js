@@ -1,5 +1,6 @@
 import {
 	PRESENCE_COLORS,
+	PRESENCE_NICK_INTERVAL_MS,
 	PRESENCE_PROTOCOL_VERSION as V,
 	PRESENCE_ROOM_LIMIT,
 	consumePresenceToken,
@@ -106,6 +107,10 @@ function makeJoinFrame(peer) {
 	return [V, 'j', ...peerRow(peer)];
 }
 
+function sitewideReaderFrame(peer) {
+	return [V, 'u', peer.id, peer.pageKey, peer.nick || `reader${peer.id.slice(0, 4)}`];
+}
+
 export class PresenceRoom {
 	constructor(ctx, env) {
 		this.ctx = ctx;
@@ -152,6 +157,12 @@ export class PresenceRoom {
 		}
 	}
 
+	broadcastReader(frame, except = null) {
+		for (const socket of this.peers) {
+			if (socket !== except && socketAttachment(socket)?.pageKey) sendSitewide(socket, frame);
+		}
+	}
+
 	report(kind) {
 		const bucketStart = presenceBucketStart(Date.now());
 		if (bucketStart !== this.aggregateBucketStart) {
@@ -191,13 +202,21 @@ export class PresenceRoom {
 	}
 
 	async fetch(request) {
+		const url = new URL(request.url);
+		// This endpoint is called only by the sibling ChatRoom Durable Object,
+		// after a message is stored. No message text or nickname is forwarded.
+		if (request.method === 'POST' && url.pathname === '/chat-notification') {
+			const id = await request.text();
+			if (!/^[a-f0-9-]{36}$/.test(id)) return new Response('Invalid message', { status: 400 });
+			this.broadcastReader([V, 'z', id]);
+			return new Response(null, { status: 204 });
+		}
 		if (request.method !== 'GET' || request.headers.get('Upgrade')?.toLowerCase() !== 'websocket') {
 			return new Response('WebSocket upgrade required', { status: 426 });
 		}
 
 		// This internal URL is constructed only after the main Worker validates a
 		// key against the public registry or non-private article manifest.
-		const url = new URL(request.url);
 		const roomName = url.searchParams.get('room');
 		if (!roomName || !/^(?:page|article):[a-z0-9][a-z0-9_-]*$/.test(roomName)) {
 			return new Response('Unknown public page', { status: 400 });
@@ -268,6 +287,7 @@ export class PresenceRoom {
 		const peer = {
 			id,
 			pageKey,
+			nick: `reader${id.slice(0, 4)}`,
 			pageTitle: currentTitle,
 			roomTag: tag,
 			country: normalizePresenceCountry(request.headers.get('x-swyx-presence-country')),
@@ -293,9 +313,15 @@ export class PresenceRoom {
 		const counts = this.sitewideCounts();
 		for (const [key, row] of counts)
 			sendSitewide(server, sitewidePageFrame(key, row.count, row.title));
+		for (const socket of this.peers) {
+			if (socket === server) continue;
+			const other = socketAttachment(socket);
+			if (other?.pageKey) sendSitewide(server, sitewideReaderFrame(other));
+		}
 		sendSitewide(server, [V, 'g']);
 		this.broadcast(makeJoinFrame(peer), server, tag);
 		this.broadcastSitewide(pageKey, counts.get(pageKey) ?? { count: 0, title: '' }, server);
+		this.broadcastReader(sitewideReaderFrame(peer), server);
 
 		return new Response(null, { status: 101, webSocket: client });
 	}
@@ -340,6 +366,17 @@ export class PresenceRoom {
 			return;
 		}
 
+		if (message.type === 'nick') {
+			if (peer.nick === message.nick) return;
+			const now = Date.now();
+			if (now - state.nickAt < PRESENCE_NICK_INTERVAL_MS) return;
+			state.nickAt = now;
+			peer.nick = message.nick;
+			socket.serializeAttachment(peer);
+			if (peer.pageKey) this.broadcastReader(sitewideReaderFrame(peer), socket);
+			return;
+		}
+
 		if (message.type === 'reaction') {
 			const now = Date.now();
 			if (now - state.reactionAt < REACTION_INTERVAL_MS) return;
@@ -374,6 +411,7 @@ export class PresenceRoom {
 		this.rateStates.delete(peer.id);
 		this.broadcast([V, 'l', peer.id], socket, peer.roomTag);
 		if (peer.pageKey) {
+			this.broadcastReader([V, 'q', peer.id], socket);
 			const row = this.sitewideCounts(socket).get(peer.pageKey) ?? { count: 0, title: '' };
 			this.broadcastSitewide(peer.pageKey, row, socket);
 		}

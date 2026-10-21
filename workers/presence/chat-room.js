@@ -173,6 +173,27 @@ export class ChatRoom {
 				// A disconnected sender may no longer have an attachment.
 			}
 			for (const peer of this.ctx.getWebSockets()) send(peer, { type: 'message', message });
+			// Presence already connects eligible public-page readers. Reuse it for a
+			// best-effort unread signal instead of opening a second socket per tab.
+			if (this.env.PRESENCE_ROOMS) {
+				try {
+					this.ctx.waitUntil(
+						Promise.resolve()
+							.then(() => {
+								const rooms = this.env.PRESENCE_ROOMS;
+								return rooms.get(rooms.idFromName('sitewide')).fetch(
+									new Request('https://presence.internal/chat-notification', {
+										method: 'POST',
+										body: message.id
+									})
+								);
+							})
+							.catch(() => {})
+					);
+				} catch {
+					// An unavailable notification must not undo a stored chat message.
+				}
+			}
 			send(socket, { type: 'ack', requestId: input.requestId, id: message.id });
 		} catch {
 			// Never log public message contents or network identifiers.

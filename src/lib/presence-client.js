@@ -1,4 +1,4 @@
-import { PRESENCE_MODES, PRESENCE_REACTIONS } from './presence-contracts.js';
+import { PRESENCE_MODES, PRESENCE_REACTIONS, normalizePresenceNick } from './presence-contracts.js';
 
 export { PRESENCE_REACTIONS } from './presence-contracts.js';
 
@@ -26,7 +26,8 @@ const MODES = new Set(PRESENCE_MODES);
  */
 /**
  * @typedef {{ pageKey: string | null, hidden: boolean, admitted: boolean, connected: boolean,
- * stopped: boolean, pages: { key: string, path: string | null, title: string, count: number }[],
+ * stopped: boolean, pages: { key: string, path: string | null, title: string, count: number,
+ * readers: { id: string, nick: string }[] }[],
  * otherCount: number }} PresenceSummary
  */
 /**
@@ -38,6 +39,9 @@ const MODES = new Set(PRESENCE_MODES);
  * | { type: 'leave', id: string }
  * | { type: 'celebration', id: string, now: number }
  * | { type: 'sitePage', key: string, count: number, title: string }
+ * | { type: 'siteReader', id: string, key: string, nick: string }
+ * | { type: 'siteReaderLeave', id: string }
+ * | { type: 'chatNotice', id: string }
  * | { type: 'siteSnapshotComplete' }} PresenceFrame
  */
 
@@ -138,6 +142,33 @@ function parsePeer(values, now) {
 export function parsePresenceFrame(input, now = Date.now()) {
 	if (!Array.isArray(input) || input[0] !== 1 || typeof input[1] !== 'string') return null;
 	const type = input[1];
+	if (
+		type === 'z' &&
+		input.length === 3 &&
+		typeof input[2] === 'string' &&
+		/^[a-f0-9-]{36}$/.test(input[2])
+	)
+		return { type: 'chatNotice', id: input[2] };
+	if (type === 'u' && input.length === 5) {
+		const [, , id, key, value] = input;
+		const nick = normalizePresenceNick(value);
+		if (
+			typeof id !== 'string' ||
+			!/^[a-zA-Z0-9_-]{1,24}$/.test(id) ||
+			typeof key !== 'string' ||
+			!/^(?:page|article):[a-z0-9][a-z0-9_-]*$/.test(key) ||
+			!nick
+		)
+			return null;
+		return { type: 'siteReader', id, key, nick };
+	}
+	if (
+		type === 'q' &&
+		input.length === 3 &&
+		typeof input[2] === 'string' &&
+		/^[a-zA-Z0-9_-]{1,24}$/.test(input[2])
+	)
+		return { type: 'siteReaderLeave', id: input[2] };
 	if (type === 'g' && input.length === 2) return { type: 'siteSnapshotComplete' };
 	if (type === 'g') {
 		const [, , key, count, title] = input;
@@ -225,4 +256,10 @@ export function reactionFrame(reaction) {
 
 export function celebrationFrame() {
 	return JSON.stringify([1, 'c']);
+}
+
+/** @param {string} value */
+export function nicknameFrame(value) {
+	const nick = normalizePresenceNick(value);
+	return nick ? JSON.stringify([1, 'n', nick]) : null;
 }

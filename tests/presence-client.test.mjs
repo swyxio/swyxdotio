@@ -6,6 +6,7 @@ import {
 	countryFlag,
 	decideAdmission,
 	normalizeCountry,
+	nicknameFrame,
 	parsePresenceFrame,
 	positionFrame,
 	reactionFrame,
@@ -67,6 +68,29 @@ test('sitewide presence frames reject invalid pages and counts', () => {
 		[1, 'g', 'page:home', 1, {}]
 	])
 		assert.equal(parsePresenceFrame(frame), null);
+});
+
+test('named readers are validated and leave by their ephemeral socket ID', () => {
+	assert.deepEqual(parsePresenceFrame([1, 'u', 'abc123', 'page:home', 'Ada']), {
+		type: 'siteReader',
+		id: 'abc123',
+		key: 'page:home',
+		nick: 'Ada'
+	});
+	assert.deepEqual(parsePresenceFrame([1, 'q', 'abc123']), {
+		type: 'siteReaderLeave',
+		id: 'abc123'
+	});
+	assert.equal(parsePresenceFrame([1, 'u', 'abc123', 'article:../private', 'Ada']), null);
+	assert.equal(parsePresenceFrame([1, 'u', 'abc123', 'page:home', 'bad\u202ename']), null);
+	assert.equal(parsePresenceFrame([1, 'u', 'abc123', 'page:home', 'x'.repeat(25)]), null);
+	assert.equal(nicknameFrame('  Ada  '), '[1,"n","Ada"]');
+	assert.equal(nicknameFrame(''), null);
+	assert.deepEqual(parsePresenceFrame([1, 'z', '00000000-0000-4000-8000-000000000001']), {
+		type: 'chatNotice',
+		id: '00000000-0000-4000-8000-000000000001'
+	});
+	assert.equal(parsePresenceFrame([1, 'z', 'message text']), null);
 });
 
 test('registered pages and identically named articles have distinct links', () => {

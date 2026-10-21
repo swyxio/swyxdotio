@@ -82,6 +82,70 @@ function setup() {
 
 const framesOf = (socket, type) => socket.frames.filter((frame) => frame[1] === type);
 
+test('nickname and page updates reach the roster while cursor traffic stays page scoped', async () => {
+	const ctx = new FakeContext();
+	const fixture = setup();
+	const oldWarn = console.warn;
+	console.warn = () => {};
+	try {
+		let room = new PresenceRoom(ctx, {});
+		const home = (await fixture.connect(room, 'page:home', 'Home')).socket;
+		room.webSocketMessage(home, JSON.stringify([1, 'n', 'Ada']));
+		const homeId = home.deserializeAttachment().id;
+		const article = (await fixture.connect(room, 'article:public-post', 'A post')).socket;
+		assert.ok(
+			framesOf(article, 'u').some(
+				(frame) => JSON.stringify(frame) === JSON.stringify([1, 'u', homeId, 'page:home', 'Ada'])
+			)
+		);
+		const articleId = article.deserializeAttachment().id;
+		room.webSocketMessage(article, JSON.stringify([1, 'n', 'Bob']));
+		assert.deepEqual(framesOf(home, 'u').at(-1), [1, 'u', articleId, 'article:public-post', 'Bob']);
+		room.webSocketMessage(article, JSON.stringify([1, 'n', 'Too fast']));
+		assert.equal(article.deserializeAttachment().nick, 'Bob');
+		room = new PresenceRoom(ctx, {});
+		const later = (await fixture.connect(room, 'page:home', 'Home')).socket;
+		assert.ok(framesOf(later, 'u').some((frame) => frame[2] === articleId && frame[4] === 'Bob'));
+		room.webSocketMessage(article, '[1,"p",0.2,0.4,"d"]');
+		assert.equal(framesOf(home, 'm').length, 0);
+		article.readyState = 3;
+		room.webSocketClose(article, 1000);
+		assert.deepEqual(framesOf(home, 'q').at(-1), [1, 'q', articleId]);
+	} finally {
+		fixture.restore();
+		console.warn = oldWarn;
+	}
+});
+
+test('internal chat notice reaches connected readers without message content', async () => {
+	const ctx = new FakeContext();
+	const fixture = setup();
+	const oldWarn = console.warn;
+	console.warn = () => {};
+	try {
+		const room = new PresenceRoom(ctx, {});
+		const home = (await fixture.connect(room, 'page:home', 'Home')).socket;
+		const article = (await fixture.connect(room, 'article:public-post', 'Post')).socket;
+		const id = '00000000-0000-4000-8000-000000000001';
+		const result = await room.fetch(
+			new Request('https://presence.internal/chat-notification', { method: 'POST', body: id })
+		);
+		assert.equal(result.status, 204);
+		assert.deepEqual(framesOf(home, 'z').at(-1), [1, 'z', id]);
+		assert.deepEqual(framesOf(article, 'z').at(-1), [1, 'z', id]);
+		const bad = await room.fetch(
+			new Request('https://presence.internal/chat-notification', {
+				method: 'POST',
+				body: 'message text'
+			})
+		);
+		assert.equal(bad.status, 400);
+	} finally {
+		fixture.restore();
+		console.warn = oldWarn;
+	}
+});
+
 test('sitewide counts include each admitted socket while cursors stay within a public page', async () => {
 	const ctx = new FakeContext();
 	const fixture = setup(ctx);

@@ -2,6 +2,7 @@
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import { canonicalPresencePath } from '$lib/read-counter';
+	import { PRESENCE_NICK_INTERVAL_MS } from '$lib/presence-contracts';
 	import {
 		PRESENCE_ADMISSION_PREFIX,
 		PRESENCE_SHARE_CELEBRATION_EVENT,
@@ -11,6 +12,7 @@
 		countryFlag,
 		countryLabel,
 		decideAdmission,
+		nicknameFrame,
 		parsePresenceFrame,
 		positionFrame,
 		reactionFrame,
@@ -20,6 +22,8 @@
 
 	/** @type {string} */
 	export let pageKey;
+	/** @type {string} */
+	export let nick = '';
 	/** @type {number} */
 	export let admissionRate = 1;
 	const dispatch = createEventDispatcher();
@@ -28,6 +32,8 @@
 	let peers = new SvelteMap();
 	/** @type {Map<string, { count: number, title: string }>} */
 	let sitePages = new SvelteMap();
+	/** @type {Map<string, { key: string, nick: string }>} */
+	let siteReaders = new SvelteMap();
 	/** @type {WebSocket | null} */
 	let socket = null;
 	/** @type {string | null} */
@@ -50,13 +56,27 @@
 	let reconnectAttempt = 0;
 	let celebrated = false;
 	let destroyed = false;
+	let mounted = false;
+	let nickTimer = 0;
+	let lastSentNick = '';
+	let lastNickAt = 0;
+	$: if (mounted && typeof nick === 'string') scheduleNick();
 	$: peerList = [...peers.values()].filter((peer) => peer.id !== selfId);
+	$: readersByPage = [...siteReaders.entries()].reduce((pages, [id, reader]) => {
+		if (id !== selfId) {
+			const readers = pages.get(reader.key) || [];
+			readers.push({ id, nick: reader.nick });
+			pages.set(reader.key, readers);
+		}
+		return pages;
+	}, /** @type {Map<string, { id: string, nick: string }[]>} */ (new SvelteMap()));
 	$: otherPages = [...sitePages.entries()]
 		.map(([key, value]) => ({
 			key,
 			path: canonicalPresencePath(key),
 			title: value.title,
-			count: Math.max(0, value.count - (key === pageKey ? 1 : 0))
+			count: Math.max(0, value.count - (key === pageKey ? 1 : 0)),
+			readers: readersByPage.get(key) || []
 		}))
 		.filter((item) => item.path && item.count > 0)
 		.sort((a, b) => b.count - a.count || a.key.localeCompare(b.key));
@@ -81,9 +101,9 @@
 		};
 	}
 
-	/** @param {string} country */
-	function peerLabel(country) {
-		return `${countryLabel(country, regionNames)} reader`;
+	/** @param {string} country @param {string} name */
+	function peerLabel(country, name) {
+		return `${name}, ${countryLabel(country, regionNames)} reader`;
 	}
 
 	/** @param {string} value */
@@ -94,7 +114,24 @@
 			socket?.readyState === WebSocket.OPEN
 		) {
 			socket.send(value);
+			return true;
 		}
+		return false;
+	}
+
+	function syncNick() {
+		if (!selfId) return;
+		const frame = nicknameFrame(nick) || nicknameFrame(`reader${selfId.slice(0, 4)}`);
+		if (frame && frame !== lastSentNick && send(frame)) {
+			lastSentNick = frame;
+			lastNickAt = Date.now();
+		}
+	}
+
+	function scheduleNick() {
+		window.clearTimeout(nickTimer);
+		const delay = Math.max(500, PRESENCE_NICK_INTERVAL_MS - (Date.now() - lastNickAt) + 50);
+		nickTimer = window.setTimeout(syncNick, delay);
 	}
 
 	/** @param {number} x @param {number} y @param {'d' | 'r' | 't'} mode @param {number} interval @param {number} movement */
@@ -161,15 +198,23 @@
 		}
 		const frame = parsePresenceFrame(raw);
 		if (!frame) return;
-		if (frame.type === 'sitePage') {
+		if (frame.type === 'chatNotice') {
+			dispatch('chatNotice', frame.id);
+		} else if (frame.type === 'sitePage') {
 			sitePages = new SvelteMap(sitePages);
 			if (frame.count) sitePages.set(frame.key, { count: frame.count, title: frame.title });
 			else sitePages.delete(frame.key);
+		} else if (frame.type === 'siteReader') {
+			siteReaders = new SvelteMap(siteReaders).set(frame.id, { key: frame.key, nick: frame.nick });
+		} else if (frame.type === 'siteReaderLeave') {
+			siteReaders = new SvelteMap(siteReaders);
+			siteReaders.delete(frame.id);
 		} else if (frame.type === 'siteSnapshotComplete') {
 			siteSnapshotComplete = true;
 		} else if (frame.type === 'welcome') {
 			selfId = frame.selfId;
 			peers = new SvelteMap(frame.peers.map((peer) => [peer.id, peer]));
+			syncNick();
 		} else if (frame.type === 'snapshot') {
 			peers = new SvelteMap(peers);
 			for (const peer of frame.peers) peers.set(peer.id, peer);
@@ -211,6 +256,7 @@
 			current.close(1000, immediate ? 'disabled' : 'hidden');
 		peers = new SvelteMap();
 		sitePages = new SvelteMap();
+		siteReaders = new SvelteMap();
 		siteSnapshotComplete = false;
 		selfId = null;
 	}
@@ -236,6 +282,8 @@
 			connected = true;
 			reconnectAttempt = 0;
 			lastPosition = null;
+			lastSentNick = '';
+			lastNickAt = 0;
 			if (isMobile) sendReadingDepth();
 		});
 		nextSocket.addEventListener('close', (event) => {
@@ -244,7 +292,9 @@
 			connected = false;
 			peers = new SvelteMap();
 			sitePages = new SvelteMap();
+			siteReaders = new SvelteMap();
 			siteSnapshotComplete = false;
+			selfId = null;
 			if (event.code === 1013 || event.code === 1008) {
 				stopped = true;
 				return;
@@ -333,6 +383,7 @@
 				hiddenCloseTimer = window.setTimeout(() => disconnect(), 30_000);
 			} else {
 				window.clearTimeout(hiddenCloseTimer);
+				scheduleNick();
 				if (!socket && !hidden) scheduleInitialConnect();
 			}
 		};
@@ -350,6 +401,7 @@
 			if (event.key === PRESENCE_VISIBILITY_KEY) setHidden(event.newValue === 'yes', false);
 		};
 
+		mounted = true;
 		scheduleInitialConnect();
 		document.addEventListener('visibilitychange', handleVisibility);
 		window.addEventListener('pointermove', handlePointerMove, { passive: true });
@@ -362,11 +414,13 @@
 		const clockTimer = window.setInterval(() => (clock = Date.now()), 250);
 
 		return () => {
+			mounted = false;
 			destroyed = true;
 			disconnect(true);
 			window.clearTimeout(connectTimer);
 			window.clearTimeout(hiddenCloseTimer);
 			window.clearTimeout(handleTouch.fadeTimer);
+			window.clearTimeout(nickTimer);
 			window.clearInterval(clockTimer);
 			document.removeEventListener('visibilitychange', handleVisibility);
 			window.removeEventListener('pointermove', handlePointerMove);
@@ -389,13 +443,14 @@
 			{#each peerList as peer (peer.id)}
 				{@const position = peerPosition(peer)}
 				{@const flag = countryFlag(peer.country)}
-				{@const label = peerLabel(peer.country)}
+				{@const name = siteReaders.get(peer.id)?.nick || `reader${peer.id.slice(0, 4)}`}
+				{@const label = peerLabel(peer.country, name)}
 				{#if peer.mode === 'r'}
 					<span
 						class="rail-marker"
 						style={`--presence-y:${Math.min(0.94, Math.max(0.06, peer.y))};--presence-color:${peer.color}`}
 						title={label}
-						aria-label={label}>{flag}</span
+						aria-label={label}>{flag}<span class="rail-name" aria-hidden="true">{name}</span></span
 					>
 				{:else if position.y < 38 || position.y > innerHeight - 48}
 					<span
@@ -404,7 +459,7 @@
 						style={`--presence-x:${Math.min(innerWidth - 36, Math.max(14, position.x))}px;--presence-color:${peer.color}`}
 						title={label}
 						aria-label={`${label}, ${position.y < 38 ? 'above' : 'below'} the viewport`}
-						>{flag}</span
+						>{flag} {name}</span
 					>
 				{:else}
 					<span
@@ -417,7 +472,8 @@
 						<svg viewBox="0 0 24 28" aria-hidden="true"
 							><path d="M2 2v21l5.3-5.2 3.7 8.1 4-1.9-3.7-7.8h7.4L2 2Z" /></svg
 						>
-						<span class="country-tag">{flag} {peer.country === 'XX' ? '' : peer.country}</span>
+						<span class:flip={position.x > innerWidth - 220} class="country-tag">{flag} {name}</span
+						>
 					</span>
 				{/if}
 				{#if peer.reaction && clock - peer.reactionAt < 1_800}
@@ -484,6 +540,10 @@
 		color: var(--page-text);
 		box-shadow: 0 2px 8px rgb(15 23 42 / 0.12);
 	}
+	.country-tag.flip {
+		left: auto;
+		right: 0;
+	}
 	.reading-rail {
 		display: none;
 		position: fixed;
@@ -508,6 +568,19 @@
 		background: var(--page-surface);
 		font-size: 13px;
 		box-shadow: 0 2px 8px rgb(15 23 42 / 0.14);
+	}
+	.rail-name {
+		position: absolute;
+		right: 24px;
+		max-width: 9rem;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		border-radius: 999px;
+		background: var(--page-surface);
+		padding: 3px 6px;
+		font-size: 11px;
+		box-shadow: 0 2px 8px rgb(15 23 42 / 0.12);
 	}
 	.offscreen-marker {
 		position: fixed;

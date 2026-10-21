@@ -33,6 +33,9 @@ test('parses, enumerates, and clamps compact client frames', () => {
 		reaction: '👋'
 	});
 	assert.deepEqual(parsePresenceClientFrame('[1,"c"]'), { type: 'share' });
+	assert.deepEqual(parsePresenceClientFrame('[1,"n","  Ada  "]'), { type: 'nick', nick: 'Ada' });
+	assert.equal(parsePresenceClientFrame(JSON.stringify([1, 'n', 'bad\u202ename'])), null);
+	assert.equal(parsePresenceClientFrame(JSON.stringify([1, 'n', 'x'.repeat(25)])), null);
 	assert.equal(parsePresenceClientFrame('[1,"r","🔥"]'), null);
 	assert.equal(parsePresenceClientFrame('[1,"p",null,0,"d"]'), null);
 	assert.equal(parsePresenceClientFrame('[2,"c"]'), null);
