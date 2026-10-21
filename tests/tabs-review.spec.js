@@ -26,7 +26,7 @@ async function makeBatch(page, origin, name, tabs) {
 /**
  * @param {import('@playwright/test').Page} page
  * @param {{id: string}} batch
- * @returns {Promise<{items: Array<{id: string, url: string, status: string, note: string}>}>}
+ * @returns {Promise<{items: Array<{id: string, url: string, status: string, note: string, group: string}>}>}
  */
 async function getBatch(page, batch) {
 	const response = await page.request.get(`/tools/tabs/api/batches/${batch.id}`, {
@@ -289,6 +289,195 @@ test('visible pickers select filters and keep batches separate', async ({ page }
 	await expect(filterChoice(page, 'Status', 'Unread')).toHaveAttribute('aria-pressed', 'true');
 	expect((await getBatch(page, first)).items.every((item) => item.status === 'unread')).toBe(true);
 	expect((await getBatch(page, second)).items[0].status).toBe('unread');
+});
+
+test('topics can be edited in the feed and swipe view without changing another batch', async ({
+	page
+}) => {
+	await page.goto('/tools');
+	const origin = await authenticateTools(page);
+	const suffix = crypto.randomUUID();
+	const url = `https://example.test/${suffix}/same-page`;
+	const first = await makeBatch(page, origin, `Topic first ${suffix}`, [
+		{ title: 'Shared topic page', url, windowId: '1', tabGroup: 'Research' },
+		{ title: 'Other topic page', url: `https://example.test/${suffix}/other` }
+	]);
+	const second = await makeBatch(page, origin, `Topic second ${suffix}`, [
+		{ title: 'Shared topic page', url }
+	]);
+	const firstItems = (await getBatch(page, first)).items;
+	const secondItem = (await getBatch(page, second)).items[0];
+	const headers = { Origin: origin, 'X-Tools-User': TEST_TOOLS_OWNER.id };
+	const firstPath = `/tools/tabs/api/batches/${first.id}/items/${firstItems[0].id}`;
+	const otherPath = `/tools/tabs/api/batches/${first.id}/items/${firstItems[1].id}`;
+	expect(
+		(await page.request.patch(firstPath, { headers, data: { note: 'Keep this note' } })).ok()
+	).toBe(true);
+	expect(
+		(await page.request.patch(otherPath, { headers, data: { topic: 'Engineering' } })).ok()
+	).toBe(true);
+
+	await page.goto(`/tools/tabs?batch=${first.id}`);
+	const editorButton = page.getByRole('button', { name: 'Edit topic for Shared topic page' });
+	await editorButton.click();
+	await expect(page.getByText('Chrome groups: Research', { exact: false })).toBeVisible();
+	await page.getByRole('textbox', { name: 'Topic', exact: true }).fill('Agent systems');
+	await page.getByRole('button', { name: 'Save topic', exact: true }).click();
+	await expect.poll(async () => (await getBatch(page, first)).items[0].group).toBe('Agent systems');
+	await page.reload();
+	await openFilters(page);
+	await expect(filterChoice(page, 'Topic', 'Agent systems')).toBeVisible();
+	await filterChoice(page, 'Topic', 'Agent systems').click();
+	await expect(page.getByRole('button', { name: 'Shared topic page', exact: true })).toBeVisible();
+	await filterChoice(page, 'Topic', 'All topics').click();
+	await useSwipeMode(page);
+	await page.getByRole('button', { name: 'Edit topic for Shared topic page' }).click();
+	await page
+		.getByRole('group', { name: 'Existing topics' })
+		.getByRole('button', { name: 'Engineering', exact: true })
+		.click();
+	await page.getByRole('button', { name: 'Save topic', exact: true }).click();
+	await expect.poll(async () => (await getBatch(page, first)).items[0].group).toBe('Engineering');
+	expect((await getBatch(page, first)).items[0]).toMatchObject({
+		status: 'unread',
+		note: 'Keep this note'
+	});
+	expect((await getBatch(page, second)).items[0]).toMatchObject({
+		group: secondItem.group,
+		status: 'unread',
+		note: ''
+	});
+});
+
+test('topic conflicts preserve the draft and scroll editing does not archive pages', async ({
+	page
+}) => {
+	await page.goto('/tools');
+	const origin = await authenticateTools(page);
+	const suffix = crypto.randomUUID();
+	const batch = await makeBatch(page, origin, `Topic conflict ${suffix}`, [
+		{ title: 'Topic conflict page', url: `https://example.test/${suffix}/conflict` },
+		{ title: 'Following page', url: `https://example.test/${suffix}/following` }
+	]);
+	const item = (await getBatch(page, batch)).items[0];
+	await page.goto(`/tools/tabs?batch=${batch.id}`);
+	await page.getByRole('button', { name: 'Scroll', exact: true }).click();
+	await page.getByRole('button', { name: 'Edit topic for Topic conflict page' }).click();
+	const input = page.getByRole('textbox', { name: 'Topic', exact: true });
+	await input.fill('My topic');
+	const update = await page.request.patch(`/tools/tabs/api/batches/${batch.id}/items/${item.id}`, {
+		headers: { Origin: origin, 'X-Tools-User': TEST_TOOLS_OWNER.id },
+		data: { topic: 'Another device' }
+	});
+	expect(update.status()).toBe(200);
+	await page.mouse.wheel(0, 700);
+	await page.getByRole('button', { name: 'Save topic', exact: true }).click();
+	await expect(page.getByRole('alert')).toContainText('changed on another device');
+	await expect(input).toHaveValue('My topic');
+	expect((await getBatch(page, batch)).items[0]).toMatchObject({
+		group: 'Another device',
+		status: 'unread'
+	});
+	await page.getByRole('button', { name: 'Save topic', exact: true }).click();
+	await expect.poll(async () => (await getBatch(page, batch)).items[0].group).toBe('My topic');
+	expect((await getBatch(page, batch)).items.every((entry) => entry.status === 'unread')).toBe(
+		true
+	);
+});
+
+test('a failed note save remains recoverable before a filtered topic change', async ({ page }) => {
+	await page.goto('/tools');
+	const origin = await authenticateTools(page);
+	const suffix = crypto.randomUUID();
+	const batch = await makeBatch(page, origin, `Topic note ${suffix}`, [
+		{ title: 'Page with a note', url: `https://example.test/${suffix}/note` }
+	]);
+	const item = (await getBatch(page, batch)).items[0];
+	let failNoteSave = true;
+	await page.route(`**/tools/tabs/api/batches/${batch.id}/items/${item.id}`, async (route) => {
+		if (
+			failNoteSave &&
+			route.request().method() === 'PATCH' &&
+			Object.hasOwn(route.request().postDataJSON(), 'note')
+		) {
+			await route.fulfill({ status: 503, json: { message: 'Try again' } });
+			return;
+		}
+		await route.continue();
+	});
+	await page.goto(`/tools/tabs?batch=${batch.id}`);
+	await openFilters(page);
+	await filterChoice(page, 'Topic', item.group).click();
+	await page.getByRole('button', { name: 'Page with a note', exact: true }).click();
+	await page.getByLabel('Your note').fill('Keep this unsaved note');
+	await page.getByRole('button', { name: 'Edit topic for Page with a note' }).click();
+	await expect(page.getByRole('alert')).toContainText('Note not saved');
+	await expect(page.getByLabel('Your note')).toHaveValue('Keep this unsaved note');
+	await expect(page.getByRole('textbox', { name: 'Topic', exact: true })).toHaveCount(0);
+	await expect(page.getByRole('button', { name: 'Retry save' })).toBeVisible();
+
+	failNoteSave = false;
+	await page.getByRole('button', { name: 'Retry save' }).click();
+	await expect
+		.poll(async () => (await getBatch(page, batch)).items[0].note)
+		.toBe('Keep this unsaved note');
+	await page.getByRole('button', { name: 'Edit topic for Page with a note' }).click();
+	await expect(page.getByLabel('Your note')).toBeDisabled();
+	await page.getByRole('textbox', { name: 'Topic', exact: true }).fill('A different topic');
+	await page.getByRole('button', { name: 'Save topic', exact: true }).click();
+	await expect
+		.poll(async () => (await getBatch(page, batch)).items[0].group)
+		.toBe('A different topic');
+	await expect(page.getByRole('button', { name: 'Page with a note', exact: true })).toHaveCount(0);
+	expect((await getBatch(page, batch)).items[0].note).toBe('Keep this unsaved note');
+});
+
+test('switching review modes cannot open a hidden topic editor during a note save', async ({
+	page
+}) => {
+	await page.goto('/tools');
+	const origin = await authenticateTools(page);
+	const suffix = crypto.randomUUID();
+	const batch = await makeBatch(page, origin, `Mode and topic ${suffix}`, [
+		{ title: 'Selected page', url: `https://example.test/${suffix}/selected` },
+		{ title: 'Other page', url: `https://example.test/${suffix}/other` }
+	]);
+	const item = (await getBatch(page, batch)).items[0];
+	let releaseSave = () => {};
+	const gate = new Promise((resolve) => {
+		releaseSave = () => resolve(undefined);
+	});
+	await page.route(`**/tools/tabs/api/batches/${batch.id}/items/${item.id}`, async (route) => {
+		if (
+			route.request().method() === 'PATCH' &&
+			Object.hasOwn(route.request().postDataJSON(), 'note')
+		)
+			await gate;
+		await route.continue();
+	});
+	await page.goto(`/tools/tabs?batch=${batch.id}`);
+	await page.getByRole('button', { name: 'Selected page', exact: true }).click();
+	await page.getByLabel('Your note').fill('Save before switching');
+	const noteRequest = page.waitForRequest(
+		(request) => request.method() === 'PATCH' && request.url().endsWith(`/items/${item.id}`)
+	);
+	await page.getByRole('button', { name: 'Swipe', exact: true }).click();
+	await noteRequest;
+	try {
+		await expect(page.getByRole('button', { name: 'Edit topic for Other page' })).toBeDisabled();
+	} finally {
+		releaseSave();
+	}
+	await expect(page.getByRole('button', { name: 'Swipe', exact: true })).toHaveAttribute(
+		'aria-pressed',
+		'true'
+	);
+	await expect(page.getByRole('button', { name: 'Tap', exact: true })).toBeEnabled();
+	await page.getByRole('button', { name: 'Edit topic for Selected page' }).click();
+	await expect(page.getByRole('textbox', { name: 'Topic', exact: true })).toBeVisible();
+	await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+	await expect(page.getByRole('button', { name: 'Tap', exact: true })).toBeEnabled();
+	expect((await getBatch(page, batch)).items[0].note).toBe('Save before switching');
 });
 
 test('full URLs remain visible and wrap in every review mode', async ({ page }) => {
