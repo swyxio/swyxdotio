@@ -312,6 +312,45 @@ test('a large synthetic batch can be browsed to its last page', async ({ page })
 	expect((await getBatch(page, batch)).items[0].status).toBe('unread');
 });
 
+test('scroll mode highlights the current page and undo returns it to view', async ({ page }) => {
+	await page.goto('/tools');
+	const origin = await authenticateTools(page);
+	const suffix = crypto.randomUUID();
+	const batch = await makeBatch(
+		page,
+		origin,
+		`QA active scroll ${suffix}`,
+		Array.from({ length: 8 }, (_, index) => ({
+			title: `Active page ${index + 1}`,
+			url: `https://example.test/${suffix}/active-${index}`
+		}))
+	);
+	await page.goto(`/tools/tabs?batch=${batch.id}`);
+	await page.getByRole('button', { name: 'Scroll', exact: true }).click();
+	const cards = page.locator('article[data-feed-item]');
+	const first = cards.nth(0);
+	const second = cards.nth(1);
+	await expect(first).toHaveAttribute('aria-current', 'true');
+	await expect(first).toContainText('Current');
+	await expect(second).not.toHaveAttribute('aria-current', 'true');
+	const box = await first.boundingBox();
+	if (!box) throw new Error('The current page is not visible.');
+	await first.hover();
+	await page.mouse.wheel(0, Math.ceil(box.y + box.height + 5));
+	await expect.poll(async () => (await getBatch(page, batch)).items[0].status).toBe('archived');
+	await expect(second).toHaveAttribute('aria-current', 'true');
+	const undo = page.getByRole('button', { name: /^Undo/ });
+	await expect(undo).toBeInViewport();
+	await undo.click();
+	await expect.poll(async () => (await getBatch(page, batch)).items[0].status).toBe('unread');
+	await expect(first).toBeInViewport();
+	await page.evaluate(
+		() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+	);
+	await expect(first).toHaveAttribute('aria-current', 'true');
+	expect((await getBatch(page, batch)).items.every((item) => item.status === 'unread')).toBe(true);
+});
+
 test('scroll mode archives a page passed by an actual mobile touch gesture', async ({ page }) => {
 	await page.goto('/tools');
 	const origin = await authenticateTools(page);
