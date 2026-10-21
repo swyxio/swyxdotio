@@ -120,9 +120,9 @@ function mockReaders(messages = []) {
 
 /** @param {import('@playwright/test').Page} page */
 async function openChat(page) {
-	const chat = page.getByRole('region', { name: 'swyx', exact: true });
+	const chat = page.getByRole('region', { name: 'swyx.irc', exact: true });
 	if (!(await chat.isVisible()))
-		await page.getByRole('button', { name: 'chat', exact: true }).click();
+		await page.getByRole('button', { name: 'Open swyx.irc chat', exact: true }).click();
 	await expect(chat).toBeVisible();
 	return chat;
 }
@@ -333,7 +333,7 @@ test('a collapsed chat shows a local unread badge and clears it on opening', asy
 	]);
 	await readers.install(context);
 	await page.goto(`${baseUrl}/america250`);
-	const launcher = page.getByRole('button', { name: 'chat', exact: true });
+	const launcher = page.getByRole('button', { name: 'Open swyx.irc chat', exact: true });
 	await expect(launcher).toBeVisible();
 	await expect.poll(() => readers.count(), { timeout: 10_000 }).toBe(1);
 	await expect(launcher.locator('.unread-badge')).toHaveCount(0);
@@ -346,7 +346,7 @@ test('a collapsed chat shows a local unread badge and clears it on opening', asy
 	await expect(launcher.locator('.unread-badge')).toHaveText('1');
 	await expect(launcher).toHaveAccessibleDescription(/1 unread message/);
 	await launcher.click();
-	const chat = page.getByRole('region', { name: 'swyx', exact: true });
+	const chat = page.getByRole('region', { name: 'swyx.irc', exact: true });
 	await expect(chat.getByText('New message')).toBeVisible();
 	await chat.getByRole('button', { name: 'Close chat' }).click();
 	await expect(launcher.locator('.unread-badge')).toHaveCount(0);
