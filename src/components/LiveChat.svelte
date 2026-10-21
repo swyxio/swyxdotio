@@ -341,6 +341,21 @@
 		launcher?.focus({ preventScroll: true });
 	}
 
+	/** @param {MouseEvent} event */
+	function followReaderPage(event) {
+		if (
+			event.defaultPrevented ||
+			event.button !== 0 ||
+			event.metaKey ||
+			event.ctrlKey ||
+			event.shiftKey ||
+			event.altKey
+		)
+			return;
+		showReaders = false;
+		void closeChat();
+	}
+
 	/** @param {SubmitEvent} event */
 	function sendMessage(event) {
 		event.preventDefault();
@@ -492,7 +507,8 @@
 		</button>
 	{/if}
 	{#if !collapsed}
-		<!-- svelte-ignore a11y_no_noninteractive_element_interactions: Escape dismisses the region when focus is inside it. -->
+		<!-- Escape dismisses the region when focus is inside it. -->
+		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 		<section
 			id="live-chat"
 			class="chat"
@@ -566,10 +582,7 @@
 										<li>
 											<a
 												href={resolve(/** @type {`/${string}`} */ (item.path || '/'))}
-												on:click={() => {
-													showReaders = false;
-													closeChat();
-												}}>{item.title || item.path}</a
+												on:click={followReaderPage}>{item.title || item.path}</a
 											>
 											<span>{item.count} {item.count === 1 ? 'reader' : 'readers'}</span>
 											{#if item.readers.length}
@@ -610,6 +623,38 @@
 					{/if}
 				</div>
 			{:else}
+				{#if !presence.hidden && presence.connected && presence.pages.length}
+					<!-- The scrollable list needs keyboard access. -->
+					<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+					<div class="chat-reading" role="region" aria-label="Readers and their pages" tabindex="0">
+						<div class="chat-reading-heading">reading now</div>
+						<ul>
+							{#each presence.pages as item (item.key)}
+								<li>
+									<span class="chat-reading-names">
+										{#if item.readers.length}
+											{item.readers
+												.map((reader) => reader.nick)
+												.join(', ')}{#if item.count > item.readers.length}, +{item.count -
+													item.readers.length} more{/if}
+										{:else}
+											{item.count} {item.count === 1 ? 'reader' : 'readers'}
+										{/if}
+									</span>
+									<span aria-hidden="true"> → </span>
+									{#if item.path}
+										<a
+											href={resolve(/** @type {`/${string}`} */ (item.path))}
+											on:click={followReaderPage}>{item.title || item.path}</a
+										>
+									{:else}
+										<span>{item.title || item.key}</span>
+									{/if}
+								</li>
+							{/each}
+						</ul>
+					</div>
+				{/if}
 				<div
 					class="chat-log"
 					role="log"
@@ -829,6 +874,36 @@
 		border-bottom: 1px solid #465a4a;
 		color: #d1d9cd;
 		font: 0.75rem/1.5 var(--font-body);
+	}
+	.chat-reading {
+		flex: 0 1 auto;
+		max-height: 5.5rem;
+		overflow-y: auto;
+		overscroll-behavior: contain;
+		padding: 0.4rem 0.8rem;
+		border-bottom: 1px solid #465a4a;
+		color: #d1d9cd;
+		font: 0.72rem/1.45 var(--font-mono);
+	}
+	.chat-reading-heading {
+		color: var(--chat-muted);
+		font-weight: 600;
+	}
+	.chat-reading ul {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.chat-reading li {
+		overflow-wrap: anywhere;
+	}
+	.chat-reading-names {
+		color: #b8e5bb;
+	}
+	.chat-reading a {
+		color: #f0f1e9;
+		text-decoration: underline;
+		text-underline-offset: 2px;
 	}
 	.chat-log {
 		flex: 1;
@@ -1054,16 +1129,42 @@
 		font-size: 0.7rem;
 		line-height: 1.2;
 	}
+	.chat-compact .chat-reading {
+		max-height: 2.8rem;
+		padding: 0.15rem 0.8rem;
+	}
+	.chat-compact .chat-reading-heading,
+	.chat-compact .chat-reading ul,
+	.chat-compact .chat-reading li {
+		display: inline;
+	}
+	.chat-compact .chat-reading-heading {
+		margin-right: 0.4rem;
+	}
+	.chat-compact .chat-reading li:not(:last-child)::after {
+		content: ' · ';
+	}
 	.chat-compact .chat-log {
+		min-height: 2rem;
 		padding: 0.25rem 0.8rem;
 	}
 	.chat-compact .chat-form {
-		grid-template-columns: minmax(0, 1fr) auto;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
 		gap: 0.2rem;
 		padding: 0.3rem 0.8rem;
 	}
-	.chat-compact :is(.nick-field, .quick-messages, .chat-error, .retry) {
+	.chat-compact :is(.chat-error, .retry) {
 		grid-column: 1 / -1;
+	}
+	.chat-compact .nick-field {
+		grid-column: 1;
+		min-width: 0;
+	}
+	.chat-compact .quick-messages {
+		grid-column: 2 / -1;
+	}
+	.chat-compact .message-field {
+		grid-column: 1 / 3;
 	}
 	.chat-compact .chat-actions {
 		gap: 0.25rem;

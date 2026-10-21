@@ -133,7 +133,7 @@ test('sitewide readers exclude self, link to other pages, and show same-page cur
 	context
 }) => {
 	await page.setViewportSize({ width: 1100, height: 850 });
-	const readers = mockReaders();
+	const readers = mockReaders([{ id: 'old', nick: 'Caro', text: 'hello', createdAt: Date.now() }]);
 	await readers.install(context);
 	await context.addInitScript(() => localStorage.setItem('swyx:chat:nick:v1', 'Alice'));
 	await page.goto(`${baseUrl}/america250`);
@@ -152,6 +152,27 @@ test('sitewide readers exclude self, link to other pages, and show same-page cur
 		await expect(chat.getByRole('button', { name: '1 other reader online' })).toBeVisible({
 			timeout: 10_000
 		});
+		const readingNow = chat.getByRole('region', { name: 'Readers and their pages' });
+		const inlinePageLink = readingNow.getByRole('link', { name: 'Learn in Public' });
+		await expect(readingNow.getByText('Bob', { exact: true })).toBeVisible();
+		await expect(inlinePageLink).toHaveAttribute('href', '/learn-in-public');
+		await expect(readingNow.getByText('Alice', { exact: true })).toHaveCount(0);
+		await page.setViewportSize({ width: 390, height: 300 });
+		await expect(inlinePageLink).toBeInViewport();
+		const log = chat.getByRole('log', { name: 'Recent chat messages' });
+		const logBox = await log.boundingBox();
+		const messageBox = await log.getByText('hello', { exact: true }).boundingBox();
+		if (!logBox || !messageBox) throw new Error('Compact chat log was not visible');
+		expect(logBox.height).toBeGreaterThanOrEqual(32);
+		expect(messageBox.y).toBeGreaterThanOrEqual(logBox.y);
+		expect(messageBox.y + messageBox.height).toBeLessThanOrEqual(logBox.y + logBox.height);
+		const form = chat.locator('form');
+		const send = chat.getByRole('button', { name: /send/ });
+		const formBox = await form.boundingBox();
+		const sendBox = await send.boundingBox();
+		if (!formBox || !sendBox) throw new Error('Compact chat form was not visible');
+		expect(sendBox.y + sendBox.height).toBeLessThanOrEqual(formBox.y + formBox.height);
+		await page.setViewportSize({ width: 1100, height: 850 });
 		const readerToggle = chat.getByRole('button', { name: '1 other reader online' });
 		await readerToggle.focus();
 		await page.keyboard.press('Enter');
@@ -162,6 +183,12 @@ test('sitewide readers exclude self, link to other pages, and show same-page cur
 		await expect(roster.getByText('1 reader', { exact: true })).toBeVisible();
 		await expect(roster.getByText('Bob', { exact: true })).toBeVisible();
 		await expect(roster.getByRole('link', { name: 'What America has meant to me' })).toHaveCount(0);
+		const [rosterTab] = await Promise.all([
+			context.waitForEvent('page'),
+			pageLink.click({ modifiers: ['Meta'] })
+		]);
+		await expect(roster).toBeVisible();
+		await rosterTab.close();
 		const backToChat = chat.getByRole('button', { name: '← back to chat' });
 		for (
 			let step = 0;
@@ -174,8 +201,15 @@ test('sitewide readers exclude self, link to other pages, and show same-page cur
 		await page.keyboard.press('Enter');
 		await expect(readerToggle).toBeFocused();
 		await expect(chat.getByLabel('Message', { exact: true })).toHaveValue('A draft to keep');
-		await chat.getByRole('button', { name: '1 other reader online' }).click();
-		await roster.getByRole('link', { name: 'Learn in Public' }).click();
+		const [newTab] = await Promise.all([
+			context.waitForEvent('page'),
+			inlinePageLink.click({ modifiers: ['Meta'] })
+		]);
+		await expect(chat).toBeVisible();
+		await expect(chat.getByLabel('Message', { exact: true })).toHaveValue('A draft to keep');
+		await expect(page).toHaveURL(/\/america250$/);
+		await newTab.close();
+		await inlinePageLink.click();
 		await expect(page).toHaveURL(/\/learn-in-public$/);
 		await expect(chat).toHaveCount(0);
 		await expect.poll(() => readers.count(), { timeout: 10_000 }).toBe(2);
@@ -188,6 +222,11 @@ test('sitewide readers exclude self, link to other pages, and show same-page cur
 
 		const reopened = await openChat(page);
 		await expect(reopened.getByRole('button', { name: '1 other reader online' })).toBeVisible();
+		await expect(
+			reopened
+				.getByRole('region', { name: 'Readers and their pages' })
+				.getByText('Bea', { exact: true })
+		).toBeVisible();
 		await reopened.getByRole('button', { name: '1 other reader online' }).click();
 		await expect(
 			reopened.getByRole('region', { name: 'Live readers' }).getByText('Bea', { exact: true })
@@ -376,6 +415,7 @@ test('mobile hide and show live readers synchronizes across open tabs', async ({
 	await firstChat.getByRole('button', { name: 'Hide live readers' }).click();
 	await expect(firstChat.getByRole('button', { name: 'Show live readers' })).toBeVisible();
 	await expect(secondChat.getByRole('button', { name: 'Live readers hidden' })).toBeVisible();
+	await expect(secondChat.getByRole('region', { name: 'Readers and their pages' })).toHaveCount(0);
 	await expect.poll(() => readers.count()).toBe(0);
 	await secondChat.getByRole('button', { name: 'Live readers hidden' }).click();
 	await secondChat.getByRole('button', { name: 'Show live readers' }).click();
