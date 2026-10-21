@@ -43,6 +43,13 @@
 		group?: string;
 		tabGroup?: string;
 	};
+	const statuses = [
+		{ value: 'unread', label: 'Unread' },
+		{ value: 'followup', label: 'Follow up' },
+		{ value: 'read', label: 'Read' },
+		{ value: 'archived', label: 'Archived' },
+		{ value: 'all', label: 'All statuses' }
+	];
 
 	export let data: { user: { id: string; email?: string; name?: string } };
 
@@ -74,6 +81,7 @@
 	let importName = '';
 	let importFile: File | null = null;
 	let fileInput: HTMLInputElement;
+	let batchOptions: HTMLDivElement;
 	let importing = false;
 	let undo: UndoEntry | null = null;
 	let undoHistory: UndoEntry[] = [];
@@ -484,6 +492,12 @@
 			selectedId = '';
 			page = {};
 			note = savedNote = '';
+			await tick();
+			const activeBatch = batchOptions?.querySelector<HTMLElement>('[aria-pressed="true"]');
+			if (activeBatch && batchOptions.scrollHeight > batchOptions.clientHeight) {
+				batchOptions.scrollTop +=
+					activeBatch.getBoundingClientRect().top - batchOptions.getBoundingClientRect().top;
+			}
 			const first = items.find((item) => item.status === 'unread');
 			if (first) await loadItem(first.id);
 		} catch (caught) {
@@ -815,32 +829,51 @@
 		</header>
 
 		<div class="toolbar">
-			<label
-				>Batch
-				<select
-					value={batchId}
-					disabled={busy || loading || !batches.length || feedPending.size > 0}
-					on:change={(event) => {
-						const select = event.currentTarget;
-						const id = select.value;
-						select.value = batchId;
-						void switchBatch(id);
-					}}
+			<div class="picker-group batch-picker">
+				<span class="picker-label" id="batch-label"
+					>Batch {#if batches.length > 3}<span class="picker-hint" aria-hidden="true"
+							>· scroll for more</span
+						>{/if}</span
 				>
-					{#if !batches.length}<option value=""
-							>{loading
-								? 'Loading batches…'
-								: batchListFailed
-									? 'Batches unavailable'
-									: 'No batches yet'}</option
-						>{/if}
-					{#each batches as batch (batch.id)}<option value={batch.id}
-							>{batch.name}{batch.count != null ? ` · ${batch.count}` : ''}</option
-						>{/each}
-				</select>
-			</label>
+				{#if batches.length}
+					<div
+						class="picker-options batch-options"
+						class:has-many={batches.length > 3}
+						bind:this={batchOptions}
+						role="group"
+						aria-labelledby="batch-label"
+					>
+						{#each batches as batch (batch.id)}
+							<button
+								type="button"
+								aria-pressed={batchId === batch.id}
+								disabled={busy || loading || feedPending.size > 0}
+								on:click={() => void switchBatch(batch.id)}
+								><span>{batch.name}</span>{#if batch.count != null}<span class="picker-count"
+										>{batch.count}</span
+									>{/if}</button
+							>
+						{/each}
+					</div>
+				{:else}
+					<p class="picker-empty">
+						{loading
+							? 'Loading batches…'
+							: batchListFailed
+								? 'Batches unavailable'
+								: 'No batches yet'}
+					</p>
+				{/if}
+			</div>
 			<details class="filters" bind:open={filtersOpen}>
-				<summary>Filters <span aria-hidden="true">{filtersOpen ? '−' : '+'}</span></summary>
+				<summary>
+					Filters <span class="filter-selection"
+						>· {statuses.find((status) => status.value === statusFilter)?.label}{topic !== 'all'
+							? ` · ${topic}`
+							: ''}</span
+					>
+					<span aria-hidden="true">{filtersOpen ? '−' : '+'}</span>
+				</summary>
 				<div class="filter-fields">
 					<label
 						>Find a page<input
@@ -850,38 +883,61 @@
 							bind:value={query}
 						/></label
 					>
-					<label
-						>Topic<select
-							bind:value={topic}
-							disabled={feedPending.size > 0 || note !== savedNote || noteSaving}
-							><option value="all">All topics</option>{#each topics as name (name)}<option
-									value={name}>{name}</option
-								>{/each}</select
-						></label
-					>
-					<label
-						>Status<select
-							bind:value={statusFilter}
-							disabled={feedPending.size > 0 || note !== savedNote || noteSaving}
-							><option value="unread">Unread</option><option value="followup">Follow up</option
-							><option value="read">Read</option><option value="archived">Archived</option><option
-								value="all">All statuses</option
-							></select
-						></label
-					>
+					<div class="picker-group">
+						<span class="picker-label" id="topic-label">Topic</span>
+						<div class="picker-options" role="group" aria-labelledby="topic-label">
+							{#each ['all', ...topics] as name (name)}
+								<button
+									type="button"
+									aria-pressed={topic === name}
+									disabled={feedPending.size > 0 || note !== savedNote || noteSaving}
+									on:click={() => (topic = name)}>{name === 'all' ? 'All topics' : name}</button
+								>
+							{/each}
+						</div>
+					</div>
+					<div class="picker-group">
+						<span class="picker-label" id="status-label">Status</span>
+						<div class="picker-options" role="group" aria-labelledby="status-label">
+							{#each statuses as status (status.value)}
+								<button
+									type="button"
+									aria-pressed={statusFilter === status.value}
+									disabled={feedPending.size > 0 || note !== savedNote || noteSaving}
+									on:click={() => (statusFilter = status.value)}>{status.label}</button
+								>
+							{/each}
+						</div>
+					</div>
 					{#if windows.length}
-						<label
-							>Captured window
-							<select
-								bind:value={windowFilter}
-								disabled={feedPending.size > 0 || note !== savedNote || noteSaving}
+						<div class="picker-group">
+							<span class="picker-label" id="window-label"
+								>Captured window {#if windows.length >= 8}<span
+										class="picker-hint"
+										aria-hidden="true">· scroll for more</span
+									>{/if}</span
 							>
-								<option value="all">All windows</option>
-								{#each windows as windowId, index (windowId)}<option value={windowId}
-										>Window {index + 1}</option
-									>{/each}
-							</select>
-						</label>
+							<div
+								class="picker-options window-options"
+								role="group"
+								aria-labelledby="window-label"
+							>
+								<button
+									type="button"
+									aria-pressed={windowFilter === 'all'}
+									disabled={feedPending.size > 0 || note !== savedNote || noteSaving}
+									on:click={() => (windowFilter = 'all')}>All windows</button
+								>
+								{#each windows as windowId, index (windowId)}
+									<button
+										type="button"
+										aria-pressed={windowFilter === windowId}
+										disabled={feedPending.size > 0 || note !== savedNote || noteSaving}
+										on:click={() => (windowFilter = windowId)}>Window {index + 1}</button
+									>
+								{/each}
+							</div>
+						</div>
 					{/if}
 				</div>
 			</details>
@@ -1435,6 +1491,70 @@
 		display: grid;
 		gap: 0.8rem;
 	}
+	.picker-group {
+		display: grid;
+		gap: 0.3rem;
+		min-width: 0;
+	}
+	.picker-label {
+		color: var(--ink);
+		font-size: 0.83rem;
+		font-weight: 700;
+	}
+	.picker-hint {
+		color: var(--muted);
+		font-weight: 400;
+	}
+	.picker-empty {
+		margin: 0;
+		color: var(--muted);
+		font-size: 0.9rem;
+	}
+	.picker-options {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.35rem;
+		min-width: 0;
+	}
+	.picker-options button {
+		min-height: 44px;
+		max-width: 100%;
+		padding: 0.45rem 0.65rem;
+		border: 1px solid var(--line);
+		border-radius: 7px;
+		background: var(--page-surface);
+		color: var(--ink);
+		font: 600 0.85rem/1.25 var(--font-body);
+		text-align: left;
+		overflow-wrap: anywhere;
+		cursor: pointer;
+	}
+	.picker-options button[aria-pressed='true'] {
+		border-color: var(--accent);
+		background: var(--accent);
+		color: var(--page-surface);
+	}
+	.batch-options {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+	}
+	.batch-options.has-many,
+	.window-options {
+		max-height: 13rem;
+		overflow-y: auto;
+		overscroll-behavior: contain;
+	}
+	.batch-options button {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 0.5rem;
+	}
+	.picker-count {
+		font-size: 0.78rem;
+		opacity: 0.75;
+		white-space: nowrap;
+	}
 	.toolbar label,
 	.import-body label {
 		display: grid;
@@ -1451,7 +1571,6 @@
 	.filters > summary {
 		display: none;
 	}
-	.toolbar select,
 	.toolbar input,
 	.import-body input,
 	.import-body textarea,
@@ -1465,7 +1584,6 @@
 		color: var(--ink);
 		font: 400 1rem/1.4 var(--font-body);
 	}
-	.toolbar select,
 	.toolbar input,
 	.import-body input {
 		min-height: 44px;
@@ -1479,7 +1597,6 @@
 		resize: vertical;
 	}
 	button:focus-visible,
-	select:focus-visible,
 	input:focus-visible,
 	textarea:focus-visible,
 	summary:focus-visible,
@@ -2083,8 +2200,14 @@
 		.toolbar {
 			display: contents;
 		}
-		.toolbar > label {
+		.batch-picker {
 			grid-column: 1 / -1;
+		}
+		.batch-options {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+		.batch-options.has-many {
+			max-height: 6.5rem;
 		}
 		.filters {
 			grid-column: 1;
@@ -2100,16 +2223,20 @@
 			cursor: pointer;
 			list-style: none;
 		}
+		.filter-selection {
+			overflow: hidden;
+			color: var(--muted);
+			font-weight: 400;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
 		.filters[open] {
 			grid-column: 1 / -1;
 		}
 		.filter-fields {
-			grid-template-columns: 1fr 1fr;
+			grid-template-columns: 1fr;
 			gap: 0.65rem;
 			padding-bottom: 0.4rem;
-		}
-		.filter-fields label:first-child {
-			grid-column: 1 / -1;
 		}
 		.import-panel {
 			grid-column: 2;

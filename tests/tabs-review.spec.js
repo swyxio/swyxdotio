@@ -47,6 +47,17 @@ async function openFilters(page) {
 	if ((await filters.getAttribute('open')) === null) await filters.locator('summary').click();
 }
 
+/**
+ * @param {import('@playwright/test').Page} page
+ * @param {string} group
+ * @param {string} choice
+ */
+function filterChoice(page, group, choice) {
+	return page
+		.getByRole('group', { name: group, exact: true })
+		.getByRole('button', { name: choice, exact: true });
+}
+
 test('private tab library requires owner sign-in', async ({ page }) => {
 	const guestApi = await page.request.get('/tools/tabs/api/batches');
 	expect(guestApi.status()).toBe(401);
@@ -209,9 +220,9 @@ test('feed decisions and notes persist, and only intentional scroll-past archive
 	await page.goto(`/tools/tabs?batch=${first.id}`);
 	await page.getByRole('button', { name: 'Tap', exact: true }).click();
 	await openFilters(page);
-	await page.getByRole('combobox', { name: 'Status', exact: true }).selectOption('archived');
+	await filterChoice(page, 'Status', 'Archived').click();
 	await expect(feedCard('Feed page 2')).toBeVisible();
-	await page.getByRole('combobox', { name: 'Status', exact: true }).selectOption('followup');
+	await filterChoice(page, 'Status', 'Follow up').click();
 	await feedCard('Feed page 1').getByRole('button', { name: 'Feed page 1', exact: true }).click();
 	await expect(feedCard('Feed page 1').getByLabel('Your note')).toHaveValue('An idea to keep');
 });
@@ -227,8 +238,57 @@ test('desktop filters are available without opening the disclosure', async ({ pa
 	await page.goto(`/tools/tabs?batch=${batch.id}`);
 	await expect(page.locator('details.filters')).toHaveAttribute('open');
 	await expect(page.getByRole('searchbox', { name: 'Find a page' })).toBeVisible();
-	await expect(page.getByRole('combobox', { name: 'Topic', exact: true })).toBeVisible();
-	await expect(page.getByRole('combobox', { name: 'Status', exact: true })).toBeVisible();
+	await expect(page.getByRole('group', { name: 'Topic', exact: true })).toBeVisible();
+	await expect(page.getByRole('group', { name: 'Status', exact: true })).toBeVisible();
+});
+
+test('visible pickers select filters and keep batches separate', async ({ page }) => {
+	await page.goto('/tools');
+	const origin = await authenticateTools(page);
+	const suffix = crypto.randomUUID();
+	const first = await makeBatch(
+		page,
+		origin,
+		`Picker first ${suffix}`,
+		Array.from({ length: 12 }, (_, index) => ({
+			title: `Picker page ${index + 1}`,
+			url: `https://example.test/${suffix}/${index}`,
+			windowId: String(index)
+		}))
+	);
+	const second = await makeBatch(page, origin, `Picker second ${suffix}`, [
+		{ title: 'Other batch', url: `https://example.test/${suffix}/other` }
+	]);
+	await page.route('**/tools/tabs/api/batches', async (route) => {
+		const response = await route.fetch();
+		/** @type {{batches: Array<{id: string}>}} */
+		const body = await response.json();
+		body.batches = body.batches.filter((batch) => [first.id, second.id].includes(batch.id));
+		await route.fulfill({ response, json: body });
+	});
+	await page.goto(`/tools/tabs?batch=${first.id}`);
+	const batches = page.getByRole('group', { name: 'Batch', exact: true });
+	const firstChoice = batches.getByRole('button', { name: `Picker first ${suffix}` });
+	const secondChoice = batches.getByRole('button', { name: `Picker second ${suffix}` });
+	await expect(firstChoice).toBeVisible();
+	await expect(secondChoice).toBeVisible();
+	await expect(firstChoice).toHaveAttribute('aria-pressed', 'true');
+	await openFilters(page);
+	await expect(filterChoice(page, 'Topic', 'All topics')).toHaveAttribute('aria-pressed', 'true');
+	await expect(filterChoice(page, 'Status', 'Unread')).toHaveAttribute('aria-pressed', 'true');
+	await expect(filterChoice(page, 'Status', 'Archived')).toBeVisible();
+	const lastWindow = filterChoice(page, 'Captured window', 'Window 12');
+	await lastWindow.focus();
+	await page.keyboard.press('Enter');
+	await expect(lastWindow).toHaveAttribute('aria-pressed', 'true');
+	await expect(page.getByRole('button', { name: 'Picker page 12', exact: true })).toBeVisible();
+	await expect(page.getByRole('button', { name: 'Picker page 1', exact: true })).toHaveCount(0);
+	await secondChoice.click();
+	await expect(secondChoice).toHaveAttribute('aria-pressed', 'true');
+	await expect(page.getByRole('button', { name: 'Other batch', exact: true })).toBeVisible();
+	await expect(filterChoice(page, 'Status', 'Unread')).toHaveAttribute('aria-pressed', 'true');
+	expect((await getBatch(page, first)).items.every((item) => item.status === 'unread')).toBe(true);
+	expect((await getBatch(page, second)).items[0].status).toBe('unread');
 });
 
 test('the first reading action is reachable across phone, split, and desktop layouts', async ({
@@ -274,7 +334,7 @@ test('filters stay accessible when changing from a mobile to a desktop viewport'
 	await expect(page.locator('details.filters')).not.toHaveAttribute('open');
 	await page.setViewportSize({ width: 1280, height: 900 });
 	await expect(page.getByRole('searchbox', { name: 'Find a page' })).toBeVisible();
-	await expect(page.getByRole('combobox', { name: 'Status', exact: true })).toBeVisible();
+	await expect(page.getByRole('group', { name: 'Status', exact: true })).toBeVisible();
 	await page.setViewportSize({ width: 390, height: 844 });
 	await expect(page.locator('details.filters summary')).toBeVisible();
 	expect((await getBatch(page, batch)).items[0].status).toBe('unread');
@@ -496,7 +556,7 @@ test('mobile triage saves notes, swipes, undo, import and batch isolation', asyn
 		status: 'archived',
 		note: 'Remember Alpha'
 	});
-	await page.getByRole('button', { name: 'Undo' }).click();
+	await page.getByRole('button', { name: 'Undo', exact: true }).click();
 	await expect(card.getByRole('heading', { name: 'Alpha page' })).toBeVisible();
 	await expect(card.getByLabel('Your note')).toHaveValue('Remember Alpha');
 	firstData = await getBatch(page, first);
@@ -537,15 +597,15 @@ test('mobile triage saves notes, swipes, undo, import and batch isolation', asyn
 	await expect(page.getByRole('status')).toContainText('Saved for follow-up.');
 	firstData = await getBatch(page, first);
 	expect(firstData.items.find((item) => item.url === bravoUrl)?.status).toBe('followup');
-	await page.getByRole('button', { name: 'Undo' }).click();
+	await page.getByRole('button', { name: 'Undo', exact: true }).click();
 	await expect(card.getByRole('heading', { name: 'Bravo page' })).toBeVisible();
 
 	await openFilters(page);
-	await page.getByRole('combobox', { name: 'Status', exact: true }).selectOption('archived');
+	await filterChoice(page, 'Status', 'Archived').click();
 	await card.getByRole('heading', { name: 'Bravo page' }).waitFor();
 	await card.getByRole('button', { name: 'Review first matching page' }).click();
 	await expect(card.getByLabel('Your note')).toHaveValue('Remember Alpha');
-	await page.getByRole('combobox', { name: 'Status', exact: true }).selectOption('all');
+	await filterChoice(page, 'Status', 'All statuses').click();
 	await page.getByRole('searchbox', { name: 'Find a page' }).fill('Bravo');
 	const queue = page.getByRole('complementary', { name: 'Pages in this view' });
 	await expect(queue.getByRole('button')).toHaveCount(1);
@@ -553,16 +613,17 @@ test('mobile triage saves notes, swipes, undo, import and batch isolation', asyn
 	await card.getByRole('button', { name: 'Review first matching page' }).click();
 	await expect(card.getByRole('heading', { name: 'Bravo page' })).toBeVisible();
 	await page.getByRole('searchbox', { name: 'Find a page' }).fill('');
-	await page
-		.getByRole('combobox', { name: 'Topic', exact: true })
-		.selectOption('AI models & research');
+	await filterChoice(page, 'Topic', 'AI models & research').click();
 	await expect(queue.getByRole('button')).toHaveCount(1);
-	await page.getByRole('combobox', { name: 'Captured window' }).selectOption('10');
+	await filterChoice(page, 'Captured window', 'Window 1').click();
 	await expect(queue.getByRole('button')).toHaveCount(0);
-	await page.getByRole('combobox', { name: 'Captured window' }).selectOption('11');
+	await filterChoice(page, 'Captured window', 'Window 2').click();
 	await expect(queue.getByRole('button')).toHaveCount(1);
 
-	await page.getByRole('combobox', { name: 'Batch', exact: true }).selectOption(second.id);
+	await page
+		.getByRole('group', { name: 'Batch', exact: true })
+		.getByRole('button', { name: `QA second ${suffix}` })
+		.click();
 	await expect(card.getByRole('heading', { name: 'Alpha page' })).toBeVisible();
 	await expect(card.getByLabel('Your note')).toHaveValue('');
 	await card.getByLabel('Your note').fill('Second batch note');
@@ -578,7 +639,7 @@ test('mobile triage saves notes, swipes, undo, import and batch isolation', asyn
 	await page.goto(`/tools/tabs?batch=${second.id}`);
 	await useSwipeMode(page);
 	await openFilters(page);
-	await page.getByRole('combobox', { name: 'Status', exact: true }).selectOption('followup');
+	await filterChoice(page, 'Status', 'Follow up').click();
 	await page
 		.getByRole('complementary', { name: 'Pages in this view' })
 		.getByRole('button', { name: /Alpha page/ })
