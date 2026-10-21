@@ -1,0 +1,9 @@
+# swyx.irc reading room
+
+Selected direction: D, made bolder. The signature is the golden title bar over a forest-green chat room, with a separate reading ledger and a more readable conversation. Mobile keeps the same character in a compact stacked window, with a disclosure for additional readers.
+
+Interaction references: [Discord group chat and calls](https://support.discord.com/hc/en-us/articles/223657667-Group-Chat-and-Calls) for an identifiable member list alongside conversation, and [Figma spotlight](https://help.figma.com/hc/en-us/articles/360040322673-Present-to-collaborators-using-spotlight) for following another person's position. The selected generated design is `selected-bold.png`; its imagined article and messages are not product data.
+
+The existing site shell, chat protocol, reader navigation, visibility controls, 48-hour retention, unread state, presets, and draggable/resizable window remain. The broad desktop ledger is available when the window is wide enough. At the widest viewport the window starts compact to leave the article index and reading column clear; the title-bar expand control opens the ledger on demand. Saved window geometry is respected. Mobile starts with one page visible and expands the remaining list on request. The disclosure retains the full public nickname, page, and backup information.
+
+Visual comparison: local Chromium test captures with mocked readers and messages, `/america250`, 1100 × 850 light and 390 × 844 light and dark, in CSS pixels. These preserve actual content and working controls instead of the mockup's invented site chrome. The mock uses a serif wordmark; the implementation uses the site's more readable sans-serif because reading comfort is a stated priority. The local captures are not a substitute for the requested deployed playtest.

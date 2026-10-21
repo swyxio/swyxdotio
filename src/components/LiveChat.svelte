@@ -67,6 +67,7 @@
 	let expiryTimer = 0;
 	let destroyed = false;
 	let showReaders = false;
+	let readingExpanded = false;
 	let unread = 0;
 	/** @type {Set<string>} */
 	const seenMessageIds = new SvelteSet();
@@ -137,9 +138,12 @@
 	/** @param {boolean} wide */
 	function defaultGeometry(wide) {
 		const view = viewport();
-		const width = wide && allowSidebar ? 268 : 336;
+		const width = wide && allowSidebar ? 268 : view.width >= 800 ? 620 : 336;
 		const bottom = !wide && view.width < 500 ? 68 : 16;
-		const height = Math.min(wide && allowSidebar ? 576 : 510, view.height - bottom - 8);
+		const height = Math.min(
+			wide && allowSidebar ? 576 : view.width >= 800 ? 620 : 510,
+			view.height - bottom - 8
+		);
 		return clampGeometry({
 			x: view.x + 16,
 			y: view.y + view.height - height - bottom,
@@ -177,6 +181,16 @@
 		} catch {
 			// The window remains movable when storage is unavailable.
 		}
+	}
+
+	function toggleChatWidth() {
+		const expanded = geometry.width >= 500;
+		geometry = restoreGeometry({
+			...geometry,
+			width: expanded ? (wideLayout ? 268 : 336) : 620,
+			height: expanded ? geometry.height : Math.max(geometry.height, 576)
+		});
+		rememberGeometry();
 	}
 
 	function syncViewport() {
@@ -566,6 +580,7 @@
 		<section
 			id="live-chat"
 			class="chat"
+			class:chat-rail={geometry.width >= 500 && geometry.height >= 350}
 			class:chat-compact={geometry.height < 350}
 			class:chat-tiny={geometry.height < 260}
 			style="left: {geometry.x}px; top: {geometry.y}px; width: {geometry.width}px; height: {geometry.height}px"
@@ -602,206 +617,251 @@
 					</span>
 				</button>
 				<span class="visually-hidden" aria-live="polite">{status}</span>
+				{#if wideLayout}
+					<button
+						type="button"
+						class="chat-width"
+						aria-label={geometry.width >= 500 ? 'Make chat compact' : 'Expand chat'}
+						title={geometry.width >= 500 ? 'Make chat compact' : 'Expand chat'}
+						on:click={toggleChatWidth}>{geometry.width >= 500 ? '↙' : '↗'}</button
+					>
+				{/if}
 				<button type="button" class="chat-close" aria-label="Close chat" on:click={closeChat}
 					>×</button
 				>
 			</div>
-			<p class="chat-notice">
-				{#if geometry.height < 350}
-					Public · unverified names · messages expire after 48h · backups up to 30 days.
-				{:else}
-					Public · nicknames are unverified and visible with your page<br />Messages disappear after
-					48 hours. Backups may persist up to 30 days.
-				{/if}
-			</p>
-			{#if showReaders}
-				<div
-					id="chat-readers"
-					class="chat-readers"
-					role="region"
-					aria-label="Live readers"
-					tabindex="-1"
-					bind:this={readerPanel}
-				>
-					<p class="readers-heading">{readerStatus}</p>
-					{#if presence.hidden}
-						<p>Live readers and your page are hidden.</p>
-						<button type="button" class="reader-action" on:click={() => onPresenceVisibility(false)}
-							>Show live readers</button
-						>
-					{:else if presence.pageKey && presence.admitted}
-						{#if presence.connected}
-							{#if presence.pages.length}
-								<ul class="reader-pages">
-									{#each presence.pages as item (item.key)}
-										<li>
-											<a
-												href={resolve(/** @type {`/${string}`} */ (item.path || '/'))}
-												on:click={followReaderPage}>{item.title || item.path}</a
-											>
-											<span>{item.count} {item.count === 1 ? 'reader' : 'readers'}</span>
-											{#if item.readers.length}
-												<div class="reader-names">
-													{#each item.readers as reader, index (reader.id)}
-														{#if index > 0},
-														{/if}<a
-															href={resolve(/** @type {`/${string}`} */ (item.path || '/'))}
-															aria-label={`Find ${reader.nick} on ${item.title || item.path}`}
-															title={`Find ${reader.nick} on this page`}
-															on:click={(event) => followReader(event, reader.id, item.key)}
-															>{reader.nick}</a
-														>
-													{/each}
-												</div>
-											{/if}
-										</li>
-									{/each}
-								</ul>
-							{:else}
-								<p>No other readers are connected right now.</p>
+			<details class="chat-notice">
+				<summary>Public · unverified · 48h · backups ≤30d <span>Details</span></summary>
+				<p>
+					Nicknames are unverified and visible with your page. Messages disappear after 48 hours.
+					Backups may persist up to 30 days.
+				</p>
+			</details>
+			<div class="chat-stage">
+				{#if showReaders}
+					<div
+						id="chat-readers"
+						class="chat-readers"
+						role="region"
+						aria-label="Live readers"
+						tabindex="-1"
+						bind:this={readerPanel}
+					>
+						<p class="readers-heading">{readerStatus}</p>
+						{#if presence.hidden}
+							<p>Live readers and your page are hidden.</p>
+							<button
+								type="button"
+								class="reader-action"
+								on:click={() => onPresenceVisibility(false)}>Show live readers</button
+							>
+						{:else if presence.pageKey && presence.admitted}
+							{#if presence.connected}
+								{#if presence.pages.length}
+									<ul class="reader-pages">
+										{#each presence.pages as item (item.key)}
+											<li>
+												<a
+													href={resolve(/** @type {`/${string}`} */ (item.path || '/'))}
+													on:click={followReaderPage}>{item.title || item.path}</a
+												>
+												<span>{item.count} {item.count === 1 ? 'reader' : 'readers'}</span>
+												{#if item.readers.length}
+													<div class="reader-names">
+														{#each item.readers as reader, index (reader.id)}
+															{#if index > 0},
+															{/if}<a
+																href={resolve(/** @type {`/${string}`} */ (item.path || '/'))}
+																aria-label={`Find ${reader.nick} on ${item.title || item.path}`}
+																title={`Find ${reader.nick} on this page`}
+																on:click={(event) => followReader(event, reader.id, item.key)}
+																>{reader.nick}</a
+															>
+														{/each}
+													</div>
+												{/if}
+											</li>
+										{/each}
+									</ul>
+								{:else}
+									<p>No other readers are connected right now.</p>
+								{/if}
 							{/if}
+							<p>
+								Your nickname and current public page are visible to other readers. Nicknames are
+								unverified; counts are connected tabs.
+							</p>
+							<div class="reader-reactions" aria-label="Wave to readers on this page">
+								{#each PRESENCE_REACTIONS as reaction (reaction)}
+									<button
+										type="button"
+										disabled={!presence.connected}
+										aria-label={`Send ${reaction}`}
+										on:click={() => onPresenceReaction(reaction)}>{reaction}</button
+									>
+								{/each}
+							</div>
+							<button type="button" class="reader-action" on:click={onPresenceShare}
+								>Share this page ✨</button
+							>
+							<button
+								type="button"
+								class="reader-action"
+								on:click={() => onPresenceVisibility(true)}>Hide live readers</button
+							>
+							<p>Country is approximate and may reflect a VPN.</p>
+						{:else}
+							<p>Live readers are unavailable on this page.</p>
 						{/if}
-						<p>
-							Your nickname and current public page are visible to other readers. Nicknames are
-							unverified; counts are connected tabs.
-						</p>
-						<div class="reader-reactions" aria-label="Wave to readers on this page">
-							{#each PRESENCE_REACTIONS as reaction (reaction)}
+					</div>
+				{:else}
+					<div class="chat-content">
+						{#if (!presence.hidden && presence.connected && presence.pages.length) || (geometry.width >= 500 && geometry.height >= 350)}
+							<!-- The scrollable list needs keyboard access. -->
+							<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+							<div
+								class="chat-reading"
+								class:chat-reading-expanded={readingExpanded}
+								role="region"
+								aria-label="Readers and their pages"
+								tabindex="0"
+							>
+								{#if geometry.width >= 500 && geometry.height >= 350}
+									<div class="chat-reading-heading">
+										reading now{!presence.hidden &&
+										presence.connected &&
+										presence.admitted &&
+										!presence.stopped
+											? ` · ${presence.otherCount}`
+											: ''}
+									</div>
+								{:else}
+									<button
+										type="button"
+										class="chat-reading-heading"
+										aria-expanded={readingExpanded}
+										on:click={() => (readingExpanded = !readingExpanded)}
+									>
+										reading now · {presence.otherCount}
+										<span aria-hidden="true">{readingExpanded ? '−' : '+'}</span>
+									</button>
+								{/if}
+								{#if !presence.hidden && presence.connected && presence.pages.length}
+									<ul>
+										{#each presence.pages as item (item.key)}
+											<li>
+												<span class="chat-reading-names">
+													{#if item.readers.length}
+														{#each item.readers as reader, index (reader.id)}
+															{#if index > 0},
+															{/if}<a
+																href={resolve(/** @type {`/${string}`} */ (item.path || '/'))}
+																aria-label={`Find ${reader.nick} on ${item.title || item.path}`}
+																title={`Find ${reader.nick} on this page`}
+																on:click={(event) => followReader(event, reader.id, item.key)}
+																>{reader.nick}</a
+															>
+														{/each}{#if item.count > item.readers.length}, +{item.count -
+																item.readers.length} more{/if}
+													{:else}
+														{item.count} {item.count === 1 ? 'reader' : 'readers'}
+													{/if}
+												</span>
+												<span class="chat-reading-arrow" aria-hidden="true"> → </span>
+												{#if item.path}
+													<a
+														href={resolve(/** @type {`/${string}`} */ (item.path))}
+														on:click={followReaderPage}>{item.title || item.path}</a
+													>
+												{:else}
+													<span>{item.title || item.key}</span>
+												{/if}
+											</li>
+										{/each}
+									</ul>
+								{:else}
+									<p class="chat-reading-empty">{readerStatus}</p>
+								{/if}
+							</div>
+						{/if}
+						<div
+							class="chat-log"
+							role="log"
+							aria-label="Recent chat messages"
+							aria-live="polite"
+							bind:this={log}
+						>
+							{#if messages.length === 0}
+								<p class="chat-empty">No recent messages. Say hello!</p>
+							{:else}
+								{#each messages as message (message.id)}
+									<div class="chat-message">
+										<time datetime={new Date(message.createdAt).toISOString()}
+											>{formatTime(message.createdAt)}</time
+										>
+										<span class="chat-nick">&lt;{message.nick}&gt;</span>
+										<span class="chat-text">{message.text}</span>
+									</div>
+								{/each}
+							{/if}
+						</div>
+					</div>
+					<form class="chat-form" bind:this={form} on:submit={sendMessage}>
+						<label class="nick-field"
+							>nick <input
+								aria-label="Nickname (unverified)"
+								bind:value={nick}
+								on:input={rememberNick}
+								maxlength="24"
+								required
+								autocomplete="nickname"
+							/></label
+						>
+						<div class="quick-messages" role="group" aria-label="Quick messages">
+							{#each quickMessages as message (message.label)}
 								<button
 									type="button"
-									disabled={!presence.connected}
-									aria-label={`Send ${reaction}`}
-									on:click={() => onPresenceReaction(reaction)}>{reaction}</button
+									aria-label={`Add ${message.text} to message`}
+									title={message.text}
+									disabled={draft.length +
+										(draft && !/\s$/.test(draft) ? 1 : 0) +
+										message.text.length >
+										500}
+									on:click={() => quickMessage(message.text)}>{message.label}</button
 								>
 							{/each}
 						</div>
-						<button type="button" class="reader-action" on:click={onPresenceShare}
-							>Share this page ✨</button
+						<label class="message-field"
+							><span class="visually-hidden">Message</span><textarea
+								bind:this={composer}
+								bind:value={draft}
+								on:keydown={composerKeydown}
+								maxlength="500"
+								required
+								rows="2"
+								placeholder="Write a message…"
+							></textarea></label
 						>
-						<button type="button" class="reader-action" on:click={() => onPresenceVisibility(true)}
-							>Hide live readers</button
-						>
-						<p>Country is approximate and may reflect a VPN.</p>
-					{:else}
-						<p>Live readers are unavailable on this page.</p>
-					{/if}
-				</div>
-			{:else}
-				{#if !presence.hidden && presence.connected && presence.pages.length}
-					<!-- The scrollable list needs keyboard access. -->
-					<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-					<div class="chat-reading" role="region" aria-label="Readers and their pages" tabindex="0">
-						<div class="chat-reading-heading">reading now</div>
-						<ul>
-							{#each presence.pages as item (item.key)}
-								<li>
-									<span class="chat-reading-names">
-										{#if item.readers.length}
-											{#each item.readers as reader, index (reader.id)}
-												{#if index > 0},
-												{/if}<a
-													href={resolve(/** @type {`/${string}`} */ (item.path || '/'))}
-													aria-label={`Find ${reader.nick} on ${item.title || item.path}`}
-													title={`Find ${reader.nick} on this page`}
-													on:click={(event) => followReader(event, reader.id, item.key)}
-													>{reader.nick}</a
-												>
-											{/each}{#if item.count > item.readers.length}, +{item.count -
-													item.readers.length} more{/if}
-										{:else}
-											{item.count} {item.count === 1 ? 'reader' : 'readers'}
-										{/if}
-									</span>
-									<span aria-hidden="true"> → </span>
-									{#if item.path}
-										<a
-											href={resolve(/** @type {`/${string}`} */ (item.path))}
-											on:click={followReaderPage}>{item.title || item.path}</a
-										>
-									{:else}
-										<span>{item.title || item.key}</span>
-									{/if}
-								</li>
-							{/each}
-						</ul>
-					</div>
-				{/if}
-				<div
-					class="chat-log"
-					role="log"
-					aria-label="Recent chat messages"
-					aria-live="polite"
-					bind:this={log}
-				>
-					{#if messages.length === 0}
-						<p class="chat-empty">No recent messages. Say hello!</p>
-					{:else}
-						{#each messages as message (message.id)}
-							<div class="chat-message">
-								<time datetime={new Date(message.createdAt).toISOString()}
-									>{formatTime(message.createdAt)}</time
-								>
-								<span class="chat-nick">&lt;{message.nick}&gt;</span>
-								<span class="chat-text">{message.text}</span>
-							</div>
-						{/each}
-					{/if}
-				</div>
-				<form class="chat-form" bind:this={form} on:submit={sendMessage}>
-					<label class="nick-field"
-						>nick <input
-							aria-label="Nickname (unverified)"
-							bind:value={nick}
-							on:input={rememberNick}
-							maxlength="24"
-							required
-							autocomplete="nickname"
-						/></label
-					>
-					<div class="quick-messages" role="group" aria-label="Quick messages">
-						{#each quickMessages as message (message.label)}
+						<div class="chat-actions">
+							<span>{pending ? 'Sending…' : `${draft.length}/500`}</span>
 							<button
-								type="button"
-								aria-label={`Add ${message.text} to message`}
-								title={message.text}
-								disabled={draft.length +
-									(draft && !/\s$/.test(draft) ? 1 : 0) +
-									message.text.length >
-									500}
-								on:click={() => quickMessage(message.text)}>{message.label}</button
+								type="submit"
+								disabled={status !== 'Connected' || !!pending || !nick.trim() || !draft.trim()}
+								>send ↵</button
 							>
-						{/each}
-					</div>
-					<label class="message-field"
-						><span class="visually-hidden">Message</span><textarea
-							bind:this={composer}
-							bind:value={draft}
-							on:keydown={composerKeydown}
-							maxlength="500"
-							required
-							rows="2"
-							placeholder="Write a message…"
-						></textarea></label
-					>
-					<div class="chat-actions">
-						<span>{pending ? 'Sending…' : `${draft.length}/500`}</span>
-						<button
-							type="submit"
-							disabled={status !== 'Connected' || !!pending || !nick.trim() || !draft.trim()}
-							>send ↵</button
-						>
-					</div>
-					{#if error}<p class="chat-error" role="status">{error}</p>{/if}
-					{#if status === 'Offline'}<button
-							type="button"
-							class="retry"
-							on:click={() => {
-								reconnectAttempt = 0;
-								connect();
-							}}>Retry connection</button
-						>{/if}
-				</form>
-			{/if}
+						</div>
+						{#if error}<p class="chat-error" role="status">{error}</p>{/if}
+						{#if status === 'Offline'}<button
+								type="button"
+								class="retry"
+								on:click={() => {
+									reconnectAttempt = 0;
+									connect();
+								}}>Retry connection</button
+							>{/if}
+					</form>
+				{/if}
+			</div>
 			<div class="chat-window-footer">
 				<button
 					type="button"
@@ -871,8 +931,8 @@
 		min-height: 1.3rem;
 		margin-left: 0.25rem;
 		border-radius: 999px;
-		background: #b8e5bb;
-		color: #1d2a22;
+		background: #d54b3d;
+		color: #fff;
 		font-size: 0.7rem;
 	}
 	.chat {
@@ -886,12 +946,12 @@
 		min-height: 0;
 		margin: 0;
 		overflow: hidden;
-		border: 1px solid #465a4a;
-		border-radius: 6px;
-		background: #1c2921;
+		border: 1px solid #546357;
+		border-radius: 8px;
+		background: #11211c;
 		color: #f0f1e9;
-		box-shadow: 0 8px 28px rgb(0 0 0 / 0.2);
-		font: 400 0.9rem/1.5 var(--font-mono);
+		box-shadow: 0 12px 34px rgb(0 0 0 / 0.28);
+		font: 400 0.95rem/1.5 var(--font-body);
 	}
 	.chat:focus {
 		outline: none;
@@ -901,7 +961,8 @@
 		justify-content: space-between;
 		align-items: center;
 		padding: 0.25rem 0.4rem;
-		border-bottom: 1px solid #465a4a;
+		background: #f1c36d;
+		color: #17231c;
 	}
 	.chat-drag-handle {
 		display: flex;
@@ -919,7 +980,7 @@
 		cursor: grabbing;
 	}
 	.chat-grip {
-		color: #91aa92;
+		color: #374a38;
 		font-size: 1.2rem;
 	}
 	.chat-title-copy,
@@ -928,47 +989,125 @@
 		display: block;
 	}
 	.chat-name {
-		color: #e0eedc;
-		font: 600 1rem/1.2 var(--font-mono);
+		color: #17231c;
+		font: 750 1.2rem/1.15 var(--font-body);
 	}
 	.chat-name span {
-		color: #a5d5aa;
+		color: #425a39;
 	}
 	.chat-status {
 		margin: 0.2rem 0 0;
-		color: var(--chat-muted);
+		color: #364c37;
 		font: 400 0.75rem/1.2 var(--font-mono);
 	}
 	.chat-status .online {
-		color: #a5d5aa;
+		color: #25783f;
 	}
-	.chat-close {
+	.chat-close,
+	.chat-width {
 		min-width: 44px;
 		min-height: 44px;
-		color: #e0eedc;
+		color: #17231c;
 		font: 1.5rem/1 var(--font-mono);
 		cursor: pointer;
 	}
+	.chat-titlebar :is(button):focus-visible {
+		outline: 2px solid #233b2c;
+		outline-offset: -2px;
+	}
 	.chat-notice {
+		flex: none;
+		max-height: 6rem;
+		overflow-y: auto;
 		margin: 0;
-		padding: 0.6rem 0.8rem;
 		border-bottom: 1px solid #465a4a;
 		color: #d1d9cd;
-		font: 0.75rem/1.5 var(--font-body);
+		font: 0.75rem/1.4 var(--font-body);
+	}
+	.chat-notice summary {
+		display: flex;
+		justify-content: space-between;
+		gap: 0.5rem;
+		padding: 0.35rem 0.8rem;
+		cursor: pointer;
+		list-style: none;
+	}
+	.chat-notice summary::-webkit-details-marker {
+		display: none;
+	}
+	.chat-notice summary span {
+		color: #f1c36d;
+		text-decoration: underline;
+		text-underline-offset: 2px;
+	}
+	.chat-notice p {
+		margin: 0;
+		padding: 0 0.8rem 0.55rem;
+	}
+	.chat-stage,
+	.chat-content {
+		display: flex;
+		flex: 1;
+		flex-direction: column;
+		min-height: 0;
+	}
+	.chat-rail .chat-content {
+		display: grid;
+		grid-template-columns: minmax(140px, 30%) minmax(0, 1fr);
 	}
 	.chat-reading {
 		flex: 0 1 auto;
 		max-height: 5.5rem;
 		overflow-y: auto;
 		overscroll-behavior: contain;
-		padding: 0.4rem 0.8rem;
+		padding: 0.35rem 0.8rem;
 		border-bottom: 1px solid #465a4a;
 		color: #d1d9cd;
-		font: 0.72rem/1.45 var(--font-mono);
+		background: #182d2a;
+		font: 0.8rem/1.4 var(--font-body);
 	}
 	.chat-reading-heading {
+		width: 100%;
+		color: #d2e5cf;
+		text-align: left;
+		font: 700 0.72rem/1.4 var(--font-mono);
+	}
+	button.chat-reading-heading {
+		cursor: pointer;
+	}
+	button.chat-reading-heading span {
+		float: right;
+		color: #f1c36d;
+	}
+	.chat:not(.chat-rail) .chat-reading:not(.chat-reading-expanded) li:not(:first-child) {
+		display: none;
+	}
+	.chat-rail .chat-reading {
+		max-height: none;
+		min-height: 0;
+		border-right: 1px solid #465a4a;
+		border-bottom: 0;
+		padding: 0.75rem;
+	}
+	.chat-rail .chat-reading-heading {
+		margin-bottom: 0.65rem;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+	}
+	.chat-rail .chat-reading li {
+		padding: 0.55rem 0;
+		border-bottom: 1px solid #465a4a;
+	}
+	.chat-rail .chat-reading-names {
+		display: block;
+		font-weight: 700;
+	}
+	.chat-rail .chat-reading-arrow {
+		display: none;
+	}
+	.chat-reading-empty {
+		margin: 0.5rem 0;
 		color: var(--chat-muted);
-		font-weight: 600;
 	}
 	.chat-reading ul {
 		margin: 0;
@@ -994,25 +1133,34 @@
 		min-height: 0;
 		overflow: auto;
 		overscroll-behavior: contain;
-		padding: 0.6rem 0.8rem;
+		padding: 0.7rem 0.8rem;
 	}
 	.chat-empty {
 		margin: 0;
 		color: var(--chat-muted);
 	}
 	.chat-message {
-		margin-bottom: 0.55rem;
+		display: grid;
+		grid-template-columns: 5.2rem minmax(0, 1fr);
+		column-gap: 0.35rem;
+		margin-bottom: 0.8rem;
 		overflow-wrap: anywhere;
 	}
 	.chat-message time {
 		color: var(--chat-muted);
-		font-size: 0.75rem;
+		font: 0.72rem/1.5 var(--font-mono);
 	}
 	.chat-nick {
+		grid-column: 2;
 		color: #b8e5bb;
+		font: 700 0.8rem/1.4 var(--font-mono);
 	}
 	.chat-text {
+		grid-column: 2;
 		white-space: pre-wrap;
+	}
+	.chat:not(.chat-rail) .chat-message {
+		grid-template-columns: 4.6rem minmax(0, 1fr);
 	}
 	.chat-form {
 		display: grid;
@@ -1083,9 +1231,9 @@
 	.chat-actions button,
 	.retry {
 		min-height: 44px;
-		border: 1px solid #78947a;
+		border: 1px solid #edc06d;
 		border-radius: 3px;
-		background: #b8e5bb;
+		background: #f1c36d;
 		color: #132017;
 		padding: 0.3rem 0.65rem;
 		font: 600 0.8rem/1 var(--font-mono);
@@ -1209,9 +1357,11 @@
 		cursor: nwse-resize;
 	}
 	.chat-compact .chat-notice {
-		padding: 0.3rem 0.8rem;
 		font-size: 0.7rem;
 		line-height: 1.2;
+	}
+	.chat-compact .chat-notice summary {
+		padding: 0.25rem 0.8rem;
 	}
 	.chat-compact .chat-reading {
 		max-height: 2.8rem;
@@ -1223,7 +1373,12 @@
 		display: inline;
 	}
 	.chat-compact .chat-reading-heading {
+		width: auto;
 		margin-right: 0.4rem;
+	}
+	.chat-compact .chat-reading-heading span {
+		float: none;
+		margin-left: 0.3rem;
 	}
 	.chat-compact .chat-reading li:not(:last-child)::after {
 		content: ' · ';
@@ -1231,6 +1386,14 @@
 	.chat-compact .chat-log {
 		min-height: 2rem;
 		padding: 0.25rem 0.8rem;
+	}
+	.chat-compact .chat-message {
+		display: block;
+		margin: 0;
+	}
+	.chat-compact .chat-message time,
+	.chat-compact .chat-nick {
+		margin-right: 0.3rem;
 	}
 	.chat-compact .chat-form {
 		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
@@ -1257,9 +1420,12 @@
 		height: 2.4rem;
 	}
 	.chat-tiny .chat-notice {
-		padding-block: 0.15rem;
+		max-height: 2.5rem;
 		font-size: 0.65rem;
 		line-height: 1.1;
+	}
+	.chat-tiny .chat-notice summary {
+		padding-block: 0.15rem;
 	}
 	.chat-tiny .chat-titlebar {
 		padding-block: 0;
@@ -1319,7 +1485,7 @@
 		white-space: nowrap;
 		border: 0;
 	}
-	.chat :is(button, input, textarea):focus-visible {
+	.chat :is(button, input, textarea, summary, a):focus-visible {
 		outline: 2px solid #d9f8d7;
 		outline-offset: 2px;
 	}
