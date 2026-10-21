@@ -204,6 +204,7 @@ test('normal runtime never accepts a dev identity from localhost, flags or forwa
 });
 
 test('Google configuration and return targets fail closed, while alternate hosts redirect to the registered host', async () => {
+	assert.equal(safeToolsNext('/tools/tabs'), '/tools/tabs');
 	for (const tool of ['draw', 'box']) {
 		assert.equal(safeToolsNext(`/tools/${tool}`), `/tools/${tool}`);
 		assert.equal(safeToolsNext(`/${tool}`), `/tools/${tool}`);

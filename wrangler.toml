@@ -40,6 +40,12 @@ database_name = "swyxdotio-read-counters"
 database_id = "9990fd0c-2211-4bf4-b263-ddbb8aaed34e"
 migrations_dir = "migrations/read-counters"
 
+[[d1_databases]]
+binding = "TABS_DB"
+database_name = "swyxdotio-tabs-private"
+database_id = "c21d3c8a-f6fe-4abf-b7ea-143e59b5e6f9"
+migrations_dir = "migrations/tabs"
+
 [[ratelimits]]
 name = "READ_IP_RATE_LIMITER"
 namespace_id = "41001"

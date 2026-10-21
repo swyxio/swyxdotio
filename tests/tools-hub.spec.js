@@ -149,8 +149,9 @@ test('account disclosure retains identity, dismisses conventionally, and adapts 
 }) => {
 	await signIn(page);
 	await expect(page.getByRole('navigation', { name: 'Your tools' }).getByRole('link')).toHaveCount(
-		7
+		9
 	);
+	await expect(page.getByRole('link', { name: /Tab bankruptcy/ })).toBeVisible();
 	const cap = page.getByRole('link', { name: /^Cap / });
 	await expect(cap).toHaveAttribute('href', '/tools/cap');
 	await expect(cap).toHaveAttribute('data-sveltekit-reload', 'true');
@@ -172,6 +173,8 @@ test('account disclosure retains identity, dismisses conventionally, and adapts 
 		6
 	);
 	await expect(page.getByRole('link', { name: /Podcast studio/ })).toHaveCount(0);
+	await expect(page.getByRole('link', { name: /Tab bankruptcy/ })).toHaveCount(0);
+	await expect((await page.request.get('/tools/tabs')).status()).toBe(403);
 	await expect(page.getByRole('link', { name: /^Cap / })).toBeVisible();
 	await expect(
 		page.getByRole('region', { name: 'Team swyx', exact: true }).getByRole('link')
@@ -253,7 +256,7 @@ for (const [name, width, height] of viewports) {
 			email: 'long.account.with.a.very.long.address@example.com'
 		});
 		const cabinet = page.getByRole('navigation', { name: 'Your tools' });
-		await expect(cabinet.getByRole('link')).toHaveCount(8);
+		await expect(cabinet.getByRole('link')).toHaveCount(9);
 		await expect
 			.poll(() =>
 				cabinet
