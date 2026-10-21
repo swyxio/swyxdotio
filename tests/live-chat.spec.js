@@ -39,6 +39,34 @@ async function mockChat(context) {
 	return { rejectNext: () => (rejectNext = true) };
 }
 
+test('quick messages fill the composer without sending or erasing a draft', async ({
+	page,
+	context
+}) => {
+	await page.setViewportSize({ width: 390, height: 844 });
+	await mockChat(context);
+	await page.goto(`${baseUrl}/america250`);
+	await page.getByRole('button', { name: 'chat', exact: true }).click();
+	const chat = page.getByRole('region', { name: 'swyx', exact: true });
+	const composer = chat.getByLabel('Message', { exact: true });
+	const log = chat.getByRole('log', { name: 'Recent chat messages' });
+	await chat.getByRole('button', { name: 'Add Hey everyone! 👋 to message' }).click();
+	await expect(composer).toHaveValue('Hey everyone! 👋');
+	await expect(composer).toBeFocused();
+	await page.keyboard.type(' there');
+	await expect(composer).toHaveValue('Hey everyone! 👋 there');
+	await expect(log.getByText('Hey everyone! 👋')).toHaveCount(0);
+	await composer.fill('My existing draft');
+	await chat.getByRole('button', { name: 'Add What are you working on? to message' }).focus();
+	await page.keyboard.press('Enter');
+	await expect(composer).toHaveValue('My existing draft What are you working on?');
+	await expect(log.getByText('My existing draft')).toHaveCount(0);
+	await composer.fill('x'.repeat(500));
+	await expect(
+		chat.getByRole('button', { name: 'Add Love this site! ❤️ to message' })
+	).toBeDisabled();
+});
+
 test('mobile chat floats over the article without moving the reader', async ({ page, context }) => {
 	await page.setViewportSize({ width: 390, height: 844 });
 	await mockChat(context);
@@ -219,6 +247,13 @@ test('dragging and resizing persist across reloads and stay within the viewport'
 		expect(box.y).toBeGreaterThanOrEqual(compact.y);
 		expect(box.y + box.height).toBeLessThanOrEqual(compact.y + compact.height);
 	}
+	const send = chat.getByRole('button', { name: /send/ });
+	const form = chat.locator('form');
+	const sendBox = await send.boundingBox();
+	const formBox = await form.boundingBox();
+	if (!sendBox || !formBox) throw new Error('Compact chat form was not visible');
+	expect(sendBox.y).toBeGreaterThanOrEqual(formBox.y);
+	expect(sendBox.y + sendBox.height).toBeLessThanOrEqual(formBox.y + formBox.height);
 	await page.setViewportSize({ width: 1100, height: 850 });
 	await expect.poll(async () => (await chat.boundingBox())?.width).toBeCloseTo(resized.width, 0);
 	await move.focus();

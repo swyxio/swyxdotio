@@ -44,6 +44,8 @@
 	let log;
 	/** @type {HTMLFormElement | undefined} */
 	let form;
+	/** @type {HTMLTextAreaElement | undefined} */
+	let composer;
 	/** @type {HTMLElement | undefined} */
 	let readerPanel;
 	/** @type {HTMLButtonElement | undefined} */
@@ -53,6 +55,11 @@
 	let error = '';
 	let nickSaveTimer = 0;
 	let draft = '';
+	const quickMessages = [
+		{ label: '👋 hey', text: 'Hey everyone! 👋' },
+		{ label: '💡 ideas', text: 'What are you working on?' },
+		{ label: '❤️ love it', text: 'Love this site! ❤️' }
+	];
 	let reconnectAttempt = 0;
 	let reconnectTimer = 0;
 	let expiryTimer = 0;
@@ -389,6 +396,16 @@
 		}
 	}
 
+	/** @param {string} text */
+	async function quickMessage(text) {
+		const separator = draft && !/\s$/.test(draft) ? ' ' : '';
+		if (draft.length + separator.length + text.length > 500) return;
+		draft += separator + text;
+		await tick();
+		composer?.focus();
+		composer?.setSelectionRange(draft.length, draft.length);
+	}
+
 	/** @param {number} timestamp */
 	function formatTime(timestamp) {
 		return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -625,8 +642,23 @@
 							autocomplete="nickname"
 						/></label
 					>
+					<div class="quick-messages" role="group" aria-label="Quick messages">
+						{#each quickMessages as message (message.label)}
+							<button
+								type="button"
+								aria-label={`Add ${message.text} to message`}
+								title={message.text}
+								disabled={draft.length +
+									(draft && !/\s$/.test(draft) ? 1 : 0) +
+									message.text.length >
+									500}
+								on:click={() => quickMessage(message.text)}>{message.label}</button
+							>
+						{/each}
+					</div>
 					<label class="message-field"
 						><span class="visually-hidden">Message</span><textarea
+							bind:this={composer}
 							bind:value={draft}
 							on:keydown={composerKeydown}
 							maxlength="500"
@@ -839,6 +871,29 @@
 		color: var(--chat-muted);
 		font-size: 0.8rem;
 	}
+	.quick-messages {
+		display: flex;
+		gap: 0.25rem;
+	}
+	.quick-messages button {
+		flex: 1;
+		min-width: 0;
+		min-height: 36px;
+		border: 1px solid #526a57;
+		border-radius: 3px;
+		background: #283b2e;
+		color: #d1e4cf;
+		padding: 0.2rem 0.15rem;
+		font: 500 0.7rem/1.15 var(--font-mono);
+		cursor: pointer;
+	}
+	.quick-messages button:hover:not(:disabled) {
+		background: #3a5340;
+	}
+	.quick-messages button:disabled {
+		opacity: 0.5;
+		cursor: default;
+	}
 	.nick-field input,
 	textarea {
 		min-width: 0;
@@ -999,9 +1054,19 @@
 		font-size: 0.7rem;
 		line-height: 1.2;
 	}
+	.chat-compact .chat-log {
+		padding: 0.25rem 0.8rem;
+	}
 	.chat-compact .chat-form {
+		grid-template-columns: minmax(0, 1fr) auto;
 		gap: 0.2rem;
 		padding: 0.3rem 0.8rem;
+	}
+	.chat-compact :is(.nick-field, .quick-messages, .chat-error, .retry) {
+		grid-column: 1 / -1;
+	}
+	.chat-compact .chat-actions {
+		gap: 0.25rem;
 	}
 	.chat-compact textarea {
 		height: 2.4rem;
