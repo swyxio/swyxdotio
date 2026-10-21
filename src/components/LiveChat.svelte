@@ -1235,13 +1235,29 @@
 		color: var(--chat-muted);
 	}
 	.chat-message {
+		position: relative;
 		margin-bottom: 0.35rem;
 		overflow-wrap: anywhere;
 	}
 	.chat-message time {
-		margin-right: 0.25rem;
-		color: var(--chat-muted);
+		position: absolute;
+		top: 0;
+		right: 0;
+		z-index: 1;
+		padding: 0.1rem 0.35rem;
+		border: 1px solid #526a57;
+		border-radius: 3px;
+		background: #1b3027;
+		color: #d1e4cf;
 		font: 0.72rem/1.5 var(--font-mono);
+		white-space: nowrap;
+		pointer-events: none;
+		opacity: 0;
+	}
+	@media (hover: hover) {
+		.chat-message:hover time {
+			opacity: 1;
+		}
 	}
 	.chat-nick {
 		margin-right: 0.25rem;
@@ -1479,7 +1495,6 @@
 		display: block;
 		margin: 0;
 	}
-	.chat-compact .chat-message time,
 	.chat-compact .chat-nick {
 		margin-right: 0.3rem;
 	}
