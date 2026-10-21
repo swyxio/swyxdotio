@@ -52,6 +52,9 @@ test('quick messages fill the composer without sending or erasing a draft', asyn
 	const log = chat.getByRole('log', { name: 'Recent chat messages' });
 	await chat.getByRole('button', { name: 'Add Hey everyone! 👋 to message' }).click();
 	await expect(composer).toHaveValue('Hey everyone! 👋');
+	await expect(composer).toBeFocused();
+	await page.keyboard.type(' there');
+	await expect(composer).toHaveValue('Hey everyone! 👋 there');
 	await expect(log.getByText('Hey everyone! 👋')).toHaveCount(0);
 	await composer.fill('My existing draft');
 	await chat.getByRole('button', { name: 'Add What are you working on? to message' }).focus();
@@ -244,6 +247,13 @@ test('dragging and resizing persist across reloads and stay within the viewport'
 		expect(box.y).toBeGreaterThanOrEqual(compact.y);
 		expect(box.y + box.height).toBeLessThanOrEqual(compact.y + compact.height);
 	}
+	const send = chat.getByRole('button', { name: /send/ });
+	const form = chat.locator('form');
+	const sendBox = await send.boundingBox();
+	const formBox = await form.boundingBox();
+	if (!sendBox || !formBox) throw new Error('Compact chat form was not visible');
+	expect(sendBox.y).toBeGreaterThanOrEqual(formBox.y);
+	expect(sendBox.y + sendBox.height).toBeLessThanOrEqual(formBox.y + formBox.height);
 	await page.setViewportSize({ width: 1100, height: 850 });
 	await expect.poll(async () => (await chat.boundingBox())?.width).toBeCloseTo(resized.width, 0);
 	await move.focus();

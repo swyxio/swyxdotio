@@ -44,6 +44,8 @@
 	let log;
 	/** @type {HTMLFormElement | undefined} */
 	let form;
+	/** @type {HTMLTextAreaElement | undefined} */
+	let composer;
 	/** @type {HTMLElement | undefined} */
 	let readerPanel;
 	/** @type {HTMLButtonElement | undefined} */
@@ -395,9 +397,13 @@
 	}
 
 	/** @param {string} text */
-	function quickMessage(text) {
+	async function quickMessage(text) {
 		const separator = draft && !/\s$/.test(draft) ? ' ' : '';
-		if (draft.length + separator.length + text.length <= 500) draft += separator + text;
+		if (draft.length + separator.length + text.length > 500) return;
+		draft += separator + text;
+		await tick();
+		composer?.focus();
+		composer?.setSelectionRange(draft.length, draft.length);
 	}
 
 	/** @param {number} timestamp */
@@ -652,6 +658,7 @@
 					</div>
 					<label class="message-field"
 						><span class="visually-hidden">Message</span><textarea
+							bind:this={composer}
 							bind:value={draft}
 							on:keydown={composerKeydown}
 							maxlength="500"
@@ -1047,9 +1054,19 @@
 		font-size: 0.7rem;
 		line-height: 1.2;
 	}
+	.chat-compact .chat-log {
+		padding: 0.25rem 0.8rem;
+	}
 	.chat-compact .chat-form {
+		grid-template-columns: minmax(0, 1fr) auto;
 		gap: 0.2rem;
 		padding: 0.3rem 0.8rem;
+	}
+	.chat-compact :is(.nick-field, .quick-messages, .chat-error, .retry) {
+		grid-column: 1 / -1;
+	}
+	.chat-compact .chat-actions {
+		gap: 0.25rem;
 	}
 	.chat-compact textarea {
 		height: 2.4rem;
