@@ -385,6 +385,53 @@ test('topic conflicts preserve the draft and scroll editing does not archive pag
 	);
 });
 
+test('a failed note save remains recoverable before a filtered topic change', async ({ page }) => {
+	await page.goto('/tools');
+	const origin = await authenticateTools(page);
+	const suffix = crypto.randomUUID();
+	const batch = await makeBatch(page, origin, `Topic note ${suffix}`, [
+		{ title: 'Page with a note', url: `https://example.test/${suffix}/note` }
+	]);
+	const item = (await getBatch(page, batch)).items[0];
+	let failNoteSave = true;
+	await page.route(`**/tools/tabs/api/batches/${batch.id}/items/${item.id}`, async (route) => {
+		if (
+			failNoteSave &&
+			route.request().method() === 'PATCH' &&
+			Object.hasOwn(route.request().postDataJSON(), 'note')
+		) {
+			await route.fulfill({ status: 503, json: { message: 'Try again' } });
+			return;
+		}
+		await route.continue();
+	});
+	await page.goto(`/tools/tabs?batch=${batch.id}`);
+	await openFilters(page);
+	await filterChoice(page, 'Topic', item.group).click();
+	await page.getByRole('button', { name: 'Page with a note', exact: true }).click();
+	await page.getByLabel('Your note').fill('Keep this unsaved note');
+	await page.getByRole('button', { name: 'Edit topic for Page with a note' }).click();
+	await expect(page.getByRole('alert')).toContainText('Note not saved');
+	await expect(page.getByLabel('Your note')).toHaveValue('Keep this unsaved note');
+	await expect(page.getByRole('textbox', { name: 'Topic', exact: true })).toHaveCount(0);
+	await expect(page.getByRole('button', { name: 'Retry save' })).toBeVisible();
+
+	failNoteSave = false;
+	await page.getByRole('button', { name: 'Retry save' }).click();
+	await expect
+		.poll(async () => (await getBatch(page, batch)).items[0].note)
+		.toBe('Keep this unsaved note');
+	await page.getByRole('button', { name: 'Edit topic for Page with a note' }).click();
+	await expect(page.getByLabel('Your note')).toBeDisabled();
+	await page.getByRole('textbox', { name: 'Topic', exact: true }).fill('A different topic');
+	await page.getByRole('button', { name: 'Save topic', exact: true }).click();
+	await expect
+		.poll(async () => (await getBatch(page, batch)).items[0].group)
+		.toBe('A different topic');
+	await expect(page.getByRole('button', { name: 'Page with a note', exact: true })).toHaveCount(0);
+	expect((await getBatch(page, batch)).items[0].note).toBe('Keep this unsaved note');
+});
+
 test('full URLs remain visible and wrap in every review mode', async ({ page }) => {
 	await page.goto('/tools');
 	const origin = await authenticateTools(page);

@@ -431,12 +431,18 @@
 		return notePromise;
 	}
 
-	function startTopicEdit(item: Item) {
+	async function startTopicEdit(item: Item) {
 		if (busy || feedPending.size || topicEditId) return;
+		busy = true;
+		if (!(await saveNote())) {
+			busy = false;
+			return;
+		}
 		resetScrollIntent();
 		topicEditId = item.id;
 		topicDraft = topicExpected = item.group || 'Reading pile';
 		topicError = '';
+		busy = false;
 		void tick().then(() => document.getElementById(`topic-edit-${item.id}`)?.focus());
 	}
 
@@ -1263,6 +1269,7 @@
 												maxlength="10000"
 												rows="3"
 												placeholder="What do you want to remember?"
+												disabled={busy || !!topicEditId}
 												bind:value={note}
 												on:input={scheduleNote}
 											></textarea>
@@ -1601,6 +1608,7 @@
 									maxlength="10000"
 									rows="3"
 									placeholder="What do you want to remember?"
+									disabled={busy || !!topicEditId}
 									bind:value={note}
 									on:input={scheduleNote}
 								></textarea>
