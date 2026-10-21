@@ -38,9 +38,17 @@ function mockReaders(messages = []) {
 		});
 		await context.routeWebSocket('**/api/presence/*', (socket) => {
 			const key = decodeURIComponent(new URL(socket.url()).pathname.split('/').pop() || '');
-			const id = `reader${++sequence}`;
+			const id = `${(++sequence).toString(16).padStart(4, '0')}abcd`;
 			const existing = [...readers.values()];
-			const reader = { socket, key, id, nick: id, x: 0.4, y: 0.01, mode: 'd' };
+			const reader = {
+				socket,
+				key,
+				id,
+				nick: `reader${id.slice(0, 4)}`,
+				x: 0.4,
+				y: 0.01,
+				mode: 'd'
+			};
 			readers.set(id, reader);
 			send(reader, [1, 'w', id, [row(reader)]]);
 			for (const peer of existing.filter((item) => item.key === key)) {
@@ -234,6 +242,35 @@ test('mobile reading rail labels the other reader', async ({ browser }) => {
 		await a.goto(`${baseUrl}/america250`);
 		await b.goto(`${baseUrl}/america250`);
 		await expect(a.locator('.rail-marker')).toContainText('Bob', { timeout: 10_000 });
+	} finally {
+		await first.close();
+		await second.close();
+	}
+});
+
+test('a cleared nickname uses the new socket identity after reconnecting', async ({ browser }) => {
+	const readers = mockReaders();
+	const first = await browser.newContext({ viewport: { width: 1100, height: 850 } });
+	const second = await browser.newContext({ viewport: { width: 1100, height: 850 } });
+	try {
+		await readers.install(first);
+		await readers.install(second);
+		await second.addInitScript(() => localStorage.setItem('swyx:chat:nick:v1', 'Bea'));
+		const a = await first.newPage();
+		const b = await second.newPage();
+		await a.goto(`${baseUrl}/america250`);
+		await expect.poll(() => readers.count(), { timeout: 10_000 }).toBe(1);
+		await b.goto(`${baseUrl}/learn-in-public`);
+		const chatA = await openChat(a);
+		await chatA.getByRole('button', { name: '1 other reader online' }).click({ timeout: 10_000 });
+		const roster = chatA.getByRole('region', { name: 'Live readers' });
+		await expect(roster.getByText('Bea', { exact: true })).toBeVisible();
+		const chatB = await openChat(b);
+		await chatB.getByLabel('Nickname (unverified)').fill('');
+		await expect(roster.getByText('reader0002', { exact: true })).toBeVisible({ timeout: 5_000 });
+		await readers.close('article:learn-in-public', 1012);
+		await expect(roster.getByText('reader0003', { exact: true })).toBeVisible({ timeout: 10_000 });
+		await expect(roster.getByText('reader', { exact: true })).toHaveCount(0);
 	} finally {
 		await first.close();
 		await second.close();

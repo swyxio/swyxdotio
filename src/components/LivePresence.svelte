@@ -120,7 +120,8 @@
 	}
 
 	function syncNick() {
-		const frame = nicknameFrame(nick) || nicknameFrame(`reader${selfId?.slice(0, 4) || ''}`);
+		if (!selfId) return;
+		const frame = nicknameFrame(nick) || nicknameFrame(`reader${selfId.slice(0, 4)}`);
 		if (frame && frame !== lastSentNick && send(frame)) {
 			lastSentNick = frame;
 			lastNickAt = Date.now();
@@ -213,6 +214,7 @@
 		} else if (frame.type === 'welcome') {
 			selfId = frame.selfId;
 			peers = new SvelteMap(frame.peers.map((peer) => [peer.id, peer]));
+			syncNick();
 		} else if (frame.type === 'snapshot') {
 			peers = new SvelteMap(peers);
 			for (const peer of frame.peers) peers.set(peer.id, peer);
@@ -282,7 +284,6 @@
 			lastPosition = null;
 			lastSentNick = '';
 			lastNickAt = 0;
-			syncNick();
 			if (isMobile) sendReadingDepth();
 		});
 		nextSocket.addEventListener('close', (event) => {
@@ -293,6 +294,7 @@
 			sitePages = new SvelteMap();
 			siteReaders = new SvelteMap();
 			siteSnapshotComplete = false;
+			selfId = null;
 			if (event.code === 1013 || event.code === 1008) {
 				stopped = true;
 				return;
