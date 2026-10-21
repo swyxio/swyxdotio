@@ -72,7 +72,12 @@
 	let error = '';
 	let message = '';
 	let query = '';
-	let topic = 'all';
+	let topic = '';
+	let topicEditId = '';
+	let topicDraft = '';
+	let topicExpected = '';
+	let topicSaving = false;
+	let topicError = '';
 	let statusFilter = 'unread';
 	let windowFilter = 'all';
 	let filtersOpen = false;
@@ -105,6 +110,7 @@
 
 	$: selected = items.find((item) => item.id === selectedId);
 	$: topics = [...new Set(items.map((item) => item.group || 'Reading pile'))].sort();
+	$: topicOptions = [...new Set([...topics, ...(topic ? [topic] : [])])].sort();
 	$: windows = [...new Set(items.flatMap((item) => item.capturedWindowIds || []))];
 	$: filtered = items.filter((item) => matches(item, query, topic, statusFilter, windowFilter));
 	$: nextFeedKey = JSON.stringify([batchId, query, topic, statusFilter, windowFilter]);
@@ -130,7 +136,7 @@
 		const term = search.trim().toLowerCase();
 		const itemTopic = item.group || 'Reading pile';
 		const itemWindows = item.capturedWindowIds || [];
-		if (selectedTopic !== 'all' && itemTopic !== selectedTopic) return false;
+		if (selectedTopic && itemTopic !== selectedTopic) return false;
 		if (selectedStatus !== 'all' && item.status !== selectedStatus) return false;
 		if (selectedWindow !== 'all' && !itemWindows.includes(selectedWindow)) return false;
 		return (
@@ -143,6 +149,14 @@
 
 	function errorText(value: unknown): string {
 		return value instanceof Error ? value.message : 'Something went wrong. Please try again.';
+	}
+
+	class ApiError extends Error {
+		statusCode: number;
+		constructor(message: string, statusCode: number) {
+			super(message);
+			this.statusCode = statusCode;
+		}
 	}
 
 	async function api<T>(
@@ -160,7 +174,10 @@
 		});
 		const body = await response.json().catch(() => ({}));
 		if (!response.ok)
-			throw new Error(body?.error || body?.message || `Request failed (${response.status}).`);
+			throw new ApiError(
+				body?.error || body?.message || `Request failed (${response.status}).`,
+				response.status
+			);
 		return body as T;
 	}
 
@@ -190,7 +207,7 @@
 	}
 
 	async function setMode(next: typeof mode) {
-		if (next === mode || busy || feedPending.size || !(await saveNote())) return;
+		if (next === mode || busy || feedPending.size || topicEditId || !(await saveNote())) return;
 		resetScrollIntent();
 		mode = next;
 		expandedId = '';
@@ -210,7 +227,8 @@
 
 	function queueFeedDecision(id: string, status: Status, automatic = false) {
 		const item = items.find((entry) => entry.id === id);
-		if (!item || feedPending.has(id) || (automatic && item.status !== 'unread')) return;
+		if (!item || topicEditId || feedPending.has(id) || (automatic && item.status !== 'unread'))
+			return;
 		const batch = batchId;
 		feedPending = new Set([...feedPending, id]);
 		void tick().then(snapshotVisibleFeedItems);
@@ -298,7 +316,7 @@
 	}
 
 	function armScroll() {
-		if (mode !== 'scroll' || busy) return;
+		if (mode !== 'scroll' || busy || topicEditId) return;
 		// Wheel/touch events may arrive after compositor scrolling has moved the page.
 		// Use the last viewport snapshot, not just the geometry in this event.
 		seenInFeed = new Set([...seenInFeed, ...visibleInFeed]);
@@ -346,7 +364,8 @@
 				scrollIntentUntil = 0;
 				seenInFeed = new Set();
 			}
-			const armed = mode === 'scroll' && !busy && performance.now() <= scrollIntentUntil;
+			const armed =
+				mode === 'scroll' && !busy && !topicEditId && performance.now() <= scrollIntentUntil;
 			if (armed && movingDown) {
 				for (const element of document.querySelectorAll<HTMLElement>('[data-feed-item]')) {
 					const id = element.dataset.feedItem;
@@ -412,8 +431,85 @@
 		return notePromise;
 	}
 
+	function startTopicEdit(item: Item) {
+		if (busy || feedPending.size || topicEditId) return;
+		resetScrollIntent();
+		topicEditId = item.id;
+		topicDraft = topicExpected = item.group || 'Reading pile';
+		topicError = '';
+		void tick().then(() => document.getElementById(`topic-edit-${item.id}`)?.focus());
+	}
+
+	function finishTopicEdit() {
+		const item = items.find((entry) => entry.id === topicEditId);
+		if (item && !matches(item, query, topic, statusFilter, windowFilter))
+			feedIds = feedIds.filter((id) => id !== item.id);
+		topicEditId = '';
+		topicDraft = topicExpected = '';
+		topicError = '';
+		resetScrollIntent();
+	}
+
+	async function saveTopic() {
+		if (!topicEditId || topicSaving || busy || feedPending.size) return;
+		const proposed = topicDraft.trim();
+		if (
+			!proposed ||
+			proposed.length > 100 ||
+			[...proposed].some((character) => {
+				const code = character.charCodeAt(0);
+				return code < 32 || (code >= 127 && code <= 159);
+			})
+		) {
+			topicError = 'Enter a topic of up to 100 characters without control characters.';
+			return;
+		}
+		if (proposed === topicExpected) {
+			finishTopicEdit();
+			return;
+		}
+		const id = topicEditId;
+		const batch = batchId;
+		topicSaving = true;
+		busy = true;
+		topicError = '';
+		resetScrollIntent();
+		try {
+			const saved = await api<{ topic: string }>(itemPath(batch, id), {
+				method: 'PATCH',
+				body: JSON.stringify({ topic: proposed, expectedTopic: topicExpected })
+			});
+			if (batch !== batchId || id !== topicEditId) return;
+			items = items.map((entry) => (entry.id === id ? { ...entry, group: saved.topic } : entry));
+			message = 'Topic saved.';
+			finishTopicEdit();
+		} catch (caught) {
+			if (caught instanceof ApiError && caught.statusCode === 409) {
+				try {
+					const latest = await api<{ item: Item }>(itemPath(batch, id));
+					if (!latest.item) throw new Error('Page unavailable.');
+					if (batch !== batchId || id !== topicEditId) return;
+					topicExpected = latest.item.group || 'Reading pile';
+					items = items.map((entry) =>
+						entry.id === id ? { ...entry, group: topicExpected } : entry
+					);
+					topicError = `This topic changed on another device to “${topicExpected}”. Your edit is still here. Save again to use it, or cancel.`;
+				} catch {
+					topicError =
+						'This topic changed on another device, but the latest value could not be loaded. Try saving again or cancel.';
+				}
+			} else {
+				topicError = `Topic not saved: ${errorText(caught)}`;
+			}
+		} finally {
+			topicSaving = false;
+			busy = false;
+			resetScrollIntent();
+		}
+	}
+
 	async function openItem(id: string) {
-		if (busy || id === selectedId) return;
+		if (busy || (mode === 'swipe' && topicEditId) || id === selectedId) return;
 		busy = true;
 		if (!(await saveNote())) {
 			busy = false;
@@ -464,7 +560,7 @@
 	}
 
 	async function switchBatch(id: string) {
-		if (busy || feedPending.size || !id) return;
+		if (busy || feedPending.size || topicEditId || !id) return;
 		resetScrollIntent();
 		busy = true;
 		error = '';
@@ -482,7 +578,7 @@
 				status: item.status || 'unread',
 				note: item.note || ''
 			}));
-			topic = 'all';
+			topic = '';
 			query = '';
 			statusFilter = 'unread';
 			windowFilter = 'all';
@@ -509,7 +605,7 @@
 	}
 
 	async function chooseStatus(status: Status) {
-		if (!selected || busy || itemLoading) return;
+		if (!selected || busy || itemLoading || topicEditId) return;
 		busy = true;
 		error = '';
 		message = '';
@@ -560,7 +656,7 @@
 	}
 
 	async function undoDecision() {
-		if (!undo || busy || feedPending.size || undo.batchId !== batchId) return;
+		if (!undo || busy || feedPending.size || topicEditId || undo.batchId !== batchId) return;
 		resetScrollIntent();
 		busy = true;
 		error = '';
@@ -604,6 +700,7 @@
 			event.pointerType !== 'touch' ||
 			busy ||
 			itemLoading ||
+			topicEditId ||
 			!(event.target instanceof Element)
 		)
 			return;
@@ -696,7 +793,7 @@
 	}
 
 	async function importBatch() {
-		if (busy || importing) return;
+		if (busy || importing || topicEditId) return;
 		error = '';
 		message = '';
 		importing = true;
@@ -750,16 +847,30 @@
 	}
 
 	beforeNavigate(({ cancel }) => {
-		if (note !== savedNote || noteSaving || feedPending.size) {
+		if (
+			note !== savedNote ||
+			noteSaving ||
+			feedPending.size ||
+			topicSaving ||
+			(topicEditId && topicDraft.trim() !== topicExpected)
+		) {
 			cancel();
-			if (feedPending.size) error = 'Wait for your decisions to finish saving before leaving.';
+			if (topicSaving || (topicEditId && topicDraft.trim() !== topicExpected))
+				topicError = 'Save or cancel your topic edit before leaving this page.';
+			else if (feedPending.size) error = 'Wait for your decisions to finish saving before leaving.';
 			else noteError = 'Save your note before leaving this page.';
 			void saveNote();
 		}
 	});
 
 	function beforeUnload(event: BeforeUnloadEvent) {
-		if (note !== savedNote || noteSaving || feedPending.size) {
+		if (
+			note !== savedNote ||
+			noteSaving ||
+			feedPending.size ||
+			topicSaving ||
+			(topicEditId && topicDraft.trim() !== topicExpected)
+		) {
 			event.preventDefault();
 			event.returnValue = '';
 		}
@@ -847,7 +958,7 @@
 							<button
 								type="button"
 								aria-pressed={batchId === batch.id}
-								disabled={busy || loading || feedPending.size > 0}
+								disabled={busy || loading || feedPending.size > 0 || !!topicEditId}
 								on:click={() => void switchBatch(batch.id)}
 								><span>{batch.name}</span>{#if batch.count != null}<span class="picker-count"
 										>{batch.count}</span
@@ -868,7 +979,7 @@
 			<details class="filters" bind:open={filtersOpen}>
 				<summary>
 					Filters <span class="filter-selection"
-						>· {statuses.find((status) => status.value === statusFilter)?.label}{topic !== 'all'
+						>· {statuses.find((status) => status.value === statusFilter)?.label}{topic
 							? ` · ${topic}`
 							: ''}</span
 					>
@@ -879,19 +990,28 @@
 						>Find a page<input
 							type="search"
 							placeholder="Search titles, URLs, topics"
-							disabled={feedPending.size > 0 || note !== savedNote || noteSaving}
+							disabled={feedPending.size > 0 || note !== savedNote || noteSaving || !!topicEditId}
 							bind:value={query}
 						/></label
 					>
 					<div class="picker-group">
 						<span class="picker-label" id="topic-label">Topic</span>
 						<div class="picker-options" role="group" aria-labelledby="topic-label">
-							{#each ['all', ...topics] as name (name)}
+							<button
+								type="button"
+								aria-pressed={!topic}
+								disabled={feedPending.size > 0 || note !== savedNote || noteSaving || !!topicEditId}
+								on:click={() => (topic = '')}>All topics</button
+							>
+							{#each topicOptions as name (name)}
 								<button
 									type="button"
 									aria-pressed={topic === name}
-									disabled={feedPending.size > 0 || note !== savedNote || noteSaving}
-									on:click={() => (topic = name)}>{name === 'all' ? 'All topics' : name}</button
+									disabled={feedPending.size > 0 ||
+										note !== savedNote ||
+										noteSaving ||
+										!!topicEditId}
+									on:click={() => (topic = name)}>{name}</button
 								>
 							{/each}
 						</div>
@@ -903,7 +1023,10 @@
 								<button
 									type="button"
 									aria-pressed={statusFilter === status.value}
-									disabled={feedPending.size > 0 || note !== savedNote || noteSaving}
+									disabled={feedPending.size > 0 ||
+										note !== savedNote ||
+										noteSaving ||
+										!!topicEditId}
 									on:click={() => (statusFilter = status.value)}>{status.label}</button
 								>
 							{/each}
@@ -925,14 +1048,20 @@
 								<button
 									type="button"
 									aria-pressed={windowFilter === 'all'}
-									disabled={feedPending.size > 0 || note !== savedNote || noteSaving}
+									disabled={feedPending.size > 0 ||
+										note !== savedNote ||
+										noteSaving ||
+										!!topicEditId}
 									on:click={() => (windowFilter = 'all')}>All windows</button
 								>
 								{#each windows as windowId, index (windowId)}
 									<button
 										type="button"
 										aria-pressed={windowFilter === windowId}
-										disabled={feedPending.size > 0 || note !== savedNote || noteSaving}
+										disabled={feedPending.size > 0 ||
+											note !== savedNote ||
+											noteSaving ||
+											!!topicEditId}
 										on:click={() => (windowFilter = windowId)}>Window {index + 1}</button
 									>
 								{/each}
@@ -986,7 +1115,7 @@
 				</p>
 				<button
 					class="primary"
-					disabled={importing || busy || feedPending.size > 0}
+					disabled={importing || busy || feedPending.size > 0 || !!topicEditId}
 					on:click={importBatch}>{importing ? 'Saving…' : 'Save new batch'}</button
 				>
 			</div>
@@ -998,7 +1127,9 @@
 				{error} <button aria-label="Dismiss error" on:click={() => (error = '')}>×</button>
 			</div>{/if}
 		{#if message && mode === 'swipe'}<div class="notice" role="status">
-				{message}{#if undo}<button disabled={busy} on:click={undoDecision}>Undo</button>{/if}
+				{message}{#if undo}<button disabled={busy || !!topicEditId} on:click={undoDecision}
+						>Undo</button
+					>{/if}
 			</div>{/if}
 
 		{#if loading}<div class="empty">
@@ -1023,7 +1154,7 @@
 							<button
 								type="button"
 								aria-pressed={mode === option}
-								disabled={busy || feedPending.size > 0}
+								disabled={busy || feedPending.size > 0 || !!topicEditId}
 								on:click={() => void setMode(option as typeof mode)}
 								>{option.charAt(0).toUpperCase() + option.slice(1)}</button
 							>
@@ -1181,7 +1312,7 @@
 								<div class="feed-actions">
 									<button
 										type="button"
-										disabled={busy || feedPending.has(item.id)}
+										disabled={busy || feedPending.has(item.id) || !!topicEditId}
 										on:click={() => {
 											resetScrollIntent();
 											queueFeedDecision(
@@ -1197,7 +1328,7 @@
 									>
 									<button
 										type="button"
-										disabled={busy || feedPending.has(item.id)}
+										disabled={busy || feedPending.has(item.id) || !!topicEditId}
 										on:click={() => {
 											resetScrollIntent();
 											queueFeedDecision(
@@ -1206,7 +1337,61 @@
 											);
 										}}>{item.status === 'archived' ? 'Return to unread' : 'Archive'}</button
 									>
+									<button
+										type="button"
+										disabled={busy || feedPending.size > 0 || !!topicEditId}
+										aria-label={`Edit topic for ${item.title || item.url}`}
+										on:click={() => startTopicEdit(item)}>Edit topic</button
+									>
 								</div>
+								{#if topicEditId === item.id}
+									<form class="topic-editor" on:submit|preventDefault={() => void saveTopic()}>
+										<label for="topic-edit-{item.id}">Topic</label>
+										<input
+											id="topic-edit-{item.id}"
+											bind:value={topicDraft}
+											maxlength="100"
+											disabled={topicSaving}
+											on:input={() => (topicError = '')}
+										/>
+										<span class="topic-editor-hint"
+											>Choose an existing topic or type a new one.</span
+										>
+										{#if item.tabGroups?.length || item.capturedWindowIds?.length}
+											<p class="topic-editor-hint topic-context">
+												{#if item.tabGroups?.length}Chrome groups: {item.tabGroups.join(', ')}{/if}
+												{#if item.tabGroups?.length && item.capturedWindowIds?.length}
+													·
+												{/if}
+												{#if item.capturedWindowIds?.length}Captured in {item.capturedWindowIds
+														.map((id) => `Window ${windows.indexOf(id) + 1}`)
+														.join(', ')}{/if}
+											</p>
+										{/if}
+										<div class="picker-options" role="group" aria-label="Existing topics">
+											{#each topics as name (name)}
+												<button
+													type="button"
+													disabled={topicSaving}
+													aria-pressed={topicDraft.trim() === name}
+													on:click={() => {
+														topicDraft = name;
+														topicError = '';
+													}}>{name}</button
+												>
+											{/each}
+										</div>
+										{#if topicError}<p class="topic-error" role="alert">{topicError}</p>{/if}
+										<div class="topic-editor-actions">
+											<button class="primary" type="submit" disabled={topicSaving}
+												>{topicSaving ? 'Saving…' : 'Save topic'}</button
+											>
+											<button type="button" disabled={topicSaving} on:click={finishTopicEdit}
+												>Cancel</button
+											>
+										</div>
+									</form>
+								{/if}
 							</div>
 						</article>
 					{/each}
@@ -1227,7 +1412,9 @@
 								(feedPending.size
 									? `Saving ${feedPending.size} ${feedPending.size === 1 ? 'decision' : 'decisions'}…`
 									: message)}</span
-						>{#if undo}<button disabled={busy || feedPending.size > 0} on:click={undoDecision}
+						>{#if undo}<button
+								disabled={busy || feedPending.size > 0 || !!topicEditId}
+								on:click={undoDecision}
 								>Undo{undoHistory.length > 1 ? ` (${undoHistory.length})` : ''}</button
 							>{:else if !feedPending.size}<button
 								on:click={() => {
@@ -1242,7 +1429,7 @@
 						{#each filtered as item (item.id)}<button
 								class:active={item.id === selectedId}
 								on:click={() => openItem(item.id)}
-								disabled={busy}
+								disabled={busy || !!topicEditId}
 								><span>{item.domain || 'Saved page'} · {item.group || 'Reading pile'}</span><strong
 									>{item.title || item.url}</strong
 								><span class="queue-url">{item.url}</span><small
@@ -1276,6 +1463,49 @@
 												: 'Unread'}</span
 								>
 							</div>
+							{#if topicEditId !== selected.id}
+								<button
+									class="edit-topic"
+									type="button"
+									disabled={busy || feedPending.size > 0 || !!topicEditId}
+									aria-label={`Edit topic for ${selected.title || selected.url}`}
+									on:click={() => startTopicEdit(selected)}>Edit topic</button
+								>
+							{:else}
+								<form class="topic-editor" on:submit|preventDefault={() => void saveTopic()}>
+									<label for="topic-edit-{selected.id}">Topic</label>
+									<input
+										id="topic-edit-{selected.id}"
+										bind:value={topicDraft}
+										maxlength="100"
+										disabled={topicSaving}
+										on:input={() => (topicError = '')}
+									/>
+									<span class="topic-editor-hint">Choose an existing topic or type a new one.</span>
+									<div class="picker-options" role="group" aria-label="Existing topics">
+										{#each topics as name (name)}
+											<button
+												type="button"
+												disabled={topicSaving}
+												aria-pressed={topicDraft.trim() === name}
+												on:click={() => {
+													topicDraft = name;
+													topicError = '';
+												}}>{name}</button
+											>
+										{/each}
+									</div>
+									{#if topicError}<p class="topic-error" role="alert">{topicError}</p>{/if}
+									<div class="topic-editor-actions">
+										<button class="primary" type="submit" disabled={topicSaving}
+											>{topicSaving ? 'Saving…' : 'Save topic'}</button
+										>
+										<button type="button" disabled={topicSaving} on:click={finishTopicEdit}
+											>Cancel</button
+										>
+									</div>
+								</form>
+							{/if}
 							<p class="domain">
 								{selected.domain || 'Saved page'}{selected.lastOpened
 									? ` · ${formatDate(selected.lastOpened)}`
@@ -1387,17 +1617,17 @@
 							<div class="decisions">
 								<button
 									class="decision read"
-									disabled={busy || itemLoading}
+									disabled={busy || itemLoading || !!topicEditId}
 									on:click={() => chooseStatus('archived')}><span>←</span> Archive</button
 								><button
 									class="decision follow"
-									disabled={busy || itemLoading}
+									disabled={busy || itemLoading || !!topicEditId}
 									on:click={() => chooseStatus('followup')}>Follow up <span>→</span></button
 								>
 							</div>
 							{#if selected.status !== 'unread'}<button
 									class="return-unread"
-									disabled={busy || itemLoading}
+									disabled={busy || itemLoading || !!topicEditId}
 									on:click={() => chooseStatus('unread')}>Return to unread</button
 								>{/if}
 						</article>
@@ -1537,6 +1767,7 @@
 	.batch-options {
 		display: grid;
 		grid-template-columns: minmax(0, 1fr);
+		grid-auto-rows: max-content;
 	}
 	.batch-options.has-many,
 	.window-options {
@@ -1983,6 +2214,68 @@
 	}
 	.topic-pill {
 		color: var(--accent);
+	}
+	.edit-topic {
+		min-height: 44px;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		color: var(--accent);
+		font-size: 0.85rem;
+		font-weight: 700;
+		cursor: pointer;
+	}
+	.topic-editor {
+		display: grid;
+		gap: 0.45rem;
+		margin: 0.65rem 0;
+		padding: 0.8rem;
+		border: 1px solid var(--line);
+		border-radius: 7px;
+		background: var(--page-bg);
+	}
+	.topic-editor label {
+		font-size: 0.85rem;
+		font-weight: 700;
+	}
+	.topic-editor input {
+		width: 100%;
+		min-width: 0;
+		min-height: 44px;
+		padding: 0.55rem 0.65rem;
+		border: 1px solid var(--line);
+		border-radius: 7px;
+		background: var(--page-surface);
+		color: var(--ink);
+		font: 400 1rem/1.4 var(--font-body);
+	}
+	.topic-editor-hint {
+		color: var(--muted);
+		font-size: 0.8rem;
+	}
+	.topic-context {
+		margin: 0;
+		overflow-wrap: anywhere;
+	}
+	.topic-error {
+		margin: 0;
+		color: var(--accent);
+		font-size: 0.85rem;
+	}
+	.topic-editor-actions {
+		display: flex;
+		align-items: center;
+		gap: 0.65rem;
+	}
+	.topic-editor-actions > button:not(.primary) {
+		min-height: 44px;
+		padding: 0.55rem 0.8rem;
+		border: 1px solid var(--line);
+		border-radius: 7px;
+		background: var(--page-surface);
+		color: var(--ink);
+		font-weight: 700;
+		cursor: pointer;
 	}
 	.domain {
 		margin: 1rem 0 0.3rem;
