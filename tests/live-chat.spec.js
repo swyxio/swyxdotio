@@ -39,7 +39,7 @@ async function mockChat(context) {
 	return { rejectNext: () => (rejectNext = true) };
 }
 
-test('quick messages fill the composer without sending or erasing a draft', async ({
+test('quick prompts fill a blank, hide while composing, and never send automatically', async ({
 	page,
 	context
 }) => {
@@ -50,21 +50,25 @@ test('quick messages fill the composer without sending or erasing a draft', asyn
 	const chat = page.getByRole('region', { name: 'swyx.irc', exact: true });
 	const composer = chat.getByLabel('Message', { exact: true });
 	const log = chat.getByRole('log', { name: 'Recent chat messages' });
-	await chat.getByRole('button', { name: 'Add Hey everyone! 👋 to message' }).click();
-	await expect(composer).toHaveValue('Hey everyone! 👋');
+	const prompts = chat.getByRole('group', { name: 'Quick messages' });
+	await chat.getByRole('button', { name: "Use prompt: hey everyone, i'm from ___ 👋" }).click();
+	await expect(composer).toHaveValue("hey everyone, i'm from ___ 👋");
 	await expect(composer).toBeFocused();
-	await page.keyboard.type(' there');
-	await expect(composer).toHaveValue('Hey everyone! 👋 there');
-	await expect(log.getByText('Hey everyone! 👋')).toHaveCount(0);
+	await expect(prompts).toHaveCount(0);
+	await page.keyboard.type('Singapore');
+	await expect(composer).toHaveValue("hey everyone, i'm from Singapore 👋");
+	await expect(log.getByText("hey everyone, i'm from Singapore 👋")).toHaveCount(0);
 	await composer.fill('My existing draft');
-	await chat.getByRole('button', { name: 'Add What are you working on? to message' }).focus();
+	await expect(prompts).toHaveCount(0);
+	await composer.fill('');
+	await chat.getByRole('button', { name: 'Use prompt: a/s/l? mine is ___ / ___ / ___' }).focus();
 	await page.keyboard.press('Enter');
-	await expect(composer).toHaveValue('My existing draft What are you working on?');
+	await expect(composer).toHaveValue('a/s/l? mine is ___ / ___ / ___');
 	await expect(log.getByText('My existing draft')).toHaveCount(0);
-	await composer.fill('x'.repeat(500));
-	await expect(
-		chat.getByRole('button', { name: 'Add Love this site! ❤️ to message' })
-	).toBeDisabled();
+	await composer.fill('');
+	await chat.getByRole('button', { name: 'Use prompt: this is whack. ___' }).click();
+	await expect(composer).toHaveValue('this is whack. ___');
+	await expect(prompts).toHaveCount(0);
 });
 
 test('mobile chat floats over the article without moving the reader', async ({ page, context }) => {
@@ -85,9 +89,9 @@ test('mobile chat floats over the article without moving the reader', async ({ p
 	await expect(chat).toBeVisible();
 	await expect(chat).toContainText('Messages disappear after 48 hours');
 	await expect(chat).toContainText('Backups may persist up to 30 days');
-	await chat.getByText('Details', { exact: true }).click();
+	await chat.locator('summary[aria-label="Chat information"]').click();
 	await expect(chat.getByText(/Backups may persist up to 30 days/)).toBeVisible();
-	await chat.getByText('Details', { exact: true }).click();
+	await chat.locator('summary[aria-label="Chat information"]').click();
 	const panel = await chat.boundingBox();
 	if (!panel) throw new Error('Floating chat was not visible');
 	expect(await chat.evaluate((element) => getComputedStyle(element).position)).toBe('fixed');
@@ -198,10 +202,10 @@ test('wide desktop chat can expand for a roomier conversation and remember that 
 	await page.goto(`${baseUrl}/learn-in-public`);
 	const chat = page.getByRole('region', { name: 'swyx.irc', exact: true });
 	await chat.getByRole('button', { name: 'Expand chat' }).click();
-	await expect.poll(async () => (await chat.boundingBox())?.width).toBe(620);
+	await expect.poll(async () => (await chat.boundingBox())?.width).toBe(540);
 	await expect(chat.getByRole('region', { name: 'Readers and their pages' })).toBeVisible();
 	await page.reload();
-	await expect.poll(async () => (await chat.boundingBox())?.width).toBe(620);
+	await expect.poll(async () => (await chat.boundingBox())?.width).toBe(540);
 	await chat.getByRole('button', { name: 'Make chat compact' }).click();
 	await expect.poll(async () => (await chat.boundingBox())?.width).toBe(268);
 });
@@ -304,10 +308,10 @@ test('dragging and resizing persist across reloads and stay within the viewport'
 	await page.setViewportSize({ width: 390, height: 300 });
 	const compact = await chat.boundingBox();
 	if (!compact) throw new Error('Compact chat was not visible');
-	await expect(chat.locator('summary').filter({ hasText: 'unverified' })).toBeVisible();
-	await chat.getByText('Details', { exact: true }).click();
+	await expect(chat.locator('summary[aria-label="Chat information"]')).toBeVisible();
+	await chat.locator('summary[aria-label="Chat information"]').click();
 	await expect(chat.getByText(/Backups may persist up to 30 days/)).toBeAttached();
-	await chat.getByText('Details', { exact: true }).click();
+	await chat.locator('summary[aria-label="Chat information"]').click();
 	for (const control of [
 		chat.getByLabel('Message', { exact: true }),
 		chat.getByRole('button', { name: /send/ }),
@@ -394,12 +398,8 @@ test('two readers receive messages and rejected sends preserve the draft', async
 	]);
 	const firstChat = first.getByRole('region', { name: 'swyx.irc', exact: true });
 	const secondChat = second.getByRole('region', { name: 'swyx.irc', exact: true });
-	await expect(firstChat.getByRole('button', { name: 'Move chat window' })).toContainText(
-		'Connected'
-	);
-	await expect(secondChat.getByRole('button', { name: 'Move chat window' })).toContainText(
-		'Connected'
-	);
+	await expect(firstChat.locator('.chat-status')).toHaveAttribute('title', 'Connected');
+	await expect(secondChat.locator('.chat-status')).toHaveAttribute('title', 'Connected');
 	await firstChat.getByLabel('Nickname (unverified)').fill('alice');
 	await firstChat.getByLabel('Message', { exact: true }).fill('Hello from the notebook');
 	await firstChat.getByRole('button', { name: /send/ }).click();
