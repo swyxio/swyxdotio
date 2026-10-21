@@ -5,6 +5,13 @@ each capture independently, including saved page text, summaries, decisions,
 and notes. The normal Tools Google session and owner subject protect both the
 page and every API request; responses are private and are not cached.
 
+The reader offers tap, scroll, and swipe modes. Bookmarks are saved as
+follow-ups; a scroll-past decision in scroll mode is saved as archived. Notes
+and decisions belong to a specific item in a specific batch and survive reloads.
+The archived and follow-up filters make decisions recoverable. Page previews
+are optional: some sites block embedding, so an original-page link is also
+available.
+
 New captures can be imported as a JSON file with a `tabs` array or as pasted
 URLs. Chrome's tab-export extension lives in the private chrometaboverflow
 repository. Capture and import do not close browser tabs. New captures contain
