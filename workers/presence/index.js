@@ -100,7 +100,7 @@ function isReplyableCloseCode(code) {
 }
 
 function peerRow(peer) {
-	return [peer.id, peer.country, peer.color, peer.x, peer.y, peer.mode];
+	return [peer.id, peer.country, peer.color, peer.x, peer.y, peer.mode, ...(peer.anchor || [])];
 }
 
 function makeJoinFrame(peer) {
@@ -361,8 +361,14 @@ export class PresenceRoom {
 			peer.x = message.x;
 			peer.y = message.y;
 			peer.mode = message.mode;
+			if (message.anchor) peer.anchor = message.anchor;
+			else delete peer.anchor;
 			socket.serializeAttachment(peer);
-			this.broadcast([V, 'm', peer.id, peer.x, peer.y, peer.mode], socket, peer.roomTag);
+			this.broadcast(
+				[V, 'm', peer.id, peer.x, peer.y, peer.mode, ...(peer.anchor || [])],
+				socket,
+				peer.roomTag
+			);
 			return;
 		}
 

@@ -4,10 +4,12 @@ const baseUrl = process.env.CHAT_TEST_BASE_URL || 'http://127.0.0.1:4173';
 /** @type {Record<string, string>} */
 const titles = {
 	'article:america250': 'What America has meant to me',
-	'article:learn-in-public': 'Learn in Public'
+	'article:learn-in-public': 'Learn in Public',
+	'page:home': 'Shawn @swyx Wang'
 };
+const articleBlocks = 'h1,h2,h3,h4,h5,h6,p,li,pre,blockquote,figure,img,table,video';
 
-/** @typedef {{ socket: import('@playwright/test').WebSocketRoute, key: string, id: string, nick: string, x: number, y: number, mode: string }} MockReader */
+/** @typedef {{ socket: import('@playwright/test').WebSocketRoute, key: string, id: string, nick: string, x: number, y: number, mode: string, anchor: number[] | null }} MockReader */
 /** @typedef {{ id: string, nick: string, text: string, createdAt: number }} MockMessage */
 
 /** A shared, in-memory presence service for independent browser contexts.
@@ -20,7 +22,15 @@ function mockReaders(messages = []) {
 	const chatSockets = new Set();
 	let sequence = 0;
 	/** @param {MockReader} reader */
-	const row = (reader) => [reader.id, 'US', '#2563EB', reader.x, reader.y, reader.mode];
+	const row = (reader) => [
+		reader.id,
+		'US',
+		'#2563EB',
+		reader.x,
+		reader.y,
+		reader.mode,
+		...(reader.anchor || [])
+	];
 	/** @param {MockReader} reader @param {unknown[]} frame */
 	const send = (reader, frame) => reader.socket.send(JSON.stringify(frame));
 	/** @param {string} key */
@@ -47,7 +57,8 @@ function mockReaders(messages = []) {
 				nick: `reader${id.slice(0, 4)}`,
 				x: 0.4,
 				y: 0.01,
-				mode: 'd'
+				mode: 'd',
+				anchor: null
 			};
 			readers.set(id, reader);
 			send(reader, [1, 'w', id, [row(reader)]]);
@@ -75,10 +86,11 @@ function mockReaders(messages = []) {
 					return;
 				}
 				if (frame[1] !== 'p') return;
-				[reader.x, reader.y, reader.mode] = frame.slice(2);
+				[reader.x, reader.y, reader.mode] = frame.slice(2, 5);
+				reader.anchor = frame.length === 9 ? frame.slice(5, 9) : null;
 				for (const peer of readers.values()) {
 					if (peer.id !== id && peer.key === key) {
-						send(peer, [1, 'm', id, reader.x, reader.y, reader.mode]);
+						send(peer, [1, 'm', id, reader.x, reader.y, reader.mode, ...(reader.anchor || [])]);
 					}
 				}
 			});
@@ -96,6 +108,11 @@ function mockReaders(messages = []) {
 	return {
 		install,
 		count: () => readers.size,
+		/** @param {string} nick */
+		position: (nick) => {
+			const reader = [...readers.values()].find((item) => item.nick === nick);
+			return reader ? { x: reader.x, y: reader.y, mode: reader.mode, anchor: reader.anchor } : null;
+		},
 		/** @param {MockMessage} message */
 		addMessage(message) {
 			messages.push(message);
@@ -117,6 +134,352 @@ function mockReaders(messages = []) {
 		}
 	};
 }
+
+test('following a named reader jumps to their cursor across pages and on the same page', async ({
+	browser,
+	page,
+	context
+}) => {
+	await page.setViewportSize({ width: 1100, height: 850 });
+	const readers = mockReaders();
+	await readers.install(context);
+	await context.addInitScript(() => localStorage.setItem('swyx:chat:nick:v1', 'Alice'));
+	await page.goto(`${baseUrl}/america250`);
+	const chat = await openChat(page);
+	const otherContext = await browser.newContext({ viewport: { width: 1100, height: 850 } });
+	try {
+		await readers.install(otherContext);
+		await otherContext.addInitScript(() => localStorage.setItem('swyx:chat:nick:v1', 'Bob'));
+		const other = await otherContext.newPage();
+		await other.goto(`${baseUrl}/learn-in-public`);
+		const roster = chat.getByRole('region', { name: 'Readers and their pages' });
+		const findBob = roster.getByRole('link', { name: 'Find Bob on Learn in Public' });
+		await expect(findBob).toBeVisible({ timeout: 10_000 });
+
+		await other.evaluate(() => window.scrollTo(0, 2500));
+		await other.mouse.move(500, 300);
+		await expect
+			.poll(() => readers.position('Bob'), { timeout: 5_000 })
+			.toMatchObject({ mode: 'd', x: expect.any(Number), y: expect.any(Number) });
+		await expect.poll(() => readers.position('Bob')?.y || 0).toBeGreaterThan(0.01);
+		const destination = readers.position('Bob');
+		if (!destination) throw new Error('Missing Bob’s cursor position');
+		// The router's initial scroll reset must not cancel the queued follow.
+		await page.evaluate(() => window.scrollTo(0, 1000));
+		await findBob.click();
+		await expect(page).toHaveURL(/\/learn-in-public$/);
+		await expect(page.locator('.remote-cursor').filter({ hasText: 'Bob' })).toBeVisible({
+			timeout: 10_000
+		});
+		const expectedScroll = await page.evaluate(
+			({ depth, anchor, selector }) => {
+				const height = Math.max(document.documentElement.scrollHeight, innerHeight);
+				const block =
+					anchor &&
+					document.querySelector('article.reading-prose')?.querySelectorAll(selector)[anchor[0]];
+				const rect = block?.getBoundingClientRect();
+				const y =
+					rect && anchor
+						? rect.top + window.scrollY + (rect.height * anchor[2]) / 10000
+						: depth * height;
+				return Math.max(0, Math.min(height - innerHeight, y - innerHeight / 2));
+			},
+			{ depth: destination.y, anchor: destination.anchor, selector: articleBlocks }
+		);
+		expect(expectedScroll).toBeGreaterThan(400);
+		await expect.poll(() => page.evaluate(() => window.scrollY)).toBeCloseTo(expectedScroll, 0);
+
+		// Scrolling with a stationary mouse updates its document position and
+		// preserves the desktop cursor, rather than reverting to a depth marker.
+		await other.evaluate(() => window.scrollTo(0, 3500));
+		await expect
+			.poll(() => Math.abs((readers.position('Bob')?.y || 0) - destination.y))
+			.toBeGreaterThan(0.001);
+		const scrolledPosition = readers.position('Bob');
+		if (!scrolledPosition) throw new Error('Missing Bob’s position after scrolling');
+		expect(scrolledPosition.mode).toBe('d');
+		await other.mouse.move(500, 340);
+		await expect
+			.poll(() => Math.abs((readers.position('Bob')?.y || 0) - scrolledPosition.y))
+			.toBeGreaterThan(0.0001);
+		const movedPosition = readers.position('Bob');
+		if (!movedPosition) throw new Error('Missing Bob’s position after a small pointer movement');
+		const expectedAfterScroll = await page.evaluate(
+			({ depth, anchor, selector }) => {
+				const height = Math.max(document.documentElement.scrollHeight, innerHeight);
+				const block =
+					anchor &&
+					document.querySelector('article.reading-prose')?.querySelectorAll(selector)[anchor[0]];
+				const rect = block?.getBoundingClientRect();
+				const y =
+					rect && anchor
+						? rect.top + window.scrollY + (rect.height * anchor[2]) / 10000
+						: depth * height;
+				return Math.max(0, Math.min(height - innerHeight, y - innerHeight / 2));
+			},
+			{ depth: movedPosition.y, anchor: movedPosition.anchor, selector: articleBlocks }
+		);
+
+		// Following the same person on the current page does not navigate or reload.
+		await page.evaluate(() => window.scrollTo(0, 0));
+		const reopened = await openChat(page);
+		const samePageBob = reopened
+			.getByRole('region', { name: 'Readers and their pages' })
+			.getByRole('link', { name: 'Find Bob on Learn in Public' });
+		await samePageBob.click();
+		await expect(page).toHaveURL(/\/learn-in-public$/);
+		await expect
+			.poll(() => page.evaluate(() => window.scrollY))
+			.toBeCloseTo(expectedAfterScroll, 0);
+		await expect(page.locator('.remote-cursor').filter({ hasText: 'Bob' })).toBeVisible();
+
+		// If the selected reader leaves before the new page connects, do not
+		// jump to a stale position or a different reader.
+		await page.goto(`${baseUrl}/america250`);
+		const source = await openChat(page);
+		const departedBob = source
+			.getByRole('region', { name: 'Readers and their pages' })
+			.getByRole('link', { name: 'Find Bob on Learn in Public' });
+		await expect(departedBob).toBeVisible({ timeout: 10_000 });
+		await departedBob.click();
+		await readers.close('article:learn-in-public', 1008);
+		await expect(page).toHaveURL(/\/learn-in-public$/);
+		await expect(page.getByRole('button', { name: 'Open swyx.irc chat' })).toContainText(
+			'0 others here',
+			{ timeout: 10_000 }
+		);
+		expect(await page.evaluate(() => window.scrollY)).toBe(0);
+	} finally {
+		await otherContext.close();
+	}
+});
+
+test('scrolling cancels a pending cross-page follow', async ({ browser, page, context }) => {
+	await page.setViewportSize({ width: 1100, height: 850 });
+	const readers = mockReaders();
+	await readers.install(context);
+	await page.goto(`${baseUrl}/america250`);
+	const chat = await openChat(page);
+	const otherContext = await browser.newContext({ viewport: { width: 1100, height: 850 } });
+	try {
+		await readers.install(otherContext);
+		await otherContext.addInitScript(() => localStorage.setItem('swyx:chat:nick:v1', 'Bob'));
+		const other = await otherContext.newPage();
+		await other.goto(`${baseUrl}/learn-in-public`);
+		const findBob = chat
+			.getByRole('region', { name: 'Readers and their pages' })
+			.getByRole('link', { name: 'Find Bob on Learn in Public' });
+		await expect(findBob).toBeVisible({ timeout: 10_000 });
+		await other.evaluate(() => window.scrollTo(0, 3500));
+		await other.mouse.move(500, 300);
+		await expect.poll(() => readers.position('Bob')?.y || 0).toBeGreaterThan(0.1);
+		await findBob.click();
+		await expect(page).toHaveURL(/\/learn-in-public$/);
+		// Native scrollbar drags emit the same scroll event. Headless Chromium
+		// on macOS hides the scrollbar, so change the viewport directly here.
+		await page.evaluate(
+			() =>
+				new Promise((resolve) => {
+					requestAnimationFrame(() => requestAnimationFrame(resolve));
+				})
+		);
+		await page.evaluate(() => window.scrollTo(0, 1100));
+		const chosenScroll = await page.evaluate(() => window.scrollY);
+		expect(chosenScroll).toBeGreaterThan(100);
+		await expect.poll(() => readers.count(), { timeout: 10_000 }).toBe(2);
+		await expect(
+			page.locator('.remote-cursor, .offscreen-marker').filter({ hasText: 'Bob' })
+		).toBeVisible({
+			timeout: 10_000
+		});
+		expect(await page.evaluate(() => window.scrollY)).toBe(chosenScroll);
+	} finally {
+		await otherContext.close();
+	}
+});
+
+test('textless media anchors identify public sources without query strings', async ({
+	page,
+	context
+}) => {
+	await page.setViewportSize({ width: 1100, height: 850 });
+	const readers = mockReaders();
+	await readers.install(context);
+	await context.addInitScript(() => localStorage.setItem('swyx:chat:nick:v1', 'Alice'));
+	await page.goto(`${baseUrl}/learn-in-public`);
+	await expect.poll(() => readers.count(), { timeout: 10_000 }).toBe(1);
+	await page.evaluate(() => {
+		const article = document.querySelector('article.reading-prose');
+		if (!article) throw new Error('Article missing');
+		article.insertAdjacentHTML(
+			'afterbegin',
+			`<img id="test-image" src="/media-a.png?visitor=one#start" style="width:200px;height:100px;display:block">
+			<figure id="test-figure" style="width:200px;height:100px;padding:25px"><img id="test-figure-image" src="/figure-a.png?visitor=one#start" style="width:80px;height:40px"></figure>
+			<video id="test-video" style="width:200px;height:100px;display:block"><source id="test-source" src="/video-a.mp4?visitor=one#start"></video>`
+		);
+	});
+	for (const [container, media, original, changed] of [
+		['#test-image', '#test-image', '/media-a.png', '/media-b.png'],
+		['#test-figure', '#test-figure-image', '/figure-a.png', '/figure-b.png'],
+		['#test-video', '#test-source', '/video-a.mp4', '/video-b.mp4']
+	]) {
+		const target = page.locator(container);
+		await target.scrollIntoViewIfNeeded();
+		const box = await target.boundingBox();
+		if (!box) throw new Error(`Missing ${container}`);
+		const index = await target.evaluate((element, selector) => {
+			const article = document.querySelector('article.reading-prose');
+			return article ? [...article.querySelectorAll(selector)].indexOf(element) : -1;
+		}, articleBlocks);
+		await page.mouse.move(box.x + 5, box.y + 5);
+		await expect
+			.poll(() => readers.position('Alice')?.anchor?.[0], { timeout: 10_000 })
+			.toBe(index);
+		const before = readers.position('Alice')?.anchor;
+		if (!before) throw new Error(`Missing ${container} anchor`);
+		await page
+			.locator(media)
+			.evaluate(
+				(element, path) => element.setAttribute('src', `${path}?visitor=two#end`),
+				original
+			);
+		await page.mouse.move(box.x + 15, box.y + 5);
+		await expect.poll(() => readers.position('Alice')?.anchor?.[1]).not.toBe(before[1]);
+		expect(readers.position('Alice')?.anchor?.[3]).toBe(before[3]);
+		await page
+			.locator(media)
+			.evaluate((element, path) => element.setAttribute('src', `${path}?visitor=two#end`), changed);
+		await page.mouse.move(box.x + 20, box.y + 5);
+		await expect
+			.poll(() => {
+				const anchor = readers.position('Alice')?.anchor;
+				return Boolean(anchor && anchor[0] === index && anchor[3] !== before[3]);
+			})
+			.toBe(true);
+		await page.locator(media).evaluate((element) => element.removeAttribute('src'));
+		await page.mouse.move(box.x + 25, box.y + 5);
+		await expect.poll(() => readers.position('Alice')?.anchor).toBeNull();
+	}
+});
+
+test('following a mobile reader centers the matching article passage on desktop', async ({
+	browser,
+	page,
+	context
+}) => {
+	await page.setViewportSize({ width: 1100, height: 850 });
+	const readers = mockReaders();
+	await readers.install(context);
+	await page.goto(`${baseUrl}/america250`);
+	const chat = await openChat(page);
+	const mobileContext = await browser.newContext({
+		viewport: { width: 390, height: 844 },
+		isMobile: true,
+		hasTouch: true
+	});
+	try {
+		await readers.install(mobileContext);
+		await mobileContext.addInitScript(() => localStorage.setItem('swyx:chat:nick:v1', 'Bob'));
+		const mobile = await mobileContext.newPage();
+		await mobile.goto(`${baseUrl}/learn-in-public`);
+		const findBob = chat
+			.getByRole('region', { name: 'Readers and their pages' })
+			.getByRole('link', { name: 'Find Bob on Learn in Public' });
+		await expect(findBob).toBeVisible({ timeout: 10_000 });
+		const target = await mobile.evaluate((selector) => {
+			const article = document.querySelector('article.reading-prose');
+			const paragraph = article?.querySelectorAll('p')[12];
+			if (!article || !paragraph) throw new Error('Article does not have the test passage');
+			const index = [...article.querySelectorAll(selector)].indexOf(paragraph);
+			const rect = paragraph.getBoundingClientRect();
+			window.scrollTo(0, window.scrollY + rect.top + rect.height / 2 - innerHeight / 2);
+			return { index, text: paragraph.textContent };
+		}, articleBlocks);
+		await expect
+			.poll(() => readers.position('Bob')?.anchor?.[0], { timeout: 10_000 })
+			.toBe(target.index);
+		const mobilePosition = readers.position('Bob');
+		if (!mobilePosition?.anchor) throw new Error('Mobile reader did not publish a content anchor');
+		const anchor = mobilePosition.anchor;
+		expect(mobilePosition.mode).toBe('r');
+		await findBob.click();
+		await expect(page).toHaveURL(/\/learn-in-public$/);
+		await expect(page.locator('.rail-marker').filter({ hasText: 'Bob' })).toBeVisible({
+			timeout: 10_000
+		});
+		const matchingPassage = page
+			.locator('article.reading-prose')
+			.locator(articleBlocks)
+			.nth(target.index);
+		await expect(matchingPassage).toHaveText(target.text || '');
+		await expect
+			.poll(async () =>
+				matchingPassage.evaluate((block, offset) => {
+					const rect = block.getBoundingClientRect();
+					return Math.abs(rect.top + (rect.height * offset) / 10000 - window.innerHeight / 2);
+				}, anchor[2])
+			)
+			.toBeLessThan(3);
+	} finally {
+		await mobileContext.close();
+	}
+});
+
+test('following a mobile reader on the homepage finds the same section', async ({
+	browser,
+	page,
+	context
+}) => {
+	await page.setViewportSize({ width: 1100, height: 850 });
+	const readers = mockReaders();
+	await readers.install(context);
+	await page.goto(`${baseUrl}/america250`);
+	const chat = await openChat(page);
+	const mobileContext = await browser.newContext({
+		viewport: { width: 390, height: 844 },
+		isMobile: true,
+		hasTouch: true
+	});
+	try {
+		await readers.install(mobileContext);
+		await mobileContext.addInitScript(() => localStorage.setItem('swyx:chat:nick:v1', 'Bob'));
+		const mobile = await mobileContext.newPage();
+		await mobile.goto(`${baseUrl}/`);
+		const findBob = chat
+			.getByRole('region', { name: 'Readers and their pages' })
+			.getByRole('link', { name: 'Find Bob on Shawn @swyx Wang' });
+		await expect(findBob).toBeVisible({ timeout: 10_000 });
+		const index = await mobile.evaluate((selector) => {
+			const main = document.querySelector('main#skip');
+			const heading = document.querySelector('#latest');
+			if (!main || !heading) throw new Error('Homepage section missing');
+			const index = [...main.querySelectorAll(selector)].indexOf(heading);
+			const rect = heading.getBoundingClientRect();
+			window.scrollTo(0, window.scrollY + rect.top + rect.height / 2 - innerHeight / 2);
+			return index;
+		}, articleBlocks);
+		expect(index).toBeGreaterThanOrEqual(0);
+		await expect.poll(() => readers.position('Bob')?.anchor?.[0], { timeout: 10_000 }).toBe(index);
+		const mobilePosition = readers.position('Bob');
+		if (!mobilePosition?.anchor) throw new Error('Homepage reader did not publish an anchor');
+		const anchor = mobilePosition.anchor;
+		await findBob.click();
+		await expect(page).toHaveURL(`${baseUrl}/`);
+		await expect(page.locator('.rail-marker').filter({ hasText: 'Bob' })).toBeVisible({
+			timeout: 10_000
+		});
+		await expect
+			.poll(async () =>
+				page.locator('#latest').evaluate((block, offset) => {
+					const rect = block.getBoundingClientRect();
+					return Math.abs(rect.top + (rect.height * offset) / 10000 - window.innerHeight / 2);
+				}, anchor[2])
+			)
+			.toBeLessThan(3);
+	} finally {
+		await mobileContext.close();
+	}
+});
 
 /** @param {import('@playwright/test').Page} page */
 async function openChat(page) {
@@ -141,6 +504,13 @@ test('sitewide readers exclude self, link to other pages, and show same-page cur
 	await expect(chat.getByRole('button', { name: '0 other readers online' })).toBeVisible({
 		timeout: 10_000
 	});
+	const presenceButton = page.getByRole('button', { name: 'Close swyx.irc chat' });
+	await expect(presenceButton).toBeVisible();
+	await expect(presenceButton).toContainText('0 others here');
+	const launcherBox = await presenceButton.boundingBox();
+	if (!launcherBox) throw new Error('Presence launcher was not visible');
+	expect(launcherBox.x + launcherBox.width).toBeGreaterThan(1100 - 40);
+	expect(launcherBox.y + launcherBox.height).toBeGreaterThan(850 - 40);
 	await chat.getByLabel('Message', { exact: true }).fill('A draft to keep');
 
 	const otherContext = await browser.newContext({ viewport: { width: 1100, height: 850 } });
@@ -152,8 +522,9 @@ test('sitewide readers exclude self, link to other pages, and show same-page cur
 		await expect(chat.getByRole('button', { name: '1 other reader online' })).toBeVisible({
 			timeout: 10_000
 		});
+		await expect(presenceButton).toContainText('1 other here');
 		const readingNow = chat.getByRole('region', { name: 'Readers and their pages' });
-		const inlinePageLink = readingNow.getByRole('link', { name: 'Learn in Public' });
+		const inlinePageLink = readingNow.getByRole('link', { name: 'Learn in Public', exact: true });
 		await expect(readingNow.getByText('Bob', { exact: true })).toBeVisible();
 		await expect(inlinePageLink).toHaveAttribute('href', '/learn-in-public');
 		await expect(readingNow.getByText('Alice', { exact: true })).toHaveCount(0);
@@ -177,7 +548,7 @@ test('sitewide readers exclude self, link to other pages, and show same-page cur
 		await readerToggle.focus();
 		await page.keyboard.press('Enter');
 		const roster = chat.getByRole('region', { name: 'Live readers' });
-		const pageLink = roster.getByRole('link', { name: 'Learn in Public' });
+		const pageLink = roster.getByRole('link', { name: 'Learn in Public', exact: true });
 		await expect(pageLink).toHaveAttribute('href', '/learn-in-public');
 		await expect(pageLink).toBeFocused();
 		await expect(roster.getByText('1 reader', { exact: true })).toBeVisible();

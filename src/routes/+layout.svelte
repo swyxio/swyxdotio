@@ -92,6 +92,7 @@
 		onPresenceVisibility={(hidden) => livePresence?.setHidden(hidden)}
 		onPresenceReaction={(reaction) => livePresence?.react(reaction)}
 		onPresenceShare={(event) => livePresence?.requestShare(event)}
+		onFollowReader={(id, pageKey) => livePresence?.followReader(id, pageKey)}
 	/>
 
 	{#if !immersiveTool}
