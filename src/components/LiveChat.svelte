@@ -69,6 +69,7 @@
 	let expiryTimer = 0;
 	let destroyed = false;
 	let showReaders = false;
+	let showTimestamps = false;
 	let readingExpanded = false;
 	let unread = 0;
 	/** @type {Set<string>} */
@@ -707,10 +708,13 @@
 				{/if}
 				<details class="chat-notice" bind:this={infoMenu}>
 					<summary aria-label="Chat information" title="Chat information">⋯</summary>
-					<p>
-						Public chat. Nicknames are unverified and visible with your page. Messages disappear
-						after 48 hours. Backups may persist up to 30 days.
-					</p>
+					<div class="chat-notice-menu">
+						<p>
+							Public chat. Nicknames are unverified and visible with your page. Messages disappear
+							after 48 hours. Backups may persist up to 30 days.
+						</p>
+						<label><input type="checkbox" bind:checked={showTimestamps} /> Show timestamps</label>
+					</div>
 				</details>
 				<button type="button" class="chat-close" aria-label="Close chat" on:click={closeChat}
 					>×</button
@@ -867,6 +871,7 @@
 						<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 						<div
 							class="chat-log"
+							class:show-timestamps={showTimestamps}
 							role="log"
 							aria-label="Recent chat messages"
 							aria-live="polite"
@@ -883,7 +888,10 @@
 								<p class="chat-empty">No recent messages. Say hello!</p>
 							{:else}
 								{#each messages as message (message.id)}
-									<div class="chat-message">
+									<div
+										class="chat-message"
+										title={showTimestamps ? undefined : formatTime(message.createdAt)}
+									>
 										<time datetime={new Date(message.createdAt).toISOString()}
 											>{formatTime(message.createdAt)}</time
 										>
@@ -1124,7 +1132,7 @@
 	.chat-notice summary::-webkit-details-marker {
 		display: none;
 	}
-	.chat-notice p {
+	.chat-notice-menu {
 		position: absolute;
 		top: calc(100% + 0.25rem);
 		right: 0.4rem;
@@ -1138,6 +1146,15 @@
 		box-shadow: 0 6px 18px rgb(0 0 0 / 0.3);
 		color: #f0f1e9;
 		font: 0.8rem/1.45 var(--font-body);
+	}
+	.chat-notice-menu p {
+		margin: 0 0 0.6rem;
+	}
+	.chat-notice-menu label {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		cursor: pointer;
 	}
 	.chat-stage,
 	.chat-content {
@@ -1235,29 +1252,26 @@
 		color: var(--chat-muted);
 	}
 	.chat-message {
-		position: relative;
 		margin-bottom: 0.35rem;
 		overflow-wrap: anywhere;
 	}
 	.chat-message time {
 		position: absolute;
-		top: 0;
-		right: 0;
-		z-index: 1;
-		padding: 0.1rem 0.35rem;
-		border: 1px solid #526a57;
-		border-radius: 3px;
-		background: #1b3027;
-		color: #d1e4cf;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		color: var(--chat-muted);
 		font: 0.72rem/1.5 var(--font-mono);
 		white-space: nowrap;
-		pointer-events: none;
-		opacity: 0;
 	}
-	@media (hover: hover) {
-		.chat-message:hover time {
-			opacity: 1;
-		}
+	.show-timestamps .chat-message time {
+		position: static;
+		width: auto;
+		height: auto;
+		margin-right: 0.25rem;
+		overflow: visible;
+		clip-path: none;
 	}
 	.chat-nick {
 		margin-right: 0.25rem;
