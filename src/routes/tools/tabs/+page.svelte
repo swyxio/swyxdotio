@@ -1087,12 +1087,12 @@
 									on:click={() => void showFeedItem(item.id)}
 									disabled={busy}>{item.title || item.url}</button
 								>
+								<p class="feed-url">{item.url}</p>
 								{#if item.summary && expandedId !== item.id}<p class="feed-excerpt">
 										{item.summary}
 									</p>{/if}
 								{#if expandedId === item.id && selectedId === item.id}
 									<section class="feed-content" aria-label="Saved content">
-										<p class="feed-url">{item.url}</p>
 										{#if itemLoading}<p class="card-loading">Loading saved content…</p>
 										{:else}
 											{#if currentSummary}<div class="summary">
@@ -1245,7 +1245,7 @@
 								disabled={busy}
 								><span>{item.domain || 'Saved page'} · {item.group || 'Reading pile'}</span><strong
 									>{item.title || item.url}</strong
-								><small
+								><span class="queue-url">{item.url}</span><small
 									>{item.status === 'followup'
 										? 'Follow up'
 										: item.status === 'read'
@@ -1815,9 +1815,10 @@
 		color: var(--accent);
 	}
 	.feed-url {
-		margin: 0 0 0.8rem;
+		margin: 0.2rem 0 0.3rem;
 		color: var(--muted);
 		font-size: 0.8rem;
+		line-height: 1.4;
 		overflow-wrap: anywhere;
 	}
 	.feed-excerpt {
@@ -1919,12 +1920,14 @@
 	.queue {
 		display: grid;
 		gap: 0.35rem;
+		min-width: 0;
 		max-height: 75vh;
 		overflow: auto;
 	}
 	.queue button {
 		display: grid;
 		gap: 0.25rem;
+		min-width: 0;
 		min-height: 44px;
 		padding: 0.75rem;
 		border: 1px solid var(--line);
@@ -1949,6 +1952,14 @@
 	.queue button strong {
 		font-size: 0.95rem;
 		line-height: 1.35;
+		overflow-wrap: anywhere;
+	}
+	.queue button .queue-url {
+		overflow: visible;
+		line-height: 1.35;
+		text-overflow: clip;
+		white-space: normal;
+		overflow-wrap: anywhere;
 	}
 	.queue-empty {
 		padding: 1rem;

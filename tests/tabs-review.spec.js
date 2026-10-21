@@ -291,6 +291,55 @@ test('visible pickers select filters and keep batches separate', async ({ page }
 	expect((await getBatch(page, second)).items[0].status).toBe('unread');
 });
 
+test('full URLs remain visible and wrap in every review mode', async ({ page }) => {
+	await page.goto('/tools');
+	const origin = await authenticateTools(page);
+	const suffix = crypto.randomUUID();
+	const url = `https://example.test/${suffix}/${'a'.repeat(220)}?source=reading&part=full#section`;
+	const batch = await makeBatch(page, origin, `QA URL ${suffix}`, [
+		{ title: 'Long URL page', url }
+	]);
+	/** @param {import('@playwright/test').Locator} urlElement */
+	async function expectFullUrl(urlElement) {
+		await expect(urlElement).toHaveText(url);
+		await expect(urlElement).toBeVisible();
+		const geometry = await urlElement.evaluate((element) => ({
+			clientWidth: element.clientWidth,
+			scrollWidth: element.scrollWidth,
+			clientHeight: element.clientHeight,
+			scrollHeight: element.scrollHeight,
+			whiteSpace: getComputedStyle(element).whiteSpace
+		}));
+		expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.clientWidth);
+		expect(geometry.scrollHeight).toBeLessThanOrEqual(geometry.clientHeight);
+		expect(geometry.whiteSpace).not.toBe('nowrap');
+	}
+	for (const viewport of [
+		{ width: 390, height: 844 },
+		{ width: 1440, height: 900 }
+	]) {
+		await page.setViewportSize(viewport);
+		await page.goto(`/tools/tabs?batch=${batch.id}`);
+		await page.getByRole('button', { name: 'Tap', exact: true }).click();
+		const feedUrl = page.locator('article[data-feed-item] .feed-url');
+		await expectFullUrl(feedUrl);
+		await page.getByRole('button', { name: 'Long URL page', exact: true }).click();
+		await expectFullUrl(feedUrl);
+		await page.getByRole('button', { name: 'Scroll', exact: true }).click();
+		await expectFullUrl(feedUrl);
+		await useSwipeMode(page);
+		const cardUrl = page.locator('article.card .source-detail');
+		const queueUrl = page
+			.getByRole('complementary', { name: 'Pages in this view' })
+			.locator('.queue-url');
+		await expectFullUrl(cardUrl);
+		await expectFullUrl(queueUrl);
+		expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+			viewport.width
+		);
+	}
+});
+
 test('the first reading action is reachable across phone, split, and desktop layouts', async ({
 	page
 }) => {
