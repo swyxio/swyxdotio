@@ -50,6 +50,8 @@
 	let composer;
 	/** @type {HTMLElement | undefined} */
 	let readerPanel;
+	/** @type {HTMLDetailsElement | undefined} */
+	let infoMenu;
 	/** @type {HTMLButtonElement | undefined} */
 	let readerToggle;
 	let ready = false;
@@ -58,9 +60,9 @@
 	let nickSaveTimer = 0;
 	let draft = '';
 	const quickMessages = [
-		{ label: '👋 hey', text: 'Hey everyone! 👋' },
-		{ label: '💡 ideas', text: 'What are you working on?' },
-		{ label: '❤️ love it', text: 'Love this site! ❤️' }
+		{ label: '👋 intro', text: "hey everyone, i'm from ___ 👋" },
+		{ label: '💬 a/s/l', text: 'a/s/l? mine is ___ / ___ / ___' },
+		{ label: '👀 whack', text: 'this is whack. ___' }
 	];
 	let reconnectAttempt = 0;
 	let reconnectTimer = 0;
@@ -74,6 +76,13 @@
 	$: unreadLabel = `${unread} unread ${unread === 1 ? 'message' : 'messages'}`;
 	let previousLogScroll = 0;
 	let wasAtLogBottom = true;
+	let followLogEnd = true;
+	let logAnchor = 0;
+	let logWidth = 0;
+	let logHeight = 0;
+	let logResizing = false;
+	let logUserScrolling = false;
+	let logUserScrollTimer = 0;
 	$: readerStatus = presence.hidden
 		? 'Live readers hidden'
 		: !presence.pageKey || !presence.admitted || presence.stopped
@@ -138,10 +147,10 @@
 	/** @param {boolean} wide */
 	function defaultGeometry(wide) {
 		const view = viewport();
-		const width = wide && allowSidebar ? 268 : view.width >= 800 ? 620 : 336;
+		const width = wide && allowSidebar ? 268 : view.width >= 800 ? 540 : 320;
 		const bottom = !wide && view.width < 500 ? 68 : 16;
 		const height = Math.min(
-			wide && allowSidebar ? 576 : view.width >= 800 ? 620 : 510,
+			wide && allowSidebar ? 500 : view.width >= 800 ? 520 : 460,
 			view.height - bottom - 8
 		);
 		return clampGeometry({
@@ -187,8 +196,8 @@
 		const expanded = geometry.width >= 500;
 		geometry = restoreGeometry({
 			...geometry,
-			width: expanded ? (wideLayout ? 268 : 336) : 620,
-			height: expanded ? geometry.height : Math.max(geometry.height, 576)
+			width: expanded ? (wideLayout ? 268 : 320) : 540,
+			height: expanded ? geometry.height : Math.max(geometry.height, 520)
 		});
 		rememberGeometry();
 	}
@@ -278,8 +287,63 @@
 	}
 
 	async function scrollLatest() {
+		followLogEnd = true;
 		await tick();
 		if (log) log.scrollTop = log.scrollHeight;
+	}
+
+	function trackLogScroll() {
+		if (
+			!log ||
+			(!logUserScrolling &&
+				(logResizing || log.clientWidth !== logWidth || log.clientHeight !== logHeight))
+		)
+			return;
+		const maxScroll = log.scrollHeight - log.clientHeight;
+		if (maxScroll <= 2 && !followLogEnd) return;
+		followLogEnd = maxScroll - log.scrollTop <= 2;
+		if (!followLogEnd) logAnchor = log.scrollTop;
+	}
+
+	function noteLogUserScroll() {
+		logUserScrolling = true;
+		window.clearTimeout(logUserScrollTimer);
+		logUserScrollTimer = window.setTimeout(() => {
+			logUserScrolling = false;
+			if (log && followLogEnd) log.scrollTop = log.scrollHeight;
+		}, 150);
+	}
+
+	/** @param {KeyboardEvent} event */
+	function noteLogKeyScroll(event) {
+		if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key))
+			noteLogUserScroll();
+	}
+
+	/** Keep the newest message in view when the window changes size, unless the reader scrolled up. */
+	/** @param {HTMLElement} node */
+	function keepLogPosition(node) {
+		let frame = 0;
+		logWidth = node.clientWidth;
+		logHeight = node.clientHeight;
+		const observer = new ResizeObserver(() => {
+			logResizing = true;
+			logWidth = node.clientWidth;
+			logHeight = node.clientHeight;
+			if (!logUserScrolling) node.scrollTop = followLogEnd ? node.scrollHeight : logAnchor;
+			cancelAnimationFrame(frame);
+			frame = requestAnimationFrame(() => (logResizing = false));
+		});
+		observer.observe(node);
+		return {
+			destroy: () => {
+				observer.disconnect();
+				cancelAnimationFrame(frame);
+				window.clearTimeout(logUserScrollTimer);
+				logUserScrolling = false;
+				logResizing = false;
+			}
+		};
 	}
 
 	/** @param {MessageEvent} event */
@@ -444,7 +508,19 @@
 			if (document.querySelector('[data-share-ui][role="menu"]')) return;
 			event.preventDefault();
 			event.stopPropagation();
+			if (infoMenu?.open) {
+				infoMenu.open = false;
+				infoMenu.querySelector('summary')?.focus();
+				return;
+			}
 			void closeChat();
+		}
+	}
+
+	/** @param {PointerEvent} event */
+	function closeInfoOutside(event) {
+		if (infoMenu?.open && event.target instanceof Node && !infoMenu.contains(event.target)) {
+			infoMenu.open = false;
 		}
 	}
 
@@ -462,6 +538,8 @@
 		}
 		showReaders = false;
 		if (document.visibilityState === 'visible') unread = 0;
+		followLogEnd = wasAtLogBottom;
+		logAnchor = previousLogScroll;
 		await tick();
 		if (log) log.scrollTop = wasAtLogBottom ? log.scrollHeight : previousLogScroll;
 		readerToggle?.focus({ preventScroll: true });
@@ -477,12 +555,12 @@
 
 	/** @param {string} text */
 	async function quickMessage(text) {
-		const separator = draft && !/\s$/.test(draft) ? ' ' : '';
-		if (draft.length + separator.length + text.length > 500) return;
-		draft += separator + text;
+		if (draft) return;
+		draft = text;
 		await tick();
 		composer?.focus();
-		composer?.setSelectionRange(draft.length, draft.length);
+		const blank = draft.indexOf('___');
+		composer?.setSelectionRange(blank, blank + 3);
 	}
 
 	/** @param {number} timestamp */
@@ -550,6 +628,8 @@
 	});
 </script>
 
+<svelte:window on:pointerdown={closeInfoOutside} />
+
 {#if ready}
 	<button
 		class="chat-launcher"
@@ -610,9 +690,8 @@
 					<span class="chat-grip" aria-hidden="true">⠿</span>
 					<span class="chat-title-copy" aria-hidden="true">
 						<span class="chat-name"><span>#</span> swyx.irc</span>
-						<span class="chat-status">
+						<span class="chat-status" title={status}>
 							<span class:online={status === 'Connected'} aria-hidden="true">●</span>
-							{status}
 						</span>
 					</span>
 				</button>
@@ -626,17 +705,17 @@
 						on:click={toggleChatWidth}>{geometry.width >= 500 ? '↙' : '↗'}</button
 					>
 				{/if}
+				<details class="chat-notice" bind:this={infoMenu}>
+					<summary aria-label="Chat information" title="Chat information">⋯</summary>
+					<p>
+						Public chat. Nicknames are unverified and visible with your page. Messages disappear
+						after 48 hours. Backups may persist up to 30 days.
+					</p>
+				</details>
 				<button type="button" class="chat-close" aria-label="Close chat" on:click={closeChat}
 					>×</button
 				>
 			</div>
-			<details class="chat-notice">
-				<summary>Public · unverified · 48h · backups ≤30d <span>Details</span></summary>
-				<p>
-					Nicknames are unverified and visible with your page. Messages disappear after 48 hours.
-					Backups may persist up to 30 days.
-				</p>
-			</details>
 			<div class="chat-stage">
 				{#if showReaders}
 					<div
@@ -784,12 +863,21 @@
 								{/if}
 							</div>
 						{/if}
+						<!-- The scrollable log needs keyboard access. -->
+						<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 						<div
 							class="chat-log"
 							role="log"
 							aria-label="Recent chat messages"
 							aria-live="polite"
+							tabindex="0"
 							bind:this={log}
+							on:scroll={trackLogScroll}
+							on:wheel|passive={noteLogUserScroll}
+							on:touchmove|passive={noteLogUserScroll}
+							on:pointerdown={noteLogUserScroll}
+							on:keydown={noteLogKeyScroll}
+							use:keepLogPosition
 						>
 							{#if messages.length === 0}
 								<p class="chat-empty">No recent messages. Say hello!</p>
@@ -817,20 +905,18 @@
 								autocomplete="nickname"
 							/></label
 						>
-						<div class="quick-messages" role="group" aria-label="Quick messages">
-							{#each quickMessages as message (message.label)}
-								<button
-									type="button"
-									aria-label={`Add ${message.text} to message`}
-									title={message.text}
-									disabled={draft.length +
-										(draft && !/\s$/.test(draft) ? 1 : 0) +
-										message.text.length >
-										500}
-									on:click={() => quickMessage(message.text)}>{message.label}</button
-								>
-							{/each}
-						</div>
+						{#if !draft}
+							<div class="quick-messages" role="group" aria-label="Quick messages">
+								{#each quickMessages as message (message.label)}
+									<button
+										type="button"
+										aria-label={`Use prompt: ${message.text}`}
+										title={message.text}
+										on:click={() => quickMessage(message.text)}>{message.label}</button
+									>
+								{/each}
+							</div>
+						{/if}
 						<label class="message-field"
 							><span class="visually-hidden">Message</span><textarea
 								bind:this={composer}
@@ -843,7 +929,9 @@
 							></textarea></label
 						>
 						<div class="chat-actions">
-							<span>{pending ? 'Sending…' : `${draft.length}/500`}</span>
+							{#if pending || draft.length >= 400}
+								<span>{pending ? 'Sending…' : `${draft.length}/500`}</span>
+							{/if}
 							<button
 								type="submit"
 								disabled={status !== 'Connected' || !!pending || !nick.trim() || !draft.trim()}
@@ -957,10 +1045,11 @@
 		outline: none;
 	}
 	.chat-titlebar {
+		position: relative;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 0.25rem 0.4rem;
+		padding: 0 0.4rem;
 		background: #f1c36d;
 		color: #17231c;
 	}
@@ -983,10 +1072,11 @@
 		color: #374a38;
 		font-size: 1.2rem;
 	}
-	.chat-title-copy,
-	.chat-name,
-	.chat-status {
-		display: block;
+	.chat-title-copy {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 0.1rem 0.55rem;
 	}
 	.chat-name {
 		color: #17231c;
@@ -996,7 +1086,7 @@
 		color: #425a39;
 	}
 	.chat-status {
-		margin: 0.2rem 0 0;
+		margin: 0;
 		color: #364c37;
 		font: 400 0.75rem/1.2 var(--font-mono);
 	}
@@ -1005,44 +1095,49 @@
 	}
 	.chat-close,
 	.chat-width {
-		min-width: 44px;
+		min-width: 40px;
 		min-height: 44px;
 		color: #17231c;
 		font: 1.5rem/1 var(--font-mono);
 		cursor: pointer;
 	}
-	.chat-titlebar :is(button):focus-visible {
+	.chat-titlebar :is(button, summary):focus-visible {
 		outline: 2px solid #233b2c;
 		outline-offset: -2px;
 	}
 	.chat-notice {
 		flex: none;
-		max-height: 6rem;
-		overflow-y: auto;
 		margin: 0;
-		border-bottom: 1px solid #465a4a;
-		color: #d1d9cd;
-		font: 0.75rem/1.4 var(--font-body);
+		padding: 0;
+		border: 0;
 	}
 	.chat-notice summary {
-		display: flex;
-		justify-content: space-between;
-		gap: 0.5rem;
-		padding: 0.35rem 0.8rem;
+		display: grid;
+		place-items: center;
+		width: 40px;
+		height: 44px;
+		color: #17231c;
+		font: 1.5rem/1 var(--font-mono);
 		cursor: pointer;
 		list-style: none;
 	}
 	.chat-notice summary::-webkit-details-marker {
 		display: none;
 	}
-	.chat-notice summary span {
-		color: #f1c36d;
-		text-decoration: underline;
-		text-underline-offset: 2px;
-	}
 	.chat-notice p {
+		position: absolute;
+		top: calc(100% + 0.25rem);
+		right: 0.4rem;
+		z-index: 2;
+		width: min(260px, calc(100% - 0.8rem));
 		margin: 0;
-		padding: 0 0.8rem 0.55rem;
+		padding: 0.75rem;
+		border: 1px solid #657869;
+		border-radius: 4px;
+		background: #182d2a;
+		box-shadow: 0 6px 18px rgb(0 0 0 / 0.3);
+		color: #f0f1e9;
+		font: 0.8rem/1.45 var(--font-body);
 	}
 	.chat-stage,
 	.chat-content {
@@ -1140,36 +1235,34 @@
 		color: var(--chat-muted);
 	}
 	.chat-message {
-		display: grid;
-		grid-template-columns: 5.2rem minmax(0, 1fr);
-		column-gap: 0.35rem;
-		margin-bottom: 0.8rem;
+		margin-bottom: 0.35rem;
 		overflow-wrap: anywhere;
 	}
 	.chat-message time {
+		margin-right: 0.25rem;
 		color: var(--chat-muted);
 		font: 0.72rem/1.5 var(--font-mono);
 	}
 	.chat-nick {
-		grid-column: 2;
+		margin-right: 0.25rem;
 		color: #b8e5bb;
 		font: 700 0.8rem/1.4 var(--font-mono);
 	}
 	.chat-text {
-		grid-column: 2;
 		white-space: pre-wrap;
-	}
-	.chat:not(.chat-rail) .chat-message {
-		grid-template-columns: 4.6rem minmax(0, 1fr);
 	}
 	.chat-form {
 		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
 		flex: 0 1 auto;
-		gap: 0.45rem;
+		gap: 0.3rem;
 		min-height: 0;
 		overflow-y: auto;
-		padding: 0.65rem 0.8rem 0.8rem;
+		padding: 0.45rem 0.8rem;
 		border-top: 1px solid #465a4a;
+	}
+	.chat-form :is(.nick-field, .quick-messages, .chat-error, .retry) {
+		grid-column: 1 / -1;
 	}
 	.nick-field {
 		display: flex;
@@ -1214,6 +1307,7 @@
 	}
 	textarea {
 		display: block;
+		height: 2.75rem;
 		resize: none;
 		max-height: 8rem;
 	}
@@ -1222,9 +1316,10 @@
 	}
 	.chat-actions {
 		display: flex;
+		flex-direction: column-reverse;
 		align-items: center;
-		justify-content: space-between;
-		gap: 0.5rem;
+		justify-content: center;
+		gap: 0;
 		color: var(--chat-muted);
 		font-size: 0.75rem;
 	}
@@ -1356,13 +1451,6 @@
 		touch-action: none;
 		cursor: nwse-resize;
 	}
-	.chat-compact .chat-notice {
-		font-size: 0.7rem;
-		line-height: 1.2;
-	}
-	.chat-compact .chat-notice summary {
-		padding: 0.25rem 0.8rem;
-	}
 	.chat-compact .chat-reading {
 		max-height: 2.8rem;
 		padding: 0.15rem 0.8rem;
@@ -1414,24 +1502,20 @@
 		grid-column: 1 / 3;
 	}
 	.chat-compact .chat-actions {
+		grid-column: 3;
 		gap: 0.25rem;
 	}
 	.chat-compact textarea {
 		height: 2.4rem;
-	}
-	.chat-tiny .chat-notice {
-		max-height: 2.5rem;
-		font-size: 0.65rem;
-		line-height: 1.1;
-	}
-	.chat-tiny .chat-notice summary {
-		padding-block: 0.15rem;
 	}
 	.chat-tiny .chat-titlebar {
 		padding-block: 0;
 	}
 	.chat-tiny :is(.chat-drag-handle, .chat-close) {
 		min-height: 32px;
+	}
+	.chat-tiny .chat-notice summary {
+		height: 32px;
 	}
 	.chat-tiny :is(.chat-name, .chat-status) {
 		display: inline;
