@@ -308,7 +308,10 @@
 	function noteLogUserScroll() {
 		logUserScrolling = true;
 		window.clearTimeout(logUserScrollTimer);
-		logUserScrollTimer = window.setTimeout(() => (logUserScrolling = false), 150);
+		logUserScrollTimer = window.setTimeout(() => {
+			logUserScrolling = false;
+			if (log && followLogEnd) log.scrollTop = log.scrollHeight;
+		}, 150);
 	}
 
 	/** @param {KeyboardEvent} event */

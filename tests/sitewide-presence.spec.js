@@ -792,9 +792,13 @@ test('resizing past a fully visible log restores the older message position', as
 		.toBeLessThanOrEqual(0);
 	for (let i = 0; i < 10; i++) await page.keyboard.press('Shift+ArrowUp');
 	await expect.poll(() => log.evaluate((element) => element.scrollTop)).toBeCloseTo(50, 0);
-	await page.evaluate(() => new Promise(requestAnimationFrame));
-	await log.evaluate((element) => (element.scrollTop = element.scrollHeight));
-	await page.evaluate(() => new Promise(requestAnimationFrame));
+	await log.focus();
+	await log.press('End');
+	await expect
+		.poll(() =>
+			log.evaluate((element) => element.scrollHeight - element.clientHeight - element.scrollTop)
+		)
+		.toBeLessThanOrEqual(1);
 	await page.setViewportSize({ width: 390, height: 844 });
 	await expect
 		.poll(() =>
