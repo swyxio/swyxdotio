@@ -61,6 +61,20 @@ test('private tab library requires owner sign-in', async ({ page }) => {
 	expect(memberApi.status()).toBe(403);
 });
 
+test('a failed batch load is not presented as an empty library', async ({ page }) => {
+	await page.goto('/tools');
+	await authenticateTools(page);
+	await page.route('**/tools/tabs/api/batches', (route) =>
+		route.fulfill({ status: 503, json: { error: 'Temporary failure.' } })
+	);
+	await page.goto('/tools/tabs');
+	await expect(page.getByRole('alert')).toContainText('Could not load your batches');
+	await expect(page.getByRole('heading', { name: 'Library unavailable.' })).toBeVisible();
+	await expect(page.getByText('No batches yet')).not.toBeVisible();
+	await page.getByRole('button', { name: 'Dismiss error' }).click();
+	await expect(page.getByRole('heading', { name: 'Library unavailable.' })).toBeVisible();
+});
+
 test('a stale scroll decision cannot replace a newer bookmark', async ({ page }) => {
 	await page.goto('/tools');
 	const origin = await authenticateTools(page);
@@ -215,6 +229,35 @@ test('desktop filters are available without opening the disclosure', async ({ pa
 	await expect(page.getByRole('searchbox', { name: 'Find a page' })).toBeVisible();
 	await expect(page.getByRole('combobox', { name: 'Topic', exact: true })).toBeVisible();
 	await expect(page.getByRole('combobox', { name: 'Status', exact: true })).toBeVisible();
+});
+
+test('the first reading action is reachable across phone, split, and desktop layouts', async ({
+	page
+}) => {
+	await page.goto('/tools');
+	const origin = await authenticateTools(page);
+	const suffix = crypto.randomUUID();
+	const title = 'A field guide to building thoughtful tools for everyday reading and research';
+	const batch = await makeBatch(page, origin, `QA layout ${suffix}`, [
+		{ title, url: `https://example.test/${suffix}/reading` }
+	]);
+	for (const viewport of [
+		{ width: 390, height: 844 },
+		{ width: 720, height: 900 },
+		{ width: 834, height: 1194 },
+		{ width: 1440, height: 900 }
+	]) {
+		await page.setViewportSize(viewport);
+		await page.goto(`/tools/tabs?batch=${batch.id}`);
+		await expect(page.getByRole('button', { name: title, exact: true })).toBeVisible();
+		const bookmark = page.getByRole('button', { name: 'Bookmark for follow-up' });
+		const bounds = await bookmark.boundingBox();
+		if (!bounds) throw new Error('The first bookmark action is not visible.');
+		expect(bounds.y + bounds.height).toBeLessThanOrEqual(viewport.height);
+		expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+			viewport.width
+		);
+	}
 });
 
 test('filters stay accessible when changing from a mobile to a desktop viewport', async ({
