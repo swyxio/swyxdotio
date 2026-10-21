@@ -490,6 +490,58 @@ async function openChat(page) {
 	return chat;
 }
 
+test('hover timestamps leave room for messages, with a keyboard option to show them', async ({
+	page,
+	context
+}) => {
+	await page.setViewportSize({ width: 1100, height: 850 });
+	const createdAt = Date.now();
+	const readers = mockReaders([{ id: 'time-test', nick: 'reader', text: 'hello!', createdAt }]);
+	await readers.install(context);
+	await page.goto(`${baseUrl}/america250`);
+	const chat = await openChat(page);
+	const message = chat.locator('.chat-message').filter({ hasText: 'hello!' });
+	const timestamp = message.locator('time');
+	await expect(timestamp).toHaveAttribute('datetime', new Date(createdAt).toISOString());
+	await expect(timestamp).toHaveCSS('position', 'absolute');
+	await expect(message).toHaveAttribute('title', (await timestamp.textContent()) || '');
+	const before = await message.locator('.chat-nick').boundingBox();
+	await message.hover();
+	const after = await message.locator('.chat-nick').boundingBox();
+	expect(after).toEqual(before);
+	await chat.locator('summary[aria-label="Chat information"]').click();
+	const showTimestamps = chat.getByRole('checkbox', { name: 'Show timestamps' });
+	await showTimestamps.focus();
+	await page.keyboard.press('Space');
+	await expect(showTimestamps).toBeChecked();
+	await expect(timestamp).toHaveCSS('position', 'static');
+	await expect(message).not.toHaveAttribute('title');
+});
+
+test('touchscreen readers can show timestamps from chat information', async ({ browser }) => {
+	const context = await browser.newContext({
+		viewport: { width: 390, height: 844 },
+		isMobile: true,
+		hasTouch: true
+	});
+	try {
+		const readers = mockReaders([
+			{ id: 'time-test', nick: 'reader', text: 'hello!', createdAt: Date.now() }
+		]);
+		await readers.install(context);
+		const page = await context.newPage();
+		await page.goto(`${baseUrl}/america250`);
+		const chat = await openChat(page);
+		const timestamp = chat.locator('.chat-message time');
+		await expect(timestamp).toHaveCSS('position', 'absolute');
+		await chat.locator('summary[aria-label="Chat information"]').tap();
+		await chat.getByRole('checkbox', { name: 'Show timestamps' }).tap();
+		await expect(timestamp).toHaveCSS('position', 'static');
+	} finally {
+		await context.close();
+	}
+});
+
 test('sitewide readers exclude self, link to other pages, and show same-page cursors', async ({
 	browser,
 	page,
