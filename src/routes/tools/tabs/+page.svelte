@@ -87,6 +87,7 @@
 	let feedPending = new Set<string>();
 	let feedErrorId = '';
 	let feedWrites: Promise<void> = Promise.resolve();
+	let activeFeedId = '';
 	let seenInFeed = new Set<string>();
 	let visibleInFeed = new Set<string>();
 	let scrollIntentUntil = 0;
@@ -174,6 +175,7 @@
 		feedKey = key;
 		feedIds = current.map((item) => item.id);
 		feedLimit = 40;
+		activeFeedId = '';
 		expandedId = '';
 		previewId = '';
 		resetScrollIntent();
@@ -203,6 +205,7 @@
 		if (!item || feedPending.has(id) || (automatic && item.status !== 'unread')) return;
 		const batch = batchId;
 		feedPending = new Set([...feedPending, id]);
+		void tick().then(snapshotVisibleFeedItems);
 		feedWrites = feedWrites.then(async () => {
 			try {
 				const current = items.find((entry) => entry.id === id);
@@ -244,18 +247,32 @@
 				error = `Could not save “${item.title || item.url}”: ${errorText(caught)}. Use its action button to retry.`;
 			} finally {
 				feedPending = new Set([...feedPending].filter((entry) => entry !== id));
+				void tick().then(snapshotVisibleFeedItems);
 			}
 		});
 	}
 
 	function snapshotVisibleFeedItems() {
 		const visibleItems: string[] = [];
+		let active = '';
 		for (const element of document.querySelectorAll<HTMLElement>('[data-feed-item]')) {
 			const rect = element.getBoundingClientRect();
+			const id = element.dataset.feedItem;
 			const visible = Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0);
-			if (visible >= Math.min(120, rect.height / 2) && element.dataset.feedItem)
-				visibleItems.push(element.dataset.feedItem);
+			const sufficientlyVisible = visible >= Math.min(120, rect.height / 2);
+			if (
+				mode === 'scroll' &&
+				!active &&
+				id &&
+				visible > 0 &&
+				(sufficientlyVisible || id === activeFeedId) &&
+				feedById.get(id)?.status === 'unread' &&
+				!feedPending.has(id)
+			)
+				active = id;
+			if (id && visible > 0 && (sufficientlyVisible || id === activeFeedId)) visibleItems.push(id);
 		}
+		activeFeedId = active;
 		visibleInFeed = new Set(visibleItems);
 	}
 
@@ -550,6 +567,16 @@
 			undo = undoHistory[undoHistory.length - 1] || null;
 			message = 'Decision undone.';
 			if (mode === 'swipe') await loadItem(entry.itemId);
+			else if (mode === 'scroll') {
+				await tick();
+				const restored = [...document.querySelectorAll<HTMLElement>('[data-feed-item]')].find(
+					(element) => element.dataset.feedItem === entry.itemId
+				);
+				restored?.scrollIntoView({ block: 'center', behavior: 'instant' });
+				resetScrollIntent();
+				await tick();
+				if (restored && entry.status === 'unread') activeFeedId = entry.itemId;
+			}
 		} catch (caught) {
 			error = `Could not undo: ${errorText(caught)}`;
 		} finally {
@@ -765,6 +792,7 @@
 	<meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 <svelte:window
+	on:resize={resetScrollIntent}
 	on:beforeunload={beforeUnload}
 	on:wheel|passive={wheelScroll}
 	on:touchstart|passive={startTouchScroll}
@@ -947,7 +975,7 @@
 					</div>
 					<p>
 						{mode === 'scroll'
-							? 'Scroll past an unread page to archive it; bookmark to follow up.'
+							? 'The highlighted page is current. Scroll past it to archive; undo to bring it back.'
 							: mode === 'tap'
 								? 'Browse your feed and bookmark pages to follow up.'
 								: 'Swipe left to archive, right to follow up.'}
@@ -974,6 +1002,8 @@
 						<article
 							class="feed-item"
 							class:expanded={expandedId === item.id}
+							class:current={mode === 'scroll' && activeFeedId === item.id}
+							aria-current={mode === 'scroll' && activeFeedId === item.id ? 'true' : undefined}
 							data-feed-item={item.id}
 						>
 							<span class="feed-source-mark" aria-hidden="true"
@@ -990,7 +1020,9 @@
 													? 'Archived'
 													: item.status === 'read'
 														? 'Read'
-														: 'Unread'}</span
+														: mode === 'scroll' && activeFeedId === item.id
+															? 'Current'
+															: 'Unread'}</span
 									>
 								</div>
 								<button
@@ -1141,6 +1173,11 @@
 									: message)}</span
 						>{#if undo}<button disabled={busy || feedPending.size > 0} on:click={undoDecision}
 								>Undo{undoHistory.length > 1 ? ` (${undoHistory.length})` : ''}</button
+							>{:else if !feedPending.size}<button
+								on:click={() => {
+									error = '';
+									message = '';
+								}}>Dismiss</button
 							>{/if}
 					</div>{/if}
 			{:else}
@@ -1608,6 +1645,11 @@
 		border-radius: 8px;
 		background: var(--page-row-hover);
 	}
+	.feed-item.current {
+		border-radius: 2px;
+		background: var(--page-accent-soft);
+		outline: 6px solid var(--page-accent-soft);
+	}
 	.feed-source-mark {
 		display: grid;
 		place-items: center;
@@ -1733,14 +1775,16 @@
 		text-align: center;
 	}
 	.feed-feedback {
-		position: sticky;
-		bottom: 0.5rem;
-		z-index: 2;
+		position: fixed;
+		left: 50%;
+		bottom: max(0.75rem, env(safe-area-inset-bottom));
+		z-index: 20;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		gap: 1rem;
-		margin-top: 0.75rem;
+		width: min(34rem, calc(100% - 2rem));
+		transform: translateX(-50%);
 		padding: 0.55rem 0.8rem;
 		border-radius: 8px;
 		background: var(--ink);
