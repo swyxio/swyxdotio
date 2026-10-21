@@ -341,6 +341,21 @@
 		launcher?.focus({ preventScroll: true });
 	}
 
+	/** @param {MouseEvent} event */
+	function followReaderPage(event) {
+		if (
+			event.defaultPrevented ||
+			event.button !== 0 ||
+			event.metaKey ||
+			event.ctrlKey ||
+			event.shiftKey ||
+			event.altKey
+		)
+			return;
+		showReaders = false;
+		void closeChat();
+	}
+
 	/** @param {SubmitEvent} event */
 	function sendMessage(event) {
 		event.preventDefault();
@@ -567,10 +582,7 @@
 										<li>
 											<a
 												href={resolve(/** @type {`/${string}`} */ (item.path || '/'))}
-												on:click={() => {
-													showReaders = false;
-													closeChat();
-												}}>{item.title || item.path}</a
+												on:click={followReaderPage}>{item.title || item.path}</a
 											>
 											<span>{item.count} {item.count === 1 ? 'reader' : 'readers'}</span>
 											{#if item.readers.length}
@@ -631,8 +643,9 @@
 									</span>
 									<span aria-hidden="true"> → </span>
 									{#if item.path}
-										<a href={resolve(/** @type {`/${string}`} */ (item.path))} on:click={closeChat}
-											>{item.title || item.path}</a
+										<a
+											href={resolve(/** @type {`/${string}`} */ (item.path))}
+											on:click={followReaderPage}>{item.title || item.path}</a
 										>
 									{:else}
 										<span>{item.title || item.key}</span>
@@ -1132,6 +1145,7 @@
 		content: ' · ';
 	}
 	.chat-compact .chat-log {
+		min-height: 2rem;
 		padding: 0.25rem 0.8rem;
 	}
 	.chat-compact .chat-form {
