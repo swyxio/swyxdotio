@@ -51,11 +51,6 @@
 			"count": 2
 		}
 	},
-	"src/components/LiveChat.svelte": {
-		"svelte/no-unused-svelte-ignore": {
-			"count": 10
-		}
-	},
 	"src/components/MobileMenu.svelte": {
 		"svelte/infinite-reactive-loop": {
 			"count": 2
