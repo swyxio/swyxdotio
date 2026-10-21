@@ -1,12 +1,16 @@
 <script>
 	import { onMount, tick } from 'svelte';
+	import { SvelteSet } from 'svelte/reactivity';
 	import { resolve } from '$app/paths';
 	import { PRESENCE_REACTIONS } from '$lib/presence-client';
+	import { normalizePresenceNick } from '$lib/presence-contracts';
 
 	/** @type {boolean} */
 	export let collapsed = false;
 	/** @type {boolean} */
 	export let allowSidebar = true;
+	/** @type {string} */
+	export let nick = '';
 	/** @type {import('$lib/presence-client').PresenceSummary} */
 	export let presence = {
 		pageKey: null,
@@ -47,13 +51,17 @@
 	let ready = false;
 	let status = 'Connecting';
 	let error = '';
-	let nick = '';
+	let nickSaveTimer = 0;
 	let draft = '';
 	let reconnectAttempt = 0;
 	let reconnectTimer = 0;
 	let expiryTimer = 0;
 	let destroyed = false;
 	let showReaders = false;
+	let unread = 0;
+	/** @type {Set<string>} */
+	const seenMessageIds = new SvelteSet();
+	$: unreadLabel = `${unread} unread ${unread === 1 ? 'message' : 'messages'}`;
 	let previousLogScroll = 0;
 	let wasAtLogBottom = true;
 	$: readerStatus = presence.hidden
@@ -237,10 +245,12 @@
 		if (!frame || typeof frame !== 'object') return;
 		if (frame.type === 'history' && Array.isArray(frame.messages)) {
 			messages = frame.messages.filter(isMessage).slice(-150);
+			for (const message of messages) rememberMessage(message.id);
 			expireMessages();
 			void scrollLatest();
 		} else if (frame.type === 'message' && isMessage(frame.message)) {
 			if (!messages.some((message) => message.id === frame.message.id)) {
+				noteMessage(frame.message.id);
 				messages = [...messages, frame.message].slice(-150);
 				expireMessages();
 				void scrollLatest();
@@ -253,6 +263,20 @@
 			if (!frame.requestId || frame.requestId === pending?.requestId) pending = null;
 			error = frame.message;
 		}
+	}
+
+	/** @param {string} id */
+	function rememberMessage(id) {
+		seenMessageIds.add(id);
+		const oldest = seenMessageIds.values().next().value;
+		if (seenMessageIds.size > 512 && oldest) seenMessageIds.delete(oldest);
+	}
+
+	/** @param {string} id */
+	export function noteMessage(id) {
+		if (seenMessageIds.has(id)) return;
+		rememberMessage(id);
+		if (collapsed || showReaders || document.visibilityState !== 'visible') unread += 1;
 	}
 
 	function disconnect() {
@@ -296,6 +320,7 @@
 	async function openChat() {
 		geometry = clampGeometry(preferredGeometry);
 		collapsed = false;
+		if (!showReaders && document.visibilityState === 'visible') unread = 0;
 		reconnectAttempt = 0;
 		connect();
 		await tick();
@@ -350,6 +375,7 @@
 			return;
 		}
 		showReaders = false;
+		if (document.visibilityState === 'visible') unread = 0;
 		await tick();
 		if (log) log.scrollTop = wasAtLogBottom ? log.scrollHeight : previousLogScroll;
 		readerToggle?.focus({ preventScroll: true });
@@ -368,6 +394,19 @@
 		return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 	}
 
+	function rememberNick() {
+		window.clearTimeout(nickSaveTimer);
+		nickSaveTimer = window.setTimeout(() => {
+			const clean = normalizePresenceNick(nick);
+			try {
+				if (clean) localStorage.setItem('swyx:chat:nick:v1', clean);
+				else if (!nick.trim()) localStorage.removeItem('swyx:chat:nick:v1');
+			} catch {
+				// The nickname still applies for this visit.
+			}
+		}, 500);
+	}
+
 	onMount(() => {
 		wideLayout = matchMedia('(min-width: 1500px)').matches;
 		collapsed = !wideLayout || !allowSidebar;
@@ -379,10 +418,14 @@
 		}
 		geometry = clampGeometry(preferredGeometry);
 		if (!nick) nick = `reader${Math.floor(1000 + Math.random() * 9000)}`;
+		rememberNick();
 		ready = true;
 		if (!collapsed) connect();
 		const onVisibility = () => {
-			if (document.visibilityState === 'visible') expireMessages();
+			if (document.visibilityState === 'visible') {
+				expireMessages();
+				if (!collapsed && !showReaders) unread = 0;
+			}
 		};
 		const onBlur = () => {
 			if (!gesture) return;
@@ -396,6 +439,7 @@
 		window.visualViewport?.addEventListener('resize', syncViewport);
 		window.visualViewport?.addEventListener('scroll', syncViewport);
 		return () => {
+			window.clearTimeout(nickSaveTimer);
 			destroyed = true;
 			disconnect();
 			window.clearTimeout(expiryTimer);
@@ -423,7 +467,11 @@
 			<span aria-hidden="true">#</span> chat{#if presence.connected}<span aria-hidden="true">
 					· {presence.otherCount} online</span
 				>{/if}
-			<span id="chat-reader-summary" class="visually-hidden">{readerStatus}</span>
+			{#if unread}<span class="unread-badge" aria-hidden="true">{unread > 99 ? '99+' : unread}</span
+				>{/if}
+			<span id="chat-reader-summary" class="visually-hidden" aria-live="polite"
+				>{readerStatus}{unread ? `; ${unreadLabel}` : ''}</span
+			>
 		</button>
 	{/if}
 	{#if !collapsed}
@@ -474,8 +522,8 @@
 				{#if geometry.height < 350}
 					Public · unverified names · messages expire after 48h · backups up to 30 days.
 				{:else}
-					Public · nicknames are unverified<br />Messages disappear after 48 hours. Backups may
-					persist up to 30 days.
+					Public · nicknames are unverified and visible with your page<br />Messages disappear after
+					48 hours. Backups may persist up to 30 days.
 				{/if}
 			</p>
 			{#if showReaders}
@@ -507,6 +555,11 @@
 												}}>{item.title || item.path}</a
 											>
 											<span>{item.count} {item.count === 1 ? 'reader' : 'readers'}</span>
+											{#if item.readers.length}
+												<div class="reader-names">
+													{item.readers.map((reader) => reader.nick).join(', ')}
+												</div>
+											{/if}
 										</li>
 									{/each}
 								</ul>
@@ -514,7 +567,10 @@
 								<p>No other readers are connected right now.</p>
 							{/if}
 						{/if}
-						<p>Your current public page is visible to other readers. Counts are connected tabs.</p>
+						<p>
+							Your nickname and current public page are visible to other readers. Nicknames are
+							unverified; counts are connected tabs.
+						</p>
 						<div class="reader-reactions" aria-label="Wave to readers on this page">
 							{#each PRESENCE_REACTIONS as reaction (reaction)}
 								<button
@@ -563,6 +619,7 @@
 						>nick <input
 							aria-label="Nickname (unverified)"
 							bind:value={nick}
+							on:input={rememberNick}
 							maxlength="24"
 							required
 							autocomplete="nickname"
@@ -607,7 +664,9 @@
 					on:click={toggleReaders}
 				>
 					<span class:reader-online={presence.connected} aria-hidden="true">●</span>
-					{showReaders ? '← back to chat' : readerStatus}
+					{showReaders ? '← back to chat' : readerStatus}{showReaders && unread
+						? ` · ${unreadLabel}`
+						: ''}
 				</button>
 				<button
 					type="button"
@@ -646,6 +705,17 @@
 	}
 	.chat-launcher span {
 		color: #a5d5aa;
+	}
+	.chat-launcher .unread-badge {
+		display: inline-grid;
+		place-items: center;
+		min-width: 1.3rem;
+		min-height: 1.3rem;
+		margin-left: 0.25rem;
+		border-radius: 999px;
+		background: #b8e5bb;
+		color: #1d2a22;
+		font-size: 0.7rem;
 	}
 	.chat {
 		--chat-muted: #b8c3b3;
@@ -870,6 +940,7 @@
 	}
 	.reader-pages li {
 		display: flex;
+		flex-wrap: wrap;
 		justify-content: space-between;
 		gap: 0.6rem;
 		padding: 0.4rem 0;
@@ -884,6 +955,11 @@
 	.reader-pages li span {
 		flex: none;
 		color: var(--chat-muted);
+	}
+	.reader-names {
+		flex-basis: 100%;
+		color: #e0eedc;
+		overflow-wrap: anywhere;
 	}
 	.reader-reactions {
 		display: flex;

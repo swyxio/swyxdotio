@@ -23,6 +23,9 @@
 	$: presenceAdmissionRate = Number(env.PUBLIC_PRESENCE_ADMISSION_RATE ?? 1);
 	$: immersiveTool = $page.url.pathname === '/tools/box' || $page.url.pathname === '/tools/draw';
 	let chatCollapsed = false;
+	let nick = '';
+	/** @type {LiveChat | undefined} */
+	let liveChat;
 	/** @type {LivePresence | undefined} */
 	let livePresence;
 	/** @type {import('$lib/presence-client').PresenceSummary} */
@@ -81,7 +84,9 @@
 		<slot />
 	</main>
 	<LiveChat
+		bind:this={liveChat}
 		bind:collapsed={chatCollapsed}
+		bind:nick
 		allowSidebar={!immersiveTool}
 		presence={chatPresence}
 		onPresenceVisibility={(hidden) => livePresence?.setHidden(hidden)}
@@ -111,8 +116,10 @@
 					<LivePresence
 						bind:this={livePresence}
 						pageKey={presencePageKey}
+						{nick}
 						admissionRate={presenceAdmissionRate}
 						on:change={(event) => (presence = event.detail)}
+						on:chatNotice={(event) => liveChat?.noteMessage(event.detail)}
 					/>
 				{/key}
 			{/if}

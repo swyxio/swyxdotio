@@ -70,6 +70,34 @@ function frame(requestId, nick, text) {
 	return JSON.stringify({ type: 'message', requestId, nick, text });
 }
 
+test('successful chat sends signal presence with only the message ID', async () => {
+	const h = roomHarness();
+	const sender = socket();
+	h.peers.push(sender);
+	const tasks = [];
+	const requests = [];
+	h.ctx.waitUntil = (task) => tasks.push(task);
+	h.env.PRESENCE_ROOMS = {
+		idFromName: (name) => name,
+		get: (name) => ({
+			async fetch(request) {
+				requests.push({ name, method: request.method, body: await request.text() });
+				return new Response(null, { status: 204 });
+			}
+		})
+	};
+	const room = new ChatRoom(h.ctx, h.env);
+	await room.webSocketMessage(sender, frame('notice', 'alice', 'private-to-chat-content'));
+	await Promise.all(tasks);
+	assert.equal(requests.length, 1);
+	assert.deepEqual(requests[0], {
+		name: 'sitewide',
+		method: 'POST',
+		body: sender.frames[0].message.id
+	});
+	assert.equal(sender.frames.at(-1).type, 'ack');
+});
+
 test('chat accepts bounded plain text and rejects malformed and control characters', () => {
 	assert.deepEqual(parseChatMessage(frame('request_1', ' visitor ', ' hello ')), {
 		requestId: 'request_1',

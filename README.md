@@ -153,10 +153,14 @@ ledger; the historical estimates are a separate static presentation layer.
 ## Live reader presence and sharing
 
 Presence is intentionally playful and approximate. On desktop, admitted readers see ephemeral
-country-labelled cursors. On mobile, the persistent representation is a flag bead on a reading
+nickname-labelled cursors. On mobile, the persistent representation is a flag bead on a reading
 progress rail; a tap or drag adds a temporary passive touch cursor without interfering with native
 scrolling. The sitewide roster counts connected reader tabs by validated public page, with a link
-to each occupied page; the count excludes the current tab and is not a count of unique people.
+to each occupied page and the unverified nicknames there; the count excludes the current tab and
+is not a count of unique people. Chat nicknames and current public pages are visible to other
+admitted readers, even before a chat message is sent.
+New chat messages can show a local unread badge while the presence connection is active; the
+badge clears when the chat is visible. It is per tab, best effort, and does not send push notifications.
 Cursor movement, one of `👋 ❤️ 💡 😂 ✨`, and a fixed share sparkle stay within the same page.
 The coordinator receives registered public page keys, public titles, and a daily keyed digest for
 connection limits, never query strings, fragments, highlighted quote text, raw IP addresses, or
@@ -169,7 +173,8 @@ from the sitewide roster. Hidden tabs stop sending; after 30 hidden seconds the 
 sitewide coordinator admits at most 1,024 sockets, 32 per page, and 64 per keyed address; ingress
 also limits connections to 60 per minute per address. The concurrent cap checks the current and
 previous daily keys, so connections open for more than two calendar days can age out of that cap.
-It uses WebSocket hibernation and writes no reader data to storage. Keys come from the same finite
+It uses WebSocket hibernation and keeps reader details only in ephemeral socket attachments, not an
+application database. Keys come from the same finite
 public-page registry and persisted non-private article manifest used by read counts, so tools,
 APIs, feeds, errors, private articles, and arbitrary attacker-controlled keys cannot enter the roster.
 
@@ -189,8 +194,9 @@ npm run deploy:presence
 npm run deploy
 ```
 
-Deploy the presence Worker before merging a main Worker change that routes into the sitewide
-coordinator: the main branch can deploy automatically. Do not roll the presence Worker back to
+Deploy the presence Worker before merging a main Worker change that uses a new presence protocol:
+the main branch can deploy automatically. An older presence Worker rejects nickname frames from
+new clients. Do not roll the presence Worker back to
 an untagged version while sitewide sockets remain connected; first drain those connections, or
 the old Worker could send page-specific cursor traffic across pages.
 

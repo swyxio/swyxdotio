@@ -3,6 +3,18 @@ export const PRESENCE_FRAME_LIMIT = 128;
 export const PRESENCE_ROOM_LIMIT = 32;
 export const PRESENCE_REACTIONS = Object.freeze(['👋', '❤️', '💡', '😂', '✨']);
 export const PRESENCE_MODES = Object.freeze(['d', 'r', 't']);
+export const PRESENCE_NICK_LIMIT = 24;
+export const PRESENCE_NICK_INTERVAL_MS = 2_000;
+// The protocol deliberately rejects control and bidirectional override characters.
+// eslint-disable-next-line no-control-regex
+const NICK_CONTROL = /[\u0000-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069]/u;
+
+/** @param {unknown} value */
+export function normalizePresenceNick(value) {
+	if (typeof value !== 'string') return null;
+	const nick = value.trim();
+	return nick && nick.length <= PRESENCE_NICK_LIMIT && !NICK_CONTROL.test(nick) ? nick : null;
+}
 
 export const PRESENCE_COLORS = Object.freeze([
 	'#2563EB',
@@ -103,18 +115,23 @@ export function parsePresenceClientFrame(raw) {
 		return { type: 'reaction', reaction: frame[2] };
 	}
 
+	if (frame[1] === 'n' && frame.length === 3) {
+		const nick = normalizePresenceNick(frame[2]);
+		return nick ? { type: 'nick', nick } : null;
+	}
+
 	if (frame[1] === 'c' && frame.length === 2) return { type: 'share' };
 
 	return null;
 }
 
 /**
- * @typedef {{ tokens: number, replenishedAt: number, reactionAt: number, shared: boolean, violations: number }} PresenceRateState
+ * @typedef {{ tokens: number, replenishedAt: number, reactionAt: number, nickAt: number, shared: boolean, violations: number }} PresenceRateState
  */
 
 /** @param {number} [now] @returns {PresenceRateState} */
 export function createPresenceRateState(now = Date.now()) {
-	return { tokens: 10, replenishedAt: now, reactionAt: 0, shared: false, violations: 0 };
+	return { tokens: 10, replenishedAt: now, reactionAt: 0, nickAt: 0, shared: false, violations: 0 };
 }
 
 /** Consume one incoming frame from a 5 frames/second, burst-10 token bucket. */
