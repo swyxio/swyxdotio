@@ -762,6 +762,47 @@ test('resizing keeps the latest chat visible without pulling a reader away from 
 	await expect.poll(() => log.evaluate((element) => element.scrollTop)).toBe(0);
 });
 
+test('resizing past a fully visible log restores the older message position', async ({
+	page,
+	context
+}) => {
+	await page.setViewportSize({ width: 1100, height: 1200 });
+	const now = Date.now();
+	const history = Array.from({ length: 10 }, (_, index) => ({
+		id: String(index),
+		nick: 'reader',
+		text: `Older message ${index}`,
+		createdAt: now
+	}));
+	const readers = mockReaders(history);
+	await readers.install(context);
+	await page.goto(`${baseUrl}/america250`);
+	const chat = await openChat(page);
+	const log = chat.getByRole('log', { name: 'Recent chat messages' });
+	await expect
+		.poll(() => log.evaluate((element) => element.scrollHeight - element.clientHeight))
+		.toBeGreaterThan(100);
+	await log.evaluate((element) => (element.scrollTop = 50));
+	await page.evaluate(() => new Promise(requestAnimationFrame));
+	const resize = chat.getByRole('button', { name: 'Resize chat window' });
+	await resize.focus();
+	for (let i = 0; i < 10; i++) await page.keyboard.press('Shift+ArrowDown');
+	await expect
+		.poll(() => log.evaluate((element) => element.scrollHeight - element.clientHeight))
+		.toBeLessThanOrEqual(0);
+	for (let i = 0; i < 10; i++) await page.keyboard.press('Shift+ArrowUp');
+	await expect.poll(() => log.evaluate((element) => element.scrollTop)).toBeCloseTo(50, 0);
+	await page.evaluate(() => new Promise(requestAnimationFrame));
+	await log.evaluate((element) => (element.scrollTop = element.scrollHeight));
+	await page.evaluate(() => new Promise(requestAnimationFrame));
+	await page.setViewportSize({ width: 390, height: 844 });
+	await expect
+		.poll(() =>
+			log.evaluate((element) => element.scrollHeight - element.clientHeight - element.scrollTop)
+		)
+		.toBeLessThanOrEqual(1);
+});
+
 test('a collapsed chat shows a local unread badge and clears it on opening', async ({
 	page,
 	context

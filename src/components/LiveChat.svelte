@@ -75,6 +75,10 @@
 	let previousLogScroll = 0;
 	let wasAtLogBottom = true;
 	let followLogEnd = true;
+	let logAnchor = 0;
+	let logWidth = 0;
+	let logHeight = 0;
+	let logResizing = false;
 	$: readerStatus = presence.hidden
 		? 'Live readers hidden'
 		: !presence.pageKey || !presence.admitted || presence.stopped
@@ -285,17 +289,36 @@
 	}
 
 	function trackLogScroll() {
-		if (log) followLogEnd = log.scrollHeight - log.clientHeight - log.scrollTop <= 2;
+		if (!log || logResizing || log.clientWidth !== logWidth || log.clientHeight !== logHeight)
+			return;
+		const maxScroll = log.scrollHeight - log.clientHeight;
+		if (maxScroll <= 2 && !followLogEnd) return;
+		followLogEnd = maxScroll - log.scrollTop <= 2;
+		if (!followLogEnd) logAnchor = log.scrollTop;
 	}
 
 	/** Keep the newest message in view when the window changes size, unless the reader scrolled up. */
 	/** @param {HTMLElement} node */
 	function keepLogPosition(node) {
+		let frame = 0;
+		logWidth = node.clientWidth;
+		logHeight = node.clientHeight;
 		const observer = new ResizeObserver(() => {
-			if (followLogEnd) node.scrollTop = node.scrollHeight;
+			logResizing = true;
+			logWidth = node.clientWidth;
+			logHeight = node.clientHeight;
+			node.scrollTop = followLogEnd ? node.scrollHeight : logAnchor;
+			cancelAnimationFrame(frame);
+			frame = requestAnimationFrame(() => (logResizing = false));
 		});
 		observer.observe(node);
-		return { destroy: () => observer.disconnect() };
+		return {
+			destroy: () => {
+				observer.disconnect();
+				cancelAnimationFrame(frame);
+				logResizing = false;
+			}
+		};
 	}
 
 	/** @param {MessageEvent} event */
@@ -479,6 +502,7 @@
 		showReaders = false;
 		if (document.visibilityState === 'visible') unread = 0;
 		followLogEnd = wasAtLogBottom;
+		logAnchor = previousLogScroll;
 		await tick();
 		if (log) log.scrollTop = wasAtLogBottom ? log.scrollHeight : previousLogScroll;
 		readerToggle?.focus({ preventScroll: true });
