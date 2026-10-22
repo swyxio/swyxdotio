@@ -141,7 +141,7 @@
 		if (selectedWindow !== 'all' && !itemWindows.includes(selectedWindow)) return false;
 		return (
 			!term ||
-			`${item.title} ${item.url} ${item.domain || ''} ${item.group || ''}`
+			`${item.title} ${item.url} ${item.domain || ''} ${item.group || ''} ${(item.tabGroups || []).join(' ')}`
 				.toLowerCase()
 				.includes(term)
 		);
@@ -1001,7 +1001,7 @@
 					<label
 						>Find a page<input
 							type="search"
-							placeholder="Search titles, URLs, topics"
+							placeholder="Search titles, URLs, topics, groups"
 							disabled={feedPending.size > 0 || note !== savedNote || noteSaving || !!topicEditId}
 							bind:value={query}
 						/></label
@@ -1372,7 +1372,7 @@
 										>
 										{#if item.tabGroups?.length || item.capturedWindowIds?.length}
 											<p class="topic-editor-hint topic-context">
-												{#if item.tabGroups?.length}Chrome groups: {item.tabGroups.join(', ')}{/if}
+												{#if item.tabGroups?.length}Tab groups: {item.tabGroups.join(', ')}{/if}
 												{#if item.tabGroups?.length && item.capturedWindowIds?.length}
 													·
 												{/if}
@@ -1565,7 +1565,7 @@
 								</div>
 							{/if}
 							{#if selected.tabGroups?.length}<p class="hint">
-									Chrome groups: {selected.tabGroups.join(', ')}
+									Tab groups: {selected.tabGroups.join(', ')}
 								</p>{/if}
 							{#if selected.capturedWindowIds?.length}<p class="hint">
 									Captured in {selected.capturedWindowIds
