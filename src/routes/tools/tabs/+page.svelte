@@ -80,6 +80,7 @@
 	let topicError = '';
 	let statusFilter = 'unread';
 	let windowFilter = 'all';
+	let tabGroupFilter = '';
 	let filtersOpen = false;
 	let itemRequest = 0;
 	let importText = '';
@@ -112,8 +113,18 @@
 	$: topics = [...new Set(items.map((item) => item.group || 'Reading pile'))].sort();
 	$: topicOptions = [...new Set([...topics, ...(topic ? [topic] : [])])].sort();
 	$: windows = [...new Set(items.flatMap((item) => item.capturedWindowIds || []))];
-	$: filtered = items.filter((item) => matches(item, query, topic, statusFilter, windowFilter));
-	$: nextFeedKey = JSON.stringify([batchId, query, topic, statusFilter, windowFilter]);
+	$: tabGroups = [...new Set(items.flatMap((item) => item.tabGroups || []))].sort();
+	$: filtered = items.filter((item) =>
+		matches(item, query, topic, statusFilter, windowFilter, tabGroupFilter)
+	);
+	$: nextFeedKey = JSON.stringify([
+		batchId,
+		query,
+		topic,
+		statusFilter,
+		windowFilter,
+		tabGroupFilter
+	]);
 	$: if (feedKey !== nextFeedKey) resetFeed(nextFeedKey, filtered);
 	$: feedById = new Map(items.map((item) => [item.id, item]));
 	$: feedItems = feedIds.map((id) => feedById.get(id)).filter((item): item is Item => !!item);
@@ -131,7 +142,8 @@
 		search: string,
 		selectedTopic: string,
 		selectedStatus: string,
-		selectedWindow: string
+		selectedWindow: string,
+		selectedTabGroup: string
 	) {
 		const term = search.trim().toLowerCase();
 		const itemTopic = item.group || 'Reading pile';
@@ -139,6 +151,7 @@
 		if (selectedTopic && itemTopic !== selectedTopic) return false;
 		if (selectedStatus !== 'all' && item.status !== selectedStatus) return false;
 		if (selectedWindow !== 'all' && !itemWindows.includes(selectedWindow)) return false;
+		if (selectedTabGroup && !(item.tabGroups || []).includes(selectedTabGroup)) return false;
 		return (
 			!term ||
 			`${item.title} ${item.url} ${item.domain || ''} ${item.group || ''} ${(item.tabGroups || []).join(' ')}`
@@ -454,7 +467,7 @@
 
 	function finishTopicEdit() {
 		const item = items.find((entry) => entry.id === topicEditId);
-		if (item && !matches(item, query, topic, statusFilter, windowFilter))
+		if (item && !matches(item, query, topic, statusFilter, windowFilter, tabGroupFilter))
 			feedIds = feedIds.filter((id) => id !== item.id);
 		topicEditId = '';
 		topicDraft = topicExpected = '';
@@ -594,6 +607,7 @@
 			query = '';
 			statusFilter = 'unread';
 			windowFilter = 'all';
+			tabGroupFilter = '';
 			undo = null;
 			undoHistory = [];
 			feedErrorId = '';
@@ -623,7 +637,9 @@
 		message = '';
 		const id = selected.id;
 		const previous = selected.status;
-		const before = items.filter((item) => matches(item, query, topic, statusFilter, windowFilter));
+		const before = items.filter((item) =>
+			matches(item, query, topic, statusFilter, windowFilter, tabGroupFilter)
+		);
 		const index = before.findIndex((item) => item.id === id);
 		if (!(await saveNote())) {
 			busy = false;
@@ -647,7 +663,7 @@
 							? 'Marked as read.'
 							: 'Marked unread.';
 			const remaining = items
-				.filter((item) => matches(item, query, topic, statusFilter, windowFilter))
+				.filter((item) => matches(item, query, topic, statusFilter, windowFilter, tabGroupFilter))
 				.filter((item) => item.id !== id);
 			const nextId =
 				index < 0
@@ -1044,6 +1060,41 @@
 							{/each}
 						</div>
 					</div>
+					{#if tabGroups.length}
+						<div class="picker-group">
+							<span class="picker-label" id="tab-group-label"
+								>Tab group {#if tabGroups.length >= 8}<span class="picker-hint" aria-hidden="true"
+										>· scroll for more</span
+									>{/if}</span
+							>
+							<div
+								class="picker-options group-options"
+								role="group"
+								aria-labelledby="tab-group-label"
+							>
+								<button
+									type="button"
+									aria-pressed={!tabGroupFilter}
+									disabled={feedPending.size > 0 ||
+										note !== savedNote ||
+										noteSaving ||
+										!!topicEditId}
+									on:click={() => (tabGroupFilter = '')}>All groups</button
+								>
+								{#each tabGroups as name (name)}
+									<button
+										type="button"
+										aria-pressed={tabGroupFilter === name}
+										disabled={feedPending.size > 0 ||
+											note !== savedNote ||
+											noteSaving ||
+											!!topicEditId}
+										on:click={() => (tabGroupFilter = name)}>{name}</button
+									>
+								{/each}
+							</div>
+						</div>
+					{/if}
 					{#if windows.length}
 						<div class="picker-group">
 							<span class="picker-label" id="window-label"
@@ -1231,6 +1282,9 @@
 									disabled={busy}>{item.title || item.url}</button
 								>
 								<p class="feed-url">{item.url}</p>
+								{#if item.tabGroups?.length}<p class="feed-context">
+										Tab groups: {item.tabGroups.join(', ')}
+									</p>{/if}
 								{#if item.summary && expandedId !== item.id}<p class="feed-excerpt">
 										{item.summary}
 									</p>{/if}
@@ -1370,15 +1424,11 @@
 										<span class="topic-editor-hint"
 											>Choose an existing topic or type a new one.</span
 										>
-										{#if item.tabGroups?.length || item.capturedWindowIds?.length}
+										{#if item.capturedWindowIds?.length}
 											<p class="topic-editor-hint topic-context">
-												{#if item.tabGroups?.length}Tab groups: {item.tabGroups.join(', ')}{/if}
-												{#if item.tabGroups?.length && item.capturedWindowIds?.length}
-													·
-												{/if}
-												{#if item.capturedWindowIds?.length}Captured in {item.capturedWindowIds
-														.map((id) => `Window ${windows.indexOf(id) + 1}`)
-														.join(', ')}{/if}
+												Captured in {item.capturedWindowIds
+													.map((id) => `Window ${windows.indexOf(id) + 1}`)
+													.join(', ')}
 											</p>
 										{/if}
 										<div class="picker-options" role="group" aria-label="Existing topics">
@@ -1784,7 +1834,8 @@
 		grid-auto-rows: max-content;
 	}
 	.batch-options.has-many,
-	.window-options {
+	.window-options,
+	.group-options {
 		max-height: 13rem;
 		overflow-y: auto;
 		overscroll-behavior: contain;
@@ -2059,7 +2110,8 @@
 	.feed-title:hover {
 		color: var(--accent);
 	}
-	.feed-url {
+	.feed-url,
+	.feed-context {
 		margin: 0.2rem 0 0.3rem;
 		color: var(--muted);
 		font-size: 0.8rem;

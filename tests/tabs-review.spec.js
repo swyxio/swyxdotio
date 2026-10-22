@@ -291,7 +291,7 @@ test('visible pickers select filters and keep batches separate', async ({ page }
 	expect((await getBatch(page, second)).items[0].status).toBe('unread');
 });
 
-test('search finds captured tab groups in tap and swipe modes', async ({ page }) => {
+test('tab groups can be searched and filtered across review modes', async ({ page }) => {
 	await page.goto('/tools');
 	const origin = await authenticateTools(page);
 	const suffix = crypto.randomUUID();
@@ -299,12 +299,30 @@ test('search finds captured tab groups in tap and swipe modes', async ({ page })
 	const batch = await makeBatch(page, origin, `Group search ${suffix}`, [
 		{ title: 'Alpha page', url: sharedUrl, tabGroup: 'Reading Circle' },
 		{ title: 'Alpha page', url: sharedUrl, tabGroup: 'Morning Finds' },
-		{ title: 'Bravo page', url: `https://example.test/${suffix}/bravo` }
+		{ title: 'Bravo page', url: `https://example.test/${suffix}/bravo`, tabGroup: 'Weekly Finds' }
+	]);
+	const second = await makeBatch(page, origin, `Group search second ${suffix}`, [
+		{ title: 'Other page', url: `https://example.test/${suffix}/other`, tabGroup: 'Morning Finds' },
+		{ title: 'Ungrouped page', url: `https://example.test/${suffix}/ungrouped` }
 	]);
 	await page.goto(`/tools/tabs?batch=${batch.id}`);
 	await openFilters(page);
 	const search = page.getByRole('searchbox', { name: 'Find a page' });
 	await search.fill('mOrNiNg fInDs');
+	await expect(page.getByRole('button', { name: 'Alpha page', exact: true })).toBeVisible();
+	await expect(page.getByRole('button', { name: 'Bravo page', exact: true })).toHaveCount(0);
+	await expect(page.locator('article.feed-item')).toContainText(
+		'Tab groups: Reading Circle, Morning Finds'
+	);
+	await search.fill('');
+	await filterChoice(page, 'Tab group', 'Morning Finds').click();
+	await expect(filterChoice(page, 'Tab group', 'Morning Finds')).toHaveAttribute(
+		'aria-pressed',
+		'true'
+	);
+	await expect(page.getByRole('button', { name: 'Alpha page', exact: true })).toBeVisible();
+	await expect(page.getByRole('button', { name: 'Bravo page', exact: true })).toHaveCount(0);
+	await page.getByRole('button', { name: 'Scroll', exact: true }).click();
 	await expect(page.getByRole('button', { name: 'Alpha page', exact: true })).toBeVisible();
 	await expect(page.getByRole('button', { name: 'Bravo page', exact: true })).toHaveCount(0);
 	await useSwipeMode(page);
@@ -317,7 +335,21 @@ test('search finds captured tab groups in tap and swipe modes', async ({ page })
 	);
 	await search.fill('no matching group');
 	await expect(queue.getByRole('button')).toHaveCount(0);
+	await search.fill('');
+	await filterChoice(page, 'Tab group', 'Weekly Finds').click();
+	await expect(queue.getByRole('button')).toHaveCount(1);
+	await expect(queue.getByRole('button')).toContainText('Bravo page');
 	expect((await getBatch(page, batch)).items.every((item) => item.status === 'unread')).toBe(true);
+	await page
+		.getByRole('group', { name: 'Batch', exact: true })
+		.getByRole('button', { name: `Group search second ${suffix}` })
+		.click();
+	await expect(filterChoice(page, 'Tab group', 'All groups')).toHaveAttribute(
+		'aria-pressed',
+		'true'
+	);
+	await expect(queue.getByRole('button')).toHaveCount(2);
+	expect((await getBatch(page, second)).items.every((item) => item.status === 'unread')).toBe(true);
 });
 
 test('topics can be edited in the feed and swipe view without changing another batch', async ({
