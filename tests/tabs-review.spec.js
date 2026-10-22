@@ -291,6 +291,67 @@ test('visible pickers select filters and keep batches separate', async ({ page }
 	expect((await getBatch(page, second)).items[0].status).toBe('unread');
 });
 
+test('tab groups can be searched and filtered across review modes', async ({ page }) => {
+	await page.goto('/tools');
+	const origin = await authenticateTools(page);
+	const suffix = crypto.randomUUID();
+	const sharedUrl = `https://example.test/${suffix}/alpha`;
+	const batch = await makeBatch(page, origin, `Group search ${suffix}`, [
+		{ title: 'Alpha page', url: sharedUrl, tabGroup: 'Reading Circle' },
+		{ title: 'Alpha page', url: sharedUrl, tabGroup: 'Morning Finds' },
+		{ title: 'Bravo page', url: `https://example.test/${suffix}/bravo`, tabGroup: 'Weekly Finds' }
+	]);
+	const second = await makeBatch(page, origin, `Group search second ${suffix}`, [
+		{ title: 'Other page', url: `https://example.test/${suffix}/other`, tabGroup: 'Morning Finds' },
+		{ title: 'Ungrouped page', url: `https://example.test/${suffix}/ungrouped` }
+	]);
+	await page.goto(`/tools/tabs?batch=${batch.id}`);
+	await openFilters(page);
+	const search = page.getByRole('searchbox', { name: 'Find a page' });
+	await search.fill('mOrNiNg fInDs');
+	await expect(page.getByRole('button', { name: 'Alpha page', exact: true })).toBeVisible();
+	await expect(page.getByRole('button', { name: 'Bravo page', exact: true })).toHaveCount(0);
+	await expect(page.locator('article.feed-item')).toContainText(
+		'Tab groups: Reading Circle, Morning Finds'
+	);
+	await search.fill('');
+	await filterChoice(page, 'Tab group', 'Morning Finds').click();
+	await expect(filterChoice(page, 'Tab group', 'Morning Finds')).toHaveAttribute(
+		'aria-pressed',
+		'true'
+	);
+	await expect(page.getByRole('button', { name: 'Alpha page', exact: true })).toBeVisible();
+	await expect(page.getByRole('button', { name: 'Bravo page', exact: true })).toHaveCount(0);
+	await page.getByRole('button', { name: 'Scroll', exact: true }).click();
+	await expect(page.getByRole('button', { name: 'Alpha page', exact: true })).toBeVisible();
+	await expect(page.getByRole('button', { name: 'Bravo page', exact: true })).toHaveCount(0);
+	await useSwipeMode(page);
+	await search.fill('reading circle');
+	const queue = page.getByRole('complementary', { name: 'Pages in this view' });
+	await expect(queue.getByRole('button')).toHaveCount(1);
+	await expect(queue.getByRole('button')).toContainText('Alpha page');
+	await expect(page.locator('article.card')).toContainText(
+		'Tab groups: Reading Circle, Morning Finds'
+	);
+	await search.fill('no matching group');
+	await expect(queue.getByRole('button')).toHaveCount(0);
+	await search.fill('');
+	await filterChoice(page, 'Tab group', 'Weekly Finds').click();
+	await expect(queue.getByRole('button')).toHaveCount(1);
+	await expect(queue.getByRole('button')).toContainText('Bravo page');
+	expect((await getBatch(page, batch)).items.every((item) => item.status === 'unread')).toBe(true);
+	await page
+		.getByRole('group', { name: 'Batch', exact: true })
+		.getByRole('button', { name: `Group search second ${suffix}` })
+		.click();
+	await expect(filterChoice(page, 'Tab group', 'All groups')).toHaveAttribute(
+		'aria-pressed',
+		'true'
+	);
+	await expect(queue.getByRole('button')).toHaveCount(2);
+	expect((await getBatch(page, second)).items.every((item) => item.status === 'unread')).toBe(true);
+});
+
 test('topics can be edited in the feed and swipe view without changing another batch', async ({
 	page
 }) => {
@@ -320,7 +381,7 @@ test('topics can be edited in the feed and swipe view without changing another b
 	await page.goto(`/tools/tabs?batch=${first.id}`);
 	const editorButton = page.getByRole('button', { name: 'Edit topic for Shared topic page' });
 	await editorButton.click();
-	await expect(page.getByText('Chrome groups: Research', { exact: false })).toBeVisible();
+	await expect(page.getByText('Tab groups: Research', { exact: false })).toBeVisible();
 	await page.getByRole('textbox', { name: 'Topic', exact: true }).fill('Agent systems');
 	await page.getByRole('button', { name: 'Save topic', exact: true }).click();
 	await expect.poll(async () => (await getBatch(page, first)).items[0].group).toBe('Agent systems');
@@ -781,7 +842,7 @@ test('mobile triage saves notes, swipes, undo, import and batch isolation', asyn
 	await expect(page.getByRole('button', { name: /Open swyx\.irc chat/ })).toHaveCount(0);
 	const card = page.locator('article.card');
 	await expect(card.getByRole('heading', { name: 'Alpha page' })).toBeVisible();
-	await expect(card).toContainText('Chrome groups: Saved work');
+	await expect(card).toContainText('Tab groups: Saved work');
 	await expect(card).toContainText('Captured in Window 1');
 	await expect(card).toContainText('Title and URL saved');
 	await card.getByRole('heading', { name: 'Alpha page' }).scrollIntoViewIfNeeded();
@@ -907,7 +968,7 @@ test('mobile triage saves notes, swipes, undo, import and batch isolation', asyn
 	await page.getByRole('button', { name: 'Save new batch' }).click();
 	await expect(page.getByRole('status')).toContainText('New batch saved.');
 	await expect(card.getByRole('heading', { name: 'Imported page' })).toBeVisible();
-	await expect(card).toContainText('Chrome groups: Ideas');
+	await expect(card).toContainText('Tab groups: Ideas');
 	await expect(card).toContainText('Captured in Window 1');
 });
 
