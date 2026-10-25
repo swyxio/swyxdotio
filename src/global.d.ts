@@ -121,6 +121,7 @@ declare namespace App {
 			TOOLS_SESSION_SECRET?: string;
 			TOOLS_OWNER_GOOGLE_SUB?: string;
 			RECLIP_URL?: string;
+			RECLIP_SERVICE?: { fetch(request: Request): Promise<Response> };
 			CF_VERSION_METADATA?: {
 				id: string;
 				tag?: string;
