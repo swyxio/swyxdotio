@@ -1041,3 +1041,37 @@ test('a delayed page load does not expose an editable stale note', async ({ page
 	release();
 	await expect(card.getByLabel('Your note')).toHaveValue('A saved thought');
 });
+
+test('keyboard triage targets the focused row and ignores typing', async ({ page }) => {
+	await page.goto('/tools');
+	const origin = await authenticateTools(page);
+	const batch = await makeBatch(
+		page,
+		origin,
+		'Keyboard review',
+		['One', 'Two', 'Three'].map((title) => ({
+			title,
+			url: 'https://example.test/' + title
+		}))
+	);
+	await page.goto('/tools/tabs?batch=' + batch.id);
+	const titles = page.locator('.feed-title');
+	await expect(titles).toHaveCount(3);
+	await page.keyboard.press('j');
+	await expect(titles.nth(0)).toBeFocused();
+	await page.keyboard.press('j');
+	await expect(titles.nth(1)).toBeFocused();
+	await page.keyboard.press('k');
+	await expect(titles.nth(0)).toBeFocused();
+	await page.keyboard.press('b');
+	await expect(titles.nth(1)).toBeFocused();
+	await page.keyboard.press('a');
+	await expect(titles.nth(2)).toBeFocused();
+	await page.keyboard.press('Enter');
+	const note = page.locator('.feed-content textarea');
+	await note.fill('abjk');
+	await note.press('a');
+	await expect(note).toHaveValue('abjka');
+	const stored = (await getBatch(page, batch)).items;
+	expect(stored.map((item) => item.status).sort()).toEqual(['archived', 'followup', 'unread']);
+});

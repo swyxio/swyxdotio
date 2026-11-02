@@ -363,7 +363,75 @@
 		touchY = y;
 	}
 
+	async function focusFeedRow(index: number) {
+		const item = feedItems[index];
+		if (!item) return;
+		feedLimit = Math.max(feedLimit, index + 1);
+		resetScrollIntent();
+		await tick();
+		const title = document.querySelector<HTMLButtonElement>(
+			`[data-feed-item="${CSS.escape(item.id)}"] .feed-title`
+		);
+		title?.focus({ preventScroll: true });
+		title?.scrollIntoView({ block: 'nearest' });
+	}
+
+	function reviewShortcut(event: KeyboardEvent) {
+		const target = event.target;
+		if (
+			!(target instanceof HTMLElement) ||
+			event.defaultPrevented ||
+			event.isComposing ||
+			event.altKey ||
+			event.ctrlKey ||
+			event.metaKey ||
+			event.shiftKey ||
+			target.closest('input, textarea, select, [contenteditable], dialog, [role="dialog"]') ||
+			document.querySelector('dialog[open], [role="dialog"][aria-modal="true"]') ||
+			loading ||
+			busy ||
+			importing ||
+			itemLoading ||
+			topicEditId ||
+			feedPending.size
+		)
+			return false;
+		const row = target.closest<HTMLElement>('[data-feed-item]');
+		if (target !== document.body && !row && !target.closest('.feed-controls, .card, .queue'))
+			return false;
+		const key = event.key;
+		if (!['j', 'k', 'b', 'a'].includes(key)) return false;
+		const swipe = mode === 'swipe';
+		const list = swipe ? filtered : feedItems;
+		if (!list.length) return false;
+		const current = swipe
+			? selectedId
+			: row?.dataset.feedItem || (mode === 'scroll' ? activeFeedId : '');
+		const index = list.findIndex((item) => item.id === current);
+		if (key === 'j' || key === 'k') {
+			const next = Math.max(0, Math.min(list.length - 1, index + (key === 'j' ? 1 : -1)));
+			if (swipe) void openItem(list[next].id);
+			else void focusFeedRow(next);
+		} else {
+			if (index < 0 || event.repeat) return false;
+			const status = key === 'b' ? 'followup' : 'archived';
+			if (swipe) void chooseStatus(status);
+			else {
+				resetScrollIntent();
+				queueFeedDecision(current, status);
+				const keyAtDecision = feedKey;
+				void feedWrites.then(() => {
+					if (feedKey === keyAtDecision && !feedErrorId && document.activeElement === target)
+						void focusFeedRow(Math.min(index + 1, feedItems.length - 1));
+				});
+			}
+		}
+		event.preventDefault();
+		return true;
+	}
+
 	function keyboardScroll(event: KeyboardEvent) {
+		if (reviewShortcut(event)) return;
 		if (
 			event.target instanceof Element &&
 			event.target.closest('input, textarea, select, button, a, [contenteditable]')
@@ -964,7 +1032,6 @@
 				>
 			</div>
 			<h1>Tab Library</h1>
-			<p class="intro">Saved pages from your reading across the web.</p>
 		</header>
 
 		<div class="toolbar">
@@ -1224,11 +1291,12 @@
 						{/each}
 					</div>
 					<p>
-						{mode === 'scroll'
-							? 'The highlighted page is current. Scroll past it to archive; undo to bring it back.'
-							: mode === 'tap'
-								? 'Browse your feed and bookmark pages to follow up.'
-								: 'Swipe left to archive, right to follow up.'}
+						{#if mode === 'scroll'}Scroll past to archive.
+						{:else if mode === 'swipe'}← Archive · Follow up →
+						{/if}
+						<span class="keys"
+							><kbd>J</kbd>/<kbd>K</kbd> next/previous · <kbd>B</kbd> bookmark · <kbd>A</kbd> archive</span
+						>
 					</p>
 				</div>
 				<div class="queue-head">
@@ -1236,10 +1304,9 @@
 						<span class="eyebrow">YOUR QUEUE</span>
 						<p>
 							<strong>{mode === 'swipe' ? filtered.length : feedItems.length}</strong>
-							{(mode === 'swipe' ? filtered.length : feedItems.length) === 1 ? 'page' : 'pages'} in this
-							view
+							{(mode === 'swipe' ? filtered.length : feedItems.length) === 1 ? 'page' : 'pages'}
 							<span>·</span>
-							{unreadCount} unread in batch
+							{unreadCount} unread
 						</p>
 					</div>
 					{#if mode === 'swipe'}<span class="swipe-hint">← Archive &nbsp; · &nbsp; Follow up →</span
@@ -1720,7 +1787,7 @@
 		--line: var(--page-border);
 		--accent: var(--page-accent);
 		display: grid;
-		grid-template-columns: 16.5rem minmax(0, 1fr);
+		grid-template-columns: 15rem minmax(0, 1fr);
 		width: min(calc(100% - 2 * var(--site-gutter)), 1160px);
 		min-height: 68vh;
 		margin: 0 auto;
@@ -1732,31 +1799,31 @@
 	}
 	.library-sidebar {
 		min-width: 0;
-		padding: 1.25rem;
 		border-right: 1px solid var(--line);
 		background: var(--page-bg);
 		border-radius: 12px 0 0 12px;
+		padding: 0.8rem;
 	}
 	.library-main {
 		min-width: 0;
-		padding: 1.5rem 1.75rem 2rem;
+		padding: 0.8rem 1rem 1.25rem;
 	}
 	.header-links {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
 		gap: 0.5rem;
-		margin-bottom: 0.85rem;
+		margin-bottom: 0.25rem;
 	}
 	.back,
 	.account {
 		display: inline-flex;
 		align-items: center;
-		min-height: 44px;
 		color: var(--accent);
 		font-size: 0.8rem;
 		font-weight: 700;
 		text-decoration: none;
+		min-height: 26px;
 	}
 	.back {
 		white-space: nowrap;
@@ -1769,21 +1836,16 @@
 	.library-header h1 {
 		margin: 0;
 		font-family: var(--font-display);
-		font-size: 2rem;
 		font-weight: 600;
 		letter-spacing: -0.035em;
 		line-height: 1.05;
-	}
-	.intro {
-		margin: 0.45rem 0 1.25rem;
-		color: var(--muted);
-		font-size: 0.9rem;
-		line-height: 1.4;
+		font-size: 1.5rem;
+		margin-bottom: 0.65rem;
 	}
 	.toolbar,
 	.filter-fields {
 		display: grid;
-		gap: 0.8rem;
+		gap: 0.55rem;
 	}
 	.picker-group {
 		display: grid;
@@ -1807,13 +1869,11 @@
 	.picker-options {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.35rem;
 		min-width: 0;
+		gap: 0.2rem;
 	}
 	.picker-options button {
-		min-height: 44px;
 		max-width: 100%;
-		padding: 0.45rem 0.65rem;
 		border: 1px solid var(--line);
 		border-radius: 7px;
 		background: var(--page-surface);
@@ -1822,6 +1882,9 @@
 		text-align: left;
 		overflow-wrap: anywhere;
 		cursor: pointer;
+		min-height: 26px;
+		padding: 0.22rem 0.42rem;
+		font-size: 0.75rem;
 	}
 	.picker-options button[aria-pressed='true'] {
 		border-color: var(--accent);
@@ -1979,10 +2042,10 @@
 	.feed-controls {
 		display: grid;
 		grid-template-columns: minmax(0, 1fr) auto;
-		gap: 0.5rem 1rem;
 		align-items: center;
-		padding-bottom: 1rem;
 		border-bottom: 1px solid var(--line);
+		padding-bottom: 0.4rem;
+		gap: 0.2rem 0.5rem;
 	}
 	.mode-bar {
 		display: contents;
@@ -1995,16 +2058,16 @@
 		background: var(--page-section-bg);
 	}
 	.mode-switch button {
-		min-width: 5rem;
-		min-height: 44px;
-		padding: 0.5rem 0.85rem;
 		border: 0;
 		border-radius: 6px;
 		background: transparent;
 		color: var(--ink);
-		font-size: 0.95rem;
 		font-weight: 700;
 		cursor: pointer;
+		min-width: 3.4rem;
+		min-height: 28px;
+		padding: 0.2rem 0.5rem;
+		font-size: 0.8rem;
 	}
 	.mode-switch button[aria-pressed='true'] {
 		background: var(--page-accent-soft);
@@ -2046,11 +2109,11 @@
 	}
 	.feed-item {
 		display: grid;
-		grid-template-columns: 2rem minmax(0, 1fr);
-		gap: 0.8rem;
 		min-width: 0;
-		padding: 1rem 0;
 		border-bottom: 1px solid var(--line);
+		padding: 0.42rem 0;
+		grid-template-columns: 1.35rem minmax(0, 1fr);
+		gap: 0.48rem;
 	}
 	.feed-item.expanded {
 		margin-inline: -0.65rem;
@@ -2066,14 +2129,14 @@
 	.feed-source-mark {
 		display: grid;
 		place-items: center;
-		width: 2rem;
-		height: 2rem;
 		border-radius: 5px;
 		background: var(--accent);
 		color: var(--page-surface);
 		font-family: var(--font-display);
-		font-size: 1.15rem;
 		font-weight: 600;
+		width: 1.35rem;
+		height: 1.35rem;
+		font-size: 0.85rem;
 	}
 	.feed-entry {
 		min-width: 0;
@@ -2096,8 +2159,6 @@
 	.feed-title {
 		display: block;
 		width: 100%;
-		min-height: 44px;
-		padding: 0.1rem 0;
 		border: 0;
 		background: none;
 		color: var(--ink);
@@ -2106,30 +2167,33 @@
 		text-align: left;
 		overflow-wrap: anywhere;
 		cursor: pointer;
+		min-height: 24px;
+		padding: 0;
+		font-size: 1.1rem;
 	}
 	.feed-title:hover {
 		color: var(--accent);
 	}
 	.feed-url,
 	.feed-context {
-		margin: 0.2rem 0 0.3rem;
 		color: var(--muted);
 		font-size: 0.8rem;
 		line-height: 1.4;
 		overflow-wrap: anywhere;
+		margin: 0.1rem 0;
 	}
 	.feed-excerpt {
 		display: -webkit-box;
 		-webkit-box-orient: vertical;
-		-webkit-line-clamp: 3;
-		line-clamp: 3;
 		overflow: hidden;
 		margin: 0.15rem 0 0;
 		color: var(--muted);
-		font-size: 1rem;
-		line-height: 1.45;
 		white-space: pre-wrap;
 		overflow-wrap: anywhere;
+		font-size: 0.85rem;
+		line-height: 1.35;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
 	}
 	.feed-actions,
 	.preview-actions {
@@ -2162,6 +2226,9 @@
 		padding-inline: 0.5rem;
 		border-color: transparent;
 		background: transparent;
+		min-height: 24px;
+		padding: 0.1rem 0.35rem;
+		font-size: 0.75rem;
 	}
 	.feed-actions button[aria-pressed='true'] {
 		background: var(--accent);
@@ -2519,6 +2586,53 @@
 	.empty .primary {
 		margin: 1rem auto 0;
 	}
+	.toolbar input {
+		min-height: 32px;
+		padding: 0.3rem 0.5rem;
+		font-size: 0.85rem;
+	}
+	.mode-bar p,
+	.queue-head p {
+		font-size: 0.75rem;
+	}
+	kbd {
+		font: 600 0.72rem/1 var(--font-body);
+	}
+	.feed-meta,
+	.feed-context,
+	.feed-url {
+		font-size: 0.75rem;
+		line-height: 1.3;
+	}
+	.feed-actions {
+		margin-top: 0.1rem;
+		gap: 0.15rem;
+	}
+	.feed-item:has(.feed-title:focus-visible) {
+		box-shadow: inset 3px 0 var(--accent);
+		background: var(--page-accent-soft);
+	}
+	@media (min-width: 1021px) {
+		.feed-item:not(.expanded) .feed-entry {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) auto;
+			align-items: start;
+			column-gap: 0.65rem;
+		}
+		.feed-entry > * {
+			grid-column: 1 / -1;
+		}
+		.feed-item:not(.expanded) .feed-meta {
+			grid-column: 1;
+			grid-row: 1;
+			align-self: center;
+		}
+		.feed-item:not(.expanded) .feed-actions {
+			grid-column: 2;
+			grid-row: 1;
+			margin: 0;
+		}
+	}
 	@media (max-width: 1020px) and (min-width: 761px) {
 		.library-shell {
 			grid-template-columns: 14rem minmax(0, 1fr);
@@ -2562,10 +2676,7 @@
 			margin-bottom: 0.35rem;
 		}
 		.library-header h1 {
-			font-size: 1.8rem;
-		}
-		.intro {
-			display: none;
+			font-size: 1.35rem;
 		}
 		.toolbar {
 			display: contents;
@@ -2653,7 +2764,7 @@
 		.feed-item {
 			grid-template-columns: 1.75rem minmax(0, 1fr);
 			gap: 0.65rem;
-			padding: 0.8rem 0;
+			padding: 0.45rem 0;
 		}
 		.feed-source-mark {
 			width: 1.75rem;
@@ -2661,12 +2772,12 @@
 			font-size: 1rem;
 		}
 		.feed-title {
-			font-size: 1.25rem;
+			font-size: 1.08rem;
 		}
 		.feed-excerpt {
-			-webkit-line-clamp: 3;
-			line-clamp: 3;
-			font-size: 1rem;
+			-webkit-line-clamp: 2;
+			line-clamp: 2;
+			font-size: 0.85rem;
 		}
 		.feed-actions {
 			gap: 0.25rem;
@@ -2692,6 +2803,16 @@
 		}
 		.account {
 			max-width: 48%;
+		}
+	}
+	@media (pointer: coarse) {
+		.feed-actions button,
+		.mode-switch button,
+		.picker-options button {
+			min-height: 36px;
+		}
+		.toolbar input {
+			font-size: 1rem;
 		}
 	}
 </style>
