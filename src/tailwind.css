@@ -45,22 +45,25 @@
 	text-rendering: optimizeLegibility;
 }
 
-.dark {
-	--page-bg: #111523;
-	--page-surface: #171b2a;
-	--page-section-bg: #1d2131;
-	--page-row-hover: #222534;
-	--page-text: #f0e8d9;
-	--page-muted: #c0b6a5;
-	--page-link: #e7c985;
-	--page-border: #383747;
-	--page-accent: #dfbd78;
-	--page-accent-soft: #342d2b;
-	--page-gold: #e5c684;
-	--selection-bg: #d7b461;
-	--control-border: #7c7389;
-	--page-paper: #21222d;
-	--page-ink: #f0e8d9;
+/* Pages always print on the light palette, whatever the reader's theme. */
+@media not print {
+	.dark {
+		--page-bg: #111523;
+		--page-surface: #171b2a;
+		--page-section-bg: #1d2131;
+		--page-row-hover: #222534;
+		--page-text: #f0e8d9;
+		--page-muted: #c0b6a5;
+		--page-link: #e7c985;
+		--page-border: #383747;
+		--page-accent: #dfbd78;
+		--page-accent-soft: #342d2b;
+		--page-gold: #e5c684;
+		--selection-bg: #d7b461;
+		--control-border: #7c7389;
+		--page-paper: #21222d;
+		--page-ink: #f0e8d9;
+	}
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -741,4 +744,53 @@ article.prose :is(h1, h2, h3, h4, h5, h6)[id] {
 	color: var(--selection-text);
 	border-radius: 2px;
 	padding: 0 1px;
+}
+
+/* Print a clean reading copy: drop the site chrome and live reading widgets,
+   keep code legible, avoid awkward page breaks, and spell out where links go. */
+@media print {
+	body {
+		background: #fff;
+	}
+
+	.site-nav-shell,
+	.literary-footer,
+	.chat-launcher,
+	#live-chat,
+	.share-bubble,
+	.share-menu,
+	.share-burst,
+	.article-index,
+	.floating-toc,
+	.article-endmatter {
+		display: none !important;
+	}
+
+	.reading-prose :where(pre) {
+		overflow: visible;
+		white-space: pre-wrap;
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
+	}
+
+	.reading-prose :where(h1, h2, h3, h4) {
+		break-after: avoid;
+	}
+
+	.reading-prose :where(img, figure, blockquote, tr) {
+		break-inside: avoid;
+	}
+
+	.reading-prose a[href^='http']:not(.bare-link)::after {
+		content: ' (' attr(href) ')';
+		color: var(--page-muted);
+		font-size: 0.85em;
+		overflow-wrap: anywhere;
+	}
+
+	/* The byline and linked images read fine without a printed address. */
+	.reading-prose .article-header a[href^='http']::after,
+	.reading-prose a[href^='http']:has(img)::after {
+		content: none;
+	}
 }
