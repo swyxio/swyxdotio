@@ -486,3 +486,7 @@ Team joining Sanity is public; original owner-supplied closed status is preserve
 - [Financing evidence](https://techcrunch.com/startup-battlefield/company/dimension/).
 
 Use the historical developer-company profile. Exclude unrelated venture-fund financing and stale operating-status claims.
+
+## boat.dev
+
+Added November 9, 2026. The [company website](https://boat.dev) describes persistent Linux virtual machines for AI agents, with SSH, Docker, a virtual desktop, and snapshot forks.
