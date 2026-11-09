@@ -1783,6 +1783,21 @@
 		"reviewedAt": "2026-09-17"
 	},
 	{
+		"id": "boat",
+		"name": "boat.dev",
+		"website": "https://boat.dev",
+		"description": "Persistent Linux VMs for AI agents, with SSH access, Docker, a browser desktop, and snapshots that agents can fork.",
+		"category": "AI infrastructure",
+		"status": "current",
+		"logo": "/portfolio/boat.png",
+		"logoSource": "https://boat.dev/apple-touch-icon.png",
+		"valuation": null,
+		"tier": "Smaller names",
+		"descriptionSourceUrl": "https://boat.dev",
+		"descriptionSourceTitle": "boat — Full cloud VMs for agents",
+		"reviewedAt": "2026-11-09"
+	},
+	{
 		"id": "astral",
 		"name": "Astral",
 		"website": "https://astral.sh",
