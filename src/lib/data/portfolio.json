@@ -616,15 +616,22 @@
 		"website": "https://conductor.build",
 		"description": "Workspace for teams of AI coding agents, with isolated cloud sandboxes, shared multiplayer sessions, and tools to review and merge changes.",
 		"category": "AI coding",
-		"status": "current",
+		"status": "exited",
 		"logo": "/portfolio/conductor.png",
 		"logoSource": "https://www.conductor.build/apple-icon.png?apple-icon.7d575655.png",
 		"valuation": null,
 		"relatedUrl": "https://x.com/charlieholtz/status/2039027121901957349",
+		"acquirer": "Meta",
 		"tier": "Well known names",
+		"exit": {
+			"acquirerLogo": "/portfolio/acquirers/meta.svg",
+			"acquirerLogoSource": "https://static.xx.fbcdn.net/rsrc.php/yf/r/-7pQO6hUGK_.svg",
+			"sourceUrl": "https://www.conductor.build/announcement",
+			"sourceTitle": "Conductor is joining Meta"
+		},
 		"descriptionSourceUrl": "https://conductor.build",
 		"descriptionSourceTitle": "Conductor: Run a team of coding agents in the cloud",
-		"reviewedAt": "2026-09-17",
+		"reviewedAt": "2026-11-09",
 		"fundingRounds": [
 			{
 				"amountUsd": 22000000,
