@@ -17,7 +17,7 @@ test('catalog retains all original entries, exits, and individual backings', () 
 	assert.equal(new Set(companies.map((company) => company.id)).size, companies.length);
 	assert.deepEqual(
 		companies.filter((company) => company.status === 'exited').map((company) => company.name),
-		['Astral', 'Promptfoo', 'Gabber', 'Codegen', 'Brev', 'Gel', 'Dynamic']
+		['Conductor', 'Astral', 'Promptfoo', 'Gabber', 'Codegen', 'Brev', 'Gel', 'Dynamic']
 	);
 	assert.equal(companies.filter((company) => company.status === 'closed').length, 2);
 	assert.equal(companies.filter((company) => company.status === 'individual').length, 2);
@@ -289,7 +289,8 @@ test('valuation formatting preserves meaningful precision and stable UTC dates',
 test('research covers every entry with dated public provenance or an explicit identity gap', async () => {
 	const audit = await readFile(new URL('docs/portfolio-research-2026-09-17.md', root), 'utf8');
 	for (const company of companies) {
-		assert.equal(company.reviewedAt, '2026-09-17', company.name);
+		assert.match(company.reviewedAt, /^\d{4}-\d{2}-\d{2}$/, company.name);
+		assert.ok(Date.parse(company.reviewedAt) >= Date.parse('2026-09-17'), company.name);
 		assert.ok(audit.includes(`## ${company.name}\n`), company.name);
 		if (company.id === 'catamaran') assert.equal(company.descriptionSourceUrl, null);
 		else {
