@@ -7,7 +7,6 @@ import {
 	retrieveAssistantSources,
 	readAssistantQuestion,
 	handleAssistantSearch,
-	ASSISTANT_MODEL,
 	ASSISTANT_RESERVATION_MICROS
 } from '../src/lib/server/search-assistant.js';
 const base = 'https://swyx.io';
@@ -145,6 +144,8 @@ test('same-origin, availability, rate and budget gates stop before inference', a
 		if (condition === 'ip') req.headers.delete('cf-connecting-ip');
 		const response = await handleAssistantSearch(req, new URL(req.url), env, options);
 		assert.equal(response.status, condition === 'origin' ? 403 : condition === 'rate' ? 429 : 503);
+		if (condition === 'budget')
+			assert.match((await response.json()).error, /regular search still works/);
 		assert.equal(calls.length, 0);
 	}
 });
@@ -163,7 +164,7 @@ test('one reserved non-thinking model call streams normalized safe tokens and me
 	env.AI.run = async (...args) => {
 		calls.push(args);
 		const frame =
-			'data: {"choices":[{"delta":{"reasoning_content":"secret"}}]}\r\n\r\ndata: {"response":"<think>secret</think>Choose a topic ["}\n\ndata: {"choices":[{"delta":{"content":"1]. [80]"}}]}\n\ndata: [DONE]\n\n';
+			'data: {"choices":[{"delta":{"reasoning_content":"secret"}}]}\r\n\r\ndata: {"choices":[{"delta":{"content":"Choose a topic ["}}]}\n\ndata: {"choices":[{"delta":{"content":"1]. [80]"}}]}\n\ndata: [DONE]\n\n';
 		const bytes = new TextEncoder().encode(frame);
 		return new ReadableStream({
 			start(c) {
@@ -193,11 +194,17 @@ test('one reserved non-thinking model call streams normalized safe tokens and me
 	);
 	assert.equal(events.at(-1).data.status, 'complete');
 	assert.equal(calls.length, 1);
-	assert.equal(calls[0][0], ASSISTANT_MODEL);
-	assert.equal(calls[0][1].max_tokens, 450);
+	assert.equal(calls[0][0], '@cf/google/gemma-4-26b-a4b-it');
+	const input = calls[0][1];
+	assert.equal(input.stream, true);
+	assert.equal(input.max_completion_tokens, 450);
+	assert.equal(input.chat_template_kwargs.enable_thinking, false);
+	assert.equal(JSON.parse(input.messages[1].content).question, 'conference advice');
 	assert.equal(calls[0][2].gateway.id, 'swyx-shared');
-	assert.match(calls[0][1].messages[1].content, /\/no_think$/);
-	assert.equal(reservations[0][1], ASSISTANT_RESERVATION_MICROS);
+	assert.deepEqual(reservations, [
+		[env.READ_COUNTERS, ASSISTANT_RESERVATION_MICROS, 'search-assistant']
+	]);
+	assert(ASSISTANT_RESERVATION_MICROS > 9000 * 0.1 + input.max_completion_tokens * 0.3);
 });
 test('slow provider reaches deadline once and cancels late stream without retry', async () => {
 	const { env, options, calls, reservations } = setup();
