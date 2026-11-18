@@ -82,6 +82,34 @@ await check('mentions inside inline code are NOT linked', async () => {
 	assert.doesNotMatch(html, /href="https:\/\/github\.com\/decorator"/);
 });
 
+await check('links whose text is their address are marked as bare links', async () => {
+	const html = await renderMarkdown(
+		'see https://example.com/a?b=1&c=2, <https://example.com> and www.example.com'
+	);
+	assert.match(
+		html,
+		/<a class="bare-link" href="https:\/\/example\.com\/a\?b=1&c=2">https:\/\/example\.com\/a\?b=1&amp;c=2<\/a>/
+	);
+	assert.match(
+		html,
+		/<a class="bare-link" href="https:\/\/example\.com">https:\/\/example\.com<\/a>/
+	);
+	assert.match(
+		html,
+		/<a class="bare-link" href="http:\/\/www\.example\.com">www\.example\.com<\/a>/
+	);
+});
+
+await check('described links and fragment links are not marked as bare links', async () => {
+	const html = await renderMarkdown(
+		'## Topic\n\nread [the docs](https://example.com) or [https://example.com](https://example.org)'
+	);
+	assert.match(html, /<a href="https:\/\/example\.com">the docs<\/a>/);
+	assert.match(html, /<a href="https:\/\/example\.org">https:\/\/example\.com<\/a>/);
+	assert.match(html, /<a class="heading-link" href="#topic">Topic<\/a>/);
+	assert.doesNotMatch(html, /bare-link/);
+});
+
 await check('code fences are highlighted by shiki', async () => {
 	const html = await renderMarkdown('```js\nconst x = 1;\n```');
 	assert.match(html, /class="shiki/);

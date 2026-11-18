@@ -164,6 +164,19 @@ const shikiWalk = {
 	}
 };
 
+// Print styles repeat each external link's address after its text. Mark links
+// whose text already is that address (bare URLs and autolinks) so the address
+// is not printed twice.
+/** @param {string} html */
+function markBareLinks(html) {
+	return html.replace(/<a href="(https?:\/\/[^"]+)">([^<]+)<\/a>/g, (link, href, text) => {
+		const label = text.replaceAll('&amp;', '&');
+		return href === label || href === `http://${label}`
+			? `<a class="bare-link" href="${href}">${text}</a>`
+			: link;
+	});
+}
+
 function createRenderer() {
 	const marked = new Marked({ gfm: true, breaks: false });
 	marked.use(headingIds());
@@ -178,7 +191,7 @@ function createRenderer() {
  * @returns {Promise<string>}
  */
 export async function renderMarkdown(md) {
-	const html = await createRenderer().parse(md ?? '');
+	const html = markBareLinks(await createRenderer().parse(md ?? ''));
 	// Build navigation from the rendered IDs so duplicate headings and existing
 	// fragment links use exactly the same destinations as the article.
 	const headings = [...html.matchAll(/^<h([1-6]) id="([^"]+)">([\s\S]*?)<\/h\1>/gm)];
