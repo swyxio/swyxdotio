@@ -555,10 +555,14 @@ responses and real test RSA signatures.
 
 ### Google project
 
-The auth-only project is `swyx-io-tools` (project number `31511070245`), owned by
+The Google Cloud project is `swyx-io-tools` (project number `31511070245`), owned by
 `shawnthe1@gmail.com`; no billing account is linked. Google branding is **swyx.io
 Tools**, audience **External**, client **swyx.io Tools Web**. Registered callbacks
 are production and `http://localhost:4188/tools/auth/google/callback` for verification.
+**Swyx Tools Desktop** is a separate desktop OAuth client in the same project.
+The desktop YouTube workflows use a verified local grant per channel. Keep the
+desktop credentials out of the web Worker and leave web sign-in on `openid`,
+`email`, and `profile`.
 Deploy the drawing companion first whenever the AI ledger protocol changes, then
 the main Worker. The companion has no public data endpoint.
 
