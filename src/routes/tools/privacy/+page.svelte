@@ -13,7 +13,8 @@
 		receive your basic profile and verified email address, and keep a signed, HTTP-only sign-in
 		cookie for up to seven days. We do not request access to Gmail, Drive, contacts, or your Google
 		password. For this Tools/Draw login flow, Google access tokens are not retained after sign-in.
-		This does not describe the separately authorized swyxcal calendar connections below.
+		The swyxcal and desktop YouTube connections described below each require their own
+		authorization.
 	</p>
 	<p>
 		Signed-in drawings are stored on Cloudflare in an account-specific workspace. Drawing caches,
@@ -122,6 +123,29 @@
 			>, including Limited Use. Calendar data is not used for the separately described funded AI
 			features above, advertising, or training general-purpose AI models. For calendar-data
 			questions or requests, contact <a href="mailto:swyx@ai.engineer">swyx@ai.engineer</a>.
+		</p>
+	</section>
+	<section id="youtube" aria-labelledby="youtube-heading">
+		<h2 id="youtube-heading">Swyx Tools Desktop: YouTube channel access</h2>
+		<p>
+			The desktop publishing tool uses the YouTube Data API. A channel operator chooses a Google
+			account and authorizes access to the intended YouTube channel in a separate Google consent
+			flow. The tool checks the channel identity, reads video and channel details, uploads files
+			that the operator selects, and updates video metadata or thumbnails at the operator’s request.
+		</p>
+		<p>
+			The desktop tool saves the OAuth grant in a private profile on the operator’s computer so it
+			can refresh access on later runs. Each channel has its own saved grant. Video files and the
+			metadata you submit go directly to YouTube. The Tools website does not receive the desktop
+			grant or the video files sent through it.
+		</p>
+		<p>
+			You can revoke the desktop grant under <a href="https://myaccount.google.com/connections"
+				>Google Account connections</a
+			>. You can also remove the local profile from your computer. Google handles the data sent to
+			YouTube under its <a href="https://policies.google.com/privacy">Privacy Policy</a>. Use of the
+			API is subject to the <a href="https://www.youtube.com/t/terms">YouTube Terms of Service</a>.
+			For questions or deletion requests, <a href="/about">contact swyx</a>.
 		</p>
 	</section>
 </article>

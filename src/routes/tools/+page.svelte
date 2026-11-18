@@ -192,6 +192,12 @@
 		ordinary Tools sign-in does not grant calendar access. Scheduler setup is in progress and new
 		bookings are paused. <a href="/tools/privacy#swyxcal">Calendar access and privacy →</a>
 	</p>
+	<p class="calendar-disclosure">
+		Swyx Tools Desktop supports authorized YouTube publishing workflows. A channel operator connects
+		each channel from the desktop tool. <a href="/tools/privacy#youtube"
+			>YouTube access and privacy →</a
+		>
+	</p>
 	{#if !data.user?.isOwner}<details class="workshop-rules">
 			<summary
 				><span>The rules of the workshop</span><span class="rules-hint"
